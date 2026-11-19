@@ -1,0 +1,123 @@
+{
+  "key": "RWB-TE-013",
+  "file_stem": "RWB TE 013 Agent runtime client with fallback",
+  "title": "Agent runtime client with fallback",
+  "module": "P10 Agent runtime (technical enabler)",
+  "flag": "rwb.agent.client",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "ai",
+  "overview_label": "Agent client + fallback",
+  "goal": "One client calls an agent safely: the rule result applies, fallback is recorded, log first",
+  "why": "Agents must never block or override a case step. In SHADOW or L1 the rule decides; the agent only adds a recommendation, within 60 seconds.",
+  "needs": [
+    "TE-007",
+    "E1-058",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E1-059",
+    "E1-062"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "AgentStepClient.runStep(case, ruleResult)"
+    ],
+    [
+      "API",
+      "GET /api/recovery/v1/admin/agent-runs"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Inputs are the case, the rule result already computed, and the agent policy in force.",
+  "writes": [
+    {
+      "t": "decision_log_entry",
+      "note": "via P7 writer: agent_version, recommendation, fallback"
+    },
+    {
+      "t": "agent_run.decision_log_id",
+      "note": "links the run to the decision"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "id, route_state"
+    },
+    {
+      "t": "agent_policy",
+      "note": "autonomy_mode, timeout_seconds, status"
+    },
+    {
+      "t": "agent_run",
+      "note": "the run result"
+    }
+  ],
+  "stores": "Decision log; ACE flag service",
+  "functions": [
+    {
+      "name": "AgentStepClient",
+      "does": "the only way to call an agent"
+    },
+    {
+      "name": "AgentStepClientImpl",
+      "does": "mode, timed call, fallback, log"
+    },
+    {
+      "name": "AutonomyModeResolver",
+      "does": "OFF, SHADOW or L1 in force"
+    },
+    {
+      "name": "DecisionLogMapper",
+      "does": "builds the P7 entry"
+    },
+    {
+      "name": "AgentRunRepository",
+      "does": "sets decision_log_id"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Case step evaluates its rule"
+    },
+    {
+      "kind": "function",
+      "text": "AutonomyModeResolver: OFF / SHADOW / L1"
+    },
+    {
+      "kind": "ai",
+      "text": "Orchestrator call, 60 s limit"
+    },
+    {
+      "kind": "check",
+      "text": "Timeout or guardrail -> fallback"
+    },
+    {
+      "kind": "table",
+      "text": "decision_log_entry written"
+    },
+    {
+      "kind": "out",
+      "text": "Step acts on the rule result"
+    }
+  ],
+  "rules": [
+    "BR1: the rule result always applies in SHADOW and L1",
+    "BR2: a timeout records a fallback",
+    "BR3: the step acts only after the log entry is written",
+    "BR4: agent_version format <agent>@<policy>/<prompt>"
+  ],
+  "risks": [
+    "No answer in 60 s -> fallback TIMED_OUT",
+    "No approved policy -> NO_POLICY fallback",
+    "Decision log write fails -> step does not act, EXCEPTION_QUEUE (MSG-P7-003)"
+  ],
+  "example": [
+    "INTAKE P1/PR1 in SHADOW on RW-2026-000201; rule R-UNI-32 v2026.11 -> RESUME_STATE",
+    "Answer arrives in 2,000 ms",
+    "Log entry: agent_version 'INTAKE@P1/PR1', recommendation null, fallback false"
+  ]
+}

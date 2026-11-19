@@ -1,0 +1,127 @@
+{
+  "key": "RWB-TE-007",
+  "file_stem": "RWB TE 007 Scheduled jobs on Quartz",
+  "title": "Scheduled jobs on Quartz",
+  "module": "P3 Case and workflow (technical enabler)",
+  "flag": "rwb.p3.quartz-jobs",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Quartz scheduled jobs",
+  "goal": "Timer check, allocation and reconciliation run once per business date, on time and visibly",
+  "why": "Two ACE instances share one Quartz store. A cluster lock gives one run per date; a 07:00 watcher alerts if allocation is late.",
+  "needs": [
+    "E1-044",
+    "E1-056"
+  ],
+  "unblocks": [
+    "E1-020",
+    "E1-011",
+    "E1-028"
+  ],
+  "triggers": [
+    [
+      "EVENT",
+      "LoadCompleted (EV-26) + JOB-02 success"
+    ],
+    [
+      "JOB",
+      "JOB-03 and JOB-04 after JOB-02"
+    ],
+    [
+      "JOB",
+      "JOB-05 timer check, cron every 5 min"
+    ],
+    [
+      "JOB",
+      "DeadlineWatcher at 07:00"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No recovery.v_ace_* read. The trigger is the ACE batch event (EV-26) raised by E1-015; Quartz tables are shared with ACE.",
+  "writes": [
+    {
+      "t": "job run log (P1)",
+      "note": "start, end, SUCCEEDED / FAILED, counts"
+    },
+    {
+      "t": "QRTZ_* (ACE common)",
+      "note": "scheduler state; no new qrtz table"
+    }
+  ],
+  "reads": [
+    {
+      "t": "job run log",
+      "note": "already succeeded for date D?"
+    }
+  ],
+  "stores": "Clustered Quartz job store (LocalDataSourceJobStore, PostgreSQLDelegate); run books JOB-03.md, JOB-04.md, JOB-05.md; operations alert channel",
+  "functions": [
+    {
+      "name": "BusinessDateJobRunner",
+      "does": "one instance, skip, dependency, log"
+    },
+    {
+      "name": "DailyJobTrigger",
+      "does": "EV-26 + JOB-02 -> JOB-03, JOB-04"
+    },
+    {
+      "name": "CatchUpOnStart",
+      "does": "missed dates in order (max 5)"
+    },
+    {
+      "name": "DeadlineWatcher",
+      "does": "07:00 check of JOB-03"
+    },
+    {
+      "name": "RecoveryJobRegistry",
+      "does": "triggers + misfire rules"
+    },
+    {
+      "name": "RunBookCheck",
+      "does": "each job has a 6-heading run book"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "EV-26 + JOB-02 succeeded"
+    },
+    {
+      "kind": "check",
+      "text": "Cluster lock: one instance"
+    },
+    {
+      "kind": "check",
+      "text": "Already done for date D?"
+    },
+    {
+      "kind": "function",
+      "text": "Run JOB-03 / JOB-04"
+    },
+    {
+      "kind": "table",
+      "text": "Job run log SUCCEEDED + counts"
+    },
+    {
+      "kind": "out",
+      "text": "07:00 watcher alerts if late"
+    }
+  ],
+  "rules": [
+    "BR1: once per business date, on one instance",
+    "BR2: JOB-03 and JOB-04 run only after JOB-02",
+    "BR3: JOB-03 must finish by 07:00 or an alert is raised",
+    "BR5: catch-up in date order, up to the limit (5 dates)"
+  ],
+  "risks": [
+    "More missed dates than the limit -> alert, no automatic catch-up (MSG-P3-031)",
+    "JOB-02 not done -> WAITING (MSG-P3-031)",
+    "JOB-03 late at 07:00 -> alert within 15 minutes (MSG-P3-031)"
+  ],
+  "example": [
+    "Instances ACE-1 and ACE-2",
+    "COLLINS load for 2026-12-02 passed at 05:20, JOB-02 succeeded at 05:50",
+    "-> JOB-03 runs once on one instance and logs SUCCEEDED with case counts"
+  ]
+}

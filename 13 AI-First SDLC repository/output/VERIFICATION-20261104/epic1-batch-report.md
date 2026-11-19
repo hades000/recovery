@@ -1,0 +1,117 @@
+# Epic 1 specification batch report
+
+Run: 2026-11-04 · Stories: **78** · Specified: **78** · Success: **72** · Blocked: **6** · Missing: **0**
+
+## Summary
+
+| Measure | Value |
+|---|---:|
+| Stories in the Epic 1 build sequence | 78 |
+| Specs written | 78 |
+| Success | 72 |
+| Blocked on source ambiguity | 6 |
+| Missing spec | 0 |
+| Specs with all required sections | 78 |
+| Specs with both unit-test rows | 78 |
+
+## Blocked stories
+
+| Key | Reason | Unblock action |
+|---|---|---|
+| RWB-E1-001 | Decision DL41/DL42 not recorded; E1-001 and E1-044 disagree on whether the migration or the reference load seeds `sys_objects`/`sys_fields`. | Resolve the named source decision, then re-run the Technical Specifier and compliance gate. |
+| RWB-E1-014 | AC2 archive boundary conflict: 2024-11-29/30 partitions vs the 2024-12-01 kept boundary. | Resolve the named source decision, then re-run the Technical Specifier and compliance gate. |
+| RWB-E1-018 | No primary-account rule for a grouped case (`case_account.is_primary`, DF-CAS-027). | Resolve the named source decision, then re-run the Technical Specifier and compliance gate. |
+| RWB-E1-032 | No rule for moving a legal document from `rwb-docs` to `rwb-docs-legal` after type confirmation; CTL-12/NFR-029 unproven. | Resolve the named source decision, then re-run the Technical Specifier and compliance gate. |
+| RWB-E1-013 | AC7 business-date fixture is inconsistent with the previous-business-date rule; `TIME_IN_STAGE` and `TAT_BY_ROUTE` median definitions are not approved. | Resolve the named source decision, then re-run the Technical Specifier and compliance gate. |
+| RWB-E1-061 | `promotion_conditions` / `watch_measures` jsonb has no machine-checkable grammar; BR2/AC5 cannot be validated generally. | Resolve the named source decision, then re-run the Technical Specifier and compliance gate. |
+
+## All stories
+
+| Key | Module | Status | UI | API | Impact | CLAR | Coverage | Compliance | Findings | Lines |
+|---|---|---|---|---|---|---|---|---|---|---:|
+| RWB-E1-001 | P1 | BLOCKED | NO | NO | NO_API_CHANGE | OPEN / 3 | SUCCESS | FAIL | 4 | 265 |
+| RWB-E1-003 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 290 |
+| RWB-E1-005 | P1 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 256 |
+| RWB-E1-064 | P1 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 263 |
+| RWB-E1-065 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 253 |
+| RWB-TE-004 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 248 |
+| RWB-E1-010 | P1 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 282 |
+| RWB-E1-017 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 264 |
+| RWB-E1-014 | P1 | BLOCKED | NO | NO | NO_API_CHANGE | OPEN / 1 | SUCCESS | FAIL | 3 | 260 |
+| RWB-E1-012 | P1 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 262 |
+| RWB-E1-016 | P1 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 264 |
+| RWB-E1-066 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 249 |
+| RWB-E1-002 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 263 |
+| RWB-E1-067 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 254 |
+| RWB-E1-068 | P1 | SUCCESS | YES | YES | EXISTING_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 243 |
+| RWB-E1-006 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 269 |
+| RWB-E1-011 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 249 |
+| RWB-E1-015 | P1 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 250 |
+| RWB-E1-004 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 255 |
+| RWB-E1-009 | P1 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 262 |
+| RWB-TE-001 | P2 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 210 |
+| RWB-TE-002 | P2 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 201 |
+| RWB-TE-003 | P2 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 213 |
+| RWB-TE-011 | P2 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 220 |
+| RWB-E1-007 | P2 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 220 |
+| RWB-E1-051 | P2 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 206 |
+| RWB-E1-047 | P2 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 220 |
+| RWB-E1-056 | P2 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 205 |
+| RWB-TE-006 | P2 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 220 |
+| RWB-E1-044 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 250 |
+| RWB-E1-042 | P3 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 272 |
+| RWB-TE-005 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 251 |
+| RWB-E1-043 | P3 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 286 |
+| RWB-E1-029 | P3 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 283 |
+| RWB-TE-007 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 262 |
+| RWB-E1-019 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 281 |
+| RWB-E1-045 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 269 |
+| RWB-E1-018 | P3 | BLOCKED | NO | YES | EXISTING_API_CHANGE | OPEN / 1 | SUCCESS | FAIL | 3 | 290 |
+| RWB-E1-020 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 5 | 357 |
+| RWB-E1-023 | P3 | SUCCESS | YES | YES | EXISTING_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 274 |
+| RWB-E1-028 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 282 |
+| RWB-E1-031 | P3 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 267 |
+| RWB-E1-021 | P3 | SUCCESS | NO | YES | EXISTING_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 287 |
+| RWB-E1-030 | P3 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 266 |
+| RWB-E1-035 | P3 | SUCCESS | YES | YES | EXISTING_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 247 |
+| RWB-E1-048 | P3 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 258 |
+| RWB-E1-038 | P4 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 273 |
+| RWB-E1-022 | P4 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 269 |
+| RWB-E1-037 | P4 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 291 |
+| RWB-E1-039 | P4,P7 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 280 |
+| RWB-TE-012 | P5 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 315 |
+| RWB-E1-025 | P5 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 272 |
+| RWB-E1-024 | P5 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 342 |
+| RWB-E1-049 | P5 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 297 |
+| RWB-E1-041 | P5 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 317 |
+| RWB-E1-050 | P5 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 290 |
+| RWB-E1-026 | P5 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 319 |
+| RWB-E1-053 | P5 | SUCCESS | YES | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 278 |
+| RWB-E1-057 | P5 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 285 |
+| RWB-E1-032 | P5 | BLOCKED | YES | YES | NEW_API_REQUIRED | OPEN / 1 | SUCCESS | FAIL | 5 | 288 |
+| RWB-E1-033 | P5 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 255 |
+| RWB-E1-040 | P5 | SUCCESS | YES | YES | EXISTING_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 254 |
+| RWB-E1-054 | P5 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 6 | 287 |
+| RWB-E1-046 | P6 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 224 |
+| RWB-E1-034 | P6 | SUCCESS | YES | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 226 |
+| RWB-E1-052 | P6 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 226 |
+| RWB-E1-055 | P6 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 234 |
+| RWB-E1-008 | P7 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 220 |
+| RWB-E1-027 | P7 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 220 |
+| RWB-TE-008 | P7 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 4 | 217 |
+| RWB-E1-013 | P9 | BLOCKED | NO | NO | NO_API_CHANGE | OPEN / 2 | SUCCESS | FAIL | 7 | 220 |
+| RWB-E1-058 | P10 | SUCCESS | NO | YES | NEW_API_REQUIRED | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 290 |
+| RWB-TE-013 | P10 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 2 | 281 |
+| RWB-E1-062 | P10 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 262 |
+| RWB-E1-059 | P10 | SUCCESS | NO | YES | EXISTING_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 251 |
+| RWB-E1-060 | P10 | SUCCESS | NO | YES | EXISTING_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 264 |
+| RWB-E1-061 | P10 | BLOCKED | NO | YES | NEW_API_REQUIRED | OPEN / 1 | BLOCKED | FAIL | 3 | 251 |
+| RWB-E1-063 | P10 | SUCCESS | NO | NO | NO_API_CHANGE | RESOLVED / 0 | SUCCESS | PASS_WITH_WARNINGS | 3 | 260 |
+
+## Notes
+
+- The 72 success specs have `CLARIFICATION_STATUS: RESOLVED [OPEN_ITEMS: 0]` and no `BLOCKED` coverage row.
+- The 6 blocked specs have an open source decision; they must not go to the Implementation Planner until resolved.
+- The Low findings are source-text, contract and assumed-value corrections; they do not block the spec gate.
+- The traceability matrix merge is in `requirement/Traceability_Matrix.md` §8.
+- No shared source, context or traceability file was modified by the module subagents.

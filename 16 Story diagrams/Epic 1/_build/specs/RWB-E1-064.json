@@ -1,0 +1,156 @@
+{
+  "key": "RWB-E1-064",
+  "file_stem": "RWB E1 064 Data dictionary for the 14 data products",
+  "title": "Data dictionary for the 14 data products",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.data-dictionary",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Data dictionary + DC-ACE",
+  "goal": "Type, source and own all 1,366 fields, and publish an ACE read contract (DC-ACE) confirmed by the ACE team",
+  "why": "Everyone can look up any field. Every view column maps to a public.table.column in ACE, and the ACE lead signs the contract before it is published.",
+  "needs": [
+    "E1-001",
+    "E1-043",
+    "E1-069"
+  ],
+  "unblocks": [
+    "E1-016",
+    "E1-017"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (sys_fields)"
+    ],
+    [
+      "API",
+      "GET /admin/data-dictionary/fields"
+    ],
+    [
+      "API",
+      "POST /admin/data-contracts/{contractId}/publish"
+    ],
+    [
+      "WHO",
+      "RW-DATASTEW owns; ACE lead confirms"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_* (16 views)",
+      "section": "A",
+      "note": "177 fields: each names its public.table.column"
+    },
+    {
+      "view": "v_ace_* (14 views)",
+      "section": "B",
+      "note": "127 fields over the RWB-ACE-001 tables"
+    },
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "derived: contact_type, city, post_code, country"
+    },
+    {
+      "view": "v_ace_plan",
+      "section": "A",
+      "note": "derived: installments, recommended_package"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "sys_fields",
+      "note": "governance attributes for 1,366 fields"
+    },
+    {
+      "t": "sys_field_version",
+      "note": "history of every field change"
+    },
+    {
+      "t": "data_contract",
+      "note": "DC-ACE: DRAFT -> PUBLISHED"
+    }
+  ],
+  "reads": [
+    {
+      "t": "sys_objects",
+      "note": "122 objects"
+    },
+    {
+      "t": "data_product",
+      "note": "14 products"
+    },
+    {
+      "t": "v_data_dictionary",
+      "note": "the joined view"
+    }
+  ],
+  "stores": "Confirmation document reference (held outside the Workbench); CHK-01 view conformance check from E1-069",
+  "functions": [
+    {
+      "name": "DataDictionaryController",
+      "does": "5 dictionary endpoints"
+    },
+    {
+      "name": "DataDictionaryService",
+      "does": "versioned changes, If-Match"
+    },
+    {
+      "name": "DataContractService",
+      "does": "confirm, publish, new DRAFT"
+    },
+    {
+      "name": "DataDictionaryLoader",
+      "does": "whole-load validation"
+    },
+    {
+      "name": "DataDictionaryQuery",
+      "does": "field + product definitions"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Steward loads 1,366 field rows"
+    },
+    {
+      "kind": "check",
+      "text": "Source is ACE or Workbench; view column exists"
+    },
+    {
+      "kind": "table",
+      "text": "sys_fields + sys_field_version"
+    },
+    {
+      "kind": "check",
+      "text": "ACE lead confirmation recorded?"
+    },
+    {
+      "kind": "table",
+      "text": "data_contract DC-ACE PUBLISHED"
+    },
+    {
+      "kind": "out",
+      "text": "GET /admin/data-dictionary/fields"
+    }
+  ],
+  "rules": [
+    "BR1: every view field names public.table.column or is one of the 7 derived fields",
+    "BR2: 122 objects and 1,366 fields",
+    "BR4: publish only after the ACE confirmation is recorded",
+    "BR9: a new ACE column enters by reference load; CHK-01 blocks the merge until then"
+  ],
+  "risks": [
+    "Publish without confirmation -> 409 (MSG-P1-021)",
+    "Bad load -> refused whole (MSG-P1-002)",
+    "View column with no sys_fields row -> CHK-01 fails ('v_ace_account.legacy_bucket has no entry')"
+  ],
+  "example": [
+    "DP01 Account and arrears: owner RW-DATASTEW, system of record 'ACE (ingested from ALS)'",
+    "297 of 304 view fields map to a public column; 7 are derived",
+    "DC-ACE (V0002 + V0003) moves DRAFT -> PUBLISHED"
+  ]
+}

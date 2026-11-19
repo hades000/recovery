@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecoveryBoundaryRules.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">th.co.scb.ace.demo.recovery.architecture</a> &gt; <span class="el_source">RecoveryBoundaryRules.java</span></div><h1>RecoveryBoundaryRules.java</h1><pre class="source lang-java linenums">package th.co.scb.ace.demo.recovery.architecture;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+
+import com.tngtech.archunit.core.domain.Dependency;
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.domain.JavaModifier;
+import com.tngtech.archunit.lang.ArchCondition;
+import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
+import jakarta.persistence.Entity;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.springframework.data.repository.Repository;
+import org.springframework.modulith.NamedInterface;
+
+final class RecoveryBoundaryRules {
+    private final ModuleMap moduleMap;
+
+<span class="fc" id="L24">    private RecoveryBoundaryRules(ModuleMap moduleMap) {</span>
+<span class="fc" id="L25">        this.moduleMap = moduleMap;</span>
+<span class="fc" id="L26">    }</span>
+
+    static RecoveryBoundaryRules from(ModuleMap moduleMap) {
+<span class="fc" id="L29">        return new RecoveryBoundaryRules(moduleMap);</span>
+    }
+
+    ArchRule bnd1() {
+<span class="fc" id="L33">        return externalDependencyRule(&quot;BND-1&quot;, &quot;collection&quot;);</span>
+    }
+
+    ArchRule bnd2() {
+<span class="fc" id="L37">        return externalDependencyRule(&quot;BND-2&quot;, &quot;common&quot;);</span>
+    }
+
+    ArchRule bnd4() {
+<span class="fc" id="L41">        return dependencyRule(</span>
+                &quot;BND-4&quot;,
+                &quot;entity or repository&quot;,
+                (source, target) -&gt;
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                        isEntityOrRepository(target)</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">                                &amp;&amp; !belongsToSameRecoveryModule(source, target),</span>
+<span class="fc" id="L47">                targetModuleLabel(&quot;common&quot;));</span>
+    }
+
+    ArchRule bnd5() {
+<span class="fc" id="L51">        return dependencyRule(</span>
+                &quot;BND-5&quot;,
+                &quot;client library&quot;,
+                (source, target) -&gt;
+<span class="fc bfc" id="L55" title="All 2 branches covered.">                        matchesClientLibrary(target.getName())</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">                                &amp;&amp; !isClientPackage(</span>
+<span class="fc" id="L57">                                        moduleFor(source.getPackageName()),</span>
+<span class="fc" id="L58">                                        source.getPackageName()),</span>
+<span class="fc" id="L59">                ignored -&gt; clientPackageLabel());</span>
+    }
+
+    List&lt;String&gt; moduleMapViolations(JavaClasses javaClasses) {
+<span class="fc" id="L63">        List&lt;String&gt; violations = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L64">        Set&lt;String&gt; presentModules = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L65">        Set&lt;String&gt; unmappedModules = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L66">        Set&lt;String&gt; namedInterfacePackages = new HashSet&lt;&gt;();</span>
+
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        for (JavaClass javaClass : javaClasses) {</span>
+<span class="fc" id="L69">            String packageName = javaClass.getPackageName();</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if (!isInOrUnder(packageName, moduleMap.rootPackage())) {</span>
+<span class="nc" id="L71">                continue;</span>
+            }
+
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            if (packageName.equals(moduleMap.rootPackage())</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">                    &amp;&amp; !javaClass.getSimpleName().equals(&quot;package-info&quot;)) {</span>
+<span class="fc" id="L76">                violations.add(</span>
+                        &quot;type &quot;
+<span class="fc" id="L78">                                + javaClass.getName()</span>
+                                + &quot; sits in the root package &quot;
+<span class="fc" id="L80">                                + moduleMap.rootPackage());</span>
+            }
+<span class="fc bfc" id="L82" title="All 2 branches covered.">            if (javaClass.getSimpleName().equals(&quot;package-info&quot;)</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">                    &amp;&amp; javaClass.isAnnotatedWith(NamedInterface.class)) {</span>
+<span class="fc" id="L84">                namedInterfacePackages.add(packageName);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            } else if (javaClass.isAnnotatedWith(NamedInterface.class)) {</span>
+<span class="fc" id="L86">                violations.add(</span>
+                        &quot;type-level @NamedInterface on &quot;
+<span class="fc" id="L88">                                + javaClass.getName()</span>
+                                + &quot;; declare published packages in package-info&quot;
+                                + &quot; and the module map&quot;);
+            }
+
+<span class="fc bfc" id="L93" title="All 2 branches covered.">            if (!packageName.equals(moduleMap.rootPackage())) {</span>
+<span class="fc" id="L94">                String firstSegment = packageName.substring(moduleMap.rootPackage().length() + 1);</span>
+<span class="fc" id="L95">                int separator = firstSegment.indexOf('.');</span>
+                String moduleName =
+<span class="fc bfc" id="L97" title="All 2 branches covered.">                        separator &lt; 0 ? firstSegment : firstSegment.substring(0, separator);</span>
+<span class="fc" id="L98">                String modulePackage = moduleMap.rootPackage() + &quot;.&quot; + moduleName;</span>
+<span class="fc" id="L99">                boolean moduleIsMapped =</span>
+<span class="fc" id="L100">                        moduleMap.modules().stream()</span>
+<span class="fc" id="L101">                                .anyMatch(module -&gt; module.name().equals(moduleName));</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">                if (moduleIsMapped) {</span>
+<span class="fc" id="L103">                    presentModules.add(moduleName);</span>
+<span class="fc" id="L104">                    ModuleMap.Module module = moduleNamed(moduleName);</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">                    if (packageName.equals(modulePackage)</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">                            &amp;&amp; !javaClass.getSimpleName().equals(&quot;package-info&quot;)</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">                            &amp;&amp; javaClass.getModifiers().contains(JavaModifier.PUBLIC)) {</span>
+<span class="fc" id="L108">                        violations.add(</span>
+                                &quot;public type &quot;
+<span class="fc" id="L110">                                        + javaClass.getName()</span>
+                                        + &quot; in module base package &quot;
+                                        + modulePackage
+                                        + &quot;; move it to a published package or internal&quot;);
+                    }
+<span class="fc" id="L115">                } else {</span>
+<span class="fc" id="L116">                    unmappedModules.add(modulePackage);</span>
+                }
+            }
+<span class="fc" id="L119">        }</span>
+
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        for (String unmappedModule : unmappedModules) {</span>
+<span class="fc" id="L122">            violations.add(&quot;package &quot; + unmappedModule + &quot; is not in the module map&quot;);</span>
+<span class="fc" id="L123">        }</span>
+
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for (ModuleMap.Module module : moduleMap.modules()) {</span>
+<span class="fc" id="L126">            String modulePackage = module.packageName(moduleMap.rootPackage());</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">            if (!presentModules.contains(module.name())) {</span>
+<span class="fc" id="L128">                violations.add(&quot;module package &quot; + modulePackage + &quot; does not exist&quot;);</span>
+            }
+
+<span class="fc bfc" id="L131" title="All 2 branches covered.">            for (String namedPackage : namedInterfacePackages) {</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">                if (isInOrUnder(namedPackage, modulePackage)) {</span>
+<span class="fc" id="L133">                    String relativePackage = namedPackage.substring(modulePackage.length() + 1);</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">                    if (!module.published().contains(relativePackage)) {</span>
+<span class="fc" id="L135">                        violations.add(</span>
+                                &quot;@NamedInterface package &quot;
+                                        + namedPackage
+                                        + &quot; is not listed in published&quot;);
+                    }
+                }
+<span class="fc" id="L141">            }</span>
+
+<span class="fc bfc" id="L143" title="All 2 branches covered.">            for (String published : module.published()) {</span>
+<span class="fc" id="L144">                String publishedPackage = modulePackage + &quot;.&quot; + published;</span>
+<span class="fc" id="L145">                boolean packageExists =</span>
+<span class="fc" id="L146">                        javaClasses.stream()</span>
+<span class="fc" id="L147">                                .anyMatch(</span>
+                                        javaClass -&gt;
+<span class="fc" id="L149">                                                isInOrUnder(</span>
+<span class="fc" id="L150">                                                        javaClass.getPackageName(),</span>
+                                                        publishedPackage));
+<span class="fc bfc" id="L152" title="All 4 branches covered.">                if (packageExists &amp;&amp; !namedInterfacePackages.contains(publishedPackage)) {</span>
+<span class="fc" id="L153">                    violations.add(</span>
+                            &quot;published package &quot;
+                                    + publishedPackage
+                                    + &quot; is missing @NamedInterface&quot;);
+                }
+<span class="fc" id="L158">            }</span>
+<span class="fc" id="L159">        }</span>
+
+<span class="fc" id="L161">        return List.copyOf(violations);</span>
+    }
+
+    private ArchRule externalDependencyRule(String ruleCode, String externalName) {
+<span class="fc" id="L165">        ModuleMap.External external = externalNamed(externalName);</span>
+<span class="fc" id="L166">        return dependencyRule(</span>
+                ruleCode,
+                externalName,
+                (source, target) -&gt;
+<span class="fc bfc" id="L170" title="All 2 branches covered.">                        isInOrUnder(target.getPackageName(), external.rootPackage())</span>
+<span class="fc" id="L171">                                &amp;&amp; external.published().stream()</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">                                        .noneMatch(</span>
+                                                published -&gt;
+<span class="fc" id="L174">                                                        isInOrUnder(</span>
+<span class="fc" id="L175">                                                                target.getPackageName(),</span>
+<span class="fc" id="L176">                                                                external.rootPackage()</span>
+                                                                        + &quot;.&quot;
+                                                                        + published)),
+<span class="fc" id="L179">                ignored -&gt; externalName);</span>
+    }
+
+    private ArchRule dependencyRule(
+            String ruleCode,
+            String description,
+            DependencyPredicate predicate,
+            ModuleLabel moduleLabel) {
+<span class="fc" id="L187">        return classes()</span>
+<span class="fc" id="L188">                .that()</span>
+<span class="fc" id="L189">                .resideInAPackage(moduleMap.rootPackage() + &quot;..&quot;)</span>
+<span class="fc" id="L190">                .should(</span>
+<span class="fc" id="L191">                        new ArchCondition&lt;&gt;(&quot;depend on &quot; + description) {</span>
+                            @Override
+                            public void check(JavaClass source, ConditionEvents events) {
+                                for (Dependency dependency :
+<span class="fc bfc" id="L195" title="All 2 branches covered.">                                        source.getDirectDependenciesFromSelf()) {</span>
+<span class="fc" id="L196">                                    JavaClass target = dependency.getTargetClass();</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">                                    if (predicate.matches(source, target)) {</span>
+                                        String recommendation =
+<span class="fc bfc" id="L199" title="All 2 branches covered.">                                                ruleCode.equals(&quot;BND-5&quot;)</span>
+                                                        ? &quot;Use &quot;
+<span class="fc" id="L201">                                                                + moduleLabel.label(target)</span>
+<span class="fc" id="L202">                                                                + &quot; or an application event.&quot;</span>
+                                                        : &quot;Use &quot;
+<span class="fc" id="L204">                                                                + moduleLabel.label(target)</span>
+<span class="fc" id="L205">                                                                + &quot;.api or an application event.&quot;;</span>
+<span class="fc" id="L206">                                        String message =</span>
+                                                &quot;Rule &quot;
+                                                        + ruleCode
+                                                        + &quot; broken: &quot;
+<span class="fc" id="L210">                                                        + source.getName()</span>
+                                                        + &quot; depends on &quot;
+<span class="fc" id="L212">                                                        + target.getName()</span>
+                                                        + &quot;. &quot;
+                                                        + recommendation;
+<span class="fc" id="L215">                                        events.add(SimpleConditionEvent.violated(source, message));</span>
+                                    }
+<span class="fc" id="L217">                                }</span>
+<span class="fc" id="L218">                            }</span>
+                        })
+<span class="fc" id="L220">                .allowEmptyShould(true);</span>
+    }
+
+    private boolean isEntityOrRepository(JavaClass target) {
+<span class="fc bfc" id="L224" title="All 4 branches covered.">        return target.isAnnotatedWith(Entity.class) || target.isAssignableTo(Repository.class);</span>
+    }
+
+    private String moduleFor(String packageName) {
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        if (!isInOrUnder(packageName, moduleMap.rootPackage())</span>
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">                || packageName.equals(moduleMap.rootPackage())) {</span>
+<span class="nc" id="L230">            return null;</span>
+        }
+<span class="fc" id="L232">        String relativePackage = packageName.substring(moduleMap.rootPackage().length() + 1);</span>
+<span class="fc" id="L233">        int separator = relativePackage.indexOf('.');</span>
+        String moduleName =
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">                separator &lt; 0 ? relativePackage : relativePackage.substring(0, separator);</span>
+<span class="fc" id="L236">        return moduleMap.modules().stream()</span>
+<span class="fc" id="L237">                .filter(module -&gt; module.name().equals(moduleName))</span>
+<span class="fc" id="L238">                .map(ModuleMap.Module::name)</span>
+<span class="fc" id="L239">                .findFirst()</span>
+<span class="fc" id="L240">                .orElse(null);</span>
+    }
+
+    private boolean belongsToSameRecoveryModule(JavaClass source, JavaClass target) {
+<span class="fc" id="L244">        String sourceModule = moduleFor(source.getPackageName());</span>
+<span class="pc bpc" id="L245" title="1 of 4 branches missed.">        return sourceModule != null &amp;&amp; sourceModule.equals(moduleFor(target.getPackageName()));</span>
+    }
+
+    private ModuleLabel targetModuleLabel(String fallback) {
+<span class="fc" id="L249">        return target -&gt; {</span>
+<span class="fc" id="L250">            String targetModule = moduleFor(target.getPackageName());</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">            if (targetModule != null) {</span>
+<span class="fc" id="L252">                return targetModule;</span>
+            }
+<span class="fc" id="L254">            return moduleMap.external().stream()</span>
+<span class="fc" id="L255">                    .filter(</span>
+                            external -&gt;
+<span class="fc" id="L257">                                    isInOrUnder(</span>
+<span class="fc" id="L258">                                            target.getPackageName(), external.rootPackage()))</span>
+<span class="fc" id="L259">                    .map(ModuleMap.External::name)</span>
+<span class="fc" id="L260">                    .findFirst()</span>
+<span class="fc" id="L261">                    .orElse(fallback);</span>
+        };
+    }
+
+    private boolean matchesClientLibrary(String className) {
+<span class="fc" id="L266">        return moduleMap.clientLibraries().stream()</span>
+<span class="fc" id="L267">                .anyMatch(</span>
+                        entry -&gt;
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">                                className.equals(entry)</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">                                        || className.startsWith(entry + &quot;.&quot;)</span>
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">                                        || className.startsWith(entry + &quot;$&quot;));</span>
+    }
+
+    private boolean isClientPackage(String moduleName, String packageName) {
+<span class="fc" id="L275">        return moduleMap.modules().stream()</span>
+<span class="fc" id="L276">                .filter(module -&gt; module.name().equals(moduleName))</span>
+<span class="fc" id="L277">                .anyMatch(</span>
+                        module -&gt;
+<span class="fc" id="L279">                                module.clientPackages().stream()</span>
+<span class="fc" id="L280">                                        .map(</span>
+                                                clientPackage -&gt;
+<span class="fc" id="L282">                                                        module.packageName(moduleMap.rootPackage())</span>
+                                                                + &quot;.&quot;
+                                                                + clientPackage)
+<span class="fc" id="L285">                                        .anyMatch(</span>
+                                                clientPackage -&gt;
+<span class="fc" id="L287">                                                        isInOrUnder(packageName, clientPackage)));</span>
+    }
+
+    private String clientPackageLabel() {
+<span class="fc" id="L291">        return moduleMap.modules().stream()</span>
+<span class="fc bfc" id="L292" title="All 2 branches covered.">                .filter(module -&gt; !module.clientPackages().isEmpty())</span>
+<span class="fc" id="L293">                .map(</span>
+                        module -&gt;
+<span class="fc" id="L295">                                module.name()</span>
+                                        + &quot;.&quot;
+<span class="fc" id="L297">                                        + module.clientPackages().getFirst())</span>
+<span class="fc" id="L298">                .reduce((first, second) -&gt; first + &quot; or &quot; + second)</span>
+<span class="fc" id="L299">                .orElse(&quot;an approved client package&quot;);</span>
+    }
+
+    private ModuleMap.Module moduleNamed(String name) {
+<span class="fc" id="L303">        return moduleMap.modules().stream()</span>
+<span class="fc" id="L304">                .filter(module -&gt; module.name().equals(name))</span>
+<span class="fc" id="L305">                .findFirst()</span>
+<span class="fc" id="L306">                .orElseThrow();</span>
+    }
+
+    private ModuleMap.External externalNamed(String name) {
+<span class="fc" id="L310">        return moduleMap.external().stream()</span>
+<span class="fc" id="L311">                .filter(external -&gt; external.name().equals(name))</span>
+<span class="fc" id="L312">                .findFirst()</span>
+<span class="fc" id="L313">                .orElseThrow();</span>
+    }
+
+    private static boolean isInOrUnder(String packageName, String packageRoot) {
+<span class="fc bfc" id="L317" title="All 4 branches covered.">        return packageName.equals(packageRoot) || packageName.startsWith(packageRoot + &quot;.&quot;);</span>
+    }
+
+    @FunctionalInterface
+    private interface DependencyPredicate {
+        boolean matches(JavaClass source, JavaClass target);
+    }
+
+    @FunctionalInterface
+    private interface ModuleLabel {
+        String label(JavaClass target);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

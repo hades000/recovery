@@ -1,0 +1,74 @@
+---
+title: "Compliance validation: RWB-E1-044 spec (v14 re-baseline, remediation run 5)"
+run_id: INC-001-epic-1-RWB-E1-044
+date: 2026-11-18
+status: SELF-CHECK PASS (spec gate round 6 in ../review/spec-gate-review-6.md; round 5 in ../review/spec-gate-review-5.md; round 4 in ../review/spec-gate-review-4.md; round 3 in ../review/spec-gate-review-3.md; round 2 in ../review/spec-gate-review-2.md; round 1 in ../review/spec-gate-review.md)
+---
+
+# Compliance validation (Technical Specifier self-check, spec v14-6)
+
+Earlier versions are kept as `compliance-validation.run1.md` to `compliance-validation.run5.md`. `gate-response.md` maps findings S01 to S11 (round 1), S10, S12 to S15 (round 2) S16 to S19 plus D-RUN-14 (round 3) and S20 to S23 plus D-RUN-17 (round 4) and S24 to S26 (round 5) to their resolutions.
+
+## Gate checklist (`aisdlc/.github/rules/specification-execution-gates.md`)
+
+| Check | Result | Evidence |
+|---|---|---|
+| `## Change Scope Declaration` with all required fields | PASS | spec, exact heading |
+| `## Requirement-to-SPEC Logic Coverage` with allowed Coverage Type (`DIRECT` / `INHERITED_EXISTING_BEHAVIOR`) and Status (`COVERED` / `BLOCKED`) | PASS | 28 rows, all `COVERED`. Out-of-scope and declined rows map to SPEC-017 with the decision in Implementation Notes |
+| Intent, trigger and preconditions, field matrix, status-transition matrix, exceptions | PASS | spec sections of the same names. Story §3 preconditions each listed |
+| API change assessment (NO_API_CHANGE) | PASS | spec "API Change Assessment"; `contracts/backend-apis.json` |
+| UI N/A justification | PASS | spec "Frontend Specification"; `figma/figma_report.md` |
+| `## Unit Test Applicability`: frontend and backend rows; `REQUIRED` / `NOT_APPLICABLE`; 80% on lines, statements, branches, functions (LINE, INSTRUCTION, BRANCH, METHOD) | PASS | Frontend NO / NOT_APPLICABLE. Backend main and backend test-scope tooling both REQUIRED at 80% on four counters, measured by the one combined `BUNDLE` rule of `recoveryCoverageVerification` that RWB-TE-001 SPEC-020 (a) and (b) set up, with this story's tooling added (orchestrator triage on S22). No waiver (S03). The main-scope baseline below 80% is recorded as a fact and is lifted by RWB-TE-001 SPEC-024 before this story's code gate (D-RUN-17; OI-E044-K closed). The Unit Tests cells hold the bare value `REQUIRED` (S10) |
+| Integration testing kept separately | PASS | "Verification beyond unit tests" table (T-044-10 to -18, D-RCV-44) |
+| Every business-rule line mapped or marked inherited | PASS | Story §3, §10, §12, §14, §15, §16 lines added. TC-to-T table (S08) |
+| Clarification Log; no open CLAR | PASS | CLAR-001 to -013 RESOLVED. CLAR-011 records the D-RUN-17 and S22 rulings, so nothing it depends on is open (S21) |
+| Status lines (MCP, classification, coverage, design evidence, clarification) | PASS | spec "Status". `CONTRADICTIONS: 0` counts unresolved contradictions, as the planning gate (line 44) and implementation gate (line 68) read it. The 8 settled ones (DG-L01, -L02, -L04, -L05, -L09, -L11, -L12, -L13) are listed with how each was settled (S20). `OPEN_ITEMS: 9` counts the open-item candidates for other owners (OI-E044-A to -G, -I, -J); OI-E044-H and -K are closed (S21) |
+
+## Source cross-check
+
+| Statement in spec | Source | Agrees |
+|---|---|---|
+| E1-044 ships no production migration file; no number fixed | Decision Log v10 D-RCV-28; story v7 §13; D-RUN-07 (build log, RUN-BRIEF) | Yes |
+| Schema `recovery`, `${recoverySchema}` | Decision Log v10 D-RCV-28 ("recovery in every environment"); L-RCV-07 | Yes (story §7/§12 disagree, DG-L01) |
+| "No per-environment override" | Story v7 §13 (attributed there, not to D-RCV-28) | Yes |
+| Bean settings inherited | `RecoveryFlywayConfig.java`; BS-2.3; squad D-RCV-48 | Yes |
+| Literal-schema rule scope; search path "in every form" | Squad register `INC-001-decisions.md` D-RCV-28 (2) (not in Decision Log v10; ASM-E044-11) | Yes |
+| Schema-prefix rules check identifiers only; literals and comments ignored | Build log D-RUN-13; squad D-RCV-28 (2) "accepted gap" for strings; Physical Schema v6: 297 lines with a `'public.…'` literal (`sys_fields` rows) | Yes |
+| One quote-aware tokenizer pass; dollar bodies scanned as code; L-LEX | Orchestrator triage on S12 (build log 2026-11-18T00:01); Physical Schema v6 function bodies (lines 2390, 6145, 6163, 6185); PostgreSQL lexical rules (nested comments, `E'…'`, `$tag$`) | Yes (ASM-E044-15, -16; T-044-22) |
+| D-RCV-28 lint rejects ADR-010 view text; seam for RWB-E1-069 | ADR v3 ADR-010; D-RCV-35; Env v4 §5; Physical Schema v6 Section A; build log orchestrator triage 2026-11-17T23:40; D-RUN-08 | Conflict recorded (DG-L09), not blocking |
+| Clean refusal uses Flyway's message | Squad register D-RCV-28 (4) | Yes (story v7 X5/AC7/§14 disagree, DG-L11) |
+| IT tag, task, fail without Docker, run before every MR | Squad D-RCV-28 (3); D-RCV-44; `backend/build.gradle.kts` | Yes |
+| Container built from `infra/postgres/init` | `RecoveryDatabaseIT`; `infra/postgres/init/*` | Yes |
+| Real-environment drift out of scope | D-RCV-05; CLAR-001 A in the 10 Nov spec | Yes (story BR7 disagrees, DG-L02) |
+| Job-monitor parts out of scope, no owner named | D-RCV-12; RWB-E1-056 v7; API Specification v4 `getAdminJobs` | Yes (gap DG-L10) |
+| MSG-P3-016 ID and parameters | Error and Message Standard v4; story v7 §14; AGENTS.md §3.6 | Yes |
+| No FK into `public` | Story v7 BR8; ADR v3 ADR-010; D-RCV-35 U4 | Yes |
+| Rollback by previous tag | NFR spec v3 NFR-027 | Yes |
+| Schema pin gap, closed whether Flyway is on or off | Phase 0 audit A-17; RWB-TE-001 SPEC-023 (the `casewf.migration` record binds `rwb.schema`, `rwb.flyway.*`); `RecoveryFlywayConfig` (`@ConditionalOnProperty rwb.flyway.enabled`; properties first parameter of `recoveryFlyway`); the repository's `@EnableConfigurationProperties` pattern (`PlatformConfig.java`, `TemporalConfig.java`; no `@ConfigurationPropertiesScan`); `application.yaml` (`hibernate.default_schema: ${rwb.schema}`; no lazy initialization) | Yes (record registered with no condition; T-044-08 both flag values) |
+| E1-044 does not give the migration account the ACE DBA role | RWB-E1-044 v7 §3, §10; ADR v3 ADR-010; D-RCV-35 U3, U4; RWB-ACE-001 v1 §4 flow 5; RWB-E1-069 v7 §10; `infra/postgres/init/` | Yes (RWB-E1-069 v7 §3 disagrees, DG-L13) |
+| `rwb_migrator` gets exactly USAGE on `public` (no table privilege) and `ace_view_owner` membership `INHERIT FALSE, SET TRUE` | Orchestrator decision D-RUN-14 (build log §1, 2026-11-18T00:31); Env and Deployment Design v4 §5 line 124; ACE Source Views v1 grant block line 727; Test Cases v7 TC-ACE-001-04 (table grants stay with the ACE DBA) | Yes (applied as the orchestrator's decision; confirmation OI-E044-J) |
+| T-044-08 runner: `casewf.migration` configurations only, no base properties | RWB-TE-001 SPEC-022 Relocation table (`RecoveryFlywayConfig` to `casewf.migration`, package-private; `PlatformConfig` and `RecoveryFlags` to P2 `integration.flags`); SPEC-023 | Yes (S16 base properties dropped with `PlatformConfig`; D-RUN-17) |
+| One combined coverage bundle, this story's tooling added | RWB-TE-001 SPEC-020 (a), (b), Unit Test Applicability backend row, T-TE001-10; orchestrator triage on S22 (TE-001 SPEC-020 (b) wins); `backend/build.gradle.kts` (one rule, no `element`, so BUNDLE) | Yes (S22; the v14-4 per-set split is withdrawn) |
+| 80% on test-scope tooling, inside the combined bundle | Squad D-RCV-40, D-RCV-43 (2); testing-standards §6; RWB-TE-001 SPEC-020 (b); implementation-execution-gates | Yes |
+| Merged RWB-TE-001 tests stay green; two permitted test changes | RWB-TE-001 SPEC-024 ("`casewf.migration.RecoveryFlywayConfig` (configuration built without running `migrate` ...)"; "existing tests stay as they are"), T-TE001-12; SPEC-002 "Existing tests"; SPEC-003 "The factory method never migrates" | Yes (S24) |
+| Plan input is RWB-TE-001 v4 and its gated plan; merged-code check at the builder's first step | D-RUN-17 (merge order; condition on E1-044's code gate only); RWB-TE-001 plan not yet gated on 18 Nov 2026 | Yes (S25; Dependencies, SPEC-002, SPEC-014, T-044-08, ASM-E044-19) |
+| Coverage baseline citation; `casewf.migration` is a sub-package | RWB-TE-001 Unit Test Applicability backend row (LINE 133/415, BRANCH 25/92, INSTRUCTION 686/2174, METHOD 41/135); RWB-TE-001 Change Scope New Nodes ("published sub-packages that receive relocated types", SPEC-022) | Yes (S26) |
+| Wave A order and package layout | Orchestrator decision D-RUN-17 (build log §1, 2026-11-18T00:55); Build Sequence v6 (no dependency between orders 1 and 2); RWB-TE-001 SPEC-022, SPEC-023 | Yes (every path in spec and contracts is the post-RWB-TE-001 path; ASM-E044-01, -19) |
+| T-044-17 (f) expects 42501 for the FK | `infra/postgres/schema/01-ace-schema-v1.sql` (`public.account.id bigint not null`, line 43; `pk_account PRIMARY KEY (id)`, line 804); spec gate round 4 probe (42830 for a non-key column, 42703 for an unknown one) | Yes (S23: key column named) |
+| GRANT ban; Section A grants on `public` also hit L-LITERAL-SCHEMA items 3 and 4 | BS-2.5, BS-2.6; D-RCV-35 U4; Physical Schema v6 grant block | Yes (E1-069 v7 and Env v4 §5 disagree, DG-L05; seam SEAM-E044-02) |
+
+## Guardrails (story v7 §17; AGENTS.md §4)
+
+| Guardrail | Spec position |
+|---|---|
+| No business value in a migration | No production migration. Fixtures are test-only |
+| No personal data | Synthetic fixture names only (ASM-E044-10). The rethrown Flyway message holds DDL or reference data only (SPEC-003) |
+| No literal schema name | SPEC-007 (identifiers only, D-RUN-13) |
+| No FK into `public` | SPEC-008, T-044-05, T-044-21 (L-FK-OUTSIDE, every environment); T-044-17 (D-RUN-14 rights asserted, no table privilege in `public`, `INHERIT` false; database refusal, this repository's grants only; DG-L13) |
+| No manual change; merged migration never edited | SPEC-001 (`validateOnMigrate`), T-044-12 |
+| No new dependency | Flyway, Testcontainers and JaCoCo are already in `backend/build.gradle.kts` |
+| No later-story work treated as existing (D-RUN-08); RWB-TE-001 an upstream dependency (D-RUN-17) | Seams SEAM-E044-01 to -03 (SPEC-016); SEAM-E044-04 names RWB-TE-001 as merged before this story, per D-RUN-17, not as later work; SPEC-017 |
+
+## Requirement and traceability
+
+REQ-RDF-001 and REQ-RDF-014 (Business Requirements Program v4 §5.1); BR-RWB-013 / FR-RWB-013 (Traceability Matrix v2.0); NFR-027 and NFR-052 cited by source ID (NFR spec v3). The rows for the matrix, in its own columns, are in `shared-updates.md`.

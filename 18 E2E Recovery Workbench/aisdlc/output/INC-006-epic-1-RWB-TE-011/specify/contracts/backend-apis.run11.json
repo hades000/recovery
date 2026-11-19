@@ -1,0 +1,61 @@
+{
+  "runId": "INC-006-epic-1-RWB-TE-011",
+  "story": "RWB-TE-011",
+  "apiImpactType": "NO_API_CHANGE",
+  "reason": "Build-time lint; no endpoint, schema, status code or message added or changed (story file v1 §10, TC-TE-011-11). API Specification v4 is read as an input file only.",
+  "endpoints": [],
+  "buildToolContract": {
+    "component": "tools/pdpa-lint (PdpaLintStep)",
+    "trigger": "Every pipeline that .gitlab-ci.yml creates. The file has no workflow: block, so GitLab creates branch pipelines (every branch, including main and develop-recovery) and tag pipelines, and no merge request pipeline; locally, scripts/dev.ps1 test before the orchestrator's merge (story file v1 §12; SPEC-TE011-013)",
+    "inputs": [
+      "Dictionary as seeded and changed by migrations: sys_fields.is_personal from the baseline infra/postgres/schema/03-recovery-physical-schema-v6.sql, then backend/src/main/resources/db/modulemigration/recovery/*.sql in Flyway order (a migration row replaces a baseline row), then any configured dictionary file. Recognised forms: INSERT ... VALUES single-row or multi-row; UPDATE ... SET is_personal WHERE field_id = / IN (literal ids). Any other statement writing sys_fields fails closed (SPEC-TE011-001). Marks made by a D-RCV-29 dictionary load are not read: the lint covers committed SQL, fixtures and logs only (seam owned by RWB-E1-064, decision in RWB-E1-043 open item R4 owned by RW-COMPLY; SPEC-TE011-017)",
+      "API specification: api/recovery-api-v4.yaml (x-personal-data: true)",
+      "Scan roots per tools/pdpa-lint/pdpa-lint.yaml (SPEC-TE011-003)",
+      "The recovery migration folder is read from rwb.flyway.location in backend/src/main/resources/application.yaml (classpath: mapped to backend/src/main/resources/). Scan roots must cover, and exclusions and lint-fixture roots must not match, any file or probe path in that folder; a mismatch with dictionary.migrationFolder or a missing or non-classpath property gives exit 2 (SPEC-TE011-003)",
+      "Lint fixtures: lintFixtureRoots, default backend/src/test/resources/migration-lint/** (RWB-E1-044 lint fixtures); FIXTURE-ID only on the raw text, never parsed, never exit 2 from content. Every root must lie under the test roots, otherwise exit 2 (SPEC-TE011-003)",
+      "Allow list: tools/pdpa-lint/pdpa-allow.yaml (SPEC-TE011-011)",
+      "Changed-file list: --changed-files-from-git <target> --branch <name>. Built only when <target> without origin/ equals changedFiles.targetBranch (default develop-recovery) and <name> is neither that branch nor in changedFiles.protectedBranches (default main, develop); then git merge-base <target> HEAD and git diff --name-only --diff-filter=AMR <merge-base>..HEAD, and a target not found or no merge base gives exit 2. Otherwise (another target such as a promotion into develop or main, a run on the target or a protected branch, or no option) the list is not built, no git command runs, condition (e) is not evaluated and a PDPA-SCOPE line says so. --changed-files-from-git with --branch missing, empty or HEAD: exit 2 (branch not determined). GitLab tag pipeline: no option, no fetch, list not built. GitLab branch pipeline (GIT_DEPTH 0, non-fatal fetch): origin/<targetBranch> --branch $CI_COMMIT_BRANCH; a merge request pipeline, if added (non-fatal fetch): origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --branch $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME. Local: scripts/dev.ps1 test with develop-recovery and the current branch (SPEC-TE011-013, -018)"
+    ],
+    "generated": "pdpa-rules.yaml in build output, CI artifact, not committed (SPEC-TE011-002)",
+    "rules": [
+      "PDPA-LOG-FIELD",
+      "PDPA-LOG-ENTITY",
+      "PDPA-EXCEPTION",
+      "PDPA-TOSTRING",
+      "PDPA-FIXTURE-FIELD",
+      "PDPA-FIXTURE-ID"
+    ],
+    "outputLine": "{rule}: {file}:{line} uses personal field {field}. Remove it or use the masking helper.",
+    "expiredAllowLine": "allow entry expired: {rule} {path} since {date}",
+    "exitCodes": {
+      "0": "no unexcused finding (notices allowed)",
+      "1": "one or more unexcused findings",
+      "2": "configuration or input error, including an unsupported sys_fields statement in a file the reader reads, a duplicate seed row across migrations, an UPDATE of an unknown field_id, an allow entry whose path matches a migration, a scan configuration that excludes or omits the migration folder or lets a lint-fixture root cover it, a lint-fixture root outside the test roots, a migration folder that does not match rwb.flyway.location, a corrective migration in the migration folder that names an unknown file, where the changed-file list is built, a target branch that cannot be resolved or has no merge base with HEAD, or --changed-files-from-git with --branch missing, empty or HEAD. Where the list is not built, no git command runs and neither changed-file exit 2 can occur. A lint-fixture file never gives exit 2 from its content"
+    },
+    "neverPrinted": "Any value found, any source line or SQL statement text, any fixture value (BR7)",
+    "state": "None; rerun to restart; same commit and dictionary give the same output",
+    "fixtureMatching": "FIXTURE-FIELD matches by (object, field) keys: object_name.field_name, source_field table.column, API schema.property. A position is resolved only when the dictionary describes that field on that object; otherwise (no object, an object outside the dictionary, or an undescribed field) an unambiguous name is a finding, an API personal name in an API-typed position is a finding, and an ambiguous name gives a notice. Scanned SQL with no named column (column-less INSERT with a literal, COPY ... FROM, \\copy ... from) is a finding with field (columns not named) (SPEC-TE011-008). Every scanned SQL statement is classified: position forms (named-column INSERT with ON CONFLICT, RETURNING, WHERE or a read-only WITH; UPDATE ... SET), non-position forms (DDL, COMMENT ON, grants, settings, transaction control, reads, DELETE, TRUNCATE, maintenance), procedural bodies, and anything else. Anything else is a finding with field (statement not recognised); any statement in a DO, function or procedure body that the class-3 rules do not list is a finding with field (DML in procedural body) (SPEC-TE011-008). A non-NULL DEFAULT literal on a resolved personal pair is a position. In a DO body, reads, control flow, any direct class-2 statement (DDL, COMMENT ON, GRANT, REVOKE, SET, RESET, transaction control, SELECT without INTO, DELETE, TRUNCATE, ANALYZE, VACUUM, REFRESH MATERIALIZED VIEW, LOCK, COPY ... TO) and EXECUTE of a string literal or format(<literal>, ...) whose text is class 2 when classed as a top-level statement raise nothing. In that text only %I (in any positional, width or flag form) is read as a name; every other specifier (%s, %L) in any form gives the finding except as COMMENT ON text; %% is a literal percent sign; a DEFAULT on a placeholder table or column gives the finding; a literal DEFAULT is checked as in class 2. Every other statement (INSERT, UPDATE, MERGE, COPY ... FROM, CALL, any other EXECUTE, a class-4 statement such as CREATE TABLE ... AS or ALTER ROLE, an unknown keyword) gives (DML in procedural body) by a catch-all. Function and procedure bodies follow the same rules, except that a named-column INSERT or UPDATE is checked as a position form. ALTER and DROP FUNCTION or PROCEDURE are non-position forms; CREATE TABLE ... AS is not recognised",
+    "columnsNotNamedField": "(columns not named)",
+    "noticeLines": [
+      "PDPA-NOTICE: {field_id} unmarked at {file}:{line}",
+      "PDPA-NOTICE: {file}:{line} object not resolved for {field}; add a fixtureObjects entry or a typed receiver",
+      "PDPA-NOTICE: {file}:{line} seeds {field}, marked personal by a later migration",
+      "PDPA-NOTICE: {file}:{line} {rule} {field} corrected by {corrective file}"
+    ],
+    "unsupportedDictionaryLine": "dictionary statement not supported: {file}:{line}",
+    "statementNotRecognisedField": "(statement not recognised)",
+    "dmlInProceduralBodyField": "(DML in procedural body)",
+    "scopeLine": "PDPA-SCOPE: exclusion {config key} {glob} excludes {n} files",
+    "correctiveMigration": "Applies only to files in the recovery migration folder. A finding in a merged migration O is accepted only when a later migration C (Flyway order) has O's line-1 story key, a line 2 starting '-- Fix:' with a non-empty reason that names O (token V\\d{4}__[A-Za-z0-9_]+\\.sql), and, where the changed-file list is built (SPEC-TE011-013), O is not on it; that condition then applies to every finding, and where the list is not built it is not evaluated. For a finding with a target table, C also holds an UPDATE, DELETE or TRUNCATE on that table; for a finding in a DEFAULT (FIXTURE-FIELD or FIXTURE-ID), C also holds ALTER COLUMN ... DROP or SET DEFAULT. Target tables: a position's table; the table of a column-less INSERT or COPY; the table a statement writes when readable (MERGE INTO, SELECT ... INTO, CREATE TABLE ... AS, COPY data block), for FIXTURE-FIELD and FIXTURE-ID alike; the table of an INSERT or UPDATE holding a FIXTURE-ID value; for (DML in procedural body), each table the body writes that can be read (INSERT, UPDATE, MERGE INTO, COPY ... FROM or CREATE TABLE ... AS, directly or in literal EXECUTE text with a literal table name); the table of a DEFAULT. These rules apply wherever the statement is: top level, a procedural body, or literal EXECUTE text. A finding with no target table (only where no written table can be read: FIXTURE-ID in a comment, COMMENT ON text, other DDL, CALL, SET or other text with no readable written table; DML in procedural body naming no readable table) needs no table write, but every other condition applies (SPEC-TE011-018)",
+    "excludedMigrationFolderLine": "scan configuration excludes the migration folder: {config key}",
+    "unknownCorrectiveLine": "corrective migration names unknown file: {file}:2",
+    "lintFixtureScopeLine": "PDPA-SCOPE: lint fixtures {config key} {glob} holds {n} files",
+    "migrationFolderMismatchLine": "migration folder does not match rwb.flyway.location: {config key}",
+    "changedFileTargetMissingLine": "changed-file list: target branch {name} not found",
+    "lintFixtureRootOutsideLine": "lint-fixture root outside the test roots: {config key}",
+    "changedFileNoMergeBaseLine": "changed-file list: no merge base with {name}",
+    "changedFileBuiltLine": "PDPA-SCOPE: changed-file list against {target}: {n} files",
+    "changedFileNotBuiltLine": "PDPA-SCOPE: changed-file list not built: target {target}, branch {name}",
+    "changedFileBranchUndeterminedLine": "changed-file list: branch not determined"
+  }
+}

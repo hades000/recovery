@@ -1,0 +1,118 @@
+{
+  "key": "RWB-E1-047",
+  "file_stem": "RWB E1 047 Feature flags for module release with a removal date",
+  "title": "Feature flags for module release with a removal date",
+  "module": "P2 Integration",
+  "flag": "none (ships on)",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Feature flags",
+  "goal": "Features ship off and turn on per environment without a deployment; overdue flags are reported",
+  "why": "Every Epic 1 feature sits behind a flag such as rwb.p1.case-list. Off means the old code path; each flag has an owner and a removal date.",
+  "needs": [
+    "E1-001"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "API",
+      "POST /admin/feature-flags"
+    ],
+    [
+      "API",
+      "PATCH /admin/feature-flags/{flagKey} (If-Match)"
+    ],
+    [
+      "CALL",
+      "FeatureFlags.isOn(key) and GET /feature-flags"
+    ],
+    [
+      "JOB",
+      "Weekly flag report, Monday 08:00"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Flags are Workbench configuration; Section B features stay behind their flags until RWB-ACE-001.",
+  "writes": [
+    {
+      "t": "feature_flag",
+      "note": "key, owner, value per environment, removal date"
+    },
+    {
+      "t": "feature_flag_change",
+      "note": "who changed what, when and why"
+    }
+  ],
+  "reads": [
+    {
+      "t": "role",
+      "note": "who may change a flag"
+    }
+  ],
+  "stores": "ACE audit log; e-mail to owners and the RW-PLATADM group; 30 s flag cache",
+  "functions": [
+    {
+      "name": "FeatureFlagController",
+      "does": "4 flag endpoints"
+    },
+    {
+      "name": "FeatureFlagService",
+      "does": "create, change, retire, audit"
+    },
+    {
+      "name": "FeatureFlagsImpl",
+      "does": "isOn with 30 s cache"
+    },
+    {
+      "name": "FlagRemovalReportJob",
+      "does": "weekly overdue report"
+    },
+    {
+      "name": "useFeatureFlag / FlagGate",
+      "does": "React hook + component"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "RW-PLATADM creates a flag"
+    },
+    {
+      "kind": "check",
+      "text": "Key rwb.<module>.<name> + removal date"
+    },
+    {
+      "kind": "table",
+      "text": "feature_flag: default off everywhere"
+    },
+    {
+      "kind": "table",
+      "text": "feature_flag_change + ACE audit"
+    },
+    {
+      "kind": "function",
+      "text": "isOn() at runtime"
+    },
+    {
+      "kind": "out",
+      "text": "Feature shows; overdue ones reported"
+    }
+  ],
+  "rules": [
+    "BR1: off means the previous code path",
+    "BR2: every flag has a key, owner, value per environment and removal date",
+    "BR4: overdue flags are reported every week",
+    "BR5: an unknown key or unreadable store means off"
+  ],
+  "risks": [
+    "No removal date -> refused (MSG-GEN-001)",
+    "Concurrent change -> 409 (MSG-GEN-004)",
+    "Unknown key on change -> 404 (MSG-P2-016)"
+  ],
+  "example": [
+    "Flag rwb.casewf.case-list-queue-column: default off, owner 'P3 squad', removal 2027-01-31",
+    "UAT has no value set -> isOn returns false",
+    "-> the queue column on SCR-02 stays hidden"
+  ]
+}

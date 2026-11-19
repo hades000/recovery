@@ -1,0 +1,143 @@
+{
+  "key": "RWB-E1-056",
+  "file_stem": "RWB E1 056 Run books and monitoring for every Epic 1 job",
+  "title": "Run books and monitoring for every Epic 1 Workbench job",
+  "module": "P2 Integration",
+  "flag": "rwb.integration.job-monitoring",
+  "status": "PARTIAL",
+  "status_text": "Ready. Reads a Section B view (ACE-001)",
+  "theme": "default",
+  "overview_label": "Job run books + monitoring",
+  "goal": "Every job has an owner, a run book and monitoring, so ops can restart it and see a late ACE batch",
+  "why": "At 06:00, ops must know whether to rerun JOB-02 or wait for ACE. The monitor shows each job's last run beside the ACE business date.",
+  "needs": [
+    "E1-007",
+    "E1-015",
+    "E1-069"
+  ],
+  "unblocks": [
+    "E1-014",
+    "E1-020",
+    "E1-027",
+    "TE-007"
+  ],
+  "triggers": [
+    [
+      "BUILD",
+      "RunbookCompletenessTest in the pipeline"
+    ],
+    [
+      "EVENT",
+      "rwb.job.run at each job start and end"
+    ],
+    [
+      "API",
+      "POST /admin/jobs/{jobId}/rerun"
+    ],
+    [
+      "WHO",
+      "RW-PLATADM operates; owners per job"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "source_system, business_date, completed_at, status"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "job_catalog",
+      "note": "16 rows: one per job, owner, run book link"
+    }
+  ],
+  "reads": [
+    {
+      "t": "data_product_load",
+      "note": "status, stale_flagged_at"
+    },
+    {
+      "t": "case_list_row.business_date",
+      "note": "last published list"
+    },
+    {
+      "t": "reconciliation_result",
+      "note": "last REC results"
+    },
+    {
+      "t": "role",
+      "note": "job owners"
+    }
+  ],
+  "stores": "Quartz + P1 job run log (TE-007); Log Analytics workbook 'Recovery jobs' + alert rules; run books docs/operations/runbooks/<jobId>.md",
+  "functions": [
+    {
+      "name": "JobCatalogController",
+      "does": "GET /admin/scheduled-jobs"
+    },
+    {
+      "name": "JobOperationsImpl",
+      "does": "catalog, last run, rerun"
+    },
+    {
+      "name": "JobRunEventListener",
+      "does": "writes rwb.job.run"
+    },
+    {
+      "name": "AceBatchStatusReader",
+      "does": "reads v_ace_batch_status only"
+    },
+    {
+      "name": "RunbookCompletenessTest",
+      "does": "8 headings, forbidden names"
+    },
+    {
+      "name": "RecoveryJobsWorkbook",
+      "does": "workbook + alert rules"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Job starts or ends"
+    },
+    {
+      "kind": "store",
+      "text": "rwb.job.run -> Log Analytics"
+    },
+    {
+      "kind": "ace",
+      "text": "ACE batch date: v_ace_batch_status"
+    },
+    {
+      "kind": "check",
+      "text": "Failed, or ACE late?"
+    },
+    {
+      "kind": "function",
+      "text": "Run book: rerun from failed step"
+    },
+    {
+      "kind": "out",
+      "text": "Alert MSG-P2-004 / job WAITING"
+    }
+  ],
+  "rules": [
+    "BR1: no inbound load job is catalogued",
+    "BR2: each run book has 8 sections",
+    "BR5: rerun of a completed job and business date is refused",
+    "BR6: a run book naming a public table fails the build"
+  ],
+  "risks": [
+    "Missing run book or section -> pipeline fails (MSG-P2-005)",
+    "Rerun while running -> refused (MSG-P2-006)",
+    "Late ACE batch -> STALE, EV-27, job WAITING (MSG-P1-001)"
+  ],
+  "example": [
+    "JOB-02 fails at 05:40 on 2026-11-30 (v_ace_account returned no row at 90 DPD)",
+    "Admin checks v_ace_batch_status: ALS COMPLETED",
+    "Rerun at 06:05 -> JOB-02 completes at 06:20"
+  ]
+}

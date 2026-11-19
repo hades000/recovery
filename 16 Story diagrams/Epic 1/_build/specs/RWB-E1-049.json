@@ -1,0 +1,131 @@
+{
+  "key": "RWB-E1-049",
+  "file_stem": "RWB E1 049 OCR pipeline on the Workbench document hub",
+  "title": "OCR pipeline on the Workbench document hub",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.ocr",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "OCR pipeline (Thai + English)",
+  "goal": "OCR every inbound scan into Thai and English text, and ask for same-day rescans",
+  "why": "Documents become searchable and classifiable. Only malware-clean files are read; pages below 0.70 quality go back to the case owner for a rescan.",
+  "needs": [
+    "TE-012",
+    "E1-024",
+    "E1-045"
+  ],
+  "unblocks": [
+    "E1-050",
+    "E1-053",
+    "E1-033"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-12 ocrStep, every 15 min (business hours)"
+    ],
+    [
+      "EVENT",
+      "DocumentStored (EV-16, source UPLOAD)"
+    ],
+    [
+      "API",
+      "POST /admin/jobs/{jobId}/rerun"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. OCR works on files in the Workbench document hub.",
+  "writes": [
+    {
+      "t": "document_intake",
+      "note": "ocr_status, ocr_quality, languages, rescan_pages"
+    },
+    {
+      "t": "document_text",
+      "note": "one row per page of OCR text"
+    }
+  ],
+  "reads": [
+    {
+      "t": "document",
+      "note": "id, case_id, source"
+    },
+    {
+      "t": "recovery_case.owner_user_id",
+      "note": "who to ask for a rescan"
+    },
+    {
+      "t": "document_hub_parameter",
+      "note": "OCR_MIN_QUALITY 0.70, OCR_WORKERS 4"
+    }
+  ],
+  "stores": "OCR JSON at ocr/{intakeId}.json in the standard container; OCR service (Autonomous Ops); ACE notification path",
+  "functions": [
+    {
+      "name": "DocumentIntakeJob",
+      "does": "Spring Batch job behind JOB-12"
+    },
+    {
+      "name": "OcrStep",
+      "does": "SKIP LOCKED, OCR, quality rule"
+    },
+    {
+      "name": "OcrClient / OcrServiceAdapter",
+      "does": "calls OCR, maps errors"
+    },
+    {
+      "name": "DocumentStoredListener",
+      "does": "intake item per upload"
+    },
+    {
+      "name": "RescanNotifier",
+      "does": "MSG-P5-018 to the owner"
+    },
+    {
+      "name": "OcrOutputReader",
+      "does": "OCR text (published)"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-12 ocrStep"
+    },
+    {
+      "kind": "check",
+      "text": "Malware scan CLEAN?"
+    },
+    {
+      "kind": "function",
+      "text": "OcrClient: th + en per page"
+    },
+    {
+      "kind": "table",
+      "text": "document_text per page"
+    },
+    {
+      "kind": "check",
+      "text": "Mean confidence >= 0.70?"
+    },
+    {
+      "kind": "out",
+      "text": "DONE, or RESCAN + owner told"
+    }
+  ],
+  "rules": [
+    "BR1: read every file in Thai and English",
+    "BR3: OCR runs only after the malware scan is CLEAN",
+    "BR4: below 0.70 -> rescan; the threshold is inclusive",
+    "BR6: an item read once is not read again"
+  ],
+  "risks": [
+    "Page below the threshold -> RESCAN, owner told (MSG-P5-018)",
+    "OCR timeout or error -> stays PENDING; alert after 2 failed runs",
+    "3 attempts used or file will not open -> FAILED, UNREADABLE_FILE, review queue"
+  ],
+  "example": [
+    "180 synthetic documents (30 x 6 types) all reach DONE or RESCAN with document_text rows",
+    "500 pages in 125 items finish in under 60 minutes with 4 workers"
+  ]
+}

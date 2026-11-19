@@ -1,0 +1,145 @@
+{
+  "key": "RWB-E1-054",
+  "file_stem": "RWB E1 054 Review queue for low confidence documents",
+  "title": "Review queue for low-confidence documents",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.review",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Document review queue",
+  "goal": "One screen to fix the type, case and fields of uncertain documents; each fix becomes training data",
+  "why": "Automation stays safe: what the machine is unsure of, a person confirms. Corrected values are kept beside the extracted ones for the next evaluation.",
+  "needs": [
+    "E1-049",
+    "E1-035",
+    "E1-050",
+    "E1-053",
+    "E1-032"
+  ],
+  "unblocks": [
+    "E1-060",
+    "E1-055"
+  ],
+  "triggers": [
+    [
+      "WHO",
+      "Litigation officer on SCR-31"
+    ],
+    [
+      "API",
+      "GET /review-items (oldest first)"
+    ],
+    [
+      "API",
+      "POST /intake-items/{intakeItemId}/resolve"
+    ],
+    [
+      "API",
+      "PATCH /documents/{documentId}/fields/{fieldId}"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The queue works on intake items, documents and Workbench cases.",
+  "writes": [
+    {
+      "t": "document_intake",
+      "note": "review_outcome ATTACHED / DISCARDED, resolved_by"
+    },
+    {
+      "t": "document",
+      "note": "review_status CONFIRMED or CORRECTED"
+    },
+    {
+      "t": "document_field",
+      "note": "corrected field_value, confirmed_by"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "DOCATT via DocumentStore"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "case_no, status via CaseDirectory"
+    },
+    {
+      "t": "document_intake",
+      "note": "review_reason, candidates, extracted_fields"
+    },
+    {
+      "t": "document_text",
+      "note": "OCR text beside the image"
+    },
+    {
+      "t": "document_field",
+      "note": "extracted_value"
+    }
+  ],
+  "stores": "Intake and write-once blob containers; outbox DocumentFieldsExtracted (EV-17)",
+  "functions": [
+    {
+      "name": "ReviewQueueController",
+      "does": "queue, item, resolve, review"
+    },
+    {
+      "name": "ReviewQueueService",
+      "does": "queue with the scope rule"
+    },
+    {
+      "name": "ReviewResolutionService",
+      "does": "SET_TYPE / ATTACH / DISCARD"
+    },
+    {
+      "name": "LabeledSetReader",
+      "does": "fixes as labelled examples"
+    },
+    {
+      "name": "ReviewQueuePage / ReviewItemPanel",
+      "does": "React SCR-31"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Officer opens SCR-31"
+    },
+    {
+      "kind": "table",
+      "text": "Review items, oldest first"
+    },
+    {
+      "kind": "check",
+      "text": "Keep or change type, pick case"
+    },
+    {
+      "kind": "check",
+      "text": "No field left in REVIEW?"
+    },
+    {
+      "kind": "function",
+      "text": "DocumentStore.store + DOCATT"
+    },
+    {
+      "kind": "out",
+      "text": "CONFIRMED / CORRECTED -> training"
+    }
+  ],
+  "rules": [
+    "BR3: attach only if no field is in REVIEW, the type is in force and the case is open",
+    "BR4: CONFIRMED when unchanged, CORRECTED when any value changed",
+    "BR5: the extracted value is kept beside the corrected one",
+    "BR9: a discarded item keeps its file and reason"
+  ],
+  "risks": [
+    "Type not in force -> 422 (MSG-P5-006)",
+    "Case closed -> 422 (MSG-P5-005)",
+    "Stale version -> 409 (MSG-GEN-004)"
+  ],
+  "example": [
+    "IN-0101 (COURT_NOTICE 0.62 / DEMAND_LETTER 0.21) attached to RW-2026-000201",
+    "hearing_date corrected 2026-12-15 -> 2026-12-16",
+    "-> state CORRECTED, review_outcome ATTACHED, one DOCATT entry"
+  ]
+}

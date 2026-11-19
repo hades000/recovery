@@ -1,0 +1,115 @@
+{
+  "key": "RWB-E1-067",
+  "file_stem": "RWB E1 067 Every Workbench action into the interaction ledger",
+  "title": "Every Workbench action into the interaction ledger",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.ledger-events",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Actions into the ledger",
+  "goal": "Every automated Workbench action on a case shows in the ledger, with duplicate events rejected and counted",
+  "why": "The case history must include what the system did, not only what people did: creation, allocation, transfer, escalation, documents and decisions.",
+  "needs": [
+    "E1-066",
+    "TE-006"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "EVENT",
+      "EV-01 CaseCreated, EV-02 CaseAllocated"
+    ],
+    [
+      "EVENT",
+      "EV-04 Transferred, EV-08 DecisionRecorded"
+    ],
+    [
+      "EVENT",
+      "EV-16 DocumentStored, EV-19 TimerBreached"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Inputs are Workbench events from the outbox.",
+  "writes": [
+    {
+      "t": "interaction",
+      "note": "via the writer: CASE_CREATED ... DECISION_TAKEN"
+    },
+    {
+      "t": "processed_event",
+      "note": "duplicate key -> hit_count + 1"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case.id",
+      "note": "the case"
+    },
+    {
+      "t": "event payload IDs",
+      "note": "assignment, document, decision_log_entry"
+    }
+  ],
+  "stores": "Outbox (at-least-once, ordered per case); exception queue for RW-PLATADM",
+  "functions": [
+    {
+      "name": "LedgerEventListener",
+      "does": "6 events, schema version check"
+    },
+    {
+      "name": "LedgerEventMapper",
+      "does": "event -> ledger command (config)"
+    },
+    {
+      "name": "LedgerDuplicateService",
+      "does": "key clash -> hit count"
+    },
+    {
+      "name": "InteractionDuplicateRepository",
+      "does": "processed_event rows"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Module commits change + event"
+    },
+    {
+      "kind": "store",
+      "text": "Outbox, ordered per case"
+    },
+    {
+      "kind": "function",
+      "text": "LedgerEventListener + mapper"
+    },
+    {
+      "kind": "check",
+      "text": "Duplicate key?"
+    },
+    {
+      "kind": "table",
+      "text": "interaction via the writer"
+    },
+    {
+      "kind": "out",
+      "text": "Full system history on SCR-03"
+    }
+  ],
+  "rules": [
+    "BR1: all 6 actions write a ledger entry",
+    "BR3: the same key gives one entry; repeats are counted",
+    "BR4: per-case order is kept",
+    "BR7: no personal data in event payloads"
+  ],
+  "risks": [
+    "Duplicate event -> one entry + a hit",
+    "Unknown schema version -> exception queue",
+    "Write fails -> 3 retries, then exception queue (MSG-P1-022)"
+  ],
+  "example": [
+    "RW-2026-000301: created 06:10, allocated to MTG-BKK-CO 06:40, transferred by u-teammgr-03",
+    "then DOC-SYN-3011 stored, SLA-ASSIGNED breached, DLE-SYN-3012 decided",
+    "-> 6 ledger entries, in order"
+  ]
+}

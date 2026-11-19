@@ -1,0 +1,265 @@
+### RWB-E1-001
+- file_stem: RWB E1 001 Recovery tables for the 14 data products
+- title: Recovery tables for the 14 data products
+- module: P1 Recovery data engine | flag: rwb.p1.data-catalog | status: READY "Ready for build" | theme: default
+- overview_label: 92 tables + dictionary
+- goal: Create the 92 recovery tables, the data dictionary and the 14-product catalog
+- why: Every later story builds on these tables. No copy of ACE data: links to ACE are varchar(255) business keys, never foreign keys into public.
+- needs: E1-044, E1-043 | unblocks: E1-007, E1-008, E1-015, E1-016, E1-017, E1-018, E1-022, E1-024, E1-047, E1-058, E1-064, E1-065, E1-069
+- triggers: BUILD "Flyway V0001 in the ACE pipeline" ; LOAD "POST /admin/reference-loads (data_product)" ; WHO "RW-DATASTEW owns, RW-REFADM loads" ; BUILD "DataDictionaryConformanceTest"
+- ace: [] ; ace_note: "Reads no view. V0001 pre-seeds dictionary rows for all 30 v_ace_* views (304 fields); the views themselves ship in E1-069."
+- writes: recovery.* (92 tables) "88 Workbench + 4 extension tables keyed by ACE business key" ; data_product "14 rows DP01-DP14, one owner and system of record each" ; sys_objects "122 rows: 92 tables + 30 views" ; sys_fields "1,366 field rows with BR Field IDs" ; v_data_dictionary "one view that answers 'what is this field?'"
+- reads: information_schema "conformance test compares both ways"
+- stores: "Append-only triggers on decision_log_entry and interaction. 20 old copy/load tables are not created (loan_account, party, load_run, dq_rule ...)."
+- functions: V0001__rwb_e1_001_recovery_schema "92 tables, triggers, dictionary seed" ; DataDictionaryConformanceTest "schema vs sys_fields, both ways" ; DataProductCatalogHandler "validate + apply the catalog load" ; DataProductRepository "reads and writes data_product" ; v_data_dictionary "joins product, object and field"
+- path: trigger "Pipeline runs Flyway V0001" > table "92 recovery tables + triggers" > table "sys_objects + sys_fields seeded" > check "Conformance test: 1,062 fields match" > function "DataProductCatalogHandler" > out "data_product: 14 products"
+- rules: "BR3: one system of record per product, written like 'ACE (ingested from ALS)', plus one owner" ; "BR5: a bare source name such as 'CCMS' is refused" ; "BR8: no copy of source data, no FK into public; ACE links are varchar(255) business keys" ; "BR9: V0001 seeds dictionary rows for the 30 views before the views exist"
+- risks: "Catalog row with no owner, or a bare system of record -> whole load refused (MSG-P1-003)" ; "File without exactly DP01-DP14 -> refused (MSG-P1-004)" ; "Same file loaded twice -> nothing written (MSG-P1-011)"
+- example: "SELECT * FROM v_data_dictionary WHERE entity = 'v_ace_account' AND field = 'days_past_due'" ; "-> DF-ACE-018 | NUMBER / integer | source public.account.delay_days" ; "-> product DP01 | 'ACE (ingested from ALS)' | DAILY | owner RW-DATASTEW" ; "account_ext.dispute_open -> DF-EXT-028 | BOOLEAN | source Workbench | DP01"
+
+### RWB-E1-002
+- file_stem: RWB E1 002 Case list v1 with case ID owner and queue
+- title: Case list v1 with case ID, owner and queue
+- module: P1 Recovery data engine | flag: rwb.p1.case-list | status: PARTIAL "Ready. Freshness gate waits for RWB-ACE-001" | theme: default
+- overview_label: Daily case list
+- goal: Publish one daily case list for every recovery team, dated to the ACE batch, in Power BI by 07:30
+- why: Teams stop keeping their own lists. Balance and days past due come live from ACE views; cases come only through the P3 interface.
+- needs: E1-018, E1-020, E1-069, E1-007, E1-015 | unblocks: E1-011
+- triggers: JOB "JOB-04 case list step (after JOB-03 or 07:15)" ; GATE "DailyCompletenessGate must say COMPLETE" ; WHO "RW-TEAMMGR owns; RW-BIANAL reads Power BI"
+- ace: v_ace_account A "account_key, account_code, days_past_due, total_balance, data_as_of" ; v_ace_efs_action A "last contact: action_code, contact_at per account_key" ; v_ace_batch_status B "ALS business_date and is_complete (the date stamp)"
+- writes: case_list_row "one row per case + account per business date, status PENDING"
+- reads: recovery_case "via CaseQueryApi only" ; case_account "open case accounts" ; queue "team and queue codes"
+- stores: "Data lake via outbound adapter INT-19 (case-list/<date>.csv); Power BI 'Case list v1'; exception queue if the lake transfer fails"
+- functions: CaseListStepConfig "read, join views, write rows" ; CaseListChainListener "start after JOB-03 on COMPLETE" ; LastContactReader "latest efs_action per account_key" ; CaseListRowRepository "replace one date's rows" ; CaseListExtractWriter "CSV to the outbound adapter" ; DailyCompletenessGate "from E1-015: COMPLETE or HOLD"
+- path: trigger "JOB-04 after JOB-03" > check "Gate: ALS batch COMPLETE?" > function "CaseQueryApi.openCaseAccounts" > ace "Join v_ace_account + v_ace_efs_action" > table "case_list_row (PENDING)" > out "E1-011 releases -> lake -> Power BI"
+- rules: "BR2: account number, balance and DPD come live from v_ace_account; no copy is kept" ; "BR3: build only when the completeness gate is COMPLETE" ; "BR8: cases only via the P3 interface; ACE only via recovery.v_ace_*" ; "BR10: an orphan key still gets a row with empty amounts and is listed by REC-05"
+- risks: "Source batch not COMPLETED -> step held, yesterday's list kept (MSG-P1-001)" ; "JOB-03 not done by 07:15 -> list built anyway with ALLOCATION_COMPLETE = NO" ; "Lake transfer fails -> PUBLISHED = NO, item on the exception queue (R-UNI-34)"
+- example: "Business date 2026-11-30" ; "v_ace_account: 28,140 accounts at 90+ DPD, 21 excluded -> 28,119 to match" ; "case_list_row: 28,156 rows (28,119 + 37 cases below 90 DPD)" ; "REC-01: 28,119 vs 28,119 -> PASS -> RELEASED -> Power BI refresh 07:30"
+
+### RWB-E1-007
+- file_stem: RWB E1 007 Integration adapters for outbound files
+- title: Integration adapters for outbound files
+- module: P2 Integration | flag: rwb.integration.file-adapters | status: PARTIAL "Ready. Inbound removed; gate waits for ACE-001" | theme: default
+- overview_label: Outbound file adapters
+- goal: One outbound adapter with data-driven retry and an owned exception queue, so failed files surface the same day
+- why: The old inbound loaders are gone: ACE ingests every source. What stays is sending files out (WIN notices, lake extracts, debt-sale tape) safely and visibly.
+- needs: E1-001, E1-069, E1-015 | unblocks: E1-002, E1-056, E1-063, TE-006
+- triggers: CALL "OutboundFiles.enqueue from an owning module" ; JOB "JOB-11 outbox sender, every minute" ; JOB "JOB-10 16:00, JOB-13 01:00, JOB-15 01:30" ; API "POST /admin/outbound-items/{itemId}/resend"
+- ace: v_ace_contact A "addressee for WIN notices (INT-14) by contact_key" ; v_ace_account A "account_key, account_code for the debt-sale tape (INT-25)" ; v_ace_batch_status B "readiness: build only when the batch is COMPLETE" ; v_ace_write_off B "write-offs read back (BR11)"
+- writes: outbound_item "one row per file; SENT, ACKNOWLEDGED or EXCEPTION" ; outbox_event, outbox_delivery "events handed to the sender" ; processed_event "consumer dedup with hit_count" ; task (via P3) "owner task when the retry limit is reached"
+- reads: interface_config "OUTBOUND rows: target, attempts, owner" ; notice "approved notices for WIN" ; document "file content in the store" ; debt_sale_account "debt-sale tape rows"
+- stores: "SFTP outbound folders + key store; document store container (TE-012); data lake (INT-19/20); WIN (INT-14); Log Analytics alerts on held and failed items"
+- functions: OutboundFileAdapterImpl "build file from tables and views" ; AceBatchReadiness "batch status -> COMPLETE or HOLD" ; OutboundFilesImpl "enqueue in the caller's transaction" ; OutboundSender "JOB-11: send, retry, exception" ; SftpTransport "the only SFTP class" ; IdempotencyGuardImpl "dedup via processed_event"
+- path: trigger "JOB-10 enqueues WIN notices" > ace "Addressee from v_ace_contact" > check "ACE batch COMPLETE?" > table "outbound_item + file in doc store" > function "JOB-11 sends over SFTP, retries" > out "ACKNOWLEDGED or EXCEPTION + task"
+- rules: "BR2: ACE is read only via recovery.v_ace_* by business key; the adapter never writes ACE" ; "BR3: a file is built only when the ACE batch is COMPLETE" ; "BR9: no inbound adapter; interface_config holds OUTBOUND rows only" ; "BR10: an item carries case IDs and keys, never names or addresses"
+- risks: "Batch not COMPLETE -> no file built (MSG-P1-001)" ; "Transfer fails -> RETRY_QUEUE at 5 / 15 / 45 minutes (MSG-GEN-006)" ; "Retry limit reached -> exception queue + owner task (MSG-P2-001)"
+- example: "INT-14 config: max 3 attempts at 5 / 15 / 45 min, owner RW-PLATADM" ; "85 approved notices for 2026-11-10" ; "JOB-10 builds WIN_NOTICE_20261110.txt with addressees from v_ace_contact by contact_key" ; "No read of any public table"
+
+### RWB-E1-008
+- file_stem: RWB E1 008 Decision log store append only and hash chained
+- title: Decision log store v1, append only and hash chained
+- module: P7 Decision center and log | flag: rwb.decision.log-store | status: READY "Ready for build" | theme: default
+- overview_label: Hash-chained decision log
+- goal: A tamper-evident, append-only store that keeps every decision once, so any later change is detected
+- why: Audit and Compliance must trust the decision log. Each entry hashes the previous one, and the database refuses UPDATE and DELETE.
+- needs: E1-001 | unblocks: E1-027, E1-039, TE-008
+- triggers: CALL "DecisionLogStore.append (from the E1-027 writer)" ; API "GET /api/recovery/v1/decision-log/{entryId}" ; API "GET /api/recovery/v1/decision-log?caseId=" ; WHO "RW-AUDIT and RW-COMPLY read"
+- ace: [] ; ace_note: "No ACE read. The decision log is pure Workbench data: it records the rule, version and inputs behind each action."
+- writes: decision_log_entry "append only; chain_seq, prev_hash, entry_hash (SHA-256)"
+- reads: decision_log_entry "last chain_seq and hash; range checks"
+- stores: "PostgreSQL advisory lock 'decision_log_chain'; trigger tr_declog_append_only; ACE incident path and notification to Compliance"
+- functions: DecisionLogStore "lock, chain_seq, hash, insert" ; CanonicalEntryForm "canonical JSON, sorted keys" ; HashChainVerifier "recompute 1,000 at a time" ; ChainBreakNotifier "incident + MSG-P7-008" ; DecisionCenterAndLogController "two read endpoints" ; DecisionLogEntry "immutable entity"
+- path: trigger "Writer calls append() last" > function "Advisory lock + read last hash" > function "CanonicalEntryForm -> SHA-256" > table "INSERT decision_log_entry" > check "UPDATE / DELETE refused by trigger" > out "Verifier flags any break"
+- rules: "BR2: never update or delete; a correction is a new entry naming the one it corrects" ; "BR3: one chain; the first entry's prev_hash is 64 zeros" ; "BR4: SHA-256 lowercase hex of canonical JSON with sorted keys" ; "BR5: append is the caller's last statement, so action and entry commit together"
+- risks: "UPDATE or DELETE attempted -> refused: 'decision_log_entry is append only'" ; "Tampered entry -> break named, incident, Compliance told within 15 min (MSG-P7-008)" ; "Store unwritable -> the caller's action rolls back (MSG-P7-003)"
+- example: "chain_seq 1 | case RW-2026-000123 | final call OWNER_ASSIGNED | prev_hash 000...000" ; "UPDATE ... SET final_call = 'CASE_TRANSFERRED' -> refused" ; "DELETE FROM decision_log_entry ... -> refused"
+
+### RWB-E1-011
+- file_stem: RWB E1 011 Reconciliation and data quality report
+- title: Reconciliation and data quality report
+- module: P1 Recovery data engine | flag: rwb.p1.reconciliation | status: PARTIAL "Ready. Gate reads a Section B view (ACE-001)" | theme: default
+- overview_label: Reconciliation REC-01..05
+- goal: Check the case list and every business key against ACE daily (REC-01..05) and hold the publish on a break
+- why: Teams must trust the case list. A count or balance gap against v_ace_account, or an orphan key, holds Power BI until it is explained.
+- needs: E1-002, E1-015, E1-069 | unblocks: E1-048
+- triggers: JOB "JOB-04 reconciliation step, before publish" ; GATE "ACE batch COMPLETE (v_ace_batch_status)" ; WHO "RW-TEAMMGR owns; RW-DATASTEW investigates"
+- ace: v_ace_account A "REC-01/02: count and balance per product group" ; v_ace_plan A "REC-03: approved restructures not booked after 2 days" ; v_ace_payment A "REC-04: payments unmatched to proceeds after 1 day" ; v_ace_customer A "REC-05: every person_key must resolve" ; v_ace_asset A "REC-05: every asset_key must resolve" ; v_ace_contact A "REC-05: every contact_key must resolve" ; v_ace_batch_status B "ALS business date + COMPLETE gate"
+- writes: reconciliation_result "one row per check per product: PASS or BREAK" ; case_list_row.publish_status "HELD or RELEASED"
+- reads: case_list_row "today's list rows" ; case_entry_exclusion "excluded accounts" ; proceeds "matched payments" ; treatment "approved restructures" ; notice, listing, document ... "REC-05 keys"
+- stores: "Data lake via INT-19: reconciliation/<date>.csv and data-quality/<date>.csv; Power BI 'Reconciliation and data quality'. No dq_rule or dq_exception table."
+- functions: ReconciliationStepConfig "runs REC-01..05 per product" ; ReconciliationService "counts, sums, variance vs tolerance" ; ReferentialCheck "REC-05 orphan business keys" ; CaseListPublishGate "sets HELD or RELEASED" ; ReconciliationExtractWriter "two lake extracts" ; LoadAlertNotifier "sends MSG-P1-012"
+- path: trigger "JOB-04 after the case list step" > ace "Count + sum v_ace_account" > check "Compare with case_list_row" > table "reconciliation_result" > check "Any BREAK -> HELD" > out "Lake extract -> Power BI 07:30"
+- rules: "BR5: every account_key, person_key, asset_key, payment_code and contact_key must resolve" ; "BR7: a REC-01 or REC-02 break holds the case-list publish" ; "BR9: nothing runs until the gate is COMPLETE" ; "BR13: an orphan never changes a Workbench row; it is only reported"
+- risks: "Variance above tolerance -> BREAK, publish HELD, alert (MSG-P1-012)" ; "Batch not COMPLETED -> checks not run (MSG-P1-001)" ; "A view errors -> run FAILED (MSG-GEN-006)"
+- example: "SSME: v_ace_account 2,903 vs case_list_row 2,891" ; "-> REC-01 BREAK, variance 12 (0.41%), publish HELD" ; "Passing day: MORTGAGE 12,256 | HP 12,960 | SSME 2,903 -> 15 PASS rows -> RELEASED"
+
+### RWB-E1-013
+- file_stem: RWB E1 013 Baseline measures
+- title: Baseline measures
+- module: P9 Reporting | flag: rwb.reporting.baseline | status: PARTIAL "Ready. Batch gate waits for RWB-ACE-001" | theme: default
+- overview_label: Baseline measures
+- goal: Freeze an agreed baseline of portfolio measures so later epics can prove what they improved
+- why: Six approved measures (route, age, queue, recovery, time in stage, turnaround), computed from Workbench records and frozen on 2026-11-27.
+- needs: E1-029, E1-018 | unblocks: (none)
+- triggers: LOAD "POST /admin/reference-loads (measure_definition)" ; JOB "JOB-15 Reporting extract, nightly 01:30" ; GATE "Only from a COMPLETED ACE batch" ; WHO "RW-TRIBE approves; RW-BIANAL reads"
+- ace: v_ace_payment A "payment_date, payment_amount since entry (RecoveryDataApi)" ; v_ace_batch_status B "DailyCompletenessGate before computing"
+- writes: measure_definition "6 approved definitions, version MD-2026.11" ; measure_snapshot "computed values; baseline rows frozen = true"
+- reads: recovery_case "via P3 CaseReportingApi" ; case_account "accounts per case" ; queue "queue per case"
+- stores: "Data lake INT-19 extract with trailer and freshness stamp; Power BI; job monitor"
+- functions: MeasureDefinitionLoadHandler "loads and validates definitions" ; MeasureCatalogService "MeasureCatalog.inForce" ; MeasureCalculators "one calculator per measure code" ; ReportingExtractJob "JOB-15: compute, snapshot, freeze" ; DataLakeWriter "INT-19 files"
+- path: trigger "JOB-15 nightly 01:30" > table "measure_definition in force" > ace "Payments via v_ace_payment" > function "MeasureCalculators" > table "measure_snapshot, frozen 2026-11-27" > out "Lake extract -> Power BI 07:30"
+- rules: "BR1: a measure is published only under an approved definition in force" ; "BR2: the baseline is frozen once written; a trigger refuses UPDATE and DELETE" ; "BR3: computed from Workbench records through the owning modules (NFR-065)" ; "BR4: only from a COMPLETED ACE batch"
+- risks: "Definition without formula or data product -> whole load refused (MSG-GEN-001)" ; "Baseline published a second time -> refused (MSG-P9-001)" ; "Batch not COMPLETE -> no baseline that night (MSG-P1-001)"
+- example: "Business date 2026-11-27: 120 open cases (60 Mortgage, 45 HP, 15 SSME)" ; "CASES_BY_ROUTE totals 120" ; "REALIZED_RECOVERY = THB 4,350,000.00" ; "Definition version MD-2026.11, approver TRB-0001, frozen = true"
+
+### RWB-E1-014
+- file_stem: RWB E1 014 Decision log copy to the data lake
+- title: Decision log copy to the data lake
+- module: P1 Recovery data engine | flag: rwb.dataengine.lake-copy | status: READY "Ready for build" | theme: default
+- overview_label: Decision log to data lake
+- goal: Copy the decision log to the data lake nightly, matched on count and last hash, so reports avoid the live log
+- why: Reporting and audit need the full decision history without loading the production database. The copy is published only if it matches exactly.
+- needs: E1-056, E1-017, E1-008, E1-027 | unblocks: E1-063
+- triggers: JOB "JOB-13 Decision log copy, cron 01:00" ; API "POST /admin/jobs/{jobId}/rerun" ; WHO "RW-COE owns; RW-AUDIT reads the lake"
+- ace: [] ; ace_note: "No ACE read. The source is the Workbench decision log, read only through the P7 DecisionLogExport interface."
+- writes: lake_copy_watermark "last copied chain_seq + hash (copy_name DECISION_LOG)"
+- reads: decision_log_entry "only via P7 DecisionLogExport" ; retention_rule "DP12 LAKE_COPY period"
+- stores: "Data lake INT-19: decision-log/business_date=YYYY-MM-DD/ (Parquet + _manifest.json); archive tier for old partitions; Quartz"
+- functions: DecisionLogLakeCopyJob "Quartz job, no concurrent run" ; DecisionLogLakeCopyService "watermark, cut-off, paging" ; LakeFileWriter "Parquet + manifest" ; LakeCopyReconciler "REC-08: count + last hash" ; LakeRetentionService "old partitions to archive" ; DecisionLogExport (P7) "head(), entriesAfter()"
+- path: trigger "JOB-13 at 01:00" > table "lake_copy_watermark" > function "DecisionLogExport pages 5,000" > store "Parquet + manifest in the lake" > check "REC-08: count + last hash match?" > out "Partition complete, watermark moves"
+- rules: "BR1: zero-tolerance match on count and last hash, or the partition is not published" ; "BR2: the log is read only through the P7 interface, never directly" ; "BR4: partitions older than the retention rule move to the archive tier" ; "BR6: a failed copy reruns the next night"
+- risks: "Count or hash mismatch -> not published, watermark kept (MSG-P1-019)" ; "Export or lake down -> run Failed (MSG-GEN-006)" ; "Rerun while running -> 409 (MSG-P2-006)"
+- example: "Live log: 12,480 entries, last hash a3f1...09c2" ; "Watermark: 12,100, hash 77be...41d0" ; "2026-11-30: 380 new entries -> partition business_date=2026-11-30 holds 380 rows" ; "REC-08 matches -> watermark moves to 12,480"
+
+### RWB-E1-015
+- file_stem: RWB E1 015 Freshness stamp per data product
+- title: Freshness stamp per data product
+- module: P1 Recovery data engine | flag: rwb.dataengine.freshness-stamp | status: PARTIAL "Ready. Whole feature waits for RWB-ACE-001" | theme: default
+- overview_label: Freshness stamp + daily gate
+- goal: Stamp each data product with its ACE batch age, flag stale data, and hold daily jobs until sources complete
+- why: Users and decisions must know how old the data is. Freshness comes only from ACE's batch record, never from data_as_of.
+- needs: E1-001, E1-069, E1-027 | unblocks: E1-002, E1-007, E1-011, E1-034, E1-052, E1-056
+- triggers: EVENT "New COMPLETED row in v_ace_batch_status (polled)" ; JOB "Cut-off check per product at expected_by" ; API "GET /data-products/freshness?product=&asOf=" ; CALL "JOB-04 asks DailyCompletenessGate"
+- ace: v_ace_batch_status B "source_system, business_date, status, is_complete (ace_batch_run)"
+- writes: data_product_load "one stamp per product: LOADED or STALE, age in days"
+- reads: data_product "refresh_cycle, expected_by" ; decision_log_entry "inputs_ref (stamps a decision read)" ; case_list_row "business_date, publish_status"
+- stores: "Events EV-26 AceDataReady and EV-27 AceDataLate; operations alert; one Quartz trigger per product"
+- functions: BatchStatusListener "polls v_ace_batch_status" ; FreshnessStampService "write stamp, set or clear STALE" ; FreshnessCheckStep "cut-off check at expected_by" ; DailyCompletenessGateImpl "COMPLETE or HOLD for a job" ; FreshnessQuery "stampFor, stampsFor (published)" ; DataFreshnessPanel "data panel on SCR-03"
+- path: ace "v_ace_batch_status: ALS COMPLETED" > function "BatchStatusListener" > table "data_product_load = LOADED" > function "DailyCompletenessGate: COMPLETE" > out "EV-26 starts JOB-02, 04, 07, 08"
+- rules: "BR4: a multi-source product takes the oldest date (DP06 = CCMS, SVAF, AMIS, RPS)" ; "BR5: every decision records the stamps it read in inputs_ref" ; "BR8: no daily job starts until its sources are COMPLETED" ; "BR9: freshness comes only from v_ace_batch_status, never from data_as_of"
+- risks: "No COMPLETED batch by expected_by -> STALE + EV-27 AceDataLate (MSG-P1-001)" ; "FAILED batch -> STALE at once, previous stamp kept (MSG-P1-001)" ; "Same batch row read twice -> duplicate_count + 1, no second event"
+- example: "ALS batch 2026-11-30: started 23:30, completed 2026-12-01 05:40, 184,500 records" ; "-> DP01 LOADED, ageDays 1, EV-26 -> JOB-02, 04, 07 and 08 start" ; "If ALS is still missing at 08:00 on 2026-12-01 -> DP01 STALE + EV-27"
+
+### RWB-E1-016
+- file_stem: RWB E1 016 Access control per data product and catalog entries
+- title: Access control per data product and catalog entries
+- module: P1 Recovery data engine | flag: rwb.dataengine.product-access | status: READY "Ready for build" | theme: default
+- overview_label: Data product access + PDPA
+- goal: Role-based read per data product: personal data masked, every read logged, each product findable in a catalog
+- why: PDPA: people see only the products their role needs, the ID number never leaves ACE in clear, and a read that cannot be logged is refused.
+- needs: E1-037, E1-001, E1-064, E1-069 | unblocks: E1-018
+- triggers: API "GET /data-products/{code}/records?caseId=" ; API "GET /admin/data-products?product=" ; LOAD "POST /admin/reference-loads (data_product_access)" ; WHO "RW-DATASTEW owns; RW-COMPLY sets masking"
+- ace: v_ace_customer A "cif_no, names, date_of_birth, id_no_masked, id_no_last4" ; v_ace_contact A "contact_value (full) + contact_value_masked, usage_code" ; v_ace_account A "account_key (catalog covers all 30 views)"
+- writes: data_product_access "who may read which product (versioned, approved)"
+- reads: party_ext, contact_point_ext "Workbench flags by key" ; account_ext, valuation_ext "Workbench decisions by key" ; sys_fields "is_personal flag per field" ; masking_rule "which role sees a field clear" ; data_product, retention_rule "catalog entries"
+- stores: "PII access log via the ACE common module to PII Kafka (INT-22). No tokenization anywhere."
+- functions: DataProductController "records + catalog endpoints" ; DataProductAccessService "capability, access row, scope, log" ; DataProductRecordService "read views by key, mask fields" ; DataProductCatalogService "builds catalog entries" ; DataProductAccessLoader "applies an approved access version"
+- path: trigger "GET /data-products/DP02/records" > check "Access row in force + case scope?" > ace "Read v_ace_customer + v_ace_contact" > function "FieldMasker masks is_personal" > store "PII access log (names, no values)" > out "Masked rows + freshness stamp"
+- rules: "BR1: read only through a data_product_access row in force" ; "BR3: with no masking rules loaded, every personal field is masked" ; "BR4: a read that cannot be logged is refused" ; "BR8/9: ID masked inside v_ace_customer; phone, email, address masked at the API"
+- risks: "No access row for the role -> 403 (MSG-P4-002)" ; "Bad access load -> refused whole (MSG-P1-002)" ; "PII log down -> 503, no data returned (MSG-GEN-006)"
+- example: "RW-AUDIT user u-audit-01 reads DP02 for case RW-2026-000102 (person_key P0000102)" ; "Mobile shows ******5678, ID shows *********0123" ; "One PII access log entry written: field names only, no values"
+
+### RWB-E1-017
+- file_stem: RWB E1 017 Retention and archive rule for the data store
+- title: Retention and archive rule for the data store
+- module: P1 Recovery data engine | flag: rwb.dataengine.retention | status: READY "Ready for build" | theme: default
+- overview_label: Retention + archive
+- goal: Archive expired rows monthly to write-once storage, holding retention periods as data and skipping legal holds
+- why: PDPA and records policy need old data removed safely. Rows are deleted only after a verified archive copy; the decision log is never archived.
+- needs: E1-001, E1-043, TE-012, E1-064 | unblocks: E1-014
+- triggers: JOB "JOB-17 Retention, first Sunday of month 02:30" ; LOAD "POST /admin/reference-loads (retention_rule)" ; WHO "RW-COMPLY owns and approves"
+- ace: [] ; ace_note: "No ACE read. Retention covers Workbench tables only; ACE keeps and ages its own source data."
+- writes: retention_rule "period in months per product and table (RET-2026.11)" ; interaction (DELETE) "archived rows removed under retention_purge = on"
+- reads: recovery_case "legal_hold via CaseHoldQuery" ; interaction "rows older than the period" ; sys_objects, sys_fields "named table must exist" ; data_product "product codes"
+- stores: "Write-once archive container (TE-012): retention/YYYY-MM-DD/<table>/ JSON lines + manifest with SHA-256; Quartz"
+- functions: RetentionJob "JOB-17, no concurrent run" ; RetentionService "select, skip holds, delete" ; ArchiveWriter "JSON lines, manifest, read-back" ; RetentionRuleLoader "validate + apply a version" ; RetentionRuleRepository "rules in force"
+- path: trigger "JOB-17 first Sunday 02:30" > table "retention_rule in force" > check "Skip cases on legal hold" > store "Write-once archive + manifest" > check "Read-back verified?" > out "Rows deleted, summary MSG-P1-020"
+- rules: "BR3: a legal hold overrides retention" ; "BR4: delete only after the archive copy is checked" ; "BR5: decision_log_entry is never archived by this job" ; "BR6: a bad rule load is refused whole"
+- risks: "Case on legal hold -> rows kept and reported (MSG-P1-020)" ; "Months outside 1-600 -> load refused (MSG-GEN-002)" ; "Archive or manifest fails -> nothing deleted (MSG-GEN-006)"
+- example: "Rule RET-2026.11: DP05 interaction, 24 months on occurred_at" ; "Run date 2026-12-06: 1,250 rows before 2024-12-06 -> retention/2026-12-06/interaction/" ; "4,800 newer rows kept"
+
+### RWB-E1-018
+- file_stem: RWB E1 018 Case ID issuance and case record v1
+- title: Case ID issuance and case record v1
+- module: P3 Case and workflow | flag: rwb.p3.casecreation | status: PARTIAL "Ready. Batch gate waits for RWB-ACE-001" | theme: default
+- overview_label: Case ID + case creation
+- goal: Open one case per borrower and product for ACE accounts at 90+ days past due, with a permanent ID
+- why: Ends manual case opening. Every case gets RW-YYYY-NNNNNN, links to ACE by business key only, and the entry decision is logged.
+- needs: E1-001, E1-016, E1-027, E1-042, E1-069 | unblocks: E1-002, E1-013, E1-020, E1-024, E1-052, E1-066
+- triggers: EVENT "EV-26 AceDataReady (ALS batch COMPLETED)" ; JOB "JOB-02 Case creation, daily" ; API "GET /api/recovery/v1/cases/{caseId}" ; WHO "RW-CASEOWN reads the new case"
+- ace: v_ace_account A "days_past_due >= 90, product_category, total_balance, tdr_flag" ; v_ace_ca_relation A "borrower person_key for each account_key" ; v_ace_customer A "person_key, deceased_flag (exclusion)" ; v_ace_batch_status B "gate: ALS batch COMPLETED"
+- writes: recovery_case "status NEW, case_no RW-YYYY-NNNNNN" ; case_account "account_key links (business key, no FK)" ; case_party "person_key links" ; case_entry_exclusion "accounts kept out, with reason" ; decision_log_entry "D6 CASE_CREATED (via the writer)"
+- reads: account_ext "dispute_open" ; party_ext "deceased_override, bankruptcy, fraud_flag" ; rule_row "EXCLUSION rules" ; lov_value "exposure, status, product lists"
+- stores: "Outbox: CaseCreated (EV-01); sequence case_no_seq_YYYY; job record"
+- functions: CaseCreationJob "JOB-02: entry rule per account_key" ; EntryRuleEvaluator "threshold + exclusions" ; CaseGrouping "one case per borrower + product" ; CaseNumberIssuer "RW-YYYY-NNNNNN, never reused" ; CaseCreationService "case, links, outbox, log in 1 tx" ; AceSourceReader "SELECT on 4 views"
+- path: trigger "EV-26: ALS batch COMPLETED" > ace "v_ace_account DPD >= 90" > ace "Borrower via v_ace_ca_relation" > check "Exclusions: deceased, fraud, dispute" > table "recovery_case NEW + links" > out "EV-01 CaseCreated + log entry"
+- rules: "BR1: entry at days_past_due >= case.entry.dpd (90, a parameter)" ; "BR2: one case per borrower person_key and product group" ; "BR3: exclusions DECEASED, FRAUD, BANKRUPTCY, ACTIVE_PLAN, OPEN_DISPUTE" ; "BR4/11: ID RW-YYYY-NNNNNN is never reused; ACE links are business keys only"
+- risks: "ALS batch not COMPLETED -> JOB-02 waits (MSG-P1-001)" ; "Decision log write fails -> the whole case rolls back (MSG-P7-003)" ; "RW-2026-999999 reached -> creation stops (MSG-P3-025)"
+- example: "Account A-5001, HIRE_PURCHASE, 90 days past due, borrower P-0101" ; "Last number issued: RW-2026-000122" ; "-> case RW-2026-000123, status NEW, is_primary = true, CaseCreated published"
+
+### RWB-E1-019
+- file_stem: RWB E1 019 Roles teams and queues as data
+- title: Roles, teams and queues as data
+- module: P3 Case and workflow | flag: rwb.p3.queuetables | status: READY "Ready for build" | theme: default
+- overview_label: Queues + teams as data
+- goal: Hold queues, members and caps as versioned data with approval and rollback, so org changes need no release
+- why: Team managers reorganise often. Allocation (E1-020) and scope (E1-037) read queues and capacity from data, not code.
+- needs: E1-038, E1-043 | unblocks: E1-020, E1-022
+- triggers: LOAD "POST /admin/reference-loads (QUEUE, QUEUE_MEMBER)" ; API "POST /admin/reference-loads/{loadId}/approve" ; JOB "QueueVersionApplier daily 00:05" ; WHO "RW-REFADM loads; RW-TEAMMGR approves"
+- ace: [] ; ace_note: "No ACE read. Queues, teams and members are Workbench reference data; members are Entra ID object IDs."
+- writes: queue "team, role, method, cap, overflow; table_version" ; queue_member "who works each queue, with capacity"
+- reads: reference_version, reference_row "the loaded version" ; role "role must exist" ; lov_value "LOV-ASSIGN methods" ; recovery_case "open cases per owner (capacity)"
+- stores: "Excel 'Queues' template (sheets QUEUE, QUEUE_MEMBER); Entra ID object IDs"
+- functions: QueueTableChecks "team, role, cap, overflow loop" ; QueueVersionApplier "applies a version on valid_from" ; CapacityService "BELOW_CAP or AT_CAP" ; QueueMembershipQuery "teams, regions, queues for scope" ; ReferenceRollbackHandler "restores the previous version"
+- path: trigger "RW-REFADM uploads the Queues file" > check "QueueTableChecks: whole file" > check "RW-TEAMMGR approves (not author)" > function "QueueVersionApplier 00:05" > table "queue + queue_member" > out "CapacityService for E1-020"
+- rules: "BR1: each queue has exactly one team and one role" ; "BR4: the author of a load cannot approve it" ; "BR6: capacity = min(member capacity, queue cap)" ; "BR8: cap must be 1-500 (parameter queue.cap.max)"
+- risks: "Unknown team code -> whole load refused (MSG-P1-002)" ; "Cap out of range -> refused (MSG-GEN-002)" ; "Approver is the author -> refused (MSG-P7-002)"
+- example: "v1 from 2026-11-30: 12 queues, 48 members" ; "Queue LIT-BKK-OFF -> team LIT-BKK, role RW-LITOFF" ; "v3 has an error in DIL-BKK-CO -> rollback restores v2"
+
+### RWB-E1-020
+- file_stem: RWB E1 020 Allocation and assignment engine v1
+- title: Allocation and assignment engine v1
+- module: P3 Case and workflow | flag: rwb.p3.allocation | status: READY "Ready for build" | theme: default
+- overview_label: Morning allocation engine
+- goal: Give every NEW case a queue and an owner by rule before 07:00, ending allocation by spreadsheet
+- why: Owners start the day with their cases ready. The first matching ALLOCATION row picks the queue; the queue's method picks an owner below the cap.
+- needs: E1-018, E1-019, E1-027, E1-056 | unblocks: E1-002, E1-021, E1-028, E1-030, E1-031
+- triggers: JOB "JOB-03 Morning allocation, after JOB-02" ; GATE "Done by 07:00 (deadline watcher, TE-007)" ; API "POST /admin/jobs/{jobId}/rerun" ; WHO "RW-TEAMMGR owns; gets a summary per team"
+- ace: [] ; ace_note: "No direct ACE read. It runs after JOB-02, which is gated on the ACE batch; product, region and band are already on the case."
+- writes: recovery_case "status ASSIGNED, owner_user_id, queue_id, team_code" ; assignment "new assignment row per case" ; queue.rr_cursor_user_id "round-robin cursor" ; decision_log_entry "OWNER_ASSIGNED, written last"
+- reads: recovery_case "NEW cases, FOR UPDATE SKIP LOCKED" ; rule_row "ALLOCATION rows (ALLOC-2026.11)" ; queue, queue_member "method, cap, overflow queue" ; assignment "open cases per owner (load)"
+- stores: "Outbox: CaseAllocated (EV-02), CaseAllocationFailed (EV-03); ACE notification (summary to team managers); job record"
+- functions: AllocationJob "JOB-03: pick NEW cases, summary" ; AllocationService "lock, match, owner, log, update" ; AllocationRuleEvaluator "first matching row wins" ; AssignmentEngine "ROUND_ROBIN, LOWEST_LOAD, NAMED, SKILL" ; OwnerLoadRepository "open cases per owner" ; AllocationSummaryBuilder "MSG-P3-011 and MSG-P3-012"
+- path: trigger "JOB-03 after JOB-02" > table "recovery_case status NEW" > check "First ALLOCATION row that matches" > function "AssignmentEngine: owner below cap" > table "case ASSIGNED + assignment + log" > out "EV-02 CaseAllocated + team summary"
+- rules: "BR1: the first matching row in row order wins; 'Any' matches all" ; "BR4: all owners at cap -> the case goes to the overflow queue" ; "BR5: no row matches -> exception queue RWB-EXC" ; "BR8: at most one allocation per case per business date"
+- risks: "All owners at cap -> overflow queue (MSG-P3-011)" ; "No rule row matches -> RWB-EXC + EV-03 (MSG-P3-012)" ; "Decision log write fails -> that case rolls back (MSG-P3-013)"
+- example: "Case RW-2026-000201: MORTGAGE, region BKK, exposure band B2" ; "Row ALLOC-014 (ALLOC-2026.11) -> queue MTG-BKK-CO (team MTG-BKK, ROUND_ROBIN, cap 150)" ; "Overflow queue MTG-BKK-OVF if every member is at 150"
+
+### RWB-E1-021
+- file_stem: RWB E1 021 Transfer rules and engine v1
+- title: Transfer rules and engine v1
+- module: P3 Case and workflow | flag: rwb.p3.transfer | status: READY "Ready for build" | theme: default
+- overview_label: Transfer engine + legal hold
+- goal: Move cases between queues and teams by rule on eight triggers, or by hand with a reason
+- why: A case must follow its route (e.g. restructure to litigation) without e-mail. Legal hold freezes automated moves; every move is logged with its rule.
+- needs: E1-028, E1-020, E1-027 | unblocks: E1-035
+- triggers: EVENT "EV-05, 06, 07, 09, 12, 16, 18 (8 triggers)" ; API "POST /cases/{caseId}/transfer" ; API "POST /cases/{caseId}/legal-hold" ; WHO "RW-TEAMMGR, RW-LITOFF (manual)"
+- ace: [] ; ace_note: "No ACE read. Transfers act on Workbench case state and TRANSFER rule rows only."
+- writes: recovery_case "queue_id, team_code, owner, legal_hold, status_before_hold" ; assignment "old one ended, new TRANSFER row + reason code" ; processed_event "event ID dedup" ; decision_log_entry "CASE_TRANSFERRED, written last"
+- reads: queue "target queue, method, cap" ; rule_row "TRANSFER rows (TRF-2026.11)" ; lov_value "LOV-TRANSFER-REASON R01-R06"
+- stores: "Outbox: CaseTransferred (EV-04), CaseStateChanged (EV-05) for hold and release"
+- functions: TransferListener "8 trigger events, dedup by ID" ; TransferRuleEvaluator "first matching TRANSFER row" ; TransferService "lock, hold check, owner, swap" ; LegalHoldService "place or lift a legal hold" ; AssignmentEngine (E1-020) "picks the new owner"
+- path: trigger "Trigger event in the outbox" > check "Seen before? (processed_event)" > check "First TRANSFER row matches" > check "Legal hold? -> skip" > table "assignment swap + case update" > out "EV-04 CaseTransferred + log"
+- rules: "BR3: a manual transfer needs a reason code from LOV-TRANSFER-REASON" ; "BR6: no automated transfer while the case is on legal hold (R-UNI-20)" ; "BR8: the same event ID is processed once" ; "BR10: a transfer keeps the case status and its clocks"
+- risks: "Two transfers at once -> version clash (MSG-GEN-004)" ; "Manual transfer without a reason -> 422 (MSG-P3-001)" ; "Target owner at cap -> 422 (MSG-P3-002)"
+- example: "RW-2026-000301 is IN_PROGRESS in TDR-BKK-CO, owner U-21" ; "Route R4 approved -> row TRF-007 (TRF-2026.11) moves it to LIT-BKK-OFF" ; "New owner U-31 by lowest load; status and clocks unchanged"

@@ -1,0 +1,55 @@
+﻿Party fields and read path
+"The fields that identify and describe a party, with their source. A party is an ACE customer read through a view, plus one party_ext row; there is no local party or contact_point table."
+Entity,Field,Data type,Physical type,Source,Source field,Meaning
+case_party,id,TEXT,uuid,Workbench,None,Record identifier of the case party link
+case_party,case_id,CROSS_REF,uuid,Workbench,None,The recovery_case this record belongs to
+case_party,person_key,TEXT,varchar(255),ACE,customer.person_key,"ACE customer this record belongs to; business key, no foreign key"
+case_party,party_role,LOV,varchar(20),Workbench,None,"Borrower, co-borrower, guarantor, authorized signatory, heir"
+case_party,role_from,DATE,date,Workbench,None,Date the role starts
+case_party,role_to,DATE,date,Workbench,None,Date the role ends
+v_ace_customer,person_key,TEXT,varchar(255),ACE,customer.person_key,ACE customer key the Workbench links to
+v_ace_customer,cif_no,TEXT,varchar(255),ACE,customer.person_key,Customer number in the bank; same value as person_key
+v_ace_customer,party_type,LOV,varchar(15),ACE,customer.party_type,"Individual or juristic person; Tier 2 column in v_ace_customer (Section B, after RWB-ACE-001)"
+v_ace_customer,first_name,TEXT,varchar(255),ACE,customer.first_name,First name or company name
+v_ace_customer,last_name,TEXT,varchar(255),ACE,customer.surname,Last name
+v_ace_customer,id_type,LOV,varchar(20),ACE,customer.id_type,"Thai national ID, passport, company registration; Tier 2 column in v_ace_customer (Section B, after RWB-ACE-001)"
+v_ace_customer,id_no_masked,TEXT,varchar(64),ACE,customer.identification_number,Identity number with all but the last four replaced by ace_mask_value. The clear value never leaves ACE
+v_ace_customer,id_no_last4,TEXT,varchar(4),ACE,customer.identification_number,"Last four of the identity number, to match a document"
+v_ace_customer,date_of_birth,DATE,date,ACE,customer.birth_date,Date of birth
+v_ace_customer,segment,LOV,varchar(20),ACE,customer.segment,"Retail, SSME, corporate; Tier 2 column in v_ace_customer (Section B, after RWB-ACE-001)"
+v_ace_customer,deceased_flag,BOOLEAN,boolean,ACE,customer.is_deceased,"Death recorded in ACE, converted to boolean; party_ext.deceased_override sits beside it"
+v_ace_customer,customer_status,LOV,varchar(255),ACE,customer.status,Customer status in ACE
+v_ace_customer,branch_code,TEXT,varchar(255),ACE,customer.branch,Branch that owns the customer record
+party_ext,person_key,TEXT,varchar(255),Workbench,customer.person_key,ACE customer key the flags belong to
+party_ext,vulnerable,BOOLEAN,boolean,Workbench,None,Vulnerable customer or hardship confirmed
+party_ext,deceased_override,BOOLEAN,boolean,Workbench,None,Death confirmed where the ACE record does not carry it
+party_ext,bankruptcy,BOOLEAN,boolean,Workbench,None,Bankruptcy or receivership confirmed
+party_ext,fraud_flag,BOOLEAN,boolean,Workbench,None,Fraud confirmed or under investigation
+v_ace_contact,contact_key,TEXT,varchar(255),ACE,"phone.phone_key, email.email_key, address.address_key",Contact point key; contact_type says which ACE table it comes from
+v_ace_contact,contact_type,LOV,varchar(10),ACE,view literal,"PHONE, EMAIL or ADDRESS"
+v_ace_contact,person_key,TEXT,varchar(255),ACE,"phone.person_key, email.person_key, address.person_key",ACE customer the contact point belongs to
+v_ace_contact,contact_value,TEXT,varchar(256),ACE,"phone.phone_number, email.email, address.address","The number, address or handle in full, for notices and calls"
+v_ace_contact,contact_value_masked,TEXT,varchar(256),ACE,recovery.ace_mask_value(...),The same value masked for display (E1-037)
+v_ace_contact,usage_code,LOV,varchar(255),ACE,phone.contact_usage,How ACE may use the number
+v_ace_contact,city,TEXT,varchar(255),ACE,address.city,City of a postal address
+v_ace_contact,post_code,TEXT,varchar(20),ACE,address.zip_code,Post code of a postal address
+v_ace_contact,country,TEXT,varchar(255),ACE,address.country,Country of a postal address
+v_ace_ca_relation,person_key,TEXT,varchar(255),ACE,ca_relation.person_key,"ACE customer on the account; business key, no foreign key"
+v_ace_ca_relation,account_key,TEXT,varchar(255),ACE,ca_relation.account_key,"ACE account the customer is related to; business key, no foreign key"
+v_ace_ca_relation,relation_type,TEXT,varchar(255),ACE,ca_relation.relation_type,"Borrower, co-borrower or guarantor on the account"
+v_ace_ca_relation,amount_of_guarantee,NUMBER,"numeric(38,2)",ACE,ca_relation.amount_of_guarantee,Amount the guarantor guarantees; blank for a borrower
+v_ace_ca_relation,date_of_guarantee,DATE,date,ACE,ca_relation.date_of_guarantee,Date the guarantee was given; blank for a borrower
+contact_point_ext,contact_key,TEXT,varchar(255),Workbench,"ACE phone_key, email_key or address_key",ACE contact point the row belongs to
+contact_point_ext,contact_type,LOV,varchar(10),Workbench,None,"PHONE, EMAIL or ADDRESS"
+contact_point_ext,consent_given,BOOLEAN,boolean,Workbench,None,True while the customer consents to contact
+contact_point_ext,consent_at,DATE,timestamptz,Workbench,None,When consent was given or withdrawn
+contact_point_ext,verified_at,DATE,timestamptz,Workbench,None,When the contact point last reached the right party
+contact_point_ext,failed_count,NUMBER,integer,Workbench,None,Failed attempts since the last success
+contact_point_ext,source,LOV,varchar(20),Workbench,None,"Bank record, field visit, agency, bureau trace, customer"
+partner,id,TEXT,uuid,Workbench,None,Record identifier of the partner
+partner,partner_code,TEXT,varchar(20),Workbench,OACode,Partner code
+partner,partner_name,TEXT,varchar(160),Workbench,REPOSS_NAME / Investor,Registered name
+partner,partner_type,LOV,varchar(15),Workbench,None,"Agency, law firm, valuer, auction vendor, broker, debt buyer, AMC, RAMC"
+partner,panel_status,LOV,varchar(12),Workbench,None,"Active, on notice, suspended, exited"
+partner,contract_end,DATE,date,Workbench,None,Contract end date
+partner,score,NUMBER,"numeric(5,2)",Workbench,None,Latest scorecard result

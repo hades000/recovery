@@ -1,0 +1,146 @@
+{
+  "key": "RWB-E1-059",
+  "file_stem": "RWB E1 059 Case intake agent in shadow E1b",
+  "title": "Case intake agent in shadow [E1b]",
+  "module": "P10 Agent runtime",
+  "flag": "rwb.agent.intake-shadow",
+  "status": "PARTIAL",
+  "status_text": "Ready. read_valuations needs RWB-ACE-001",
+  "theme": "ai",
+  "overview_label": "Intake agent (shadow)",
+  "goal": "An intake agent summarises each new case and flags gaps in shadow, scored against analysts",
+  "why": "Prove the agent is useful and safe before it helps anyone. Shadow output is never shown and changes nothing; it is only scored.",
+  "needs": [
+    "E1-030",
+    "E1-058",
+    "TE-013"
+  ],
+  "unblocks": [
+    "E1-061",
+    "E2-028"
+  ],
+  "triggers": [
+    [
+      "EVENT",
+      "EV-01 CaseCreated"
+    ],
+    [
+      "CALL",
+      "INTAKE agent, key INTAKE:<caseId>:<date>"
+    ],
+    [
+      "API",
+      "POST /admin/agent-evaluations (INTAKE-S1)"
+    ],
+    [
+      "WHO",
+      "RW-COE evaluates; owners see nothing"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "contact_type, usage_code (tool read_contact_points)"
+    },
+    {
+      "view": "v_ace_valuation",
+      "section": "B",
+      "note": "appraised_value, appraisal_date (read_valuations)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "agent_run",
+      "note": "SHADOW output, status, cost"
+    },
+    {
+      "t": "agent_evaluation_run",
+      "note": "evaluation on sample INTAKE-S1"
+    },
+    {
+      "t": "agent_evaluation",
+      "note": "agreement, precision, recall per gap type"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "case_no, product, status, entry date"
+    },
+    {
+      "t": "document",
+      "note": "documents on the case"
+    },
+    {
+      "t": "agent_sample",
+      "note": "labelled cases from the analysts"
+    }
+  ],
+  "stores": "Outbox EV-28; INT-23 model via the gateway; 5 read tools: read_case, read_accounts, read_documents, read_valuations, read_contact_points",
+  "functions": [
+    {
+      "name": "IntakeShadowListener",
+      "does": "EV-01 -> orchestrator"
+    },
+    {
+      "name": "IntakeInputAssembler",
+      "does": "masked inputs from 5 tools"
+    },
+    {
+      "name": "IntakeOutputScorer",
+      "does": "agent gaps vs labels"
+    },
+    {
+      "name": "intake-summary-v1.json",
+      "does": "output schema + gap list"
+    },
+    {
+      "name": "prompt INTAKE PR1",
+      "does": "the versioned prompt"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "EV-01 CaseCreated"
+    },
+    {
+      "kind": "function",
+      "text": "5 tools read case, docs, contacts"
+    },
+    {
+      "kind": "ace",
+      "text": "v_ace_contact + v_ace_valuation"
+    },
+    {
+      "kind": "ai",
+      "text": "INTAKE agent in SHADOW"
+    },
+    {
+      "kind": "table",
+      "text": "agent_run (no case change)"
+    },
+    {
+      "kind": "out",
+      "text": "Scored on INTAKE-S1"
+    }
+  ],
+  "rules": [
+    "BR1: shadow output is never shown and changes nothing",
+    "BR2: one run per case per business date",
+    "BR4: a stale ACE input must produce the STALE_INPUT gap",
+    "BR5: agreement = matches / labelled cases"
+  ],
+  "risks": [
+    "Timeout or guardrail failure -> stored as a failure, no retry",
+    "ACE batch not COMPLETE and no STALE_INPUT gap -> SCHEMA_RULE fails",
+    "Empty evaluation sample -> 422 (MSG-P10-002)"
+  ],
+  "example": [
+    "200 cases created 2026-11-30 to 2026-12-04 -> 200 SHADOW runs",
+    "No case, task or decision-log change",
+    "Gap types: MISSING_DOCUMENT, NO_VALID_APPRAISAL, NO_CONTACT_POINT, STALE_INPUT"
+  ]
+}

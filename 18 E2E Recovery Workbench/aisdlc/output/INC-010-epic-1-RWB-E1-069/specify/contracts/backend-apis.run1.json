@@ -1,0 +1,89 @@
+{
+  "runId": "INC-010-epic-1-RWB-E1-069",
+  "story": "RWB-E1-069",
+  "apiImpactType": "NO_API_CHANGE",
+  "httpEndpoints": [],
+  "events": [],
+  "note": "There is no endpoint and no event (Story RWB-E1-069 v1, section 12). The contracts below are the non-HTTP interfaces this story publishes.",
+  "contracts": [
+    {
+      "id": "CON-RWB-E1-069-001",
+      "type": "flyway-migration",
+      "file": "backend/src/main/resources/db/modulemigration/recovery/V<seq>__rwb_e1_069_ace_source_views.sql",
+      "line1": "-- Story: RWB-E1-069",
+      "contents": [
+        "3 helper functions, CREATE OR REPLACE (ACE Source Views v1, lines 31-86)",
+        "16 Section A views (ACE Source Views v1, lines 94-452)",
+        "Section A grant block (spec SPEC-004)"
+      ],
+      "seq": "next free at merge (D-RCV-28)",
+      "spec": ["SPEC-RWB-E1-069-001", "SPEC-RWB-E1-069-002", "SPEC-RWB-E1-069-003", "SPEC-RWB-E1-069-004"]
+    },
+    {
+      "id": "CON-RWB-E1-069-002",
+      "type": "flyway-migration",
+      "file": "backend/src/main/resources/db/modulemigration/recovery/V<seq>__rwb_e1_069_ace_tier2_views.sql",
+      "line1": "-- Story: RWB-E1-069",
+      "contents": [
+        "14 Section B views (ACE Source Views v1, lines 461-711)",
+        "Section B grant block"
+      ],
+      "precondition": "RWB-ACE-001 deployed (DL43); merged only after it is deployed (DG-L20)",
+      "spec": ["SPEC-RWB-E1-069-005", "SPEC-RWB-E1-069-006"]
+    },
+    {
+      "id": "CON-RWB-E1-069-003",
+      "type": "published-read-interface",
+      "objects": "30 views ${recoverySchema}.v_ace_* (Story RWB-E1-069 v1, section 11)",
+      "rules": [
+        "SELECT only",
+        "no PK or FK",
+        "owner ace_view_owner",
+        "recovery_svc SELECT per view",
+        "PUBLIC none"
+      ],
+      "fields": "304 fields, DF-ACE-001..304. Columns are cited from ACE Source Views v1 and not copied here.",
+      "spec": ["SPEC-RWB-E1-069-003", "SPEC-RWB-E1-069-006"]
+    },
+    {
+      "id": "CON-RWB-E1-069-004",
+      "type": "database-grants",
+      "grantees": {
+        "ace_view_owner": "owns the 30 views; USAGE on public; SELECT on the 21 Tier 1 tables (this story) and the 14 Tier 2 tables (RWB-ACE-001); no right in schema recovery",
+        "recovery_svc": "USAGE on recovery; SELECT on each v_ace_* view; EXECUTE on the 3 helper functions; nothing in public",
+        "PUBLIC": "nothing on recovery tables or views; no EXECUTE on the helper functions"
+      },
+      "spec": ["SPEC-RWB-E1-069-002", "SPEC-RWB-E1-069-004", "SPEC-RWB-E1-069-006"]
+    },
+    {
+      "id": "CON-RWB-E1-069-005",
+      "type": "test-resource",
+      "file": "backend/src/test/resources/architecture/recovery-modules.yaml",
+      "key": "sourceViews",
+      "shape": "list of 30 strings, exactly the v_ace_* names in Story RWB-E1-069 v1, section 11",
+      "owner": "RWB-E1-069 for this key only; the rest of the file belongs to RWB-TE-001 (D-RCV-37)",
+      "spec": ["SPEC-RWB-E1-069-013"]
+    },
+    {
+      "id": "CON-RWB-E1-069-006",
+      "type": "test-resource",
+      "file": "backend/src/test/resources/db/recovery-migration-lint-exceptions.yaml",
+      "shape": {
+        "storyKey": "rwb_e1_069",
+        "decision": "D-RCV-35 3.2/8.2",
+        "maxNonFixFiles": 2,
+        "allowQualifiers": ["public"],
+        "allowStatements": ["GRANT", "REVOKE", "ALTER VIEW ... OWNER TO"]
+      },
+      "spec": ["SPEC-RWB-E1-069-014"]
+    },
+    {
+      "id": "CON-RWB-E1-069-007",
+      "type": "build-message",
+      "rule": "BND-6",
+      "text": "Boundary rule BND-6 broken: <SimpleClassName> reads public.<table>. Read recovery.<view> instead.",
+      "source": "Story RWB-E1-069 v1, section 14",
+      "spec": ["SPEC-RWB-E1-069-012"]
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "key": "RWB-TE-012",
+  "file_stem": "RWB TE 012 Document storage containers",
+  "title": "Document storage containers",
+  "module": "P5 Document hub (technical enabler)",
+  "flag": "rwb.dochub.storage-containers",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Blob containers (write-once)",
+  "goal": "Containers reached only by managed identity, with a write-once legal container",
+  "why": "Court notices and deeds are evidence. The legal container is immutable for 3,650 days and locked in PROD; no keys or SAS tokens exist.",
+  "needs": [
+    "TE-001"
+  ],
+  "unblocks": [
+    "E1-024",
+    "E1-041",
+    "E1-049",
+    "E1-057",
+    "E1-017"
+  ],
+  "triggers": [
+    [
+      "WHO",
+      "RW-PLATADM applies the storage template"
+    ],
+    [
+      "CALL",
+      "DocumentStore writes via DocumentContainers"
+    ],
+    [
+      "CALL",
+      "Startup readiness check"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Containers hold Workbench documents; the document table holds the storage_ref.",
+  "writes": [
+    {
+      "t": "(blobs)",
+      "note": "{container}/{caseId}/{documentId}/v{n}"
+    }
+  ],
+  "reads": [
+    {
+      "t": "document",
+      "note": "storage_ref, write_once, doc_version"
+    }
+  ],
+  "stores": "Azure storage account (private endpoint, no keys or SAS): rwb-intake, rwb-docs (versioning, 30-day soft delete), rwb-docs-legal (immutable 3,650 days), rwb-quarantine",
+  "functions": [
+    {
+      "name": "Storage infrastructure template",
+      "does": "account, 4 containers, policies"
+    },
+    {
+      "name": "DocumentContainers",
+      "does": "clients + readiness (published)"
+    },
+    {
+      "name": "DocumentContainersConfig",
+      "does": "managed identity only, 10 s timeout"
+    },
+    {
+      "name": "StorageReadinessIndicator",
+      "does": "all 4 exist + policy set"
+    },
+    {
+      "name": "StorageErrorMapper",
+      "does": "immutable -> WriteOnceViolation"
+    },
+    {
+      "name": "ContentHashGuard",
+      "does": "same content -> existing blob"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Admin applies the template"
+    },
+    {
+      "kind": "store",
+      "text": "4 containers + policies + roles"
+    },
+    {
+      "kind": "check",
+      "text": "Readiness: all present?"
+    },
+    {
+      "kind": "function",
+      "text": "DocumentStore writes v{n}"
+    },
+    {
+      "kind": "check",
+      "text": "Overwrite legal blob?"
+    },
+    {
+      "kind": "out",
+      "text": "Refused 409 MSG-P5-002 + audit"
+    }
+  ],
+  "rules": [
+    "BR1: write-once refuses overwrite and delete for the retention period",
+    "BR3: access by managed identity only",
+    "BR5: ready only if all 4 containers exist and the policy is set",
+    "BR7: identical content returns the existing blob"
+  ],
+  "risks": [
+    "Overwrite or delete of a legal blob -> refused (MSG-P5-002)",
+    "Container or policy missing -> not ready, writes refused (MSG-GEN-006)",
+    "Storage timeout -> 503 (MSG-GEN-006)"
+  ],
+  "example": [
+    "DOC-0701 at rwb-docs-legal/RW-2026-000701/DOC-0701/v1, hash H701",
+    "Overwrite attempt -> BlobImmutableDueToPolicy, hash unchanged",
+    "-> the store returns 409 MSG-P5-002"
+  ]
+}

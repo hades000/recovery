@@ -1,0 +1,145 @@
+{
+  "runId": "INC-009-epic-1-RWB-E1-043",
+  "story": "RWB-E1-043",
+  "apiInScope": true,
+  "apiImpactType": "NEW_API_REQUIRED",
+  "contractDelta": "None against API Specification v2 (spec.md §API change assessment). `ReferenceLoad` already carries id, table, validFrom, status and rows; approval returns the same shape; the list endpoint returns `ListOfValues` with versions. No OpenAPI file change; this is first delivery of the three endpoints plus the rollback endpoint reused from RWB-E1-019 (CLAR-008).",
+  "backwardCompatibility": "Additive; no existing endpoint changes (spec.md §API change assessment).",
+  "versioning": "No API version change; the OpenAPI file is unchanged (spec.md §API change assessment).",
+  "basePath": "/api/recovery/v1",
+  "style": "ADR-RCV-001: custom REST, plain JSON, uuid ids, MSG-* error codes; no HAL, no Spring Data REST export.",
+  "endpoints": [
+    {
+      "id": "EP-RWB-E1-043-01",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads",
+      "description": "Load a reference-data file for a table code. Validates schema/key/business-date checks (BR2-BR6), computes SHA-256 content hash over rows sorted by key, and writes a VALIDATED reference_version plus its reference_row rows, or returns the existing load idempotently on an identical hash (CLAR-005, X4).",
+      "requestBody": {
+        "contentType": "application/json",
+        "shape": "ReferenceLoadRequest { tableCode: string, validFrom: date, rows: array<{ rowKey: string, rowData: object }> }"
+      },
+      "responseBody": {
+        "status": 201,
+        "contentType": "application/json",
+        "shape": "ReferenceLoad { id: uuid, tableCode: string, versionNo: int, validFrom: date, status: \"VALIDATED\", rowCount: int, contentHash: string, loadId: uuid, rows: array<{ rowKey: string, rowData: object }> }"
+      },
+      "authorization": "Reference data C (load) — spec.md §API change assessment. RWB-E1-022 session/role mechanism not yet SUCCESS (PRE-6, Risk-2); TASK-13 checks for its RecoveryAccessGuard/role-mapping interface directly.",
+      "errors": [
+        { "status": 401, "code": "MSG-P4-001", "when": "No/invalid session." },
+        { "status": 403, "code": "MSG-P4-002", "when": "Caller lacks Reference data C." },
+        { "status": 409, "code": "MSG-P3-027", "when": "Different content at an already-approved valid-from (CLAR-005)." },
+        { "status": 422, "code": "MSG-P3-027", "when": "A row fails the schema/key check (X2), naming the row and column (AC4)." },
+        { "status": 422, "code": "MSG-GEN-001", "when": "Empty load file / header-only file (X7, AC10), names `rows`." },
+        { "status": 422, "code": "MSG-P3-027", "when": "`validFrom` before the business date (X3)." },
+        { "status": 503, "when": "Downstream dependency unavailable." }
+      ],
+      "specRefs": ["SPEC-RWB-E1-043-001", "SPEC-RWB-E1-043-003", "SPEC-RWB-E1-043-004"],
+      "tasks": ["TASK-RWB-E1-043-07", "TASK-RWB-E1-043-13"],
+      "testScenarios": ["TC-E1-043-04", "TC-E1-043-06", "TC-E1-043-07", "TC-E1-043-10", "TC-E1-043-11"]
+    },
+    {
+      "id": "EP-RWB-E1-043-02",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads/{loadId}/approve",
+      "description": "Approve a VALIDATED reference_version. Refuses an approver who is also the author (X1, AC2) and uses optimistic locking so of two simultaneous approvals only one succeeds (X5, AC8). On success sets status APPROVED, approver_user_id, approved_at and the superseded version's valid_to.",
+      "requestBody": {
+        "contentType": "application/json",
+        "shape": "ReferenceLoadApproval { } (approver identity comes from the session, not the body)"
+      },
+      "responseBody": {
+        "status": 200,
+        "contentType": "application/json",
+        "shape": "ReferenceLoad { id: uuid, tableCode: string, versionNo: int, validFrom: date, status: \"APPROVED\", approverUserId: uuid, approvedAt: timestamp, rowCount: int, contentHash: string, loadId: uuid, rows: array<{ rowKey: string, rowData: object }> }"
+      },
+      "authorization": "Reference data A (approve) — spec.md §API change assessment; CLAR-001 assumes RW-RISK holds it pending RWB-E1-037. RWB-E1-022 mechanism not yet SUCCESS (PRE-6, Risk-2).",
+      "errors": [
+        { "status": 401, "code": "MSG-P4-001", "when": "No/invalid session." },
+        { "status": 403, "code": "MSG-P4-002", "when": "Caller lacks Reference data A." },
+        { "status": 404, "code": "MSG-P4-003", "when": "`loadId` does not resolve to a VALIDATED version." },
+        { "status": 409, "code": "MSG-P7-002", "when": "Approver is the author, or there is no approver (X1, AC2)." },
+        { "status": 409, "code": "MSG-GEN-004", "when": "Two simultaneous approvals of the same load; the later request loses the optimistic lock (X5, AC8)." }
+      ],
+      "specRefs": ["SPEC-RWB-E1-043-005", "SPEC-RWB-E1-043-010"],
+      "tasks": ["TASK-RWB-E1-043-08", "TASK-RWB-E1-043-13"],
+      "testScenarios": ["TC-E1-043-02", "TC-E1-043-08"]
+    },
+    {
+      "id": "EP-RWB-E1-043-03",
+      "method": "GET",
+      "path": "/api/recovery/v1/admin/lists/{listCode}",
+      "description": "Read the version history (and currently-in-force version) for a table code, for admin/audit screens outside this story's scope. `listCode` is the LOV-REF-TABLE table code (data-model.md §4).",
+      "requestBody": null,
+      "responseBody": {
+        "status": 200,
+        "contentType": "application/json",
+        "shape": "ListOfValues { listCode: string, versions: array<{ id: uuid, versionNo: int, validFrom: date, validTo: date|null, status: string, approvedAt: timestamp|null }> }"
+      },
+      "authorization": "Reference data R (read) — spec.md §API change assessment. RWB-E1-022 mechanism not yet SUCCESS (PRE-6, Risk-2).",
+      "errors": [
+        { "status": 401, "code": "MSG-P4-001", "when": "No/invalid session." },
+        { "status": 403, "code": "MSG-P4-002", "when": "Caller lacks Reference data R." },
+        { "status": 404, "code": "MSG-P4-003", "when": "`listCode` not in LOV-REF-TABLE." }
+      ],
+      "specRefs": ["SPEC-RWB-E1-043-006", "SPEC-RWB-E1-043-009"],
+      "tasks": ["TASK-RWB-E1-043-10", "TASK-RWB-E1-043-13"],
+      "testScenarios": ["TC-E1-043-01a", "TC-E1-043-05a"]
+    },
+    {
+      "id": "EP-RWB-E1-043-04",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads/{loadId}/rollback",
+      "description": "Roll back an APPROVED reference_version: same endpoint shape as the rule-rollback mechanism already recorded with RWB-E1-019 (CLAR-008). Sets status ROLLED_BACK and — per IMPL-NOTE-01 (plan.md §Risks, an inference beyond CLAR-008's endpoint-reuse answer, flagged for FDA/Technical Specifier confirmation before Builder codes it) — clears the superseded version's valid_to so the prior APPROVED version resumes being in force.",
+      "requestBody": {
+        "contentType": "application/json",
+        "shape": "ReferenceRollbackRequest { reason: string }"
+      },
+      "responseBody": {
+        "status": 200,
+        "contentType": "application/json",
+        "shape": "ReferenceLoad { id: uuid, tableCode: string, versionNo: int, status: \"ROLLED_BACK\", rows: array<{ rowKey: string, rowData: object }> }"
+      },
+      "authorization": "Reference data A (approve right governs rollback, by analogy with approve) — inferred, not individually stated in spec.md's API table; flagged alongside IMPL-NOTE-01.",
+      "errors": [
+        { "status": 401, "code": "MSG-P4-001", "when": "No/invalid session." },
+        { "status": 403, "code": "MSG-P4-002", "when": "Caller lacks the rollback right." },
+        { "status": 404, "code": "MSG-P4-003", "when": "`loadId` does not resolve to any `rwb_reference_version` row at all." },
+        { "status": 422, "code": "MSG-P3-027", "when": "`loadId` resolves to a `rwb_reference_version` row, but its status is not APPROVED." }
+      ],
+      "specRefs": ["spec.md §Feature flag and rollback", "CLAR-008"],
+      "tasks": ["TASK-RWB-E1-043-09", "TASK-RWB-E1-043-13"],
+      "testScenarios": ["TC-E1-043-13 (planner-added, IMPL-NOTE-01)", "TC-E1-043-13b (planner-added, 422 negative path)"],
+      "note": "No individual SPEC-RWB-E1-043-01x ID covers rollback: spec.md's own coverage table never ties one to a BR/AC/X row (tasks.md §Requirement and spec coverage note). IMPL-NOTE-01: field-level rollback mechanics are a planner inference beyond CLAR-008's endpoint-reuse answer; not asserted as settled spec (plan.md §Risks). The 404/422 split above resolves REVIEW-RWB-E1-043-PLAN-001 (Low, plan-gate review): approved disposition Option A, Jira `TB0001-1204` comment `1783253`, 2026-11-10 — 404 is row-not-found only, 422 is row-found-wrong-status, mirroring EP-RWB-E1-043-02's existing pattern."
+    }
+  ],
+  "movedOut": [],
+  "backendOnlyContracts": [
+    {
+      "id": "BOC-RWB-E1-043-01",
+      "kind": "internal-interface",
+      "description": "`ReferenceDataService.rows(tableCode, businessDate)` — the engine-facing read used by the allocation engine and other internal recovery modules to resolve the in-force version's rows for a date. No REST endpoint exists for this call (spec.md has no corresponding row in §API change assessment); TC-E1-043-01's date-based-serving half, TC-E1-043-03 (engine reads and logs once) and TC-E1-043-09/X6 (no version in force) are reachable only through this interface, not through HTTP.",
+      "file": "backend/src/main/java/th/co/scb/ace/demo/recovery/refdata/api/ReferenceDataService.java",
+      "packagedInJar": true,
+      "readBy": ["recovery allocation engine (internal)", "other recovery modules via `@NamedInterface`"],
+      "specRefs": ["SPEC-RWB-E1-043-006", "SPEC-RWB-E1-043-007", "SPEC-RWB-E1-043-008", "SPEC-RWB-E1-043-009"],
+      "tasks": ["TASK-RWB-E1-043-10", "TASK-RWB-E1-043-12"]
+    }
+  ],
+  "coverage": {
+    "specRef": "spec.md §Unit Test Applicability",
+    "decision": "Backend: REQUIRED, 80% line/statement/branch/function (JaCoCo), recovery module classes only.",
+    "tasks": ["TASK-RWB-E1-043-19"],
+    "classDirectories": ["backend/src/main/java/th/co/scb/ace/demo/recovery/refdata/**"]
+  },
+  "planRefs": {
+    "source": "plan.md §Backend Plan, §Requirement Logic To Task Coverage",
+    "tasks": [
+      "TASK-RWB-E1-043-01", "TASK-RWB-E1-043-02", "TASK-RWB-E1-043-03", "TASK-RWB-E1-043-04",
+      "TASK-RWB-E1-043-05", "TASK-RWB-E1-043-06", "TASK-RWB-E1-043-07", "TASK-RWB-E1-043-08",
+      "TASK-RWB-E1-043-09", "TASK-RWB-E1-043-10", "TASK-RWB-E1-043-11", "TASK-RWB-E1-043-12",
+      "TASK-RWB-E1-043-13", "TASK-RWB-E1-043-14", "TASK-RWB-E1-043-15", "TASK-RWB-E1-043-16",
+      "TASK-RWB-E1-043-17", "TASK-RWB-E1-043-18", "TASK-RWB-E1-043-19", "TASK-RWB-E1-043-20",
+      "TASK-RWB-E1-043-21"
+    ],
+    "approvalPending": "PRE-1, PRE-2, PRE-4, PRE-5, PRE-6, PRE-7, PRE-8 (plan.md §Plan approval preconditions) — none of these endpoints may be coded before Plan and Task approval, and TASK-01/-04/-13 must re-verify RWB-E1-044/-042/-022 are merged first."
+  }
+}

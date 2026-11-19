@@ -1,0 +1,178 @@
+{
+  "key": "RWB-E1-069",
+  "file_stem": "RWB E1 069 Read only ACE source views",
+  "title": "Read-only ACE source views, grants and boundary rule",
+  "module": "P1 Recovery data engine",
+  "flag": "none (the views are the read path)",
+  "status": "PARTIAL",
+  "status_text": "Ready. 14 Section B views wait for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "ACE views + grants (hub)",
+  "goal": "Recovery code reads ACE only through 30 SELECT-only views",
+  "why": "One copy of source data. ACE cascades deletes on account, so there is no FK into public; links are business keys. Views rename ACE columns for the Workbench.",
+  "needs": [
+    "E1-001",
+    "E1-044",
+    "ACE-001"
+  ],
+  "unblocks": [
+    "E1-002",
+    "E1-016",
+    "E1-018"
+  ],
+  "triggers": [
+    [
+      "BUILD",
+      "Flyway V0002 (16 views) + V0003 (14)"
+    ],
+    [
+      "BUILD",
+      "ViewConformanceTest in the pipeline"
+    ],
+    [
+      "BUILD",
+      "ArchUnit rule BND-6 on every PR"
+    ],
+    [
+      "WHO",
+      "Recovery squad + ACE DBA grant"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "days_past_due <- public.account.delay_days"
+    },
+    {
+      "view": "v_ace_payment",
+      "section": "A",
+      "note": "payment_date <- ace_to_date(pay_date text)"
+    },
+    {
+      "view": "v_ace_customer",
+      "section": "A",
+      "note": "id_no_masked + id_no_last4 only; clear ID stays in ACE"
+    },
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "phone + email + address union, contact_type"
+    },
+    {
+      "view": "v_ace_plan",
+      "section": "A",
+      "note": "4 ACE plan tables in one view"
+    },
+    {
+      "view": "v_ace_* (11 more)",
+      "section": "A",
+      "note": "efs_action, collateral, holiday, product, branch ..."
+    },
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "over ace_batch_run (Tier 2 table)"
+    },
+    {
+      "view": "v_ace_* (13 more)",
+      "section": "B",
+      "note": "valuation, lawsuit, pod, score, iam_group ..."
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "party_ext",
+      "note": "vulnerable, deceased_override, bankruptcy, fraud_flag"
+    },
+    {
+      "t": "contact_point_ext",
+      "note": "consent and quality per phone / email / address"
+    },
+    {
+      "t": "account_ext",
+      "note": "dispute_open"
+    },
+    {
+      "t": "valuation_ext",
+      "note": "accepted, stale_flag, age_days"
+    }
+  ],
+  "reads": [
+    {
+      "t": "sys_objects, sys_fields",
+      "note": "one dictionary row per view column"
+    }
+  ],
+  "stores": "flyway_schema_history_recovery; roles ace_view_owner (owns views) and recovery_svc (SELECT on views only); recovery-modules.yaml sourceViews",
+  "functions": [
+    {
+      "name": "V0002 ace_source_views",
+      "does": "16 Section A views + grants"
+    },
+    {
+      "name": "V0003 ace_tier2_views",
+      "does": "14 Section B views + grants"
+    },
+    {
+      "name": "ViewConformanceTest",
+      "does": "compile, no FK, dictionary, grants"
+    },
+    {
+      "name": "SourceViewBoundaryRule",
+      "does": "BND-6: no class names public.*"
+    },
+    {
+      "name": "ace_to_date / ace_to_boolean",
+      "does": "text -> date, Y/N -> boolean"
+    },
+    {
+      "name": "recovery-modules.yaml",
+      "does": "the 30 allowed view names"
+    }
+  ],
+  "path": [
+    {
+      "kind": "store",
+      "text": "ACE public tables (21 + 14)"
+    },
+    {
+      "kind": "function",
+      "text": "ace_view_owner: SELECT, owns views"
+    },
+    {
+      "kind": "ace",
+      "text": "recovery.v_ace_* (30 views)"
+    },
+    {
+      "kind": "function",
+      "text": "recovery_svc: SELECT on views only"
+    },
+    {
+      "kind": "check",
+      "text": "BND-6 + conformance test"
+    },
+    {
+      "kind": "out",
+      "text": "Every module reads ACE here"
+    }
+  ],
+  "rules": [
+    "BR1: recovery reads ACE only via the 30 SELECT-only views; it loads, copies and transforms nothing",
+    "BR3: recovery_svc holds no privilege in public; PUBLIC holds nothing; no write on a view",
+    "BR4: no constraint in recovery references public; links are varchar(255) business keys",
+    "BR9: a Section B view is created only after its ACE table exists (V0003 after RWB-ACE-001)"
+  ],
+  "risks": [
+    "recovery_svc selects public.account -> SQLSTATE 42501 permission denied",
+    "Class AccountReader reads public.account -> build fails: 'Boundary rule BND-6 broken'",
+    "V0003 before RWB-ACE-001 -> 'relation public.valuation does not exist', no B view made"
+  ],
+  "example": [
+    "ACE account ACC0000017 has delay_days = 95",
+    "SELECT days_past_due FROM recovery.v_ace_account WHERE account_code = 'ACC0000017' -> 95",
+    "Dictionary: DF-ACE-018, source public.account.delay_days, DP01, DAILY",
+    "Second party_ext row for person_key P0000123 -> SQLSTATE 23505, first row unchanged"
+  ]
+}

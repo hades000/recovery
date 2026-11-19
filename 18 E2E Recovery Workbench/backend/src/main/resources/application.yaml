@@ -1,0 +1,106 @@
+# Recovery Workbench, local build of the ACE recovery module.
+# Profile "local" (application-local.yaml) points at the docker compose stack.
+# SIT/UAT/PROD values come from the ACE deployment and Key Vault; nothing secret lives here.
+
+spring:
+  application:
+    name: ace-recovery
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${RWB_DB_URL:jdbc:postgresql://localhost:5433/ace}
+    username: ${RWB_DB_USER:recovery_svc}
+    password: ${RECOVERY_SVC_PASSWORD:}
+    hikari:
+      maximum-pool-size: 50          # NFR: 180 concurrent users, pool 50
+      connection-init-sql: SET TIME ZONE 'Asia/Bangkok'
+  jpa:
+    open-in-view: false              # BS-3.6: no lazy loading outside a transaction
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.default_schema: ${rwb.schema}
+      hibernate.jdbc.time_zone: Asia/Bangkok
+  flyway:
+    enabled: false                   # the recovery module runs its own Flyway bean (BS-2.3)
+  quartz:
+    job-store-type: memory           # ACE uses its JDBC job store; locally Quartz is in memory
+  jackson:
+    time-zone: Asia/Bangkok
+
+server:
+  port: 8080
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus, metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,parameterCatalog
+      show-details: when-authorized
+      roles: RW-PLATADM
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${RWB_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
+logging:
+  structured:
+    format:
+      console: ${RWB_LOG_FORMAT:ecs}  # structured JSON; never personal data (BS-4.6)
+  level:
+    io.temporal: INFO
+    org.drools: WARN
+    org.kie: WARN
+
+rwb:
+  environment: ${RWB_ENVIRONMENT}            # required, DEV|SIT|UAT|PROD (REVIEW-001 H2)
+  schema: recovery
+  p3:
+    temporal: ${RWB_P3_TEMPORAL:false}
+    drools: ${RWB_P3_DROOLS:false}
+    configservice: ${RWB_P3_CONFIGSERVICE:false}
+  flyway:
+    enabled: true
+    url: ${RWB_DB_URL:jdbc:postgresql://localhost:5433/ace}
+    user: ${RWB_MIGRATOR_USER:rwb_migrator}
+    password: ${RWB_MIGRATOR_PASSWORD:}
+    location: classpath:db/modulemigration/recovery
+  security:
+    issuer: ${RWB_OIDC_ISSUER:http://localhost:8090/entra}
+    jwk-set-uri: ${RWB_OIDC_JWKS_URI:http://localhost:8090/entra/jwks}
+    audience: ${RWB_OIDC_AUDIENCE:api://rwb-recovery}
+    roles-claim: roles
+    cors-origins: ${RWB_CORS_ORIGINS:http://localhost:5173}
+  temporal:
+    target: ${RWB_TEMPORAL_TARGET:localhost:7233}
+    namespace: rwb-recovery
+    codec-key: ${RWB_TEMPORAL_CODEC_KEY:}
+    codec-key-id: ${RWB_TEMPORAL_CODEC_KEY_ID:local-1}
+    rpc-timeout: 5s                  # internal call timeout (backend-context §8)
+  drools:
+    kiebase-cache-max: 20            # parameter drools.kiebase.cache.max
+  blob:
+    connection-string: ${RWB_BLOB_CONNECTION_STRING:}
+    endpoint: ${RWB_BLOB_ENDPOINT:}
+    document-container: rwb-documents
+    legal-container: rwb-documents-legal

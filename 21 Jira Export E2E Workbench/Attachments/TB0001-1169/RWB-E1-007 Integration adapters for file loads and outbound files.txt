@@ -1,0 +1,902 @@
+RWB-E1-007 Integration adapters for file loads and outbound files
+=================================================================
+
+
+
+How to read this file
+- Part A  Story scope after the Grooming decision (JOB-09, JOB-10, JOB-11 move
+          to a new Data Loading story, and the Henka outbound path).
+- Part B  DL-11: Non-functional targets (availability, performance, RTO/RPO).
+- Part C  Error notification and handling (four error cases).
+- Part D  FileCheckRunner specification (files, fields, rules, results,
+          sample files).
+- "ASSUMED" means we used a value because no document gives it.
+- "TO CONFIRM" means we need an answer from the client or a system owner.
+- "PROPOSAL" means it is our suggestion, not yet decided.
+- No change has been made to the Project Hub itself.
+
+The five most urgent open items
+  1. DL-11 (non-functional targets) was due on 5 November 2026 and is late.
+     The recovery point and recovery time (RPO and RTO) have no value yet.
+  2. Henka must give the outbound file path (INT-14) for the end-to-end test of
+     JOB-10 and JOB-11. No date is agreed.
+  3. File layouts for CCMS, SVAF, AMIS, RPS, WIN and GL are due from Data
+     engineering on 13 November 2026 (DEP-15). Until then we assume a layout.
+  4. The retry rule for outbound files does not work as written: 3 attempts
+     with waits of 5, 15 and 45 minutes means the 45 minutes is never used.
+  5. The rule for when a data product becomes "stale" is stated two ways.
+
+
+
+######################################################################
+PART A - STORY SCOPE AFTER THE GROOMING DECISION
+######################################################################
+
+Decision from the Grooming session on 11 November 2026
+- All Job-xx execution scope leaves the Epic 1 stories and moves into one new
+  story for Data Loading.
+- The new story must define: the jobs and interfaces, when they run, the
+  processing flow and dependencies, the input, output and business rules, and
+  the error handling and expected results.
+- For RWB-E1-007, JOB-09, JOB-10 and JOB-11 move to the new story. The
+  dependencies and Acceptance Criteria (ACs) of E1-007 must be reviewed.
+- Decision from K. Pongchai Charoenrungrodkun: Henka must provide the outbound
+  path for the end-to-end test of this job.
+
+Where the story stands today
+- RWB-E1-007 is already "creation only" in the Hub (8 build actions, AC1 to
+  AC3). The job text and the old AC1 to AC9 are saved in "Recovery Workbench
+  Data Load Story Removals v1.md".
+- What is left to do is the review of dependencies and ACs, and the Henka
+  decision.
+
+
+A1. Which jobs and interfaces move, and what stays?
+---------------------------------------------------
+Moves to the new Data Loading story:
+  JOB-09  File loads
+          Files: CCMS (INT-10), SVAF (INT-11), AMIS (INT-12), RPS (INT-13),
+          WIN proof of delivery (INT-15), GL (INT-16).
+  JOB-10  WIN outbound notices        File: INT-14 (WIN, outbound)
+  JOB-11  Outbox sender               Sends INT-14 and any other outbound item
+
+Stays in RWB-E1-007 (build only):
+  - The four tables: interface_config, interface_run, outbound_item,
+    processed_event.
+  - The classes: FileLoadAdapterImpl, FileCheckRunner, OutboundFilesImpl,
+    SftpTransport, IdempotencyGuardImpl.
+  - Two endpoints: GET /admin/outbound-items and
+    POST /admin/outbound-items/{itemId}/resend.
+  - AdapterBoundaryTest (no SFTP or file access outside the adapter package).
+
+Not built in this story or the new one: the Control-M and ADF schedules of
+the source extracts (RWB-E1-051), the run books and monitoring (RWB-E1-056),
+the full job screen SCR-44 (Epic 2 and Epic 8), and the WIN notice wording
+(RWB-E2-021).
+
+
+A2. When do the jobs run?
+-------------------------
+All jobs run on Quartz in the ACE service. Times are Asia/Bangkok.
+
+  JOB-09 File loads
+    - Weekly on Monday at 04:00: CCMS, SVAF, RPS and WIN.
+    - Monthly on the 2nd working day: AMIS and GL.
+    - Starts when the file arrives. The file must match the file pattern in
+      the interface setup.
+    - If no file is there by the cut-off, the run is marked MISSING.
+    - Owner: Data steward.
+
+  JOB-10 WIN outbound notices
+    - Every day at 16:00, using the notices approved by P6.
+    - Owner: Platform administrator.
+
+  JOB-11 Outbox sender
+    - Every minute. No dependency.
+    - Picks up items that are waiting (PENDING or RETRY) and due now.
+    - Owner: Platform administrator.
+
+
+A3. How do the jobs work, and what do they depend on?
+-----------------------------------------------------
+JOB-09 (files coming in)
+  1. Find the file in the inbound folder.
+  2. Write a run record with status RECEIVED (file name, hash, date).
+  3. Run four file checks (see Part D). The old data stays if any check fails.
+  4. If all pass, hand the records to the owning module loader and mark the
+     run LOADED.
+  5. The loader (not this job) publishes LoadCompleted (EV-26) or
+     LoadRefused (EV-27).
+
+JOB-10 (queue the notice file)
+  1. Receive the approved notices from P6.
+  2. Write one outbound item for the day's file, inside the caller
+     transaction. The duplicate guard is "INT-14:" plus the business date, so
+     a second run for the same date adds nothing.
+
+JOB-11 (send the file)
+  1. Pick due items with a lock, so two threads never send the same item.
+  2. Send over SFTP (only SftpTransport may open SFTP). Mark SENT.
+  3. Mark ACKNOWLEDGED when the acknowledgment file arrives.
+  4. If still SENT with no acknowledgment after 30 minutes, send again. This
+     30 minutes is an assumption (see decision DL11).
+
+Dependencies
+  - JOB-09 needs: the file; the E1-007 tables and adapter; the owning module
+    loader (E1-004, E1-009 and later loads); the check rows DQ-057 onwards.
+  - JOB-10 needs: approved notices from P6; E1-007 OutboundFiles; WIN notice
+    wording (RWB-E2-021).
+  - JOB-11 needs: items from JOB-10 or any other outbound request; SftpTransport;
+    the INT-14 outbound path from Henka (A7).
+  - RWB-E1-007 itself depends only on RWB-E1-001 (the database schema). The new
+    Data Loading story depends on E1-007, not the other way round.
+
+
+A4. Input, output and business rules
+------------------------------------
+JOB-09
+  Input: the file for the interface.
+  Output: one run record per file, and records passed to the owning module.
+  Rules:
+    - Reject the whole file if a check fails.
+    - Keep unknown references in an exception list (loader).
+    - Same file again (same hash) is marked DUPLICATE and nothing loads.
+    - Keep the previous load if a file is rejected or missing.
+    - Mark the data product stale one business day after the file was due.
+
+JOB-10
+  Input: approved notices (contract number, addressee, address, notice type,
+  template version, document reference). About 1,900 letters a month.
+  Output: one outbound item for the day's file.
+  Rule: hold the case step until the file is acknowledged.
+
+JOB-11
+  Input: waiting items that are due.
+  Output: the SFTP transfer and the item status.
+  Rules:
+    - The number of attempts and the waits come from the interface setup,
+      not from code. INT-14 has 3 attempts and waits of 5, 15 and 45 minutes.
+    - One send per item, even with two threads.
+    - Outbound items carry case IDs only, never names or addresses.
+
+
+A5. Errors and expected results
+-------------------------------
+The full answer is in Part C. In short:
+  - Rejected file: run marked REFUSED, message MSG-P1-002, old data stays.
+  - Missing file: run marked MISSING, product stale one business day later,
+    message MSG-P1-001.
+  - Send failed: case goes to RETRY_QUEUE; after the last try the item is
+    EXCEPTION, the cases go to EXCEPTION_QUEUE, a task goes to RW-PLATADM and
+    MSG-P2-001 is logged.
+  - Resend: item goes back to PENDING with count 0; response MSG-GEN-005.
+
+
+A6. Changes to dependencies and ACs of RWB-E1-007
+-------------------------------------------------
+Dependencies
+  1. Keep "Depends on: RWB-E1-001". Add the new Data Loading story as a user
+     of E1-007.
+  2. Section 3 lists check rows (DQ-057 to DQ-063 and DQ-085 to DQ-091) and
+     "INT-15 rows loaded" as preconditions. They are inputs for the new story.
+     Reword them.
+  3. Section 13 loads setup rows for INT-10 to INT-16 and INT-25, but section 3
+     names only four rows. Use one list.
+  4. Add the Henka outbound path as a dependency.
+
+Acceptance criteria
+  Keep:
+    AC1 Four tables created
+    AC2 Adapter classes created
+    AC3 Exception queue endpoints created
+  Add to E1-007: the FileCheckRunner ACs in Part D, section 7. The checker is
+  built in this story and can be tested with sample files, without running a
+  job.
+  Add to E1-007 (our proposal): the duplicate-event guard. It is not a job.
+    "Given consumer booking-confirmation already processed event key
+     EV-10:TRT-0001:v1, when the same event arrives again, then the consumer
+     does nothing and the hit count becomes 2."
+  Move to the new Data Loading story:
+    JOB-09 ...... missing file, same file twice, the end-to-end load, the alert
+    JOB-10/11 ... retry, exception queue, two senders at once, resend
+  Add once Henka confirms the path (proposal): "the outbound path comes from the
+  setup row, not from code".
+
+Gap to fix: build actions A3, A4, A6 and A7 still say things like "DQ-059 refuses
+the file" or "85 cases go to EXCEPTION_QUEUE" in their "Done when" column. No
+remaining AC covers these. Rewrite them as "the class exists", or move them.
+
+Test cases: TC-E1-007-01 to 03 stay. TC-E1-007-04 to 10 move with their ACs.
+Traceability rows for REQ-DRI-007 (R-UNI-33, 34, 35, 36, 40) must point to the
+new story until retry is tested there.
+
+
+A7. Henka outbound path
+-----------------------
+Decision: Henka provides the outbound path for the end-to-end test of this job.
+
+What we need from Henka
+  - The INT-14 outbound SFTP folder in DEV and SIT.
+  - Write access for the service identity SY-DATALOAD, with the key in the key
+    store (NFR-052).
+  - The folder and file name for the acknowledgment coming back (TO CONFIRM),
+    because JOB-11 marks ACKNOWLEDGED only when it arrives.
+
+How to record it
+  - Add it to the RAID log next to DEP-15 (Henka file layouts and test files).
+    Owner: Henka. The due date is not in the notes (TO CONFIRM).
+  - Action A1 of the story already needs write access to the outbound folder.
+    Name Henka as the source of the path.
+  - JOB-11 cannot be proven end to end until the path is received.
+
+Gap in the design (PROPOSAL)
+  The interface setup table has an inbound path but no outbound path. Add an
+  outbound_path column to the migration V2026_11_07__p2_adapter_tables.sql, or
+  rename the field to a neutral remote_path.
+
+Please confirm (Part A)
+  1. Henka: the INT-14 outbound path, the acknowledgment path and file name,
+     and the date.
+  2. Retry rule: 3 attempts with waits of 5, 15 and 45 minutes only gives two
+     waits, so 45 minutes is never used. Should it be 4 attempts, or only 5 and
+     15 minutes? (Part B shows that NFR-026 says "three retries".)
+  3. Stale rule: the old AC marked a product stale at the rejection. The
+     interface specification (and the missing-file AC) say one business day
+     after the file was due. Which applies?
+  4. Is the 30 minute resend wait confirmed? It is only assumed.
+  5. The INT-14 file holds addressee and address, but the guardrail says outbound
+     items carry case IDs only. Please confirm the item points to the file
+     (payloadRef) and only the file holds the addresses.
+  6. The key and number of the new Data Loading story, so links can be written.
+
+
+######################################################################
+PART B - DL-11: NON-FUNCTIONAL TARGETS
+######################################################################
+
+YOUR QUESTION
+Please give the confirmed target values for each non-functional requirement:
+availability, performance and recovery (RTO/RPO). For any target not yet
+confirmed, please give the owner, the expected confirmation date, and the
+impact on Technical Design and Non-Functional Testing.
+
+SHORT ANSWER
+No target is confirmed yet. Every target is either "Proposed" (we build and test
+against the value shown until the owner confirms it) or "Open" (no value). The
+two open targets are the recovery point (RPO) and the recovery time (RTO). The
+decision log needed DL11 by 5 November 2026. On 12 November it is 7 days late.
+
+DL11 in the decision log
+  Question ....... What is the value for each non-functional target, or the
+                   owner and date for it?
+  Options ........ A: use the ACE values where ACE has them, the solution
+                      architect proposes the rest, Risk agrees.
+                   B: wait for a bank standard for each target.
+  Recommended .... A
+  Owner .......... Solution architect with Risk
+  Needed by ...... 5 November 2026 (late)
+  If late ........ Performance and resilience cannot be tested against a pass
+                   mark.
+  Related item ... DEP-12 (targets for availability, RPO and RTO) is needed by
+                   13 November 2026.
+
+
+B1. The target values
+---------------------
+Availability and recovery
+  NFR-020  Available in business hours ........ 99.9 percent. Proposed.
+  NFR-021  Available outside business hours ... 99.5 percent, not counting the
+                                                change window. Proposed.
+                                                The change window is not
+                                                defined anywhere.
+  NFR-022  Recovery point (RPO) ............... "The ACE value". No number.
+                                                OPEN. Owner: IT lead with
+                                                Operational Risk.
+  NFR-023  Recovery time (RTO) ................ "The ACE value". No number.
+                                                OPEN. Owner: IT lead with
+                                                Operational Risk.
+  NFR-024  Agent or model outage .............. Fall back to the rule result.
+                                                Always on. Proposed.
+  NFR-025  Outage of a source system .......... Queue the work and retry. Do not
+                                                lose it. Proposed.
+  NFR-026  Interface failure .................. Three retries, then the
+                                                exception queue. Proposed.
+  NFR-027  Release rollback ................... Redeploy the previous tag.
+                                                Proposed.
+  NFR-071  Document backup and restore ........ Bank backup schedule; restore
+                                                tested before the first release
+                                                and at each release. OPEN
+                                                (DL27, needed by 13 Nov 2026).
+
+Performance
+  NFR-008  Screen response ..................... Under 2 seconds. Proposed.
+  NFR-009  Case record with 50 documents ....... Under 2 seconds. Proposed.
+  NFR-010  Agent answer ........................ Under 60 seconds, then the rule
+                                                result is used. Proposed.
+  NFR-011  Rule evaluation ..................... Under 300 ms (95th percentile).
+                                                Proposed, DL11.
+  NFR-012  Search .............................. Under 3 seconds for cases,
+                                                under 5 seconds for documents.
+                                                Proposed, DL11.
+  NFR-007  Decision log history ................ Under 2 seconds at about 36 GB.
+                                                Proposed, DL11.
+  NFR-070  Interaction ledger history .......... Under 2 seconds at the 2031 size.
+                                                Proposed, DL11.
+  NFR-069  Document store size ................. About 5.8 million documents and
+                                                2.8 TB by end of 2031.
+                                                Proposed, DL11.
+  NFR-013  Daily COLLINS load .................. Done by 07:00. Proposed.
+  NFR-019  Daily rebalancing job ............... Done by 07:00. Proposed, DL11.
+  NFR-068  Alert on a failing interface,
+           job or agent ........................ Within 15 minutes, to the named
+                                                owner. Proposed, DL11.
+
+Size used for the performance targets: about 23,600 open cases at go-live and
+26,500 at the end of 2027; 1,234 named users; about 410 online in the busiest
+hour; about 21 requests a second. These sizes depend on DL15, which is also
+still open (needed by 6 November 2026).
+
+
+B2. Targets not yet confirmed: owner, date and impact
+-----------------------------------------------------
+A. RPO and RTO (NFR-022, NFR-023)
+   Owner: IT lead with Operational Risk (specification). DL11 and DEP-12 name
+   the solution architect with Risk. Please confirm one owner.
+   Date: DL11 was due 5 November (late). DEP-12 is due 13 November 2026. We
+   propose 13 November (TO CONFIRM).
+   Impact on technical design: we cannot check the database design (zone
+   redundant PostgreSQL, point-in-time restore) or the failover design against a
+   recovery target. Backup frequency cannot be sized.
+   Impact on non-functional testing: the restore test (planned before Epic 1)
+   says "within the ACE recovery objectives", so it has no real pass mark. The
+   database failover test has no target time. The tests can run but cannot pass
+   or fail. This blocks the Epic 1 go-live gate.
+
+B. Availability outside business hours (NFR-021) and the change window
+   Owner: IT lead. Date: with DL11, 13 November (proposed).
+   Impact on design: sets the service level for batch, dispatch and partner
+   exchange. The change window must be defined. The monthly release window is
+   under DL34 (SCB IT).
+   Impact on testing: availability is read monthly from monitoring. The target
+   is the pass mark for the resilience test (stop an instance, fail the
+   database over) before Epic 1 and Epic 5.
+
+C. Targets proposed under DL11 (NFR-007, 011, 012, 019, 021, 026, 068, 069, 070)
+   Owner: Solution architect with Risk. Date: 13 November (proposed).
+   Impact on design: none if confirmed as proposed. The design (scale-out on the
+   shared AKS clusters, monthly partitions, documents in Blob storage, batch
+   outside business hours) is built for these values. If a value changes, the
+   partitioning, sizing and scaling rules are reworked.
+   Impact on testing: the test plan already uses these values (410 simulated
+   users, 95th percentile under 2 seconds, allocation by 07:00, case history
+   under 2 seconds). If a value changes, the test is run again.
+
+D. Document backup and restore (NFR-071)
+   Owner: IT lead. Related decision DL27 (solution architect with Compliance).
+   Date: 13 November 2026.
+   Impact on design: the bank backup service is used, but the schedule is not
+   given.
+   Impact on testing: the document restore test has no restore time.
+
+E. Volume base (DL15)
+   Owner: Data lead. Date: 6 November (late).
+   Impact: load, volume and stress tests are sized on 23,600 cases at go-live,
+   26,500 at end of 2027 (15 percent growth). A different base changes the test
+   data size and the capacity targets.
+
+B3. What this means for the specification
+- The Non-Functional Specification can be finished now, with RPO and RTO shown
+  as "to be set by SCB IT, owner and date named".
+- ACs for non-functional testing can be written now for the proposed values. The
+  restore and failover ACs need the RPO and RTO numbers.
+- The test plan has two pass marks that are not in the specification: error rate
+  under 0.5 percent under load, and recovery within 10 minutes after twice the
+  busiest-hour load. Please confirm them as new requirements.
+
+Please confirm (Part B)
+  1. The ACE RPO and RTO values, the owner, and the date (we propose 13 Nov).
+  2. Is DL11 option A approved, so the proposed values become the build and test
+     values?
+  3. The change window for the 99.5 percent target: days and times.
+  4. The bank backup schedule for documents (NFR-071, DL27).
+  5. NFR-026 says "three retries per item". The INT-14 setup has three attempts
+     with waits of 5, 15 and 45 minutes, so 45 is never used. If "three retries"
+     means three retries after the first attempt (four attempts), 45 minutes is
+     used. Which applies?
+  6. Is the 30 minute resend wait for an item with no acknowledgment confirmed?
+     It is assumed under DL11.
+  7. The two extra test plan pass marks above, as new requirements.
+
+
+######################################################################
+PART C - ERROR NOTIFICATION AND HANDLING
+######################################################################
+
+YOUR QUESTION
+For each error case: Is the error returned by an API (which one)? If not, how
+and where is it communicated (email, application log or user screen)? Who is
+told?
+The four cases: AC2 (MSG-P1-002), AC3 (MSG-P2-001), AC5 (MSG-P1-001) and AC9
+(MSG-GEN-005).
+
+SUMMARY
+  Case                      API response?                 Where it shows                 Who is told
+  ------------------------  ----------------------------  -----------------------------  -----------------------
+  AC2 File rejected         No (scheduled job)            Alert, run status, log         Data steward group
+  MSG-P1-002
+  AC3 Retry limit reached   No. The item is read with     Log, task, case status         Platform administrator
+  MSG-P2-001                GET /admin/outbound-items                                    (RW-PLATADM for INT-14)
+  AC5 File missing          No                            Warning on screens, alert,     Data steward group;
+  MSG-P1-001                                              run status                     users see the warning
+  AC9 Resend                Yes. POST /admin/outbound-    API response, audit log, log   The platform administrator
+  MSG-GEN-005               items/{itemId}/resend                                        who resends
+
+How messages are sent in this design
+- Internal alerts use the ACE notification path. The design lists the channel
+  for internal alerts as "Workbench and email". The ACs do not name the medium
+  (TO CONFIRM).
+- The application log gets the message ID and the check ID. Check IDs and codes
+  never show on screen.
+- The screen for loads and files is SCR-44. It is built in Epic 2 and fully in
+  Epic 8. There is no screen for these jobs in Epic 1.
+- In Epic 1 the run status can be read with GET /admin/jobs (Platform
+  administration, read). Whether it lists the file runs of this story is TO
+  CONFIRM.
+
+CASE 1 - AC2: a file fails a check (for example a control total mismatch)
+  The CCMS file CCMS_COLL_20261109.txt has 4,200 records but the last line says
+  4,201. The whole file is rejected.
+  Message MSG-P1-002: "The CCMS load for 2026-11-09 was refused: control total.
+  The previous load is still in use."
+  API response: No. The job has no caller.
+  How it is communicated:
+    - Alert through the ACE notification path (Workbench and email, TO CONFIRM).
+    - Run record shows REFUSED, the failed check (DQ-059) and no records passed.
+    - The message ID and check ID go to the log. File contents are never logged.
+    - LoadRefused (EV-27) is sent by the loader.
+    - The old load of 2026-11-02 stays in use.
+  Who is told: the data steward group, as the AC says. The COLLINS rejection
+  flows also tell the platform administrator group. Is the platform
+  administrator also told here? (TO CONFIRM.) The data steward asks the sending
+  team for a new file by hand. The system sends nothing to the sending team.
+
+CASE 2 - AC3: retry limit reached
+  The WIN file WIN_NOTICE_20261110.txt (85 notices on 85 cases) fails to send on
+  attempts 1, 2 and 3.
+  Message MSG-P2-001: "{item} was not delivered to {interface} after {count}
+  attempts. It is in the exception queue."
+  API response: No. The message is not returned by an API. The item is read with
+  GET /admin/outbound-items (Platform administration, read; filters on status
+  and interface). It shows status, attempt count, last error, case count and
+  owner role, but no message code.
+  How it is communicated:
+    - The message goes to the log on the last failed attempt.
+    - A task is created for the owner role (RW-PLATADM for INT-14).
+    - After attempt 1 each of the 85 cases moves to RETRY_QUEUE. After attempt 3
+      each case moves to EXCEPTION_QUEUE.
+    - SCR-44 will list outbound items (Epic 2 and Epic 8). Its message list does
+      not yet include MSG-P2-001.
+    - No email is specified for this message (TO CONFIRM).
+  Who is told: the platform administrator, through the task. Case owners see the
+  case status change. The target for alerts is 15 minutes (NFR-068, proposed).
+
+CASE 3 - AC5: file missing at the cut-off
+  No SVAF file for 2026-11-09 is in the inbound folder by Monday 04:00. On
+  2026-11-10 the SVAF data product is marked stale.
+  Message MSG-P1-001: "{product} is from {date}. Today's load has not arrived."
+  API response: No. The job has no caller.
+  How it is communicated:
+    - Run record for INT-11 shows MISSING. No loader is called.
+    - On 2026-11-10 (one business day after the due date) the freshness check
+      marks the SVAF product (DP06) stale.
+    - A warning with the age of the data shows on the screens that use it.
+    - The data steward group gets MSG-P1-001 from the freshness check.
+    - The previous appraisals stay in use.
+  Who is told: the data steward group (alert). Screen users see the warning. The
+  data steward asks the sending team for the file by hand.
+  Open: is the alert an email, a Workbench notification, or both?
+
+CASE 4 - AC9: resend from the exception queue
+  Outbound item OB-0002 is in EXCEPTION after 3 attempts. A platform
+  administrator resends it. The item goes back to PENDING with attempt count 0.
+  Message MSG-GEN-005: "Saved."
+  API response: Yes. POST /admin/outbound-items/{itemId}/resend (Platform
+  administration, update), with an If-Match version.
+    Success: 200 with the item (status PENDING, attempt count 0).
+    Errors (problem+json with message code and Thai text):
+      401  MSG-P4-001   no valid session or role
+      403  MSG-P4-002   caller may not do this (for example a case owner)
+      404  MSG-P4-003   item not found or out of scope
+      409  MSG-GEN-004  the version is old
+      503  MSG-GEN-006  service unavailable
+  How it is communicated:
+    - The resend is written to the ACE audit log with the user and the time.
+    - The message ID goes to the application log.
+    - The message shows from the response of the call (SCR-44 from Epic 2).
+      SCR-44 does not yet list MSG-GEN-005.
+  Who is told: the platform administrator who made the call. The audit entry is
+  kept for audit. Nobody else is notified.
+  Gaps in the API:
+    - The item response has no message field, so "the response carries
+      MSG-GEN-005" cannot be met as the contract is written. PROPOSAL: add a
+      message code to the 200 response, or change the AC to say the screen shows
+      MSG-GEN-005 after a 200.
+    - "Saved." does not say the item is queued again. The message standard asks
+      a confirmation to say what happened and what follows. A resend message of
+      its own would follow the standard (PROPOSAL).
+    - A resend on an item that is not in EXCEPTION has no defined 409 message
+      (TO CONFIRM).
+
+Please confirm (Part C)
+  1. The medium of each alert (MSG-P1-001, MSG-P1-002, MSG-P2-001): email,
+     Workbench notification, or both.
+  2. AC2: is the platform administrator told together with the data steward
+     group?
+  3. AC2 and AC5: is a product marked stale at the rejection, or one business day
+     after the due date?
+  4. AC3: is the task enough for the platform administrator, or also an email?
+  5. AC9: how does the response carry MSG-GEN-005?
+  6. Do the file runs of JOB-09 show in GET /admin/jobs in Epic 1?
+  7. Add MSG-P2-001 and MSG-GEN-005 to the SCR-44 message list.
+
+
+######################################################################
+PART D - FILECHECKRUNNER SPECIFICATION
+######################################################################
+
+Grooming rule: the detailed rules go in the User Story description, and the ACs
+only state what must be tested. Sections 1 to 5 below are the text for the story
+description. Section 7 is the AC list. In this part the sections are numbered
+1 to 8.
+
+Please read this first
+- The project documents do not yet give the exact layout of each file (first and
+  last lines, separator, file names). Data engineering and the system owners are
+  due to send it (DEP-15, due 13 November 2026).
+- Until then we used an assumed layout. Each assumption is marked ASSUMED or
+  TO CONFIRM.
+- Sample files are in the folder "RWB-E1-007 FileCheckRunner Samples" (23 files).
+
+YOUR QUESTION
+-------------
+Please give the detailed FileCheckRunner specification:
+  1. Which files must be checked?
+  2. Which fields must be checked in each file?
+  3. What rules apply?
+  4. What is the expected result in each case, good or bad?
+  5. Please give sample files, with good and bad data, and the expected results.
+
+
+1. WHAT FILECHECKRUNNER DOES
+----------------------------
+FileCheckRunner is a small checker. When a file arrives, it checks the file
+BEFORE any record is used. If every check passes, the records are passed on to
+be loaded. If any check fails, the whole file is rejected and nothing is loaded.
+The old data stays in use.
+
+It makes four checks:
+
+  Check            What it looks at
+  ---------------  -------------------------------------------------------
+  Business date    Is this file for the right date, and is it new?
+  Structure        Are all the columns there, with the right type and size?
+  Control total    Do the record count and the total amount match the last
+                   line (trailer) of the file?
+  Keys             Does every record have its key, and is each key used only
+                   once?
+
+Notes on your diagram
+- The label "DQ01" is a different thing. DQ01 is a data quality rule in another
+  story (E1-006). The file checks have names like DQ-058 (with a hyphen). For
+  the CCMS file they are DQ-057 to DQ-060. Please change the label.
+- The first field in the diagram (DF_COL_001) is an ID the Workbench creates
+  itself. It is not a column in the file. The checker only checks columns that
+  are really in the file.
+
+Not done by FileCheckRunner (other stories do these)
+- Checking that an account or customer exists (References).
+- Checking that a code is in the list of values.
+- Checking that the file is not too different from last time (Movement).
+
+
+2. WHICH FILES ARE CHECKED
+--------------------------
+Only files that come IN. The file we send OUT to WIN is not checked here.
+
+  Interface  File                      How often                   Checks
+  ---------  ------------------------  --------------------------  -----------------
+  INT-10     CCMS collateral           Weekly, Monday 04:00        DQ-057 to DQ-060
+  INT-11     SVAF appraisals           Weekly, Monday 04:00        DQ-064 to DQ-067
+  INT-12     AMIS assets and sales     Monthly, 2nd working day    DQ-071 to DQ-074
+  INT-13     RPS repossessed vehicles  Weekly, Monday 04:00        DQ-078 to DQ-081
+  INT-15     WIN proof of delivery     Weekly, Monday 04:00        DQ-085 to DQ-088
+  INT-16     GL write-off postings     Monthly, 2nd working day    DQ-092 to DQ-095
+
+The four checks in each range are always in this order: business date,
+structure, control total, keys.
+
+
+3. WHICH FIELDS ARE CHECKED
+---------------------------
+"Required" means the field must not be empty. "Optional" means it may be empty.
+KEY is the field that must be filled and unique (ASSUMED). TOTAL is the amount
+column that is added up and compared with the last line (ASSUMED).
+
+3.1 CCMS collateral (INT-10)
+  Collateral No ................. Required, text up to 20     KEY
+  Collateral Type ............... Required, text up to 15
+  Title Deed / Ownership Doc .... Optional, text up to 40
+  Plot No. ...................... Optional, text up to 20
+  Area .......................... Optional, text up to 20
+  Province ...................... Optional, text up to 40
+  District ...................... Optional, text up to 60
+  Subdistrict ................... Optional, text up to 60
+  Insvalue ...................... Optional, amount (2 decimals)   TOTAL
+  Insurance Expiry .............. Optional, date
+  Lien Rank ..................... Optional, whole number
+  Also named for CCMS: "account links". They are not in the field list yet.
+
+3.2 SVAF appraisals (INT-11)
+  Appraisal No. ................. Required, text up to 20     KEY
+  Appraisal Type ................ Required, text up to 15
+  Appraised Value ............... Required, amount (2 decimals)  TOTAL
+  Forced Sale Value ............. Optional, amount (2 decimals)
+  Appraisal Date ................ Required, date
+  Also named for SVAF: "collateral or asset reference" and "valuer". They are
+  not in the field list yet. The reference is needed to match the appraisal
+  to its collateral.
+
+3.3 AMIS assets and sales (INT-12)
+  Asset ID ...................... Required, text up to 20     KEY
+  Asset Code .................... Optional, text up to 20
+  Asset Type .................... Required, text up to 20
+  Transfer-in Type .............. Required, text up to 20
+  From Segment .................. Optional, text up to 20
+  Ownership Transfer in Date .... Required, date
+  Book Value .................... Required, amount            TOTAL
+  Auction Purchase Price ........ Optional, amount
+  Contract Date ................. Required, date
+  Sale Date ..................... Required, date
+  Sale Price .................... Required, amount
+  Sale Transfer Fee ............. Optional, amount
+  Specific Business Tax ......... Optional, amount
+  Corporate Income Tax .......... Optional, amount
+  Incentive Amount .............. Optional, amount
+  Question: a property that has not been sold has no sale data, but the sale
+  fields are marked Required. How should such a row look in the file?
+
+3.4 RPS repossessed vehicles (INT-13)
+  ReposessedCarDate ............. Optional, date (Thai year YYMMDD)
+  STOCK_DATE .................... Optional, date
+  The file also carries AccNo, ContractNo, RepoDT, VehicleStatus and OutBal,
+  but they are not in the field list yet. We assume ContractNo is the key and
+  OutBal is the amount that is added up (TO CONFIRM).
+
+3.5 WIN proof of delivery (INT-15)
+  DDMMYYYY ...................... Optional, date
+  ContractNO .................... Linked to the notice
+  Barcode ....................... Treated as Required here   KEY (ASSUMED)
+  DDMMYYYY_callBack ............. Optional, date
+  Sent Type ..................... Optional, text up to 10
+  This file has no amount column, so only the record count is compared.
+
+3.6 GL write-off postings (INT-16)
+  AMT ........................... Required, amount            TOTAL
+  DATE .......................... Optional, date
+  RC ............................ Optional, text up to 10
+  OC ............................ Optional, text up to 10
+  PRODUCT ....................... Optional, text up to 10
+  Also named: ACCOUNT and EVENT (not in the field list yet). No key is defined
+  for this file yet.
+
+General rules for all fields
+- Amounts are in THB with two decimals.
+- Dates are stored as Gregorian dates. Buddhist Era years are converted.
+- Codes (for example province) are matched to the list by the loader, not by
+  this checker.
+
+
+4. THE RULES
+------------
+Rule for all checks: no tolerance. One fault rejects the whole file.
+
+4.1 Business date
+  - The date in the first line of the file must be the date we expect. For a
+    weekly file this is the Monday the file is due (the date in the file name).
+  - A file for a date that has already been loaded is rejected, even if the
+    content is different.
+  - The same file sent twice is not a failed check. It is marked DUPLICATE and
+    nothing is loaded again.
+
+4.2 Structure
+  - Every expected column is in the first row of the file. None missing, none
+    extra.
+  - Every record has the same number of columns.
+  - Every value matches its type: an amount has digits and at most 2 decimals,
+    a date is a real date.
+  - Every value fits the size of its field.
+  - A Required field is not empty. (Our proposal. Please confirm.)
+
+4.3 Control total
+  - The number of records equals the record count on the last line.
+  - The sum of the amount column equals the total on the last line. Exact
+    sum, to 2 decimals, no rounding.
+  - A file without an amount column is compared on record count only.
+  - A file with no last line, or an unreadable one, fails this check.
+
+4.4 Keys
+  - The key field is filled in every record.
+  - No key value appears twice in the file.
+
+Where the numbers come from
+- Dates, totals, field lists and keys come from the file and from data tables.
+  Nothing is written in the program code.
+
+Privacy
+- The file contents are never written to the log. Only the file name, the
+  counts, the line number, the field name and the check result are logged.
+
+
+5. WHAT HAPPENS (EXPECTED RESULTS)
+----------------------------------
+If every check passes
+  - The records go to the loader.
+  - The run is marked LOADED with the record count.
+
+If any check fails
+  - The whole file is rejected. The run is marked REFUSED.
+  - The run record shows which check failed.
+  - No record goes to the loader.
+  - The previous load stays in use.
+  - The message MSG-P1-002 is used: "The {source} load for {date} was refused:
+    {check}. The previous load is still in use." The {check} is "business
+    date", "structure", "control total" or "keys".
+  - The alert, the stale marker and the events are done by the job and the
+    loader (new Data Loading story).
+
+  Case                                         Failed check   Run status  Records loaded
+  -------------------------------------------  -------------  ----------  --------------
+  Good file                                    none           LOADED      all
+  Wrong date in the first line                 business date  REFUSED     0
+  Date already loaded, content different       business date  REFUSED     0
+  Same file sent again                         none run       DUPLICATE   0
+  A column is missing                          structure      REFUSED     0
+  Letters in an amount, or an impossible date  structure      REFUSED     0
+  Value longer than its field                  structure      REFUSED     0
+  Required field empty                         structure      REFUSED     0
+  Record count differs from the last line      control total  REFUSED     0
+  Amount total differs from the last line      control total  REFUSED     0
+  Key empty                                    keys           REFUSED     0
+  Key used twice                               keys           REFUSED     0
+  No file by the cut-off                       (job, not      MISSING     0
+                                               this checker)
+
+Example from the story: the CCMS file CCMS_COLL_20261109.txt has 4,200 records
+but the last line says 4,201. The control total check fails (DQ-059), nothing
+is loaded, and the load of 2026-11-02 stays in use.
+
+If a file has more than one fault, all results are saved. The first fault in
+the order above is shown in the message.
+
+
+6. SAMPLE FILES
+---------------
+Folder: "RWB-E1-007 FileCheckRunner Samples" (23 files). All data is made up.
+No personal data. The expected date for every sample is 2026-11-09.
+
+How the sample files are built (ASSUMED layout)
+  Line 1:   H | interface | source | business date
+  Line 2:   column names
+  Next:     one line per record
+  Last:     T | record count | total amount
+
+CCMS (5 records, total Insvalue 13,260,000.50)
+  VALID ............................... Passes. 5 records loaded.
+  F01 wrong business date ............. Header says 2026-11-02. Rejected,
+                                        business date (DQ-057).
+  F02 repeat date, changed content .... Rejected, business date (DQ-057), when
+                                        the valid file is already loaded.
+  F03 missing column Province ......... Rejected, structure (DQ-058).
+  F04 letters in Insvalue ............. Rejected, structure (DQ-058).
+  F05 Plot No. too long ............... Rejected, structure (DQ-058).
+  F06 Collateral Type empty ........... Rejected, structure (DQ-058).
+  F07 last line says 6, file has 5 .... Rejected, control total (DQ-059).
+  F08 total is 13,260,001.50 .......... Rejected, control total (DQ-059).
+                                        Real sum is 13,260,000.50.
+  F09 key COL-000003 twice ............ Rejected, keys (DQ-060).
+  F10 Collateral No empty ............. Rejected, keys (DQ-060).
+
+SVAF (4 records, total Appraised Value 12,800,000.00)
+  VALID ............................... Passes. 4 records loaded.
+  F01 wrong business date ............. Rejected, business date (DQ-064).
+  F02 Appraisal Date empty ............ Rejected, structure (DQ-065).
+  F03 total is 12,800,500.00 .......... Rejected, control total (DQ-066).
+  F04 key APR-2026-0102 twice ......... Rejected, keys (DQ-067).
+
+WIN proof of delivery (5 records, count only)
+  VALID ............................... Passes. 5 records loaded.
+  F01 wrong business date ............. Rejected, business date (DQ-085).
+  F02 last line says 5, file has 4 .... Rejected, control total (DQ-087).
+                                        Same idea as the story example (40 and
+                                        39).
+  F03 missing column Barcode .......... Rejected, structure (DQ-086).
+  F04 callBack date 31112026 .......... Rejected, structure (DQ-086).
+                                        31 November does not exist.
+  F05 barcode RR000000002TH twice ..... Rejected, keys (DQ-088).
+  F06 Barcode empty ................... Rejected, keys (DQ-088).
+
+Not ready yet: sample files for AMIS, RPS and GL. We need the layout, key and
+total field for each first.
+
+Two more tests to run
+  - Send the VALID file twice. The second time the result is DUPLICATE.
+  - Empty folder. The result is MISSING. This is a job test and belongs to the
+    new Data Loading story.
+
+
+7. ACCEPTANCE CRITERIA (TESTABLE RESULTS ONLY)
+----------------------------------------------
+The detail is in the story description. These ACs only state what is tested.
+They use the sample files and do not need a job to run.
+
+  AC4  A good file passes
+       Given the sample file CCMS_COLL_20261109_VALID.txt
+       When FileCheckRunner runs for INT-10
+       Then all four checks pass and 5 records go to the loader
+
+  AC5  A wrong business date is rejected
+       Given the sample file ..._F01_wrong_business_date.txt
+       When FileCheckRunner runs for INT-10
+       Then the file is rejected at DQ-057 and 0 records go to the loader
+
+  AC6  A structure fault is rejected
+       Given the sample file ..._F03_missing_column_Province.txt
+       When FileCheckRunner runs for INT-10
+       Then the file is rejected at DQ-058 and the result names "Province"
+
+  AC7  A control total mismatch is rejected
+       Given the sample file ..._F07_trailer_count_mismatch.txt
+       When FileCheckRunner runs for INT-10
+       Then the file is rejected at DQ-059 and 0 records go to the loader
+
+  AC8  A repeated key is rejected
+       Given the sample file ..._F09_duplicate_key.txt
+       When FileCheckRunner runs for INT-10
+       Then the file is rejected at DQ-060
+
+  AC9  Check rules come from data
+       Given the check rows for INT-15 are DQ-085 to DQ-088
+       When FileCheckRunner runs WIN_POD_20261109_F02_trailer_count_mismatch.txt
+       Then the file is rejected at DQ-087
+       And no expected value or tolerance comes from the program code
+
+The earlier file-check ACs for E1-007 (old AC2 and AC4) are replaced by these.
+The JOB-09 behaviour (schedule, missing file, stale marker, alert) moves to
+the new Data Loading story.
+
+
+8. WHAT WE NEED FROM YOU
+------------------------
+  1. File layout: first and last lines, separator, file names, date format,
+     and whether Buddhist Era years can appear (DEP-15, due 13 Nov 2026).
+  2. The key field of each file. Our guesses: CCMS Collateral No, SVAF
+     Appraisal No., AMIS Asset ID, RPS ContractNo, WIN Barcode. GL has none.
+  3. The amount column that is added up in each file. Our guesses: CCMS
+     Insvalue, SVAF Appraised Value, AMIS Book Value, RPS OutBal, GL AMT.
+     WIN has none.
+  4. The expected date of a monthly file (AMIS, GL), and of a weekly file that
+     arrives after Monday.
+  5. An empty Required field: should it reject the file (our proposal), or
+     should only that record be held back?
+  6. The columns that are named for a file but are not in the field list yet
+     (see section 3).
+  7. The six source field names still to be confirmed with the system owners:
+     Collateral No, Collateral Type, Insurance Expiry, Lien Rank, Appraisal
+     Type, Delivery Status.
+  8. "Record count" on the run record: is it the records read, or the records
+     handed to the loader? The data dictionary says "read", the story says 0
+     after a rejection.
+  9. Should all four checks always run and be saved (our proposal), or should
+     the checker stop at the first failure?
+ 10. The story's solution plan still lists two jobs, OutboundSender (JOB-11)
+     and FileLoadJob (JOB-09). They move to the new Data Loading story.

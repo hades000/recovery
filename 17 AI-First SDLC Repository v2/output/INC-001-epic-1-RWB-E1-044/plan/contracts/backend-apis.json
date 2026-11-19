@@ -1,0 +1,210 @@
+{
+  "runId": "INC-001-epic-1-RWB-E1-044",
+  "story": "RWB-E1-044",
+  "apiInScope": false,
+  "apiImpactType": "NO_API_CHANGE",
+  "endpoints": [],
+  "deferredEndpoints": [
+    {
+      "method": "GET",
+      "path": "/api/recovery/v1/admin/jobs",
+      "query": {
+        "type": "MIGRATION"
+      },
+      "decision": "D-RCV-12",
+      "clarification": "CLAR-002 A (RESOLVED 2026-11-09, Product Owner, Jira TB0001-1205 comment 1781236): deferred to the job-monitor story",
+      "specRef": "SPEC-RWB-E1-044-013"
+    }
+  ],
+  "backendOnlyContracts": [
+    {
+      "id": "CON-RWB-E1-044-001",
+      "kind": "flyway-module-configuration",
+      "frontendConsumer": "NONE (backend-only)",
+      "owner": "th.co.scb.ace.demo.recovery.casewf.internal.migration.RecoveryFlywayConfig",
+      "specRefs": [
+        "SPEC-RWB-E1-044-001",
+        "SPEC-RWB-E1-044-002",
+        "SPEC-RWB-E1-044-003",
+        "SPEC-RWB-E1-044-004",
+        "SPEC-RWB-E1-044-005",
+        "SPEC-RWB-E1-044-014",
+        "SPEC-RWB-E1-044-018"
+      ],
+      "dataSource": "mainDataSource",
+      "settings": {
+        "locations": [
+          "classpath:db/modulemigration/recovery"
+        ],
+        "table": "flyway_schema_history_recovery",
+        "schema": "connection currentSchema of mainDataSource (ace in ACE PostgreSQL profiles); no schemas/defaultSchema/placeholder call (D-RCV-47)",
+        "createSchemas": false,
+        "createSchemasNote": "set explicitly: Flyway default is true; with false Flyway never creates a schema; a missing currentSchema fails the migrate (D-RCV-48, X12, T-044-03)",
+        "objectPrefix": "rwb_",
+        "cleanDisabled": true,
+        "validateOnMigrate": true,
+        "outOfOrder": false,
+        "baselineVersion": "0",
+        "baselineOnMigrate": true,
+        "validateMigrationNaming": true,
+        "ignoreMigrationPatterns": "Flyway default (*:future)",
+        "drivenBySpringFlywayProperties": false,
+        "baselineNote": "as SampleModuleConfig: schema ace is non-empty, so the first recovery migrate writes a baseline row at version 0 and applies V0001 and later; no baseline row on an empty schema (D-RCV-48, T-044-16)"
+      },
+      "activation": {
+        "databaseProduct": "PostgreSQL only; skipped on H2 outside the migration job (OPEN-007)",
+        "dbMigrateWithoutRecovery": "profile db-migrate active without db-migrate-recovery -> recovery bean and initializer not created, whatever spring.flyway.enabled says; no flyway_schema_history_recovery or rwb_ object created (D-RCV-45, T-044-15)",
+        "localStart": "local developer start: spring.flyway.enabled=true and PostgreSQL -> FlywayMigrationInitializer after core initializer when present; no hard @DependsOn",
+        "deployedApp": "scb-aks: spring.flyway.enabled=false -> not run",
+        "migrationJob": {
+          "profiles": "db-migrate,db-migrate-recovery",
+          "file": "backend/src/main/resources/application-db-migrate-recovery.yaml",
+          "springFlywayEnabled": false,
+          "quartzAutoStartup": false,
+          "exit": "0 on success; non-zero after logging MSG-P3-016 on FlywayException",
+          "jenkinsChange": "OPEN-019 (K. Tee)",
+          "environments": [
+            "DEV",
+            "SIT",
+            "UAT",
+            "PROD"
+          ],
+          "image": "one image built once; same digest deployed to DEV, SIT, UAT and PROD (OPEN-013 ruling)",
+          "missingBeanOrNonPostgres": "no skip: log MSG-P3-016 object=recoveryFlyway at ERROR, exit non-zero, migrate nothing (REVIEW-RWB-E1-044-014, T-044-12)",
+          "account": "migration-job database role already used by the core db-migrate step on schema ace (ACEDbFlywayRole_<ENV>); the recovery step must use the same role so ACE default privileges (db/migration-env/<env>/V001.001__grant_permission.sql) give ACEAppRole_<ENV> DML on rwb_ tables and sequences (OPEN-019 condition); no DBA request (D-RCV-47; OPEN-020 withdrawn)"
+        }
+      },
+      "errorReporting": {
+        "messageId": "MSG-P3-016",
+        "parameters": [
+          "schema (connection current schema; omitted for lint)",
+          "object (version, file, file:line or recoveryFlyway)"
+        ],
+        "textInCode": false,
+        "exception": "refused clean shows Flyway's own message (D-RCV-28 (4))"
+      },
+      "decisions": [
+        "D-RCV-18",
+        "D-RCV-28",
+        "D-RCV-45",
+        "D-RCV-47",
+        "D-RCV-48"
+      ]
+    },
+    {
+      "id": "CON-RWB-E1-044-002",
+      "kind": "migration-file-convention",
+      "specRefs": [
+        "SPEC-RWB-E1-044-006",
+        "SPEC-RWB-E1-044-007",
+        "SPEC-RWB-E1-044-008",
+        "SPEC-RWB-E1-044-009"
+      ],
+      "folder": "backend/src/main/resources/db/modulemigration/recovery/",
+      "fileNamePattern": "^V[0-9]{4}__rwb_(e[0-9]+|te)_[0-9]{3}_[a-z0-9_]+\\.sql$",
+      "sequence": "unique and contiguous 0001..N, taken at merge (D-RCV-28, D-RCV-34)",
+      "line1": "-- Story: <KEY>, KEY ^RWB-(E[0-9]+|TE)-[0-9]{3}$",
+      "line2Fix": "-- Fix: <reason> (compensating files only)",
+      "perKey": "at most one non-fix file; each fix file needs one non-fix file of the same key with lower seq",
+      "forbidden": [
+        "U*.sql",
+        "R__*.sql",
+        "any schema-qualified object name (only information_schema / pg_catalog reads allowed)",
+        "schema-qualified type",
+        "any statement naming a schema (CREATE/ALTER/DROP SCHEMA, SET SCHEMA, AUTHORIZATION)",
+        "SET search_path",
+        "table, sequence or index identifier without prefix rwb_ in any statement (see objectNames)",
+        "GRANT or REVOKE in any statement, including ALTER DEFAULT PRIVILEGES (privileges come from ACE default privileges for the migration-job role; REVIEW-RWB-E1-044-019)",
+        "any of the above inside dollar-quoted bodies ($$...$$, $tag$...$tag$), function and DO bodies included"
+      ],
+      "acceptedGap": [
+        "names inside ordinary single-quoted string literals other than nextval/currval/setval arguments and '...'::regclass (code review)",
+        "names given to views, functions, procedures, types, triggers, policies and rules (not listed in D-RCV-47; code review); the tables they read or act on are checked"
+      ],
+      "allowedQualifiers": [
+        "information_schema",
+        "pg_catalog"
+      ],
+      "enforcedBy": "RecoveryMigrationLintTest (unit test in ACE test task; D-RCV-05)",
+      "decisions": [
+        "D-RCV-28",
+        "D-RCV-34",
+        "D-RCV-47"
+      ],
+      "objectNames": {
+        "prefix": "rwb_",
+        "appliesTo": "every table, sequence and index identifier in any statement: CREATE TABLE/SEQUENCE/INDEX names; RENAME TO targets; named PRIMARY KEY/UNIQUE/EXCLUDE constraints; targets of ALTER TABLE/SEQUENCE/INDEX (any action incl. OWNER TO), DROP TABLE/SEQUENCE/INDEX, TRUNCATE, LOCK, CLUSTER, REINDEX, ANALYZE, VACUUM; COMMENT ON TABLE/COLUMN/SEQUENCE/INDEX and COMMENT ON CONSTRAINT/TRIGGER/POLICY/RULE ... ON; CREATE TRIGGER/POLICY ... ON, CREATE RULE ... TO; REFERENCES, CREATE INDEX ... ON, LIKE, INHERITS, PARTITION OF, INSERT INTO, UPDATE, DELETE FROM, MERGE INTO; every relation in FROM, JOIN, USING; sequence in nextval/currval/setval and '...'::regclass",
+        "notTableIdentifiers": "set-returning function calls in FROM, parenthesised subqueries and VALUES lists, CTE names of the same statement, aliases, column references (table.column)",
+        "allowList": "relations qualified by information_schema or pg_catalog (read-only); unqualified catalog names fail",
+        "compliantByDerivation": "unnamed indexes, unnamed index-backed constraints and implicit serial/identity sequences (PostgreSQL derives rwb_x_pkey, rwb_x_id_seq from the rwb_ table)",
+        "physicalTableName": "rwb_ + table name in Physical Schema v4 / Logical Data Model",
+        "qualified": "never (no schema qualifier)"
+      }
+    }
+  ],
+  "source": "specify/contracts/backend-apis.json (unchanged content) plus planPins (plan 2026-11-10)",
+  "planPins": {
+    "package": "th.co.scb.ace.demo.recovery.casewf.internal.migration (no package-info.java; CLAR-003 A)",
+    "mainClasses": [
+      "RecoveryFlywayConfig",
+      "RecoveryFlywayCondition",
+      "RecoveryMigrateAndExitRunner",
+      "RecoveryMigrationExit",
+      "RecoveryMigrationReport"
+    ],
+    "beans": {
+      "recoveryFlyway": "@Conditional(RecoveryFlywayCondition); configure(mainDataSource).load()",
+      "recoveryFlywayMigrationInitializer": "@Conditional(RecoveryFlywayCondition.RecoveryLocalStartCondition): PG and FE and not profile db-migrate; forces coreFlywayMigrationInitializer first via ObjectProvider when present; no @DependsOn",
+      "recoveryMigrateAndExitRunner": "@Profile(db-migrate-recovery); not conditional on recoveryFlyway or on MAE; fails fast (exit 1, MSG-P3-016 object=recoveryFlyway) when MAE is not true, the bean is absent or the URL is not PG"
+    },
+    "configureFactory": "static FluentConfiguration configure(DataSource): all CON-RWB-E1-044-001 settings; tests override only locations",
+    "migrateOrReport": "static void migrateOrReport(Flyway, String jdbcUrl): migrate(); on FlywayException report MSG-P3-016 and rethrow; used by initializer, runner and RecoveryFlywayIT",
+    "activationRule": "recoveryFlyway iff PG and (DBMR or (FE and not DBM)); initializer iff PG and FE and not DBM; runner iff DBMR; PG = spring.datasource.url starts with jdbc:postgresql:; FE = spring.flyway.enabled=true; DBM = profile db-migrate active; DBMR = profile db-migrate-recovery active; MAE (recovery.flyway.migrate-and-exit=true) is checked only inside the runner (data-model section 3; plan gate REVIEW-RWB-E1-044-028)",
+    "migrateAndExitProperty": "recovery.flyway.migrate-and-exit",
+    "profileFile": {
+      "path": "backend/src/main/resources/application-db-migrate-recovery.yaml",
+      "content": {
+        "spring.flyway.enabled": false,
+        "spring.quartz.auto-startup": false,
+        "recovery.flyway.migrate-and-exit": true
+      }
+    },
+    "exitSeam": "RecoveryMigrationExit; default System.exit(SpringApplication.exit(context, () -> code))",
+    "messageSchemaParameter": "currentSchema parsed from the JDBC URL string passed to migrateOrReport (spring.datasource.url, or the test URL); omitted when absent; host, user, password never read; omitted for lint",
+    "migrationFolder": "not created by this story; first migration story (RWB-E1-042) creates it; lint treats missing as empty",
+    "testTooling": [
+      "MigrationLint",
+      "MigrationSqlScanner",
+      "SchemaComparator",
+      "RecoveryPostgres"
+    ],
+    "tests": {
+      "test": [
+        "RecoveryFlywayConfigTest",
+        "RecoveryMigrationLintTest"
+      ],
+      "recoveryIntegrationTest": [
+        "RecoveryFlywayIT",
+        "RecoveryMigrationJobIT"
+      ]
+    },
+    "testDependency": {
+      "coordinates": "org.testcontainers:testcontainers-postgresql",
+      "version": "BOM-managed (spring-boot-dependencies 4.2.0-M2: 2.0.5)",
+      "scope": "testImplementation",
+      "approval": "OPEN-030 (PRE-3), approved with plan approval by D-RCV-49",
+      "notAdded": [
+        "org.springframework.boot:spring-boot-testcontainers (mainDataSource reads spring.datasource.*, @ServiceConnection does not reach it)",
+        "org.testcontainers:testcontainers-junit-jupiter (containers started in @BeforeAll so missing Docker fails)"
+      ]
+    },
+    "containerImage": "postgres:16-alpine (digest recorded by the Builder)",
+    "gradle": {
+      "test": "excludeTags(e2e, recovery-it)",
+      "testE2E": "excludeTags(recovery-it)",
+      "recoveryIntegrationTest": "includeTags(recovery-it), test source set, shouldRunAfter(test), not in check/build",
+      "coverage": "recoveryCoverageReport/recoveryCoverageVerification: executionData test + recoveryIntegrationTest; class dirs main recovery/** + test recovery/casewf/internal/migration/** excl *Test, *IT; 80% LINE, INSTRUCTION, BRANCH, METHOD (combined gate); plus a blocking unit gate from test execution data alone on the main class directory recovery/** (selected by directory; lint tooling an information figure), read from the recoveryCoverageReport XML built before recoveryIntegrationTest; recoveryIntegrationTest execution data added via the eager Task overload, no task dependency (no build-file change beyond D-RCV-49; REVIEW-RWB-E1-044-026, -037, -038); Case A (TE-001 merged) adds only these; Case B creates them (SPEC-015 (d))"
+    },
+    "lintPlanReading": "REVIEW-RWB-E1-044-022: FROM/USING that introduce no relation are not relation positions; COMMENT ON COLUMN two-part = table.column (table must be rwb_), three-part = schema-qualified; pending human disposition (PRE-5)"
+  }
+}

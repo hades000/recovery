@@ -1,0 +1,156 @@
+{
+  "key": "RWB-E1-028",
+  "file_stem": "RWB E1 028 Service levels timers escalation and prescription dates",
+  "title": "Service levels, timers, escalation and prescription dates",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.timers",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Timers + prescription date",
+  "goal": "Timers warn and escalate a breach; a prescription date stops claims expiring unseen",
+  "why": "Missed deadlines cost money and legal rights. Working days come from the ACE holiday calendar, and a legal claim's last date is computed from ACE payments.",
+  "needs": [
+    "E1-045",
+    "E1-020",
+    "E1-027",
+    "E1-043"
+  ],
+  "unblocks": [
+    "E1-030",
+    "TE-007",
+    "E2-015"
+  ],
+  "triggers": [
+    [
+      "EVENT",
+      "EV-01, 02, 04, 05 start/stop SERVICE_LEVEL"
+    ],
+    [
+      "EVENT",
+      "EV-06 / EV-07 pause and resume timers"
+    ],
+    [
+      "JOB",
+      "JOB-05 Timer check, every 5 min"
+    ],
+    [
+      "API",
+      "GET /cases/{caseId}/timers"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "contract_date, last_payment_date (prescription)"
+    },
+    {
+      "view": "v_ace_holiday",
+      "section": "A",
+      "note": "holiday_date, holiday_weekday (working days)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "timer",
+      "note": "SERVICE_LEVEL + PRESCRIPTION; warn_at, expires_at, warned_at"
+    },
+    {
+      "t": "recovery_case.prescription_date",
+      "note": "earliest last payment + LEGAL_PERIOD"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "warning and breach entries (R-UNI-30)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "status, queue, product"
+    },
+    {
+      "t": "case_account",
+      "note": "accounts behind the case"
+    },
+    {
+      "t": "queue",
+      "note": "escalation role"
+    },
+    {
+      "t": "reference_row",
+      "note": "SERVICE_LEVEL, LEGAL_PERIOD"
+    }
+  ],
+  "stores": "Outbox: TimerDue (EV-18), TimerBreached (EV-19); exception queue when no service level is in force",
+  "functions": [
+    {
+      "name": "TimerStarter",
+      "does": "start / stop SL timers on events"
+    },
+    {
+      "name": "PrescriptionService",
+      "does": "prescription date + timer"
+    },
+    {
+      "name": "TimerPauseHandler",
+      "does": "pause and resume on deviation"
+    },
+    {
+      "name": "TimerCheckJob",
+      "does": "JOB-05: warn, breach, expire"
+    },
+    {
+      "name": "WorkingDayCalculator",
+      "does": "working days via v_ace_holiday"
+    },
+    {
+      "name": "TimerService",
+      "does": "timers + prescription (published)"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "CaseAllocated (EV-02)"
+    },
+    {
+      "kind": "ace",
+      "text": "Working days from v_ace_holiday"
+    },
+    {
+      "kind": "table",
+      "text": "timer RUNNING, warn_at, expires_at"
+    },
+    {
+      "kind": "function",
+      "text": "JOB-05 every 5 min"
+    },
+    {
+      "kind": "check",
+      "text": "Past warn_at or expires_at?"
+    },
+    {
+      "kind": "out",
+      "text": "MSG-P3-003 warn or EV-19 breach"
+    }
+  ],
+  "rules": [
+    "BR3: a breach goes to the named escalation role; the case does not move (R-UNI-30)",
+    "BR4: prescription = earliest last payment + legal period; contract date as fallback",
+    "BR5: the PRESCRIPTION timer never pauses",
+    "BR8: working days come from v_ace_holiday"
+  ],
+  "risks": [
+    "No SERVICE_LEVEL version in force -> no timer, case to exception queue (MSG-P3-026)",
+    "Decision log fails at a breach -> timer stays RUNNING, next run retries (MSG-P7-003)",
+    "Deviation raised -> SL timer paused (MSG-P3-004)"
+  ],
+  "example": [
+    "HP case RW-2026-000401 in LIT-BKK-OFF, ASSIGNED 2026-12-01 09:00, SL 5 working days, warn 80%",
+    "2026-12-05..07 are non-working days in v_ace_holiday",
+    "-> expires_at 2026-12-09 09:00, warn_at 2026-12-08 09:00"
+  ]
+}

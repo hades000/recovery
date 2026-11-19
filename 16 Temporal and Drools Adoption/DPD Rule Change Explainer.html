@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
+<title>DPD Rule Change</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow column, top to bottom: rule, board, cases, log, notes. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --fg: #1b1f24;
+  --muted: #5d6670;
+  --line: #d8dde3;
+  --soft: #eef0f3;
+  --accent: #1f5fd1;
+  --accent-soft: #e3ecfb;
+  --ok: #1d7a4a;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121417; --surface: #1a1d21; --fg: #e5e7ea; --muted: #9aa3ac;
+    --line: #2d3238; --soft: #22262b; --accent: #7ea6ff; --accent-soft: #1e2a44; --ok: #5cc48d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121417; --surface: #1a1d21; --fg: #e5e7ea; --muted: #9aa3ac;
+  --line: #2d3238; --soft: #22262b; --accent: #7ea6ff; --accent-soft: #1e2a44; --ok: #5cc48d;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+.wrap {
+  max-width: 860px; margin: 0 auto;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px;
+}
+h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; text-wrap: balance; }
+h2 { font-size: 16px; font-weight: 600; margin: 0 0 10px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-size: 13px; }
+.hint { margin-top: 8px; font-size: 14px; color: var(--muted); }
+.hint b { color: var(--fg); font-weight: 500; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; min-width: 0; }
+.scroll { overflow-x: auto; }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; white-space: nowrap; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+tr:last-child td { border-bottom: 0; }
+td.changed { background: var(--accent-soft); }
+input[type=number] {
+  width: 64px; font: inherit; font-family: var(--mono); padding: 3px 6px;
+  border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--fg);
+}
+input:disabled { opacity: .7; }
+
+.status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 14px; }
+.inforce { font-size: 14px; }
+.tag { display: inline-block; font-family: var(--mono); font-size: 12px; padding: 1px 7px; border-radius: 4px; background: var(--soft); border: 1px solid var(--line); }
+.tag.v2 { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.pipeline { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.pipeline li.done { color: var(--ok); }
+.pipeline li.done::before { content: "✓ "; }
+.err { color: #c0392b; font-size: 13px; }
+
+button {
+  font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+  padding: 6px 14px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--fg);
+}
+button:hover:not(:disabled) { border-color: var(--fg); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+button:disabled { cursor: default; opacity: .45; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+details { margin-top: 12px; font-size: 13px; }
+summary { cursor: pointer; color: var(--muted); }
+pre { margin: 8px 0 0; padding: 10px 12px; background: var(--soft); border-radius: 6px; overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; }
+
+/* Board */
+.board { display: grid; gap: 10px; }
+.decision { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 12px; border: 1px dashed var(--muted); border-radius: 6px; }
+.decision .lab { font-weight: 500; }
+.lane { display: grid; grid-template-columns: 130px 1fr; gap: 8px; align-items: stretch; }
+.lane-name { font-weight: 500; font-size: 14px; display: flex; align-items: center; }
+.stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.cell { background: var(--soft); border-radius: 6px; padding: 8px; min-height: 64px; display: grid; align-content: start; gap: 6px; }
+.stage { font-size: 12px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 26px; }
+.chip {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 12px; font-weight: 600; background: var(--fg); color: var(--surface);
+}
+.chip.new { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.chip.moved { animation: pop .35s ease-out; }
+@keyframes pop { from { transform: scale(.4); opacity: .3; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .chip.moved { animation: none; } }
+@media (max-width: 560px) {
+  .lane { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* Cases */
+.cases { display: grid; gap: 10px; }
+.case { display: grid; grid-template-columns: 32px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.case:last-child { border-bottom: 0; }
+.case .chip { width: 30px; height: 30px; }
+.case .text { min-width: 0; font-size: 14px; }
+.case .text .what { color: var(--muted); }
+.newpath { color: var(--accent); font-weight: 500; }
+@media (max-width: 480px) {
+  .case { grid-template-columns: 32px 1fr; }
+  .case button { grid-column: 2; justify-self: start; }
+}
+
+td.result-new { color: var(--accent); font-weight: 500; }
+tr.divider td { background: var(--soft); color: var(--muted); font-size: 13px; }
+
+/* Notes */
+.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.notes li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; font-size: 14px; }
+.notes .k { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding-top: 2px; }
+.notes .k.yes { color: var(--ok); }
+.notes .k.fix { color: var(--accent); }
+.notes .k.note { color: var(--muted); }
+@media (max-width: 480px) { .notes li { grid-template-columns: 1fr; gap: 2px; } }
+.source { font-size: 12px; color: var(--muted); }
+
+/* Architecture diagram */
+.dg-fig { margin: 0; display: grid; gap: 12px; }
+.dg { display: block; width: 100%; min-width: 720px; height: auto; color: var(--fg); font-family: var(--font); }
+.dg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.dg .pill { fill: var(--soft); }
+.dg .frame { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.dg .t { font-size: 14px; font-weight: 600; fill: currentColor; text-anchor: middle; }
+.dg .s { font-size: 12px; fill: var(--muted); text-anchor: middle; }
+.dg .mono-s { font-family: var(--mono); }
+.dg .band { font-size: 11px; font-weight: 600; letter-spacing: .08em; fill: var(--muted); }
+.dg .lbl { font-size: 11.5px; fill: var(--muted); text-anchor: middle; }
+.dg .arw { fill: none; stroke: var(--muted); stroke-width: 1.5; marker-end: url(#ah); }
+.dg .mk { fill: var(--muted); }
+.dg .mk-on { fill: var(--accent); }
+.dg [data-k] { transition: opacity .2s; }
+.dg .dim { opacity: .25; }
+.dg .on .box { stroke: var(--accent); stroke-width: 2; fill: var(--accent-soft); }
+.dg .on .frame { stroke: var(--accent); }
+.dg .on .arw { stroke: var(--accent); stroke-width: 2; marker-end: url(#ah-on); }
+.dg .on .lbl, .dg .on .s { fill: var(--accent); }
+.dg .route-new { fill: var(--accent); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .dg [data-k] { transition: none; } }
+.stepbar { display: flex; align-items: center; gap: 12px; }
+.stepno { font-size: 13px; color: var(--muted); min-width: 92px; text-align: center; font-variant-numeric: tabular-nums; }
+.steptext { font-size: 15px; max-width: 68ch; min-height: 3em; }
+.row-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+</style>
+
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>What a rule change does to a running case</h1>
+    <p class="muted">One rule picks the route for a recovery case by DPD (days past due). All three cases below have DPD 75. Change the rule and see which ones take the new path.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="h-arch">
+    <h2 id="h-arch">How the parts fit</h2>
+    <figure class="dg-fig">
+      <div class="scroll">
+        <svg class="dg" id="dg" viewBox="0 0 1000 560" role="img" aria-label="A rule change goes from RW-COE through compile, test and approval into the rule package store. A case event goes into that case's Temporal workflow, which evaluates the rule through the Drools evaluator, records the result, writes the decision log and then updates the case.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="ah-on" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-on"/></marker>
+          </defs>
+
+          <text class="band" x="20" y="22">RULE CHANGE · NO RELEASE</text>
+
+          <g data-k="coe"><rect class="box" x="20" y="40" width="160" height="72" rx="6"/>
+            <text class="t" x="100" y="70">RW-COE</text><text class="s" x="100" y="92">edits Excel table</text></g>
+          <g data-k="a-up"><line class="arw" x1="180" y1="76" x2="248" y2="76"/><text class="lbl" x="215" y="68">uploads</text></g>
+
+          <g data-k="compile"><rect class="box" x="250" y="40" width="170" height="72" rx="6"/>
+            <text class="t" x="335" y="70">Compile + test</text><text class="s" x="335" y="92">Excel → DRL · 50 cases</text></g>
+          <g data-k="a-pass"><line class="arw" x1="420" y1="76" x2="488" y2="76"/><text class="lbl" x="455" y="68">passes</text></g>
+
+          <g data-k="approve"><rect class="box" x="490" y="40" width="150" height="72" rx="6"/>
+            <text class="t" x="565" y="70">RW-RISK</text><text class="s" x="565" y="92">approves</text></g>
+          <g data-k="a-valid"><line class="arw" x1="640" y1="76" x2="718" y2="76"/><text class="lbl" x="679" y="68">valid-from</text></g>
+
+          <g data-k="store"><rect class="box" x="720" y="36" width="260" height="80" rx="6"/>
+            <text class="t" x="850" y="58">Rule package store</text></g>
+          <g data-k="v1"><rect class="box pill" x="742" y="72" width="104" height="26" rx="13"/><text class="s mono-s" x="794" y="89">v1 · 1 Nov</text></g>
+          <g data-k="v2"><rect class="box pill" x="856" y="72" width="104" height="26" rx="13"/><text class="s mono-s" x="908" y="89">v2 · 1 Dec</text></g>
+
+          <g data-k="evaluator"><rect class="box" x="330" y="180" width="200" height="64" rx="6"/>
+            <text class="t" x="430" y="207">Drools evaluator</text><text class="s" x="430" y="228">picks version in force</text></g>
+          <g data-k="load"><path class="arw" d="M532,212 H850 V118"/><text class="lbl" x="690" y="204">loads in-force version</text></g>
+
+          <text class="band" x="20" y="290">CASE RUN · TEMPORAL</text>
+
+          <g data-k="wf"><rect class="frame" x="230" y="305" width="750" height="130" rx="8"/>
+            <text class="s mono-s" x="964" y="326" text-anchor="end">case-{id} workflow · one per case</text></g>
+
+          <g data-k="call"><line class="arw" x1="405" y1="343" x2="405" y2="246"/><text class="lbl" x="397" y="290" text-anchor="end">calls</text></g>
+          <g data-k="ret"><line class="arw" x1="455" y1="246" x2="455" y2="343"/><text class="lbl" x="463" y="290" text-anchor="start">rule ID + version</text></g>
+
+          <g data-k="event"><rect class="box" x="20" y="345" width="150" height="64" rx="6"/>
+            <text class="t" x="95" y="372">Case event</text><text class="s" x="95" y="393">DPD update</text></g>
+          <g data-k="signal"><line class="arw" x1="170" y1="377" x2="328" y2="377"/><text class="lbl" x="200" y="369">signal</text></g>
+
+          <g data-k="eval"><rect class="box" x="330" y="345" width="200" height="64" rx="6"/>
+            <text class="t" x="430" y="372">1 · Evaluate rule</text><text class="s" x="430" y="393">runs as an activity</text></g>
+          <g data-k="a-e2l"><line class="arw" x1="530" y1="377" x2="568" y2="377"/></g>
+          <g data-k="log"><rect class="box" x="570" y="345" width="180" height="64" rx="6"/>
+            <text class="t" x="660" y="372">2 · Log decision</text><text class="s" x="660" y="393">before any change</text></g>
+          <g data-k="a-l2s"><line class="arw" x1="750" y1="377" x2="788" y2="377"/></g>
+          <g data-k="state"><rect class="box" x="790" y="345" width="170" height="64" rx="6"/>
+            <text class="t" x="875" y="372">3 · Apply state</text><text class="s" x="875" y="393">move the case</text></g>
+
+          <g data-k="a-hist"><line class="arw" x1="430" y1="409" x2="430" y2="473"/><text class="lbl" x="438" y="456" text-anchor="start">recorded</text></g>
+          <g data-k="a-log"><line class="arw" x1="660" y1="409" x2="660" y2="473"/><text class="lbl" x="668" y="456" text-anchor="start">writes</text></g>
+          <g data-k="a-case"><line class="arw" x1="875" y1="409" x2="875" y2="473"/><text class="lbl" x="883" y="456" text-anchor="start">updates</text></g>
+
+          <g data-k="hist"><rect class="box" x="330" y="475" width="200" height="64" rx="6"/>
+            <text class="t" x="430" y="502">Workflow history</text><text class="s" x="430" y="523">replay reads this, not Drools</text></g>
+          <g data-k="dlog"><rect class="box" x="570" y="475" width="180" height="64" rx="6"/>
+            <text class="t" x="660" y="502">Decision log</text><text class="s" x="660" y="523">case · rule · version</text></g>
+          <g data-k="case"><rect class="box" x="790" y="475" width="170" height="64" rx="6"/>
+            <text class="t" x="875" y="502">Case record</text><text class="s" id="routeTxt" x="875" y="523">ACE DB · holds route</text></g>
+        </svg>
+      </div>
+      <figcaption>
+        <div class="stepbar">
+          <button type="button" id="dgBack">Back</button>
+          <span class="stepno" id="dgNo">Overview</span>
+          <button type="button" class="primary" id="dgNext">Next</button>
+        </div>
+        <p id="dgText" class="steptext"></p>
+      </figcaption>
+    </figure>
+  </section>
+
+  <p class="hint">Now try it with three cases: <b>Publish v2</b>, then <b>Next event</b> on B, <b>Open case</b> on C, and <b>Next event</b> on A.</p>
+
+  <section class="panel" aria-labelledby="h-rule">
+    <h2 id="h-rule">The rule (Excel decision table, package ROUTE)</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Rule</th><th>Route</th><th>v1 · from 1 Nov</th><th>v2 · from 1 Dec</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">R-DPD-01</td><td>Soft collection</td><td class="mono">DPD under 30</td><td class="mono">DPD under 30</td></tr>
+          <tr><td class="mono">R-DPD-02</td><td>Restructure</td><td class="mono">DPD 30 to 90</td><td class="mono changed">DPD 30 to <span id="t2a">60</span></td></tr>
+          <tr><td class="mono">R-DPD-03</td><td>Legal</td><td class="mono">DPD over 90</td><td class="mono changed">DPD over <input type="number" id="t2" value="60" min="31" max="365" aria-label="v2 Legal threshold in days"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="status">
+      <button class="primary" id="publish" type="button">Publish v2</button>
+      <span class="inforce">In force today (<span id="today">29 Nov 2026</span>): <span class="tag" id="inforce">v1</span></span>
+      <span class="err" id="err" hidden></span>
+    </div>
+    <ul class="pipeline" id="pipeline" hidden>
+      <li data-i="0">Compiled to DRL</li>
+      <li data-i="1">50 test scenarios passed</li>
+      <li data-i="2">Approved by RW-RISK</li>
+      <li data-i="3">In force from 1 Dec 2026</li>
+    </ul>
+    <details>
+      <summary>Generated DRL for R-DPD-03 (nobody edits this by hand)</summary>
+      <pre id="drl"></pre>
+    </details>
+  </section>
+
+  <section class="panel" aria-labelledby="h-board">
+    <h2 id="h-board">Where each case is</h2>
+    <div class="board" id="board">
+      <div class="decision">
+        <span class="lab">Route decision</span>
+        <span class="muted" style="font-size:13px">the rule runs here, once per case</span>
+        <div class="chips" id="cell-decision"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-cases">
+    <div class="row-actions">
+      <h2 id="h-cases" style="margin:0">Cases</h2>
+      <button type="button" id="reset">Start over</button>
+    </div>
+    <div class="cases" id="cases"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-log">
+    <h2 id="h-log">Decision log</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Date</th><th>Case</th><th>Event</th><th>Rule run</th><th>Version used</th><th>Result</th></tr></thead>
+        <tbody id="log"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-notes">
+    <h2 id="h-notes">Checking your understanding</h2>
+    <ul class="notes">
+      <li><span class="k yes">Right</span><span>A rule change can send a case down a new path. The workflow code doesn't change and nothing is redeployed.</span></li>
+      <li><span class="k fix">Correction</span><span>Nobody edits the DRL file. RW-COE edits the Excel decision table, and the DRL is generated from it on upload. It is then tested, approved by RW-RISK (not the author), and in force from its valid-from date. Rollback is one call.</span></li>
+      <li><span class="k fix">Correction</span><span>There is one Temporal workflow per case, not one per process. Soft collection, Restructure and Legal are routes the rule picks for that case.</span></li>
+      <li><span class="k note">Detail</span><span>A decision already made keeps the version it used. Temporal records the result, and a replay reads that record instead of running the rule again. Only the next decision uses the new rule. That is why A stays and B moves.</span></li>
+      <li><span class="k note">Different</span><span>Changing workflow code, such as adding a step or reordering steps, is a separate change. It needs a version guard and the replay test before release, and running cases finish on the old code.</span></li>
+      <li><span class="k note">Timing</span><span>Case workflows on Temporal start in Epic 3. In Epics 1 and 2, Drools already runs rule packages inside features such as allocation and transfer, and timers stay on Quartz.</span></li>
+    </ul>
+  </section>
+
+  <p class="source">Based on D-RCV-36 (Temporal and Drools Change Register v1), RWB-E1-072, RWB-E2-040 and RWB-E2-043. Example rule, package and cases are made up for illustration.</p>
+</main>
+
+<script>
+(function () {
+  var ROUTES = [
+    { id: "soft",  name: "Soft collection", stages: ["Call", "Reminder", "Paid"] },
+    { id: "res",   name: "Restructure",     stages: ["Assess", "Agree plan", "Monitor"] },
+    { id: "legal", name: "Legal",           stages: ["Notice", "File case", "Enforce"] }
+  ];
+  var byId = {}; ROUTES.forEach(function (r) { byId[r.id] = r; });
+
+  var state, lastMoved = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function fresh() {
+    state = {
+      version: 1, v2T: null, date: "29 Nov 2026",
+      cases: {
+        A: { dpd: 75, opened: true,  route: "res", stage: 0, ver: 1, rule: "R-DPD-02", isNew: false },
+        B: { dpd: 75, opened: true,  route: null },
+        C: { dpd: 75, opened: false, route: null }
+      },
+      log: [{ date: "20 Nov 2026", c: "A", ev: "Route decision", rule: "R-DPD-02", ver: "v1", res: "Restructure", isNew: false }]
+    };
+    lastMoved = null;
+  }
+
+  function threshold(v) { return v === 1 ? 90 : state.v2T; }
+  function evaluate(dpd, v) {
+    if (dpd < 30) return { rule: "R-DPD-01", route: "soft" };
+    if (dpd <= threshold(v)) return { rule: "R-DPD-02", route: "res" };
+    return { rule: "R-DPD-03", route: "legal" };
+  }
+
+  function buildBoard() {
+    var board = $("board");
+    ROUTES.forEach(function (r) {
+      var lane = document.createElement("div");
+      lane.className = "lane";
+      var cells = r.stages.map(function (s, i) {
+        return '<div class="cell"><span class="stage">' + s + '</span><div class="chips" id="cell-' + r.id + '-' + i + '"></div></div>';
+      }).join("");
+      lane.innerHTML = '<div class="lane-name">' + r.name + '</div><div class="stages">' + cells + '</div>';
+      board.appendChild(lane);
+    });
+  }
+
+  function chip(id, c) {
+    var cls = "chip" + (c.isNew ? " new" : "") + (lastMoved === id ? " moved" : "");
+    return '<span class="' + cls + '" title="Case ' + id + '">' + id + '</span>';
+  }
+
+  function render() {
+    document.querySelectorAll(".chips").forEach(function (el) { el.innerHTML = ""; });
+    Object.keys(state.cases).forEach(function (id) {
+      var c = state.cases[id];
+      if (!c.opened) return;
+      var target = c.route ? $("cell-" + c.route + "-" + c.stage) : $("cell-decision");
+      target.insertAdjacentHTML("beforeend", chip(id, c));
+    });
+
+    var html = "";
+    Object.keys(state.cases).forEach(function (id) {
+      var c = state.cases[id], what, label, disabled = false;
+      if (!c.opened) {
+        what = "Not opened yet. Opening it runs the route decision.";
+        label = "Open case";
+      } else if (!c.route) {
+        what = "Open, waiting for its next event. Route not decided yet.";
+        label = "Next event";
+      } else {
+        var r = byId[c.route];
+        what = "On " + r.name + ", stage " + r.stages[c.stage] + ". Route decided by " + c.rule + " under v" + c.ver + ".";
+        if (c.isNew) what += ' <span class="newpath">New path from v2.</span>';
+        label = c.stage < 2 ? "Next event" : "Finished";
+        disabled = c.stage >= 2;
+      }
+      html += '<div class="case">' + chip(id, c).replace(" moved", "") +
+        '<div class="text"><div>Case ' + id + ' · DPD ' + c.dpd + '</div><div class="what">' + what + '</div></div>' +
+        '<button type="button" data-case="' + id + '"' + (disabled ? " disabled" : "") + '>' + label + '</button></div>';
+    });
+    $("cases").innerHTML = html;
+
+    $("log").innerHTML = state.log.map(function (e) {
+      if (e.divider) return '<tr class="divider"><td>' + e.date + '</td><td colspan="5">' + e.text + '</td></tr>';
+      return '<tr><td>' + e.date + '</td><td>' + e.c + '</td><td>' + e.ev + '</td><td class="mono">' + e.rule +
+        '</td><td class="mono">' + e.ver + '</td><td class="' + (e.isNew ? "result-new" : "") + '">' + e.res + '</td></tr>';
+    }).join("");
+
+    $("today").textContent = state.date;
+    var tag = $("inforce");
+    tag.textContent = "v" + state.version;
+    tag.className = "tag" + (state.version === 2 ? " v2" : "");
+    $("publish").disabled = state.version === 2;
+    $("t2").disabled = state.version === 2;
+    drl();
+  }
+
+  function drl() {
+    var t = state.version === 2 ? state.v2T : (parseInt($("t2").value, 10) || 60);
+    $("t2a").textContent = t;
+    $("drl").textContent =
+      'rule "R-DPD-03"\n' +
+      '    activation-group "ROUTE"   // first match wins\n' +
+      '    salience 97\n' +
+      'when\n' +
+      '    $f : CaseFacts( dpd > ' + t + ' )\n' +
+      'then\n' +
+      '    result.put("route", "LEGAL");\n' +
+      'end';
+  }
+
+  function step(id) {
+    var c = state.cases[id];
+    lastMoved = id;
+    if (!c.opened || !c.route) {
+      var ev = c.opened ? "Route decision" : "Case opened, route decision";
+      c.opened = true;
+      var r = evaluate(c.dpd, state.version);
+      c.route = r.route; c.stage = 0; c.ver = state.version; c.rule = r.rule;
+      c.isNew = state.version === 2 && r.route !== evaluate(c.dpd, 1).route;
+      state.log.push({ date: state.date, c: id, ev: ev, rule: r.rule, ver: "v" + state.version, res: byId[r.route].name, isNew: c.isNew });
+    } else if (c.stage < 2) {
+      c.stage++;
+      var rt = byId[c.route];
+      state.log.push({ date: state.date, c: id, ev: "Stage moved", rule: "none", ver: "v" + c.ver + " (recorded)", res: rt.name + " · " + rt.stages[c.stage], isNew: c.isNew });
+    }
+    render();
+  }
+
+  function publish() {
+    var t = parseInt($("t2").value, 10), err = $("err");
+    if (!(t >= 31 && t <= 365)) {
+      err.textContent = "Enter a whole number of days between 31 and 365.";
+      err.hidden = false;
+      return;
+    }
+    err.hidden = true;
+    $("publish").disabled = true;
+    $("t2").disabled = true;
+    var pipe = $("pipeline"), items = pipe.querySelectorAll("li");
+    items.forEach(function (li) { li.className = ""; });
+    pipe.hidden = false;
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var delay = reduce ? 0 : 350, i = 0;
+    (function next() {
+      if (i < items.length) { items[i].className = "done"; i++; setTimeout(next, delay); return; }
+      state.version = 2; state.v2T = t; state.date = "1 Dec 2026"; lastMoved = null;
+      state.log.push({ divider: true, date: "1 Dec 2026", text: "Rule v2 in force: Legal from DPD over " + t + ". No workflow code changed." });
+      render();
+    })();
+  }
+
+  $("publish").addEventListener("click", publish);
+  $("t2").addEventListener("input", drl);
+  $("reset").addEventListener("click", function () {
+    fresh();
+    $("pipeline").hidden = true;
+    $("err").hidden = true;
+    $("t2").value = 60;
+    render();
+  });
+  $("cases").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-case]");
+    if (b && !b.disabled) step(b.getAttribute("data-case"));
+  });
+
+  fresh();
+  buildBoard();
+  render();
+
+  // Architecture diagram stepper
+  var STEPS = [
+    { k: [], t: "Two paths meet in one place. A rule change only reaches the rule package store at the top. A running case only reads from it, through the Drools evaluator. Press Next to follow case B (DPD 75)." },
+    { k: ["coe"], t: "RW-COE changes the Legal line from DPD over 90 to DPD over 60 in the Excel decision table." },
+    { k: ["coe", "a-up", "compile"], t: "On upload the table is compiled to DRL and run against at least 50 test cases. A failure stops it here." },
+    { k: ["a-pass", "approve"], t: "RW-RISK approves the new version. The author can't approve their own change." },
+    { k: ["a-valid", "store", "v1", "v2"], t: "v2 is stored beside v1, in force from 1 Dec. Nothing is deployed and no workflow code changes." },
+    { k: ["event", "signal", "wf"], t: "On 2 Dec case B gets a DPD update. It arrives as a signal to case B's own workflow." },
+    { k: ["wf", "eval", "call", "evaluator", "load", "store", "v2"], t: "The workflow runs Evaluate rule as an activity. Drools picks the version in force on 2 Dec, which is v2. R-DPD-03 matches because DPD 75 is over 60." },
+    { k: ["wf", "eval", "ret", "a-hist", "hist"], t: "The result (R-DPD-03, v2) is saved in the workflow history. A replay reads this record and doesn't call Drools again." },
+    { k: ["wf", "eval", "a-e2l", "log", "a-log", "dlog"], t: "The decision log entry is written first: case B, R-DPD-03, v2. If this write fails, the case doesn't move." },
+    { k: ["wf", "log", "a-l2s", "state", "a-case", "case"], t: "Only then is the state applied. Case B moves to Legal. This is the new path.", route: "case B → Legal", isNew: true },
+    { k: ["hist", "dlog", "case", "v1"], t: "Case A was routed on 20 Nov under v1. That result is already in its history and decision log, so v2 doesn't touch it. A stays on Restructure.", route: "case A → Restructure" }
+  ];
+  var dgStep = 0;
+  function dgRender() {
+    var s = STEPS[dgStep], on = {};
+    s.k.forEach(function (k) { on[k] = true; });
+    document.querySelectorAll("#dg [data-k]").forEach(function (g) {
+      var k = g.getAttribute("data-k"), active = !!on[k];
+      g.classList.toggle("on", active);
+      g.classList.toggle("dim", s.k.length > 0 && !active);
+    });
+    var rt = $("routeTxt");
+    rt.textContent = s.route || "ACE DB · holds route";
+    rt.classList.toggle("route-new", !!s.isNew);
+    $("dgNo").textContent = dgStep === 0 ? "Overview" : "Step " + dgStep + " of " + (STEPS.length - 1);
+    $("dgText").textContent = s.t;
+    $("dgBack").disabled = dgStep === 0;
+    $("dgNext").textContent = dgStep === STEPS.length - 1 ? "Start over" : "Next";
+  }
+  $("dgNext").addEventListener("click", function () { dgStep = dgStep === STEPS.length - 1 ? 0 : dgStep + 1; dgRender(); });
+  $("dgBack").addEventListener("click", function () { if (dgStep > 0) { dgStep--; dgRender(); } });
+  dgRender();
+})();
+</script>
+
+</body>
+</html>

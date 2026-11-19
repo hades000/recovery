@@ -1,0 +1,145 @@
+{
+  "key": "RWB-E1-002",
+  "file_stem": "RWB E1 002 Case list v1 with case ID owner and queue",
+  "title": "Case list v1 with case ID, owner and queue",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.p1.case-list",
+  "status": "PARTIAL",
+  "status_text": "Ready. Freshness gate waits for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "Daily case list",
+  "goal": "Publish one daily case list for every recovery team, dated to the ACE batch, in Power BI by 07:30",
+  "why": "Teams stop keeping their own lists. Balance and days past due come live from ACE views; cases come only through the P3 interface.",
+  "needs": [
+    "E1-018",
+    "E1-020",
+    "E1-069",
+    "E1-007",
+    "E1-015"
+  ],
+  "unblocks": [
+    "E1-011"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-04 case list step (after JOB-03 or 07:15)"
+    ],
+    [
+      "GATE",
+      "DailyCompletenessGate must say COMPLETE"
+    ],
+    [
+      "WHO",
+      "RW-TEAMMGR owns; RW-BIANAL reads Power BI"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "account_key, account_code, days_past_due, total_balance, data_as_of"
+    },
+    {
+      "view": "v_ace_efs_action",
+      "section": "A",
+      "note": "last contact: action_code, contact_at per account_key"
+    },
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "ALS business_date and is_complete (the date stamp)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "case_list_row",
+      "note": "one row per case + account per business date, status PENDING"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "via CaseQueryApi only"
+    },
+    {
+      "t": "case_account",
+      "note": "open case accounts"
+    },
+    {
+      "t": "queue",
+      "note": "team and queue codes"
+    }
+  ],
+  "stores": "Data lake via outbound adapter INT-19 (case-list/<date>.csv); Power BI 'Case list v1'; exception queue if the lake transfer fails",
+  "functions": [
+    {
+      "name": "CaseListStepConfig",
+      "does": "read, join views, write rows"
+    },
+    {
+      "name": "CaseListChainListener",
+      "does": "start after JOB-03 on COMPLETE"
+    },
+    {
+      "name": "LastContactReader",
+      "does": "latest efs_action per account_key"
+    },
+    {
+      "name": "CaseListRowRepository",
+      "does": "replace one date's rows"
+    },
+    {
+      "name": "CaseListExtractWriter",
+      "does": "CSV to the outbound adapter"
+    },
+    {
+      "name": "DailyCompletenessGate",
+      "does": "from E1-015: COMPLETE or HOLD"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-04 after JOB-03"
+    },
+    {
+      "kind": "check",
+      "text": "Gate: ALS batch COMPLETE?"
+    },
+    {
+      "kind": "function",
+      "text": "CaseQueryApi.openCaseAccounts"
+    },
+    {
+      "kind": "ace",
+      "text": "Join v_ace_account + v_ace_efs_action"
+    },
+    {
+      "kind": "table",
+      "text": "case_list_row (PENDING)"
+    },
+    {
+      "kind": "out",
+      "text": "E1-011 releases -> lake -> Power BI"
+    }
+  ],
+  "rules": [
+    "BR2: account number, balance and DPD come live from v_ace_account; no copy is kept",
+    "BR3: build only when the completeness gate is COMPLETE",
+    "BR8: cases only via the P3 interface; ACE only via recovery.v_ace_*",
+    "BR10: an orphan key still gets a row with empty amounts and is listed by REC-05"
+  ],
+  "risks": [
+    "Source batch not COMPLETED -> step held, yesterday's list kept (MSG-P1-001)",
+    "JOB-03 not done by 07:15 -> list built anyway with ALLOCATION_COMPLETE = NO",
+    "Lake transfer fails -> PUBLISHED = NO, item on the exception queue (R-UNI-34)"
+  ],
+  "example": [
+    "Business date 2026-11-30",
+    "v_ace_account: 28,140 accounts at 90+ DPD, 21 excluded -> 28,119 to match",
+    "case_list_row: 28,156 rows (28,119 + 37 cases below 90 DPD)",
+    "REC-01: 28,119 vs 28,119 -> PASS -> RELEASED -> Power BI refresh 07:30"
+  ]
+}

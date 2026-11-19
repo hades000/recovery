@@ -1,0 +1,128 @@
+{
+  "key": "RWB-E1-033",
+  "file_stem": "RWB E1 033 Search across cases",
+  "title": "Search across cases",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.search",
+  "status": "READY",
+  "status_text": "Ready for build (Should)",
+  "theme": "default",
+  "overview_label": "Document search across cases",
+  "goal": "Find documents across in-scope cases by type, date, field or text; every search is audited",
+  "why": "Finding 'all appraisals over 5M last month' takes seconds, not days. Personal fields and free text are searchable only by roles that see them unmasked.",
+  "needs": [
+    "E1-024",
+    "E1-053",
+    "E1-049"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "WHO",
+      "Litigation officer on the Document search page"
+    ],
+    [
+      "API",
+      "GET /documents/search?type=&field=&q="
+    ],
+    [
+      "EVENT",
+      "DOCUMENT_SEARCH access event"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No recovery.v_ace_* read. Snippet masking uses the ACE PII service; case scope comes from CaseDirectory.",
+  "writes": [
+    {
+      "t": "access log entry",
+      "note": "DOCUMENT_SEARCH; free text stored as SHA-256"
+    }
+  ],
+  "reads": [
+    {
+      "t": "document",
+      "note": "active documents in scope"
+    },
+    {
+      "t": "document_field",
+      "note": "field conditions (numeric index)"
+    },
+    {
+      "t": "document_text",
+      "note": "free text (pg_trgm index)"
+    },
+    {
+      "t": "document_type",
+      "note": "field_definitions"
+    },
+    {
+      "t": "recovery_case",
+      "note": "caseIdsInScope via CaseDirectory"
+    }
+  ],
+  "stores": "PII access log (free text logged only as a hash)",
+  "functions": [
+    {
+      "name": "DocumentHubController",
+      "does": "the search endpoint"
+    },
+    {
+      "name": "DocumentSearchService",
+      "does": "validate, mask check, scope, log"
+    },
+    {
+      "name": "DocumentSearchRepository",
+      "does": "one SQL over 3 tables"
+    },
+    {
+      "name": "SnippetBuilder",
+      "does": "60-char snippet, highlight, mask"
+    },
+    {
+      "name": "DocumentSearchPage",
+      "does": "React criteria + results"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Search: APPRAISAL_REPORT > 5M"
+    },
+    {
+      "kind": "check",
+      "text": "Role may search this field?"
+    },
+    {
+      "kind": "function",
+      "text": "CaseDirectory.caseIdsInScope"
+    },
+    {
+      "kind": "table",
+      "text": "document + document_field + text"
+    },
+    {
+      "kind": "table",
+      "text": "DOCUMENT_SEARCH logged first"
+    },
+    {
+      "kind": "out",
+      "text": "50 rows, newest first"
+    }
+  ],
+  "rules": [
+    "BR1: only active documents on in-scope cases are returned",
+    "BR2: personal fields and free text only for roles that see them unmasked",
+    "BR3: logged before results return; free text kept only as a hash",
+    "BR5: limits such as SEARCH_MAX_RESULTS are parameters"
+  ],
+  "risks": [
+    "Masked role searches free text -> 422 (MSG-P5-020)",
+    "Access log not confirmed -> 503 (MSG-P5-019)",
+    "Over 1,000 matches -> capped with a message (MSG-P5-021)"
+  ],
+  "example": [
+    "TEST-LIT-01 (scope ALL) searches APPRAISAL_REPORT, appraised_value > 5,000,000, stored in Oct 2026",
+    "-> exactly 9 documents within 2 s",
+    "One DOCUMENT_SEARCH access entry written"
+  ]
+}

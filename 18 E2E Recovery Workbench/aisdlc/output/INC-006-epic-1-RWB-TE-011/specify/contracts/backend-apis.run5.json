@@ -1,0 +1,42 @@
+{
+  "runId": "INC-006-epic-1-RWB-TE-011",
+  "story": "RWB-TE-011",
+  "apiImpactType": "NO_API_CHANGE",
+  "reason": "Build-time lint; no endpoint, schema, status code or message added or changed (story file v1 §10, TC-TE-011-11). API Specification v4 is read as an input file only.",
+  "endpoints": [],
+  "buildToolContract": {
+    "component": "tools/pdpa-lint (PdpaLintStep)",
+    "trigger": "Every merge request pipeline and every branch pipeline, including main (story file v1 §12; SPEC-TE011-013)",
+    "inputs": [
+      "Dictionary as seeded and changed by migrations: sys_fields.is_personal from the baseline infra/postgres/schema/03-recovery-physical-schema-v6.sql, then backend/src/main/resources/db/modulemigration/recovery/*.sql in Flyway order (a migration row replaces a baseline row), then any configured dictionary file. Recognised forms: INSERT ... VALUES single-row or multi-row; UPDATE ... SET is_personal WHERE field_id = / IN (literal ids). Any other statement writing sys_fields fails closed (SPEC-TE011-001). Marks made by D-RCV-29 reference load are not read (files only; seam owned by RWB-E1-043, SPEC-TE011-017)",
+      "API specification: api/recovery-api-v4.yaml (x-personal-data: true)",
+      "Scan roots per tools/pdpa-lint/pdpa-lint.yaml (SPEC-TE011-003)",
+      "Allow list: tools/pdpa-lint/pdpa-allow.yaml (SPEC-TE011-011)"
+    ],
+    "generated": "pdpa-rules.yaml in build output, CI artifact, not committed (SPEC-TE011-002)",
+    "rules": [
+      "PDPA-LOG-FIELD",
+      "PDPA-LOG-ENTITY",
+      "PDPA-EXCEPTION",
+      "PDPA-TOSTRING",
+      "PDPA-FIXTURE-FIELD",
+      "PDPA-FIXTURE-ID"
+    ],
+    "outputLine": "{rule}: {file}:{line} uses personal field {field}. Remove it or use the masking helper.",
+    "expiredAllowLine": "allow entry expired: {rule} {path} since {date}",
+    "exitCodes": {
+      "0": "no unexcused finding (notices allowed)",
+      "1": "one or more unexcused findings",
+      "2": "configuration or input error, including an unsupported sys_fields statement, a duplicate seed row across migrations, an UPDATE of an unknown field_id, or an allow entry whose path matches a migration"
+    },
+    "neverPrinted": "Any value found, any source line or SQL statement text, any fixture value (BR7)",
+    "state": "None; rerun to restart; same commit and dictionary give the same output",
+    "fixtureMatching": "FIXTURE-FIELD matches by (object, field) keys: object_name.field_name, source_field table.column, API schema.property; unresolved objects: unambiguous names only, ambiguous names give a notice (SPEC-TE011-008)",
+    "noticeLines": [
+      "PDPA-NOTICE: {field_id} unmarked at {file}:{line}",
+      "PDPA-NOTICE: {file}:{line} object not resolved for {field}; add a fixtureObjects entry or a typed receiver",
+      "PDPA-NOTICE: {file}:{line} seeds {field}, marked personal by a later migration"
+    ],
+    "unsupportedDictionaryLine": "dictionary statement not supported: {file}:{line}"
+  }
+}

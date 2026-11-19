@@ -1,0 +1,50 @@
+{
+  "runId": "INC-002-epic-1-RWB-TE-001",
+  "story": "RWB-TE-001",
+  "uiInScope": false,
+  "frontendChangesRequired": true,
+  "specRefs": [
+    "SPEC-RWB-TE-001-013",
+    "SPEC-RWB-TE-001-014",
+    "SPEC-RWB-TE-001-015",
+    "SPEC-RWB-TE-001-020"
+  ],
+  "integrations": [],
+  "rationale": "No route, screen, component, i18n key, API-service call or generated type is added. The frontend change is a folder, an ESLint rule and its Vitest fixture test.",
+  "importBoundary": {
+    "id": "CON-RWB-TE-001-F01",
+    "file": "frontend/eslint.config.js",
+    "scope": "src/modules/recovery/**/*.{ts,tsx}",
+    "rule": "no-restricted-imports (error)",
+    "decision": "CLAR-002 (recovery tech lead, 2026-11-09); D-RCV-39; D-RCV-43",
+    "allowedOutsideRecovery": [
+      "@/components/ui/**",
+      "@/lib/utils",
+      "@/utils/<top-level file> except names starting with cfsc",
+      "@/contexts/ApiClientContext",
+      "@/api/schema"
+    ],
+    "forbidden": "every import starting with ../ (any depth), every @/modules/** other than @/modules/recovery/**, every other @/ path not in allowedOutsideRecovery; the rule matches import text and does not resolve paths",
+    "notGoverned": "third-party packages",
+    "proof": {
+      "runner": "Vitest (devDependency, D-RCV-06; CLAR-003 A)",
+      "config": "frontend/vitest.config.ts",
+      "test": "src/modules/recovery/__tests__/importBoundary.test.ts (plan may rename); ESLint Node API with ignore: false; fixtures linted under a path inside the recovery folder",
+      "fixtures": "src/modules/recovery/__fixtures__/ (in ESLint ignores; excluded from tsconfig.app.json with __tests__; never imported by the build)",
+      "wiring": "test target hand-defined in frontend/package.json nx.targets (vitest run --coverage); Nx 24 @nx/vite infers none and @nx/vitest is not registered; test added to frontend check dependsOn; nx.json, root package.json and CI unchanged (D-RCV-05, D-RCV-43)",
+      "coverage": "@vitest/coverage-v8, include src/modules/recovery/**/*.{ts,tsx} excluding __tests__ and __fixtures__, thresholds 80 lines/statements/branches/functions (SPEC-020, D-RCV-40); expected result PASS with 0 measurable statements recorded as printed (placeholder file only); rule proven by T-TE001-07"
+    },
+    "allowedInsideRecovery": [
+      "@/modules/recovery/**",
+      "./ (same folder or below)"
+    ],
+    "sharedFiles": [
+      "frontend/eslint.config.js",
+      "frontend/package.json",
+      "frontend/tsconfig.app.json",
+      "frontend/vitest.config.ts (new)",
+      "package-lock.json",
+      "frontend/package-lock.json"
+    ]
+  }
+}

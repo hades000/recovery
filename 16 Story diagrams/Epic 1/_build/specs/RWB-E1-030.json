@@ -1,0 +1,132 @@
+{
+  "key": "RWB-E1-030",
+  "file_stem": "RWB E1 030 Daily rebalancing and queue measures",
+  "title": "Daily rebalancing and queue measures",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.rebalance",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Daily rebalancing",
+  "goal": "A daily job assigns unowned cases, spreads over-cap load, and publishes reconciled queue measures",
+  "why": "Workload stays fair without manual shuffling. Cases on deviation or legal hold never move, and measures publish only when they reconcile.",
+  "needs": [
+    "E1-020",
+    "E1-027",
+    "E1-028"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-06 Daily rebalancing, 06:30 or after JOB-03"
+    ],
+    [
+      "EVENT",
+      "TimerBreached -> MSG-P3-028 to team manager"
+    ],
+    [
+      "WHO",
+      "RW-TEAMMGR; RW-BIANAL reads Power BI"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Rebalancing works on Workbench cases, queues, members and timers.",
+  "writes": [
+    {
+      "t": "assignment",
+      "note": "reason REBALANCE"
+    },
+    {
+      "t": "recovery_case.owner_user_id",
+      "note": "new owner"
+    },
+    {
+      "t": "queue_measure",
+      "note": "depth, unassigned, age, spread, breached"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "one entry per move, written first"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "unowned and over-cap cases"
+    },
+    {
+      "t": "queue, queue_member",
+      "note": "method and cap"
+    },
+    {
+      "t": "timer",
+      "note": "breached counts"
+    }
+  ],
+  "stores": "Outbox: CaseTransferred (EV-04) per move; data lake (JOB-15 copy); Power BI queue page",
+  "functions": [
+    {
+      "name": "RebalanceJob",
+      "does": "JOB-06: cases + owners to fix"
+    },
+    {
+      "name": "RebalanceService",
+      "does": "R-UNI-19 selection, hold checks"
+    },
+    {
+      "name": "AssignmentEngine",
+      "does": "member below the cap"
+    },
+    {
+      "name": "QueueMeasureService",
+      "does": "snapshot, reconcile, publish"
+    },
+    {
+      "name": "TimerBreachNotifier",
+      "does": "MSG-P3-028 on TimerBreached"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-06 at 06:30"
+    },
+    {
+      "kind": "table",
+      "text": "Unowned + over-cap cases"
+    },
+    {
+      "kind": "check",
+      "text": "Skip deviation / legal hold"
+    },
+    {
+      "kind": "function",
+      "text": "AssignmentEngine below cap"
+    },
+    {
+      "kind": "table",
+      "text": "assignment REBALANCE + log"
+    },
+    {
+      "kind": "out",
+      "text": "queue_measure -> lake -> Power BI"
+    }
+  ],
+  "rules": [
+    "BR2: an over-cap owner loses their newest cases (R-UNI-19)",
+    "BR3: deviation or legal-hold cases are never moved",
+    "BR6: measures publish only on zero difference (DL25, REC-01)",
+    "BR7: every move is logged first"
+  ],
+  "risks": [
+    "No member has capacity -> cases stay put (MSG-P3-011)",
+    "Snapshot does not reconcile -> not published (MSG-P3-029)",
+    "Decision log fails -> that case not moved, run continues (MSG-P7-003)"
+  ],
+  "example": [
+    "Queue TDR-BKK-CO (LOWEST_LOAD, cap 150) has 12 unowned cases",
+    "U-61 holds 140, U-62 holds 144",
+    "-> 8 cases to U-61, 4 to U-62, reason REBALANCE"
+  ]
+}

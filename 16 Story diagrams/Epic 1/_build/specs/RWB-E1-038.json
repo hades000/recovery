@@ -1,0 +1,126 @@
+{
+  "key": "RWB-E1-038",
+  "file_stem": "RWB E1 038 Delegation of authority table as reference data",
+  "title": "Delegation of authority table as reference data",
+  "module": "P4 Access and administration",
+  "flag": "rwb.access.delegation-table",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Delegation of authority table",
+  "goal": "Approval limits by decision, product and amount as a versioned table the router queries by date",
+  "why": "Who may approve a write-off or restructure is a bank regulation (DoA). Holding it as data keeps the router honest and every decision keeps its version.",
+  "needs": [
+    "E1-043",
+    "E1-029",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E2-013"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (delegation_limit)"
+    ],
+    [
+      "API",
+      "POST /admin/reference-loads/{loadId}/approve"
+    ],
+    [
+      "CALL",
+      "DelegationOfAuthority.lowestLevel(...)"
+    ],
+    [
+      "WHO",
+      "RW-REFADM loads; RW-RISK approves"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Amounts come from the decision being routed (Epic 2); the table itself is Workbench reference data.",
+  "writes": [
+    {
+      "t": "delegation_limit",
+      "note": "levels L1-L6 by decision, regulation item, product"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "AC-VERS on approval"
+    }
+  ],
+  "reads": [
+    {
+      "t": "delegation_limit",
+      "note": "rows valid on the decision date"
+    },
+    {
+      "t": "lov_value",
+      "note": "LOV-DECISION, APPROVAL-LEVEL, PRODUCT"
+    }
+  ],
+  "stores": "Incident to RW-RISK when no row covers a decision (NOT_COVERED)",
+  "functions": [
+    {
+      "name": "DelegationLimitLoader",
+      "does": "whole-file checks, L6 -> L1 order"
+    },
+    {
+      "name": "ReferenceLoadApprovalService",
+      "does": "shared maker-checker (E1-037)"
+    },
+    {
+      "name": "DelegationLookupService",
+      "does": "lowestLevel (published)"
+    },
+    {
+      "name": "DelegationLimitRepository",
+      "does": "rows valid on a date"
+    },
+    {
+      "name": "AccessAndAdministrationController",
+      "does": "load + approve endpoints"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Load DOA-2026.11 (218 rows)"
+    },
+    {
+      "kind": "check",
+      "text": "No duplicates, limits do not fall"
+    },
+    {
+      "kind": "check",
+      "text": "RW-RISK approves (not loader)"
+    },
+    {
+      "kind": "table",
+      "text": "delegation_limit in force"
+    },
+    {
+      "kind": "function",
+      "text": "lowestLevel walks L6 -> L1"
+    },
+    {
+      "kind": "out",
+      "text": "Level + row IDs + version"
+    }
+  ],
+  "rules": [
+    "BR3: the lowest covering level on the decision date wins",
+    "BR5: a related-party write-off always goes to L1 (Board)",
+    "BR7: a decision keeps the version it was routed with (R-UNI-38)",
+    "BR8: Risk approves, never the loader"
+  ],
+  "risks": [
+    "Duplicate rows or falling limits -> refused (MSG-P1-002)",
+    "No covering row (e.g. HP before chapter 8) -> NOT_COVERED + incident (MSG-P7-010)",
+    "Decision log fails -> version not approved (MSG-P7-003)"
+  ],
+  "example": [
+    "DOA-2026.11 (95 limits, regulations 540031 / 690070) -> 218 rows: 109 MORTGAGE, 109 SSME",
+    "Item 2.1.1 at L4: 300,000,000.00 with loss <= 45% and max loss 150,000,000.00",
+    "...or 50,000,000.00 with no loss limit"
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "key": "RWB-E1-032",
+  "file_stem": "RWB E1 032 Automatic attach from the OCR intake",
+  "title": "Automatic attach from the OCR intake",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.autoattach",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Auto-attach OCR documents",
+  "goal": "Documents attach to their case automatically when exactly one open case matches; unclear ones go to a person",
+  "why": "Mailroom and branch scans stop waiting for manual filing. The case or account number found in the text is resolved through the case directory.",
+  "needs": [
+    "E1-024",
+    "E1-050",
+    "E1-053"
+  ],
+  "unblocks": [
+    "E1-054"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-12 matchStep, every 15 min (business hours)"
+    ],
+    [
+      "WHO",
+      "Reviewer resolves held items on SCR-31"
+    ],
+    [
+      "API",
+      "POST /intake-items/{intakeItemId}/resolve"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "account_code: an account number in the text -> open cases"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "document_intake",
+      "note": "match_status, candidate_case_ids, case_id"
+    },
+    {
+      "t": "document",
+      "note": "via DocumentStore: type, confidence, review_status"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "DOCATT with classifier version + match method"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case, case_account",
+      "note": "find by case or account number"
+    },
+    {
+      "t": "document_intake",
+      "note": "predicted_type, classifier_version"
+    },
+    {
+      "t": "document_text",
+      "note": "OCR text to search"
+    },
+    {
+      "t": "document_hub_parameter",
+      "note": "CLASSIFY_THRESHOLD"
+    }
+  ],
+  "stores": "rwb-docs container (PENDING docs held); PII access log on intake reads; DocumentStored event (EV-16)",
+  "functions": [
+    {
+      "name": "MatchStep",
+      "does": "JOB-12 step: select, match, store"
+    },
+    {
+      "name": "CaseMatcher",
+      "does": "find case / account number, resolve"
+    },
+    {
+      "name": "MatchPatterns",
+      "does": "CASE_NO_PATTERN, ACCOUNT_NO_PATTERN"
+    },
+    {
+      "name": "AutoAttachService",
+      "does": "StoreRequest + low-confidence rule"
+    },
+    {
+      "name": "ManualAttachService",
+      "does": "scope + type checks, version lock"
+    },
+    {
+      "name": "UnmatchedIntakeTab",
+      "does": "React SCR-31 Unmatched list"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-12 matchStep"
+    },
+    {
+      "kind": "table",
+      "text": "document_intake OCR DONE"
+    },
+    {
+      "kind": "function",
+      "text": "CaseMatcher reads case / account no"
+    },
+    {
+      "kind": "ace",
+      "text": "Account no -> v_ace_account -> case"
+    },
+    {
+      "kind": "check",
+      "text": "Exactly one open case?"
+    },
+    {
+      "kind": "out",
+      "text": "DocumentStore.store or held for a person"
+    }
+  ],
+  "rules": [
+    "BR1: exactly one open case -> attach with no person involved",
+    "BR3: no match, several, conflict, closed case or no type -> a person decides",
+    "BR4: below CLASSIFY_THRESHOLD -> stored for review, not write-once",
+    "BR5: DOCATT is logged before the store"
+  ],
+  "risks": [
+    "No readable case or account number -> NO_MATCH (MSG-P5-003)",
+    "Account matches 2+ open cases -> MULTIPLE (MSG-P5-003)",
+    "Decision log fails -> auto stays PENDING, manual gets 503 (MSG-P7-003)"
+  ],
+  "example": [
+    "Court notice with case ID RW-2026-000123, classified COURT_NOTICE 0.93 by CLS-1.0 (threshold 0.80)",
+    "-> stored on RW-2026-000123, source SCAN, review_status NOT_NEEDED",
+    "DOCATT entry: match method CASE_ID"
+  ]
+}

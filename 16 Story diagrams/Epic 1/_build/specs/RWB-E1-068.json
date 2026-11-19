@@ -1,0 +1,114 @@
+{
+  "key": "RWB-E1-068",
+  "file_stem": "RWB E1 068 Interaction ledger read interface",
+  "title": "Interaction ledger read interface",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.ledger-read",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Ledger read interface",
+  "goal": "Case owners read a case's full history in order, filtered by channel, actor and date, masked by role",
+  "why": "One read path for the ledger, so masking, scope and the PII log are never skipped. Nobody queries the interaction table directly.",
+  "needs": [
+    "E1-066",
+    "E1-037",
+    "E1-016"
+  ],
+  "unblocks": [
+    "E1-023",
+    "E1-062"
+  ],
+  "triggers": [
+    [
+      "API",
+      "GET /cases/{caseId}/interactions?channel=&actor="
+    ],
+    [
+      "WHO",
+      "Case owner, team manager, conduct, audit"
+    ],
+    [
+      "CALL",
+      "InteractionLedgerReader (published)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. EFS history from v_ace_efs_action is merged in by the case record view (E1-023).",
+  "writes": [],
+  "reads": [
+    {
+      "t": "interaction",
+      "note": "ordered by occurred_at, case_seq"
+    },
+    {
+      "t": "recovery_case.id",
+      "note": "scope via CaseScopeQuery"
+    }
+  ],
+  "stores": "PII access log for any unmasked read; P4 MaskingPolicy",
+  "functions": [
+    {
+      "name": "InteractionLedgerReader",
+      "does": "the one read path (published)"
+    },
+    {
+      "name": "LedgerReadService",
+      "does": "scope, filter, query, mask, log"
+    },
+    {
+      "name": "InteractionRepository",
+      "does": "filtered, ordered query"
+    },
+    {
+      "name": "InteractionsHandler (P3)",
+      "does": "API-P3-014 + actor filter"
+    },
+    {
+      "name": "CaseHistoryPanel",
+      "does": "React SCR-03 history panel"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Open SCR-03 history"
+    },
+    {
+      "kind": "check",
+      "text": "Scope + filter valid?"
+    },
+    {
+      "kind": "table",
+      "text": "interaction ordered by time"
+    },
+    {
+      "kind": "function",
+      "text": "Mask summary by role"
+    },
+    {
+      "kind": "store",
+      "text": "PII log for unmasked fields"
+    },
+    {
+      "kind": "out",
+      "text": "InteractionPage on SCR-03"
+    }
+  ],
+  "rules": [
+    "BR1: order by time, then case_seq",
+    "BR2: filter by channel, actor and date range",
+    "BR4: mask by role",
+    "BR6: nobody queries interaction directly"
+  ],
+  "risks": [
+    "from after to -> 422 (MSG-GEN-003)",
+    "Case out of scope -> 404 (MSG-P4-003)",
+    "Page size over 200 -> 422 (MSG-GEN-002)"
+  ],
+  "example": [
+    "RW-2026-000401 has 9 entries: 3 EFS calls, 2 visits by u-owner-04, 4 Workbench actions",
+    "-> returned in time order",
+    "Sources shown as 'EFS, INT-07' and 'WORKBENCH, P3 case and workflow'"
+  ]
+}

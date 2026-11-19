@@ -1,0 +1,131 @@
+# Copilot Instructions - Spec-Driven Development
+
+This repository uses a spec-driven PDLC workflow for software development.
+
+## Default Behavior
+- Prefer the agents in `.github/agents/`.
+- Follow centralized rules in `.github/rules/`.
+- Use templates in `.github/templates/`.
+- Preserve traceability through every artifact.
+- Treat GitHub issues, branches, commits, and pull requests as trace metadata when available.
+
+## SCBX AI-First SDLC Playbook
+This repository follows the SCBX AI-First SDLC Playbook. Increment-level governance (project
+path, lifecycle tailoring, human approval gates) is defined in `.github/rules/lifecycle-governance.md`.
+Every bounded increment has an increment card and a lifecycle tailoring record in `docs/increments/`
+(templates: `.github/templates/increment-card-template.md`,
+`.github/templates/lifecycle-tailoring-record.md`). Agents read the increment card to understand the
+selected path, reused artefacts and approval status before producing output.
+
+## Context Management (Prerequisite for All Workflows)
+
+**Context creation and maintenance is foundational to all PDLC workflows.**
+
+### Context Loading For Every Agent
+
+Before starting a task, every agent must inspect `.github/contexts/` and read the files relevant to its scope. Keep using the existing context filenames, and also consider any additional files added to the folder. Read explicitly designated Word/PDF context files as well as Markdown files; use the project-context index when available. Do not load unrelated files. Treat context as guidance alongside task requirements and current source evidence. Context Builder creates new context only, Context Updater owns context maintenance, and other agents must not modify context files unless explicitly assigned that work.
+
+### Initial Context Setup
+For new projects or when context does not exist, use a single unified agent:
+
+```text
+Context Builder (Unified - Merged)
+  → Uses a Confluence link when provided; otherwise uses attached Word/PDF documents
+  → Inspects available legacy project documentation, source code, configuration, and tests
+  → Extracts tech stack from source code (package.json, config files, folder structure)
+  → Gathers business and client-domain context from supplied sources
+  → Applies standards DURING context creation (integrated, not separate)
+  → Creates `.github/contexts/project-context.md` (all business requirements, logic, rules, constraints, design intent, and acceptance criteria)
+  → Creates `.github/contexts/domain-context.md` (supplemental industry/domain references; links to business requirements)
+  → Creates `.github/contexts/frontend-context.md` (frontend/UI implementation and detailed design: screens, themes, fonts, styles)
+  → Creates `.github/contexts/backend-context.md` (backend implementation, APIs, data, integrations, and operations)
+  → Creates `.github/contexts/testing-standards.md` (testing and verification strategy, frameworks, coverage)
+  → Preserves and indexes additional user-provided standards under `.github/contexts/`
+  → Creates `requirement/Context_{ProjectName}.md` (detailed context with CTX-* IDs)
+  → Updates `requirement/Traceability_Matrix.md` with CTX-* IDs
+```
+
+**No MCP file validation needed** - all context extracted directly from source code and project structure.
+**Standards are embedded, not separate** - as context is discovered, standards are applied to ensure consistency.
+
+### Context Maintenance
+As project evolves, keep context synchronized:
+
+```text
+Context Updater
+  (triggered by: Confluence/document changes, legacy project or code changes, domain guidance, custom standards, or user request)
+  → reviews source documents, project structure, configuration, and all context files
+  → detects changes (MINOR/MODERATE/MAJOR)
+  → updates project/domain/technology/testing context and affected user-provided standards
+  → tracks changes with CTX-UPDATE-* IDs
+  → escalates MAJOR changes for approval
+  → updates `requirement/Traceability_Matrix.md`
+```
+
+## Human-Initiated Stages
+- Every PDLC stage is started manually by a human. At the specification, planning, and post-test code gates, the stage agent automatically invokes Compliance Reviewer as a bounded subagent before completing. This review does not start the next PDLC stage.
+- Critical, High, and Medium review findings stop the handoff until a human records remediation or explicit acceptance; remediation requires re-review. Keep the `FAIL` status and every finding visible.
+- Follow `.github/rules/pdlc.md`: a `FAIL` with only Low-severity findings emits the specified `REVIEW_GATE_WARNING` and does not automatically stop the handoff. Preserve the `FAIL` status; mixed severities follow the highest-severity outcome. Independent stage hard gates remain blocking.
+- Stage agents remain unavailable as subagents unless explicitly allowlisted for a documented exception. Technical Specifier may invoke Figma Extractor during specification; Technical Specifier, Implementation Planner, and Technical Documenter may invoke Compliance Reviewer only at their respective review gates.
+
+## Required Flow
+For existing source requirement folders:
+
+```text
+[Context exists per Context Builder]
+-> Requirement Intake Consolidator
+-> Traceability Manager
+-> Technical Specifier
+-> Technical Specifier automatically invokes Compliance Reviewer (spec gate)
+-> Implementation Planner
+-> Implementation Planner automatically invokes Compliance Reviewer (plan gate)
+-> Implementation Builder
+-> API Tester (tests every API in output/{RUN_ID}/specify/spec.md when `API In Scope: YES`)
+-> Functional Automation Test (tests every UI behavior in output/{RUN_ID}/specify/spec.md when `UI In Scope: YES`)
+-> Technical Documenter (automatically invokes Compliance Reviewer as code gate before final documentation)
+-> Traceability Manager
+```
+
+For new business problems:
+
+```text
+[Context exists per Context Builder]
+-> User Story Generator
+-> Technical Specifier
+-> Technical Specifier automatically invokes Compliance Reviewer (spec gate)
+-> Implementation Planner
+-> Implementation Planner automatically invokes Compliance Reviewer (plan gate)
+-> Implementation Builder
+-> API Tester (tests every API in output/{RUN_ID}/specify/spec.md when `API In Scope: YES`)
+-> Functional Automation Test (tests every UI behavior in output/{RUN_ID}/specify/spec.md when `UI In Scope: YES`)
+-> Technical Documenter (automatically invokes Compliance Reviewer as code gate before final documentation)
+-> Traceability Manager
+```
+
+## Design Evidence Handling
+- Figma is optional when the story has no frontend task.
+- Figma failures (MCP error, rate limit, auth) never block. Technical Specifier falls back to Jira/Confluence screenshots or manual uploads, assigns `SCR-*` screen IDs, and records `Design Source: Manual upload (no Figma link)`.
+- Planning and implementation proceed with manual-upload design evidence and carry the design-source note forward.
+- Only a frontend story with no design evidence at all (`DESIGN_EVIDENCE_STATUS: PENDING_MANUAL_UPLOAD`) blocks planning and implementation until screenshots are added to `output/{RUN_ID}/specify/figma/png/screens/` and Technical Specifier is re-run.
+
+## Parallel Context Updates
+**At any point in the PDLC, a human may run Context Updater to:**
+- Sync technology versions and dependencies
+- Sync changes from Confluence pages or attached Word/PDF sources
+- Update client industry/domain context and user-provided standards
+- Update architectural guidance when code patterns evolve
+- Flag conflicts between detected state and approved specs/plans
+- Maintain alignment between project reality and documented standards
+
+## Domain-Specific Controls
+Apply regulatory and domain controls only when in scope:
+- Privacy controls (e.g., GDPR, PDPA, CCPA).
+- KYC and AML checks when applicable.
+- Customer risk profiling and suitability assessments.
+- Consent and disclosure capture.
+- Approval workflows (e.g., maker-checker).
+- Role-based access control and audit trails.
+- Regulatory reporting evidence and compliance.
+
+## Data Protection
+Never include real customer PII, sensitive account information, credentials, secrets, tokens, or production data in generated artifacts, examples, tests, commits, PR descriptions, or documentation.

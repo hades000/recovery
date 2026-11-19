@@ -1,0 +1,107 @@
+{
+  "key": "RWB-TE-008",
+  "file_stem": "RWB TE 008 Decision log hash chain check",
+  "title": "Decision log hash chain check",
+  "module": "P7 Decision center and log (technical enabler)",
+  "flag": "rwb.decision.hash-check",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Nightly hash chain check",
+  "goal": "Recompute the decision-log hash chain every night, so any tampering is reported to Compliance the same day",
+  "why": "Append-only is enforced by the database (E1-008); this job proves it every night. A break names the first bad entry and opens an incident.",
+  "needs": [
+    "E1-008",
+    "TE-007"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-14 Hash chain check, cron 02:00"
+    ],
+    [
+      "GATE",
+      "Waits for JOB-13 (decision log copy), by 04:00"
+    ],
+    [
+      "API",
+      "POST /admin/jobs/{jobId}/rerun"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. It reads only the Workbench decision log.",
+  "writes": [
+    {
+      "t": "(job run record)",
+      "note": "lastSeq, lastHash, result, breakSeq"
+    }
+  ],
+  "reads": [
+    {
+      "t": "decision_log_entry",
+      "note": "chain_seq, entry_hash, prev_hash (all rows)"
+    }
+  ],
+  "stores": "ACE job run record; ACE notification path; incident; Quartz",
+  "functions": [
+    {
+      "name": "HashChainCheckJob",
+      "does": "no concurrent run; waits for JOB-13"
+    },
+    {
+      "name": "HashChainVerifier",
+      "does": "recompute 1,000 at a time"
+    },
+    {
+      "name": "ChainCheckReporter",
+      "does": "MSG-P7-007 / 008 / 013"
+    },
+    {
+      "name": "JobRunRecorder",
+      "does": "writes the run record"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-14 at 02:00"
+    },
+    {
+      "kind": "check",
+      "text": "JOB-13 finished? (until 04:00)"
+    },
+    {
+      "kind": "table",
+      "text": "decision_log_entry 1..max seq"
+    },
+    {
+      "kind": "function",
+      "text": "Recompute every hash"
+    },
+    {
+      "kind": "check",
+      "text": "Any mismatch?"
+    },
+    {
+      "kind": "out",
+      "text": "INTACT or BROKEN + incident"
+    }
+  ],
+  "rules": [
+    "BR1: a nightly check with a same-day report",
+    "BR3: covers chain_seq 1 to the maximum at the start of the run",
+    "BR4: runs after JOB-13, starting by 04:00",
+    "BR6: one active run; a rerun is a new record"
+  ],
+  "risks": [
+    "Hash mismatch -> BROKEN + incident to Compliance (MSG-P7-008)",
+    "Run error -> FAILED (MSG-P7-013)",
+    "Empty log -> INTACT with count 0 (MSG-P7-007)"
+  ],
+  "example": [
+    "48,210 entries; JOB-13 ended 01:40 on 3 Dec 2026",
+    "-> INTACT, last chain_seq 48,210",
+    "If entry 30,005 were tampered -> BROKEN at 30,005"
+  ]
+}

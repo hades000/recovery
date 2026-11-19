@@ -1,0 +1,394 @@
+﻿Acceptance criteria
+"Gherkin per story, as written in the Markdown file."
+Key,Title,Gherkin
+RWB-TE-001,Recovery module folder and boundary test,
+RWB-TE-002,Code owners for the recovery module,
+RWB-TE-003,Types and contract tests from the API specification,
+RWB-TE-004,Masked data in SIT and UAT,"Feature: Masked data in SIT and UAT
+
+  Background:
+    Given SIT reads ACE through recovery.v_ace_* as recovery_svc
+    Given masking rule version ""MASK-2026.11"" is in force
+    Given the ACE business date is 2026-11-19
+
+  Scenario: AC1 Masked by the view
+    Given v_ace_customer holds person_key ""P-0001"" with identification number ""1234567890123""
+    When a case owner reads the customer through GET /api/recovery/v1/cases/{caseId}
+    Then the response holds id_no_masked ""XXXXXXXXX0123"" and id_no_last4 ""0123""
+    Then no response field holds ""1234567890123""
+
+  Scenario: AC2 The clear value stays in ACE
+    Given the module map lists the 30 v_ace_* views as the only source objects
+    When the view conformance test reads v_ace_customer
+    Then no column of v_ace_customer returns the clear identification number
+    Then the test fails when a view adds such a column
+
+  Scenario: AC3 A role without the masking rule
+    Given masking rule ""MASK-2026.11"" lets only RW-CASEOWN see v_ace_contact.contact_value in clear for DF-ACE-078
+    When a user holding RW-AUDIT only reads the same case
+    Then the phone shows ""XXXXXX5678"" from contact_value_masked
+    Then a request for the clear value is refused with 403 and MSG-P4-002
+
+  Scenario: AC4 No clear personal value in schema recovery
+    Given SIT holds 23,600 open cases and the recovery rows of the synthetic set
+    When MaskedDataVerifier scans every column tagged is_personal in sys_fields
+    Then no value matches a Thai national ID check digit, a Thai mobile number or an email address
+    Then the report names 0 findings
+
+  Scenario: AC5 No masking rule for a field
+    Given no masking rule in ""MASK-2026.11"" covers v_ace_customer.date_of_birth (DF-ACE-059) for any role
+    When a case owner reads the customer
+    Then FieldMasker masks the date of birth
+    Then no rule falls back to a token
+
+  Scenario: AC6 A direct read of a public table
+    Given the SIT service identity recovery_svc
+    When a recovery class runs SELECT on public.account
+    Then the database refuses the statement
+    Then the pipeline fails with boundary rule BND-6
+
+  Scenario: AC7 The ACE business date is behind
+    Given v_ace_batch_status holds no COMPLETED ALS row for 2026-11-20 and v_ace_account.data_as_of is 2026-11-19
+    When a case owner opens the case record
+    Then the record shows the stale banner with MSG-P1-001 naming ""ALS"" and 2026-11-19"
+RWB-TE-006,Outbox and retry for outbound work,"Feature: Outbox and retry for outbound work
+
+  Background:
+    Given consumer ""win-dispatch"" takes work request WIN_DISPATCH, holds the case step and has owner role RW-PLATADM
+    Given consumers ""ledger"" and ""reporting-feed"" take CaseAllocated, CaseTransferred and CaseStateChanged, do not hold the case step and have owner role RW-PLATADM
+    Given the retry settings are 3 retries at 1, 5 and 15 minutes after the previous attempt
+    Given case ""RW-2026-000601"" has notice ""NT-SYN-0601"" waiting for approval
+
+  Scenario: AC1 Sent after commit
+    Given a notice approved
+    When the transaction commits at 14 December 2026 10:00:00
+    Then the outbox holds one WIN_DISPATCH request for case ""RW-2026-000601"" with one delivery for ""win-dispatch""
+    Then the header holds the event ID, idempotency key ""WIN_DISPATCH:NT-SYN-0601"", schema version 1, occurred time and actor
+    Then the payload holds notice and case references only, with no name, address or identifier
+    Then at the 10:01 run the sender delivers it and ""win-dispatch"" passes the notice to OutboundFiles.enqueue for the day's WIN file
+    Then the delivery has status DELIVERED
+
+  Scenario: AC2 Retry limit
+    Given a target down for longer than the retry limit
+    When ""win-dispatch"" fails at 10:01, 10:02, 10:07 and 10:22
+    Then the system makes no fifth attempt
+    Then the item moves to the exception queue: the ""win-dispatch"" delivery has status EXCEPTION and attempt count 4
+    Then the system raises task RESOLVE_OUTBOX_DELIVERY on case ""RW-2026-000601"" for role RW-PLATADM
+    Then event RETRY_LIMIT_REACHED moves the case to EXCEPTION_QUEUE by R-UNI-36 with one decision log entry
+
+  Scenario: AC3 Nothing is sent for a change that did not commit
+    Given the notice approval fails after OutboxWriter.publish and the transaction rolls back
+    When the sender runs
+    Then no event and no delivery exist for ""NT-SYN-0601""
+
+  Scenario: AC4 A retry that succeeds
+    Given ""win-dispatch"" fails at 10:01 and the case moves to RETRY_QUEUE by R-UNI-33
+    When the attempt at 10:02 succeeds
+    Then the system delivers the delivery status with attempt count 2
+    Then event RETRY_SUCCEEDED returns the case to the state it paused in by R-UNI-35
+
+  Scenario: AC5 The same event is written once
+    Given the approval of ""NT-SYN-0601"" is submitted twice with idempotency key ""WIN_DISPATCH:NT-SYN-0601""
+    When both transactions commit
+    Then the outbox holds one event with that key
+    Then the second transaction receives DuplicateOutboxKeyException and changes nothing
+
+  Scenario: AC6 Two sender instances
+    Given 200 due deliveries and two service instances
+    When JOB-11 runs on both at 10:01
+    Then the system makes each delivery once
+    Then the delivery log holds 200 calls
+
+  Scenario: AC7 Order per case and consumer
+    Given event CaseTransferred with case sequence 11 and event CaseStateChanged with case sequence 12 for case ""RW-2026-000601""
+    Given the ""ledger"" consumer fails on sequence 11
+    When the sender runs
+    Then the system does not deliver sequence 12 to ""ledger"" until sequence 11 is DELIVERED
+
+  Scenario: AC8 Consumers are independent
+    Given event CaseAllocated for case ""RW-2026-000601""
+    When ""ledger"" fails and ""reporting-feed"" succeeds at 10:01
+    Then the system delivers the ""reporting-feed"" delivery and the ""ledger"" delivery is RETRYING with next attempt 10:02
+    Then the case route state does not change, because ""ledger"" does not hold the case step
+
+  Scenario: AC9 Sending an exception delivery again
+    Given delivery ""OBD-SYN-0001"" has status EXCEPTION
+    When the platform administrator sends it again
+    Then the response is 200 with message MSG-GEN-005
+    Then the delivery status is PENDING with attempt count 0 and due at the next run
+    When the platform administrator sends delivery ""OBD-SYN-0002"" with status DELIVERED again
+    Then the response is 409 with message MSG-P2-022
+
+  Scenario: AC10 An event with no case
+    Given an event with no case whose only consumer fails 4 times
+    When the retries are used
+    Then the delivery status is EXCEPTION
+    Then the system sends an alert to the platform administrator within 15 minutes
+    Then no task and no case event are raised
+
+  Scenario: AC11 Retry settings come from configuration
+    Given the retry delays are changed in the configuration service to 2, 10 and 30 minutes at 09:00
+    When ""ledger"" fails at 10:01
+    Then the next attempt is due at 10:03"
+RWB-TE-007,Scheduled jobs on Quartz,"Feature: Scheduled jobs on Quartz
+
+  Background:
+    Given two service instances ""ACE-1"" and ""ACE-2"" share the clustered Quartz job store
+    Given the COLLINS load for business date 2026-12-02 passed its checks at 05:20 and JOB-02 succeeded at 05:50
+
+  Scenario: AC1 Runs once
+    When the morning allocation is due for business date 2026-12-02
+    Then JOB-03 runs once, on one of the two instances
+    Then the system logs its run with job ""JOB-03"", business date 2026-12-02, instance, start, end, status ""SUCCEEDED"" and the case counts
+
+  Scenario: AC2 Missed run
+    Given both instances were down from 04:30 to 09:40 on 2026-12-02
+    When the service restarts at 09:40
+    Then JOB-03 and JOB-04 run for business date 2026-12-02 after JOB-02 succeeds for that date
+    Then the system logs each run with MSG-P3-030 naming the job and 2026-12-02
+
+  Scenario: AC3 Repeated run for the same date
+    Given JOB-03 succeeded for business date 2026-12-02
+    When JOB-03 is fired again for 2026-12-02
+    Then the system allocates no case again
+    Then the run log records a skip for JOB-03 and 2026-12-02
+
+  Scenario: AC4 Timer check does not overlap
+    Given a JOB-05 run that started at 10:00 takes 7 minutes
+    When the 10:05 fire is due
+    Then the 10:05 run starts only after the 10:00 run ends
+    Then no two JOB-05 runs are in progress at the same time
+
+  Scenario: AC5 Several missed dates
+    Given COLLINS loads passed for business dates 2026-12-02, 2026-12-03 and 2026-12-04 while both instances were down
+    When the service restarts on 2026-12-04 at 11:00
+    Then JOB-03 runs for 2026-12-02, then 2026-12-03, then 2026-12-04
+    Then the system logs each run with its business date
+
+  Scenario: AC6 More missed dates than the limit
+    Given 7 business dates with passed COLLINS loads and no JOB-03 run
+    When the service restarts
+    Then no automatic catch-up run starts
+    Then an alert with MSG-P3-031 names JOB-03 and the 7 dates
+
+  Scenario: AC7 Dependency not met
+    Given JOB-02 failed for business date 2026-12-03
+    When JOB-03 is due for 2026-12-03
+    Then JOB-03 does not run and its run is recorded ""WAITING"" with MSG-P3-031 naming ""JOB-02""
+    Then when JOB-02 succeeds for 2026-12-03 at 08:10 JOB-03 runs for 2026-12-03
+
+  Scenario: AC8 Instance stops part way
+    Given JOB-04 is running for 2026-12-02 on ""ACE-1""
+    When ""ACE-1"" stops
+    Then ""ACE-2"" runs JOB-04 again for 2026-12-02 within the cluster check-in interval of 20 seconds
+    Then the run log shows one ""FAILED"" run on ""ACE-1"" and one ""SUCCEEDED"" run on ""ACE-2""
+
+  Scenario: AC9 Allocation late
+    Given JOB-03 for 2026-12-02 has not succeeded at 07:00
+    When the deadline check runs at 07:00
+    Then an alert with MSG-P3-031 naming JOB-03, 2026-12-02 and 07:00 reaches the operations channel by 07:15
+
+  Scenario: AC10 Run book for every job
+    Given the run book folder holds run books for JOB-03 and JOB-05 only
+    When the build runs
+    Then the build fails naming JOB-04
+
+  Scenario: AC11 No new Quartz job holds a case wait
+    Given a proposed job class ""CaseReminderJob"" that sleeps until a case reaches its next stage
+    When the architecture test runs in the build
+    Then the build fails and names ""CaseReminderJob""
+    Then JOB-05 passes the same test: it schedules, pauses, resumes and cancels timer rows through TimerScheduler and holds no wait on a case
+    Then no Temporal schedule is registered in Epic 1 or Epic 2"
+RWB-TE-008,Decision log hash chain check,"Feature: Decision log hash chain check
+
+  Background:
+    Given the environment is SIT with the synthetic decision log
+    Given JOB-13 for business date 2 December 2026 ended at 01:40 on 3 December 2026
+
+  Scenario: AC1 Chain intact
+    Given the decision log holds 48,210 entries and none has been changed
+    When JOB-14 runs at 02:00 on 3 December 2026
+    Then the job run record shows type ""JOB-14"", business date 2 December 2026, status ""COMPLETED"" and result ""INTACT""
+    Then its checks hold entries checked 48,210, last chain_seq 48,210 and that entry's entry_hash
+    Then MSG-P7-007 with the count and the last hash is sent to the Compliance group
+
+  Scenario: AC2 Break
+    Given the actions of the entry with chain_seq 30,005 were changed in the SIT database with the trigger disabled
+    When JOB-14 runs
+    Then the run result is ""BROKEN"" with first break chain_seq 30,005 and its entry ID
+    Then the system raises an incident and MSG-P7-008 with the entry ID is sent to the Compliance group before 08:00 on 3 December 2026
+
+  Scenario: AC3 A run that stops is reported
+    Given the database connection is closed in the test double after 20,000 entries
+    When JOB-14 runs
+    Then the run status is ""FAILED"" with entries checked 20,000
+    Then the system alerts the platform administrator group
+    Then the system sends MSG-P7-013 to the Compliance group with the date of the last complete check, 2 December 2026
+
+  Scenario: AC4 A rerun gives a new record and no second scheduled run
+    Given JOB-14 for business date 2 December 2026 failed at 02:20
+    When test user ""U-9301"" holding RW-PLATADM reruns it from the job monitor at 08:30
+    Then a second run record for business date 2 December 2026 is written with rerun true
+    Then the system marks the report to Compliance as a rerun
+    Then while the rerun is running a second start of JOB-14 is refused by the scheduler
+
+  Scenario: AC5 An empty log is intact
+    Given the decision log holds no entry
+    When JOB-14 runs
+    Then the result is ""INTACT"" with entries checked 0 and last hash of 64 zeros
+
+  Scenario: AC6 The job waits for the decision log copy
+    Given JOB-13 for business date 2 December 2026 is still running at 02:00 and ends at 02:25
+    When JOB-14 fires at 02:00
+    Then it starts the check at 02:25 and records the JOB-13 end time
+    Then if JOB-13 has not ended by 04:00 the check starts at 04:00 with the note ""JOB-13 not ended""
+
+  Scenario: AC7 Several changed entries
+    Given the entries with chain_seq 12,001 and 40,350 were changed in the SIT database
+    When JOB-14 runs
+    Then the first break is chain_seq 12,001 and the failing count is 2
+    Then one incident and one MSG-P7-008 report name both entry IDs
+
+  Scenario: AC8 Entries written during the run
+    Given the log holds 48,210 entries when JOB-14 starts
+    Given 37 entries are appended while it runs
+    When the run ends
+    Then entries checked is 48,210 and last chain_seq is 48,210
+    Then the next night's run checks 48,247 entries"
+RWB-TE-009,Performance test harness,
+RWB-TE-010,Browser and accessibility tests,
+RWB-TE-011,"PDPA lint for code, tests and logs",
+RWB-TE-012,Document storage containers,"Feature: Document storage containers
+
+  Background:
+    Given the SIT storage account has containers ""rwb-intake"", ""rwb-docs"", ""rwb-docs-legal"" and ""rwb-quarantine""
+    Given ""rwb-docs-legal"" has a time-based immutability policy of 3650 days
+
+  Scenario: AC1 Write-once
+    Given court notice ""DOC-0701"" stored at ""rwb-docs-legal/RW-2026-000701/DOC-0701/v1"" with hash ""H701""
+    When a client using the ACE service managed identity tries to overwrite it
+    Then storage refuses the write with ""BlobImmutableDueToPolicy""
+    Then the blob hash is still ""H701""
+    Then the attempt is in the audit log with the identity and the time
+    Then DocumentStore.replaceContent for ""DOC-0701"" raises WriteOnceViolationException, shown as 409 with MSG-P5-002
+
+  Scenario: AC2 Delete is refused
+    Given court notice ""DOC-0701"" in ""rwb-docs-legal""
+    When a client using the ACE service managed identity tries to delete it
+    Then storage refuses the delete
+    Then the blob is still readable
+
+  Scenario: AC3 A new blob in the write-once container is allowed
+    Given court notice ""DOC-0701"" at ""v1"" in ""rwb-docs-legal""
+    When the ACE service identity writes ""rwb-docs-legal/RW-2026-000701/DOC-0701/v2""
+    Then the write succeeds and both ""v1"" and ""v2"" are readable
+
+  Scenario: AC4 The standard container keeps earlier versions
+    Given ""rwb-docs/RW-2026-000702/DOC-0702/v1"" holds an appraisal report
+    When the blob is overwritten by the ACE service identity in SIT
+    Then the previous blob version is still readable through blob versioning
+    Then a deleted blob can be restored within the 30 days of soft delete
+
+  Scenario: AC5 The identities hold only their roles
+    Given the role assignments applied by the template in SIT
+    When the assignments are listed
+    Then the ACE service identity holds Storage Blob Data Contributor on ""rwb-intake"", ""rwb-docs"" and ""rwb-docs-legal"" only
+    Then ""RWB-SIT-SY-OCR"" holds Storage Blob Data Contributor on ""rwb-intake"", ""rwb-docs"" and ""rwb-quarantine"" only
+
+  Scenario: AC6 Key-based access is refused
+    Given the storage account has shared key access disabled
+    When a client calls ""rwb-docs"" with the account key or with a shared access signature
+    Then storage refuses the request with ""KeyBasedAuthenticationNotPermitted""
+
+  Scenario: AC7 An identity with no role is refused
+    Given managed identity ""RWB-SIT-SY-AGENT"" has no role on ""rwb-docs-legal""
+    When it tries to read ""rwb-docs-legal/RW-2026-000701/DOC-0701/v1""
+    Then storage refuses with ""AuthorizationPermissionMismatch""
+
+  Scenario: AC8 Public network access is refused
+    Given public network access is disabled on the storage account
+    When a client outside the private endpoint calls the account
+    Then the system refuses the request
+
+  Scenario: AC9 A missing immutability policy stops the document hub
+    Given the immutability policy is removed from ""rwb-docs-legal"" in DEV
+    When the service starts
+    Then the readiness check reports the document hub as not ready, naming ""rwb-docs-legal""
+    Then an upload through POST /api/recovery/v1/cases/{caseId}/documents returns 503 with MSG-GEN-006
+    Then the system writes no document row
+
+  Scenario: AC10 Storage does not answer
+    Given the storage account does not answer within 10 seconds
+    When BlobStorageAdapter writes a file to ""rwb-docs""
+    Then it raises StorageUnavailableException after 10 seconds
+    Then the upload endpoint returns 503 with MSG-GEN-006
+
+  Scenario: AC11 The quarantine container is closed to user sessions
+    Given file ""Q-0001"" in ""rwb-quarantine""
+    When the ACE service tries to read it on behalf of a case owner
+    Then the system refuses the read
+    Then only ""RWB-SIT-SY-OCR"" can write to ""rwb-quarantine""
+
+  Scenario: AC12 A repeated write of the same file is not an overwrite
+    Given ""rwb-docs-legal/RW-2026-000703/DOC-0703/v1"" holds a file with hash ""H703""
+    When BlobStorageAdapter is asked to write the same file with hash ""H703"" to the same name
+    Then the system attempts no overwrite and the existing blob reference is returned
+    Then the same name with a different hash raises WriteOnceViolationException"
+RWB-TE-013,Agent runtime client with fallback,"Feature: Agent runtime client with fallback
+
+  Background:
+    Given agent ""INTAKE"" has approved policy ""P1"" with timeout 60 seconds and prompt ""PR1""
+    Given case ""RW-2026-000201"" is in route state ""NEW"" and status ""New""
+    Given the calling step has rule result rule ""R-UNI-32"" version ""2026.11"" with next state ""RESUME_STATE""
+
+  Scenario: AC1 Shadow
+    Given the policy of ""INTAKE"" has autonomy mode ""SHADOW""
+    When the agent answers in 2,000 ms with a valid output
+    Then the system stores the agent answer on the agent run and the rule result is the applied result
+    Then one decision log entry holds agent version ""INTAKE@P1/PR1"", the rule ID and version, recommendation null and fallback false in actions
+    Then the calling step receives the rule result and no agent output
+
+  Scenario: AC2 No answer
+    Given the agent does not answer in 60 seconds
+    When the step runs
+    Then the system uses the rule result and the step continues to ""RESUME_STATE""
+    Then the decision log entry holds actions fallback true with reason ""TIMED_OUT"" and the agent run ID (R-UNI-32)
+    Then the agent run holds status ""TIMED_OUT"" and fallback true
+
+  Scenario: AC3 Assisted mode returns the answer as a recommendation
+    Given the policy of ""INTAKE"" has autonomy mode ""L1""
+    When the agent answers with confidence 0.91
+    Then the rule result is the applied result
+    Then the outcome returns the agent answer as the recommendation for the person who decides
+    Then the decision log entry holds the agent answer in recommendation with confidence 0.91
+
+  Scenario: AC4 A guardrail failure falls back
+    Given the agent answer fails check ""SCHEMA""
+    When the step runs
+    Then the system applies the rule result
+    Then the decision log entry holds actions fallback true with reason ""SCHEMA""
+
+  Scenario: AC5 No approved policy
+    Given agent ""INTAKE"" has no approved policy on 2026-11-30
+    When the step runs on 2026-11-30
+    Then the system makes no orchestrator call
+    Then the system applies the rule result with fallback true and reason ""NO_POLICY"" in the decision log entry
+
+  Scenario: AC6 The decision log write fails
+    Given the decision log writer throws on write
+    When the step runs
+    Then the calling step does not act and case ""RW-2026-000201"" stays in ""NEW""
+    Then the client raises DecisionNotRecordedException carrying MSG-P7-003 and an incident is raised (R-UNI-39)
+    Then the agent run stays with decision_log_id empty
+
+  Scenario: AC7 A repeated step key
+    Given the step with key ""CASEWF:RW-2026-000201:ENTRY:2026-11-30"" ran once
+    When it runs again with the same key
+    Then one agent run and one decision log entry exist for the key
+    Then the second call returns the first outcome (R-UNI-40)
+
+  Scenario: AC8 Agent switched off
+    Given the policy of ""INTAKE"" has autonomy mode ""OFF""
+    When the step runs
+    Then no orchestrator call and no agent run row are made
+    Then the decision log entry holds agent version null and fallback false"

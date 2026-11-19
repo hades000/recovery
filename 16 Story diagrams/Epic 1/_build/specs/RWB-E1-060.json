@@ -1,0 +1,131 @@
+{
+  "key": "RWB-E1-060",
+  "file_stem": "RWB E1 060 Extraction evaluation E1c",
+  "title": "Extraction evaluation [E1c]",
+  "module": "P10 Agent runtime",
+  "flag": "rwb.agent.extraction-eval",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "ai",
+  "overview_label": "Extraction evaluation",
+  "goal": "Measure three ways of extracting each field, then pick an approach and review threshold per document type",
+  "why": "Decide with numbers whether OCR templates, a model, or both extract fields best, and set the confidence above which no person needs to check.",
+  "needs": [
+    "E1-053",
+    "E1-058"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "API",
+      "POST /admin/agent-samples (EXTRACT-S1)"
+    ],
+    [
+      "API",
+      "POST /admin/agent-evaluations (3 approaches)"
+    ],
+    [
+      "API",
+      "GET /admin/agent-evaluations (CSV export)"
+    ],
+    [
+      "WHO",
+      "RW-COE runs; RW-RISK reviews"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The sample is labelled Workbench documents and their confirmed fields.",
+  "writes": [
+    {
+      "t": "agent_sample",
+      "note": "labelled documents (personal values hashed)"
+    },
+    {
+      "t": "agent_run",
+      "note": "MODEL runs in shadow"
+    },
+    {
+      "t": "agent_evaluation_run",
+      "note": "run + proposal per type"
+    },
+    {
+      "t": "agent_evaluation",
+      "note": "TP / FP / FN, precision, recall per field"
+    }
+  ],
+  "reads": [
+    {
+      "t": "document",
+      "note": "id, document_type, storage_ref"
+    },
+    {
+      "t": "document_field",
+      "note": "confirmed values (the labels)"
+    }
+  ],
+  "stores": "Document content via P5 DocumentQueryService; model gateway; CSV export",
+  "functions": [
+    {
+      "name": "ExtractionApproachRunner",
+      "does": "OCR_TEMPLATE, MODEL, OCR_AND_MODEL"
+    },
+    {
+      "name": "FieldMatchScorer",
+      "does": "precision, recall, F1"
+    },
+    {
+      "name": "ExtractionProposalBuilder",
+      "does": "approach + threshold per type"
+    },
+    {
+      "name": "SampleRowValidator",
+      "does": "rows vs P5, hash personal"
+    },
+    {
+      "name": "prompt EXTRACT PR1",
+      "does": "with schema extract-fields-v1"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "RW-COE loads EXTRACT-S1"
+    },
+    {
+      "kind": "table",
+      "text": "Labelled documents + fields"
+    },
+    {
+      "kind": "ai",
+      "text": "3 approaches per document"
+    },
+    {
+      "kind": "function",
+      "text": "FieldMatchScorer per field"
+    },
+    {
+      "kind": "check",
+      "text": "30+ docs? precision 0.95?"
+    },
+    {
+      "kind": "out",
+      "text": "Proposal: approach + threshold"
+    }
+  ],
+  "rules": [
+    "BR2: precision, recall and F1 to 4 decimals",
+    "BR3: fewer than 30 labelled documents -> no proposal",
+    "BR4: threshold = lowest confidence reaching 0.95 precision, else review-only",
+    "BR5: ties go to the approach with fewer model calls"
+  ],
+  "risks": [
+    "Fewer than 30 documents -> 'insufficient sample'",
+    "Model timeout -> counted as a false negative",
+    "Bad sample row -> refused (MSG-P10-001)"
+  ],
+  "example": [
+    "40 COURT_NOTICE documents",
+    "hearing_date with OCR_TEMPLATE: TP 34, FP 2, FN 4",
+    "-> precision 0.9444, recall 0.8947"
+  ]
+}

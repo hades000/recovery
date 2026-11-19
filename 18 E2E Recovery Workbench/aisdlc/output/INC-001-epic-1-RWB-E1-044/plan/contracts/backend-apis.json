@@ -1,0 +1,207 @@
+{
+  "contractId": "CON-PLAN-RWB-E1-044-BACKEND",
+  "runId": "INC-001-epic-1-RWB-E1-044",
+  "story": "RWB-E1-044",
+  "planVersion": "v2",
+  "specVersion": "v14-7",
+  "specContract": "../../specify/contracts/backend-apis.json",
+  "baseLayout": {
+    "source": "RWB-TE-001 plan v7 (../../../INC-002-epic-1-RWB-TE-001/plan/plan.md, tasks.md, data-model.md), plan gate round 7 PASS",
+    "decision": "D-RUN-17 (orchestrator, Claude Code; AI-SDLC-BUILD-LOG.md section 1, 2026-11-18T00:55): RWB-TE-001 merges before RWB-E1-044",
+    "flywayConfigPath": "backend/src/main/java/th/co/scb/ace/demo/recovery/casewf/migration/RecoveryFlywayConfig.java",
+    "migrationPropertiesPath": "backend/src/main/java/th/co/scb/ace/demo/recovery/casewf/migration/RecoveryMigrationProperties.java",
+    "migrationPropertiesType": "RecoveryMigrationProperties(String schema, Flyway flyway), prefix rwb, nested Flyway(boolean enabled, String url, String user, String password, String location)",
+    "registrationBeforeThisStory": "@EnableConfigurationProperties(RecoveryMigrationProperties.class) on RecoveryFlywayConfig, which is @ConditionalOnProperty on rwb.flyway.enabled; SPEC-002 case 1 applies",
+    "bindingTestPath": "backend/src/test/java/th/co/scb/ace/demo/recovery/casewf/migration/RecoveryFlywayConfigTest.java",
+    "bindingTestMethod": "bindsSchemaAndFlywayFromApplicationYaml (T-TE001-12)",
+    "bindingTestAllowedChange": "SPEC-002 Existing tests change (2) only: add MigrationPropertiesConfig to the user configuration; no assertion changes; change (1) does not apply because application.yaml line 74 is the literal recovery",
+    "toolingClassDirectoryBeforeThisStory": "th/co/scb/ace/demo/recovery/architecture/boundary/** only (RWB-TE-001 plan v7 TASK-01 and Coverage gate edit); SPEC-014 case 1 applies"
+  },
+  "apiInScope": false,
+  "apiImpactType": "NO_API_CHANGE",
+  "endpoints": [],
+  "uiInScope": false,
+  "migration": {
+    "production": "NONE",
+    "basis": "Decision Log v10 D-RCV-28 and story v7 section 13: RWB-E1-044 ships no production migration file; D-RUN-07 fixes no sequence",
+    "fixtureNumbers": "test-only, concrete from V0001 because the lint checks contiguity (ASM-E044-14)"
+  },
+  "backendOnlyContracts": [
+    {
+      "id": "CON-PLAN-E044-001",
+      "type": "Flyway bean configuration",
+      "owner": "th.co.scb.ace.demo.recovery.casewf.migration.RecoveryFlywayConfig (package-private; moved there by RWB-TE-001)",
+      "historyTable": "flyway_schema_history_recovery",
+      "placeholder": {
+        "recoverySchema": "recovery"
+      },
+      "location": "classpath:db/modulemigration/recovery",
+      "settings": {
+        "outOfOrder": false,
+        "baselineVersion": "0",
+        "baselineOnMigrate": true,
+        "cleanDisabled": true,
+        "createSchemas": false,
+        "validateMigrationNaming": true,
+        "validateOnMigrate": true,
+        "ignoreMigrationPatterns": "Flyway default (*:future)"
+      },
+      "changesByThisStory": [
+        "add .validateOnMigrate(true)",
+        "remove @Bean(initMethod = \"migrate\") from recoveryFlyway so the factory never migrates",
+        "add @Bean(initMethod = \"migrate\") RecoveryMigrationRunner recoveryMigrationRunner(Flyway recoveryFlyway, RecoveryMigrationProperties properties)",
+        "remove @EnableConfigurationProperties from RecoveryFlywayConfig"
+      ],
+      "unchanged": [
+        "data-source selection (rwb.flyway.user branch, otherwise the main DataSource)",
+        "history table, placeholder, locations, outOfOrder, baselineVersion, baselineOnMigrate, cleanDisabled, createSchemas, validateMigrationNaming"
+      ],
+      "specRefs": [
+        "SPEC-RWB-E1-044-001",
+        "SPEC-RWB-E1-044-003",
+        "SPEC-RWB-E1-044-013"
+      ]
+    },
+    {
+      "id": "CON-PLAN-E044-002",
+      "type": "Schema pin",
+      "owner": "th.co.scb.ace.demo.recovery.casewf.migration.RecoveryMigrationProperties (binding) and MigrationPropertiesConfig (registration, new, package-private, no condition)",
+      "constraint": "@Validated on the record; @NotNull and @Pattern(regexp = \"recovery\", message = \"rwb.schema must be recovery (D-RCV-28)\") on schema",
+      "whenChecked": "when Spring binds the record, on every start, whatever rwb.flyway.enabled is; not in a constructor or compact constructor, so code-built records are unaffected",
+      "failure": "ConfigurationPropertiesBindException whose chain holds BindValidationException; the message names rwb.schema, the value found and D-RCV-28; no message ID (ASM-E044-03); no credential",
+      "scope": "one check, in P3 casewf.migration; the P2 integration.internal record that also binds rwb.schema is not checked again",
+      "specRefs": [
+        "SPEC-RWB-E1-044-002"
+      ]
+    },
+    {
+      "id": "CON-PLAN-E044-003",
+      "type": "Migration failure report",
+      "owner": "th.co.scb.ace.demo.recovery.casewf.migration.RecoveryMigrationRunner (package-private, new)",
+      "format": "ERROR MSG-P3-016 schema={} object={}",
+      "object": {
+        "validationFailure": "versions of flyway.validateWithResult().invalidMigrations, comma-separated and distinct",
+        "migrationFailure": "flyway.info().pending()[0].getVersion() after the PostgreSQL rollback",
+        "noVersion": "recoveryFlyway"
+      },
+      "apiVerifiedAgainst": "flyway-core 12.4.0 (local Gradle cache, javap, 18 Nov 2026): Flyway.migrate(), Flyway.validateWithResult() returns ValidateResult with invalidMigrations of ValidateOutput.version, Flyway.info() returns MigrationInfoService with pending() and MigrationInfo.getVersion(); org.flywaydb.core.api.exception.FlywayValidateException extends FlywayException and exposes no invalid-migration list in this version",
+      "behaviour": "logs exactly one ERROR line, then rethrows the same FlywayException so the context fails and the service does not start; a refused clean() is not wrapped",
+      "specRefs": [
+        "SPEC-RWB-E1-044-003"
+      ]
+    },
+    {
+      "id": "CON-PLAN-E044-004",
+      "type": "Migration lint finding",
+      "format": "MSG-P3-016 schema=recovery object=<file>:<line> rule=<RULE-ID> <detail>",
+      "toolingPackage": "th.co.scb.ace.demo.recovery.architecture.migration (test scope; JUnit tests may share it and are excluded from coverage by name)",
+      "entryPoint": "th.co.scb.ace.demo.recovery.architecture.migration.MigrationLint#lint(Path folder)",
+      "ruleInterface": "MigrationRule#ruleId(); MigrationRule#check(ParsedMigrationFile, FolderContext); MigrationRule#checkFolder(FolderContext) default returns no finding, NameRule overrides it for non-.sql folder entries",
+      "registry": "MigrationRules#all() — one ordered list",
+      "ruleIds": [
+        "L-NAME",
+        "L-UNDO",
+        "L-REPEATABLE",
+        "L-SEQ-GAP",
+        "L-SEQ-DUP",
+        "L-HEADER",
+        "L-HEADER-MULTI",
+        "L-KEY-DUP",
+        "L-FIX-LINE2",
+        "L-FIX-NO-BASE",
+        "L-SEARCH-PATH",
+        "L-LITERAL-SCHEMA",
+        "L-FK-OUTSIDE",
+        "L-GRANT",
+        "L-LEX"
+      ],
+      "findingIdentity": "one finding per (rule, file, line, key); L-LITERAL-SCHEMA key is the disallowed schema name; L-FK-OUTSIDE key is the referenced qualifier; L-SEARCH-PATH and L-GRANT have no key; L-LEX key is the opener offset",
+      "extensionPoint": "LiteralSchemaRule#isAllowedQualifier(MigrationStatement, String) returns true only for ${recoverySchema}, information_schema and pg_catalog; no public exception (SEAM-E044-01, owner RWB-E1-069)",
+      "specRefs": [
+        "SPEC-RWB-E1-044-004",
+        "SPEC-RWB-E1-044-005",
+        "SPEC-RWB-E1-044-006",
+        "SPEC-RWB-E1-044-007",
+        "SPEC-RWB-E1-044-008",
+        "SPEC-RWB-E1-044-009",
+        "SPEC-RWB-E1-044-010",
+        "SPEC-RWB-E1-044-016"
+      ]
+    },
+    {
+      "id": "CON-PLAN-E044-005",
+      "type": "Schema comparison finding (test scope)",
+      "format": "MSG-P3-016 schema=recovery object=recovery.<table>.<column|constraint|index|view>",
+      "components": [
+        "SchemaSnapshot",
+        "SchemaSnapshotReader (catalog rows to snapshot; fromRows is pure)",
+        "SchemaComparator (pure comparison and formatting)",
+        "SchemaDifference"
+      ],
+      "specRefs": [
+        "SPEC-RWB-E1-044-012"
+      ]
+    }
+  ],
+  "coverageWiring": {
+    "case": "SPEC-014 case 1 — the merged RWB-TE-001 include covers architecture/boundary/** only",
+    "task": "TASK-13",
+    "file": "backend/build.gradle.kts",
+    "edit": "add migrationToolingClasses (test output, include th/co/scb/ace/demo/recovery/architecture/migration/**, exclude **/*Test.class, **/*Test$*.class, **/*IT.class, **/*IT$*.class) to classDirectories of recoveryCoverageReport and recoveryCoverageVerification; no new task, rule, counter, threshold or exclusion; execution data test; both tasks stay outside check",
+    "rule": "one BUNDLE rule, LINE, INSTRUCTION, BRANCH and METHOD at 0.80",
+    "specRefs": [
+      "SPEC-RWB-E1-044-014"
+    ]
+  },
+  "migratorRights": {
+    "decision": "D-RUN-14 (orchestrator, Claude Code; AI-SDLC-BUILD-LOG.md section 1, 2026-11-18T00:31); recovery tech lead to confirm (OI-E044-J)",
+    "role": "rwb_migrator",
+    "rights": [
+      "GRANT USAGE ON SCHEMA public TO rwb_migrator (no table privilege)",
+      "GRANT ace_view_owner TO rwb_migrator WITH INHERIT FALSE, SET TRUE (ADMIN false)"
+    ],
+    "appliedIn": "infra/postgres/init/20-grants.sql.inc after REVOKE ALL ON SCHEMA public FROM PUBLIC; role comments in infra/postgres/init/00-roles-and-databases.sh reworded; SIT, UAT and PROD by the environment owner (OI-E044-I)",
+    "notGranted": [
+      "ACE DBA role",
+      "any table privilege in public (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER)",
+      "CREATE on public",
+      "ADMIN on ace_view_owner",
+      "any other role membership"
+    ],
+    "test": "T-044-17",
+    "specRefs": [
+      "SPEC-RWB-E1-044-017"
+    ]
+  },
+  "outOfScope": [
+    {
+      "item": "MigrationRunRecorder; GET /api/recovery/v1/admin/jobs with type=MIGRATION; SCR-44 migration-run display; AC8 job-monitor status; story section 10 read and rerun authority; TC-E1-044-10",
+      "status": "out of scope by D-RCV-12; no receiving story named or inferred",
+      "documentGap": "DG-L10",
+      "openItem": "OI-E044-G",
+      "specRef": "SPEC-RWB-E1-044-017",
+      "checkedBy": "TASK-19"
+    },
+    {
+      "item": "Drift check against real SIT, UAT and PROD; read-only drift account; flag rwb.p3.migration-drift-gate",
+      "status": "out of scope by D-RCV-05",
+      "documentGap": "DG-L02",
+      "specRef": "SPEC-RWB-E1-044-012, SPEC-RWB-E1-044-017",
+      "checkedBy": "TASK-19"
+    },
+    {
+      "item": "public qualifier exception for CREATE VIEW ${recoverySchema}.v_ace_* (SEAM-E044-01); Section A grants and two non-fix files per key (SEAM-E044-02)",
+      "status": "seam owned by RWB-E1-069; not built here",
+      "openItems": [
+        "OI-E044-B",
+        "OI-E044-F"
+      ],
+      "documentGaps": [
+        "DG-L05",
+        "DG-L09"
+      ],
+      "specRef": "SPEC-RWB-E1-044-016",
+      "checkedBy": "TASK-19"
+    }
+  ]
+}

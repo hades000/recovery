@@ -1,0 +1,24 @@
+{
+  "runId": "INC-006-epic-1-RWB-TE-011",
+  "story": "RWB-TE-011",
+  "apiImpactType": "NO_API_CHANGE",
+  "reason": "Build-time lint; no endpoint, schema, status code or message added or changed (story file v1 §10, TC-TE-011-11). API Specification v4 is read as an input file only.",
+  "endpoints": [],
+  "buildToolContract": {
+    "component": "tools/pdpa-lint (PdpaLintStep)",
+    "trigger": "Every merge request pipeline and every branch pipeline, including main (story file v1 §12; SPEC-TE011-013)",
+    "inputs": [
+      "Dictionary seed: sys_fields.is_personal (default infra/postgres/schema/03-recovery-physical-schema-v6.sql, then backend/src/main/resources/db/modulemigration/recovery/*.sql)",
+      "API specification: api/recovery-api-v4.yaml (x-personal-data: true)",
+      "Scan roots per tools/pdpa-lint/pdpa-lint.yaml (SPEC-TE011-003)",
+      "Allow list: tools/pdpa-lint/pdpa-allow.yaml (SPEC-TE011-011)"
+    ],
+    "generated": "pdpa-rules.yaml in build output, CI artifact, not committed (SPEC-TE011-002)",
+    "rules": ["PDPA-LOG-FIELD", "PDPA-LOG-ENTITY", "PDPA-EXCEPTION", "PDPA-TOSTRING", "PDPA-FIXTURE-FIELD", "PDPA-FIXTURE-ID"],
+    "outputLine": "{rule}: {file}:{line} uses personal field {field}. Remove it or use the masking helper.",
+    "expiredAllowLine": "allow entry expired: {rule} {path} since {date}",
+    "exitCodes": { "0": "no unexcused finding", "1": "one or more unexcused findings", "2": "configuration or input error" },
+    "neverPrinted": "Any value found, any source line, any fixture value (BR7)",
+    "state": "None; rerun to restart; same commit and dictionary give the same output"
+  }
+}

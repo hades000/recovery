@@ -1,0 +1,406 @@
+RWB-E1-042 CENTRAL CONFIGURATION SERVICE AND PARAMETER CATALOG
+
+==============================================================
+PART 1. SCOPE OF THE STORY
+==============================================================
+
+Q1. Please confirm the scope of this story.
+
+A. Yes, your understanding is correct.
+
+RWB-E1-042 builds:
+  - the tables parameter_catalog and parameter_value
+  - the catalog seed, which loads the default values into the tables
+    when the system is deployed
+  - the endpoint GET /api/recovery/v1/admin/parameters
+  - the ParameterKeys class, which is generated automatically when
+    the system is built
+  - the service that reads parameter values (ParameterService) and
+    the start-up check for missing values
+  - the two build checks: the one that finds hard-coded numbers and
+    the one that checks the catalog is complete
+
+RWB-E1-042 does not build the upload, approve or rollback of
+parameter values. See Q3 and Q4.
+
+--------------------------------------------------------------
+
+Q2. Is ParameterKeys generated from the catalog file
+config/parameter-catalog.csv or from the table parameter_catalog?
+
+A. It is generated from the CATALOG FILE config/parameter-catalog.csv.
+
+  - The class is generated when the system is built. At that moment
+    there is no database to read from.
+  - The file is the single source of truth. The system copies the
+    file's rows into the parameter_catalog table when it is deployed.
+    So the table is a copy of the file.
+  - To add a new parameter, a developer edits the file, the team
+    reviews it, and a new release goes out.
+  - To change a value, nobody needs a release. The value is loaded
+    and approved.
+
+--------------------------------------------------------------
+
+Q3. Which endpoints are not in this story?
+
+A. These three are not built in E1-042:
+  - POST /admin/reference-loads (upload)
+  - POST /admin/reference-loads/{loadId}/approve
+  - POST /admin/reference-loads/{loadId}/rollback
+
+RWB-E1-043 builds the upload and approve endpoints. RWB-E1-019
+builds the rollback endpoint, as recorded in the stories.
+
+--------------------------------------------------------------
+
+Q4. Who handles an upload to POST /admin/reference-loads with table
+"PARAMETER": E1-042 or E1-043?
+
+A. RWB-E1-043 handles it. This covers the endpoint and the PARAMETER
+handler behind it. The handler checks the key, the value type, the
+value range and the environment, and it saves the rows into
+parameter_value.
+
+RWB-E1-042 only creates the tables and the catalog that the handler
+uses. RWB-E1-043 depends on E1-042, so it can build the PARAMETER
+handler on top of them.
+
+To make this work, E1-043 must add "PARAMETER" to its scope.
+  - Today E1-043's list of 13 tables does not include PARAMETER.
+  - The handler writes straight into parameter_value, while the
+    other tables go into reference_version and reference_row.
+
+==============================================================
+PART 2. POST /api/recovery/v1/admin/reference-loads
+==============================================================
+
+This endpoint is built in RWB-E1-043. The answers below describe how
+it must work for table PARAMETER.
+
+Q5. Is table = "PARAMETER" sent in the body of this API?
+
+A. Yes. The request is a form upload (multipart/form-data). "table"
+is one of the form fields.
+
+--------------------------------------------------------------
+
+Q6. Can you provide the full request body for this API?
+
+A.
+Field             Type                      Required  Meaning
+file              file                      Yes       A CSV file with the columns key,environment,value.
+                                                      Example: case.entry.dpd,PROD,91
+table             text                      Yes       Must be PARAMETER
+validFrom         date, like 2026-12-10     Yes       The date the new value starts. It cannot be
+                                                      before today's business date.
+changeRequestRef  text, max 30 characters   No        Change request number
+impactSummary     text, max 1000 characters No        What the change affects
+rollbackPlan      text, max 1000 characters No        How to undo the change
+
+Permission needed: Reference data, right C.
+
+If the same file is sent again with the same table and validFrom,
+the system returns the load it already has. It does not create a
+second one.
+
+--------------------------------------------------------------
+
+Q7. Do you have example responses for success and failure?
+
+A. Yes. These are examples. The specification does not give worked
+examples, so the exact text of type, title and traceId may differ.
+
+SUCCESS (HTTP 201)
+
+{
+  "id": "3f2b8c1e-0000-0000-0000-000000000000",
+  "table": "PARAMETER",
+  "validFrom": "2026-12-10",
+  "status": "VALIDATED",
+  "rows": 1
+}
+
+FAILURE: the value is outside the allowed range (HTTP 422)
+
+{
+  "type": "about:blank",
+  "title": "Unprocessable",
+  "status": 422,
+  "detail": "case.entry.dpd must be between 1 and 365.",
+  "messageCode": "MSG-GEN-002",
+  "messageTh": "case.entry.dpd ต้องอยู่ระหว่าง 1 ถึง 365",
+  "field": "case.entry.dpd",
+  "traceId": "..."
+}
+
+FAILURE: the value has the wrong type (HTTP 422)
+
+{
+  "type": "about:blank",
+  "title": "Unprocessable",
+  "status": 422,
+  "detail": "The PARAMETER load for 2026-12-10 was refused: value is not INTEGER. The previous load is still in use.",
+  "messageCode": "MSG-P1-002",
+  "traceId": "..."
+}
+
+All error responses use the same format (application/problem+json).
+
+--------------------------------------------------------------
+
+Q8. Does error 503 have a message?
+
+A. Not yet. The story does not name one.
+
+The API specification lists two possible messages for 503:
+  - MSG-P7-003: "The action was not taken because the decision could
+    not be recorded. Try again in a few minutes."
+  - MSG-GEN-006: "{system} is not available. Your request is queued
+    and will be retried."
+
+Our proposal: use MSG-GEN-006 and set {system} to "Parameter service".
+
+MSG-GEN-006 says the request is "queued", but a load or a read is
+not queued. Please confirm this message or give us a different one.
+We will then record it in the API specification.
+
+--------------------------------------------------------------
+
+Q9. Does error 401 have a message?
+
+A. Yes. It is MSG-P4-001:
+  - English: "You have no Recovery Workbench role. Ask your team
+    manager to request one."
+  - Thai: "คุณยังไม่มีสิทธิ์ใช้งาน Recovery Workbench กรุณาติดต่อผู้จัดการทีมเพื่อขอสิทธิ์"
+
+--------------------------------------------------------------
+
+Q10. "Wrong type or unknown key (MSG-P1-002)" and "empty file
+(MSG-GEN-001)" show no error code. Can this API return them?
+
+A. Yes, this API can return both.
+
+  - They are returned with HTTP status 422.
+  - The code is in the "messageCode" field of the response. There is
+    no separate error-code field.
+
+HTTP status  When                                         Message
+401          Not signed in, or no Workbench role          MSG-P4-001
+403          No Reference data C permission               MSG-P4-002
+409          An approved version already exists for       MSG-P3-027
+             this start date with different content
+422          Value outside the range                      MSG-GEN-002
+422          Wrong value type, or key not in the catalog  MSG-P1-002
+422          Empty file                                   MSG-GEN-001
+503          Service unavailable                          Proposed: MSG-GEN-006 (see Q8)
+
+The API specification lists MSG-P1-002 in the story but not in its
+own error list. We will add it to the API specification.
+
+==============================================================
+PART 3. GET /api/recovery/v1/admin/parameters
+==============================================================
+
+This endpoint is built in RWB-E1-042. The full path is
+/api/recovery/v1/admin/parameters. The story text shows only the
+short form /admin/parameters.
+
+Q11. For the request query "key" (prefix), what kind of prefix do
+we use?
+
+A. "key" matches the START of the parameter key. The specification
+does not give a fixed list of prefixes. The Epic 1 catalog uses
+lowercase words separated by dots:
+
+Prefix          Example key
+case.           case.entry.dpd
+refdata.        refdata.cache.ttl-seconds
+config.         config.cache.ttl-seconds
+caselist.       caselist.export.maxrows
+recon.          recon.caselist.tolerance.pct
+servicelevel.   servicelevel.required-statuses
+ace.            ace.db.password
+
+Product parameters use uppercase names with no prefix, for example
+ENTRY_DPD and NOTICE_PERIOD_DAYS.
+
+Example: GET /api/recovery/v1/admin/parameters?key=case. returns
+every key that starts with "case.".
+
+--------------------------------------------------------------
+
+Q12. Can you provide the full request and response for this API?
+
+A.
+
+REQUEST. There is no body. There are four optional query parameters:
+
+Query parameter  Meaning
+key              Start of the parameter key
+kind             BUSINESS or ENVIRONMENT
+owner            Owner role, for example RW-COE
+environment      DEV, SIT, UAT or PROD
+
+Permission needed: Rules and parameters, right R.
+
+RESPONSE (HTTP 200). A list with one entry per parameter. It is not
+split into pages.
+
+Field          Meaning
+key            Parameter name
+kind           BUSINESS or ENVIRONMENT
+type           Value type, for example INTEGER
+unit           Unit, for example SECONDS
+min, max       Smallest and largest allowed value
+default        Default value
+scope          GLOBAL or PRODUCT
+required       true or false
+owner          Owner role
+environments   Environments where it applies
+usedBy         Code packages that read it
+secret         true if it is a secret
+valueInForce   The value in use now. Left out when "secret" is true.
+versionNo      Version number of that value
+validFrom      Date that version started
+
+ONE POINT TO CONFIRM. Each entry has only one valueInForce. The
+specification does not say which environment it belongs to when
+"environment" is not sent.
+
+Our proposal: if "environment" is not sent, return the value for the
+environment the service is running in. If it is sent, return the
+value for that environment. Please confirm.
+
+--------------------------------------------------------------
+
+Q13. Do you have example responses for success and failure?
+
+A.
+
+SUCCESS (HTTP 200)
+
+[
+  {
+    "key": "case.entry.dpd",
+    "kind": "BUSINESS",
+    "type": "INTEGER",
+    "unit": "CALENDAR_DAYS",
+    "min": "1",
+    "max": "365",
+    "default": "90",
+    "scope": "GLOBAL",
+    "required": true,
+    "owner": "RW-COE",
+    "environments": ["DEV", "SIT", "UAT", "PROD"],
+    "usedBy": ["recovery.casewf.casecreation"],
+    "secret": false,
+    "valueInForce": "90",
+    "versionNo": 1,
+    "validFrom": "2026-11-30"
+  },
+  {
+    "key": "ace.db.password",
+    "kind": "ENVIRONMENT",
+    "type": "STRING",
+    "scope": "GLOBAL",
+    "required": false,
+    "owner": "RW-PLATADM",
+    "environments": ["DEV", "SIT", "UAT", "PROD"],
+    "usedBy": ["ACE common module"],
+    "secret": true
+  }
+]
+
+The second entry is a secret, so it has no valueInForce.
+
+FAILURE: the role has no Rules and parameters R permission (HTTP 403)
+
+{
+  "type": "about:blank",
+  "title": "Forbidden",
+  "status": 403,
+  "detail": "You cannot read parameters here. Your role does not include it.",
+  "messageCode": "MSG-P4-002",
+  "messageTh": "คุณไม่สามารถอ่านพารามิเตอร์ได้ เนื่องจากบทบาทของคุณไม่มีสิทธิ์นี้",
+  "traceId": "..."
+}
+
+The action text "read parameters" is our proposal, because the story
+does not fix it. This response contains no parameter list and no
+secret value.
+
+FAILURE: not signed in, or no Workbench role (HTTP 401)
+The messageCode is MSG-P4-001.
+
+--------------------------------------------------------------
+
+Q14. Does error 503 have a message?
+
+A. Not yet, the same as for the POST API. Our proposal is
+MSG-GEN-006 (see Q8). Please confirm.
+
+HTTP status  When                                      Message
+401          Not signed in, or no Workbench role       MSG-P4-001
+403          No Rules and parameters R permission      MSG-P4-002
+503          Service unavailable                       Proposed: MSG-GEN-006
+
+--------------------------------------------------------------
+
+Q15. Is "environment" in the request DEV, SIT, UAT?
+
+A. There are four environments: DEV, SIT, UAT and PROD. PROD is
+included.
+
+The catalog and the database accept only these four values. The API
+specification does not limit the "environment" field to them, so we
+will add that limit.
+
+==============================================================
+PART 4. WHAT MOVES OUT OF RWB-E1-042
+==============================================================
+
+Because E1-043 builds the PARAMETER upload, these parts of E1-042
+move to E1-043:
+
+Part of E1-042                                  What changes
+Flow steps 5, 6 and 7 (load, checks, approve)   Move to E1-043
+AC5 (range), AC6 (wrong type), AC7 (author      Move to E1-043, with tests
+cannot approve), AC10 (rollback)                TC-E1-042-05, 06, 07 and 10
+ParameterLoadChecks and ParameterLoadHandler    Move to E1-043
+Contract rows for the POST load, approve and    Removed from E1-042
+rollback endpoints
+Event ParameterVersionApproved                  Published by E1-043. E1-042's
+                                                ParameterService still listens
+                                                for it and refreshes its cache.
+Build step 4, and exception paths X4, X5, X6    Move to E1-043
+and X8
+
+What stays in E1-042: the two tables, the catalog seed,
+ParameterKeys, ParameterService, the start-up check,
+GET /admin/parameters and the two build checks.
+
+Two points to note:
+  - Tests. AC1, AC8 and AC11 need a second parameter version.
+    Without the upload endpoint, the E1-042 tests insert that
+    version straight into parameter_value as test data.
+  - Link between a load and its rows. parameter_value has no
+    load_id, but approve works on {loadId}. E1-043 must add a
+    load_id column to parameter_value.
+
+==============================================================
+WHAT WE NEED YOU TO CONFIRM
+==============================================================
+
+1. Who builds the PARAMETER upload
+   Our proposal: RWB-E1-043, with "PARAMETER" added to its scope.
+
+2. Message for HTTP 503 on both APIs
+   Our proposal: MSG-GEN-006, with {system} = "Parameter service".
+
+3. GET with no "environment" sent
+   Our proposal: return the value for the environment the service
+   is running in.
+
+4. Text for the 403 message on the GET
+   Our proposal: "read parameters".

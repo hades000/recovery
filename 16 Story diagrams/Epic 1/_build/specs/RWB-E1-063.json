@@ -1,0 +1,121 @@
+{
+  "key": "RWB-E1-063",
+  "file_stem": "RWB E1 063 Agent monitoring dashboard v1 E2c",
+  "title": "Agent monitoring dashboard v1 [E2c]",
+  "module": "P10 Agent runtime",
+  "flag": "rwb.agent.monitor",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "ai",
+  "overview_label": "Agent monitoring dashboard",
+  "goal": "Risk sees runs, fallback, latency, cost and scores daily, with an alert when the cost cap is breached",
+  "why": "An agent in use must stay watched. The dashboard reads a daily lake extract, never live tables, and is published only when counts match.",
+  "needs": [
+    "E1-061",
+    "E1-007",
+    "E1-014",
+    "E1-058"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-15 Reporting extract 01:30, step agentRunDaily"
+    ],
+    [
+      "API",
+      "POST /admin/jobs/{jobId}/rerun"
+    ],
+    [
+      "WHO",
+      "RW-RISK and RW-COE read Power BI"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Source is agent_run and agent_policy in the Workbench.",
+  "writes": [
+    {
+      "t": "agent_alert",
+      "note": "one alert per agent, type, segment and date"
+    }
+  ],
+  "reads": [
+    {
+      "t": "agent_run",
+      "note": "runs of the previous day"
+    },
+    {
+      "t": "agent_policy",
+      "note": "daily_cost_cap_thb, alert_role"
+    },
+    {
+      "t": "agent_evaluation",
+      "note": "latest DONE score"
+    }
+  ],
+  "stores": "Data lake table agent_run_daily; Power BI 'Agent monitor v1'; P6 notification interface; outbox (JOB-11)",
+  "functions": [
+    {
+      "name": "AgentRunExtractSource",
+      "does": "daily rows + alerts (published)"
+    },
+    {
+      "name": "AgentMonitorService",
+      "does": "aggregates per agent + version"
+    },
+    {
+      "name": "AgentRunExtractStep",
+      "does": "write, count check, publish"
+    },
+    {
+      "name": "CostAlertService",
+      "does": "cost vs cap, MSG-P10-004"
+    },
+    {
+      "name": "AgentAlertRepository",
+      "does": "agent_alert rows"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-15 at 01:30"
+    },
+    {
+      "kind": "table",
+      "text": "agent_run, previous day"
+    },
+    {
+      "kind": "function",
+      "text": "Group by agent + version"
+    },
+    {
+      "kind": "store",
+      "text": "agent_run_daily in the lake"
+    },
+    {
+      "kind": "check",
+      "text": "Cost above the 2,000 cap?"
+    },
+    {
+      "kind": "out",
+      "text": "Power BI + MSG-P10-004 alert"
+    }
+  ],
+  "rules": [
+    "BR1: the dashboard reads the data lake, never live tables",
+    "BR2: publish only when counts match",
+    "BR3: alert only when cost is above the cap (2,000 baht)",
+    "BR4: one alert per agent, type, segment and date"
+  ],
+  "risks": [
+    "Count mismatch -> publish held, previous day stays",
+    "Notification down -> alert retried by JOB-11",
+    "Cost exactly at the cap -> no alert"
+  ],
+  "example": [
+    "2026-12-01: INTAKE 120 runs, 9 fallbacks (0.0750), 1,840 baht -> no alert",
+    "SCREENING 150 runs, 2,310.50 baht, over the 2,000 cap",
+    "-> MSG-P10-004 to RW-COE and RW-RISK"
+  ]
+}

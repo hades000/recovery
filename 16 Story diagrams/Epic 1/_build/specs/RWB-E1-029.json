@@ -1,0 +1,127 @@
+{
+  "key": "RWB-E1-029",
+  "file_stem": "RWB E1 029 Rule load validation and rollback",
+  "title": "Rule load, validation and rollback",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.ruleload",
+  "status": "RETIRED",
+  "status_text": "Retired (D-RCV-36 T8) -> RWB-E1-073",
+  "theme": "default",
+  "overview_label": "Rule load + rollback",
+  "goal": "Rule changes move from Excel to production with checks, a dry run, approval and one-call rollback",
+  "why": "Retired by D-RCV-36 T8 (rules move to Drools XLS packages); the new home is RWB-E1-073. Shown here so readers see what the story covered.",
+  "needs": [],
+  "unblocks": [
+    "E1-048",
+    "TE-005"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/rule-versions (ALLOCATION ...)"
+    ],
+    [
+      "API",
+      "POST /admin/rule-versions/{versionId}/approve"
+    ],
+    [
+      "API",
+      "POST /admin/rule-versions/{versionId}/rollback"
+    ],
+    [
+      "JOB",
+      "RuleEffectiveDateJob daily 00:01"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The dry run counts open Workbench cases whose result would change.",
+  "writes": [
+    {
+      "t": "rule_row",
+      "note": "rule_table, row_order, target_queue_code"
+    },
+    {
+      "t": "rule_version",
+      "note": "header + change log per version"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "product, queue, region, band (dry run)"
+    },
+    {
+      "t": "lov_value",
+      "note": "LOV-ASSIGN, PRODUCT, REGION, EXPOSURE"
+    }
+  ],
+  "stores": "Excel rule template with Rows and Tests tabs",
+  "functions": [
+    {
+      "name": "RuleTemplateParser",
+      "does": "reads Rows + Tests tabs"
+    },
+    {
+      "name": "RuleLoadValidator",
+      "does": "overlap, unreachable, default row"
+    },
+    {
+      "name": "RuleTestRunner",
+      "does": "runs the 50 test cases"
+    },
+    {
+      "name": "RuleDryRun",
+      "does": "counts cases that would change"
+    },
+    {
+      "name": "RuleVersionService",
+      "does": "approve, effective date, rollback"
+    },
+    {
+      "name": "RuleEffectiveDateJob",
+      "does": "APPROVED -> IN_FORCE at 00:01"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "RW-COE loads ALLOC-2026.12"
+    },
+    {
+      "kind": "check",
+      "text": "Schema, overlap, default row"
+    },
+    {
+      "kind": "check",
+      "text": "50 tests + dry run"
+    },
+    {
+      "kind": "check",
+      "text": "RW-RISK approves (not author)"
+    },
+    {
+      "kind": "table",
+      "text": "rule_version IN_FORCE on valid_from"
+    },
+    {
+      "kind": "out",
+      "text": "Rollback restores previous in 1 call"
+    }
+  ],
+  "rules": [
+    "BR1: schema, overlap, unreachable, default and test checks must all pass",
+    "BR3: hit policy Unique (ADR-004)",
+    "BR6: the author cannot approve; Risk signs",
+    "BR7: rollback in one call"
+  ],
+  "risks": [
+    "Two rows match at the same row order -> refused (MSG-P3-027)",
+    "Approver is the author -> refused (MSG-P7-002)",
+    "Rollback with no earlier version -> refused (MSG-P3-015)"
+  ],
+  "example": [
+    "U-41 (RW-COE) loads ALLOC-2026.12: 26 rows, 50 tests, over ALLOC-2026.11 (24 rows)",
+    "U-51 (RW-RISK) approves; in force 2026-12-15",
+    "Change log: '50 of 50 test cases passed'"
+  ]
+}

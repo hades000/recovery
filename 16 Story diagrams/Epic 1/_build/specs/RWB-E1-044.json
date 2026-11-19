@@ -1,0 +1,122 @@
+{
+  "key": "RWB-E1-044",
+  "file_stem": "RWB E1 044 Database migrations versioned with parameterized schema names",
+  "title": "Database migrations versioned with parameterized schema names",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.migration-drift-gate",
+  "status": "READY",
+  "status_text": "Ready (naming per D-RCV-28)",
+  "theme": "default",
+  "overview_label": "Flyway migration rules",
+  "goal": "Every schema change is a forward-only Flyway migration with no literal schema name",
+  "why": "DEV, SIT, UAT and PROD must hold the same recovery schema. Files are V<seq>__<story>_<name>.sql with ${recoverySchema}; the views ship as V0002 / V0003.",
+  "needs": [],
+  "unblocks": [
+    "E1-042",
+    "E1-043",
+    "TE-005",
+    "TE-006",
+    "TE-007"
+  ],
+  "triggers": [
+    [
+      "BUILD",
+      "MigrationLint on every pull request"
+    ],
+    [
+      "BUILD",
+      "SchemaDriftCheck: clean vs target"
+    ],
+    [
+      "JOB",
+      "Flyway migrate step at deployment"
+    ],
+    [
+      "API",
+      "GET /admin/jobs?type=MIGRATION"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. It fixes how the 30 views ship: Section A in V0002 (E1-069), Section B in V0003 after RWB-ACE-001. No FK into public.",
+  "writes": [
+    {
+      "t": "flyway_schema_history_recovery",
+      "note": "own history table: version + checksum"
+    }
+  ],
+  "reads": [
+    {
+      "t": "information_schema",
+      "note": "drift check"
+    },
+    {
+      "t": "sys_objects",
+      "note": "lint: every table catalogued"
+    }
+  ],
+  "stores": "PostgreSQL test container in the pipeline; P1 job monitor record per run",
+  "functions": [
+    {
+      "name": "RecoveryFlywayConfig",
+      "does": "own Flyway instance, clean refused"
+    },
+    {
+      "name": "MigrationRunRecorder",
+      "does": "job record per run"
+    },
+    {
+      "name": "MigrationLint",
+      "does": "literal schema, FK into public"
+    },
+    {
+      "name": "SchemaDriftCheck",
+      "does": "clean build vs target diff"
+    },
+    {
+      "name": "V0001__rwb_e1_001_recovery_schema",
+      "does": "the baseline (E1-001)"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Developer adds V<seq>__<story>.sql"
+    },
+    {
+      "kind": "check",
+      "text": "Lint: no literal schema, no FK to public"
+    },
+    {
+      "kind": "check",
+      "text": "Apply to a clean container"
+    },
+    {
+      "kind": "check",
+      "text": "Drift check vs target"
+    },
+    {
+      "kind": "table",
+      "text": "flyway_schema_history_recovery"
+    },
+    {
+      "kind": "out",
+      "text": "Same schema in every environment"
+    }
+  ],
+  "rules": [
+    "BR2: no literal schema name; use ${recoverySchema} (fixed to recovery)",
+    "BR4: PROD is forward-only: clean disabled, no undo files",
+    "BR6: its own history table flyway_schema_history_recovery",
+    "BR8: no foreign key into public (ADR-010)"
+  ],
+  "risks": [
+    "Schema drift found -> pipeline fails (MSG-P3-016)",
+    "An applied file was edited -> checksum fails, service does not start (MSG-P3-016)",
+    "Literal schema name in a file -> build fails (MSG-P3-016)"
+  ],
+  "example": [
+    "V12__add_queue_to_case.sql with header '-- Story: RWB-E1-020'",
+    "-> applied once; version 12 + checksum in flyway_schema_history_recovery",
+    "Second run applies nothing"
+  ]
+}

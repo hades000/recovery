@@ -1,0 +1,741 @@
+<!-- source: 02 Business architecture and process/Recovery Workbench Detailed Process Flows v4.xlsx -->
+<!-- converted: 2026-11-04 from XLSX -->
+
+> **Source:** `02 Business architecture and process/Recovery Workbench Detailed Process Flows v4.xlsx`  
+> **Converted from:** XLSX
+
+## Flows
+
+| Detailed process flows |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|
+| Ten flows. Step and rule counts are calculated from the Steps and Rules tabs. |  |  |  |  |  |  |
+| Flow | Name | Starts when | Steps | Rules | End states | Exception events |
+| Restructure | Restructure, TDR | The route decision D6 approves a restructure, or D5 proposes one |  |  | 3 | 5 |
+| Settlement | Settlement | The route decision D6 approves a settlement |  |  | 2 | 4 |
+| Deed in lieu and voluntary surrender | Deed in lieu and voluntary surrender | The route decision D6 approves a deed in lieu, or the customer offers the asset during a negotiation |  |  | 2 | 3 |
+| Litigation and enforcement | Litigation and enforcement, D7 | The route decision D6.3 approves litigation, or a broken treatment returns the case to the legal route |  |  | 4 | 10 |
+| Guarantee claim | Guarantee claim, D6.5 and D6.6 | A guarantee is detected on the case at takeover and the claim deadline timer starts |  |  | 2 | 6 |
+| Asset disposal | Asset disposal, D8.1 to D8.3 | An asset is taken onto the bank's books and the holding age clock starts |  |  | 4 | 7 |
+| Debt sale | Debt sale, D8.4 | The monthly debt sale cycle opens, or a residual arrives from the disposal route |  |  | 2 | 7 |
+| Write off and recover after charge-off | Write off and recover after charge-off, D9 | The monthly eligibility scan runs on the cut-off date, or a residual arrives from another route |  |  | 2 | 9 |
+| Deviations X1 to X7 | Deviations X1 to X7 | The screening agent flags a deviation at entry or on a new document |  |  | 3 | 0 |
+| Universal rules | Universal rules, any state | The case is in any active state on any route |  |  | 6 | 2 |
+| Total |  |  |  |  |  |  |
+
+## Steps
+
+| Steps |  |  |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|---|---|
+| 233 steps with their lane, owner, systems and the rules that enter and leave each one. |  |  |  |  |  |  |  |  |  |
+| Flow | Step | Label | Element | Lane | Owner | Systems | Rules in | Rules out | Timers |
+| Restructure | ROUTE_APPROVED_RESTRUCTURE | Route approved | Start event | The Workbench | None | None | None | R-RES-01 | None |
+| Restructure | PROPOSED_IN_COLLINS | Proposed in COLLINS | System task | The Workbench | Workbench | Workbench, COLLINS | R-RES-01 | R-RES-02, R-RES-03 | None |
+| Restructure | IN_FCR_QUEUE | In the FCR queue | User task | Case owner and the recovery team | Restructuring officer, FCR, FCR team manager | COLLINS, EFS, Workbench | R-RES-02, R-RES-05 | R-RES-04, R-RES-05 | 2 working days |
+| Restructure | WITH_FCR_OFFICER | With the FCR officer | User task | Case owner and the recovery team | Restructuring officer, FCR | EFS, Workbench, ACE and TDR | R-RES-04, R-RES-07, R-RES-15 | R-RES-06, R-RES-09, R-RES-10, R-RES-35 | 2 working days |
+| Restructure | AFFORDABILITY_IN_ACE | Affordability in ACE | System task | The Workbench | ACE and TDR system | ACE and TDR, Workbench | R-RES-06 | R-RES-07, R-RES-08 | 2 working days |
+| Restructure | AWAITING_CREDIT_APPROVAL | Awaiting credit approval | User task | Approvers and committees | Credit approval committee, Head of credit | Workbench | R-RES-10, R-RES-13 | R-RES-11, R-RES-12, R-RES-13 | 3 working days |
+| Restructure | DECLINED_BY_CREDIT | Declined by credit | Exception event | Case owner and the recovery team | Restructuring officer, FCR | Workbench | R-RES-12 | R-RES-14 | None |
+| Restructure | OFFER_WITH_CUSTOMER | Offer with the customer | Customer task | Customer and guarantor | Customer, Deviation owner | Workbench, WIN and DMS, LINE, SMS | R-RES-09, R-RES-11, R-RES-19 | R-RES-15, R-RES-16, R-RES-17, R-RES-18, R-RES-19 | offer validity 14 days |
+| Restructure | RETURNED_TO_COLLINS | Returned to COLLINS | Exception event | The Workbench | Workbench | COLLINS, EFS, Workbench | R-RES-17, R-RES-18 | R-RES-20 | None |
+| Restructure | WITH_OPS_BOOKING | With operations | User task | Case owner and the recovery team | Operations (booking) | EasyApp e-signature, Workbench, NLEADS, ALS core | R-RES-16, R-RES-21, R-RES-23, R-RES-24 | R-RES-21, R-RES-22, R-RES-23, R-RES-24 | 1 working day; 2 working days |
+| Restructure | BOOKED_IN_ALS_NLEADS | Booked | System task | The Workbench | Workbench | ALS core, NLEADS | R-RES-22 | R-RES-25 | None |
+| Restructure | PLAN_RUNNING | Plan running | System task | Case owner and the recovery team | Restructuring officer, FCR, Workbench, Deviation owner | Workbench, ALS core | R-RES-25, R-RES-26, R-RES-28, R-RES-34 | R-RES-26, R-RES-27, R-RES-33, R-RES-34 | None |
+| Restructure | PLAN_CURE_PERIOD | In the cure period | Exception event | Case owner and the recovery team | Case owner | ALS core, Workbench | R-RES-27 | R-RES-28, R-RES-29 | cure_period_days from reference data |
+| Restructure | PLAN_BROKEN | Plan broken | Exception event | Case owner and the recovery team | Case owner | Workbench | R-RES-29 | R-RES-30, R-RES-31, R-RES-36 | None |
+| Restructure | PLAN_COMPLETED | Plan completed | End event | The Workbench | Workbench | ALS core, CCMS, Workbench | R-RES-33 | None | None |
+| Restructure | BACK_TO_ROUTE_DECISION | Back to the route decision | End event | Case owner and the recovery team | Case owner | COLLINS, Workbench, ACE and TDR | R-RES-03, R-RES-08, R-RES-14, R-RES-20, R-RES-30, R-RES-32, R-RES-37 | None | 5 working days; 2 working days |
+| Restructure | RESTRUCTURE_BARRED | Restructure barred | End event | Case owner and the recovery team | Case owner | Workbench | R-RES-31 | R-RES-32 | None |
+| Restructure | UNMATCHED_EXCEPTION | UNMATCHED_EXCEPTION | Exception event | Case owner and the recovery team | Case owner | Workbench | R-RES-35, R-RES-36 | R-RES-37 | same day |
+| Settlement | ROUTE_APPROVED_SETTLEMENT | Route approved | Start event | The Workbench | None | None | None | R-SET-01 | None |
+| Settlement | PAYOFF_AND_RANGE_SET | Payoff and range set | System task | The Workbench | Workbench | ALS core, Workbench | R-SET-01, R-SET-03 | R-SET-02, R-SET-03 | None |
+| Settlement | WITH_FCR_OFFICER_SET | With the FCR officer | User task | Case owner and the recovery team | Restructuring officer, FCR | EFS, Workbench | R-SET-02, R-SET-09 | R-SET-04, R-SET-05, R-SET-25 | 2 working days |
+| Settlement | AWAITING_APPROVAL_SET | Awaiting approval | User task | Approvers and committees | Credit approval committee | Workbench | R-SET-05 | R-SET-06, R-SET-07 | 3 working days |
+| Settlement | DECLINED_BY_APPROVER_SET | Approval refused | Exception event | Case owner and the recovery team | Restructuring officer, FCR | Workbench | R-SET-07 | R-SET-08 | None |
+| Settlement | OFFER_WITH_CUSTOMER_SET | Offer with the customer | Customer task | Customer and guarantor | Customer, Deviation owner | Workbench, WIN and DMS, LINE, SMS | R-SET-04, R-SET-06, R-SET-12 | R-SET-09, R-SET-10, R-SET-11, R-SET-12 | offer validity 14 days |
+| Settlement | WITH_OPS_SETTLEMENT | With operations | User task | Case owner and the recovery team | Operations (booking) | EasyApp e-signature, Workbench | R-SET-10 | R-SET-13 | 1 working day |
+| Settlement | AWAITING_PAYMENT | Awaiting payment | Customer task | Customer and guarantor | Customer, Case owner | ALS core, Workbench | R-SET-13, R-SET-16 | R-SET-14, R-SET-15, R-SET-16, R-SET-17, R-SET-26 | payment due 30 days; 2 working days |
+| Settlement | PAYMENT_PART_RECEIVED | Part received | Exception event | The Workbench | Workbench | ALS core, Workbench | R-SET-15 | R-SET-18, R-SET-19 | None |
+| Settlement | PAYMENT_CLEARED | Payment cleared | System task | The Workbench | Workbench | ALS core, GL, Workbench | R-SET-14, R-SET-18 | R-SET-20 | None |
+| Settlement | COLLATERAL_RELEASE_REQUESTED | Release requested | System task | The Workbench | Workbench, Case owner | ALS core, CCMS, the Workbench document hub | R-SET-20, R-SET-22 | R-SET-21, R-SET-22 | 5 working days |
+| Settlement | PAYMENT_REVERSED | Payment reversed | Exception event | Case owner and the recovery team | Case owner | ALS core, Workbench | R-SET-23 | R-SET-24 | None |
+| Settlement | CASE_CLOSED_SETTLED | Case closed | End event | The Workbench | Workbench | CCMS, the Workbench document hub, Workbench | R-SET-21 | R-SET-23 | None |
+| Settlement | RETURNED_TO_ROUTE_SET | Back to the route decision | End event | Case owner and the recovery team | Case owner | Workbench | R-SET-08, R-SET-11, R-SET-17, R-SET-19, R-SET-24, R-SET-27 | None | 2 working days |
+| Settlement | UNMATCHED_EXCEPTION | UNMATCHED_EXCEPTION | Exception event | Case owner and the recovery team | Case owner | Workbench | R-SET-25, R-SET-26 | R-SET-27 | same day |
+| Deed in lieu and voluntary surrender | ROUTE_APPROVED_DIL | Route approved | Start event | The Workbench | None | None | None | R-DIL-01 | None |
+| Deed in lieu and voluntary surrender | EARLY_READINESS_CHECK | Early readiness check | System task | The Workbench | Workbench | Workbench, CCMS | R-DIL-01 | R-DIL-02, R-DIL-03, R-DIL-04 | 2 working days |
+| Deed in lieu and voluntary surrender | ENCUMBRANCE_BLOCKED | Encumbrance unresolved | Exception event | Case owner and the recovery team | Case owner | CCMS, Land Office | R-DIL-04 | R-DIL-05, R-DIL-06 | 10 working days |
+| Deed in lieu and voluntary surrender | VALUATION_ORDERED | Valuation ordered | System task | The Workbench | Workbench | CCMS, Land Office, Workbench, SCIS | R-DIL-02, R-DIL-03, R-DIL-05 | R-DIL-07, R-DIL-08 | None |
+| Deed in lieu and voluntary surrender | AWAITING_VALUER | Awaiting the valuer | Partner task | Partners and external parties | Valuer, Partner and agency manager | SVAF, Partner Portal | R-DIL-07, R-DIL-11 | R-DIL-09, R-DIL-10, R-DIL-11 | panel service level |
+| Deed in lieu and voluntary surrender | VALUATION_ACCEPTED | Valuation accepted | System task | Case owner and the recovery team | Workbench, Case owner | Workbench, SVAF | R-DIL-08, R-DIL-09, R-DIL-10 | R-DIL-12 | 2 working days |
+| Deed in lieu and voluntary surrender | WITH_FCR_OFFICER_DIL | With the FCR officer | User task | Case owner and the recovery team | Restructuring officer, FCR | Workbench | R-DIL-12 | R-DIL-13 | 5 working days |
+| Deed in lieu and voluntary surrender | TRANSFER_PRICE_SET | Transfer price set | System task | The Workbench | Workbench | Workbench | R-DIL-13 | R-DIL-14, R-DIL-15 | None |
+| Deed in lieu and voluntary surrender | AWAITING_SECOND_SIGNATURE | Awaiting second signature | User task | Approvers and committees | Head of NPA | Workbench | R-DIL-15 | R-DIL-16, R-DIL-17 | 3 working days |
+| Deed in lieu and voluntary surrender | OFFER_WITH_CUSTOMER_DIL | Offer with the customer | Customer task | Customer and guarantor | Customer | the Workbench document hub, WIN and DMS, Workbench | R-DIL-14, R-DIL-16 | R-DIL-18, R-DIL-19, R-DIL-20, R-DIL-21, R-DIL-35 | offer validity 14 days |
+| Deed in lieu and voluntary surrender | WITH_FIELD_INSPECTION | Field inspection | User task | Partners and external parties | Field officer or agency field team | Field App, Workbench, RPS | R-DIL-18, R-DIL-19 | R-DIL-22 | 5 working days |
+| Deed in lieu and voluntary surrender | ASSET_UNLOCK_DECISION | Asset unlock rule | Gateway | The Workbench | Workbench | Field App, Workbench | R-DIL-22 | R-DIL-23, R-DIL-24 | None |
+| Deed in lieu and voluntary surrender | AWAITING_APPROVER_SUMMARY | Approver summary | User task | Approvers and committees | Head of NPA | Workbench | R-DIL-24 | R-DIL-25, R-DIL-26 | 3 working days |
+| Deed in lieu and voluntary surrender | AWAITING_TRANSFER | Awaiting transfer | Partner task | Customer and guarantor | Customer | Workbench, Land Office, SCIS | R-DIL-23, R-DIL-25, R-DIL-30 | R-DIL-27, R-DIL-28, R-DIL-29, R-DIL-36 | None |
+| Deed in lieu and voluntary surrender | TITLE_NOT_CLEAN | Title not clean | Exception event | Case owner and the recovery team | Case owner | Land Office, SCIS, CCMS | R-DIL-29 | R-DIL-30, R-DIL-31 | 10 working days |
+| Deed in lieu and voluntary surrender | ASSET_ON_BOOKS | Asset on the books | System task | The Workbench | Workbench | Land Office, AMIS, ALS core, CCMS, SCIS | R-DIL-27, R-DIL-28 | R-DIL-32, R-DIL-33 | None |
+| Deed in lieu and voluntary surrender | RENTAL_RUNNING | Rental running | System task | Case owner and the recovery team | Case owner | ATS, AMIS, Workbench | R-DIL-32 | R-DIL-34 | None |
+| Deed in lieu and voluntary surrender | HANDED_TO_DISPOSAL | Handed to disposal | End event | Case owner and the recovery team | Sale officer | AMIS, Workbench, ATS | R-DIL-33, R-DIL-34 | None | None |
+| Deed in lieu and voluntary surrender | RETURNED_TO_ROUTE_DIL | Back to the route decision | End event | Case owner and the recovery team | Case owner | Workbench | R-DIL-06, R-DIL-17, R-DIL-20, R-DIL-21, R-DIL-26, R-DIL-31, R-DIL-37 | None | 2 working days |
+| Deed in lieu and voluntary surrender | UNMATCHED_EXCEPTION | UNMATCHED_EXCEPTION | Exception event | Case owner and the recovery team | Case owner | Workbench | R-DIL-35, R-DIL-36 | R-DIL-37 | same day |
+| Litigation and enforcement | LIT_ROUTE_APPROVED | Litigation approved | Start event | The Workbench | None | None | None | R-LIT-01, R-LIT-02 | None |
+| Litigation and enforcement | DEVIATION_HOLD | Deviation hold | Exception event | Case owner and the recovery team | Complaint officer, Named deviation approver | Workbench, Document Hub | R-LIT-14, R-LIT-73 | R-LIT-74, R-LIT-75, R-LIT-76, R-LIT-77, R-LIT-78, R-LIT-79 | None |
+| Litigation and enforcement | NOTICE_GENERATED | Notice generated | System task | The Workbench | Workbench | Workbench, Workbench scheduler, EFS, Rules component, the Workbench document hub | R-LIT-01, R-LIT-02, R-LIT-06 | R-LIT-03, R-LIT-04, R-LIT-05 | Same day; 1 working day |
+| Litigation and enforcement | NOTICE_BLOCKED | Notice blocked | Exception event | Case owner and the recovery team | Litigation officer, Conduct and QA officer | Workbench, the Workbench document hub | R-LIT-04, R-LIT-05, R-LIT-22 | R-LIT-06 | 1 working day; 2 working days |
+| Litigation and enforcement | NOTICE_DISPATCHED | Notice dispatched | System task | The Workbench | Workbench | Rules component, letter engine, the Workbench document hub, WIN and DMS, NCB | R-LIT-03, R-LIT-10 | R-LIT-07, R-LIT-08, R-LIT-09 | 1 working day; 3 working days |
+| Litigation and enforcement | WITH_CUSTOMER_NOTICE_PERIOD | Notice period running | Customer task | Customer and guarantor | Customer | WIN and DMS, Workbench | R-LIT-07 | R-LIT-12, R-LIT-13, R-LIT-14, R-LIT-15 | Notice period by product and type |
+| Litigation and enforcement | NOTICE_UNSERVED | Notice unserved | Exception event | Case owner and the recovery team | Litigation officer | WIN and DMS | R-LIT-08, R-LIT-09 | R-LIT-10, R-LIT-11 | 7 days; 2 working days |
+| Litigation and enforcement | PACK_ASSEMBLY | Pack assembled | System task | The Workbench | Head of Litigation, Workbench | Workbench, Workbench scheduler, Document Hub, the Workbench document hub | R-LIT-11, R-LIT-15, R-LIT-18, R-LIT-21, R-LIT-32 | R-LIT-16, R-LIT-17 | To the prescription date; 3 working days; 1 working day |
+| Litigation and enforcement | PACK_DEFECT_HOLD | Pack held on a defect | Exception event | Case owner and the recovery team | Litigation officer | Document Hub, the Workbench document hub | R-LIT-17 | R-LIT-18, R-LIT-19, R-LIT-20 | 5 working days |
+| Litigation and enforcement | PACK_VERIFIED | Pack verified | User task | Approvers and committees | Litigation officer, Head of Litigation | Document Hub, CCMS, LHS, the Workbench document hub, Workbench, Workbench scheduler | R-LIT-16, R-LIT-19, R-LIT-20 | R-LIT-21, R-LIT-22, R-LIT-23 | 2 working days; 10 working days; To the prescription date |
+| Litigation and enforcement | FIRM_SELECTION | Firm selected by rule | Gateway | The Workbench | Workbench | Rules component, partner performance data | R-LIT-23 | R-LIT-24, R-LIT-25 | Same day |
+| Litigation and enforcement | FIRM_ESCALATED | No firm available | User task | Approvers and committees | Head of Litigation | Workbench | R-LIT-25 | R-LIT-26 | 2 working days |
+| Litigation and enforcement | FIRM_INSTRUCTED | Firm instructed | Partner task | Partners and external parties | Panel law firm | Partner Portal, Rules component | R-LIT-24, R-LIT-26, R-LIT-29 | R-LIT-27, R-LIT-28, R-LIT-30 | 2 working days |
+| Litigation and enforcement | FIRM_DECLINED | Firm declined or breached | Exception event | The Workbench | Workbench, Partner and agency manager | Partner Portal | R-LIT-27, R-LIT-28 | R-LIT-29 | 2 working days |
+| Litigation and enforcement | FILED_IN_COURT | Filed in court | Partner task | Partners and external parties | Panel law firm | Partner Portal, court e-filing, LIT | R-LIT-30 | R-LIT-31, R-LIT-33 | Filing service level by task |
+| Litigation and enforcement | FILING_REJECTED | Court rejected the filing | Exception event | Case owner and the recovery team | Litigation officer | Partner Portal, LIT | R-LIT-31 | R-LIT-32 | 5 working days |
+| Litigation and enforcement | IN_HEARING | In hearing | Partner task | Partners and external parties | Panel law firm, Litigation officer | LIT, Partner Portal, Workbench scheduler, Workbench, Committee View, ALS core and GL | R-LIT-33, R-LIT-35, R-LIT-38, R-LIT-40, R-LIT-42, R-LIT-43, R-LIT-48, R-LIT-74 | R-LIT-34, R-LIT-36, R-LIT-41, R-LIT-44, R-LIT-45, R-LIT-73 | To the hearing date; To the new date; 5 working days |
+| Litigation and enforcement | HEARING_ADJOURNED | Hearing adjourned | Exception event | Partners and external parties | Panel law firm | Partner Portal, Workbench scheduler | R-LIT-34 | R-LIT-35 | To the new date |
+| Litigation and enforcement | SETTLEMENT_OFFERED_AT_COURT | Settlement offered | Gateway | Approvers and committees | Approver at D7.4 | Workbench, Committee View | R-LIT-36 | R-LIT-37, R-LIT-38 | 3 working days |
+| Litigation and enforcement | LITIGATION_HELD | Litigation held | System task | Case owner and the recovery team | Restructuring officer, FCR | Workbench, ALS core | R-LIT-37 | R-LIT-39, R-LIT-40 | 2 working days |
+| Litigation and enforcement | JUDGMENT_RECORDED | Judgment recorded | System task | Case owner and the recovery team | Enforcement owner | LIT, Partner Portal | R-LIT-44 | R-LIT-50, R-LIT-51 | 5 working days |
+| Litigation and enforcement | JUDGMENT_DISMISSED | Dismissed or lost | Exception event | Case owner and the recovery team | Litigation officer | LIT, Partner Portal | R-LIT-45 | R-LIT-46 | To the appeal window end |
+| Litigation and enforcement | APPEAL_DECISION | Appeal decision | Gateway | Approvers and committees | Approver at D7.4 | Workbench, Committee View | R-LIT-46 | R-LIT-47, R-LIT-49 | To the window end |
+| Litigation and enforcement | APPEAL_FILED | Appeal filed | Partner task | Partners and external parties | Panel law firm | Partner Portal, LIT | R-LIT-47 | R-LIT-48 | To the filing deadline |
+| Litigation and enforcement | LEGAL_SPEND_APPROVAL | Legal spend approval | Gateway | Approvers and committees | Approver at D7.4 | Workbench, Committee View | R-LIT-41 | R-LIT-42, R-LIT-43 | 3 working days |
+| Litigation and enforcement | ASSET_TRACE | Assets traced | System task | The Workbench | Workbench | NCB, registries, insurers | R-LIT-50 | R-LIT-52, R-LIT-53 | 10 working days |
+| Litigation and enforcement | ENFORCEMENT_DECISION | Enforce or defer | Gateway | Case owner and the recovery team | Enforcement owner | Workbench, Workbench scheduler, Partner Portal | R-LIT-52, R-LIT-53, R-LIT-56, R-LIT-64, R-LIT-69 | R-LIT-54, R-LIT-55, R-LIT-58 | 5 working days; 10 working days |
+| Litigation and enforcement | DEFERRAL_RECORDED | Deferral recorded | Exception event | Case owner and the recovery team | Enforcement owner | Workbench, Workbench scheduler | R-LIT-55 | R-LIT-56, R-LIT-57 | To the review date |
+| Litigation and enforcement | WRIT_AND_SEIZURE | Writ and seizure | Partner task | Partners and external parties | Panel law firm | Partner Portal, LED | R-LIT-54 | R-LIT-63, R-LIT-64 | To the writ deadline |
+| Litigation and enforcement | LED_AUCTION | LED auction | Partner task | Partners and external parties | Legal Execution Department | Partner Portal, LED | R-LIT-63, R-LIT-66 | R-LIT-65, R-LIT-66, R-LIT-67 | To the auction date; To the next auction date |
+| Litigation and enforcement | NO_BID_AT_70 | No bid at 70 percent | Exception event | Case owner and the recovery team | Enforcement owner | LED, Partner Portal | R-LIT-67 | R-LIT-68, R-LIT-69 | 5 working days |
+| Litigation and enforcement | PROCEEDS_MATCHED | Proceeds matched | System task | The Workbench | Workbench, Case owner | ALS core and GL, LED, ALS core, Workbench | R-LIT-61, R-LIT-65, R-LIT-72 | R-LIT-70, R-LIT-71, R-LIT-72 | 2 working days; 1 working day |
+| Litigation and enforcement | BANKRUPTCY_PETITION | Bankruptcy petition | Gateway | Approvers and committees | Approver at D7.5 | Workbench, Committee View | R-LIT-58 | R-LIT-59, R-LIT-60 | 5 working days |
+| Litigation and enforcement | OFFICIAL_RECEIVER_CLAIM | Claim with the official receiver | Partner task | Partners and external parties | Official receiver, Legal | Partner Portal, courts, Workbench | R-LIT-59, R-LIT-78 | R-LIT-61, R-LIT-62 | To the filing deadline; To the receiver deadline |
+| Litigation and enforcement | TO_TREATMENT | Back to treatment | End event | Case owner and the recovery team | Restructuring officer, FCR, Case owner | Workbench, EFS, LIT, SVAF | R-LIT-13, R-LIT-75, R-LIT-79 | None | 2 working days; 5 working days; 10 working days |
+| Litigation and enforcement | TO_ASSET_DISPOSAL | To asset disposal | End event | Case owner and the recovery team | Sale officer | AMIS, Workbench | R-LIT-68 | None | 5 working days |
+| Litigation and enforcement | TO_WRITE_OFF | To write off | End event | Case owner and the recovery team | Write-off team with Credit Administration, Fraud team with the write-off team | Workbench, Aric | R-LIT-49, R-LIT-57, R-LIT-60, R-LIT-62, R-LIT-71, R-LIT-77 | None | 10 working days |
+| Litigation and enforcement | CASE_CLOSED | Case closed | End event | Case owner and the recovery team | Case owner | ALS core, Workbench, LIT, ALS core and GL | R-LIT-12, R-LIT-39, R-LIT-51, R-LIT-70, R-LIT-76 | None | None |
+| Guarantee claim | GUARANTEE_DETECTED | Guarantee detected | Start event | The Workbench | None | None | None | R-GUA-01, R-GUA-02 | None |
+| Guarantee claim | NOT_ELIGIBLE | Not eligible | Exception event | Case owner and the recovery team | Guarantee officer | Workbench | R-GUA-02 | R-GUA-03 | None |
+| Guarantee claim | DEADLINE_TIMER_RUNNING | Claim deadline running | System task | The Workbench | Workbench | Workbench, Workbench scheduler, ALS core | R-GUA-01, R-GUA-03 | R-GUA-04, R-GUA-05, R-GUA-06 | To the claim deadline |
+| Guarantee claim | CLAIM_PREPARATION | Claim assembled | System task | The Workbench | Workbench | Workbench, Document Hub | R-GUA-04, R-GUA-10, R-GUA-13, R-GUA-18 | R-GUA-07, R-GUA-08, R-GUA-09 | 5 working days; 1 working day; 2 working days |
+| Guarantee claim | CLAIM_DEFECT_HOLD | Claim held on a defect | Exception event | Case owner and the recovery team | Guarantee officer | Document Hub, the Workbench document hub | R-GUA-08 | R-GUA-10, R-GUA-11 | 5 working days |
+| Guarantee claim | CLAIM_APPROVAL | Officer approves the claim | User task | Case owner and the recovery team | Guarantee officer, Head of Litigation | Document Hub, Workbench, Workbench scheduler | R-GUA-07, R-GUA-11 | R-GUA-12, R-GUA-13 | 3 working days; To the claim deadline |
+| Guarantee claim | CLAIM_SUBMITTED | Claim submitted | Partner task | Partners and external parties | TCG | Workbench, TCG claim channel | R-GUA-12, R-GUA-15, R-GUA-21 | R-GUA-14, R-GUA-17, R-GUA-20, R-GUA-22 | 2 working days; 5 working days |
+| Guarantee claim | GUARANTOR_NOTICE | Guarantor noticed | Customer task | Customer and guarantor | Guarantor, Case owner | WIN and DMS, Workbench | R-GUA-06, R-GUA-31 | R-GUA-28, R-GUA-29, R-GUA-30 | Notice period by product |
+| Guarantee claim | TCG_QUERY | TCG query | Exception event | Case owner and the recovery team | Guarantee officer | TCG claim channel, Workbench | R-GUA-14 | R-GUA-15, R-GUA-16 | To the TCG response date |
+| Guarantee claim | CLAIM_REJECTED | Claim rejected | Exception event | Case owner and the recovery team | Guarantee officer | TCG claim channel | R-GUA-16, R-GUA-17 | R-GUA-18, R-GUA-19 | 5 working days |
+| Guarantee claim | CLAIM_PART_PAID | Part paid | System task | The Workbench | Workbench | ALS core and GL | R-GUA-20 | R-GUA-21, R-GUA-24 | 2 working days |
+| Guarantee claim | CLAIM_PAID | Paid to the guaranteed share | System task | The Workbench | Workbench | ALS core and GL | R-GUA-22 | R-GUA-23 | 2 working days |
+| Guarantee claim | GUARANTOR_DISPUTE_HOLD | Guarantor dispute | Exception event | Case owner and the recovery team | Complaint officer | Workbench | R-GUA-30 | R-GUA-31, R-GUA-32 | None |
+| Guarantee claim | DEADLINE_MISSED | Claim deadline missed | Exception event | Case owner and the recovery team | Guarantee officer | Workbench, Workbench scheduler | R-GUA-05, R-GUA-09 | R-GUA-27 | None |
+| Guarantee claim | SUBROGATION_POSITION | Subrogation recorded | System task | Case owner and the recovery team | Guarantee officer | Workbench, ALS core | R-GUA-23, R-GUA-24 | R-GUA-25, R-GUA-26 | None |
+| Guarantee claim | RESIDUAL_TO_ROUTE | Residual to another route | End event | Case owner and the recovery team | Case owner | Workbench | R-GUA-19, R-GUA-25, R-GUA-27, R-GUA-29, R-GUA-32 | None | 5 working days |
+| Guarantee claim | GUARANTEE_CLOSED | Guarantee closed | End event | Case owner and the recovery team | Case owner | Workbench, ALS core | R-GUA-26, R-GUA-28 | None | 5 working days |
+| Asset disposal | ASSET_PENDING_TAKE_ON | Asset pending take-on | Start event | The Workbench | Workbench | WIN and DMS, Document Hub | R-DIS-05 | R-DIS-01, R-DIS-02, R-DIS-03, R-DIS-04 | None |
+| Asset disposal | FAILED_NOTICE_QUEUE | Failed notice queue | Exception event | Case owner and the recovery team | Sale officer | WIN and DMS, Document Hub | R-DIS-04 | R-DIS-05 | 2 working days |
+| Asset disposal | ASSET_ON_BOOKS | Asset record created | System task | Case owner and the recovery team | Sale officer | RPS, AMIS, Field App, integration adapters, the Land Office, the Legal Execution Department | R-DIS-01, R-DIS-02, R-DIS-03 | R-DIS-06, R-DIS-07 | 1 working day |
+| Asset disposal | TITLE_BLOCKED | Title or registration blocked | Exception event | Case owner and the recovery team | Sale officer | CCMS, the Land Office, SCIS, Document Hub | R-DIS-07, R-DIS-53 | R-DIS-08 | 10 working days; 5 working days |
+| Asset disposal | ASSET_HELD | Asset held | User task | Case owner and the recovery team | Sale officer, Workbench | Workbench, Finance provision feed, CCMS, the Land Office, SCIS, ALS core and GL, Partner Portal, LIT, SVAF, Decision Log, ATS | R-DIS-06, R-DIS-08, R-DIS-09, R-DIS-11, R-DIS-14, R-DIS-17, R-DIS-27, R-DIS-62, R-DIS-63, R-DIS-68, R-DIS-72 | R-DIS-09, R-DIS-10, R-DIS-13, R-DIS-15, R-DIS-19, R-DIS-66 | 3 working days; 2 working days |
+| Asset disposal | WORK_ORDER_OPEN | Work order with the vendor | Partner task | Partners and external parties | Property services vendor | Partner Portal | R-DIS-10, R-DIS-12 | R-DIS-11, R-DIS-12 | per fee schedule |
+| Asset disposal | EVICTION_REQUIRED | Eviction instructed | User task | Case owner and the recovery team | Litigation officer | LIT, Partner Portal | R-DIS-13 | R-DIS-14 | None |
+| Asset disposal | REAPPRAISAL_ORDERED | Re-appraisal ordered | Partner task | Partners and external parties | Valuer | SVAF, integration adapters, Decision Log | R-DIS-15, R-DIS-18 | R-DIS-16 | 10 working days |
+| Asset disposal | REAPPRAISAL_RECEIVED | Value reported | System task | Case owner and the recovery team | Sale officer | SVAF, Agent Runtime | R-DIS-16 | R-DIS-17, R-DIS-18 | 2 working days |
+| Asset disposal | DISPOSAL_PAUSED_DEVIATION | Paused on a deviation | Exception event | Case owner and the recovery team | Deviation owner | Workbench, Decision Log, auction portal | R-DIS-66, R-DIS-67 | R-DIS-68, R-DIS-69 | None |
+| Asset disposal | ROUTE_RECOMMENDED | Disposal route recommended | System task | Case owner and the recovery team | Sale officer | Agent Runtime, COLLINS, Case Workspace, Partner Portal | R-DIS-19, R-DIS-45, R-DIS-65 | R-DIS-20 | 2 working days |
+| Asset disposal | ROUTE_WITH_APPROVER | With the approver | Gateway | Case owner and the recovery team | Sale officer | Rules component, Committee View | R-DIS-20 | R-DIS-21, R-DIS-22, R-DIS-23, R-DIS-24, R-DIS-25, R-DIS-26, R-DIS-27, R-DIS-70 | 2 working days |
+| Asset disposal | ROUTE_APPROVED_AUCTION | Auction route approved | System task | Case owner and the recovery team | Sale officer, Committee | Case Workspace, Decision Log, Committee View | R-DIS-21, R-DIS-22 | R-DIS-28 | None |
+| Asset disposal | ROUTE_APPROVED_RAMC | RAMC route approved | System task | Case owner and the recovery team | Sale officer | Calculation Service, Committee View | R-DIS-23 | R-DIS-59 | None |
+| Asset disposal | ROUTE_APPROVED_BUYBACK | Buy-back route approved | System task | Case owner and the recovery team | Sale officer | Calculation Service, Case Workspace | R-DIS-24 | R-DIS-61, R-DIS-62 | None |
+| Asset disposal | RENTAL_ACTIVE | Asset rented | System task | Case owner and the recovery team | Sale officer | ATS, integration adapters | R-DIS-25 | R-DIS-63 | None |
+| Asset disposal | BROKER_INSTRUCTED | Broker instructed | Partner task | Partners and external parties | Broker | Partner Portal | R-DIS-26 | R-DIS-64, R-DIS-65 | per instruction term |
+| Asset disposal | PRICE_PROPOSED | Opening and floor price proposed | System task | Case owner and the recovery team | Sale officer | Agent Runtime, COLLINS | R-DIS-28 | R-DIS-29 | 1 working day |
+| Asset disposal | FLOOR_APPROVED | Floor approved | Gateway | The Workbench | Workbench | Rules component | R-DIS-29 | R-DIS-30, R-DIS-33, R-DIS-34 | None |
+| Asset disposal | LISTING_BLOCKED | Listing blocked on evidence | Exception event | Case owner and the recovery team | Sale officer | Document Hub | R-DIS-34 | R-DIS-35 | 5 working days |
+| Asset disposal | VENDOR_ALLOCATED | Vendor allocated on the scorecard | Partner task | Partners and external parties | Auction and remarketing vendor, Partner and agency manager | Rules component, Partner Portal | R-DIS-30, R-DIS-31 | R-DIS-31, R-DIS-32 | 2 working days |
+| Asset disposal | LISTING_LIVE | Listing live | System task | The Workbench | Auction and remarketing vendor, Workbench | Partner Portal, auction portal, HOME.SCB, Document Hub | R-DIS-32, R-DIS-33, R-DIS-35 | R-DIS-36, R-DIS-67 | 2 working days; per asset class |
+| Asset disposal | ROUND_OPEN | Round open at the price step | System task | Partners and external parties | Auction and remarketing vendor, Workbench | auction portal, Workbench scheduler, Rules component | R-DIS-36, R-DIS-38, R-DIS-50 | R-DIS-37, R-DIS-38, R-DIS-39 | per schedule |
+| Asset disposal | BID_RECEIVED | Bid received | System task | The Workbench | Workbench | auction portal | R-DIS-37 | R-DIS-40, R-DIS-41 | None |
+| Asset disposal | SECOND_SIGNATURE_PENDING | Second signature pending | Gateway | Approvers and committees | Committee | Committee View | R-DIS-41 | R-DIS-42, R-DIS-43 | 2 working days |
+| Asset disposal | NO_BID_AT_FLOOR | Floor reached with no bid | Exception event | Case owner and the recovery team | Sale officer | auction portal, Workbench | R-DIS-39 | R-DIS-44, R-DIS-46 | None |
+| Asset disposal | RELISTED | Re-listed | System task | Case owner and the recovery team | Sale officer | Workbench, Decision Log, SVAF | R-DIS-43, R-DIS-44 | R-DIS-45 | None |
+| Asset disposal | SALE_AGREED | Sale agreed | System task | Case owner and the recovery team | Sale officer | Case Workspace, auction portal, Decision Log, Calculation Service, ALS core and GL, Partner Portal | R-DIS-40, R-DIS-42, R-DIS-61, R-DIS-64 | R-DIS-47 | 1 working day |
+| Asset disposal | AWAITING_PAYMENT | Awaiting payment, five days | Partner task | Partners and external parties | Buyer | auction portal, ALS core and GL | R-DIS-47 | R-DIS-48, R-DIS-49 | 5 calendar days |
+| Asset disposal | AWARD_CANCELED | Award canceled | Exception event | Case owner and the recovery team | Sale officer | auction portal, Partner Portal | R-DIS-49 | R-DIS-50 | None |
+| Asset disposal | TITLE_TRANSFER_PENDING | Title transfer pending | System task | Case owner and the recovery team | Sale officer | ALS core and GL, integration adapters | R-DIS-48 | R-DIS-51, R-DIS-52, R-DIS-53 | None |
+| Asset disposal | ASSET_SOLD | Asset sold and transferred | System task | The Workbench | Workbench, Sale officer | SCIS, integration adapters, the Land Office, Document Hub | R-DIS-51, R-DIS-52 | R-DIS-54 | 5 working days; 10 working days |
+| Asset disposal | RAMC_TRANSFER_PENDING | RAMC transfer pending | Partner task | Partners and external parties | RAMC | Partner Portal, Calculation Service | R-DIS-59 | R-DIS-60 | per agreement |
+| Asset disposal | PROCEEDS_APPLIED | Proceeds applied to the case | System task | The Workbench | Workbench | ALS core and GL, Agent Runtime | R-DIS-54 | R-DIS-55, R-DIS-56 | same day |
+| Asset disposal | SHORTFALL_RAISED | Shortfall raised | System task | Case owner and the recovery team | Write-off team | Rules component | R-DIS-55 | R-DIS-57, R-DIS-58, R-DIS-71 | None |
+| Asset disposal | ASSET_TRANSFERRED | Transferred to RAMC | End event | The Workbench | Workbench | ALS core and GL, AMIS | R-DIS-60 | None | None |
+| Asset disposal | CASE_CLOSED_NO_SHORTFALL | Case closed, no shortfall | End event | The Workbench | Workbench | Workbench, ALS core and GL | R-DIS-56 | None | None |
+| Asset disposal | TO_DEBT_SALE | To the debt sale route | End event | Case owner and the recovery team | Debt sale officer | Workbench | R-DIS-46, R-DIS-58 | None | None |
+| Asset disposal | TO_WRITEOFF | To the write-off route | End event | Approvers and committees | Write-off committee, Legal | Workbench, LIT, the Legal Execution Department | R-DIS-57, R-DIS-69 | None | None |
+| Asset disposal | UNMATCHED_EXCEPTION | UNMATCHED_EXCEPTION | Exception event | Case owner and the recovery team | Sale officer | Workbench | R-DIS-70, R-DIS-71 | R-DIS-72 | same day |
+| Debt sale | LOT_CANDIDATE_SELECTED | Candidate accounts selected | Start event | The Workbench | None | None | None | R-DS-01, R-DS-02 | None |
+| Debt sale | CASE_EXCLUDED | Account excluded | Exception event | Case owner and the recovery team | Case owner | Workbench, Aric | R-DS-02 | R-DS-03 | None |
+| Debt sale | LOT_BUILT | Lot built and priced | System task | Case owner and the recovery team | Debt sale officer | Rules component, Recovery Data Store, Workbench | R-DS-01, R-DS-05 | R-DS-04, R-DS-05 | per monthly cycle |
+| Debt sale | LOT_WITH_COMMITTEE | Lot with the committee | Gateway | Approvers and committees | Committee | Agent Runtime, COLLINS, Case Workspace, Committee View | R-DS-04, R-DS-07 | R-DS-06, R-DS-07, R-DS-08 | 5 working days |
+| Debt sale | LOT_APPROVED | Lot, reserve and terms approved | System task | Case owner and the recovery team | Debt sale officer | Committee View, Decision Log | R-DS-06 | R-DS-10 | None |
+| Debt sale | LOT_WITHDRAWN | Lot withdrawn | Exception event | Case owner and the recovery team | Debt sale officer | Decision Log | R-DS-08, R-DS-22 | R-DS-09 | None |
+| Debt sale | TAPE_PREPARED | Masked data tape prepared | System task | The Workbench | Workbench | PII service, Recovery Data Store, Document Hub | R-DS-10, R-DS-12 | R-DS-11, R-DS-13 | 3 working days |
+| Debt sale | TAPE_REJECTED | Tape rejected on masking | Exception event | The Workbench | Workbench | PII service, Document Hub | R-DS-11 | R-DS-12 | None |
+| Debt sale | DATA_ROOM_OPEN | Data room open | System task | Case owner and the recovery team | Debt sale officer | buyer portal, Document Hub | R-DS-13 | R-DS-14 | per cycle |
+| Debt sale | BUYER_PENDING_KYC | Buyer pending KYC | Gateway | The Workbench | Workbench, Debt sale officer | Rules component, buyer portal, Buyer portal, Workbench | R-DS-14, R-DS-40 | R-DS-15, R-DS-16 | 3 working days; 10 working days |
+| Debt sale | BUYER_CLEARED | Buyer cleared | Partner task | Partners and external parties | Buyer | buyer portal | R-DS-15 | R-DS-17 | None |
+| Debt sale | BUYER_REJECTED | Buyer refused | Exception event | Case owner and the recovery team | Debt sale officer | Decision Log, buyer portal | R-DS-16 | R-DS-40, R-DS-41 | None |
+| Debt sale | BIDDING_OPEN | Bidding open | Partner task | Partners and external parties | Buyer | buyer portal, Committee View | R-DS-17, R-DS-21, R-DS-28 | R-DS-18 | per cycle |
+| Debt sale | BIDS_RECEIVED | Bids received | System task | The Workbench | Workbench | buyer portal | R-DS-18 | R-DS-19, R-DS-20 | None |
+| Debt sale | BID_BELOW_RESERVE | Best bid below the reserve | Exception event | Case owner and the recovery team | Debt sale officer | Committee View | R-DS-20 | R-DS-21, R-DS-22 | None |
+| Debt sale | AWARD_PENDING | Award pending confirmation | Gateway | Case owner and the recovery team | Debt sale officer | Case Workspace, Committee View | R-DS-19 | R-DS-23 | 2 working days |
+| Debt sale | LOT_AWARDED | Lot awarded | System task | Case owner and the recovery team | Debt sale officer | Document Hub, buyer portal | R-DS-23 | R-DS-24 | None |
+| Debt sale | SETTLEMENT_PENDING | Settlement pending | Partner task | Partners and external parties | Buyer | buyer portal, ALS core and GL | R-DS-24 | R-DS-25, R-DS-26, R-DS-27 | per agreed settlement period |
+| Debt sale | AWARD_CANCELED_DS | Award canceled | Exception event | Case owner and the recovery team | Debt sale officer | Decision Log, Recovery Data Store, buyer portal | R-DS-26, R-DS-27 | R-DS-28 | None |
+| Debt sale | SETTLED | Buyer settled | System task | The Workbench | Workbench | ALS core and GL, integration adapters | R-DS-25 | R-DS-29 | None |
+| Debt sale | DATA_TRANSFERRED | Account data transferred | System task | The Workbench | Workbench | integration adapters, buyer portal | R-DS-29 | R-DS-30 | 5 working days |
+| Debt sale | DERECOGNISED | Balance derecognised | System task | The Workbench | Workbench | ALS core and GL, integration adapters | R-DS-30 | R-DS-31, R-DS-32 | None |
+| Debt sale | GL_POSTED | Posted to the general ledger | System task | Case owner and the recovery team | Credit Administration | ALS core and GL, Finance provision feed, integration adapters | R-DS-31, R-DS-33 | R-DS-34, R-DS-35 | month-end close |
+| Debt sale | POSTING_REJECTED_DS | Posting rejected | Exception event | Case owner and the recovery team | Credit Administration | integration adapters | R-DS-32 | R-DS-33 | 2 working days |
+| Debt sale | PUTBACK_RAISED | Put-back claim raised | Partner task | Case owner and the recovery team | Debt sale officer | buyer portal, Decision Log | R-DS-35 | R-DS-36, R-DS-38 | 10 working days |
+| Debt sale | PUTBACK_UPHELD | Put-back upheld | System task | Case owner and the recovery team | Debt sale officer | ALS core and GL, buyer portal | R-DS-36 | R-DS-37 | None |
+| Debt sale | PUTBACK_REFUSED | Put-back refused | System task | Case owner and the recovery team | Debt sale officer | Decision Log, buyer portal | R-DS-38 | R-DS-39 | None |
+| Debt sale | LOT_CLOSED | Lot closed | End event | Case owner and the recovery team | Debt sale officer | Recovery Data Store, Power BI | R-DS-34, R-DS-39 | None | per claim window |
+| Debt sale | BACK_TO_CASE_LIST | Accounts back on the case list | End event | Case owner and the recovery team | Debt sale officer, Case owner, Head of Asset Liquidity | Workbench, ALS core and GL, Buyer portal | R-DS-03, R-DS-09, R-DS-37, R-DS-41 | None | next cycle |
+| Write off and recover after charge-off | SCAN_DUE | Monthly scan due | Start event | Case owner and the recovery team | Workbench, Write-off team | integration adapters, Reference data, Workbench, Workbench scheduler, Decision Log | R-WO-04, R-WO-08, R-WO-19, R-WO-45 | R-WO-01, R-WO-02, R-WO-03 | next cut-off |
+| Write off and recover after charge-off | SCAN_HELD | Scan held | Exception event | Case owner and the recovery team | Write-off team | integration adapters, ALS core and GL, Reference data, Finance provision feed | R-WO-02, R-WO-03 | R-WO-04 | 1 working day |
+| Write off and recover after charge-off | POPULATION_PROPOSED | Population proposed | System task | Case owner and the recovery team | Write-off team | Rules component, COLLINS, ALS core and GL | R-WO-01 | R-WO-05, R-WO-06, R-WO-07 | monthly cut-off |
+| Write off and recover after charge-off | CASE_REMOVED_BY_TEAM | Case removed with a reason | Exception event | Case owner and the recovery team | Deviation owner, Write-off team | Workbench, Decision Log, Case Workspace | R-WO-06, R-WO-07 | R-WO-08 | None |
+| Write off and recover after charge-off | PACK_PREPARED | Write-off pack prepared | System task | Case owner and the recovery team | Write-off team | Agent Runtime, Document Hub | R-WO-05 | R-WO-09, R-WO-11, R-WO-12 | 3 working days |
+| Write off and recover after charge-off | PACK_INCOMPLETE | Pack incomplete | Exception event | Case owner and the recovery team | Write-off team | Recovery Data Store, Document Hub | R-WO-09 | R-WO-10 | 2 working days |
+| Write off and recover after charge-off | WITH_COMMITTEE | With the write-off committee | Gateway | Approvers and committees | Write-off committee | Case and Workflow Service, Committee View, Workbench scheduler | R-WO-10, R-WO-11, R-WO-18, R-WO-46 | R-WO-15, R-WO-16, R-WO-17, R-WO-18 | before the scheduled meeting |
+| Write off and recover after charge-off | ESCALATED_TO_CREDIT_COMMITTEE | Above the limit, credit committee | Gateway | Approvers and committees | Credit approval committee | Committee View, Reference data | R-WO-12 | R-WO-13, R-WO-14 | before the scheduled meeting |
+| Write off and recover after charge-off | APPROVED | Approved | System task | Case owner and the recovery team | Credit Administration | Committee View, Decision Log | R-WO-13, R-WO-15 | R-WO-20 | None |
+| Write off and recover after charge-off | DEFERRED | Deferred with a review date | Exception event | Case owner and the recovery team | Write-off team | Workbench scheduler, Committee View | R-WO-17 | R-WO-19 | to the review date |
+| Write off and recover after charge-off | RETURNED_TO_PURSUE | Returned to the pursue track | End event | Case owner and the recovery team | Case owner | Committee View, Decision Log | R-WO-14, R-WO-16 | None | None |
+| Write off and recover after charge-off | POSTING_PENDING | Posting pending | System task | Case owner and the recovery team | Credit Administration | Workbench scheduler, ALS core and GL, integration adapters | R-WO-20, R-WO-23, R-WO-44 | R-WO-21, R-WO-22 | month-end close window; to confirm with Credit Administration |
+| Write off and recover after charge-off | POSTED | Posted to ALS and the GL | System task | Case owner and the recovery team | Credit Administration | ALS core and GL, integration adapters | R-WO-21 | R-WO-25, R-WO-42, R-WO-43 | None |
+| Write off and recover after charge-off | POSTING_REJECTED | Posting rejected | Exception event | Case owner and the recovery team | Credit Administration | integration adapters, ALS core and GL | R-WO-22 | R-WO-23, R-WO-24 | 2 working days |
+| Write off and recover after charge-off | PROVISION_RELEASED | Provision released | System task | The Workbench | Workbench | Rules component, ALS core and GL | R-WO-25 | R-WO-26 | None |
+| Write off and recover after charge-off | FINANCE_FEED_SENT | Finance feed sent | System task | Case owner and the recovery team | Credit Administration | Finance provision feed, integration adapters | R-WO-26, R-WO-28 | R-WO-27, R-WO-29 | month-end close |
+| Write off and recover after charge-off | FINANCE_FEED_REJECTED | Finance feed rejected | Exception event | Case owner and the recovery team | Credit Administration | integration adapters, Finance provision feed | R-WO-27 | R-WO-28 | 2 working days |
+| Write off and recover after charge-off | PLACEMENT_DECIDED | Post charge-off treatment decided | Gateway | Partners and external parties | Partner and agency manager | Rules component, Partner Portal | R-WO-29, R-WO-31 | R-WO-30, R-WO-31, R-WO-32 | 5 working days |
+| Write off and recover after charge-off | PLACED_WITH_AGENCY | Placed with an agency | Partner task | Partners and external parties | Outsourced agency | Partner Portal, OA portal | R-WO-30, R-WO-33, R-WO-35 | R-WO-33, R-WO-34, R-WO-36, R-WO-37, R-WO-38 | same day on the portal; same day |
+| Write off and recover after charge-off | SOLD_POST_CHARGEOFF | Sold to a buyer | Partner task | Case owner and the recovery team | Debt sale officer | buyer portal, Workbench | R-WO-32 | R-WO-40, R-WO-50 | per cycle |
+| Write off and recover after charge-off | PLACEMENT_RECALLED | Placement recalled | Exception event | Partners and external parties | Partner and agency manager | Partner Portal, Decision Log | R-WO-34 | R-WO-35 | None |
+| Write off and recover after charge-off | PAYMENT_MATCHED | Payment matched and posted | System task | The Workbench | Workbench | ALS core and GL, Agent Runtime, integration adapters | R-WO-37, R-WO-39, R-WO-49 | R-WO-41 | next working day |
+| Write off and recover after charge-off | PAYMENT_EXCEPTION | Payment on the exception list | Exception event | Case owner and the recovery team | Case owner | Agent Runtime, Case Workspace | R-WO-38 | R-WO-39 | 2 working days |
+| Write off and recover after charge-off | REMITTED_TO_BUYER | Remitted to the buyer | System task | Case owner and the recovery team | Debt sale officer | ALS core and GL, buyer portal | R-WO-40 | R-WO-51 | 5 working days |
+| Write off and recover after charge-off | RETENTION_RUNNING | Retention timer running | System task | The Workbench | Workbench, Operational Excellence | Partner Portal, Workbench scheduler, Rules component, Power BI, Document Hub | R-WO-36, R-WO-42, R-WO-48 | R-WO-47, R-WO-48 | monthly; 5 working days |
+| Write off and recover after charge-off | CASE_CLOSED | Case closed | End event | Case owner and the recovery team | Workbench, Credit Administration | Workbench scheduler, Document Hub, Decision Log, ALS and GL, Workbench | R-WO-47, R-WO-50, R-WO-51 | R-WO-49 | on expiry; 5 working days |
+| Write off and recover after charge-off | WRITEOFF_EXCEPTION | Write-off exception, owner to confirm | Exception event | Case owner and the recovery team | Owner to confirm with C&R | Rules component, Case Workspace, Committee View, Power BI | R-WO-24, R-WO-41, R-WO-43 | R-WO-44, R-WO-45, R-WO-46 | to confirm with Credit Administration |
+| Deviations X1 to X7 | ANY_STATE | Any active state | Start event | The Workbench | None | None | None | R-DEV-01 | None |
+| Deviations X1 to X7 | DEV_FLAGGED | DEV_FLAGGED | System task | The Workbench | Workbench | Workbench, the Workbench document hub | R-DEV-01 | R-DEV-02, R-DEV-03, R-DEV-04, R-DEV-05, R-DEV-06, R-DEV-07, R-DEV-21 | same day |
+| Deviations X1 to X7 | DEV_WITH_OWNER | DEV_WITH_OWNER | User task | Case owner and the recovery team | Complaint officer, Specialist, Legal, Fraud team, Legal, Agent, case owner, Team manager | Workbench, Aric, LIT | R-DEV-02, R-DEV-03, R-DEV-04, R-DEV-05, R-DEV-06, R-DEV-20, R-DEV-21 | R-DEV-09, R-DEV-10, R-DEV-11, R-DEV-12, R-DEV-13, R-DEV-14, R-DEV-15, R-DEV-16, R-DEV-17, R-DEV-20, R-DEV-22 | deadline driven; 10 working days; same day |
+| Deviations X1 to X7 | DEV_REJECTED | DEV_REJECTED | System task | The Workbench | Workbench | Workbench | R-DEV-07 | R-DEV-08 | None |
+| Deviations X1 to X7 | DEV_RESOLVED | DEV_RESOLVED | System task | Case owner and the recovery team | Case owner | Workbench, NCB | R-DEV-09, R-DEV-16 | R-DEV-18 | None |
+| Deviations X1 to X7 | DEV_REROUTE | DEV_REROUTE | Gateway | Case owner and the recovery team | Restructuring officer, Case owner, Write-off team, Legal, litigation officer | Workbench, Aric, EFS, LIT | R-DEV-10, R-DEV-12, R-DEV-13, R-DEV-14, R-DEV-15, R-DEV-17, R-DEV-22 | R-DEV-19 | 30 days; 2 working days |
+| Deviations X1 to X7 | RESUMED | RESUMED | End event | Case owner and the recovery team | Previous owner | Workbench | R-DEV-08, R-DEV-18 | None | None |
+| Deviations X1 to X7 | ROUTE_D6 | ROUTE_D6 | End event | Case owner and the recovery team | Case owner | Workbench | R-DEV-19 | None | None |
+| Deviations X1 to X7 | CASE_ENDED | CASE_ENDED | End event | The Workbench | Workbench | ALS, Workbench | R-DEV-11 | None | None |
+| Universal rules | ANY_ACTIVE | ANY_ACTIVE | Start event | The Workbench | None | None | None | R-UNI-01, R-UNI-02, R-UNI-03, R-UNI-04, R-UNI-05, R-UNI-06, R-UNI-07, R-UNI-08, R-UNI-09, R-UNI-10, R-UNI-11, R-UNI-12, R-UNI-13, R-UNI-14, R-UNI-15, R-UNI-16, R-UNI-17, R-UNI-18, R-UNI-19, R-UNI-20, R-UNI-22, R-UNI-23, R-UNI-24, R-UNI-25, R-UNI-26, R-UNI-27, R-UNI-28, R-UNI-29, R-UNI-30, R-UNI-31, R-UNI-32, R-UNI-33, R-UNI-34, R-UNI-37, R-UNI-38, R-UNI-39, R-UNI-40, R-UNI-47, R-UNI-48, R-UNI-49, R-UNI-50 | None |
+| Universal rules | CUSTOMER_EVENT | CUSTOMER_EVENT | Gateway | Approvers and committees | None | None | None | None | None |
+| Universal rules | BANK_EVENT | BANK_EVENT | Gateway | Approvers and committees | None | None | None | None | None |
+| Universal rules | PARTNER_EVENT | PARTNER_EVENT | Gateway | Approvers and committees | None | None | None | None | None |
+| Universal rules | SYSTEM_EVENT | SYSTEM_EVENT | Gateway | Approvers and committees | None | None | None | None | None |
+| Universal rules | PORTFOLIO_EVENT | PORTFOLIO_EVENT | Gateway | Approvers and committees | None | None | None | None | None |
+| Universal rules | HELD_DEVIATION | HELD_DEVIATION | System task | Case owner and the recovery team | Complaint officer, Specialist, Legal, Specialist, Legal, Fraud team | Workbench, the Workbench document hub, LIT, Aric | R-UNI-04, R-UNI-05, R-UNI-06, R-UNI-07, R-UNI-08, R-UNI-09 | R-UNI-43 | same day; deadline driven |
+| Universal rules | HELD_LEGAL | HELD_LEGAL | System task | Approvers and committees | Compliance, Risk, Legal | Workbench, ACE | R-UNI-11, R-UNI-13, R-UNI-20 | R-UNI-21 | statutory period; scheme terms; until lifted |
+| Universal rules | HELD_CONDUCT | HELD_CONDUCT | System task | Case owner and the recovery team | Conduct and QA officer | Workbench | R-UNI-10 | R-UNI-44 | same day |
+| Universal rules | EXCEPTION_QUEUE | EXCEPTION_QUEUE | Exception event | The Workbench | Case owner, Platform team | ALS, Workbench, integration adapters | R-UNI-03, R-UNI-34, R-UNI-36, R-UNI-39 | R-UNI-41 | 2 working days; per interface; immediate |
+| Universal rules | RETRY_QUEUE | RETRY_QUEUE | Exception event | The Workbench | Platform team | integration adapters | R-UNI-33 | R-UNI-35, R-UNI-36 | per interface |
+| Universal rules | ESCALATED | ESCALATED | User task | Approvers and committees | Approver per the matrix, Team manager | Workbench | R-UNI-15, R-UNI-30 | R-UNI-42 | 1 working day; per state |
+| Universal rules | REALLOCATED | REALLOCATED | User task | Case owner and the recovery team | Team manager | Workbench | R-UNI-18, R-UNI-19 | R-UNI-46 | 1 working day; weekly |
+| Universal rules | PARTNER_RECALLED | PARTNER_RECALLED | System task | Partners and external parties | Partner and agency manager, Head of the partner type | Partner Portal, Workbench | R-UNI-25, R-UNI-26, R-UNI-27, R-UNI-28, R-UNI-29 | R-UNI-45 | per partner type; 5 working days; 2 working days; same day |
+| Universal rules | RESUME_STATE | RESUME_STATE | End event | The Workbench | Workbench, Case owner, Platform team, Center of excellence, Team manager, Deviation owner, Conduct and QA officer | EFS, Workbench, NCB, ALS, iCore, integration adapters, the COLLINS load | R-UNI-12, R-UNI-21, R-UNI-23, R-UNI-24, R-UNI-32, R-UNI-35, R-UNI-38, R-UNI-40, R-UNI-42, R-UNI-43, R-UNI-44, R-UNI-46 | None | same day; 1 working day; 60 seconds; on the effective date; 2 working days |
+| Universal rules | ROUTE_D6_REOPEN | ROUTE_D6_REOPEN | End event | Case owner and the recovery team | Case owner, Workbench, Litigation officer, Partner and agency manager, Head of the owning team | ALS, Workbench, EFS, Partner Portal | R-UNI-02, R-UNI-14, R-UNI-22, R-UNI-31, R-UNI-37, R-UNI-41, R-UNI-45, R-UNI-50 | None | 1 working day; same day; immediate; 2 working days |
+| Universal rules | CASE_CURED_CLOSED | CASE_CURED_CLOSED | End event | Case owner and the recovery team | Case owner | ALS, EFS, Workbench | R-UNI-01 | None | same day |
+| Universal rules | CASE_CLOSED_SOLD | CASE_CLOSED_SOLD | End event | Case owner and the recovery team | Debt sale officer, Case owner, Guarantee officer | ALS and GL, Workbench, CCMS, ALS | R-UNI-47, R-UNI-48, R-UNI-49 | None | same day; 5 working days |
+| Universal rules | CANCELED_IN_ERROR | CANCELED_IN_ERROR | End event | Case owner and the recovery team | Case owner | EFS, Workbench | R-UNI-16 | None | 2 working days |
+| Universal rules | MERGED | MERGED | End event | Case owner and the recovery team | Case owner | Workbench | R-UNI-17 | None | 2 working days |
+
+## Rules
+
+| Rules by step |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|
+| 448 rules, each joining a step to the next. |  |  |  |  |  |  |  |
+| Rule | Flow | From step | Event | To step | Lane | Owner | Timer |
+| R-RES-01 | Restructure | ROUTE_APPROVED_RESTRUCTURE | ROUTE_APPROVED | PROPOSED_IN_COLLINS | The Workbench | Workbench | None |
+| R-RES-02 | Restructure | PROPOSED_IN_COLLINS | RESTRUCTURE_PROPOSED | IN_FCR_QUEUE | Case owner and the recovery team | Restructuring officer, FCR | 2 working days |
+| R-RES-03 | Restructure | PROPOSED_IN_COLLINS | NO_PROPOSAL_RETURNED | BACK_TO_ROUTE_DECISION | Case owner and the recovery team | Case owner | None |
+| R-RES-04 | Restructure | IN_FCR_QUEUE | CASE_PICKED_UP | WITH_FCR_OFFICER | Case owner and the recovery team | Restructuring officer, FCR | 2 working days |
+| R-RES-05 | Restructure | IN_FCR_QUEUE | QUEUE_SLA_BREACHED | IN_FCR_QUEUE | Case owner and the recovery team | FCR team manager | None |
+| R-RES-06 | Restructure | WITH_FCR_OFFICER | AFFORDABILITY_REQUIRED | AFFORDABILITY_IN_ACE | Rules, workflow and agents | ACE and TDR system | 2 working days |
+| R-RES-07 | Restructure | AFFORDABILITY_IN_ACE | AFFORDABILITY_PASSED | WITH_FCR_OFFICER | Case owner and the recovery team | Restructuring officer, FCR | None |
+| R-RES-08 | Restructure | AFFORDABILITY_IN_ACE | AFFORDABILITY_FAILED | BACK_TO_ROUTE_DECISION | Case owner and the recovery team | Case owner | None |
+| R-RES-09 | Restructure | WITH_FCR_OFFICER | OFFER_PREPARED | OFFER_WITH_CUSTOMER | Customer and guarantor | Customer | offer validity 14 days |
+| R-RES-10 | Restructure | WITH_FCR_OFFICER | OFFER_PREPARED | AWAITING_CREDIT_APPROVAL | Approvers and committees | Credit approval committee | 3 working days |
+| R-RES-11 | Restructure | AWAITING_CREDIT_APPROVAL | CREDIT_APPROVED | OFFER_WITH_CUSTOMER | Customer and guarantor | Customer | offer validity 14 days |
+| R-RES-12 | Restructure | AWAITING_CREDIT_APPROVAL | CREDIT_DECLINED | DECLINED_BY_CREDIT | Case owner and the recovery team | Restructuring officer, FCR | None |
+| R-RES-13 | Restructure | AWAITING_CREDIT_APPROVAL | APPROVAL_SLA_BREACHED | AWAITING_CREDIT_APPROVAL | Approvers and committees | Head of credit | None |
+| R-RES-14 | Restructure | DECLINED_BY_CREDIT | DECLINE_RECORDED | BACK_TO_ROUTE_DECISION | Case owner and the recovery team | Case owner | None |
+| R-RES-15 | Restructure | OFFER_WITH_CUSTOMER | CUSTOMER_COUNTER_OFFERED | WITH_FCR_OFFICER | Case owner and the recovery team | Restructuring officer, FCR | 2 working days |
+| R-RES-16 | Restructure | OFFER_WITH_CUSTOMER | CUSTOMER_SIGNED | WITH_OPS_BOOKING | Case owner and the recovery team | Operations (booking) | 1 working day |
+| R-RES-17 | Restructure | OFFER_WITH_CUSTOMER | CUSTOMER_DECLINED | RETURNED_TO_COLLINS | The Workbench | Workbench | None |
+| R-RES-18 | Restructure | OFFER_WITH_CUSTOMER | OFFER_EXPIRED | RETURNED_TO_COLLINS | The Workbench | Workbench | None |
+| R-RES-19 | Restructure | OFFER_WITH_CUSTOMER | DEVIATION_RAISED | OFFER_WITH_CUSTOMER | Case owner and the recovery team | Deviation owner | None |
+| R-RES-20 | Restructure | RETURNED_TO_COLLINS | PRIOR_STATUS_RESTORED | BACK_TO_ROUTE_DECISION | Case owner and the recovery team | Case owner | None |
+| R-RES-21 | Restructure | WITH_OPS_BOOKING | BOOKING_SUBMITTED | WITH_OPS_BOOKING | Case owner and the recovery team | Operations (booking) | 2 working days |
+| R-RES-22 | Restructure | WITH_OPS_BOOKING | BOOKING_CONFIRMED | BOOKED_IN_ALS_NLEADS | The Workbench | Workbench | None |
+| R-RES-23 | Restructure | WITH_OPS_BOOKING | BOOKING_REJECTED | WITH_OPS_BOOKING | Case owner and the recovery team | Operations (booking) | 1 working day |
+| R-RES-24 | Restructure | WITH_OPS_BOOKING | NLEADS_CALLBACK_MISSING | WITH_OPS_BOOKING | Case owner and the recovery team | Operations (booking) | None |
+| R-RES-25 | Restructure | BOOKED_IN_ALS_NLEADS | SCHEDULE_SET | PLAN_RUNNING | Case owner and the recovery team | Restructuring officer, FCR | None |
+| R-RES-26 | Restructure | PLAN_RUNNING | PAYMENT_RECEIVED | PLAN_RUNNING | The Workbench | Workbench | None |
+| R-RES-27 | Restructure | PLAN_RUNNING | PAYMENT_MISSED | PLAN_CURE_PERIOD | Case owner and the recovery team | Case owner | cure_period_days from reference data |
+| R-RES-28 | Restructure | PLAN_CURE_PERIOD | PAYMENT_RECEIVED_LATE | PLAN_RUNNING | The Workbench | Workbench | None |
+| R-RES-29 | Restructure | PLAN_CURE_PERIOD | CURE_PERIOD_EXPIRED | PLAN_BROKEN | Case owner and the recovery team | Case owner | None |
+| R-RES-30 | Restructure | PLAN_BROKEN | BREAK_RECORDED | BACK_TO_ROUTE_DECISION | Case owner and the recovery team | Case owner | 5 working days |
+| R-RES-31 | Restructure | PLAN_BROKEN | BREAK_RECORDED | RESTRUCTURE_BARRED | Case owner and the recovery team | Case owner | None |
+| R-RES-32 | Restructure | RESTRUCTURE_BARRED | BAR_APPLIED | BACK_TO_ROUTE_DECISION | Case owner and the recovery team | Case owner | None |
+| R-RES-33 | Restructure | PLAN_RUNNING | FINAL_INSTALLMENT_PAID | PLAN_COMPLETED | The Workbench | Workbench | None |
+| R-RES-34 | Restructure | PLAN_RUNNING | DEVIATION_RAISED | PLAN_RUNNING | Case owner and the recovery team | Deviation owner | None |
+| R-RES-35 | Restructure | WITH_FCR_OFFICER | OFFER_PREPARED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Case owner | same day |
+| R-RES-36 | Restructure | PLAN_BROKEN | BREAK_RECORDED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Case owner | same day |
+| R-RES-37 | Restructure | UNMATCHED_EXCEPTION | MANUAL_DECISION_RECORDED | BACK_TO_ROUTE_DECISION | Case owner and the recovery team | Case owner | 2 working days |
+| R-SET-01 | Settlement | ROUTE_APPROVED_SETTLEMENT | ROUTE_APPROVED | PAYOFF_AND_RANGE_SET | The Workbench | Workbench | None |
+| R-SET-02 | Settlement | PAYOFF_AND_RANGE_SET | RANGE_SET | WITH_FCR_OFFICER_SET | Case owner and the recovery team | Restructuring officer, FCR | 2 working days |
+| R-SET-03 | Settlement | PAYOFF_AND_RANGE_SET | PAYOFF_STALE | PAYOFF_AND_RANGE_SET | The Workbench | Workbench | None |
+| R-SET-04 | Settlement | WITH_FCR_OFFICER_SET | OFFER_PREPARED | OFFER_WITH_CUSTOMER_SET | Customer and guarantor | Customer | offer validity 14 days |
+| R-SET-05 | Settlement | WITH_FCR_OFFICER_SET | OFFER_PREPARED | AWAITING_APPROVAL_SET | Approvers and committees | Credit approval committee | 3 working days |
+| R-SET-06 | Settlement | AWAITING_APPROVAL_SET | APPROVAL_GRANTED | OFFER_WITH_CUSTOMER_SET | Customer and guarantor | Customer | offer validity 14 days |
+| R-SET-07 | Settlement | AWAITING_APPROVAL_SET | APPROVAL_REFUSED | DECLINED_BY_APPROVER_SET | Case owner and the recovery team | Restructuring officer, FCR | None |
+| R-SET-08 | Settlement | DECLINED_BY_APPROVER_SET | DECLINE_RECORDED | RETURNED_TO_ROUTE_SET | Case owner and the recovery team | Case owner | None |
+| R-SET-09 | Settlement | OFFER_WITH_CUSTOMER_SET | CUSTOMER_COUNTER_OFFERED | WITH_FCR_OFFICER_SET | Case owner and the recovery team | Restructuring officer, FCR | 2 working days |
+| R-SET-10 | Settlement | OFFER_WITH_CUSTOMER_SET | CUSTOMER_SIGNED | WITH_OPS_SETTLEMENT | Case owner and the recovery team | Operations (booking) | 1 working day |
+| R-SET-11 | Settlement | OFFER_WITH_CUSTOMER_SET | OFFER_EXPIRED | RETURNED_TO_ROUTE_SET | Case owner and the recovery team | Case owner | None |
+| R-SET-12 | Settlement | OFFER_WITH_CUSTOMER_SET | DEVIATION_RAISED | OFFER_WITH_CUSTOMER_SET | Case owner and the recovery team | Deviation owner | None |
+| R-SET-13 | Settlement | WITH_OPS_SETTLEMENT | SETTLEMENT_BOOKED | AWAITING_PAYMENT | Customer and guarantor | Customer | payment due 30 days |
+| R-SET-14 | Settlement | AWAITING_PAYMENT | PAYMENT_RECEIVED | PAYMENT_CLEARED | The Workbench | Workbench | None |
+| R-SET-15 | Settlement | AWAITING_PAYMENT | PAYMENT_RECEIVED | PAYMENT_PART_RECEIVED | The Workbench | Workbench | None |
+| R-SET-16 | Settlement | AWAITING_PAYMENT | PAYMENT_UNMATCHED | AWAITING_PAYMENT | Case owner and the recovery team | Case owner | 2 working days |
+| R-SET-17 | Settlement | AWAITING_PAYMENT | PAYMENT_DEADLINE_PASSED | RETURNED_TO_ROUTE_SET | Case owner and the recovery team | Case owner | None |
+| R-SET-18 | Settlement | PAYMENT_PART_RECEIVED | FINAL_INSTALLMENT_RECEIVED | PAYMENT_CLEARED | The Workbench | Workbench | None |
+| R-SET-19 | Settlement | PAYMENT_PART_RECEIVED | INSTALLMENT_MISSED | RETURNED_TO_ROUTE_SET | Case owner and the recovery team | Case owner | None |
+| R-SET-20 | Settlement | PAYMENT_CLEARED | CLEARANCE_CONFIRMED | COLLATERAL_RELEASE_REQUESTED | The Workbench | Workbench | None |
+| R-SET-21 | Settlement | COLLATERAL_RELEASE_REQUESTED | COLLATERAL_RELEASED | CASE_CLOSED_SETTLED | The Workbench | Workbench | None |
+| R-SET-22 | Settlement | COLLATERAL_RELEASE_REQUESTED | TITLE_DOCUMENTS_MISSING | COLLATERAL_RELEASE_REQUESTED | Case owner and the recovery team | Case owner | 5 working days |
+| R-SET-23 | Settlement | CASE_CLOSED_SETTLED | PAYMENT_REVERSED | PAYMENT_REVERSED | Case owner and the recovery team | Case owner | None |
+| R-SET-24 | Settlement | PAYMENT_REVERSED | REVERSAL_RECORDED | RETURNED_TO_ROUTE_SET | Case owner and the recovery team | Case owner | None |
+| R-SET-25 | Settlement | WITH_FCR_OFFICER_SET | OFFER_PREPARED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Case owner | same day |
+| R-SET-26 | Settlement | AWAITING_PAYMENT | PAYMENT_RECEIVED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Case owner | same day |
+| R-SET-27 | Settlement | UNMATCHED_EXCEPTION | MANUAL_DECISION_RECORDED | RETURNED_TO_ROUTE_SET | Case owner and the recovery team | Case owner | 2 working days |
+| R-DIL-01 | Deed in lieu and voluntary surrender | ROUTE_APPROVED_DIL | ROUTE_APPROVED | EARLY_READINESS_CHECK | The Workbench | Workbench | 2 working days |
+| R-DIL-02 | Deed in lieu and voluntary surrender | EARLY_READINESS_CHECK | ENCUMBRANCE_CLEAR | VALUATION_ORDERED | The Workbench | Workbench | None |
+| R-DIL-03 | Deed in lieu and voluntary surrender | EARLY_READINESS_CHECK | REGISTRATION_CHECK_PASSED | VALUATION_ORDERED | The Workbench | Workbench | None |
+| R-DIL-04 | Deed in lieu and voluntary surrender | EARLY_READINESS_CHECK | ENCUMBRANCE_UNRESOLVED | ENCUMBRANCE_BLOCKED | Case owner and the recovery team | Case owner | 10 working days |
+| R-DIL-05 | Deed in lieu and voluntary surrender | ENCUMBRANCE_BLOCKED | ENCUMBRANCE_CLEARED | VALUATION_ORDERED | The Workbench | Workbench | None |
+| R-DIL-06 | Deed in lieu and voluntary surrender | ENCUMBRANCE_BLOCKED | HOLD_EXPIRED | RETURNED_TO_ROUTE_DIL | Case owner and the recovery team | Case owner | None |
+| R-DIL-07 | Deed in lieu and voluntary surrender | VALUATION_ORDERED | FAST_LANE_SELECTED | AWAITING_VALUER | Partners and external parties | Valuer | panel service level |
+| R-DIL-08 | Deed in lieu and voluntary surrender | VALUATION_ORDERED | PRELIMINARY_VALUATION_USED | VALUATION_ACCEPTED | The Workbench | Workbench | None |
+| R-DIL-09 | Deed in lieu and voluntary surrender | AWAITING_VALUER | VALUATION_RECEIVED | VALUATION_ACCEPTED | Case owner and the recovery team | Case owner | 2 working days |
+| R-DIL-10 | Deed in lieu and voluntary surrender | AWAITING_VALUER | ACCESS_REFUSED | VALUATION_ACCEPTED | Case owner and the recovery team | Case owner | None |
+| R-DIL-11 | Deed in lieu and voluntary surrender | AWAITING_VALUER | VALUER_SLA_BREACHED | AWAITING_VALUER | Partners and external parties | Partner and agency manager | None |
+| R-DIL-12 | Deed in lieu and voluntary surrender | VALUATION_ACCEPTED | VALUE_ACCEPTED | WITH_FCR_OFFICER_DIL | Case owner and the recovery team | Restructuring officer, FCR | 5 working days |
+| R-DIL-13 | Deed in lieu and voluntary surrender | WITH_FCR_OFFICER_DIL | TERMS_AGREED | TRANSFER_PRICE_SET | The Workbench | Workbench | None |
+| R-DIL-14 | Deed in lieu and voluntary surrender | TRANSFER_PRICE_SET | PRICE_INSIDE_FLOOR | OFFER_WITH_CUSTOMER_DIL | Customer and guarantor | Customer | offer validity 14 days |
+| R-DIL-15 | Deed in lieu and voluntary surrender | TRANSFER_PRICE_SET | PRICE_BELOW_FLOOR | AWAITING_SECOND_SIGNATURE | Approvers and committees | Head of NPA | 3 working days |
+| R-DIL-16 | Deed in lieu and voluntary surrender | AWAITING_SECOND_SIGNATURE | SECOND_SIGNATURE_GIVEN | OFFER_WITH_CUSTOMER_DIL | Customer and guarantor | Customer | offer validity 14 days |
+| R-DIL-17 | Deed in lieu and voluntary surrender | AWAITING_SECOND_SIGNATURE | SECOND_SIGNATURE_REFUSED | RETURNED_TO_ROUTE_DIL | Case owner and the recovery team | Case owner | None |
+| R-DIL-18 | Deed in lieu and voluntary surrender | OFFER_WITH_CUSTOMER_DIL | CUSTOMER_ACCEPTED | WITH_FIELD_INSPECTION | Partners and external parties | Field officer or agency field team | 5 working days |
+| R-DIL-19 | Deed in lieu and voluntary surrender | OFFER_WITH_CUSTOMER_DIL | CUSTOMER_ACCEPTED | WITH_FIELD_INSPECTION | Partners and external parties | Field officer or agency field team | 5 working days |
+| R-DIL-20 | Deed in lieu and voluntary surrender | OFFER_WITH_CUSTOMER_DIL | CUSTOMER_WITHDREW | RETURNED_TO_ROUTE_DIL | Case owner and the recovery team | Case owner | None |
+| R-DIL-21 | Deed in lieu and voluntary surrender | OFFER_WITH_CUSTOMER_DIL | OFFER_EXPIRED | RETURNED_TO_ROUTE_DIL | Case owner and the recovery team | Case owner | None |
+| R-DIL-22 | Deed in lieu and voluntary surrender | WITH_FIELD_INSPECTION | INSPECTION_COMPLETED | ASSET_UNLOCK_DECISION | The Workbench | Workbench | None |
+| R-DIL-23 | Deed in lieu and voluntary surrender | ASSET_UNLOCK_DECISION | AUTO_UNLOCK_PASSED | AWAITING_TRANSFER | Customer and guarantor | Customer | None |
+| R-DIL-24 | Deed in lieu and voluntary surrender | ASSET_UNLOCK_DECISION | AUTO_UNLOCK_FAILED | AWAITING_APPROVER_SUMMARY | Approvers and committees | Head of NPA | 3 working days |
+| R-DIL-25 | Deed in lieu and voluntary surrender | AWAITING_APPROVER_SUMMARY | APPROVER_RELEASED | AWAITING_TRANSFER | Customer and guarantor | Customer | None |
+| R-DIL-26 | Deed in lieu and voluntary surrender | AWAITING_APPROVER_SUMMARY | APPROVER_REFUSED | RETURNED_TO_ROUTE_DIL | Case owner and the recovery team | Case owner | None |
+| R-DIL-27 | Deed in lieu and voluntary surrender | AWAITING_TRANSFER | TRANSFER_COMPLETED | ASSET_ON_BOOKS | The Workbench | Workbench | None |
+| R-DIL-28 | Deed in lieu and voluntary surrender | AWAITING_TRANSFER | TRANSFER_COMPLETED | ASSET_ON_BOOKS | The Workbench | Workbench | None |
+| R-DIL-29 | Deed in lieu and voluntary surrender | AWAITING_TRANSFER | TITLE_NOT_CLEAN | TITLE_NOT_CLEAN | Case owner and the recovery team | Case owner | 10 working days |
+| R-DIL-30 | Deed in lieu and voluntary surrender | TITLE_NOT_CLEAN | TITLE_CLEARED | AWAITING_TRANSFER | Customer and guarantor | Customer | None |
+| R-DIL-31 | Deed in lieu and voluntary surrender | TITLE_NOT_CLEAN | HOLD_EXPIRED | RETURNED_TO_ROUTE_DIL | Case owner and the recovery team | Case owner | None |
+| R-DIL-32 | Deed in lieu and voluntary surrender | ASSET_ON_BOOKS | BUYBACK_AGREED | RENTAL_RUNNING | Case owner and the recovery team | Case owner | None |
+| R-DIL-33 | Deed in lieu and voluntary surrender | ASSET_ON_BOOKS | DISPOSAL_REQUIRED | HANDED_TO_DISPOSAL | Case owner and the recovery team | Sale officer | None |
+| R-DIL-34 | Deed in lieu and voluntary surrender | RENTAL_RUNNING | RENTAL_ARREARS | HANDED_TO_DISPOSAL | Case owner and the recovery team | Sale officer | None |
+| R-DIL-35 | Deed in lieu and voluntary surrender | OFFER_WITH_CUSTOMER_DIL | CUSTOMER_ACCEPTED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Case owner | same day |
+| R-DIL-36 | Deed in lieu and voluntary surrender | AWAITING_TRANSFER | TRANSFER_COMPLETED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Case owner | same day |
+| R-DIL-37 | Deed in lieu and voluntary surrender | UNMATCHED_EXCEPTION | MANUAL_DECISION_RECORDED | RETURNED_TO_ROUTE_DIL | Case owner and the recovery team | Case owner | 2 working days |
+| R-LIT-01 | Litigation and enforcement | LIT_ROUTE_APPROVED | ROUTE_APPROVED | NOTICE_GENERATED | The Workbench | Workbench | Same day |
+| R-LIT-02 | Litigation and enforcement | LIT_ROUTE_APPROVED | TREATMENT_BROKEN | NOTICE_GENERATED | The Workbench | Workbench | Same day |
+| R-LIT-03 | Litigation and enforcement | NOTICE_GENERATED | TEMPLATE_SELECTED | NOTICE_DISPATCHED | The Workbench | Workbench | 1 working day |
+| R-LIT-04 | Litigation and enforcement | NOTICE_GENERATED | TEMPLATE_WITHDRAWN | NOTICE_BLOCKED | Case owner and the recovery team | Litigation officer | 1 working day |
+| R-LIT-05 | Litigation and enforcement | NOTICE_GENERATED | CONTACT_STOP_APPLIED | NOTICE_BLOCKED | Case owner and the recovery team | Conduct and QA officer | None |
+| R-LIT-06 | Litigation and enforcement | NOTICE_BLOCKED | TEMPLATE_REPLACED | NOTICE_GENERATED | The Workbench | Workbench | 1 working day |
+| R-LIT-07 | Litigation and enforcement | NOTICE_DISPATCHED | PROOF_OF_DELIVERY_RECEIVED | WITH_CUSTOMER_NOTICE_PERIOD | Customer and guarantor | Customer | Notice period by product and type |
+| R-LIT-08 | Litigation and enforcement | NOTICE_DISPATCHED | PROOF_WINDOW_EXPIRED | NOTICE_UNSERVED | Case owner and the recovery team | Litigation officer | 7 days |
+| R-LIT-09 | Litigation and enforcement | NOTICE_DISPATCHED | DELIVERY_FAILED | NOTICE_UNSERVED | Case owner and the recovery team | Litigation officer | 2 working days |
+| R-LIT-10 | Litigation and enforcement | NOTICE_UNSERVED | ALTERNATE_SERVICE_ORDERED | NOTICE_DISPATCHED | The Workbench | Workbench | 3 working days |
+| R-LIT-11 | Litigation and enforcement | NOTICE_UNSERVED | PRESCRIPTION_WARNING | PACK_ASSEMBLY | Approvers and committees | Head of Litigation | To the prescription date |
+| R-LIT-12 | Litigation and enforcement | WITH_CUSTOMER_NOTICE_PERIOD | CUSTOMER_PAID_IN_FULL | CASE_CLOSED | Case owner and the recovery team | Case owner | None |
+| R-LIT-13 | Litigation and enforcement | WITH_CUSTOMER_NOTICE_PERIOD | CUSTOMER_REQUESTED_TREATMENT | TO_TREATMENT | Case owner and the recovery team | Restructuring officer, FCR | 2 working days |
+| R-LIT-14 | Litigation and enforcement | WITH_CUSTOMER_NOTICE_PERIOD | CUSTOMER_DISPUTED | DEVIATION_HOLD | Case owner and the recovery team | Complaint officer | None |
+| R-LIT-15 | Litigation and enforcement | WITH_CUSTOMER_NOTICE_PERIOD | NOTICE_PERIOD_EXPIRED | PACK_ASSEMBLY | The Workbench | Workbench | 3 working days |
+| R-LIT-16 | Litigation and enforcement | PACK_ASSEMBLY | PACK_COMPLETE | PACK_VERIFIED | Case owner and the recovery team | Litigation officer | 2 working days |
+| R-LIT-17 | Litigation and enforcement | PACK_ASSEMBLY | PACK_INCOMPLETE | PACK_DEFECT_HOLD | Case owner and the recovery team | Litigation officer | 5 working days |
+| R-LIT-18 | Litigation and enforcement | PACK_DEFECT_HOLD | DOCUMENT_RETRIEVED | PACK_ASSEMBLY | The Workbench | Workbench | 1 working day |
+| R-LIT-19 | Litigation and enforcement | PACK_DEFECT_HOLD | DOCUMENT_UNRECOVERABLE | PACK_VERIFIED | Approvers and committees | Head of Litigation | 10 working days |
+| R-LIT-20 | Litigation and enforcement | PACK_DEFECT_HOLD | PRESCRIPTION_WARNING | PACK_VERIFIED | Approvers and committees | Head of Litigation | To the prescription date |
+| R-LIT-21 | Litigation and enforcement | PACK_VERIFIED | OFFICER_REJECTED_PACK | PACK_ASSEMBLY | The Workbench | Workbench | 1 working day |
+| R-LIT-22 | Litigation and enforcement | PACK_VERIFIED | CONDUCT_CHECK_FAILED | NOTICE_BLOCKED | Case owner and the recovery team | Conduct and QA officer | 2 working days |
+| R-LIT-23 | Litigation and enforcement | PACK_VERIFIED | PACK_APPROVED | FIRM_SELECTION | The Workbench | Workbench | Same day |
+| R-LIT-24 | Litigation and enforcement | FIRM_SELECTION | FIRM_MATCHED | FIRM_INSTRUCTED | Partners and external parties | Panel law firm | 2 working days |
+| R-LIT-25 | Litigation and enforcement | FIRM_SELECTION | NO_FIRM_AVAILABLE | FIRM_ESCALATED | Approvers and committees | Head of Litigation | 2 working days |
+| R-LIT-26 | Litigation and enforcement | FIRM_ESCALATED | FIRM_NOMINATED | FIRM_INSTRUCTED | Partners and external parties | Panel law firm | 2 working days |
+| R-LIT-27 | Litigation and enforcement | FIRM_INSTRUCTED | INSTRUCTION_DECLINED | FIRM_DECLINED | The Workbench | Workbench | 2 working days |
+| R-LIT-28 | Litigation and enforcement | FIRM_INSTRUCTED | FIRM_BREACHED_SLA | FIRM_DECLINED | Partners and external parties | Partner and agency manager | None |
+| R-LIT-29 | Litigation and enforcement | FIRM_DECLINED | RESELECTION_RUN | FIRM_INSTRUCTED | Partners and external parties | Panel law firm | 2 working days |
+| R-LIT-30 | Litigation and enforcement | FIRM_INSTRUCTED | CASE_FILED | FILED_IN_COURT | Partners and external parties | Panel law firm | Filing service level by task |
+| R-LIT-31 | Litigation and enforcement | FILED_IN_COURT | COURT_REJECTED_FILING | FILING_REJECTED | Case owner and the recovery team | Litigation officer | 5 working days |
+| R-LIT-32 | Litigation and enforcement | FILING_REJECTED | PACK_REWORKED | PACK_ASSEMBLY | The Workbench | Workbench | 3 working days |
+| R-LIT-33 | Litigation and enforcement | FILED_IN_COURT | HEARING_SCHEDULED | IN_HEARING | Partners and external parties | Panel law firm | To the hearing date |
+| R-LIT-34 | Litigation and enforcement | IN_HEARING | HEARING_ADJOURNED | HEARING_ADJOURNED | Partners and external parties | Panel law firm | To the new date |
+| R-LIT-35 | Litigation and enforcement | HEARING_ADJOURNED | NEW_DATE_SET | IN_HEARING | Partners and external parties | Panel law firm | To the new date |
+| R-LIT-36 | Litigation and enforcement | IN_HEARING | SETTLEMENT_PROPOSED | SETTLEMENT_OFFERED_AT_COURT | Approvers and committees | Approver at D7.4 | 3 working days |
+| R-LIT-37 | Litigation and enforcement | SETTLEMENT_OFFERED_AT_COURT | SETTLEMENT_APPROVED | LITIGATION_HELD | Case owner and the recovery team | Restructuring officer, FCR | 2 working days |
+| R-LIT-38 | Litigation and enforcement | SETTLEMENT_OFFERED_AT_COURT | SETTLEMENT_REJECTED | IN_HEARING | Partners and external parties | Panel law firm | None |
+| R-LIT-39 | Litigation and enforcement | LITIGATION_HELD | SETTLEMENT_COMPLETED | CASE_CLOSED | Case owner and the recovery team | Case owner | None |
+| R-LIT-40 | Litigation and enforcement | LITIGATION_HELD | SETTLEMENT_BROKEN | IN_HEARING | Partners and external parties | Panel law firm | 5 working days |
+| R-LIT-41 | Litigation and enforcement | IN_HEARING | FEE_DUE | LEGAL_SPEND_APPROVAL | Approvers and committees | Approver at D7.4 | 3 working days |
+| R-LIT-42 | Litigation and enforcement | LEGAL_SPEND_APPROVAL | FEE_APPROVED | IN_HEARING | Partners and external parties | Panel law firm | 5 working days |
+| R-LIT-43 | Litigation and enforcement | LEGAL_SPEND_APPROVAL | FEE_REJECTED | IN_HEARING | Case owner and the recovery team | Litigation officer | None |
+| R-LIT-44 | Litigation and enforcement | IN_HEARING | JUDGMENT_FOR_THE_BANK | JUDGMENT_RECORDED | Case owner and the recovery team | Enforcement owner | 5 working days |
+| R-LIT-45 | Litigation and enforcement | IN_HEARING | JUDGMENT_AGAINST_THE_BANK | JUDGMENT_DISMISSED | Case owner and the recovery team | Litigation officer | To the appeal window end |
+| R-LIT-46 | Litigation and enforcement | JUDGMENT_DISMISSED | APPEAL_WINDOW_OPEN | APPEAL_DECISION | Approvers and committees | Approver at D7.4 | To the window end |
+| R-LIT-47 | Litigation and enforcement | APPEAL_DECISION | APPEAL_APPROVED | APPEAL_FILED | Partners and external parties | Panel law firm | To the filing deadline |
+| R-LIT-48 | Litigation and enforcement | APPEAL_FILED | APPEAL_HEARING_SET | IN_HEARING | Partners and external parties | Panel law firm | To the hearing date |
+| R-LIT-49 | Litigation and enforcement | APPEAL_DECISION | APPEAL_DECLINED | TO_WRITE_OFF | Case owner and the recovery team | Write-off team with Credit Administration | None |
+| R-LIT-50 | Litigation and enforcement | JUDGMENT_RECORDED | ENFORCEMENT_OPENED | ASSET_TRACE | The Workbench | Workbench | 10 working days |
+| R-LIT-51 | Litigation and enforcement | JUDGMENT_RECORDED | DEBTOR_PAID_AFTER_JUDGMENT | CASE_CLOSED | Case owner and the recovery team | Case owner | None |
+| R-LIT-52 | Litigation and enforcement | ASSET_TRACE | ASSETS_FOUND | ENFORCEMENT_DECISION | Case owner and the recovery team | Enforcement owner | 5 working days |
+| R-LIT-53 | Litigation and enforcement | ASSET_TRACE | NO_ASSET_FOUND | ENFORCEMENT_DECISION | Case owner and the recovery team | Enforcement owner | 5 working days |
+| R-LIT-54 | Litigation and enforcement | ENFORCEMENT_DECISION | ENFORCE_APPROVED | WRIT_AND_SEIZURE | Partners and external parties | Panel law firm | To the writ deadline |
+| R-LIT-55 | Litigation and enforcement | ENFORCEMENT_DECISION | DEFER_RECORDED | DEFERRAL_RECORDED | Case owner and the recovery team | Enforcement owner | To the review date |
+| R-LIT-56 | Litigation and enforcement | DEFERRAL_RECORDED | REVIEW_DATE_REACHED | ENFORCEMENT_DECISION | Case owner and the recovery team | Enforcement owner | 5 working days |
+| R-LIT-57 | Litigation and enforcement | DEFERRAL_RECORDED | ENFORCEMENT_EXHAUSTED | TO_WRITE_OFF | Case owner and the recovery team | Write-off team with Credit Administration | None |
+| R-LIT-58 | Litigation and enforcement | ENFORCEMENT_DECISION | PETITION_PROPOSED | BANKRUPTCY_PETITION | Approvers and committees | Approver at D7.5 | 5 working days |
+| R-LIT-59 | Litigation and enforcement | BANKRUPTCY_PETITION | PETITION_APPROVED | OFFICIAL_RECEIVER_CLAIM | Partners and external parties | Official receiver | To the filing deadline |
+| R-LIT-60 | Litigation and enforcement | BANKRUPTCY_PETITION | PETITION_REJECTED | TO_WRITE_OFF | Case owner and the recovery team | Write-off team with Credit Administration | None |
+| R-LIT-61 | Litigation and enforcement | OFFICIAL_RECEIVER_CLAIM | DIVIDEND_RECEIVED | PROCEEDS_MATCHED | The Workbench | Workbench | 2 working days |
+| R-LIT-62 | Litigation and enforcement | OFFICIAL_RECEIVER_CLAIM | CLAIM_DEADLINE_MISSED | TO_WRITE_OFF | Case owner and the recovery team | Write-off team with Credit Administration | None |
+| R-LIT-63 | Litigation and enforcement | WRIT_AND_SEIZURE | SEIZURE_EXECUTED | LED_AUCTION | Partners and external parties | Legal Execution Department | To the auction date |
+| R-LIT-64 | Litigation and enforcement | WRIT_AND_SEIZURE | SEIZURE_BLOCKED | ENFORCEMENT_DECISION | Case owner and the recovery team | Enforcement owner | 10 working days |
+| R-LIT-65 | Litigation and enforcement | LED_AUCTION | ROUND_SOLD | PROCEEDS_MATCHED | The Workbench | Workbench | 2 working days |
+| R-LIT-66 | Litigation and enforcement | LED_AUCTION | ROUND_NO_BID | LED_AUCTION | Partners and external parties | Legal Execution Department | To the next auction date |
+| R-LIT-67 | Litigation and enforcement | LED_AUCTION | LADDER_EXHAUSTED | NO_BID_AT_70 | Case owner and the recovery team | Enforcement owner | 5 working days |
+| R-LIT-68 | Litigation and enforcement | NO_BID_AT_70 | ASSET_TAKEN_ON_BOOK | TO_ASSET_DISPOSAL | Case owner and the recovery team | Sale officer | 5 working days |
+| R-LIT-69 | Litigation and enforcement | NO_BID_AT_70 | ASSET_RETURNED_UNSOLD | ENFORCEMENT_DECISION | Case owner and the recovery team | Enforcement owner | 5 working days |
+| R-LIT-70 | Litigation and enforcement | PROCEEDS_MATCHED | BALANCE_SATISFIED | CASE_CLOSED | Case owner and the recovery team | Case owner | None |
+| R-LIT-71 | Litigation and enforcement | PROCEEDS_MATCHED | SHORTFALL_REMAINS | TO_WRITE_OFF | Case owner and the recovery team | Write-off team with Credit Administration | 10 working days |
+| R-LIT-72 | Litigation and enforcement | PROCEEDS_MATCHED | NO_CASE_REFERENCE | PROCEEDS_MATCHED | Case owner and the recovery team | Case owner | 1 working day |
+| R-LIT-73 | Litigation and enforcement | IN_HEARING | DEVIATION_RAISED | DEVIATION_HOLD | Approvers and committees | Named deviation approver | None |
+| R-LIT-74 | Litigation and enforcement | DEVIATION_HOLD | X1_RESOLVED | IN_HEARING | Partners and external parties | Panel law firm | None |
+| R-LIT-75 | Litigation and enforcement | DEVIATION_HOLD | X1_UPHELD | TO_TREATMENT | Case owner and the recovery team | Case owner | 5 working days |
+| R-LIT-76 | Litigation and enforcement | DEVIATION_HOLD | X3_INSURANCE_SETTLED | CASE_CLOSED | Case owner and the recovery team | Case owner | None |
+| R-LIT-77 | Litigation and enforcement | DEVIATION_HOLD | X4_FRAUD_CONFIRMED | TO_WRITE_OFF | Case owner and the recovery team | Fraud team with the write-off team | None |
+| R-LIT-78 | Litigation and enforcement | DEVIATION_HOLD | X5_BANKRUPTCY_DETECTED | OFFICIAL_RECEIVER_CLAIM | Case owner and the recovery team | Legal | To the receiver deadline |
+| R-LIT-79 | Litigation and enforcement | DEVIATION_HOLD | X7_COLLATERAL_EVENT | TO_TREATMENT | Case owner and the recovery team | Case owner | 10 working days |
+| R-GUA-01 | Guarantee claim | GUARANTEE_DETECTED | GUARANTEE_FOUND | DEADLINE_TIMER_RUNNING | The Workbench | Workbench | To the claim deadline |
+| R-GUA-02 | Guarantee claim | GUARANTEE_DETECTED | CONDITIONS_NOT_MET | NOT_ELIGIBLE | Case owner and the recovery team | Guarantee officer | None |
+| R-GUA-03 | Guarantee claim | NOT_ELIGIBLE | CONDITIONS_LATER_MET | DEADLINE_TIMER_RUNNING | The Workbench | Workbench | To the claim deadline |
+| R-GUA-04 | Guarantee claim | DEADLINE_TIMER_RUNNING | PREPARATION_DUE | CLAIM_PREPARATION | The Workbench | Workbench | 5 working days |
+| R-GUA-05 | Guarantee claim | DEADLINE_TIMER_RUNNING | CLAIM_DEADLINE_MISSED | DEADLINE_MISSED | Case owner and the recovery team | Guarantee officer | None |
+| R-GUA-06 | Guarantee claim | DEADLINE_TIMER_RUNNING | GUARANTOR_NOTICE_DUE | GUARANTOR_NOTICE | Customer and guarantor | Guarantor | Notice period by product |
+| R-GUA-07 | Guarantee claim | CLAIM_PREPARATION | CHECKLIST_COMPLETE | CLAIM_APPROVAL | Case owner and the recovery team | Guarantee officer | 3 working days |
+| R-GUA-08 | Guarantee claim | CLAIM_PREPARATION | CHECKLIST_INCOMPLETE | CLAIM_DEFECT_HOLD | Case owner and the recovery team | Guarantee officer | 5 working days |
+| R-GUA-09 | Guarantee claim | CLAIM_PREPARATION | CLAIM_DEADLINE_MISSED | DEADLINE_MISSED | Case owner and the recovery team | Guarantee officer | None |
+| R-GUA-10 | Guarantee claim | CLAIM_DEFECT_HOLD | DOCUMENT_SUPPLIED | CLAIM_PREPARATION | The Workbench | Workbench | 1 working day |
+| R-GUA-11 | Guarantee claim | CLAIM_DEFECT_HOLD | DEADLINE_WARNING | CLAIM_APPROVAL | Approvers and committees | Head of Litigation | To the claim deadline |
+| R-GUA-12 | Guarantee claim | CLAIM_APPROVAL | CLAIM_APPROVED | CLAIM_SUBMITTED | Partners and external parties | TCG | 2 working days |
+| R-GUA-13 | Guarantee claim | CLAIM_APPROVAL | CLAIM_SENT_BACK | CLAIM_PREPARATION | The Workbench | Workbench | 2 working days |
+| R-GUA-14 | Guarantee claim | CLAIM_SUBMITTED | TCG_QUERY_RAISED | TCG_QUERY | Case owner and the recovery team | Guarantee officer | To the TCG response date |
+| R-GUA-15 | Guarantee claim | TCG_QUERY | QUERY_ANSWERED | CLAIM_SUBMITTED | Partners and external parties | TCG | 5 working days |
+| R-GUA-16 | Guarantee claim | TCG_QUERY | QUERY_UNANSWERED | CLAIM_REJECTED | Case owner and the recovery team | Guarantee officer | None |
+| R-GUA-17 | Guarantee claim | CLAIM_SUBMITTED | CLAIM_REJECTED_BY_TCG | CLAIM_REJECTED | Case owner and the recovery team | Guarantee officer | 5 working days |
+| R-GUA-18 | Guarantee claim | CLAIM_REJECTED | RESUBMISSION_POSSIBLE | CLAIM_PREPARATION | The Workbench | Workbench | 5 working days |
+| R-GUA-19 | Guarantee claim | CLAIM_REJECTED | RESUBMISSION_NOT_POSSIBLE | RESIDUAL_TO_ROUTE | Case owner and the recovery team | Case owner | None |
+| R-GUA-20 | Guarantee claim | CLAIM_SUBMITTED | PART_PAYMENT_RECEIVED | CLAIM_PART_PAID | The Workbench | Workbench | 2 working days |
+| R-GUA-21 | Guarantee claim | CLAIM_PART_PAID | BALANCE_CLAIMED | CLAIM_SUBMITTED | Partners and external parties | TCG | 5 working days |
+| R-GUA-22 | Guarantee claim | CLAIM_SUBMITTED | FULL_PAYMENT_RECEIVED | CLAIM_PAID | The Workbench | Workbench | 2 working days |
+| R-GUA-23 | Guarantee claim | CLAIM_PAID | SUBROGATION_DUE | SUBROGATION_POSITION | Case owner and the recovery team | Guarantee officer | None |
+| R-GUA-24 | Guarantee claim | CLAIM_PART_PAID | SUBROGATION_DUE | SUBROGATION_POSITION | Case owner and the recovery team | Guarantee officer | None |
+| R-GUA-25 | Guarantee claim | SUBROGATION_POSITION | RESIDUAL_REMAINS | RESIDUAL_TO_ROUTE | Case owner and the recovery team | Case owner | 5 working days |
+| R-GUA-26 | Guarantee claim | SUBROGATION_POSITION | BALANCE_SATISFIED | GUARANTEE_CLOSED | Case owner and the recovery team | Case owner | None |
+| R-GUA-27 | Guarantee claim | DEADLINE_MISSED | LOSS_RECORDED | RESIDUAL_TO_ROUTE | Case owner and the recovery team | Case owner | 5 working days |
+| R-GUA-28 | Guarantee claim | GUARANTOR_NOTICE | GUARANTOR_SETTLED | GUARANTEE_CLOSED | Case owner and the recovery team | Case owner | 5 working days |
+| R-GUA-29 | Guarantee claim | GUARANTOR_NOTICE | GUARANTOR_REFUSED | RESIDUAL_TO_ROUTE | Case owner and the recovery team | Case owner | None |
+| R-GUA-30 | Guarantee claim | GUARANTOR_NOTICE | GUARANTOR_DISPUTED | GUARANTOR_DISPUTE_HOLD | Case owner and the recovery team | Complaint officer | None |
+| R-GUA-31 | Guarantee claim | GUARANTOR_DISPUTE_HOLD | X1_RESOLVED | GUARANTOR_NOTICE | Case owner and the recovery team | Case owner | None |
+| R-GUA-32 | Guarantee claim | GUARANTOR_DISPUTE_HOLD | X1_UPHELD | RESIDUAL_TO_ROUTE | Case owner and the recovery team | Case owner | 5 working days |
+| R-DIS-01 | Asset disposal | ASSET_PENDING_TAKE_ON | REPOSSESSION_COMPLETED | ASSET_ON_BOOKS | Case owner and the recovery team | Sale officer | 1 working day |
+| R-DIS-02 | Asset disposal | ASSET_PENDING_TAKE_ON | DIL_TRANSFER_REGISTERED | ASSET_ON_BOOKS | Case owner and the recovery team | Sale officer | 1 working day |
+| R-DIS-03 | Asset disposal | ASSET_PENDING_TAKE_ON | LED_HANDOVER_RECEIVED | ASSET_ON_BOOKS | Case owner and the recovery team | Sale officer | 1 working day |
+| R-DIS-04 | Asset disposal | ASSET_PENDING_TAKE_ON | STATUTORY_NOTICE_FAILED | FAILED_NOTICE_QUEUE | Case owner and the recovery team | Sale officer | 2 working days |
+| R-DIS-05 | Asset disposal | FAILED_NOTICE_QUEUE | NOTICE_REISSUED | ASSET_PENDING_TAKE_ON | The Workbench | Workbench | None |
+| R-DIS-06 | Asset disposal | ASSET_ON_BOOKS | ASSET_RECORD_CONFIRMED | ASSET_HELD | Case owner and the recovery team | Sale officer | None |
+| R-DIS-07 | Asset disposal | ASSET_ON_BOOKS | TITLE_UNRESOLVED | TITLE_BLOCKED | Case owner and the recovery team | Sale officer | 10 working days |
+| R-DIS-08 | Asset disposal | TITLE_BLOCKED | TITLE_CLEARED | ASSET_HELD | Case owner and the recovery team | Sale officer | None |
+| R-DIS-09 | Asset disposal | ASSET_HELD | PROVISION_STEP_DUE | ASSET_HELD | The Workbench | Workbench | None |
+| R-DIS-10 | Asset disposal | ASSET_HELD | WORK_ORDER_RAISED | WORK_ORDER_OPEN | Partners and external parties | Property services vendor | per fee schedule |
+| R-DIS-11 | Asset disposal | WORK_ORDER_OPEN | WORK_ACCEPTED | ASSET_HELD | Case owner and the recovery team | Sale officer | 3 working days |
+| R-DIS-12 | Asset disposal | WORK_ORDER_OPEN | WORK_REFUSED | WORK_ORDER_OPEN | Partners and external parties | Property services vendor | None |
+| R-DIS-13 | Asset disposal | ASSET_HELD | OCCUPANTS_REFUSE_POSSESSION | EVICTION_REQUIRED | Case owner and the recovery team | Litigation officer | None |
+| R-DIS-14 | Asset disposal | EVICTION_REQUIRED | POSSESSION_TAKEN | ASSET_HELD | Case owner and the recovery team | Sale officer | None |
+| R-DIS-15 | Asset disposal | ASSET_HELD | REAPPRAISAL_CYCLE_DUE | REAPPRAISAL_ORDERED | Partners and external parties | Valuer | 10 working days |
+| R-DIS-16 | Asset disposal | REAPPRAISAL_ORDERED | VALUER_REPORTED | REAPPRAISAL_RECEIVED | Case owner and the recovery team | Sale officer | 2 working days |
+| R-DIS-17 | Asset disposal | REAPPRAISAL_RECEIVED | VALUE_ACCEPTED | ASSET_HELD | The Workbench | Workbench | None |
+| R-DIS-18 | Asset disposal | REAPPRAISAL_RECEIVED | VALUE_REJECTED | REAPPRAISAL_ORDERED | Partners and external parties | Valuer | None |
+| R-DIS-19 | Asset disposal | ASSET_HELD | READY_TO_SELL | ROUTE_RECOMMENDED | Case owner and the recovery team | Sale officer | 2 working days |
+| R-DIS-20 | Asset disposal | ROUTE_RECOMMENDED | ROUTE_SUBMITTED | ROUTE_WITH_APPROVER | Case owner and the recovery team | Sale officer | 2 working days |
+| R-DIS-21 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_APPROVED | ROUTE_APPROVED_AUCTION | Case owner and the recovery team | Sale officer | None |
+| R-DIS-22 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_APPROVED | ROUTE_APPROVED_AUCTION | Approvers and committees | Committee | None |
+| R-DIS-23 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_APPROVED | ROUTE_APPROVED_RAMC | Case owner and the recovery team | Sale officer | None |
+| R-DIS-24 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_APPROVED | ROUTE_APPROVED_BUYBACK | Case owner and the recovery team | Sale officer | None |
+| R-DIS-25 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_APPROVED | RENTAL_ACTIVE | Case owner and the recovery team | Sale officer | None |
+| R-DIS-26 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_APPROVED | BROKER_INSTRUCTED | Partners and external parties | Broker | per instruction term |
+| R-DIS-27 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_REFUSED | ASSET_HELD | Case owner and the recovery team | Sale officer | None |
+| R-DIS-28 | Asset disposal | ROUTE_APPROVED_AUCTION | PRICE_MODEL_RUN | PRICE_PROPOSED | Case owner and the recovery team | Sale officer | 1 working day |
+| R-DIS-29 | Asset disposal | PRICE_PROPOSED | FLOOR_APPROVED_BY_OFFICER | FLOOR_APPROVED | The Workbench | Workbench | None |
+| R-DIS-30 | Asset disposal | FLOOR_APPROVED | VENDOR_REQUIRED | VENDOR_ALLOCATED | Partners and external parties | Auction and remarketing vendor | 2 working days |
+| R-DIS-31 | Asset disposal | VENDOR_ALLOCATED | VENDOR_UNAVAILABLE | VENDOR_ALLOCATED | Partners and external parties | Partner and agency manager | None |
+| R-DIS-32 | Asset disposal | VENDOR_ALLOCATED | VENDOR_ACCEPTED | LISTING_LIVE | Partners and external parties | Auction and remarketing vendor | 2 working days |
+| R-DIS-33 | Asset disposal | FLOOR_APPROVED | LISTING_EVIDENCE_COMPLETE | LISTING_LIVE | The Workbench | Workbench | per asset class |
+| R-DIS-34 | Asset disposal | FLOOR_APPROVED | LISTING_EVIDENCE_MISSING | LISTING_BLOCKED | Case owner and the recovery team | Sale officer | 5 working days |
+| R-DIS-35 | Asset disposal | LISTING_BLOCKED | EVIDENCE_SUPPLIED | LISTING_LIVE | The Workbench | Workbench | None |
+| R-DIS-36 | Asset disposal | LISTING_LIVE | ROUND_OPENED | ROUND_OPEN | Partners and external parties | Auction and remarketing vendor | per schedule |
+| R-DIS-37 | Asset disposal | ROUND_OPEN | BID_PLACED | BID_RECEIVED | The Workbench | Workbench | None |
+| R-DIS-38 | Asset disposal | ROUND_OPEN | ROUND_CLOSED_NO_BID | ROUND_OPEN | The Workbench | Workbench | per schedule |
+| R-DIS-39 | Asset disposal | ROUND_OPEN | FLOOR_REACHED_NO_BID | NO_BID_AT_FLOOR | Case owner and the recovery team | Sale officer | None |
+| R-DIS-40 | Asset disposal | BID_RECEIVED | BID_AT_OR_ABOVE_FLOOR | SALE_AGREED | Case owner and the recovery team | Sale officer | 1 working day |
+| R-DIS-41 | Asset disposal | BID_RECEIVED | BID_BELOW_FLOOR | SECOND_SIGNATURE_PENDING | Approvers and committees | Committee | 2 working days |
+| R-DIS-42 | Asset disposal | SECOND_SIGNATURE_PENDING | SECOND_SIGNATURE_GIVEN | SALE_AGREED | Case owner and the recovery team | Sale officer | None |
+| R-DIS-43 | Asset disposal | SECOND_SIGNATURE_PENDING | SECOND_SIGNATURE_REFUSED | RELISTED | Case owner and the recovery team | Sale officer | None |
+| R-DIS-44 | Asset disposal | NO_BID_AT_FLOOR | RELIST_RULE_APPLIED | RELISTED | Case owner and the recovery team | Sale officer | None |
+| R-DIS-45 | Asset disposal | RELISTED | ROUTE_REVIEW_REQUIRED | ROUTE_RECOMMENDED | Case owner and the recovery team | Sale officer | 2 working days |
+| R-DIS-46 | Asset disposal | NO_BID_AT_FLOOR | RELIST_LIMIT_REACHED | TO_DEBT_SALE | Case owner and the recovery team | Debt sale officer | None |
+| R-DIS-47 | Asset disposal | SALE_AGREED | AWARD_MADE | AWAITING_PAYMENT | Partners and external parties | Buyer | 5 calendar days |
+| R-DIS-48 | Asset disposal | AWAITING_PAYMENT | PAYMENT_RECEIVED | TITLE_TRANSFER_PENDING | Case owner and the recovery team | Sale officer | None |
+| R-DIS-49 | Asset disposal | AWAITING_PAYMENT | PAYMENT_TERM_EXPIRED | AWARD_CANCELED | Case owner and the recovery team | Sale officer | None |
+| R-DIS-50 | Asset disposal | AWARD_CANCELED | ROUND_REOPENED | ROUND_OPEN | Partners and external parties | Auction and remarketing vendor | None |
+| R-DIS-51 | Asset disposal | TITLE_TRANSFER_PENDING | REGISTRATION_TRANSFERRED | ASSET_SOLD | The Workbench | Workbench | 5 working days |
+| R-DIS-52 | Asset disposal | TITLE_TRANSFER_PENDING | TITLE_REGISTERED | ASSET_SOLD | Case owner and the recovery team | Sale officer | 10 working days |
+| R-DIS-53 | Asset disposal | TITLE_TRANSFER_PENDING | TRANSFER_REJECTED | TITLE_BLOCKED | Case owner and the recovery team | Sale officer | 5 working days |
+| R-DIS-54 | Asset disposal | ASSET_SOLD | PROCEEDS_POSTED | PROCEEDS_APPLIED | The Workbench | Workbench | same day |
+| R-DIS-55 | Asset disposal | PROCEEDS_APPLIED | SHORTFALL_CALCULATED | SHORTFALL_RAISED | Case owner and the recovery team | Write-off team | None |
+| R-DIS-56 | Asset disposal | PROCEEDS_APPLIED | NO_SHORTFALL | CASE_CLOSED_NO_SHORTFALL | The Workbench | Workbench | None |
+| R-DIS-57 | Asset disposal | SHORTFALL_RAISED | RESIDUAL_ROUTED | TO_WRITEOFF | Approvers and committees | Write-off committee | None |
+| R-DIS-58 | Asset disposal | SHORTFALL_RAISED | RESIDUAL_ROUTED | TO_DEBT_SALE | Case owner and the recovery team | Debt sale officer | None |
+| R-DIS-59 | Asset disposal | ROUTE_APPROVED_RAMC | TRANSFER_INSTRUCTED | RAMC_TRANSFER_PENDING | Partners and external parties | RAMC | per agreement |
+| R-DIS-60 | Asset disposal | RAMC_TRANSFER_PENDING | TRANSFER_COMPLETED | ASSET_TRANSFERRED | The Workbench | Workbench | None |
+| R-DIS-61 | Asset disposal | ROUTE_APPROVED_BUYBACK | BUYBACK_TERMS_SIGNED | SALE_AGREED | Case owner and the recovery team | Sale officer | None |
+| R-DIS-62 | Asset disposal | ROUTE_APPROVED_BUYBACK | BUYBACK_FUNDING_FAILED | ASSET_HELD | Case owner and the recovery team | Sale officer | None |
+| R-DIS-63 | Asset disposal | RENTAL_ACTIVE | TENANT_DEFAULTED | ASSET_HELD | Case owner and the recovery team | Sale officer | None |
+| R-DIS-64 | Asset disposal | BROKER_INSTRUCTED | BROKER_SOLD | SALE_AGREED | Case owner and the recovery team | Sale officer | None |
+| R-DIS-65 | Asset disposal | BROKER_INSTRUCTED | BROKER_TERM_EXPIRED | ROUTE_RECOMMENDED | Case owner and the recovery team | Sale officer | None |
+| R-DIS-66 | Asset disposal | ASSET_HELD | DEVIATION_RAISED | DISPOSAL_PAUSED_DEVIATION | Case owner and the recovery team | Deviation owner | None |
+| R-DIS-67 | Asset disposal | LISTING_LIVE | DEVIATION_RAISED | DISPOSAL_PAUSED_DEVIATION | Case owner and the recovery team | Deviation owner | None |
+| R-DIS-68 | Asset disposal | DISPOSAL_PAUSED_DEVIATION | DEVIATION_CLEARED | ASSET_HELD | Case owner and the recovery team | Sale officer | None |
+| R-DIS-69 | Asset disposal | DISPOSAL_PAUSED_DEVIATION | BANKRUPTCY_CONFIRMED | TO_WRITEOFF | Case owner and the recovery team | Legal | None |
+| R-DIS-70 | Asset disposal | ROUTE_WITH_APPROVER | ROUTE_APPROVED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Sale officer | same day |
+| R-DIS-71 | Asset disposal | SHORTFALL_RAISED | RESIDUAL_ROUTED | UNMATCHED_EXCEPTION | Case owner and the recovery team | Sale officer | same day |
+| R-DIS-72 | Asset disposal | UNMATCHED_EXCEPTION | MANUAL_DECISION_RECORDED | ASSET_HELD | Case owner and the recovery team | Sale officer | 2 working days |
+| R-DS-01 | Debt sale | LOT_CANDIDATE_SELECTED | DEBT_SALE_CYCLE_OPENED | LOT_BUILT | Case owner and the recovery team | Debt sale officer | per monthly cycle |
+| R-DS-02 | Debt sale | LOT_CANDIDATE_SELECTED | ACCOUNT_EXCLUDED | CASE_EXCLUDED | Case owner and the recovery team | Case owner | None |
+| R-DS-03 | Debt sale | CASE_EXCLUDED | EXCLUSION_CLEARED | BACK_TO_CASE_LIST | Case owner and the recovery team | Debt sale officer | next cycle |
+| R-DS-04 | Debt sale | LOT_BUILT | LOT_PRICED | LOT_WITH_COMMITTEE | Approvers and committees | Committee | 5 working days |
+| R-DS-05 | Debt sale | LOT_BUILT | LOT_TOO_THIN | LOT_BUILT | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-06 | Debt sale | LOT_WITH_COMMITTEE | LOT_APPROVED_BY_COMMITTEE | LOT_APPROVED | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-07 | Debt sale | LOT_WITH_COMMITTEE | RESERVE_RAISED | LOT_WITH_COMMITTEE | Approvers and committees | Committee | None |
+| R-DS-08 | Debt sale | LOT_WITH_COMMITTEE | LOT_REFUSED | LOT_WITHDRAWN | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-09 | Debt sale | LOT_WITHDRAWN | ACCOUNTS_RETURNED | BACK_TO_CASE_LIST | Case owner and the recovery team | Case owner | None |
+| R-DS-10 | Debt sale | LOT_APPROVED | TAPE_BUILD_RUN | TAPE_PREPARED | The Workbench | Workbench | 3 working days |
+| R-DS-11 | Debt sale | TAPE_PREPARED | MASKING_CHECK_FAILED | TAPE_REJECTED | The Workbench | Workbench | None |
+| R-DS-12 | Debt sale | TAPE_REJECTED | TAPE_REBUILT | TAPE_PREPARED | The Workbench | Workbench | None |
+| R-DS-13 | Debt sale | TAPE_PREPARED | MASKING_CHECK_PASSED | DATA_ROOM_OPEN | Case owner and the recovery team | Debt sale officer | per cycle |
+| R-DS-14 | Debt sale | DATA_ROOM_OPEN | BUYER_REQUESTED_ACCESS | BUYER_PENDING_KYC | The Workbench | Workbench | 3 working days |
+| R-DS-15 | Debt sale | BUYER_PENDING_KYC | KYC_PASSED | BUYER_CLEARED | Partners and external parties | Buyer | None |
+| R-DS-16 | Debt sale | BUYER_PENDING_KYC | KYC_FAILED | BUYER_REJECTED | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-17 | Debt sale | BUYER_CLEARED | BIDDING_WINDOW_OPENED | BIDDING_OPEN | Partners and external parties | Buyer | per cycle |
+| R-DS-18 | Debt sale | BIDDING_OPEN | BID_SUBMITTED | BIDS_RECEIVED | The Workbench | Workbench | None |
+| R-DS-19 | Debt sale | BIDS_RECEIVED | BIDDING_WINDOW_CLOSED | AWARD_PENDING | Case owner and the recovery team | Debt sale officer | 2 working days |
+| R-DS-20 | Debt sale | BIDS_RECEIVED | BEST_BID_BELOW_RESERVE | BID_BELOW_RESERVE | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-21 | Debt sale | BID_BELOW_RESERVE | LOT_REOFFERED | BIDDING_OPEN | Partners and external parties | Buyer | None |
+| R-DS-22 | Debt sale | BID_BELOW_RESERVE | LOT_NOT_CLEARED | LOT_WITHDRAWN | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-23 | Debt sale | AWARD_PENDING | AWARD_CONFIRMED | LOT_AWARDED | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-24 | Debt sale | LOT_AWARDED | SETTLEMENT_TERM_STARTED | SETTLEMENT_PENDING | Partners and external parties | Buyer | per agreed settlement period |
+| R-DS-25 | Debt sale | SETTLEMENT_PENDING | BUYER_SETTLED | SETTLED | The Workbench | Workbench | None |
+| R-DS-26 | Debt sale | SETTLEMENT_PENDING | BUYER_CANCELED | AWARD_CANCELED_DS | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-27 | Debt sale | SETTLEMENT_PENDING | SETTLEMENT_TERM_EXPIRED | AWARD_CANCELED_DS | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-28 | Debt sale | AWARD_CANCELED_DS | LOT_REOFFERED_AFTER_CANCEL | BIDDING_OPEN | Partners and external parties | Buyer | None |
+| R-DS-29 | Debt sale | SETTLED | DATA_TRANSFER_RUN | DATA_TRANSFERRED | The Workbench | Workbench | 5 working days |
+| R-DS-30 | Debt sale | DATA_TRANSFERRED | DERECOGNITION_RUN | DERECOGNISED | The Workbench | Workbench | None |
+| R-DS-31 | Debt sale | DERECOGNISED | GL_POSTING_RUN | GL_POSTED | Case owner and the recovery team | Credit Administration | month-end close |
+| R-DS-32 | Debt sale | DERECOGNISED | POSTING_REJECTED | POSTING_REJECTED_DS | Case owner and the recovery team | Credit Administration | 2 working days |
+| R-DS-33 | Debt sale | POSTING_REJECTED_DS | POSTING_CORRECTED | GL_POSTED | Case owner and the recovery team | Credit Administration | None |
+| R-DS-34 | Debt sale | GL_POSTED | CLAIM_WINDOW_CLOSED | LOT_CLOSED | Case owner and the recovery team | Debt sale officer | per claim window |
+| R-DS-35 | Debt sale | GL_POSTED | PUTBACK_CLAIMED | PUTBACK_RAISED | Case owner and the recovery team | Debt sale officer | 10 working days |
+| R-DS-36 | Debt sale | PUTBACK_RAISED | PUTBACK_ACCEPTED | PUTBACK_UPHELD | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-37 | Debt sale | PUTBACK_UPHELD | ACCOUNT_RETURNED | BACK_TO_CASE_LIST | Case owner and the recovery team | Case owner | None |
+| R-DS-38 | Debt sale | PUTBACK_RAISED | PUTBACK_REFUSED_BY_BANK | PUTBACK_REFUSED | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-39 | Debt sale | PUTBACK_REFUSED | CLAIM_CLOSED | LOT_CLOSED | Case owner and the recovery team | Debt sale officer | None |
+| R-DS-40 | Debt sale | BUYER_REJECTED | BUYER_REMEDIATED | BUYER_PENDING_KYC | Case owner and the recovery team | Debt sale officer | 10 working days |
+| R-DS-41 | Debt sale | BUYER_REJECTED | BUYER_BARRED | BACK_TO_CASE_LIST | Approvers and committees | Head of Asset Liquidity | None |
+| R-WO-01 | Write off and recover after charge-off | SCAN_DUE | MONTHLY_SCAN_STARTED | POPULATION_PROPOSED | Case owner and the recovery team | Write-off team | monthly cut-off |
+| R-WO-02 | Write off and recover after charge-off | SCAN_DUE | ALS_LOAD_FAILED | SCAN_HELD | Case owner and the recovery team | Write-off team | 1 working day |
+| R-WO-03 | Write off and recover after charge-off | SCAN_DUE | TAX_CRITERIA_UNPUBLISHED | SCAN_HELD | Case owner and the recovery team | Write-off team | None |
+| R-WO-04 | Write off and recover after charge-off | SCAN_HELD | LOAD_RESTORED | SCAN_DUE | The Workbench | Workbench | None |
+| R-WO-05 | Write off and recover after charge-off | POPULATION_PROPOSED | PACK_BUILT | PACK_PREPARED | Case owner and the recovery team | Write-off team | 3 working days |
+| R-WO-06 | Write off and recover after charge-off | POPULATION_PROPOSED | CASE_HAS_OPEN_DEVIATION | CASE_REMOVED_BY_TEAM | Case owner and the recovery team | Deviation owner | None |
+| R-WO-07 | Write off and recover after charge-off | POPULATION_PROPOSED | TEAM_REMOVED_CASE | CASE_REMOVED_BY_TEAM | Case owner and the recovery team | Write-off team | None |
+| R-WO-08 | Write off and recover after charge-off | CASE_REMOVED_BY_TEAM | REMOVAL_CLEARED | SCAN_DUE | Case owner and the recovery team | Write-off team | next cut-off |
+| R-WO-09 | Write off and recover after charge-off | PACK_PREPARED | PACK_CHECK_FAILED | PACK_INCOMPLETE | Case owner and the recovery team | Write-off team | 2 working days |
+| R-WO-10 | Write off and recover after charge-off | PACK_INCOMPLETE | PACK_COMPLETED | WITH_COMMITTEE | Approvers and committees | Write-off committee | None |
+| R-WO-11 | Write off and recover after charge-off | PACK_PREPARED | PACK_ROUTED | WITH_COMMITTEE | Approvers and committees | Write-off committee | before the scheduled meeting |
+| R-WO-12 | Write off and recover after charge-off | PACK_PREPARED | LIMIT_EXCEEDED | ESCALATED_TO_CREDIT_COMMITTEE | Approvers and committees | Credit approval committee | before the scheduled meeting |
+| R-WO-13 | Write off and recover after charge-off | ESCALATED_TO_CREDIT_COMMITTEE | CREDIT_COMMITTEE_APPROVED | APPROVED | Case owner and the recovery team | Credit Administration | None |
+| R-WO-14 | Write off and recover after charge-off | ESCALATED_TO_CREDIT_COMMITTEE | CREDIT_COMMITTEE_REJECTED | RETURNED_TO_PURSUE | Case owner and the recovery team | Case owner | None |
+| R-WO-15 | Write off and recover after charge-off | WITH_COMMITTEE | COMMITTEE_APPROVED | APPROVED | Case owner and the recovery team | Credit Administration | None |
+| R-WO-16 | Write off and recover after charge-off | WITH_COMMITTEE | COMMITTEE_REJECTED | RETURNED_TO_PURSUE | Case owner and the recovery team | Case owner | None |
+| R-WO-17 | Write off and recover after charge-off | WITH_COMMITTEE | COMMITTEE_DEFERRED | DEFERRED | Case owner and the recovery team | Write-off team | to the review date |
+| R-WO-18 | Write off and recover after charge-off | WITH_COMMITTEE | DECISION_INCOMPLETE | WITH_COMMITTEE | Approvers and committees | Write-off committee | None |
+| R-WO-19 | Write off and recover after charge-off | DEFERRED | REVIEW_DATE_REACHED | SCAN_DUE | Case owner and the recovery team | Write-off team | next cut-off |
+| R-WO-20 | Write off and recover after charge-off | APPROVED | POSTING_TASK_CREATED | POSTING_PENDING | Case owner and the recovery team | Credit Administration | month-end close window |
+| R-WO-21 | Write off and recover after charge-off | POSTING_PENDING | ALS_POSTING_CONFIRMED | POSTED | Case owner and the recovery team | Credit Administration | None |
+| R-WO-22 | Write off and recover after charge-off | POSTING_PENDING | ALS_POSTING_REJECTED | POSTING_REJECTED | Case owner and the recovery team | Credit Administration | 2 working days |
+| R-WO-23 | Write off and recover after charge-off | POSTING_REJECTED | REJECTION_CLEARED | POSTING_PENDING | Case owner and the recovery team | Credit Administration | None |
+| R-WO-24 | Write off and recover after charge-off | POSTING_REJECTED | RETRY_LIMIT_REACHED | WRITEOFF_EXCEPTION | Case owner and the recovery team | Owner to confirm with C&R | to confirm with Credit Administration |
+| R-WO-25 | Write off and recover after charge-off | POSTED | PROVISION_RELEASE_RUN | PROVISION_RELEASED | The Workbench | Workbench | None |
+| R-WO-26 | Write off and recover after charge-off | PROVISION_RELEASED | FINANCE_FEED_RUN | FINANCE_FEED_SENT | Case owner and the recovery team | Credit Administration | month-end close |
+| R-WO-27 | Write off and recover after charge-off | FINANCE_FEED_SENT | FINANCE_REJECTED_FILE | FINANCE_FEED_REJECTED | Case owner and the recovery team | Credit Administration | 2 working days |
+| R-WO-28 | Write off and recover after charge-off | FINANCE_FEED_REJECTED | FEED_ACCEPTED_ON_RETRY | FINANCE_FEED_SENT | Case owner and the recovery team | Credit Administration | None |
+| R-WO-29 | Write off and recover after charge-off | FINANCE_FEED_SENT | POST_CHARGEOFF_RULE_RUN | PLACEMENT_DECIDED | Partners and external parties | Partner and agency manager | 5 working days |
+| R-WO-30 | Write off and recover after charge-off | PLACEMENT_DECIDED | SOFT_RECOVERY_SELECTED | PLACED_WITH_AGENCY | Partners and external parties | Outsourced agency | same day on the portal |
+| R-WO-31 | Write off and recover after charge-off | PLACEMENT_DECIDED | NO_AGENCY_CAPACITY | PLACEMENT_DECIDED | Partners and external parties | Partner and agency manager | 5 working days |
+| R-WO-32 | Write off and recover after charge-off | PLACEMENT_DECIDED | SALE_SELECTED | SOLD_POST_CHARGEOFF | Case owner and the recovery team | Debt sale officer | per cycle |
+| R-WO-33 | Write off and recover after charge-off | PLACED_WITH_AGENCY | AGENCY_REPORTED_RESULT | PLACED_WITH_AGENCY | Partners and external parties | Outsourced agency | same day |
+| R-WO-34 | Write off and recover after charge-off | PLACED_WITH_AGENCY | AGENCY_UNDERPERFORMS | PLACEMENT_RECALLED | Partners and external parties | Partner and agency manager | None |
+| R-WO-35 | Write off and recover after charge-off | PLACEMENT_RECALLED | REPLACEMENT_MADE | PLACED_WITH_AGENCY | Partners and external parties | Outsourced agency | None |
+| R-WO-36 | Write off and recover after charge-off | PLACED_WITH_AGENCY | PLACEMENT_TERM_EXPIRED | RETENTION_RUNNING | The Workbench | Workbench | None |
+| R-WO-37 | Write off and recover after charge-off | PLACED_WITH_AGENCY | PAYMENT_RECEIVED_AFTER_CHARGEOFF | PAYMENT_MATCHED | The Workbench | Workbench | next working day |
+| R-WO-38 | Write off and recover after charge-off | PLACED_WITH_AGENCY | PAYMENT_MATCHES_NOTHING | PAYMENT_EXCEPTION | Case owner and the recovery team | Case owner | 2 working days |
+| R-WO-39 | Write off and recover after charge-off | PAYMENT_EXCEPTION | EXCEPTION_CLEARED | PAYMENT_MATCHED | The Workbench | Workbench | None |
+| R-WO-40 | Write off and recover after charge-off | SOLD_POST_CHARGEOFF | PAYMENT_BELONGS_TO_BUYER | REMITTED_TO_BUYER | Case owner and the recovery team | Debt sale officer | 5 working days |
+| R-WO-41 | Write off and recover after charge-off | PAYMENT_MATCHED | WRITEOFF_QUESTIONED | WRITEOFF_EXCEPTION | Case owner and the recovery team | Owner to confirm with C&R | to confirm with Credit Administration |
+| R-WO-42 | Write off and recover after charge-off | POSTED | POPULATION_RECONCILED | RETENTION_RUNNING | The Workbench | Workbench | monthly |
+| R-WO-43 | Write off and recover after charge-off | POSTED | POPULATION_NOT_RECONCILED | WRITEOFF_EXCEPTION | Case owner and the recovery team | Owner to confirm with C&R | to confirm with Credit Administration |
+| R-WO-44 | Write off and recover after charge-off | WRITEOFF_EXCEPTION | CORRECTION_REPOST | POSTING_PENDING | Case owner and the recovery team | Credit Administration | to confirm with Credit Administration |
+| R-WO-45 | Write off and recover after charge-off | WRITEOFF_EXCEPTION | CORRECTION_RETURN_TO_SCAN | SCAN_DUE | Case owner and the recovery team | Write-off team | next cut-off |
+| R-WO-46 | Write off and recover after charge-off | WRITEOFF_EXCEPTION | CORRECTION_REFER_TO_COMMITTEE | WITH_COMMITTEE | Approvers and committees | Write-off committee | None |
+| R-WO-47 | Write off and recover after charge-off | RETENTION_RUNNING | RETENTION_TIMER_EXPIRED | CASE_CLOSED | The Workbench | Workbench | on expiry |
+| R-WO-48 | Write off and recover after charge-off | RETENTION_RUNNING | RETENTION_CLASS_MISSING | RETENTION_RUNNING | The Workbench | Operational Excellence | 5 working days |
+| R-WO-49 | Write off and recover after charge-off | CASE_CLOSED | PAYMENT_RECEIVED_AFTER_CHARGEOFF | PAYMENT_MATCHED | The Workbench | Workbench | next working day |
+| R-WO-50 | Write off and recover after charge-off | SOLD_POST_CHARGEOFF | SALE_SETTLED | CASE_CLOSED | Case owner and the recovery team | Credit Administration | None |
+| R-WO-51 | Write off and recover after charge-off | REMITTED_TO_BUYER | REMITTANCE_CONFIRMED | CASE_CLOSED | Case owner and the recovery team | Credit Administration | 5 working days |
+| R-DEV-01 | Deviations X1 to X7 | ANY_STATE | DEVIATION_FLAGGED | DEV_FLAGGED | The Workbench | Workbench | same day |
+| R-DEV-02 | Deviations X1 to X7 | DEV_FLAGGED | OWNER_ASSIGNED | DEV_WITH_OWNER | Case owner and the recovery team | Complaint officer | None |
+| R-DEV-03 | Deviations X1 to X7 | DEV_FLAGGED | OWNER_ASSIGNED | DEV_WITH_OWNER | Case owner and the recovery team | Specialist, Legal | None |
+| R-DEV-04 | Deviations X1 to X7 | DEV_FLAGGED | OWNER_ASSIGNED | DEV_WITH_OWNER | Case owner and the recovery team | Fraud team | None |
+| R-DEV-05 | Deviations X1 to X7 | DEV_FLAGGED | OWNER_ASSIGNED | DEV_WITH_OWNER | Case owner and the recovery team | Legal | deadline driven |
+| R-DEV-06 | Deviations X1 to X7 | DEV_FLAGGED | OWNER_ASSIGNED | DEV_WITH_OWNER | Rules, workflow and agents | Agent, case owner | None |
+| R-DEV-07 | Deviations X1 to X7 | DEV_FLAGGED | FLAG_REJECTED | DEV_REJECTED | The Workbench | Workbench | None |
+| R-DEV-08 | Deviations X1 to X7 | DEV_REJECTED | CLOCK_RESUMED | RESUMED | Case owner and the recovery team | Previous owner | None |
+| R-DEV-09 | Deviations X1 to X7 | DEV_WITH_OWNER | DEVIATION_RESOLVED | DEV_RESOLVED | Case owner and the recovery team | Case owner | None |
+| R-DEV-10 | Deviations X1 to X7 | DEV_WITH_OWNER | DEVIATION_RESOLVED | DEV_REROUTE | Case owner and the recovery team | Restructuring officer | None |
+| R-DEV-11 | Deviations X1 to X7 | DEV_WITH_OWNER | INSURANCE_SETTLED | CASE_ENDED | The Workbench | Workbench | None |
+| R-DEV-12 | Deviations X1 to X7 | DEV_WITH_OWNER | ESTATE_CONFIRMED | DEV_REROUTE | Case owner and the recovery team | Case owner | None |
+| R-DEV-13 | Deviations X1 to X7 | DEV_WITH_OWNER | FRAUD_CONFIRMED | DEV_REROUTE | Case owner and the recovery team | Write-off team | None |
+| R-DEV-14 | Deviations X1 to X7 | DEV_WITH_OWNER | FRAUD_NOT_CONFIRMED | DEV_REROUTE | Case owner and the recovery team | Case owner | None |
+| R-DEV-15 | Deviations X1 to X7 | DEV_WITH_OWNER | BANKRUPTCY_FILED | DEV_REROUTE | Case owner and the recovery team | Legal, litigation officer | None |
+| R-DEV-16 | Deviations X1 to X7 | DEV_WITH_OWNER | CONTACT_RESTORED | DEV_RESOLVED | Case owner and the recovery team | Case owner | None |
+| R-DEV-17 | Deviations X1 to X7 | DEV_WITH_OWNER | CONTACT_NOT_FOUND | DEV_REROUTE | Case owner and the recovery team | Case owner | 30 days |
+| R-DEV-18 | Deviations X1 to X7 | DEV_RESOLVED | CLOCK_RESUMED | RESUMED | Case owner and the recovery team | Previous owner | None |
+| R-DEV-19 | Deviations X1 to X7 | DEV_REROUTE | ROUTE_REOPENED | ROUTE_D6 | Case owner and the recovery team | Case owner | None |
+| R-DEV-20 | Deviations X1 to X7 | DEV_WITH_OWNER | SLA_BREACHED | DEV_WITH_OWNER | Case owner and the recovery team | Team manager | 10 working days |
+| R-DEV-21 | Deviations X1 to X7 | DEV_FLAGGED | OWNER_ASSIGNED | DEV_WITH_OWNER | Case owner and the recovery team | Team manager | same day |
+| R-DEV-22 | Deviations X1 to X7 | DEV_WITH_OWNER | DEVIATION_RESOLVED | DEV_REROUTE | Case owner and the recovery team | Case owner | 2 working days |
+| R-UNI-01 | Universal rules | ANY_ACTIVE | PAYMENT_RECEIVED | CASE_CURED_CLOSED | Case owner and the recovery team | Case owner | same day |
+| R-UNI-02 | Universal rules | ANY_ACTIVE | PAYMENT_RECEIVED | ROUTE_D6_REOPEN | Case owner and the recovery team | Case owner | 1 working day |
+| R-UNI-03 | Universal rules | ANY_ACTIVE | PAYMENT_RECEIVED | EXCEPTION_QUEUE | Case owner and the recovery team | Case owner | 2 working days |
+| R-UNI-04 | Universal rules | ANY_ACTIVE | COMPLAINT_RAISED | HELD_DEVIATION | Case owner and the recovery team | Complaint officer | same day |
+| R-UNI-05 | Universal rules | ANY_ACTIVE | CUSTOMER_DECEASED | HELD_DEVIATION | Case owner and the recovery team | Specialist, Legal | same day |
+| R-UNI-06 | Universal rules | ANY_ACTIVE | VULNERABILITY_IDENTIFIED | HELD_DEVIATION | Case owner and the recovery team | Specialist | same day |
+| R-UNI-07 | Universal rules | ANY_ACTIVE | BANKRUPTCY_NOTIFIED | HELD_DEVIATION | Case owner and the recovery team | Legal | deadline driven |
+| R-UNI-08 | Universal rules | ANY_ACTIVE | FRAUD_FLAGGED | HELD_DEVIATION | Case owner and the recovery team | Fraud team | same day |
+| R-UNI-09 | Universal rules | ANY_ACTIVE | DEBT_DISPUTED | HELD_DEVIATION | Case owner and the recovery team | Complaint officer | same day |
+| R-UNI-10 | Universal rules | ANY_ACTIVE | CONSENT_WITHDRAWN | HELD_CONDUCT | Case owner and the recovery team | Conduct and QA officer | same day |
+| R-UNI-11 | Universal rules | ANY_ACTIVE | DATA_SUBJECT_REQUEST | HELD_LEGAL | Approvers and committees | Compliance | statutory period |
+| R-UNI-12 | Universal rules | ANY_ACTIVE | CONTACT_DETAIL_CHANGED | RESUME_STATE | The Workbench | Workbench | same day |
+| R-UNI-13 | Universal rules | ANY_ACTIVE | RELIEF_SCHEME_APPLIED | HELD_LEGAL | Approvers and committees | Risk | scheme terms |
+| R-UNI-14 | Universal rules | ANY_ACTIVE | ROUTE_OVERRIDDEN | ROUTE_D6_REOPEN | Case owner and the recovery team | Case owner | same day |
+| R-UNI-15 | Universal rules | ANY_ACTIVE | OVERRIDE_REFUSED | ESCALATED | Approvers and committees | Approver per the matrix | 1 working day |
+| R-UNI-16 | Universal rules | ANY_ACTIVE | CASE_CREATED_IN_ERROR | CANCELED_IN_ERROR | Case owner and the recovery team | Case owner | 2 working days |
+| R-UNI-17 | Universal rules | ANY_ACTIVE | DUPLICATE_CASE_FOUND | MERGED | Case owner and the recovery team | Case owner | 2 working days |
+| R-UNI-18 | Universal rules | ANY_ACTIVE | OWNER_UNAVAILABLE | REALLOCATED | Case owner and the recovery team | Team manager | 1 working day |
+| R-UNI-19 | Universal rules | ANY_ACTIVE | CASELOAD_CAP_BREACHED | REALLOCATED | Case owner and the recovery team | Team manager | weekly |
+| R-UNI-20 | Universal rules | ANY_ACTIVE | LEGAL_HOLD_PLACED | HELD_LEGAL | Case owner and the recovery team | Legal | until lifted |
+| R-UNI-21 | Universal rules | HELD_LEGAL | LEGAL_HOLD_LIFTED | RESUME_STATE | Case owner and the recovery team | Case owner | same day |
+| R-UNI-22 | Universal rules | ANY_ACTIVE | CLASSIFICATION_CHANGED | ROUTE_D6_REOPEN | The Workbench | Workbench | 1 working day |
+| R-UNI-23 | Universal rules | ANY_ACTIVE | PRODUCT_MIGRATED | RESUME_STATE | The Workbench | Platform team | 1 working day |
+| R-UNI-24 | Universal rules | ANY_ACTIVE | CORRECTION_RECORDED | RESUME_STATE | Case owner and the recovery team | Case owner | same day |
+| R-UNI-25 | Universal rules | ANY_ACTIVE | PARTNER_NO_RESPONSE | PARTNER_RECALLED | Partners and external parties | Partner and agency manager | per partner type |
+| R-UNI-26 | Universal rules | ANY_ACTIVE | PARTNER_PANEL_EXIT | PARTNER_RECALLED | Partners and external parties | Partner and agency manager | 5 working days |
+| R-UNI-27 | Universal rules | ANY_ACTIVE | PARTNER_CONFLICT_DECLARED | PARTNER_RECALLED | Partners and external parties | Partner and agency manager | 2 working days |
+| R-UNI-28 | Universal rules | ANY_ACTIVE | PARTNER_INSOLVENT | PARTNER_RECALLED | Approvers and committees | Head of the partner type | same day |
+| R-UNI-29 | Universal rules | ANY_ACTIVE | PARTNER_CONDUCT_BREACH | PARTNER_RECALLED | Partners and external parties | Partner and agency manager | same day |
+| R-UNI-30 | Universal rules | ANY_ACTIVE | SLA_BREACHED | ESCALATED | Case owner and the recovery team | Team manager | per state |
+| R-UNI-31 | Universal rules | ANY_ACTIVE | PRESCRIPTION_WARNING | ROUTE_D6_REOPEN | Case owner and the recovery team | Litigation officer | immediate |
+| R-UNI-32 | Universal rules | ANY_ACTIVE | AGENT_UNAVAILABLE | RESUME_STATE | The Workbench | Workbench | 60 seconds |
+| R-UNI-33 | Universal rules | ANY_ACTIVE | SYSTEM_UNAVAILABLE | RETRY_QUEUE | The Workbench | Platform team | per interface |
+| R-UNI-34 | Universal rules | ANY_ACTIVE | OUTBOUND_FAILED | EXCEPTION_QUEUE | The Workbench | Platform team | per interface |
+| R-UNI-35 | Universal rules | RETRY_QUEUE | RETRY_SUCCEEDED | RESUME_STATE | The Workbench | Workbench | None |
+| R-UNI-36 | Universal rules | RETRY_QUEUE | RETRY_LIMIT_REACHED | EXCEPTION_QUEUE | The Workbench | Platform team | None |
+| R-UNI-37 | Universal rules | ANY_ACTIVE | UPSTREAM_DATA_CORRECTED | ROUTE_D6_REOPEN | The Workbench | Workbench | 1 working day |
+| R-UNI-38 | Universal rules | ANY_ACTIVE | RULE_VERSION_EFFECTIVE | RESUME_STATE | The Workbench | Center of excellence | on the effective date |
+| R-UNI-39 | Universal rules | ANY_ACTIVE | DECISION_LOG_WRITE_FAILED | EXCEPTION_QUEUE | The Workbench | Platform team | immediate |
+| R-UNI-40 | Universal rules | ANY_ACTIVE | DUPLICATE_EVENT | RESUME_STATE | The Workbench | Workbench | None |
+| R-UNI-41 | Universal rules | EXCEPTION_QUEUE | MANUAL_DECISION_RECORDED | ROUTE_D6_REOPEN | Case owner and the recovery team | Case owner | 2 working days |
+| R-UNI-42 | Universal rules | ESCALATED | ESCALATION_CLOSED | RESUME_STATE | Case owner and the recovery team | Team manager | None |
+| R-UNI-43 | Universal rules | HELD_DEVIATION | DEVIATION_CLEARED | RESUME_STATE | Case owner and the recovery team | Deviation owner | None |
+| R-UNI-44 | Universal rules | HELD_CONDUCT | CONTACT_STOP_LIFTED | RESUME_STATE | Case owner and the recovery team | Conduct and QA officer | None |
+| R-UNI-45 | Universal rules | PARTNER_RECALLED | PARTNER_RESELECTED | ROUTE_D6_REOPEN | Partners and external parties | Partner and agency manager | 2 working days |
+| R-UNI-46 | Universal rules | REALLOCATED | OWNER_ACCEPTED | RESUME_STATE | Case owner and the recovery team | Case owner | 2 working days |
+| R-UNI-47 | Universal rules | ANY_ACTIVE | ACCOUNT_IN_SOLD_LOT | CASE_CLOSED_SOLD | Case owner and the recovery team | Debt sale officer | same day |
+| R-UNI-48 | Universal rules | ANY_ACTIVE | ASSET_PROCEEDS_CLEAR_DEBT | CASE_CLOSED_SOLD | Case owner and the recovery team | Case owner | 5 working days |
+| R-UNI-49 | Universal rules | ANY_ACTIVE | GUARANTEE_CLEARS_DEBT | CASE_CLOSED_SOLD | Case owner and the recovery team | Guarantee officer | 5 working days |
+| R-UNI-50 | Universal rules | ANY_ACTIVE | CASE_REOPEN_REQUESTED | ROUTE_D6_REOPEN | Approvers and committees | Head of the owning team | 2 working days |
+
+## Key
+
+| Key |  |  |
+|---|---|---|
+| What each element and lane means. |  |  |
+| Item | Term | Meaning |
+| Element | Start event | Where the flow begins |
+| Element | System task | The Workbench or another system acts |
+| Element | User task | A bank officer acts |
+| Element | Customer task | The customer acts |
+| Element | Partner task | A partner acts |
+| Element | Gateway | A rule or an approver chooses the path |
+| Element | Exception event | A step reached by an exception |
+| Element | End event | The flow ends here |
+| Lane | Customer and guarantor | Actor |
+| Lane | Case owner and the recovery team | Actor |
+| Lane | Approvers and committees | Actor |
+| Lane | Partners and external parties | Actor |
+| Lane | The Workbench | Actor |
+| Lane | Rules, workflow and agents | System |
+| Lane | Bank systems of record | System |
+| Standard | BPMN 2.0 | Events, tasks, gateways and lanes |

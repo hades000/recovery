@@ -1,0 +1,322 @@
+### RWB-E1-022
+- file_stem: RWB E1 022 Sign on with SSO MFA and the first roles
+- title: Sign-on with SSO, MFA and the first roles
+- module: P4 Access and administration | flag: rwb.access.sso-roles | status: READY "Ready for build" | theme: default
+- overview_label: SSO + MFA + roles
+- goal: Entra ID sign-on with MFA is the only way in; roles come from group membership and menus follow permissions
+- why: No local passwords. A person holds a role only through an Entra group, a second factor is required, and conflicting role pairs are refused.
+- needs: E1-001, E1-019 | unblocks: E1-037, E1-039
+- triggers: WHO "Any user opens the Workbench" ; CALL "Entra ID OIDC token: groups + amr claims" ; API "GET /me/session" ; API "GET /api/recovery/v1/admin/roles"
+- ace: [] ; ace_note: "No recovery.v_ace_* read. v_ace_iam_group (Section B) exists but is not used here; ACE's common module performs the sign-in."
+- writes: role_conflict "role pairs that may not be held together"
+- reads: role "role_code, default_scope, entra_group" ; permission "letters per capability area, matrix version" ; role_conflict "SOD-2026.11 pairs"
+- stores: "Entra ID (INT-21): groups and amr claims; ACE audit and SOC log (INT-22) for sign-in and refusal events"
+- functions: SessionResolver "amr = mfa, group -> role, conflicts" ; AccessCheckService "union of letters per capability" ; AccessCheckInterceptor "enforces x-capability per endpoint" ; AccessEventPublisher "sign-in and refusal events" ; SessionBanner, AccessRequestPage "React: scope line, request page"
+- path: trigger "User opens the Workbench" > store "Entra ID: password + 2nd factor" > check "amr contains mfa?" > table "Groups -> role rows; conflict check" > function "Session: roles, PM-2026.11, scope" > out "Filtered menu + access checks"
+- rules: "BR1: Entra group membership is the only way to hold a role; no local passwords" ; "BR2: a second factor is required" ; "BR5: conflicting role pairs are refused" ; "BR7: a session keeps the matrix version it resolved at sign-in"
+- risks: "No Workbench group -> 401 (MSG-P4-001)" ; "No MFA in the token -> 401 (MSG-P4-005)" ; "Role conflict -> refused + incident (MSG-P4-006)"
+- example: "User U-1001 is in group RWB-SIT-RW-CASEOWN" ; "-> role RW-CASEOWN, scope OWN, matrix PM-2026.11" ; "Banner: 'Case owner. Scope: own cases.'  No Administration menu"
+
+### RWB-E1-023
+- file_stem: RWB E1 023 Case record view v1 read only
+- title: Case record view v1, read only
+- module: P3 Case and workflow | flag: rwb.p3.caserecordview | status: PARTIAL "Ready. Stale banner waits for RWB-ACE-001" | theme: default
+- overview_label: Case record view (SCR-03)
+- goal: One read-only case screen: live ACE data by key, dated sections, masked and logged personal data
+- why: Case owners stop switching between ALS, EFS and spreadsheets. Nothing is copied: the screen reads 4 views live and shows how old each section is.
+- needs: E1-018, E1-024, E1-037, E1-039, E1-068, E1-069 | unblocks: E1-035
+- triggers: WHO "Case owner opens a case from SCR-02" ; API "GET /cases/{caseId} (+ accounts, parties)" ; API "GET /cases/{caseId}/interactions, /documents" ; EVENT "AC-READ access event per read"
+- ace: v_ace_account A "account_code, days_past_due, total_balance, data_as_of" ; v_ace_customer A "cif_no, names, id_no_masked, id_no_last4" ; v_ace_contact A "contact_value + contact_value_masked by contact_key" ; v_ace_efs_action A "EFS contact history: action_code, contact_at, comments" ; v_ace_batch_status B "stale banner if the batch is not COMPLETE"
+- writes: (none)
+- reads: recovery_case "header: case_no, status, owner" ; case_account, case_party "business keys to look up in ACE" ; queue "queue and team names" ; interaction "via InteractionLedgerReader (E1-068)" ; document "via the P5 document hub"
+- stores: "Access log / PII Kafka via AccessEventPublisher (AC-READ). No data copied."
+- functions: CaseRecordQueryService "compose sections + merged history" ; AceSourceReader "SELECT on 4 views by key" ; MaskingApplier "FieldMasker + AC-READ event" ; CaseAndWorkflowController "5 P3 read endpoints" ; CaseRecordPage "React SCR-03 with date badges" ; StaleBanner, OnHoldBanner "MSG-P1-001, MSG-P3-004"
+- path: trigger "Open case RW-2026-000701" > check "Case record R + in scope?" > table "recovery_case + key links" > ace "v_ace_account / customer / contact" > function "Mask by role + AC-READ log" > out "SCR-03 with ACE date per section"
+- rules: "BR1: every section shows its ACE business date" ; "BR3: the ID number is never shown in clear (id_no_masked / id_no_last4 only)" ; "BR4: a read that cannot be logged returns nothing" ; "BR8: live reads from 4 views; no copy is kept"
+- risks: "ACE batch not COMPLETE -> stale banner (MSG-P1-001)" ; "Case out of scope -> 404 (MSG-P4-003)" ; "Access event fails -> read refused (MSG-P7-003)"
+- example: "Case RW-2026-000701: owner U-81, HP, 2 accounts" ; "Account A-7001: 97 days past due, THB 206,175.00, ACE date 2026-12-02 (data_as_of)" ; "p95 under 2 s with 50 documents and 120 history entries"
+
+### RWB-E1-024
+- file_stem: RWB E1 024 Document store and index
+- title: Document store and index
+- module: P5 Document hub | flag: rwb.dochub.store | status: READY "Ready for build" | theme: default
+- overview_label: Document store + index
+- goal: Store every document against its case with its type, index fields and versions; legal types are write-once
+- why: Litigation needs one trusted home for notices and deeds. The type table, not the caller, decides write-once and retention; no store without a log entry.
+- needs: E1-027, E1-018, E1-025, TE-012, E1-001 | unblocks: E1-026, E1-032, E1-033, E1-040, E1-041, E1-049
+- triggers: CALL "DocumentStore.store (upload E1-026, intake E1-032)" ; API "GET /documents/{documentId} (+ /content)" ; API "POST /documents/{documentId}/versions" ; JOB "JOB-12 CopyPendingStep retries blob copy"
+- ace: [] ; ace_note: "No ACE read. Documents link to Workbench cases; any person link uses person_key, a business key with no FK."
+- writes: document "v1 COPY_PENDING -> STORED; version chain, content_sha256" ; document_field "index fields, e.g. black_case_no" ; decision_log_entry "DOCATT / STORED before the store"
+- reads: recovery_case "via CaseDirectory" ; document_type "write_once, retention_class (DOCTYPE-2026.11)" ; document_hub_parameter "size and type limits"
+- stores: "Blob containers rwb-docs, rwb-docs-legal (write-once), rwb-quarantine, intake (TE-012); path {container}/{caseId}/{documentId}/v1; outbox DocumentStored (EV-16)"
+- functions: DocumentStoreService "validate, dedup, log, insert, copy" ; DocumentStore "store, addVersion, findById" ; DocumentHubController "3 document endpoints" ; DocumentHubRepository "document + document_field" ; CopyPendingStep "JOB-12: retry blob copy" ; DocumentDetailPanel "React panel from SCR-30"
+- path: trigger "DocumentStore.store(...)" > check "Case + type + hash dedup" > table "decision log + document + fields" > store "Blob: rwb-docs-legal or rwb-docs" > table "document state STORED" > out "EV-16 DocumentStored"
+- rules: "BR3: write-once and retention come from the type table, never from the caller" ; "BR4: a write-once document is never changed; a change is a new version" ; "BR6: the same case + type + hash returns the existing document" ; "BR8: no store without a decision log entry"
+- risks: "Delete or replace of a write-once document -> refused (MSG-P5-002)" ; "Wrong file type -> 415 (MSG-P5-001)" ; "Blob copy fails -> stays COPY_PENDING, 503 on content (MSG-GEN-006)"
+- example: "notice-0001.pdf, 1.2 MB, type COURT_NOTICE (write-once, LEGAL10Y), source SCAN" ; "Case RW-2026-000123 -> rwb-docs-legal/RW-2026-000123/{documentId}/v1" ; "Index field black_case_no = BC-TEST-0456"
+
+### RWB-E1-025
+- file_stem: RWB E1 025 Document types and fields agreed
+- title: Document types and fields agreed
+- module: P5 Document hub | flag: rwb.dochub.doctypes | status: READY "Ready for build" | theme: default
+- overview_label: 6 document types, 26 fields
+- goal: One versioned list of 6 document types and 26 fields for OCR, classification and extraction
+- why: Every document step needs the same answer to 'what types exist and what fields matter'. Changing the list is a data load, not a release.
+- needs: E1-012 | unblocks: E1-024, E1-040, E1-050, E1-053
+- triggers: LOAD "POST /admin/reference-loads (DOCUMENT_TYPE)" ; API "POST /admin/reference-loads/{loadId}/approve" ; WHO "RW-COE prepares; Legal + Head of NPA sign" ; CALL "DocumentTypeCatalog: version in force"
+- ace: [] ; ace_note: "No ACE read. Document types are Workbench reference data."
+- writes: document_type "6 types, 26 fields, write_once, retention_class, version"
+- reads: lov_value "LOV-RETENTION classes (via the P4 list service)"
+- stores: "Load file DOCTYPE-2026.11 with the Legal and NPA sign-off dates; 5-minute catalog cache"
+- functions: DocumentTypeLoader "parse, validate, stage, approve" ; DocumentTypeCatalog "version in force, type by code" ; DocumentTypeCatalogService "5-min cache, cleared on approve" ; DocumentTypeRepository "document_type only"
+- path: trigger "RW-REFADM uploads DOCTYPE-2026.11" > check "Unique codes, retention class, sign-offs" > table "document_type LOADED" > check "Approver is not the loader" > table "APPROVED, in force from valid_from" > out "Catalog for OCR, classify, extract"
+- rules: "BR1: Legal and NPA sign before extraction is built" ; "BR3: one invalid row refuses the whole load" ; "BR4: a version takes effect on valid_from; work already done keeps its version" ; "BR5: the loader cannot approve"
+- risks: "Missing Legal or NPA sign-off -> load refused (MSG-P3-027)" ; "Same version loaded twice -> 409 (MSG-P3-027)" ; "Loader approves their own load -> 409 (MSG-P7-002)"
+- example: "DOCTYPE-2026.11, valid from 2026-11-30: 6 types" ; "COURT_NOTICE: court_name, black_case_no, notice_date, hearing_date | LEGAL10Y | write_once true" ; "APPRAISAL_REPORT: GENERAL05Y | write_once false | 4 fields"
+
+### RWB-E1-027
+- file_stem: RWB E1 027 Decision log writer v1
+- title: Decision log writer v1
+- module: P7 Decision center and log | flag: rwb.decision.log-writer | status: READY "Ready for build" | theme: default
+- overview_label: Decision log writer
+- goal: One writer records every Epic 1 decision with its rule ID and version, inside the action's transaction
+- why: 'No record, no action.' Every module calls one writer so each decision carries who, what rule, which version and which inputs.
+- needs: E1-008, E1-056 | unblocks: E1-021, E1-032 and every story that logs a decision
+- triggers: CALL "DecisionLogWriter.write(record) inside caller tx" ; JOB "Used by JOB-02 and JOB-03" ; WHO "SY-CASEWF and every calling module"
+- ace: [] ; ace_note: "No ACE read. Callers pass an inputs_ref that points at what they read (for example ACE freshness stamps)."
+- writes: decision_log_entry "via DecisionLogStore.append; idempotency_key" ; outbox "EV-08 DecisionRecorded"
+- reads: lov_value "LOV-DECISION codes" ; decision_log_entry "idempotency key lookup"
+- stores: "Outbox (EV-08 for ledger and reporting); metric decision_log_repeats_total; incident on failure"
+- functions: DecisionLogWriter "write(); @Transactional(MANDATORY)" ; DecisionLogWriterService "tx check, idempotency, append" ; DecisionLogRecordValidator "required fields, version group" ; Epic1DecisionRecords "builders for 4 Epic 1 events" ; DecisionRecordedPublisher "EV-08 into the outbox"
+- path: trigger "Caller builds DecisionLogRecord" > check "Transaction open? Key seen?" > check "Required fields + rule version" > function "DecisionLogStore.append (E1-008)" > store "Outbox EV-08 DecisionRecorded" > out "Caller commits action + entry"
+- rules: "BR2: decision code, inputs ref, final call, decided at and actor are required" ; "BR3: at least one of rule, model or agent version; a rule ID needs its rule version" ; "BR5: no record, no action" ; "BR7: decision codes are parameters rwb.decision.code.*"
+- risks: "Missing version group, inputs ref or case -> refused (MSG-P7-009)" ; "Store unwritable -> caller rolls back + incident (MSG-P7-003)" ; "Called outside a transaction -> IllegalTransactionStateException"
+- example: "JOB-02 creates RW-2026-000123 -> entry CASE_CREATED, actor SY-CASEWF" ; "JOB-03 assigns owner U-7101 by row ALLOC-MTG-BKK-01 of ALLOC-2026.11 -> entry OWNER_ASSIGNED" ; "2 entries, 2 DecisionRecorded events in the outbox"
+
+### RWB-E1-028
+- file_stem: RWB E1 028 Service levels timers escalation and prescription dates
+- title: Service levels, timers, escalation and prescription dates
+- module: P3 Case and workflow | flag: rwb.p3.timers | status: READY "Ready for build" | theme: default
+- overview_label: Timers + prescription date
+- goal: Timers warn and escalate a breach; a prescription date stops claims expiring unseen
+- why: Missed deadlines cost money and legal rights. Working days come from the ACE holiday calendar, and a legal claim's last date is computed from ACE payments.
+- needs: E1-045, E1-020, E1-027, E1-043 | unblocks: E1-030, TE-007, E2-015
+- triggers: EVENT "EV-01, 02, 04, 05 start/stop SERVICE_LEVEL" ; EVENT "EV-06 / EV-07 pause and resume timers" ; JOB "JOB-05 Timer check, every 5 min" ; API "GET /cases/{caseId}/timers"
+- ace: v_ace_account A "contract_date, last_payment_date (prescription)" ; v_ace_holiday A "holiday_date, holiday_weekday (working days)"
+- writes: timer "SERVICE_LEVEL + PRESCRIPTION; warn_at, expires_at, warned_at" ; recovery_case.prescription_date "earliest last payment + LEGAL_PERIOD" ; decision_log_entry "warning and breach entries (R-UNI-30)"
+- reads: recovery_case "status, queue, product" ; case_account "accounts behind the case" ; queue "escalation role" ; reference_row "SERVICE_LEVEL, LEGAL_PERIOD"
+- stores: "Outbox: TimerDue (EV-18), TimerBreached (EV-19); exception queue when no service level is in force"
+- functions: TimerStarter "start / stop SL timers on events" ; PrescriptionService "prescription date + timer" ; TimerPauseHandler "pause and resume on deviation" ; TimerCheckJob "JOB-05: warn, breach, expire" ; WorkingDayCalculator "working days via v_ace_holiday" ; TimerService "timers + prescription (published)"
+- path: trigger "CaseAllocated (EV-02)" > ace "Working days from v_ace_holiday" > table "timer RUNNING, warn_at, expires_at" > function "JOB-05 every 5 min" > check "Past warn_at or expires_at?" > out "MSG-P3-003 warn or EV-19 breach"
+- rules: "BR3: a breach goes to the named escalation role; the case does not move (R-UNI-30)" ; "BR4: prescription = earliest last payment + legal period; contract date as fallback" ; "BR5: the PRESCRIPTION timer never pauses" ; "BR8: working days come from v_ace_holiday"
+- risks: "No SERVICE_LEVEL version in force -> no timer, case to exception queue (MSG-P3-026)" ; "Decision log fails at a breach -> timer stays RUNNING, next run retries (MSG-P7-003)" ; "Deviation raised -> SL timer paused (MSG-P3-004)"
+- example: "HP case RW-2026-000401 in LIT-BKK-OFF, ASSIGNED 2026-12-01 09:00, SL 5 working days, warn 80%" ; "2026-12-05..07 are non-working days in v_ace_holiday" ; "-> expires_at 2026-12-09 09:00, warn_at 2026-12-08 09:00"
+
+### RWB-E1-029
+- file_stem: RWB E1 029 Rule load validation and rollback
+- title: Rule load, validation and rollback
+- module: P3 Case and workflow | flag: rwb.p3.ruleload | status: RETIRED "Retired (D-RCV-36 T8) -> RWB-E1-073" | theme: default
+- overview_label: Rule load + rollback
+- goal: Rule changes move from Excel to production with checks, a dry run, approval and one-call rollback
+- why: Retired by D-RCV-36 T8 (rules move to Drools XLS packages); the new home is RWB-E1-073. Shown here so readers see what the story covered.
+- needs: (none) | unblocks: E1-048, TE-005
+- triggers: LOAD "POST /admin/rule-versions (ALLOCATION ...)" ; API "POST /admin/rule-versions/{versionId}/approve" ; API "POST /admin/rule-versions/{versionId}/rollback" ; JOB "RuleEffectiveDateJob daily 00:01"
+- ace: [] ; ace_note: "No ACE read. The dry run counts open Workbench cases whose result would change."
+- writes: rule_row "rule_table, row_order, target_queue_code" ; rule_version "header + change log per version"
+- reads: recovery_case "product, queue, region, band (dry run)" ; lov_value "LOV-ASSIGN, PRODUCT, REGION, EXPOSURE"
+- stores: "Excel rule template with Rows and Tests tabs"
+- functions: RuleTemplateParser "reads Rows + Tests tabs" ; RuleLoadValidator "overlap, unreachable, default row" ; RuleTestRunner "runs the 50 test cases" ; RuleDryRun "counts cases that would change" ; RuleVersionService "approve, effective date, rollback" ; RuleEffectiveDateJob "APPROVED -> IN_FORCE at 00:01"
+- path: trigger "RW-COE loads ALLOC-2026.12" > check "Schema, overlap, default row" > check "50 tests + dry run" > check "RW-RISK approves (not author)" > table "rule_version IN_FORCE on valid_from" > out "Rollback restores previous in 1 call"
+- rules: "BR1: schema, overlap, unreachable, default and test checks must all pass" ; "BR3: hit policy Unique (ADR-004)" ; "BR6: the author cannot approve; Risk signs" ; "BR7: rollback in one call"
+- risks: "Two rows match at the same row order -> refused (MSG-P3-027)" ; "Approver is the author -> refused (MSG-P7-002)" ; "Rollback with no earlier version -> refused (MSG-P3-015)"
+- example: "U-41 (RW-COE) loads ALLOC-2026.12: 26 rows, 50 tests, over ALLOC-2026.11 (24 rows)" ; "U-51 (RW-RISK) approves; in force 2026-12-15" ; "Change log: '50 of 50 test cases passed'"
+
+### RWB-E1-030
+- file_stem: RWB E1 030 Daily rebalancing and queue measures
+- title: Daily rebalancing and queue measures
+- module: P3 Case and workflow | flag: rwb.p3.rebalance | status: READY "Ready for build" | theme: default
+- overview_label: Daily rebalancing
+- goal: A daily job assigns unowned cases, spreads over-cap load, and publishes reconciled queue measures
+- why: Workload stays fair without manual shuffling. Cases on deviation or legal hold never move, and measures publish only when they reconcile.
+- needs: E1-020, E1-027, E1-028 | unblocks: (none)
+- triggers: JOB "JOB-06 Daily rebalancing, 06:30 or after JOB-03" ; EVENT "TimerBreached -> MSG-P3-028 to team manager" ; WHO "RW-TEAMMGR; RW-BIANAL reads Power BI"
+- ace: [] ; ace_note: "No ACE read. Rebalancing works on Workbench cases, queues, members and timers."
+- writes: assignment "reason REBALANCE" ; recovery_case.owner_user_id "new owner" ; queue_measure "depth, unassigned, age, spread, breached" ; decision_log_entry "one entry per move, written first"
+- reads: recovery_case "unowned and over-cap cases" ; queue, queue_member "method and cap" ; timer "breached counts"
+- stores: "Outbox: CaseTransferred (EV-04) per move; data lake (JOB-15 copy); Power BI queue page"
+- functions: RebalanceJob "JOB-06: cases + owners to fix" ; RebalanceService "R-UNI-19 selection, hold checks" ; AssignmentEngine "member below the cap" ; QueueMeasureService "snapshot, reconcile, publish" ; TimerBreachNotifier "MSG-P3-028 on TimerBreached"
+- path: trigger "JOB-06 at 06:30" > table "Unowned + over-cap cases" > check "Skip deviation / legal hold" > function "AssignmentEngine below cap" > table "assignment REBALANCE + log" > out "queue_measure -> lake -> Power BI"
+- rules: "BR2: an over-cap owner loses their newest cases (R-UNI-19)" ; "BR3: deviation or legal-hold cases are never moved" ; "BR6: measures publish only on zero difference (DL25, REC-01)" ; "BR7: every move is logged first"
+- risks: "No member has capacity -> cases stay put (MSG-P3-011)" ; "Snapshot does not reconcile -> not published (MSG-P3-029)" ; "Decision log fails -> that case not moved, run continues (MSG-P7-003)"
+- example: "Queue TDR-BKK-CO (LOWEST_LOAD, cap 150) has 12 unowned cases" ; "U-61 holds 140, U-62 holds 144" ; "-> 8 cases to U-61, 4 to U-62, reason REBALANCE"
+
+### RWB-E1-031
+- file_stem: RWB E1 031 Queue and owner on the case list with filters
+- title: Queue and owner on the case list with filters
+- module: P3 Case and workflow | flag: rwb.p3.caselistqueue | status: READY "Ready for build" | theme: default
+- overview_label: Case list filters + export
+- goal: Managers see queue and owner, filter by queue, team and status, and export a masked, logged file
+- why: Managers stop rebuilding lists in Excel. Only in-scope cases are shown, and every export is logged before the file is built.
+- needs: E1-020, E1-039 | unblocks: (none)
+- triggers: WHO "Team manager on SCR-02 Case list" ; API "GET /api/recovery/v1/cases?queue=&team=&status=" ; API "GET /cases/export" ; EVENT "AC-EXPT access event"
+- ace: [] ; ace_note: "No direct ACE read. Personal columns in the export are masked through FieldMasker (E1-037)."
+- writes: decision_log_entry "access event AC-EXPT (via AccessEventPublisher)"
+- reads: recovery_case "in-scope cases with owner and status" ; queue "queue and team names"
+- stores: "xlsx download 'Case list YYYYMMDD 1.xlsx'; access log"
+- functions: CaseAndWorkflowController "GET /cases, GET /cases/export" ; CaseQueryService "scoped, filtered query" ; CaseExportService "row limit, log first, masked xlsx" ; CaseListPage "React SCR-02" ; CaseListFilters "queue, team, status pickers" ; ExportButton "starts the export"
+- path: trigger "Filter on SCR-02" > check "Scope: Own, Team, Region, All" > table "recovery_case joined to queue" > check "Under 10,000 rows?" > table "AC-EXPT logged first" > out "Masked xlsx download"
+- rules: "BR1: only in-scope cases are returned (Own, Team, Region, All)" ; "BR3: every export is logged before the file is made (CTL-11)" ; "BR4: export columns are masked by role" ; "BR5: caselist.export.maxrows = 10,000"
+- risks: "No match -> empty state (MSG-P3-020)" ; "Over the row limit -> 422 (MSG-P3-021)" ; "Access log unwritable -> no export (MSG-P7-003)"
+- example: "U-71 (team DIL-BKK, scope Team) filters queue DIL-BKK-CO, status ASSIGNED" ; "-> 64 cases, none from DIL-BKK-OVF (20 cases)" ; "Export -> 'Case list 20261202 1.xlsx', AC-EXPT logged first"
+
+### RWB-E1-032
+- file_stem: RWB E1 032 Automatic attach from the OCR intake
+- title: Automatic attach from the OCR intake
+- module: P5 Document hub | flag: rwb.dochub.autoattach | status: READY "Ready for build" | theme: default
+- overview_label: Auto-attach OCR documents
+- goal: Documents attach to their case automatically when exactly one open case matches; unclear ones go to a person
+- why: Mailroom and branch scans stop waiting for manual filing. The case or account number found in the text is resolved through the case directory.
+- needs: E1-024, E1-050, E1-053 | unblocks: E1-054
+- triggers: JOB "JOB-12 matchStep, every 15 min (business hours)" ; WHO "Reviewer resolves held items on SCR-31" ; API "POST /intake-items/{intakeItemId}/resolve"
+- ace: v_ace_account A "account_code: an account number in the text -> open cases"
+- writes: document_intake "match_status, candidate_case_ids, case_id" ; document "via DocumentStore: type, confidence, review_status" ; decision_log_entry "DOCATT with classifier version + match method"
+- reads: recovery_case, case_account "find by case or account number" ; document_intake "predicted_type, classifier_version" ; document_text "OCR text to search" ; document_hub_parameter "CLASSIFY_THRESHOLD"
+- stores: "rwb-docs container (PENDING docs held); PII access log on intake reads; DocumentStored event (EV-16)"
+- functions: MatchStep "JOB-12 step: select, match, store" ; CaseMatcher "find case / account number, resolve" ; MatchPatterns "CASE_NO_PATTERN, ACCOUNT_NO_PATTERN" ; AutoAttachService "StoreRequest + low-confidence rule" ; ManualAttachService "scope + type checks, version lock" ; UnmatchedIntakeTab "React SCR-31 Unmatched list"
+- path: trigger "JOB-12 matchStep" > table "document_intake OCR DONE" > function "CaseMatcher reads case / account no" > ace "Account no -> v_ace_account -> case" > check "Exactly one open case?" > out "DocumentStore.store or held for a person"
+- rules: "BR1: exactly one open case -> attach with no person involved" ; "BR3: no match, several, conflict, closed case or no type -> a person decides" ; "BR4: below CLASSIFY_THRESHOLD -> stored for review, not write-once" ; "BR5: DOCATT is logged before the store"
+- risks: "No readable case or account number -> NO_MATCH (MSG-P5-003)" ; "Account matches 2+ open cases -> MULTIPLE (MSG-P5-003)" ; "Decision log fails -> auto stays PENDING, manual gets 503 (MSG-P7-003)"
+- example: "Court notice with case ID RW-2026-000123, classified COURT_NOTICE 0.93 by CLS-1.0 (threshold 0.80)" ; "-> stored on RW-2026-000123, source SCAN, review_status NOT_NEEDED" ; "DOCATT entry: match method CASE_ID"
+
+### RWB-E1-033
+- file_stem: RWB E1 033 Search across cases
+- title: Search across cases
+- module: P5 Document hub | flag: rwb.dochub.search | status: READY "Ready for build (Should)" | theme: default
+- overview_label: Document search across cases
+- goal: Find documents across in-scope cases by type, date, field or text; every search is audited
+- why: Finding 'all appraisals over 5M last month' takes seconds, not days. Personal fields and free text are searchable only by roles that see them unmasked.
+- needs: E1-024, E1-053, E1-049 | unblocks: (none)
+- triggers: WHO "Litigation officer on the Document search page" ; API "GET /documents/search?type=&field=&q=" ; EVENT "DOCUMENT_SEARCH access event"
+- ace: [] ; ace_note: "No recovery.v_ace_* read. Snippet masking uses the ACE PII service; case scope comes from CaseDirectory."
+- writes: access log entry "DOCUMENT_SEARCH; free text stored as SHA-256"
+- reads: document "active documents in scope" ; document_field "field conditions (numeric index)" ; document_text "free text (pg_trgm index)" ; document_type "field_definitions" ; recovery_case "caseIdsInScope via CaseDirectory"
+- stores: "PII access log (free text logged only as a hash)"
+- functions: DocumentHubController "the search endpoint" ; DocumentSearchService "validate, mask check, scope, log" ; DocumentSearchRepository "one SQL over 3 tables" ; SnippetBuilder "60-char snippet, highlight, mask" ; DocumentSearchPage "React criteria + results"
+- path: trigger "Search: APPRAISAL_REPORT > 5M" > check "Role may search this field?" > function "CaseDirectory.caseIdsInScope" > table "document + document_field + text" > table "DOCUMENT_SEARCH logged first" > out "50 rows, newest first"
+- rules: "BR1: only active documents on in-scope cases are returned" ; "BR2: personal fields and free text only for roles that see them unmasked" ; "BR3: logged before results return; free text kept only as a hash" ; "BR5: limits such as SEARCH_MAX_RESULTS are parameters"
+- risks: "Masked role searches free text -> 422 (MSG-P5-020)" ; "Access log not confirmed -> 503 (MSG-P5-019)" ; "Over 1,000 matches -> capped with a message (MSG-P5-021)"
+- example: "TEST-LIT-01 (scope ALL) searches APPRAISAL_REPORT, appraised_value > 5,000,000, stored in Oct 2026" ; "-> exactly 9 documents within 2 s" ; "One DOCUMENT_SEARCH access entry written"
+
+### RWB-E1-034
+- file_stem: RWB E1 034 Letter template management
+- title: Letter template management
+- module: P6 Communications | flag: rwb.comms.template-admin | status: READY "Ready for build (Should)" | theme: default
+- overview_label: Letter template approval
+- goal: Officers upload template versions; Legal approves or withdraws them on screen, with no developer
+- why: Letter wording is a legal control (CTL-14). Only a Legal-approved version can be current, and the uploader can never approve their own template.
+- needs: E1-046, E1-015 | unblocks: E1-052
+- triggers: WHO "RW-LITOFF uploads on SCR-33" ; API "POST /templates (DOCX + metadata)" ; API "POST /templates/{id}/approve or /withdraw" ; WHO "RW-LEGAL approves with a valid-from date"
+- ace: [] ; ace_note: "No ACE read. Templates hold merge codes; the ACE values are filled in later by notice generation (E1-052)."
+- writes: template "next version: Draft -> Approved -> Withdrawn"
+- reads: merge_field "every merge code must be in the catalog"
+- stores: "Write-once template body storage (body_ref); ACE audit log"
+- functions: TemplateController "5 template endpoints" ; TemplateAdminService "upload, approve, withdraw, audit" ; TemplateBodyStore "write-once DOCX body" ; MergeCodeScanner "reads {{CODE}} (from E1-046)" ; TemplateApprovalScreen "React SCR-33"
+- path: trigger "Upload demand-mtg-th-v3.docx" > check "DOCX, size, merge codes in catalog" > store "Write-once body, version v3 Draft" > check "RW-LEGAL approves (not uploader)" > table "template Approved from valid_from" > out "TemplateCatalog returns v3 as current"
+- rules: "BR1: only Approved, with approver and time, can be current (CTL-14)" ; "BR2: the uploader cannot approve (CTL-05)" ; "BR4: every merge code must be in the catalog" ; "BR6: a withdrawn template holds generation; there is no fallback"
+- risks: "Uploader tries to approve -> refused (MSG-P7-002)" ; "Unknown merge code -> refused (MSG-P6-006)" ; "File not DOCX -> refused (MSG-P6-010)"
+- example: "LIT-0101 uploads demand-mtg-th-v3.docx for DEMAND-MTG / TH with CASE_NO, TOTAL_OUTSTANDING" ; "-> v3 Draft" ; "LEG-0001 approves with valid from 2026-11-20 -> v3 becomes current"
+
+### RWB-E1-035
+- file_stem: RWB E1 035 Case record view v1 1 with documents and history timeline
+- title: Case record view v1.1 with documents and history timeline
+- module: P3 Case and workflow | flag: rwb.p3.timeline | status: READY "Ready for build (Should)" | theme: default
+- overview_label: Case history timeline
+- goal: One timeline of contacts, documents, assignments, transfers and status changes, with who or which rule
+- why: 'Why is this case here?' gets one answer. Rule-caused events show their rule ID and version; manual ones show the person and reason.
+- needs: E1-021, E1-023, E1-027 | unblocks: E2-016
+- triggers: WHO "Case owner opens the Timeline panel" ; API "GET /cases/{caseId}/timeline?page=0&size=50"
+- ace: [] ; ace_note: "No ACE read here. ACE contact history is shown in the record view (E1-023); this panel reads Workbench sources."
+- writes: (none)
+- reads: interaction "contacts via the interaction ledger" ; assignment "assignments and transfers" ; document "via P5 DocumentQuery" ; decision_log_entry "via P7 DecisionLogQuery"
+- stores: "None. Each section times out at 3,000 ms (caserecord.section.timeout.ms)."
+- functions: CaseAndWorkflowController "GET timeline" ; TimelineService "read 4 sources, sort, page" ; TimelineItemMapper "puts rule + version or person in 'by'" ; CaseAndWorkflowRepository "interaction + assignment" ; TimelinePanel "React panel on SCR-03"
+- path: trigger "Open Timeline on SCR-03" > check "Case record R + in scope?" > table "interaction + assignment" > function "P5 documents + P7 decision log" > function "Sort: time, type order, ID" > out "Timeline with who / which rule"
+- rules: "BR1: time order; ties go decision, status, assignment, transfer, contact, document" ; "BR2: rule-caused events show the rule ID and version" ; "BR3: a manual transfer shows its reason" ; "BR6: under 2 s at the 2031 ledger size (NFR-070)"
+- risks: "Decision log query does not answer -> other sections shown + section message (MSG-P3-023)" ; "Case out of scope -> 404 (MSG-P4-003)" ; "No Case record R right -> 403 (MSG-P4-002)"
+- example: "RW-2026-000801: 12-02 08:10 transfer by TRF-007 / TRF-2026.11" ; "12-02 10:30 demand letter | 12-03 09:00 title deed" ; "12-03 11:15 status IN_PROGRESS by U-81"
+
+### RWB-E1-037
+- file_stem: RWB E1 037 Role to permission matrix and PDPA field masking by role
+- title: Role to permission matrix as data and PDPA field masking by role
+- module: P4 Access and administration | flag: rwb.access.permission-matrix | status: READY "Ready for build" | theme: default
+- overview_label: Permission matrix + masking
+- goal: Rights, scope and PDPA masking as approved data; personal fields clear only for roles that need them
+- why: Access changes without a deployment, and PDPA masking is decided by Compliance in data. The clear ID number never leaves ACE.
+- needs: E1-022, E1-043, E1-027, E1-069 | unblocks: E1-031, E1-033, E1-016
+- triggers: LOAD "POST /admin/reference-loads (permission)" ; LOAD "POST /admin/reference-loads (masking_rule)" ; WHO "RW-SECADM / RW-COMPLY approve" ; CALL "Every request: ScopeService + FieldMasker"
+- ace: v_ace_customer A "id_no_masked, id_no_last4, cif_no, names, date_of_birth" ; v_ace_contact A "contact_value + contact_value_masked (ace_mask_value)"
+- writes: permission "role x 14 capability areas, letters CRUDA" ; masking_rule "which role sees which personal field clear" ; decision_log_entry "AC-VERS on each approval"
+- reads: role "roles to grant" ; recovery_case "owner, team, region for scope" ; sys_fields "is_personal flag"
+- stores: "ACE common module IAM groups (session revalidated every 5 min); access log"
+- functions: PermissionMatrixLoader "validates the whole matrix" ; MaskingRuleLoader "rules; refuses the clear ID" ; ReferenceLoadApprovalService "maker-checker + AC-VERS" ; ScopeService "builds ScopeFilter (published)" ; FieldMasker "fills @PersonalData fields" ; SessionRevalidationFilter "ends sessions on group removal"
+- path: trigger "RW-REFADM loads PM-2026.12" > check "Every role x 14 areas valid" > check "RW-SECADM approves (not loader)" > table "permission + AC-VERS entry" > ace "FieldMasker: masked or clear column" > out "403 / 404 / masked fields per role"
+- rules: "BR1: the matrix version in force is the only source of rights" ; "BR4: scope first, then permission; out-of-scope data is never returned" ; "BR6: a personal field is masked unless a rule allows it" ; "BR10: no tokenization; id_no_last4 is the clearest ID value"
+- risks: "No right for the area -> 403 (MSG-P4-002)" ; "Out of scope -> 404 (MSG-P4-003)" ; "Bad matrix file -> refused in full (MSG-P1-002)"
+- example: "U-2101 loads PM-2026.12 giving RW-LEGAL 'R' on Queue and allocation; U-2102 (RW-SECADM) approves" ; "2026-12-01: U-2103 (RW-LEGAL) calls GET /queues -> 200 instead of 403" ; "No deployment needed"
+
+### RWB-E1-038
+- file_stem: RWB E1 038 Delegation of authority table as reference data
+- title: Delegation of authority table as reference data
+- module: P4 Access and administration | flag: rwb.access.delegation-table | status: READY "Ready for build" | theme: default
+- overview_label: Delegation of authority table
+- goal: Approval limits by decision, product and amount as a versioned table the router queries by date
+- why: Who may approve a write-off or restructure is a bank regulation (DoA). Holding it as data keeps the router honest and every decision keeps its version.
+- needs: E1-043, E1-029, E1-027 | unblocks: E2-013
+- triggers: LOAD "POST /admin/reference-loads (delegation_limit)" ; API "POST /admin/reference-loads/{loadId}/approve" ; CALL "DelegationOfAuthority.lowestLevel(...)" ; WHO "RW-REFADM loads; RW-RISK approves"
+- ace: [] ; ace_note: "No ACE read. Amounts come from the decision being routed (Epic 2); the table itself is Workbench reference data."
+- writes: delegation_limit "levels L1-L6 by decision, regulation item, product" ; decision_log_entry "AC-VERS on approval"
+- reads: delegation_limit "rows valid on the decision date" ; lov_value "LOV-DECISION, APPROVAL-LEVEL, PRODUCT"
+- stores: "Incident to RW-RISK when no row covers a decision (NOT_COVERED)"
+- functions: DelegationLimitLoader "whole-file checks, L6 -> L1 order" ; ReferenceLoadApprovalService "shared maker-checker (E1-037)" ; DelegationLookupService "lowestLevel (published)" ; DelegationLimitRepository "rows valid on a date" ; AccessAndAdministrationController "load + approve endpoints"
+- path: trigger "Load DOA-2026.11 (218 rows)" > check "No duplicates, limits do not fall" > check "RW-RISK approves (not loader)" > table "delegation_limit in force" > function "lowestLevel walks L6 -> L1" > out "Level + row IDs + version"
+- rules: "BR3: the lowest covering level on the decision date wins" ; "BR5: a related-party write-off always goes to L1 (Board)" ; "BR7: a decision keeps the version it was routed with (R-UNI-38)" ; "BR8: Risk approves, never the loader"
+- risks: "Duplicate rows or falling limits -> refused (MSG-P1-002)" ; "No covering row (e.g. HP before chapter 8) -> NOT_COVERED + incident (MSG-P7-010)" ; "Decision log fails -> version not approved (MSG-P7-003)"
+- example: "DOA-2026.11 (95 limits, regulations 540031 / 690070) -> 218 rows: 109 MORTGAGE, 109 SSME" ; "Item 2.1.1 at L4: 300,000,000.00 with loss <= 45% and max loss 150,000,000.00" ; "...or 50,000,000.00 with no loss limit"
+
+### RWB-E1-039
+- file_stem: RWB E1 039 Access log into the decision log and break glass admin
+- title: Access log into the decision log and break-glass admin
+- module: P4 Access and administration | flag: rwb.access.access-log | status: READY "Ready for build" | theme: default
+- overview_label: Access log + break-glass
+- goal: Every sign-in, refusal, read and export in one audit log; emergency access is time-boxed
+- why: Auditors ask 'who saw this customer?'. The answer is in the hash-chained decision log, and break-glass access is time-boxed and marked on every entry.
+- needs: E1-008, E1-022, E1-027 | unblocks: E1-031, E2-005
+- triggers: CALL "AccessEventPublisher.publish on every read" ; API "POST /admin/break-glass (with incident)" ; API "GET /admin/access-log" ; WHO "RW-PLATADM requests; RW-SECADM approves"
+- ace: [] ; ace_note: "No ACE read. The log stores field IDs and masked flags, never the personal values read from ACE."
+- writes: decision_log_entry "AC-SIGN, AC-DENY, AC-READ, AC-EXPT, AC-BGON (P7 writer)"
+- reads: decision_log_entry "by actor and time (ix_declog_actor_time)" ; role "break-glass group"
+- stores: "ACE audit and SOC log; bank IAM break-glass group; incident system; MSG-P4-004 banner"
+- functions: AccessLogWriter "AccessEvent -> DecisionLogRecord" ; AccessEventPublisher "called by P3 and P5 (published)" ; BreakGlassService "group, incident, reason, AC-BGON" ; BreakGlassGrantCheck "grant until endsAt, mark entries" ; AccessLogQueryService "maps to the P7 reader" ; BreakGlassBanner "React MSG-P4-004 banner"
+- path: trigger "User opens RW-2026-000123" > function "AccessEventPublisher.publish" > function "AccessLogWriter (same tx)" > table "decision_log_entry AC-READ" > check "Logged? else no data" > out "RW-AUDIT queries AC-READ by case"
+- rules: "BR2: no log, no data" ; "BR3: store field IDs and masked flags only, never values" ; "BR4: break-glass needs IAM approval, an open incident and a 20+ character reason" ; "BR5: break-glass window 4 h (assumed) and ends automatically"
+- risks: "Log unwritable -> 503, no data returned (MSG-P7-003)" ; "Not in the break-glass group -> 403 (MSG-P4-007)" ; "Missing incident or short reason -> 422 (MSG-GEN-001 / 002)"
+- example: "U-4101 (RW-CASEOWN) opens RW-2026-000123 at 10:15 on 2026-12-03" ; "-> one AC-READ entry" ; "Fields DF-PTY-007 and DF-PTY-016 recorded as 'masked'"
+
+### RWB-E1-040
+- file_stem: RWB E1 040 Document checklist per case type as reference data
+- title: Document checklist per case type as reference data
+- module: P5 Document hub | flag: rwb.dochub.checklist | status: READY "Ready for build (Should)" | theme: default
+- overview_label: Document checklist per stage
+- goal: Required documents per stage and route as versioned data, so missing ones show on the case
+- why: Litigation packs stop failing for a missing title deed. The checklist is recomputed when a document arrives, the stage changes, or a version takes effect.
+- needs: E1-024, E1-043, E1-025, E1-026 | unblocks: E1-054
+- triggers: EVENT "DocumentStored (EV-16)" ; EVENT "CaseStateChanged (EV-05)" ; JOB "JOB-12 checklistRefreshStep on a new version" ; API "GET /cases/{caseId}/document-checklist"
+- ace: [] ; ace_note: "No ACE read. Stage and route come from the Workbench case; documents from the document hub."
+- writes: document_checklist_item "required types per stage and route (CHK-2026.11)" ; case_document_check "present / missing per case and type"
+- reads: recovery_case "stage_code, route_code via CaseDirectory" ; document "active documents on the case" ; document_type "type must be in force"
+- stores: "Exception queue after retries"
+- functions: ChecklistLoader "DOCUMENT_CHECKLIST reference load" ; ChecklistEvaluator "pick rows, count, write result" ; DocumentStoredChecklistListener "EV-16, idempotent by event ID" ; ChecklistRefreshStep "JOB-12: recompute on new version" ; DocumentChecklistPanel "React SCR-30 panel" ; MissingDocumentsBadge "React SCR-02 badge"
+- path: trigger "EV-16 or EV-05 arrives" > table "Case stage + route" > table "document_checklist_item rows" > function "ChecklistEvaluator counts docs" > table "case_document_check" > out "SCR-30 panel + SCR-02 badge"
+- rules: "BR2: case type = stage; rows for the route take precedence over rows with no route" ; "BR3: a version takes effect on valid_from, no deployment" ; "BR4: only active documents count, once per type" ; "BR6: a repeated event changes nothing"
+- risks: "No rows for the stage -> 'No checklist for this case type'" ; "Bad type or stage in the load -> refused (MSG-P3-027)" ; "No Documents R right -> 403 (MSG-P4-002)"
+- example: "RW-2026-000123 at stage LITIGATION holds a demand letter and a court notice" ; "-> those 2 present" ; "-> TITLE_DEED and APPRAISAL_REPORT missing (CHK-2026.11)"

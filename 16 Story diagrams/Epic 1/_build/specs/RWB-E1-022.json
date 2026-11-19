@@ -1,0 +1,126 @@
+{
+  "key": "RWB-E1-022",
+  "file_stem": "RWB E1 022 Sign on with SSO MFA and the first roles",
+  "title": "Sign-on with SSO, MFA and the first roles",
+  "module": "P4 Access and administration",
+  "flag": "rwb.access.sso-roles",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "SSO + MFA + roles",
+  "goal": "Entra ID sign-on with MFA is the only way in; roles come from group membership and menus follow permissions",
+  "why": "No local passwords. A person holds a role only through an Entra group, a second factor is required, and conflicting role pairs are refused.",
+  "needs": [
+    "E1-001",
+    "E1-019"
+  ],
+  "unblocks": [
+    "E1-037",
+    "E1-039"
+  ],
+  "triggers": [
+    [
+      "WHO",
+      "Any user opens the Workbench"
+    ],
+    [
+      "CALL",
+      "Entra ID OIDC token: groups + amr claims"
+    ],
+    [
+      "API",
+      "GET /me/session"
+    ],
+    [
+      "API",
+      "GET /api/recovery/v1/admin/roles"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No recovery.v_ace_* read. v_ace_iam_group (Section B) exists but is not used here; ACE's common module performs the sign-in.",
+  "writes": [
+    {
+      "t": "role_conflict",
+      "note": "role pairs that may not be held together"
+    }
+  ],
+  "reads": [
+    {
+      "t": "role",
+      "note": "role_code, default_scope, entra_group"
+    },
+    {
+      "t": "permission",
+      "note": "letters per capability area, matrix version"
+    },
+    {
+      "t": "role_conflict",
+      "note": "SOD-2026.11 pairs"
+    }
+  ],
+  "stores": "Entra ID (INT-21): groups and amr claims; ACE audit and SOC log (INT-22) for sign-in and refusal events",
+  "functions": [
+    {
+      "name": "SessionResolver",
+      "does": "amr = mfa, group -> role, conflicts"
+    },
+    {
+      "name": "AccessCheckService",
+      "does": "union of letters per capability"
+    },
+    {
+      "name": "AccessCheckInterceptor",
+      "does": "enforces x-capability per endpoint"
+    },
+    {
+      "name": "AccessEventPublisher",
+      "does": "sign-in and refusal events"
+    },
+    {
+      "name": "SessionBanner, AccessRequestPage",
+      "does": "React: scope line, request page"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "User opens the Workbench"
+    },
+    {
+      "kind": "store",
+      "text": "Entra ID: password + 2nd factor"
+    },
+    {
+      "kind": "check",
+      "text": "amr contains mfa?"
+    },
+    {
+      "kind": "table",
+      "text": "Groups -> role rows; conflict check"
+    },
+    {
+      "kind": "function",
+      "text": "Session: roles, PM-2026.11, scope"
+    },
+    {
+      "kind": "out",
+      "text": "Filtered menu + access checks"
+    }
+  ],
+  "rules": [
+    "BR1: Entra group membership is the only way to hold a role; no local passwords",
+    "BR2: a second factor is required",
+    "BR5: conflicting role pairs are refused",
+    "BR7: a session keeps the matrix version it resolved at sign-in"
+  ],
+  "risks": [
+    "No Workbench group -> 401 (MSG-P4-001)",
+    "No MFA in the token -> 401 (MSG-P4-005)",
+    "Role conflict -> refused + incident (MSG-P4-006)"
+  ],
+  "example": [
+    "User U-1001 is in group RWB-SIT-RW-CASEOWN",
+    "-> role RW-CASEOWN, scope OWN, matrix PM-2026.11",
+    "Banner: 'Case owner. Scope: own cases.'  No Administration menu"
+  ]
+}

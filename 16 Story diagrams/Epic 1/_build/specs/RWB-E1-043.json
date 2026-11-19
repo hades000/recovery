@@ -1,0 +1,140 @@
+{
+  "key": "RWB-E1-043",
+  "file_stem": "RWB E1 043 Reference data service with versioned tables",
+  "title": "Reference data service with versioned tables",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.refdata-versions",
+  "status": "PARTIAL",
+  "status_text": "Ready. Business-date check waits for ACE-001",
+  "theme": "default",
+  "overview_label": "Versioned reference data",
+  "goal": "12 reference tables versioned with author, approver and dates, so values change by data release",
+  "why": "Products, regions, queues, service levels and limits all change. One registry decides which version is in force on a date; holidays come from ACE instead.",
+  "needs": [
+    "E1-042",
+    "E1-044"
+  ],
+  "unblocks": [
+    "E1-028",
+    "E1-037",
+    "E1-038",
+    "E1-040",
+    "E1-045"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (any of 12 tables)"
+    ],
+    [
+      "API",
+      "POST /admin/reference-loads/{loadId}/approve"
+    ],
+    [
+      "CALL",
+      "ReferenceDataService.rows(table, date)"
+    ],
+    [
+      "WHO",
+      "RW-REFADM loads; Risk approves"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "business date precondition for loads"
+    },
+    {
+      "view": "v_ace_holiday",
+      "section": "A",
+      "note": "not served here: holidays are read by E1-028"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "reference_version",
+      "note": "header: table, version, valid_from, author, approver"
+    },
+    {
+      "t": "reference_row",
+      "note": "the rows of each version (append only)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "reference_version, reference_row",
+      "note": "version in force for a date"
+    },
+    {
+      "t": "lov_value",
+      "note": "LOV-REF-TABLE codes"
+    }
+  ],
+  "stores": "In-memory ReferenceRowCache (refdata.cache.ttl-seconds); engine log line per table read; daily DQ report (E1-011)",
+  "functions": [
+    {
+      "name": "ReferenceVersionRegistryImpl",
+      "does": "checks, numbering, write, approve"
+    },
+    {
+      "name": "ReferenceDataServiceImpl",
+      "does": "version in force for a date"
+    },
+    {
+      "name": "ReferenceRowCache",
+      "does": "TTL cache"
+    },
+    {
+      "name": "ReferenceTableSchemas",
+      "does": "columns per table code"
+    },
+    {
+      "name": "ReferenceVersionLogger",
+      "does": "one log line per table read"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Upload EXPOSURE_BAND v4"
+    },
+    {
+      "kind": "check",
+      "text": "Schema, keys, date, author"
+    },
+    {
+      "kind": "table",
+      "text": "reference_version VALIDATED"
+    },
+    {
+      "kind": "check",
+      "text": "Approver is not the author"
+    },
+    {
+      "kind": "table",
+      "text": "APPROVED; v3 gets valid_to"
+    },
+    {
+      "kind": "out",
+      "text": "Engines read v4 from 2026-12-01"
+    }
+  ],
+  "rules": [
+    "BR1: 12 tables: PRODUCT, REGION, EXPOSURE_BAND, ROLE, TEAM, QUEUE, SERVICE_LEVEL ... (no holiday)",
+    "BR3: in force = approved version with the latest valid_from <= the date",
+    "BR4: the approver is never the author",
+    "BR9: no version in force -> the engine does not run"
+  ],
+  "risks": [
+    "Approved by the author -> stays VALIDATED (MSG-P7-002)",
+    "Row fails the table schema -> refused (MSG-P3-027)",
+    "No version in force -> engine stops and alerts (MSG-P3-027)"
+  ],
+  "example": [
+    "EXPOSURE_BAND v3 (E1-E4) from 2026-11-30",
+    "U-REF-01 loads v4 (E1-E5) from 2026-12-01; U-RSK-01 approves",
+    "A read for 2026-11-30 returns v3, whose valid_to is now 2026-11-30"
+  ]
+}

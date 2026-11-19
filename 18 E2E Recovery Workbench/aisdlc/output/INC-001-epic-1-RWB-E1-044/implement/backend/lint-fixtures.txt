@@ -1,0 +1,65 @@
+TASK-03 / TASK-04 lint fixture corpus (SPEC-004 .. -010, -016; T-044-01..-07, -20..-22)
+=========================================================================================
+
+Location: backend/src/test/resources/migration-lint/
+Folders: 50. Every folder is scanned on its own and RecoveryMigrationLintTest asserts the
+complete ordered finding list (rule / file / line / key), so an extra finding fails too.
+Line 1 of every fixture is "-- Story: <KEY>" derived from its file name; each non-fix file
+has a distinct key, and t01-seqgap-fail / t01-seqdup-fail use rwb_e1_045 for their second
+file so only the sequence rule fires (PA-E044-12). Fixture keys and names are synthetic.
+
+Folder                                  Expected findings (rule @ line, key)
+------------------------------------------------------------------------------------------
+t01-pass                                none
+t01-readme-pass                         none (README.md is the one accepted non-SQL entry)
+t01-name-fail                           L-NAME @0 V0002__rwb_044_bad.sql
+t01-nonsql-fail                         L-NAME @0 notes.txt (folder listed entry by entry)
+t01-undo-fail                           L-UNDO @0 U0001__rwb_e1_044_undo.sql (no L-NAME)
+t01-repeatable-fail                     L-REPEATABLE @0 R__views.sql (no L-NAME)
+t01-seqgap-fail                         L-SEQ-GAP @0 V0002 (no L-KEY-DUP)
+t01-seqdup-fail                         L-SEQ-DUP @0 0001 (both files named; no L-SEQ-GAP)
+t03-header-fail                         L-HEADER @1
+t03-header-multi-fail                   L-HEADER-MULTI @3
+t03-keydup-fail                         L-KEY-DUP @0 RWB-E1-028 (names both files)
+t03-fix-line2-fail                      L-FIX-LINE2 @2
+t03-fix-nobase-fail                     L-FIX-NO-BASE @0 RWB-E1-028
+t03-fix-pass                            none
+t02-positions-fail                      18 x L-LITERAL-SCHEMA @2..@19 (one per position) + L-FK-OUTSIDE @12
+t02-types-fail                          3 x L-LITERAL-SCHEMA @2, @3, @4
+t02-schema-bare-fail                    L-LITERAL-SCHEMA @2 ("CREATE SCHEMA public")
+t02-allowed-pass                        none (${recoverySchema}, information_schema, pg_catalog)
+t02-comment-string-pass                 none (comment and string literal hold "public")
+t02-dollar-body-fail                    L-LITERAL-SCHEMA @3 (body is code, D-RUN-13)
+t02-quoted-fail                         L-LITERAL-SCHEMA @2 ("public".account)
+t02-seam-marker-fail                    L-LITERAL-SCHEMA @2 (SEAM-E044-01 marker, RWB-E1-069)
+t05-fk-public-fail                      L-LITERAL-SCHEMA @2 + L-FK-OUTSIDE @2 (both, same line)
+t05-fk-pgcatalog-fail                   L-FK-OUTSIDE @2 only (pg_catalog is not a literal-schema finding)
+t05-fk-pass                             none (placeholder and unqualified references)
+t06-format-fail                         L-NAME @0 V0001__rwb_044_bad.sql,
+                                        L-LITERAL-SCHEMA @2 recovery
+t20-searchpath-fail                     8 x L-SEARCH-PATH @2..@9 (all eight forms)
+t20-grant-fail                          3 x L-GRANT @2, @3, @4 (line start and statement start)
+t20-grant-pass                          none (GRANT/REVOKE only in a comment)
+t21-literals-pass                       none (literals, comments, doubled quote, E'...')
+t21-literal-negatives-fail              L-LITERAL-SCHEMA @4, @5, @6 + L-FK-OUTSIDE @6
+t22-n1 .. t22-n15                       the T-044-22 negative table, counted by multiplicity:
+                                        n1 @3; n2 @2; n3 @3; n4 @2; n5 @2; n6 @2; n7 @3; n8 @3;
+                                        n9 @4; n10 one @2; n11 L-LITERAL @3 + L-LEX @2;
+                                        n12 L-LITERAL @3 + L-LEX @2; n13 L-LITERAL @3 + L-LEX @2;
+                                        n14 L-SEARCH-PATH @2; n15 L-LITERAL @2 + L-FK-OUTSIDE @2
+t22-p1 .. t22-p3                        none (nested comment; string in a body; $ in a string)
+t22-s1                                  none; parsed model: 2 statements, both at line 3,
+                                        kinds CREATE TABLE and INSERT (leading comments ignored)
+
+Boundary methods in RecoveryMigrationLintTest (@TempDir, not resource folders)
+--------------------------------------------------------------------------------
+anEmptyFolderGivesNoFinding             empty folder -> no finding (pass)
+anUnreadableSqlEntryFailsClosed         directory named V0002__rwb_e1_044_unreadable.sql
+                                        -> UncheckedIOException whose message names it (fail closed)
+
+Red / green
+-----------
+Red   : implement/backend/task-03-red.log   - compileTestJava fails on the missing
+        MigrationLint and MigrationRules (EXIT_CODE=1).
+Green : implement/backend/task-04-green.log - ./gradlew test --tests "*RecoveryMigrationLintTest"
+        --tests "*MigrationLexerTest" BUILD SUCCESSFUL, EXIT_CODE=0 (70 tests).

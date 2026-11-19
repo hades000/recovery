@@ -1,0 +1,49 @@
+== 1. Consolidated migration on a clean schema ==
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to table clean.parameter_catalog
+drop cascades to table clean.parameter_value
+ok: catalog rows = 13
+ok: value rows = 28
+ok: parameter_value constraints = 9
+ok: E1-042 indexes = 4
+== 2. Re-run is idempotent ==
+NOTICE:  relation "parameter_catalog" already exists, skipping
+NOTICE:  relation "parameter_value" already exists, skipping
+NOTICE:  relation "ix_parameter_value_in_force" already exists, skipping
+NOTICE:  relation "ix_parameter_value_lookup" already exists, skipping
+NOTICE:  relation "ux_parameter_value_version_all" already exists, skipping
+NOTICE:  relation "ux_parameter_value_approved_from" already exists, skipping
+ok: catalog rows after re-run = 13
+ok: value rows after re-run = 28
+== 3. Split review files on a clean schema ==
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to table split.parameter_catalog
+drop cascades to table split.parameter_value
+ok: split catalog rows = 13
+ok: split value rows = 28
+== 4. E1-001 baseline overlap (tables already exist) ==
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to table baseline.parameter_catalog
+drop cascades to table baseline.parameter_value
+NOTICE:  relation "parameter_catalog" already exists, skipping
+NOTICE:  relation "parameter_value" already exists, skipping
+ok: baseline catalog rows = 13
+ok: baseline value rows = 28
+ok: baseline added FK = 1
+ok: baseline added checks = 5
+== 5. Negative database tests ==
+ok: duplicate global version with NULL product_group refused
+ok: maker-checker on approve refused
+ok: secret with a default value refused
+ok: value for an unknown key refused
+ok: APPROVED row without approved_at refused
+ok: valid_to before valid_from refused
+ok: second approved version at the same valid_from refused
+ok: invalid environment refused
+== 6. Deployment guard catches a required key with no value ==
+NOTICE:  drop cascades to 2 other objects
+DETAIL:  drop cascades to table guardtest.parameter_catalog
+drop cascades to table guardtest.parameter_value
+ok: deployment guard refused a required key with no value
+
+ALL MIGRATION TESTS PASSED

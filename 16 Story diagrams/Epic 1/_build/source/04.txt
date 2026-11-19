@@ -1,0 +1,398 @@
+### RWB-E1-058
+- file_stem: RWB E1 058 Agent platform set up E1a
+- title: Agent platform set-up [E1a]
+- module: P10 Agent runtime | flag: rwb.agent.platform | status: READY "Ready for build (cites removed E1-003)" | theme: ai
+- overview_label: Agent platform (gateway)
+- goal: One governed path for every agent: model gateway, versioned prompts and policies, guardrails
+- why: No agent talks to a model directly. Inputs are masked, outputs are checked, every run is recorded with cost, and Risk approves each prompt and policy.
+- needs: E1-001, E1-037 | unblocks: TE-013, E1-059, E1-060, E1-061, E1-062, E1-063
+- triggers: LOAD "POST /admin/agent-configs (prompt + policy)" ; API "POST /admin/agent-configs/{versionId}/approve" ; CALL "AgentOrchestrator.run via TE-013 client" ; API "POST /admin/agent-samples, /agent-evaluations"
+- ace: [] ; ace_note: "No ACE read in the platform itself. Agents read data only through allowed tools (ToolGateway) that call published module interfaces."
+- writes: agent_policy "autonomy mode, timeout, confidence floor, cost" ; agent_prompt "versioned prompt text" ; agent_run "one row per run: status, tokens, cost, latency" ; agent_sample, agent_evaluation_run "evaluation samples and runs" ; agent_evaluation "scores per run"
+- reads: recovery_case "via P3 tools only" ; agent_policy, agent_prompt "version in force"
+- stores: "INT-23 model endpoint (private endpoint, DL33 option B via AAL); P4 masking service; outbox EV-28 AgentRunCompleted"
+- functions: ModelGatewayClient "INT-23 call with policy timeout" ; AgentConfigService "load, validate, loader != approver" ; AgentOrchestrator "run one step (published)" ; GuardrailChecker "schema -> tools -> confidence floor" ; ToolGateway + PromptInputMasker "allowed tools, masked inputs" ; EvaluationHarness "shadow scoring"
+- path: trigger "Caller runs agent (idempotency key)" > function "PromptInputMasker masks inputs" > ai "Model via INT-23 gateway" > check "Guardrails: schema, tools, floor" > table "agent_run + EV-28" > out "Answer, or fallback to the rule result"
+- rules: "BR3: timeout 60 s -> TIMED_OUT, the rule result is used" ; "BR4: checks run in order schema -> tools -> confidence floor" ; "BR7: cost = (tokens in + out) / 1000 x price_per_1k_tokens_thb" ; "BR8: the loader of a prompt or policy cannot approve it"
+- risks: "Model timeout -> TIMED_OUT, fallback (no user message)" ; "Config load check fails -> refused (MSG-P10-001)" ; "Loader approves own version -> refused (MSG-P7-002)"
+- example: "Agent ECHO, policy P1 / prompt PR1, model MODEL-A-2026-10, case RW-2026-000101" ; "-> ANSWERED in 1,200 ms, 900 tokens in, 150 out" ; "-> cost 0.0525 baht, EV-28 AgentRunCompleted"
+
+### RWB-E1-060
+- file_stem: RWB E1 060 Extraction evaluation E1c
+- title: Extraction evaluation [E1c]
+- module: P10 Agent runtime | flag: rwb.agent.extraction-eval | status: READY "Ready for build" | theme: ai
+- overview_label: Extraction evaluation
+- goal: Measure three ways of extracting each field, then pick an approach and review threshold per document type
+- why: Decide with numbers whether OCR templates, a model, or both extract fields best, and set the confidence above which no person needs to check.
+- needs: E1-053, E1-058 | unblocks: (none)
+- triggers: API "POST /admin/agent-samples (EXTRACT-S1)" ; API "POST /admin/agent-evaluations (3 approaches)" ; API "GET /admin/agent-evaluations (CSV export)" ; WHO "RW-COE runs; RW-RISK reviews"
+- ace: [] ; ace_note: "No ACE read. The sample is labelled Workbench documents and their confirmed fields."
+- writes: agent_sample "labelled documents (personal values hashed)" ; agent_run "MODEL runs in shadow" ; agent_evaluation_run "run + proposal per type" ; agent_evaluation "TP / FP / FN, precision, recall per field"
+- reads: document "id, document_type, storage_ref" ; document_field "confirmed values (the labels)"
+- stores: "Document content via P5 DocumentQueryService; model gateway; CSV export"
+- functions: ExtractionApproachRunner "OCR_TEMPLATE, MODEL, OCR_AND_MODEL" ; FieldMatchScorer "precision, recall, F1" ; ExtractionProposalBuilder "approach + threshold per type" ; SampleRowValidator "rows vs P5, hash personal" ; prompt EXTRACT PR1 "with schema extract-fields-v1"
+- path: trigger "RW-COE loads EXTRACT-S1" > table "Labelled documents + fields" > ai "3 approaches per document" > function "FieldMatchScorer per field" > check "30+ docs? precision 0.95?" > out "Proposal: approach + threshold"
+- rules: "BR2: precision, recall and F1 to 4 decimals" ; "BR3: fewer than 30 labelled documents -> no proposal" ; "BR4: threshold = lowest confidence reaching 0.95 precision, else review-only" ; "BR5: ties go to the approach with fewer model calls"
+- risks: "Fewer than 30 documents -> 'insufficient sample'" ; "Model timeout -> counted as a false negative" ; "Bad sample row -> refused (MSG-P10-001)"
+- example: "40 COURT_NOTICE documents" ; "hearing_date with OCR_TEMPLATE: TP 34, FP 2, FN 4" ; "-> precision 0.9444, recall 0.8947"
+
+### RWB-E1-061
+- file_stem: RWB E1 061 Intake agent evaluation and L1 proposal E2a
+- title: Intake agent evaluation and L1 proposal [E2a]
+- module: P10 Agent runtime | flag: rwb.agent.promotion | status: READY "Ready for build" | theme: ai
+- overview_label: Intake agent L1 proposal
+- goal: Turn the intake agent's shadow results into an approval report and a versioned L1 policy proposal for Risk
+- why: Moving an agent from shadow to L1 (it may recommend) is a governed decision with evidence: sample size, agreement, failures, cost and latency.
+- needs: E1-059 | unblocks: E1-063
+- triggers: API "GET /admin/agent-evaluations/{id}/report" ; LOAD "POST /admin/agent-configs (INTAKE P2 L1)" ; API "POST /admin/agent-configs/{versionId}/approve" ; WHO "RW-COE proposes; RW-RISK approves"
+- ace: [] ; ace_note: "No ACE read. The report reads agent runs and their scores."
+- writes: agent_policy "P2: autonomy L1, conditions, fallback, watch measures"
+- reads: agent_evaluation_run "the DONE evaluation" ; agent_evaluation "scores per gap type" ; agent_run "status, latency_ms, cost_thb"
+- stores: "CSV and PDF exports for the steering committee"
+- functions: AgentEvaluationController "report endpoint" ; EvaluationReportService "aggregates runs and scores" ; EvaluationReportExporter "CSV and PDF" ; PromotionProposalValidator "BR1-BR3 for mode L1"
+- path: trigger "RW-COE requests the report" > table "agent_run + agent_evaluation" > function "Report: agreement, cost, p95" > check "Conditions met? 200+ cases?" > check "RW-RISK approves (not loader)" > out "agent_policy P2 L1 from valid_from"
+- rules: "BR1: the proposal names a DONE run, conditions, fallback and watch measures" ; "BR2: conditions are checked against the scores" ; "BR3: at least 200 cases in the evaluation" ; "BR6: the loader cannot approve"
+- risks: "Report asked while evaluation runs -> 409 (MSG-P10-008)" ; "Conditions not met -> refused (MSG-P10-001)" ; "Loader approves -> 409 (MSG-P7-002)"
+- example: "EV-INTAKE-001: 200 runs (188 ANSWERED, 7 TIMED_OUT, 3 GUARDRAIL_FAILED, 2 BELOW_FLOOR)" ; "Cost 412.60 baht (2.063 per case), p50 4,100 ms, p95 9,800 ms" ; "Proposal P2 L1 requires agreement >= 0.85 per gap type"
+
+### RWB-E1-062
+- file_stem: RWB E1 062 Deviation screening agent in shadow E2b
+- title: Deviation screening agent in shadow [E2b]
+- module: P10 Agent runtime | flag: rwb.agent.screening-shadow | status: READY "Ready for build" | theme: ai
+- overview_label: Deviation screening (shadow)
+- goal: An agent proposes deviations X1-X7 with reasons in shadow, so precision and recall are known
+- why: Deviations (vulnerability, dispute, fraud ...) change how a case is handled. The agent only proposes; in shadow nothing is raised.
+- needs: E1-058, TE-013 | unblocks: (none)
+- triggers: EVENT "EV-01 CaseCreated" ; EVENT "EV-16 DocumentStored" ; CALL "SCREENING agent, key SCREENING:<case>:<event>" ; API "POST /admin/agent-evaluations (SCREEN-S1)"
+- ace: [] ; ace_note: "No ACE read. Inputs are the Workbench case, its 180-day interaction ledger and its documents, all masked."
+- writes: agent_run "SHADOW proposals with reasons" ; agent_evaluation_run "review_count, failure_counts" ; agent_evaluation "precision and recall per code X1-X7"
+- reads: recovery_case "product, region, deviation_open" ; interaction "180-day ledger via InteractionLedgerReader" ; document, document_field "documents and fields" ; rule_row "R-DEV-02..06 owner role" ; agent_sample "labelled cases"
+- stores: "Outbox EV-28; model gateway; interaction ledger via P7"
+- functions: ScreeningShadowListener "EV-01 and EV-16 -> agent" ; ScreeningInputAssembler "case, ledger, docs (masked)" ; ScreeningOwnerResolver "owner role from rule rows" ; ScreeningRuleChecks "code list, X1 needs a contact" ; ScreeningScorer "precision + recall per code"
+- path: trigger "EV-01 or EV-16" > table "Case + ledger + documents" > ai "SCREENING agent in SHADOW" > check "Codes X1-X7? X1 has a contact?" > table "agent_run (no deviation raised)" > out "Scored on SCREEN-S1"
+- rules: "BR1: shadow raises nothing (R-DEV-01 never fires)" ; "BR3: an unmapped code goes to RW-TEAMMGR, marked 'unmapped'" ; "BR4: an X1 proposal names the contact in the prior 30 days" ; "BR6: only proposals at or above the floor (0.80) are scored"
+- risks: "Code outside X1-X7 -> GUARDRAIL_FAILED" ; "X1 without a preceding contact -> SCHEMA_RULE fail" ; "Timeout -> TIMED_OUT, no retry"
+- example: "200 cases -> proposals stored in SHADOW" ; "deviation_open stays false on every case" ; "One score row per code X1-X7, sample size 200"
+
+### RWB-E1-063
+- file_stem: RWB E1 063 Agent monitoring dashboard v1 E2c
+- title: Agent monitoring dashboard v1 [E2c]
+- module: P10 Agent runtime | flag: rwb.agent.monitor | status: READY "Ready for build" | theme: ai
+- overview_label: Agent monitoring dashboard
+- goal: Risk sees runs, fallback, latency, cost and scores daily, with an alert when the cost cap is breached
+- why: An agent in use must stay watched. The dashboard reads a daily lake extract, never live tables, and is published only when counts match.
+- needs: E1-061, E1-007, E1-014, E1-058 | unblocks: (none)
+- triggers: JOB "JOB-15 Reporting extract 01:30, step agentRunDaily" ; API "POST /admin/jobs/{jobId}/rerun" ; WHO "RW-RISK and RW-COE read Power BI"
+- ace: [] ; ace_note: "No ACE read. Source is agent_run and agent_policy in the Workbench."
+- writes: agent_alert "one alert per agent, type, segment and date"
+- reads: agent_run "runs of the previous day" ; agent_policy "daily_cost_cap_thb, alert_role" ; agent_evaluation "latest DONE score"
+- stores: "Data lake table agent_run_daily; Power BI 'Agent monitor v1'; P6 notification interface; outbox (JOB-11)"
+- functions: AgentRunExtractSource "daily rows + alerts (published)" ; AgentMonitorService "aggregates per agent + version" ; AgentRunExtractStep "write, count check, publish" ; CostAlertService "cost vs cap, MSG-P10-004" ; AgentAlertRepository "agent_alert rows"
+- path: trigger "JOB-15 at 01:30" > table "agent_run, previous day" > function "Group by agent + version" > store "agent_run_daily in the lake" > check "Cost above the 2,000 cap?" > out "Power BI + MSG-P10-004 alert"
+- rules: "BR1: the dashboard reads the data lake, never live tables" ; "BR2: publish only when counts match" ; "BR3: alert only when cost is above the cap (2,000 baht)" ; "BR4: one alert per agent, type, segment and date"
+- risks: "Count mismatch -> publish held, previous day stays" ; "Notification down -> alert retried by JOB-11" ; "Cost exactly at the cap -> no alert"
+- example: "2026-12-01: INTAKE 120 runs, 9 fallbacks (0.0750), 1,840 baht -> no alert" ; "SCREENING 150 runs, 2,310.50 baht, over the 2,000 cap" ; "-> MSG-P10-004 to RW-COE and RW-RISK"
+
+### RWB-E1-064
+- file_stem: RWB E1 064 Data dictionary for the 14 data products
+- title: Data dictionary for the 14 data products
+- module: P1 Recovery data engine | flag: rwb.dataengine.data-dictionary | status: READY "Ready for build" | theme: default
+- overview_label: Data dictionary + DC-ACE
+- goal: Type, source and own all 1,366 fields, and publish an ACE read contract (DC-ACE) confirmed by the ACE team
+- why: Everyone can look up any field. Every view column maps to a public.table.column in ACE, and the ACE lead signs the contract before it is published.
+- needs: E1-001, E1-043, E1-069 | unblocks: E1-016, E1-017
+- triggers: LOAD "POST /admin/reference-loads (sys_fields)" ; API "GET /admin/data-dictionary/fields" ; API "POST /admin/data-contracts/{contractId}/publish" ; WHO "RW-DATASTEW owns; ACE lead confirms"
+- ace: v_ace_* (16 views) A "177 fields: each names its public.table.column" ; v_ace_* (14 views) B "127 fields over the RWB-ACE-001 tables" ; v_ace_contact A "derived: contact_type, city, post_code, country" ; v_ace_plan A "derived: installments, recommended_package"
+- writes: sys_fields "governance attributes for 1,366 fields" ; sys_field_version "history of every field change" ; data_contract "DC-ACE: DRAFT -> PUBLISHED"
+- reads: sys_objects "122 objects" ; data_product "14 products" ; v_data_dictionary "the joined view"
+- stores: "Confirmation document reference (held outside the Workbench); CHK-01 view conformance check from E1-069"
+- functions: DataDictionaryController "5 dictionary endpoints" ; DataDictionaryService "versioned changes, If-Match" ; DataContractService "confirm, publish, new DRAFT" ; DataDictionaryLoader "whole-load validation" ; DataDictionaryQuery "field + product definitions"
+- path: trigger "Steward loads 1,366 field rows" > check "Source is ACE or Workbench; view column exists" > table "sys_fields + sys_field_version" > check "ACE lead confirmation recorded?" > table "data_contract DC-ACE PUBLISHED" > out "GET /admin/data-dictionary/fields"
+- rules: "BR1: every view field names public.table.column or is one of the 7 derived fields" ; "BR2: 122 objects and 1,366 fields" ; "BR4: publish only after the ACE confirmation is recorded" ; "BR9: a new ACE column enters by reference load; CHK-01 blocks the merge until then"
+- risks: "Publish without confirmation -> 409 (MSG-P1-021)" ; "Bad load -> refused whole (MSG-P1-002)" ; "View column with no sys_fields row -> CHK-01 fails ('v_ace_account.legacy_bucket has no entry')"
+- example: "DP01 Account and arrears: owner RW-DATASTEW, system of record 'ACE (ingested from ALS)'" ; "297 of 304 view fields map to a public column; 7 are derived" ; "DC-ACE (V0002 + V0003) moves DRAFT -> PUBLISHED"
+
+### RWB-E1-065
+- file_stem: RWB E1 065 Sandbox database with synthetic recovery data
+- title: Sandbox database with synthetic recovery data
+- module: P1 Recovery data engine | flag: rwb.dataengine.sandbox | status: PARTIAL "Ready. Section B views wait for RWB-ACE-001" | theme: default
+- overview_label: Synthetic sandbox DB
+- goal: A DEV sandbox with the ACE schema, recovery schema and synthetic data for view reads
+- why: Developers need realistic ACE-shaped rows to code against the 30 views. Everything is synthetic; the ACE-shaped tables are a test double, never deployed.
+- needs: E1-001, E1-069 | unblocks: TE-004
+- triggers: BUILD "Pipeline stage 'Sandbox build' on DDL change" ; BUILD "Applies ACE DDL, Tier 2 DDL, V0001-V0003" ; WHO "RW-TRIBE reads via rwb_sandbox_read"
+- ace: v_ace_* (16 views) A "seeded + verified: account, payment, customer ..." ; v_ace_* (14 views) B "seeded once the Tier 2 DDL exists"
+- writes: recovery_case + links "2,812 synthetic cases (seed 20261128)" ; deviation, interaction, document "exception shapes, 10 cases each" ; party_ext ... valuation_ext "extension rows by ACE key" ; role, permission "54 roles + test users" ; public.* (sandbox only) "22 Tier 1 + 14 Tier 2 ACE-shaped tables"
+- reads: sys_objects, sys_fields "every column must be catalogued" ; lov_value "valid codes"
+- stores: "PostgreSQL 17 databases rwb_sandbox and rwb_sandbox_next; role rwb_sandbox_read; ACE Schema PostgreSQL v1.sql; advisory lock"
+- functions: AceSchemaLoader "ACE DDL, Tier 2, V0001-V0003" ; SandboxGenerator "synthetic rows in FK order" ; ValueFactory "seeded values, SYN-FIRST-000123" ; ExceptionShapeBuilder "10 cases per shape" ; SandboxVerifier "views compile, no PII, 89/90 DPD" ; AccessSeedLoader "roles + test users"
+- path: trigger "DDL or migration changes" > table "Build rwb_sandbox_next" > function "Seed ACE-shaped + recovery rows" > ace "30 views compile and return rows" > check "No PII in recovery, keys resolve" > out "Rename to rwb_sandbox + grant read"
+- rules: "BR1: synthetic data only" ; "BR7: the ACE-shaped tables are a DEV test double, never deployed" ; "BR8: the 20 removed copy/load tables are absent" ; "BR9: clear ID only in ACE-shaped tables; recovery sees id_no_masked / id_no_last4"
+- risks: "Column with no sys_fields row -> build fails" ; "PII pattern found in recovery -> build fails" ; "Tier 2 DDL absent -> stop before V0003; Section A is still published"
+- example: "1,226 Mortgage, 1,296 HP and 290 SSME cases; RW-2026-000001 fully linked" ; "30 of 30 views compile" ; "loan_account, party, tracker_row ... do not exist"
+
+### RWB-E1-066
+- file_stem: RWB E1 066 Interaction ledger store and writer
+- title: Interaction ledger store and writer
+- module: P1 Recovery data engine | flag: rwb.dataengine.ledger-writer | status: READY "Ready for build" | theme: default
+- overview_label: Interaction ledger writer
+- goal: One append-only, gap-free ledger per case, written inside the transaction of each contact
+- why: 'What happened on this case?' must be complete and tamper-proof. The ledger records what happened; the decision log records why. The two are linked.
+- needs: E1-018, E1-027 | unblocks: E1-055, E1-067, E1-068
+- triggers: API "POST /api/recovery/v1/cases/{caseId}/interactions" ; CALL "InteractionLedgerWriter.append (MANDATORY tx)" ; WHO "Case owner records a call or visit"
+- ace: [] ; ace_note: "No ACE read. EFS contact history stays in ACE (v_ace_efs_action) and is merged on screen by E1-023, not copied here."
+- writes: interaction "append only; case_seq, event_code, actor, source_ref, decision_log_id"
+- reads: recovery_case.id "the case must exist" ; decision_log_entry "the linked decision (why)"
+- stores: "Trigger tr_interaction_append_only; pg_advisory_xact_lock per case; incident LEDGER_WRITE_FAILED"
+- functions: InteractionLedgerWriter "append(), tx MANDATORY (published)" ; LedgerWriteService "validate, lock, case_seq, insert" ; InteractionRepository "insert and read only" ; Interaction "immutable entity" ; InteractionsHandler (P3) "API-P3-015 delegates to the writer"
+- path: trigger "POST /cases/{caseId}/interactions" > check "Rights + LOV-LEDGER-EVENT valid" > function "Advisory lock: case_seq = max + 1" > table "INSERT interaction (append only)" > check "Write failed -> rollback + incident" > out "201 Created, gap-free history"
+- rules: "BR4: append-only; a correction is a new entry" ; "BR5: a failed write stops the action and raises an incident" ; "BR6: the ledger records what happened, the decision log why; they are linked" ; "BR7: case_seq has no gaps"
+- risks: "Ledger write fails -> 503 + incident (MSG-P1-022)" ; "Missing field -> 422 (MSG-GEN-001)" ; "Case out of scope -> 404 (MSG-P4-003)"
+- example: "RW-2026-000201 has 6 entries" ; "u-owner-02 logs CALL OUTBOUND 2026-12-02 10:15, RIGHT_PARTY, promise 25,000.00 for 2026-12-15" ; "-> case_seq 7, event CONTACT, source WORKBENCH"
+
+### RWB-E1-067
+- file_stem: RWB E1 067 Every Workbench action into the interaction ledger
+- title: Every Workbench action into the interaction ledger
+- module: P1 Recovery data engine | flag: rwb.dataengine.ledger-events | status: READY "Ready for build" | theme: default
+- overview_label: Actions into the ledger
+- goal: Every automated Workbench action on a case shows in the ledger, with duplicate events rejected and counted
+- why: The case history must include what the system did, not only what people did: creation, allocation, transfer, escalation, documents and decisions.
+- needs: E1-066, TE-006 | unblocks: (none)
+- triggers: EVENT "EV-01 CaseCreated, EV-02 CaseAllocated" ; EVENT "EV-04 Transferred, EV-08 DecisionRecorded" ; EVENT "EV-16 DocumentStored, EV-19 TimerBreached"
+- ace: [] ; ace_note: "No ACE read. Inputs are Workbench events from the outbox."
+- writes: interaction "via the writer: CASE_CREATED ... DECISION_TAKEN" ; processed_event "duplicate key -> hit_count + 1"
+- reads: recovery_case.id "the case" ; event payload IDs "assignment, document, decision_log_entry"
+- stores: "Outbox (at-least-once, ordered per case); exception queue for RW-PLATADM"
+- functions: LedgerEventListener "6 events, schema version check" ; LedgerEventMapper "event -> ledger command (config)" ; LedgerDuplicateService "key clash -> hit count" ; InteractionDuplicateRepository "processed_event rows"
+- path: trigger "Module commits change + event" > store "Outbox, ordered per case" > function "LedgerEventListener + mapper" > check "Duplicate key?" > table "interaction via the writer" > out "Full system history on SCR-03"
+- rules: "BR1: all 6 actions write a ledger entry" ; "BR3: the same key gives one entry; repeats are counted" ; "BR4: per-case order is kept" ; "BR7: no personal data in event payloads"
+- risks: "Duplicate event -> one entry + a hit" ; "Unknown schema version -> exception queue" ; "Write fails -> 3 retries, then exception queue (MSG-P1-022)"
+- example: "RW-2026-000301: created 06:10, allocated to MTG-BKK-CO 06:40, transferred by u-teammgr-03" ; "then DOC-SYN-3011 stored, SLA-ASSIGNED breached, DLE-SYN-3012 decided" ; "-> 6 ledger entries, in order"
+
+### RWB-E1-068
+- file_stem: RWB E1 068 Interaction ledger read interface
+- title: Interaction ledger read interface
+- module: P1 Recovery data engine | flag: rwb.dataengine.ledger-read | status: READY "Ready for build" | theme: default
+- overview_label: Ledger read interface
+- goal: Case owners read a case's full history in order, filtered by channel, actor and date, masked by role
+- why: One read path for the ledger, so masking, scope and the PII log are never skipped. Nobody queries the interaction table directly.
+- needs: E1-066, E1-037, E1-016 | unblocks: E1-023, E1-062
+- triggers: API "GET /cases/{caseId}/interactions?channel=&actor=" ; WHO "Case owner, team manager, conduct, audit" ; CALL "InteractionLedgerReader (published)"
+- ace: [] ; ace_note: "No ACE read. EFS history from v_ace_efs_action is merged in by the case record view (E1-023)."
+- writes: (none)
+- reads: interaction "ordered by occurred_at, case_seq" ; recovery_case.id "scope via CaseScopeQuery"
+- stores: "PII access log for any unmasked read; P4 MaskingPolicy"
+- functions: InteractionLedgerReader "the one read path (published)" ; LedgerReadService "scope, filter, query, mask, log" ; InteractionRepository "filtered, ordered query" ; InteractionsHandler (P3) "API-P3-014 + actor filter" ; CaseHistoryPanel "React SCR-03 history panel"
+- path: trigger "Open SCR-03 history" > check "Scope + filter valid?" > table "interaction ordered by time" > function "Mask summary by role" > store "PII log for unmasked fields" > out "InteractionPage on SCR-03"
+- rules: "BR1: order by time, then case_seq" ; "BR2: filter by channel, actor and date range" ; "BR4: mask by role" ; "BR6: nobody queries interaction directly"
+- risks: "from after to -> 422 (MSG-GEN-003)" ; "Case out of scope -> 404 (MSG-P4-003)" ; "Page size over 200 -> 422 (MSG-GEN-002)"
+- example: "RW-2026-000401 has 9 entries: 3 EFS calls, 2 visits by u-owner-04, 4 Workbench actions" ; "-> returned in time order" ; "Sources shown as 'EFS, INT-07' and 'WORKBENCH, P3 case and workflow'"
+
+### RWB-TE-001
+- file_stem: RWB TE 001 Recovery module folder and boundary test
+- title: Recovery module folder and boundary test
+- module: P2 Integration (technical enabler) | flag: none | status: READY "Ready for build" | theme: default
+- overview_label: Module boundary test
+- goal: Module packages plus a build-time ArchUnit test, so no module reaches another's internals
+- why: 19 modules stay separable. The build fails the moment a class imports another module's internals; E1-069 adds BND-6 so nobody reads public.* tables.
+- needs: (none) | unblocks: TE-002, TE-003, TE-011, TE-012, E1-069
+- triggers: BUILD "RecoveryBoundaryTest on every pull request" ; BUILD "Front-end rule no-collection-import" ; CALL "RecoveryAccessGuard on /api/recovery/v1/**"
+- ace: [] ; ace_note: "No ACE read. This story sets the rules; RWB-E1-069 adds BND-6 'read recovery.v_ace_*, never public.*' to this same test."
+- writes: (none)
+- reads: (none)
+- stores: "architecture/recovery-modules.yaml (module map); front-end src/modules/recovery; CI pipeline"
+- functions: recovery-modules.yaml "module, package, published packages" ; RecoveryBoundaryTest "ArchUnit rules BND-1..BND-5" ; ModuleMapLoader "fails on an unlisted package" ; Boundary fixtures "one breaking class per rule" ; RecoveryAccessGuard "common access check for the API"
+- path: trigger "Developer opens a pull request" > store "recovery-modules.yaml" > check "RecoveryBoundaryTest BND-1..6" > check "Breaks a rule?" > function "Fix via <module>.api or an event" > out "Build passes"
+- rules: "BND-1: the collection module only through its published packages" ; "BND-3: recovery modules meet only through published packages or events" ; "BND-4: a module uses only its own entities and repositories" ; "BND-5: HTTP, SFTP and file clients only in recovery.integration.adapter"
+- risks: "Import of a collection internal class -> build fails (BND-1)" ; "Using another module's entity -> build fails (BND-4)" ; "Endpoint called without the right -> 403 (MSG-P4-002)"
+- example: "recovery.casewf.internal.SampleService imports collection.internal.CollectorRepository -> BND-1 fails" ; "recovery.integration.internal imports recovery.decision.internal.DecisionLogRepository -> BND-3 fails" ; "Using recovery.decision.writer.DecisionLogWriter instead -> passes"
+
+### RWB-TE-002
+- file_stem: RWB TE 002 Code owners for the recovery module
+- title: Code owners for the recovery module
+- module: P2 Integration (technical enabler) | flag: none | status: READY "Ready for build" | theme: default
+- overview_label: CODEOWNERS + branch rule
+- goal: A CODEOWNERS file plus a branch rule make sure every recovery or common change is approved by its owning team
+- why: The recovery module lives in the shared ACE repository. Migrations and common code must be reviewed by the team that owns them.
+- needs: TE-001 | unblocks: (none)
+- triggers: BUILD "CodeOwnersValidation on every pull request" ; WHO "ACE admin sets the branch rule on main" ; WHO "Owners approve before merge"
+- ace: [] ; ace_note: "No ACE read. It protects the migration folder db/migration/recovery/, owned by the TechX recovery tech leads."
+- writes: (none)
+- reads: (none)
+- stores: ".github/CODEOWNERS; GitHub branch rule on main; pipeline"
+- functions: CODEOWNERS "path -> owning team, last match wins" ; CodeOwnersValidation "fails on missing owner or pattern" ; Branch rule on main "1 owner approval, stale dismissed"
+- path: trigger "Pull request opened" > store "CODEOWNERS: path -> team" > check "Validation: owners exist?" > function "Host requests owning teams" > check "Owner approved? (not author)" > out "Merge allowed"
+- rules: "BR1: recovery back end, test and migration paths -> @scb-ace/techx-recovery-tech-leads" ; "BR3: the common module -> @scb-ace/ace-team" ; "BR5: the last matching pattern wins" ; "BR6: author approval does not count; a new commit dismisses approvals"
+- risks: "Approval from a non-owner -> blocked ('Review required from code owners')" ; "Owner team not found -> validation fails ('owner {team} not found')" ; "New commit pushed -> approvals dismissed"
+- example: "PR touches recovery/casewf/internal/AllocationService.java and a common/ file" ; "-> needs @scb-ace/techx-recovery-tech-leads AND @scb-ace/ace-team" ; "Typo @scb-ace/recovery-leads-typo -> validation fails"
+
+### RWB-TE-003
+- file_stem: RWB TE 003 Types and contract tests from the API specification
+- title: Types and contract tests from the API specification
+- module: P2 Integration (technical enabler) | flag: none | status: READY "Ready for build" | theme: default
+- overview_label: OpenAPI types + contract tests
+- goal: Generate server interfaces and TS types from the OpenAPI file, with a contract and 403 test each
+- why: The API spec (79 operations) is the single source of truth. Code cannot drift from it, and every endpoint is proven to refuse the wrong role.
+- needs: TE-001 | unblocks: (none)
+- triggers: BUILD "Lint api/recovery-api.yaml" ; BUILD "Generate Spring interfaces + TS types" ; BUILD "RecoveryContractTest + AccessContractTest"
+- ace: [] ; ace_note: "No ACE read. Tests use an in-memory database and synthetic fixtures."
+- writes: (none)
+- reads: permission (seed) "role rights used by the 403 tests"
+- stores: "api/recovery-api.yaml (OpenAPI 3.1, base /api/recovery/v1, x-module, x-capability, x-first-release); build report"
+- functions: recovery-api rule set "lint: operationId, x-capability ..." ; Server generator config "recovery.generated.web / .model" ; Front-end generator script "types + client for ace-web" ; OperationCatalog "operation, release, capability" ; RecoveryContractTest "request + response vs spec" ; RecoveryAccessContractTest "wrong role -> 403 MSG-P4-002"
+- path: store "recovery-api.yaml" > check "Lint the spec" > function "Generate server + TS types" > check "Contract test per operation" > check "Wrong role -> 403?" > out "Report: passed / failed / pending"
+- rules: "BR1: the OpenAPI file is the only source of endpoints" ; "BR2: every operation has operationId, x-module, x-capability, x-first-release, Problem schema" ; "BR3: operations of the current release must be implemented and pass" ; "BR4: a wrong role gets 403 MSG-P4-002"
+- risks: "Response schema drift -> 'contract broken' naming the JSON path" ; "Undocumented status code -> test fails" ; "Endpoint skips its access check -> 'access not enforced'"
+- example: "getCasesCaseidTimers returns escalationLevel = 'two' -> fails at $[0].escalationLevel" ; "getAdminJobs with no controller -> 'has no implementation'" ; "postQueuesQueueidPlacements (E2) -> pending"
+
+### RWB-TE-004
+- file_stem: RWB TE 004 Masked data in SIT and UAT
+- title: Masked data in SIT and UAT
+- module: P1 Recovery data engine (technical enabler) | flag: rwb.dataengine.masked-copy | status: READY "Ready (names pre-ACE copy tables)" | theme: default
+- overview_label: Masked copy for SIT/UAT
+- goal: SIT and UAT tests run on realistic volumes using masked copies, never exposing a real customer
+- why: Testers need production-sized data with real balances and dates, but PDPA forbids real names and IDs. Any personal-looking value refuses the whole load.
+- needs: E1-065 | unblocks: (none)
+- triggers: WHO "RW-PLATADM starts the load for SIT or UAT" ; CALL "PII service drops masked extract + manifest" ; JOB "Masked copy pipeline stage (on request)"
+- ace: [] ; ace_note: "No recovery.v_ace_* read. Note: the story still names pre-alignment copy tables (party, loan_account); check against the ACE Data Tier Map when building."
+- writes: recovery schema (swap) "whole-schema swap from recovery_next" ; tools.masked_copy_load "load report and counts"
+- reads: sys_fields "is_personal columns to verify" ; masking rules table "mask version in force"
+- stores: "Per-environment intake container (masked extract + manifest); staging schema recovery_next; advisory lock; pipeline load report"
+- functions: MaskedCopyLoader "env guard, manifest, staging, swap" ; ManifestValidator "extract ID, mask version, totals" ; MaskingVerifier "Thai ID check digit, phone, email" ; LoadReportWriter "the load report" ; Masked copy stage "pipeline stage with a lock"
+- path: trigger "PII service drops extract" > check "Target SIT or UAT only" > check "Manifest + totals match" > check "No personal-looking values" > table "Load recovery_next, then swap" > out "Load report per product"
+- rules: "BR1: no production data in DEV; SIT and UAT get masked data only" ; "BR3: any personal value left -> the whole load is refused" ; "BR4: balances, dates and keys stay unmasked; totals match the manifest" ; "BR5: the same customer gets the same token everywhere"
+- risks: "Personal-looking value found -> refused (MSG-P1-002)" ; "Totals do not match the manifest -> refused (MSG-P1-002)" ; "Target is DEV or PROD -> refused (MSG-P1-002)"
+- example: "Extract PII-SIT-20261120 (business date 2026-11-19, MASK-2026.11): 28,119 accounts" ; "Mortgage 12,256 | HP 12,960 | SSME 2,903" ; "Loaded; counts and total_balance per product equal the manifest"
+
+### RWB-TE-005
+- file_stem: RWB TE 005 Rule table test harness
+- title: Rule table test harness
+- module: P3 Case and workflow (technical enabler) | flag: rwb.p3.rule-harness | status: RETIRED "Retired (D-RCV-36 T8) -> RWB-E1-073" | theme: default
+- overview_label: Rule table test harness
+- goal: Test every rule row against its own test case on load and in every build, just like code
+- why: Retired by D-RCV-36 T8 (rules move to Drools XLS packages); the new home is RWB-E1-073. Shown here so readers see what the story covered.
+- needs: E1-044 | unblocks: E1-048
+- triggers: LOAD "POST /admin/rule-versions (runs the harness)" ; BUILD "Gradle task ruleTests per rule ID" ; WHO "RW-COE writes the Tests sheet"
+- ace: [] ; ace_note: "No ACE read. Each test builds a synthetic case file from facts."
+- writes: rule_test_case "one test case per rule row"
+- reads: rule_row "route set, from state, event, condition, owner"
+- stores: "Rule files recovery/src/test/resources/rules/*.xlsx"
+- functions: RuleTableHarnessImpl "runs each test via the evaluator" ; CaseFileFixtureBuilder "synthetic case from facts" ; TestsSheetReader "reads the Tests sheet" ; RuleTableHarnessTest "JUnit 5 test per rule ID" ; RuleTestCaseRepository "rule_test_case rows"
+- path: trigger "Load rule version + Tests sheet" > function "Build synthetic case per test" > check "Exactly one row hits?" > check "To state, owner, timer match?" > table "Version VALIDATED or FAILED" > out "Same tests in every build"
+- rules: "BR1: one test case per rule row" ; "BR2: pass = exactly one hit, the named row, and expected values" ; "BR3: any failure -> FAILED; it cannot be approved" ; "BR5: synthetic facts only"
+- risks: "Mismatch -> FAILED (MSG-P3-014)" ; "Rule row without a test -> FAILED (MSG-P3-014)" ; "Two rows hit -> fail naming both (MSG-P3-014)"
+- example: "Restructure route set RES-2026.11 (R-RES-01..37)" ; "-> 37 tests run, all pass" ; "-> state VALIDATED"
+
+### RWB-TE-006
+- file_stem: RWB TE 006 Outbox and retry for outbound work
+- title: Outbox and retry for outbound work
+- module: P2 Integration (technical enabler) | flag: rwb.integration.outbox | status: READY "Ready for build" | theme: default
+- overview_label: Outbox + retry
+- goal: Events and outbound work are written in the same transaction as the change, then delivered in order with retry
+- why: Nothing is lost and nothing is sent for a change that rolled back. Every event EV-01..EV-28 and every WIN dispatch goes through this one outbox.
+- needs: E1-044, E1-027, E1-007 | unblocks: E1-067 and every event-publishing story
+- triggers: CALL "OutboxWriter.publish inside the change's tx" ; JOB "JOB-11 Outbox sender, every minute" ; API "POST /admin/outbox/deliveries/{id}/resend"
+- ace: [] ; ace_note: "No ACE read. The outbox is Workbench plumbing; consumers include win-dispatch, the ledger and reporting."
+- writes: outbox_event "event + case_seq, same transaction as the change" ; outbox_delivery "one per consumer: PENDING, DELIVERED, EXCEPTION" ; task "RESOLVE_OUTBOX_DELIVERY at the retry limit (P3)" ; recovery_case.route_state "SYSTEM_UNAVAILABLE etc."
+- reads: recovery_case "case for case events"
+- stores: "Consumer idempotency store (IdempotencyGuard, E1-007); ACE audit log on resend; operations alert channel"
+- functions: OutboxWriter "event + deliveries in caller tx" ; OutboxRepository "skip-locked due rows, case order" ; OutboxSender "deliver, retry, exception" ; ConsumerCatalog "consumers + retry settings" ; OutboxSenderEventStep "JOB-11 event step" ; OutboxAdminController "list + resend deliveries"
+- path: trigger "Service changes a case" > table "outbox_event + deliveries (same tx)" > function "JOB-11 picks lowest seq per case" > check "Consumer OK? else retry 1/5/15 min" > table "DELIVERED or EXCEPTION + task" > out "Consumer got it exactly once"
+- rules: "BR1: the event and the change commit in the same transaction" ; "BR4: per-case order is kept for each consumer" ; "BR5: retry, then the exception queue with a task" ; "BR8: no decision log entry, no move to exception"
+- risks: "Resend of a delivery not in EXCEPTION -> 409 (MSG-P2-022)" ; "Case-less event over the limit -> EXCEPTION + alert (MSG-P2-001)" ; "Decision log unwritable at the limit -> stays RETRYING (MSG-P7-003)"
+- example: "Notice NT-SYN-0601 on RW-2026-000601 approved, commit at 2026-12-14 10:00:00" ; "-> one WIN_DISPATCH event, one delivery for consumer 'win-dispatch'" ; "Retries at 1, 5 and 15 minutes if WIN does not answer"
+
+### RWB-TE-007
+- file_stem: RWB TE 007 Scheduled jobs on Quartz
+- title: Scheduled jobs on Quartz
+- module: P3 Case and workflow (technical enabler) | flag: rwb.p3.quartz-jobs | status: READY "Ready for build" | theme: default
+- overview_label: Quartz scheduled jobs
+- goal: Timer check, allocation and reconciliation run once per business date, on time and visibly
+- why: Two ACE instances share one Quartz store. A cluster lock gives one run per date; a 07:00 watcher alerts if allocation is late.
+- needs: E1-044, E1-056 | unblocks: E1-020, E1-011, E1-028 (hosts their job bodies)
+- triggers: EVENT "LoadCompleted (EV-26) + JOB-02 success" ; JOB "JOB-03 and JOB-04 after JOB-02" ; JOB "JOB-05 timer check, cron every 5 min" ; JOB "DeadlineWatcher at 07:00"
+- ace: [] ; ace_note: "No recovery.v_ace_* read. The trigger is the ACE batch event (EV-26) raised by E1-015; Quartz tables are shared with ACE."
+- writes: job run log (P1) "start, end, SUCCEEDED / FAILED, counts" ; QRTZ_* (ACE common) "scheduler state; no new qrtz table"
+- reads: job run log "already succeeded for date D?"
+- stores: "Clustered Quartz job store (LocalDataSourceJobStore, PostgreSQLDelegate); run books JOB-03.md, JOB-04.md, JOB-05.md; operations alert channel"
+- functions: BusinessDateJobRunner "one instance, skip, dependency, log" ; DailyJobTrigger "EV-26 + JOB-02 -> JOB-03, JOB-04" ; CatchUpOnStart "missed dates in order (max 5)" ; DeadlineWatcher "07:00 check of JOB-03" ; RecoveryJobRegistry "triggers + misfire rules" ; RunBookCheck "each job has a 6-heading run book"
+- path: trigger "EV-26 + JOB-02 succeeded" > check "Cluster lock: one instance" > check "Already done for date D?" > function "Run JOB-03 / JOB-04" > table "Job run log SUCCEEDED + counts" > out "07:00 watcher alerts if late"
+- rules: "BR1: once per business date, on one instance" ; "BR2: JOB-03 and JOB-04 run only after JOB-02" ; "BR3: JOB-03 must finish by 07:00 or an alert is raised" ; "BR5: catch-up in date order, up to the limit (5 dates)"
+- risks: "More missed dates than the limit -> alert, no automatic catch-up (MSG-P3-031)" ; "JOB-02 not done -> WAITING (MSG-P3-031)" ; "JOB-03 late at 07:00 -> alert within 15 minutes (MSG-P3-031)"
+- example: "Instances ACE-1 and ACE-2" ; "COLLINS load for 2026-12-02 passed at 05:20, JOB-02 succeeded at 05:50" ; "-> JOB-03 runs once on one instance and logs SUCCEEDED with case counts"
+
+### RWB-TE-008
+- file_stem: RWB TE 008 Decision log hash chain check
+- title: Decision log hash chain check
+- module: P7 Decision center and log (technical enabler) | flag: rwb.decision.hash-check | status: READY "Ready for build" | theme: default
+- overview_label: Nightly hash chain check
+- goal: Recompute the decision-log hash chain every night, so any tampering is reported to Compliance the same day
+- why: Append-only is enforced by the database (E1-008); this job proves it every night. A break names the first bad entry and opens an incident.
+- needs: E1-008, TE-007 | unblocks: (none)
+- triggers: JOB "JOB-14 Hash chain check, cron 02:00" ; GATE "Waits for JOB-13 (decision log copy), by 04:00" ; API "POST /admin/jobs/{jobId}/rerun"
+- ace: [] ; ace_note: "No ACE read. It reads only the Workbench decision log."
+- writes: (job run record) "lastSeq, lastHash, result, breakSeq"
+- reads: decision_log_entry "chain_seq, entry_hash, prev_hash (all rows)"
+- stores: "ACE job run record; ACE notification path; incident; Quartz"
+- functions: HashChainCheckJob "no concurrent run; waits for JOB-13" ; HashChainVerifier "recompute 1,000 at a time" ; ChainCheckReporter "MSG-P7-007 / 008 / 013" ; JobRunRecorder "writes the run record"
+- path: trigger "JOB-14 at 02:00" > check "JOB-13 finished? (until 04:00)" > table "decision_log_entry 1..max seq" > function "Recompute every hash" > check "Any mismatch?" > out "INTACT or BROKEN + incident"
+- rules: "BR1: a nightly check with a same-day report" ; "BR3: covers chain_seq 1 to the maximum at the start of the run" ; "BR4: runs after JOB-13, starting by 04:00" ; "BR6: one active run; a rerun is a new record"
+- risks: "Hash mismatch -> BROKEN + incident to Compliance (MSG-P7-008)" ; "Run error -> FAILED (MSG-P7-013)" ; "Empty log -> INTACT with count 0 (MSG-P7-007)"
+- example: "48,210 entries; JOB-13 ended 01:40 on 3 Dec 2026" ; "-> INTACT, last chain_seq 48,210" ; "If entry 30,005 were tampered -> BROKEN at 30,005"
+
+### RWB-TE-011
+- file_stem: RWB TE 011 PDPA lint for code tests and logs
+- title: PDPA lint for code, tests and logs
+- module: P2 Integration (technical enabler) | flag: none | status: READY "Ready (names pre-ACE party tables)" | theme: default
+- overview_label: PDPA lint
+- goal: Fail the build when personal data appears in code, logs, exceptions or fixtures
+- why: PDPA leaks usually start in a log line or a test fixture. The rules are generated from the data dictionary, and the lint never prints the value it found.
+- needs: TE-001 | unblocks: (none)
+- triggers: BUILD "PdpaLintStep on every PR and main build" ; BUILD "RuleGenerator rebuilds pdpa-rules.yaml"
+- ace: [] ; ace_note: "No runtime ACE read. Personal fields come from sys_fields and the API spec; note the story still names pre-alignment party / contact_point fields."
+- writes: (none)
+- reads: sys_fields "is_personal seed (definitions only)" ; API spec "x-personal-data markers"
+- stores: "pdpa-rules.yaml (generated); pdpa-allow.yaml (owner, reason, expiry); CI pipeline"
+- functions: PersonalFieldReader "personal fields from seed + spec" ; RuleGenerator "writes pdpa-rules.yaml" ; CheckDigitMatcher "valid Thai national ID check" ; PdpaLintStep "scan; print rule, file, line" ; pdpa-allow.yaml "allow list with expiry"
+- path: table "sys_fields.is_personal" > function "RuleGenerator -> pdpa-rules.yaml" > check "Scan logs, exceptions, fixtures" > check "Allow-list entry valid?" > out "Build fails: rule, file, line (no value)"
+- rules: "BR1: the personal field list comes from the dictionary" ; "BR3: fixtures use 'SYN-' values only" ; "BR6: an allow entry needs an owner, a reason and an unexpired date" ; "BR7: never print the value found"
+- risks: "A log writes a personal field -> PDPA-LOG-FIELD" ; "A fixture holds a valid Thai ID -> PDPA-FIXTURE-ID" ; "Expired allow entry -> build fails"
+- example: "recovery.casewf.internal.SampleService logs party.getFirstName()" ; "-> build fails with PDPA-LOG-FIELD naming first_name" ; "The value itself is not printed"
+
+### RWB-TE-012
+- file_stem: RWB TE 012 Document storage containers
+- title: Document storage containers
+- module: P5 Document hub (technical enabler) | flag: rwb.dochub.storage-containers | status: READY "Ready for build" | theme: default
+- overview_label: Blob containers (write-once)
+- goal: Containers reached only by managed identity, with a write-once legal container
+- why: Court notices and deeds are evidence. The legal container is immutable for 3,650 days and locked in PROD; no keys or SAS tokens exist.
+- needs: TE-001 | unblocks: E1-024, E1-041, E1-049, E1-057, E1-017
+- triggers: WHO "RW-PLATADM applies the storage template" ; CALL "DocumentStore writes via DocumentContainers" ; CALL "Startup readiness check"
+- ace: [] ; ace_note: "No ACE read. Containers hold Workbench documents; the document table holds the storage_ref."
+- writes: (blobs) "{container}/{caseId}/{documentId}/v{n}"
+- reads: document "storage_ref, write_once, doc_version"
+- stores: "Azure storage account (private endpoint, no keys or SAS): rwb-intake, rwb-docs (versioning, 30-day soft delete), rwb-docs-legal (immutable 3,650 days), rwb-quarantine"
+- functions: Storage infrastructure template "account, 4 containers, policies" ; DocumentContainers "clients + readiness (published)" ; DocumentContainersConfig "managed identity only, 10 s timeout" ; StorageReadinessIndicator "all 4 exist + policy set" ; StorageErrorMapper "immutable -> WriteOnceViolation" ; ContentHashGuard "same content -> existing blob"
+- path: trigger "Admin applies the template" > store "4 containers + policies + roles" > check "Readiness: all present?" > function "DocumentStore writes v{n}" > check "Overwrite legal blob?" > out "Refused 409 MSG-P5-002 + audit"
+- rules: "BR1: write-once refuses overwrite and delete for the retention period" ; "BR3: access by managed identity only" ; "BR5: ready only if all 4 containers exist and the policy is set" ; "BR7: identical content returns the existing blob"
+- risks: "Overwrite or delete of a legal blob -> refused (MSG-P5-002)" ; "Container or policy missing -> not ready, writes refused (MSG-GEN-006)" ; "Storage timeout -> 503 (MSG-GEN-006)"
+- example: "DOC-0701 at rwb-docs-legal/RW-2026-000701/DOC-0701/v1, hash H701" ; "Overwrite attempt -> BlobImmutableDueToPolicy, hash unchanged" ; "-> the store returns 409 MSG-P5-002"
+
+### RWB-TE-013
+- file_stem: RWB TE 013 Agent runtime client with fallback
+- title: Agent runtime client with fallback
+- module: P10 Agent runtime (technical enabler) | flag: rwb.agent.client | status: READY "Ready for build" | theme: ai
+- overview_label: Agent client + fallback
+- goal: One client calls an agent safely: the rule result applies, fallback is recorded, log first
+- why: Agents must never block or override a case step. In SHADOW or L1 the rule decides; the agent only adds a recommendation, within 60 seconds.
+- needs: TE-007, E1-058, E1-027 | unblocks: E1-059, E1-062
+- triggers: CALL "AgentStepClient.runStep(case, ruleResult)" ; API "GET /api/recovery/v1/admin/agent-runs"
+- ace: [] ; ace_note: "No ACE read. Inputs are the case, the rule result already computed, and the agent policy in force."
+- writes: decision_log_entry "via P7 writer: agent_version, recommendation, fallback" ; agent_run.decision_log_id "links the run to the decision"
+- reads: recovery_case "id, route_state" ; agent_policy "autonomy_mode, timeout_seconds, status" ; agent_run "the run result"
+- stores: "Decision log; ACE flag service"
+- functions: AgentStepClient "the only way to call an agent" ; AgentStepClientImpl "mode, timed call, fallback, log" ; AutonomyModeResolver "OFF, SHADOW or L1 in force" ; DecisionLogMapper "builds the P7 entry" ; AgentRunRepository "sets decision_log_id"
+- path: trigger "Case step evaluates its rule" > function "AutonomyModeResolver: OFF / SHADOW / L1" > ai "Orchestrator call, 60 s limit" > check "Timeout or guardrail -> fallback" > table "decision_log_entry written" > out "Step acts on the rule result"
+- rules: "BR1: the rule result always applies in SHADOW and L1" ; "BR2: a timeout records a fallback" ; "BR3: the step acts only after the log entry is written" ; "BR4: agent_version format <agent>@<policy>/<prompt>"
+- risks: "No answer in 60 s -> fallback TIMED_OUT" ; "No approved policy -> NO_POLICY fallback" ; "Decision log write fails -> step does not act, EXCEPTION_QUEUE (MSG-P7-003)"
+- example: "INTAKE P1/PR1 in SHADOW on RW-2026-000201; rule R-UNI-32 v2026.11 -> RESUME_STATE" ; "Answer arrives in 2,000 ms" ; "Log entry: agent_version 'INTAKE@P1/PR1', recommendation null, fallback false"

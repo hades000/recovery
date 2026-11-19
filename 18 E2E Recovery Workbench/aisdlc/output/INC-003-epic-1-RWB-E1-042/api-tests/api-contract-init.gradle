@@ -1,0 +1,37 @@
+// RWB-E1-042 API Tester: adds an external API-test source set so the suite runs against the
+// story worktree (run2 at tip 74e4ccb, run3 at tip 9056ed2) without changing any file in the repository or its build script.
+//
+// Usage (from the worktree's backend/ directory):
+//   .\gradlew.bat --init-script <this file> apiTest
+//
+// The source lives under the API Tester stage folder, not under backend/src/test.
+
+def apiTestSource = new File(
+        'C:/Users/SahilMore/Downloads/Recovery Workbench SharePoint Set v14/18 E2E Recovery Workbench/aisdlc/output/INC-003-epic-1-RWB-E1-042/api-tests/apitest-source')
+
+gradle.projectsEvaluated {
+    def project = gradle.rootProject
+    def sourceSets = project.extensions.getByType(org.gradle.api.tasks.SourceSetContainer)
+    def test = sourceSets.getByName('test')
+
+    def apiTest = sourceSets.create('apiTest')
+    apiTest.java.srcDir(apiTestSource)
+    apiTest.compileClasspath = project.files(sourceSets.getByName('main').output, test.output,
+            project.configurations.getByName('testRuntimeClasspath'))
+    apiTest.runtimeClasspath = apiTest.output + apiTest.compileClasspath
+
+    project.tasks.register('apiTest', org.gradle.api.tasks.testing.Test) { t ->
+        t.group = 'verification'
+        t.description = 'RWB-E1-042 API contract tests from an external source set.'
+        t.testClassesDirs = apiTest.output.classesDirs
+        t.classpath = apiTest.runtimeClasspath
+        t.useJUnitPlatform()
+        t.systemProperty('user.timezone', 'Asia/Bangkok')
+        t.reports.junitXml.required = true
+        t.reports.html.required = true
+        t.testLogging {
+            events('passed', 'failed', 'skipped')
+            exceptionFormat = 'full'
+        }
+    }
+}

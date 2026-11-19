@@ -1,0 +1,334 @@
+<!-- source: 06 Data/Recovery Workbench Conceptual Data Model v5.xlsx -->
+<!-- converted: 2026-11-04 from XLSX -->
+
+> **Source:** `06 Data/Recovery Workbench Conceptual Data Model v5.xlsx`  
+> **Converted from:** XLSX
+
+## Subject areas
+
+| Subject areas |  |  |  |  |
+|---|---|---|---|---|
+| 17 subject areas. Each entity belongs to one subject area. The entity count is calculated from the Entities tab. |  |  |  |  |
+| Subject area | What it holds | Entities | Entities in it | Data products |
+| Case | The recovery case, its owner, its status and route, and the accounts and parties linked to it. |  | Recovery case, Case account, Case party, Deviation, Case entry exclusion | DP03 |
+| Work management | Queues, assignments, tasks and timers that move the case and hold it to service levels. |  | Queue, Assignment, Task, Timer, Queue member | DP03 |
+| Party | Customers, guarantors, co-borrowers and heirs, their role on the case and how to reach them. |  | Party, Contact point, Party product | DP02 |
+| Account and arrears | Loan accounts with balances, arrears, days past due, classification and payments. |  | Loan account, Account payment | DP01 |
+| Collateral and asset | Collateral securing the accounts, its valuation, and assets the bank holds after repossession or transfer. |  | Collateral, Account collateral, Valuation, Asset | DP06 |
+| Treatment | Restructures, settlements, deeds in lieu, guarantee claims and their terms, approvals and outcomes. |  | Treatment, Guarantee claim, Dp treatment, Dp guarantee claim | DP04 |
+| Legal | Notices, lawsuits, hearings, judgments and enforcement. |  | Legal action, Notice, Hearing | DP07 |
+| Partner | Law firms, agencies, valuers, auction vendors and buyers, and the work placed with them. |  | Partner, Partner instruction | DP08 |
+| Disposal and debt sale | Asset listings and bids, debt sale lots, buyers and awards. |  | Listing, Asset sale, Debt sale lot, Debt sale account | DP06, DP09 |
+| Interaction | Every contact, letter, promise and hand-over on the case, in order. |  | Interaction, Collections history | DP05 |
+| Document | Documents held against the case, the fields extracted from them, and custody of originals. |  | Document, Document field, Document custody, Case document check, Document intake, Document text, Retention action, Signature request | DP10 |
+| Decision and control | One log entry per decision, with versions, inputs, recommendation, approval, actions and outcome. |  | Decision log entry, Score, Approval | DP12, DP11 |
+| Money and closure | Payments and proceeds matched to the case, write-offs and recovery after charge-off. |  | Proceeds, Write-off | DP13 |
+| Reference and access | Rules, limits, lists of values, roles, permissions and templates, all versioned. |  | Rule, Delegation limit, List value, Role, Permission, Template, Data product, Data product access, Sys objects, Sys fields, Sys field version, Retention rule, Efs ledger outcome, Parameter catalog, Parameter value, Reference version, Reference row, Rule test case, Masking rule, Role conflict, Partner user, Document type, Document checklist item, Document hub parameter, Merge field, Payment match rule | DP14 |
+| Loads and operations | Loads, interfaces, data quality, jobs, feature flags, the outbox and idempotency records that run the Workbench. |  | Data product load, Data contract, Load run, Dq exception, Dq rule, Source field map, Source code map, Tracker inventory, Tracker row, Reconciliation result, Lake copy watermark, Interface config, Interface run, Interface signoff, Outbound item, Processed event, Idempotency key, Outbox event, Outbox delivery, Feature flag, Feature flag change, Job catalog | OPS |
+| Agent runtime | Agent policies, prompts, runs, labeled samples, evaluations, feedback and alerts. |  | Agent policy, Agent prompt, Agent run, Agent sample, Agent evaluation run, Agent evaluation, Agent feedback, Agent alert | AGT |
+| Reporting | Measure definitions, the daily case list and the measure snapshots published to Power BI. |  | Case list row, Queue measure, Measure definition, Measure snapshot, Measure publish | DP03, RPT |
+| Total |  |  |  |  |
+
+## Data products
+
+| Data products |  |  |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|---|---|
+| 14 data products. Each has one system of record, one way in and one freshness. |  |  |  |  |  |  |  |  |  |
+| ID | Data product | What it holds | System of record | How it reaches the Workbench | Freshness | In ACE today | Decisions it serves | Main users | Entities |
+| DP01 | Account and arrears | Loan accounts with balances, interest, fees, days past due, bucket, classification, restructure flag and payments | Core bank (ALS) | COLLINS daily batch into the ACE database | End of day; in the Workbench the next morning | Yes: loan information | D6 entry, D6 to D9 | Case owner, restructuring officer, write-off team member |  |
+| DP02 | Customer and party | Customers, guarantors, co-borrowers and heirs, tokenized identifiers, contact points, consent and flags for vulnerability, death and bankruptcy | SCBPDM and core bank | COLLINS daily batch into the ACE database | End of day; in the Workbench the next morning | Yes: customer profile and customer information | All decisions | Case owner, hardship and vulnerability specialist, Compliance and PDPA officer |  |
+| DP03 | Case and ownership | The case, its accounts and parties, status, stage, route, owner, queue, tasks, timers and deviations | Recovery Workbench | Held in the Workbench | As it changes | New in the Workbench | All decisions | Case owner, team manager, capacity and workforce planner |  |
+| DP04 | Treatment and offers | Restructures, settlements, deeds in lieu, buy-backs and guarantee claims, with terms, approval level and outcome | Recovery Workbench; restructure plans in ACE | Held in the Workbench | As it changes | Partly: restructure calculation in ACE | D5, D6 | Restructuring officer, guarantee officer, approvers |  |
+| DP05 | Contact and promises | Every contact, letter, promise and hand-over on the case, in order, including the collections history from EFS | EFS before day 90; the Workbench after | COLLINS daily batch from EFS; held in the Workbench | End of day for EFS history; as it changes after | Partly: collection activity log | D6 entry, X6 | Case owner, phone and field collector, Conduct and QA officer |  |
+| DP06 | Collateral and assets | Collateral, appraisals, assets held after repossession or transfer, listings and sale results | CCMS, SVAF, AMIS, RPS | File load until a batch feed exists | Weekly or monthly today | Partly: SVAF by manual file; NPA not available | D6, D8 | NPA and asset manager, sale officer, Head of NPA |  |
+| DP07 | Legal events and cases | Notices and proof of delivery, lawsuits, court case numbers, hearings, judgments and enforcement | LIT for court records; the Workbench for instructions | COLLINS daily batch for litigation status; held in the Workbench | End of day for LIT status | Partly: litigation status | D7 | Litigation officer, enforcement owner, law firm user |  |
+| DP08 | Partner performance | Partners on the panel, work placed with each, results, fees and scorecards | Recovery Workbench | Held in the Workbench; partner results through the partner portal | As it changes | New in the Workbench | D7, D8 | Partner and agency manager, Head of Litigation |  |
+| DP09 | Debt sale | Debt sale lots, the accounts in each lot, buyers, prices, approval and put-backs | Recovery Workbench | Held in the Workbench | As it changes | No: debt sale data not available | D8.4 | Debt sale officer, Head of Asset Liquidity |  |
+| DP10 | Documents and extracted fields | Documents against the case, the fields read from them, retention class and custody of originals | Recovery Workbench document hub | Held in the Workbench | As it changes | New in the Workbench | All decisions | Case owner, Credit Administration officer, Legal counsel |  |
+| DP11 | Scores and route economics | Risk scores, expected return by route, estimated sale price and sale success rate, restructure scheme suggestions | COLLINS | COLLINS daily batch into the ACE database | End of day; monthly for some models | Yes: COLLINS scores | D5, D6, D8, D9 | Case owner, Risk and model risk officer, center of excellence analyst |  |
+| DP12 | Decision log | One entry per decision with the rule, model and agent versions, inputs, recommendation, approval, actions and outcome | Recovery Workbench | Held in the Workbench | As it changes | New in the Workbench | Audit, testing, learning | Internal audit, Risk and model risk officer, center of excellence analyst |  |
+| DP13 | Money and closure | Payments and proceeds matched to the case, write-off postings and recovery after charge-off | Core bank (ALS) and GL | COLLINS daily batch for payments; file load for GL | End of day for payments; monthly for GL | Partly: payments in loan information | D6 to D9 | Write-off team member, Finance and CFO delegate |  |
+| DP14 | Reference data | Rules, approval limits, lists of values, roles, permissions and letter templates, each versioned | Recovery Workbench | Held in the Workbench | By versioned load | New in the Workbench | All decisions | Reference data administrator, data steward and data product owner |  |
+| Total |  |  |  |  |  |  |  |  |  |
+
+## Entities
+
+| Entities |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|
+| 108 entities, each with its subject area, data product, system of record and what it takes from ACE. |  |  |  |  |  |  |
+| Entity | Subject area | Data product | What it is | System of record | ACE | Fields |
+| Recovery case | Case | DP03 Case and ownership | One recovery case per customer per product, from 90 days past due to close. | Workbench | Extend ACE Case | 33 |
+| Case account | Case | DP03 Case and ownership | Links each loan account to the case it is recovered under. | Workbench | New | 6 |
+| Case party | Case | DP03 Case and ownership | The role each party plays on a case. | Workbench | New | 6 |
+| Deviation | Case | DP03 Case and ownership | A deviation X1 to X7 raised on a case. | Workbench | New | 10 |
+| Queue | Work management | DP03 Case and ownership | A queue of work belonging to one team and one role. | Workbench | Extend ACE work queue | 10 |
+| Assignment | Work management | DP03 Case and ownership | Who holds a case or a task and from when. | Workbench | Reuse ACE Assignee | 10 |
+| Task | Work management | DP03 Case and ownership | A unit of work on a case: a CMMN human, customer, partner or decision task. | Workbench | New | 10 |
+| Timer | Work management | DP03 Case and ownership | A running clock on a case: a service level, a legal period or an offer validity. | Workbench | New | 14 |
+| Party | Party | DP02 Customer and party | A person or company with a role on one or more cases. | SCBPDM via COLLINS | Extend ACE Customer | 13 |
+| Contact point | Party | DP02 Customer and party | A way to reach a party, with its consent and whether it works. | Workbench | New | 8 |
+| Loan account | Account and arrears | DP01 Account and arrears | A loan account in the core bank. | Core bank (ALS) via COLLINS | Reuse ACE Account | 24 |
+| Account payment | Account and arrears | DP01 Account and arrears | A payment posted to a loan account. | Core bank (ALS) via COLLINS | Reuse ACE Payment | 7 |
+| Collateral | Collateral and asset | DP06 Collateral and assets | Property or vehicle securing one or more accounts. | CCMS | Extend ACE Collateral | 13 |
+| Account collateral | Collateral and asset | DP06 Collateral and assets | Which collateral secures which account. | Workbench | New | 4 |
+| Valuation | Collateral and asset | DP06 Collateral and assets | An appraisal of collateral or an asset. | SVAF | New | 12 |
+| Asset | Collateral and asset | DP06 Collateral and assets | An asset the bank holds after repossession, deed in lieu or auction purchase. | AMIS for property; RPS for vehicles | Extend ACE Asset | 15 |
+| Treatment | Treatment | DP04 Treatment and offers | A resolution put to the customer or carried out on the case, with its terms and outcome. | Workbench | New; restructure plans reuse ACE TDRCalculation | 25 |
+| Guarantee claim | Treatment | DP04 Treatment and offers | A claim against a Thai Credit Guarantee Corporation guarantee or an insurer. | Workbench | New | 8 |
+| Legal action | Legal | DP07 Legal events and cases | A notice, lawsuit, appeal, enforcement or bankruptcy action on a case. | LIT for court records; Workbench for instructions | New | 14 |
+| Notice | Legal | DP07 Legal events and cases | A demand, recall or statutory notice and its proof of delivery. | Workbench; WIN for dispatch | New | 14 |
+| Hearing | Legal | DP07 Legal events and cases | A court hearing on a legal action. | LIT | New | 6 |
+| Partner | Partner | DP08 Partner performance | An outside firm the bank places work with. | Workbench | New | 7 |
+| Partner instruction | Partner | DP08 Partner performance | Work placed with a partner on a case. | Workbench | New | 9 |
+| Listing | Disposal and debt sale | DP06 Collateral and assets | An asset offered for sale, with its prices and rounds. | Workbench | New | 8 |
+| Asset sale | Disposal and debt sale | DP06 Collateral and assets | The sale of an asset. | AMIS | New | 11 |
+| Debt sale lot | Disposal and debt sale | DP09 Debt sale | A lot of accounts offered to debt buyers. | Workbench | New | 11 |
+| Debt sale account | Disposal and debt sale | DP09 Debt sale | An account in a debt sale lot. | Workbench | New | 7 |
+| Interaction | Interaction | DP05 Contact and promises | One entry in the interaction ledger: a contact, letter, promise, payment or hand-over. | Workbench | Extend ACE activity log | 29 |
+| Document | Document | DP10 Documents and extracted fields | A document held against a case. | Workbench document hub | Extend ACE Attachment | 20 |
+| Document field | Document | DP10 Documents and extracted fields | A field read from a document. | Workbench document hub | New | 8 |
+| Document custody | Document | DP10 Documents and extracted fields | Each movement of an original document. | Workbench | New | 7 |
+| Decision log entry | Decision and control | DP12 Decision log | One record per decision. Append only and hash chained. | Workbench | New | 22 |
+| Score | Decision and control | DP11 Scores and route economics | A score or estimate COLLINS returns for an account or case. | COLLINS | Reuse ACE | 9 |
+| Proceeds | Money and closure | DP13 Money and closure | Money received on a case and what it was matched to. | Workbench | New | 9 |
+| Write-off | Money and closure | DP13 Money and closure | A write-off of the balance on a case. | GL for posting; Workbench for the decision | New | 11 |
+| Rule | Reference and access | DP14 Reference data | One versioned routing rule or sentry. | Workbench | New | 18 |
+| Delegation limit | Reference and access | DP14 Reference data | An approval limit by decision, level, product and amount. | Workbench | New | 19 |
+| List value | Reference and access | DP14 Reference data | A value in a list of values. | Workbench | New | 7 |
+| Role | Reference and access | DP14 Reference data | A Workbench role, held as data. | Workbench | Extend ACE RBAC | 6 |
+| Permission | Reference and access | DP14 Reference data | What a role may do in one capability area. | Workbench | Extend ACE RBAC | 5 |
+| Template | Reference and access | DP14 Reference data | A letter or notice template. | Workbench | New | 14 |
+| Data product | Reference and access | DP14 Reference data | One of the 14 data products, with its single system of record, owner and refresh cycle. | Workbench | New | 10 |
+| Data product access | Reference and access | DP14 Reference data | Which role may read which data product, by version. | Workbench | New | 7 |
+| Data product load | Loads and operations | OPS Loads and operations | The freshness stamp of a data product for one business date. | Workbench | New | 9 |
+| Data contract | Loads and operations | OPS Loads and operations | A versioned data contract with one source system, confirmed by its system owner. | Workbench | New | 11 |
+| Sys objects | Reference and access | DP14 Reference data | The metadata registry of entities: one row per object in the data dictionary. | Workbench | New | 7 |
+| Sys fields | Reference and access | DP14 Reference data | The metadata registry of fields: the data dictionary held as data. | Workbench | New | 17 |
+| Sys field version | Reference and access | DP14 Reference data | Each version of a field definition, kept when the definition changes. | Workbench | New | 5 |
+| Load run | Loads and operations | OPS Loads and operations | One run of a data load or job step, with its checks and row counts. | Workbench | New | 20 |
+| Dq exception | Loads and operations | OPS Loads and operations | A record a load check or data quality rule held, until it passes again. | Workbench | New | 11 |
+| Dq rule | Loads and operations | OPS Loads and operations | A versioned data quality row rule run on a P1 table. | Workbench | New | 12 |
+| Source field map | Loads and operations | OPS Loads and operations | How a source field maps to a Workbench field, by interface and mapping version. | Workbench | New | 11 |
+| Source code map | Loads and operations | OPS Loads and operations | How a source code maps to a Workbench list value, by interface and map version. | Workbench | New | 8 |
+| Tracker inventory | Loads and operations | OPS Loads and operations | A team's Excel or SharePoint tracker, its decision and its load, sign-off and retirement. | Workbench | New | 26 |
+| Tracker row | Loads and operations | OPS Loads and operations | One row loaded from a tracker file, with its non-personal fields. | Workbench | New | 9 |
+| Case list row | Reporting | DP03 Case and ownership | One row of the daily case list per case account and business date, published to Power BI. | Workbench | New | 19 |
+| Collections history | Interaction | DP05 Contact and promises | An EFS contact or promise on an account, loaded from the COLLINS daily batch. | Workbench | New | 10 |
+| Reconciliation result | Loads and operations | OPS Loads and operations | The daily reconciliation of the case list to ALS by product group. | Workbench | New | 12 |
+| Lake copy watermark | Loads and operations | OPS Loads and operations | How far a copy to the data lake has reached, for example the decision log copy. | Workbench | New | 6 |
+| Retention rule | Reference and access | DP14 Reference data | How long rows of a table or a retention class are kept and what happens at the end, by version. | Workbench | New | 12 |
+| Dp treatment | Treatment | DP04 Treatment and offers | The copy of each treatment for a business date in the DP04 data product. | Workbench | New | 18 |
+| Dp guarantee claim | Treatment | DP04 Treatment and offers | The copy of each guarantee claim for a business date in the DP04 data product. | Workbench | New | 10 |
+| Interface config | Loads and operations | OPS Loads and operations | The settings of one file interface, by version. | Workbench | New | 13 |
+| Interface run | Loads and operations | OPS Loads and operations | One inbound file received by the adapter and the result of its file checks. | Workbench | New | 12 |
+| Interface signoff | Loads and operations | OPS Loads and operations | The data steward's sign-off that an interface no longer needs manual handling. | Workbench | New | 7 |
+| Outbound item | Loads and operations | OPS Loads and operations | One outbound file waiting to be sent, sent or in the exception queue. | Workbench | New | 10 |
+| Processed event | Loads and operations | OPS Loads and operations | An event or work key a consumer has already processed, so a repeat is ignored and counted. | Workbench | New | 6 |
+| Idempotency key | Loads and operations | OPS Loads and operations | The stored response of an API request sent with an Idempotency-Key header, kept 24 hours. | Workbench | New | 5 |
+| Outbox event | Loads and operations | OPS Loads and operations | An application event or outbound work request written in the same transaction as the change. | Workbench | New | 9 |
+| Outbox delivery | Loads and operations | OPS Loads and operations | The delivery of one outbox event to one consumer, with its retries. | Workbench | New | 9 |
+| Feature flag | Loads and operations | OPS Loads and operations | A feature flag with its value per environment, owner and removal date. | Workbench | New | 11 |
+| Feature flag change | Loads and operations | OPS Loads and operations | One change of a feature flag value in one environment. | Workbench | New | 6 |
+| Job catalog | Loads and operations | OPS Loads and operations | A scheduled job with its owner, run book and expected duration. | Workbench | New | 9 |
+| Party product | Party | DP02 Customer and party | Another product the party holds at the bank, from the customer profile. | Workbench | New | 6 |
+| Efs ledger outcome | Reference and access | DP14 Reference data | Which EFS action codes enter the interaction ledger and on which channel. | Workbench | New | 4 |
+| Case entry exclusion | Case | DP03 Case and ownership | An account at 90 days past due that an exclusion rule kept out of recovery on a business date. | Workbench | New | 6 |
+| Queue member | Work management | DP03 Case and ownership | A person who works a queue, with personal capacity and skills, by version. | Workbench | New | 8 |
+| Queue measure | Reporting | DP03 Case and ownership | One snapshot of a queue's counts, ageing and breaches, published when it reconciles to the case list. | Workbench | New | 11 |
+| Parameter catalog | Reference and access | DP14 Reference data | The definition of every parameter and environment setting, with its owner and default. | Workbench | New | 15 |
+| Parameter value | Reference and access | DP14 Reference data | An approved, dated value version of a parameter per environment and product group. | Workbench | New | 12 |
+| Reference version | Reference and access | DP14 Reference data | One version of a reference or rule table, with its author, approver, checks and change checklist. | Workbench | New | 22 |
+| Reference row | Reference and access | DP14 Reference data | One row of a reference table version held as data. | Workbench | New | 4 |
+| Rule test case | Reference and access | DP14 Reference data | A test case of the rule table test harness, with its expected and actual result. | Workbench | New | 13 |
+| Masking rule | Reference and access | DP14 Reference data | Which role sees which personal data field unmasked, by version. | Workbench | New | 7 |
+| Role conflict | Reference and access | DP14 Reference data | A pair of roles one person may not hold together, by version. | Workbench | New | 7 |
+| Partner user | Reference and access | DP14 Reference data | A partner user's identity bound to one partner firm and one partner role. | Workbench | New | 6 |
+| Document type | Reference and access | DP14 Reference data | A document type, the fields extracted from it and its Legal and NPA sign-off, by version. | Workbench | New | 16 |
+| Document checklist item | Reference and access | DP14 Reference data | A document type required or expected for a case stage and route, by checklist version. | Workbench | New | 10 |
+| Case document check | Document | DP10 Documents and extracted fields | The latest document completeness check of a case against its checklist. | Workbench | New | 9 |
+| Document hub parameter | Reference and access | DP14 Reference data | A document hub parameter value, by version. | Workbench | New | 8 |
+| Document intake | Document | DP10 Documents and extracted fields | A file received by the document hub, from scan to OCR, classification, extraction, matching and review. | Workbench | New | 40 |
+| Document text | Document | DP10 Documents and extracted fields | The OCR text of one page of an intake item. | Workbench | New | 6 |
+| Retention action | Document | DP10 Documents and extracted fields | What the monthly retention job did with one document. | Workbench | New | 5 |
+| Merge field | Reference and access | DP14 Reference data | A merge code a template may use and the field that supplies its value, by catalog version. | Workbench | New | 9 |
+| Signature request | Document | DP10 Documents and extracted fields | A request for a party to sign a generated document, and its result. | Workbench | New | 12 |
+| Approval | Decision and control | DP12 Decision log | An item waiting for approval, routed to the level the delegation of authority requires. | Workbench | New | 22 |
+| Payment match rule | Reference and access | DP14 Reference data | A rule for matching a payment to a plan installment, by version. | Workbench | New | 13 |
+| Measure definition | Reporting | RPT Reporting | The agreed definition of a reported measure, by version. | Workbench | New | 10 |
+| Measure snapshot | Reporting | RPT Reporting | The value of one measure for a business date, product and dimension value. | Workbench | New | 12 |
+| Measure publish | Reporting | RPT Reporting | Whether the day's dashboard data set was published or held after reconciling to the case list. | Workbench | New | 6 |
+| Agent policy | Agent runtime | AGT Agent runtime | A version of an agent's policy: model, tools, autonomy, limits and fallback. | Workbench | New | 25 |
+| Agent prompt | Agent runtime | AGT Agent runtime | A version of an agent's prompt text. | Workbench | New | 10 |
+| Agent run | Agent runtime | AGT Agent runtime | One call of an agent or model, with its versions, checks, answer, cost and fallback. | Workbench | New | 25 |
+| Agent sample | Agent runtime | AGT Agent runtime | One labeled subject in a versioned evaluation sample. | Workbench | New | 9 |
+| Agent evaluation run | Agent runtime | AGT Agent runtime | One evaluation of an agent version against a sample. | Workbench | New | 16 |
+| Agent evaluation | Agent runtime | AGT Agent runtime | The score of one approach on one label key in an evaluation run. | Workbench | New | 11 |
+| Agent feedback | Agent runtime | AGT Agent runtime | A person's verdict on an agent answer. | Workbench | New | 6 |
+| Agent alert | Agent runtime | AGT Agent runtime | A cost cap or drift alert raised for an agent. | Workbench | New | 9 |
+
+## Relationships
+
+| Relationships |  |  |  |  |
+|---|---|---|---|---|
+| 119 relationships. Each reads from the entity that holds the reference to the entity it refers to. |  |  |  |  |
+| Entity | Refers to | Cardinality | What the reference means | Subject area |
+| Recovery case | Party | Many to one | The borrower the case is opened for | Case |
+| Recovery case | Queue | Many to zero or one | The queue the case is in | Case |
+| Case account | Recovery case | Many to one | The recovery_case this record belongs to | Case |
+| Case account | Loan account | Many to one | The loan_account this record belongs to | Case |
+| Case party | Recovery case | Many to one | The recovery_case this record belongs to | Case |
+| Case party | Party | Many to one | The party this record belongs to | Case |
+| Deviation | Recovery case | Many to one | The recovery_case this record belongs to | Case |
+| Queue | Queue | Many to zero or one | Queue that receives overflow | Work management |
+| Assignment | Recovery case | Many to one | The recovery_case this record belongs to | Work management |
+| Assignment | Task | Many to zero or one | The task this record belongs to | Work management |
+| Assignment | Queue | Many to zero or one | The queue the assignment placed the case in | Work management |
+| Task | Recovery case | Many to one | The recovery_case this record belongs to | Work management |
+| Timer | Recovery case | Many to one | The recovery_case this record belongs to | Work management |
+| Timer | Task | Many to zero or one | The task this record belongs to | Work management |
+| Timer | Treatment | Many to zero or one | The treatment a plan timer belongs to | Work management |
+| Contact point | Party | Many to one | The party this record belongs to | Party |
+| Account payment | Loan account | Many to one | The loan_account this record belongs to | Account and arrears |
+| Account collateral | Loan account | Many to one | The loan_account this record belongs to | Collateral and asset |
+| Account collateral | Collateral | Many to one | The collateral this record belongs to | Collateral and asset |
+| Valuation | Collateral | Many to zero or one | The collateral this record belongs to | Collateral and asset |
+| Valuation | Asset | Many to zero or one | The asset this record belongs to | Collateral and asset |
+| Valuation | Partner | Many to zero or one | The valuer | Collateral and asset |
+| Asset | Recovery case | Many to zero or one | The recovery_case this record belongs to | Collateral and asset |
+| Asset | Collateral | Many to zero or one | The collateral this record belongs to | Collateral and asset |
+| Treatment | Recovery case | Many to one | The recovery_case this record belongs to | Treatment |
+| Treatment | Decision log entry | Many to zero or one | The decision that approved it | Treatment |
+| Guarantee claim | Recovery case | Many to one | The recovery_case this record belongs to | Treatment |
+| Legal action | Recovery case | Many to one | The recovery_case this record belongs to | Legal |
+| Legal action | Partner | Many to zero or one | The law firm instructed | Legal |
+| Notice | Recovery case | Many to one | The recovery_case this record belongs to | Legal |
+| Notice | Document | Many to zero or one | The generated notice | Legal |
+| Notice | Party | Many to zero or one | Party the notice is addressed to | Legal |
+| Notice | Template | Many to zero or one | Template version the notice was generated from | Legal |
+| Notice | Outbound item | Many to zero or one | WIN file the notice was last written to | Legal |
+| Hearing | Legal action | Many to one | The legal_action this record belongs to | Legal |
+| Partner instruction | Recovery case | Many to one | The recovery_case this record belongs to | Partner |
+| Partner instruction | Partner | Many to one | The partner this record belongs to | Partner |
+| Listing | Asset | Many to one | The asset this record belongs to | Disposal and debt sale |
+| Asset sale | Asset | Many to one | The asset this record belongs to | Disposal and debt sale |
+| Asset sale | Listing | Many to zero or one | The listing this record belongs to | Disposal and debt sale |
+| Debt sale lot | Partner | Many to zero or one | Winning buyer | Disposal and debt sale |
+| Debt sale account | Debt sale lot | Many to one | The debt_sale_lot this record belongs to | Disposal and debt sale |
+| Debt sale account | Loan account | Many to one | The loan_account this record belongs to | Disposal and debt sale |
+| Interaction | Recovery case | Many to one | The recovery_case this record belongs to | Interaction |
+| Interaction | Party | Many to zero or one | The party this record belongs to | Interaction |
+| Interaction | Decision log entry | Many to zero or one | Decision log entry the entry records, for DECISION_TAKEN | Interaction |
+| Interaction | Interaction | Many to zero or one | Entry this entry corrects | Interaction |
+| Interaction | Contact point | Many to zero or one | The contact point reached; the number or address stays masked in contact_point | Interaction |
+| Interaction | Treatment | Many to zero or one | The treatment offered, for an OFFER entry | Interaction |
+| Interaction | Proceeds | Many to zero or one | The proceeds matched, for a PAYMENT entry | Interaction |
+| Document | Recovery case | Many to one | The recovery_case this record belongs to | Document |
+| Document | Party | Many to zero or one | The party this record belongs to | Document |
+| Document | Document | Many to zero or one | The document row this version supersedes; empty for version 1 | Document |
+| Document | Template | Many to zero or one | Template version a generated document was made from | Document |
+| Document | Treatment | Many to zero or one | Treatment a generated document belongs to | Document |
+| Document field | Document | Many to one | The document this record belongs to | Document |
+| Document custody | Document | Many to one | The document this record belongs to | Document |
+| Decision log entry | Recovery case | Many to zero or one | The recovery_case this record belongs to; empty only for access events (decision code AC-...) with no case | Decision and control |
+| Decision log entry | Decision log entry | Many to zero or one | The entry this entry corrects | Decision and control |
+| Score | Loan account | Many to zero or one | The loan_account this record belongs to | Decision and control |
+| Score | Recovery case | Many to zero or one | The recovery_case this record belongs to | Decision and control |
+| Proceeds | Recovery case | Many to one | The recovery_case this record belongs to | Money and closure |
+| Proceeds | Treatment | Many to zero or one | The treatment this record belongs to | Money and closure |
+| Proceeds | Account payment | Many to zero or one | The account_payment this record belongs to | Money and closure |
+| Write-off | Recovery case | Many to one | The recovery_case this record belongs to | Money and closure |
+| Write-off | Decision log entry | Many to zero or one | The decision_log_entry this record belongs to | Money and closure |
+| Permission | Role | Many to one | The role this record belongs to | Reference and access |
+| Load run | Interface run | Many to zero or one | The P2 interface run the file load belongs to | Loads and operations |
+| Load run | Tracker inventory | Many to zero or one | Tracker of a tracker load | Loads and operations |
+| Dq exception | Load run | Many to one | The load run that raised it | Loads and operations |
+| Tracker inventory | Load run | Many to zero or one | Latest load run of the tracker | Loads and operations |
+| Tracker row | Tracker inventory | Many to one | Tracker the row came from | Loads and operations |
+| Tracker row | Load run | Many to one | Load run that loaded the row | Loads and operations |
+| Case list row | Recovery case | Many to one | Case | Reporting |
+| Case list row | Loan account | Many to one | Loan account; unique with business_date | Reporting |
+| Retention rule | Reference version | Many to zero or one | Reference version that brought the row | Reference and access |
+| Dp treatment | Treatment | Many to one | The treatment copied; unique with business_date | Treatment |
+| Dp treatment | Recovery case | Many to one | The case of the treatment | Treatment |
+| Dp treatment | Decision log entry | Many to zero or one | The decision that approved the treatment | Treatment |
+| Dp guarantee claim | Guarantee claim | Many to one | The guarantee claim copied; unique with business_date | Treatment |
+| Dp guarantee claim | Recovery case | Many to one | The case of the claim | Treatment |
+| Processed event | Outbox event | Many to zero or one | Outbox event of the first delivery, where the key came from an event | Loads and operations |
+| Outbox event | Recovery case | Many to zero or one | The case the event belongs to; empty for events with no case; unique with case_seq | Loads and operations |
+| Outbox delivery | Outbox event | Many to one | The outbox event delivered | Loads and operations |
+| Outbox delivery | Task | Many to zero or one | The RESOLVE_OUTBOX_DELIVERY task raised when the delivery entered the exception queue | Loads and operations |
+| Party product | Party | Many to one | The party that holds the product | Party |
+| Case entry exclusion | Loan account | Many to one | The account excluded; unique with business_date | Case |
+| Queue member | Queue | Many to one | The queue | Work management |
+| Queue measure | Queue | Many to one | The queue measured; unique with as_of | Reporting |
+| Reference row | Reference version | Many to one | The reference version the row belongs to; unique with row_key | Reference and access |
+| Partner user | Partner | Many to one | The firm the partner user works for | Reference and access |
+| Document type | Reference version | Many to zero or one | Reference version that brought the row | Reference and access |
+| Document checklist item | Reference version | Many to zero or one | Reference version that brought the row | Reference and access |
+| Case document check | Recovery case | Many to one | Case checked; one row per case; unique | Document |
+| Case document check | Outbox event | Many to zero or one | Event that triggered the last check, for repeat detection | Document |
+| Document hub parameter | Reference version | Many to zero or one | Reference version that brought the row | Reference and access |
+| Document intake | Partner | Many to zero or one | Partner that sent the file by SFTP | Document |
+| Document intake | Load run | Many to zero or one | JOB-12 run that took the item in | Document |
+| Document intake | Recovery case | Many to zero or one | Case the item belongs to once known | Document |
+| Document intake | Document | Many to zero or one | Document created from the item, or the uploaded document | Document |
+| Document text | Document intake | Many to one | Intake item the page belongs to; unique with page_no | Document |
+| Document text | Document | Many to zero or one | Document the page belongs to once attached | Document |
+| Retention action | Document | Many to one | Document acted on; unique with run_month | Document |
+| Retention action | Decision log entry | Many to zero or one | DOCRET decision log entry for an archive | Document |
+| Signature request | Recovery case | Many to one | Case | Document |
+| Signature request | Treatment | Many to zero or one | Treatment the agreement belongs to | Document |
+| Signature request | Document | Many to one | Generated document sent for signature | Document |
+| Signature request | Party | Many to one | Signing party | Document |
+| Signature request | Document | Many to zero or one | Signed copy or branch scan | Document |
+| Approval | Recovery case | Many to one | The case | Decision and control |
+| Approval | Delegation limit | Many to zero or one | Delegation row that covers the item | Decision and control |
+| Approval | Decision log entry | Many to zero or one | Decision log entry of the outcome | Decision and control |
+| Agent policy | Agent evaluation run | Many to zero or one | Evaluation run an autonomy step is based on | Agent runtime |
+| Agent run | Recovery case | Many to zero or one | The case the run is for | Agent runtime |
+| Agent run | Agent evaluation run | Many to zero or one | Evaluation run the run belongs to, if any | Agent runtime |
+| Agent run | Decision log entry | Many to zero or one | Decision log entry written for the step that used the run | Agent runtime |
+| Agent evaluation | Agent evaluation run | Many to one | Evaluation run the score belongs to | Agent runtime |
+| Agent feedback | Agent run | Many to one | Agent run the feedback is on | Agent runtime |
+| Agent feedback | Decision log entry | Many to zero or one | Decision log entry written for the feedback | Agent runtime |
+
+## Gaps
+
+| Gaps and the assumptions taken |  |  |  |  |
+|---|---|---|---|---|
+| Where the data needed is not available today or waits on a bank decision. The model is built on the assumption shown. |  |  |  |  |
+| Gap | What is missing | Assumption the model takes | What it affects | Decision |
+| G1 | Collateral records and appraisals reach ACE weekly or monthly by manual file. Daily appraisal data is not available. | A file load from CCMS and SVAF each week. An appraisal past its age limit is flagged on the case and blocks the route decision until replaced. | DP06; D6 route, D8 floor price | DL06, DL12 |
+| G2 | Assets held after repossession or transfer (AMIS, RPS) are not in COLLINS. | A monthly file load from AMIS and a weekly file load from RPS until a batch feed exists. | DP06; D8 disposal | DL06, DL12 |
+| G3 | Debt sale data is not available in ACE. | Debt sale lots are built and held in the Workbench. Past lots are loaded once from the bank's debt sale files. | DP09; D8.4 debt sale | None |
+| G4 | The Thai Credit Guarantee quota is not available in ACE. | The guarantee officer records the quota and the claim deadline on the case. The deadline drives a timer. | DP04; D6.5 guarantee claim | DL06 |
+| G5 | The full loan history since the account opened is not available. | The model holds what COLLINS carries. Routing does not need history before collections started. | DP01 | DL12 |
+| G6 | How much EFS contact history comes into the interaction ledger. | The contact outcomes the business lead names, for the period the account was in collections, loaded at case entry and daily while the case is open. | DP05; D6 entry, X6 | DL29 |
+| G7 | Where customer facts come from. | The customer profile ACE already receives through COLLINS from UDP, SCBPDM and the core bank batch. | DP02 | DL20 |
+| G8 | What counts as one case. | One case per customer per product, with the accounts linked through case account. | DP03; every entity linked to the case | DL17 |
+| G9 | Systems that carry the case identifier. | The Workbench only. The account number joins the case to other systems. | DP03; all inbound and outbound flows | DL21 |
+| G10 | Thai names for fields, labels and list values. | Each list value carries an English and a Thai label. Thai labels are filled as they are approved. | DP14 lists of values; every screen | DL10 |
+| G11 | Retention and masking per data product. | Every field marked as personal data is masked for every role except those the masking rules name. Retention follows the bank schedule once received. | All data products | DL26 |
+| G12 | Difference accepted between a load and its source. | Zero. A load that does not reconcile to its control totals is refused whole and the previous load stays in use. | All loaded data products | DL25 |
+| G13 | Write-off postings in the general ledger are not in COLLINS. | A monthly file from the GL is matched to the write-off record. | DP13; D9 | DL12 |
+| G14 | Work orders and operational status held in Salesforce are not available. | Not modeled. NPA work orders are raised as tasks on the case. | DP06; D8 | DL12 |
+
+## Key
+
+| Key |  |  |
+|---|---|---|
+| What each term and value means. |  |  |
+| Item | Term | Meaning |
+| Term | Subject area | A group of entities about one business subject |
+| Term | Data product | A set of entities with one system of record, one way into the Workbench and one freshness, published for use by decisions, screens and reports |
+| Term | Entity | A thing the Workbench holds a record of |
+| Term | System of record | The system whose value is correct when two systems differ |
+| Value | Held in the Workbench | The Workbench is the system of record and writes the data itself |
+| Value | End of day; in the Workbench the next morning | COLLINS loads the source at the end of the business day into the ACE database |
+| Value | Reuse ACE | The entity exists in ACE and is used as it is |
+| Value | Extend ACE | The entity exists in ACE and the Workbench adds fields or states |
+| Value | New | The entity is added in the recovery module |
+| Value | Many to one | Every record refers to exactly one record of the other entity |
+| Value | Many to zero or one | A record may refer to one record of the other entity or to none |
+| Standard | ISO/IEC/IEEE 29148 | Requirements for data and information |
+| Standard | Bank TSD section T3 | Metadata-driven data model: objects, fields and records, standard columns, lists of values and relationships |

@@ -1,0 +1,115 @@
+{
+  "key": "RWB-E1-025",
+  "file_stem": "RWB E1 025 Document types and fields agreed",
+  "title": "Document types and fields agreed",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.doctypes",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "6 document types, 26 fields",
+  "goal": "One versioned list of 6 document types and 26 fields for OCR, classification and extraction",
+  "why": "Every document step needs the same answer to 'what types exist and what fields matter'. Changing the list is a data load, not a release.",
+  "needs": [
+    "E1-012"
+  ],
+  "unblocks": [
+    "E1-024",
+    "E1-040",
+    "E1-050",
+    "E1-053"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (DOCUMENT_TYPE)"
+    ],
+    [
+      "API",
+      "POST /admin/reference-loads/{loadId}/approve"
+    ],
+    [
+      "WHO",
+      "RW-COE prepares; Legal + Head of NPA sign"
+    ],
+    [
+      "CALL",
+      "DocumentTypeCatalog: version in force"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Document types are Workbench reference data.",
+  "writes": [
+    {
+      "t": "document_type",
+      "note": "6 types, 26 fields, write_once, retention_class, version"
+    }
+  ],
+  "reads": [
+    {
+      "t": "lov_value",
+      "note": "LOV-RETENTION classes (via the P4 list service)"
+    }
+  ],
+  "stores": "Load file DOCTYPE-2026.11 with the Legal and NPA sign-off dates; 5-minute catalog cache",
+  "functions": [
+    {
+      "name": "DocumentTypeLoader",
+      "does": "parse, validate, stage, approve"
+    },
+    {
+      "name": "DocumentTypeCatalog",
+      "does": "version in force, type by code"
+    },
+    {
+      "name": "DocumentTypeCatalogService",
+      "does": "5-min cache, cleared on approve"
+    },
+    {
+      "name": "DocumentTypeRepository",
+      "does": "document_type only"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "RW-REFADM uploads DOCTYPE-2026.11"
+    },
+    {
+      "kind": "check",
+      "text": "Unique codes, retention class, sign-offs"
+    },
+    {
+      "kind": "table",
+      "text": "document_type LOADED"
+    },
+    {
+      "kind": "check",
+      "text": "Approver is not the loader"
+    },
+    {
+      "kind": "table",
+      "text": "APPROVED, in force from valid_from"
+    },
+    {
+      "kind": "out",
+      "text": "Catalog for OCR, classify, extract"
+    }
+  ],
+  "rules": [
+    "BR1: Legal and NPA sign before extraction is built",
+    "BR3: one invalid row refuses the whole load",
+    "BR4: a version takes effect on valid_from; work already done keeps its version",
+    "BR5: the loader cannot approve"
+  ],
+  "risks": [
+    "Missing Legal or NPA sign-off -> load refused (MSG-P3-027)",
+    "Same version loaded twice -> 409 (MSG-P3-027)",
+    "Loader approves their own load -> 409 (MSG-P7-002)"
+  ],
+  "example": [
+    "DOCTYPE-2026.11, valid from 2026-11-30: 6 types",
+    "COURT_NOTICE: court_name, black_case_no, notice_date, hearing_date | LEGAL10Y | write_once true",
+    "APPRAISAL_REPORT: GENERAL05Y | write_once false | 4 fields"
+  ]
+}

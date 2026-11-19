@@ -1,0 +1,62 @@
+{
+  "run_id": "INC-009-epic-1-RWB-E1-001",
+  "story": "RWB-E1-001",
+  "api_impact": "NO_API_CHANGE",
+  "source": {
+    "file": "api/recovery-api-v4.yaml",
+    "specification": "API Specification v4"
+  },
+  "changes": [],
+  "operations_used": [
+    {
+      "operationId": "postAdminReferenceLoads",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads",
+      "x-module": "P4",
+      "x-capability": { "area": "Reference data", "right": "C" },
+      "x-first-release": "E1",
+      "built_by": "RWB-E1-043",
+      "request": { "content_type": "multipart/form-data", "fields": { "file": "binary", "table": "data_product", "validFrom": "date" } },
+      "responses": {
+        "201": "ReferenceLoad",
+        "403": "Problem, messageCode MSG-P4-002 (caller without Reference data C; TC-E1-001-11)",
+        "422": "Problem, messageCode MSG-P1-004 | MSG-P1-003 | MSG-P1-007; detail lists every finding (SPEC-RWB-E1-001-015)"
+      },
+      "repeat": "Same content hash as the version in force: nothing written; MSG-P1-011 (SPEC-RWB-E1-001-014; GAP-E1001-13)",
+      "this_story_adds": "DataProductCatalogHandler registered for table code data_product behind rwb.p1.data-catalog"
+    },
+    {
+      "operationId": "postAdminReferenceLoadsLoadidApprove",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads/{loadId}/approve",
+      "x-module": "P4",
+      "x-capability": { "area": "Reference data", "right": "A" },
+      "x-first-release": "E1",
+      "built_by": "RWB-E1-043",
+      "this_story_adds": "DataProductCatalogHandler.apply is called on approval (ASM-E1001-05)",
+      "open": "No role holds Reference data A (GAP-E1001-08)"
+    }
+  ],
+  "published_interface_implemented": {
+    "name": "ReferenceTableHandler",
+    "owner": "RWB-E1-043 (to be published; GAP-E1001-07)",
+    "signature": [
+      "String tableCode()",
+      "ValidationReport validate(ReferenceLoadFile file)",
+      "int apply(UUID loadId, ReferenceLoadFile file, LocalDate validFrom)"
+    ],
+    "implementation": "th.co.scb.ace.demo.recovery.dataengine.internal.catalog.DataProductCatalogHandler"
+  },
+  "database_read_model": {
+    "view": "${recoverySchema}.v_data_dictionary",
+    "columns": ["entity", "field", "field_id", "data_type", "physical_type", "is_mandatory", "lov_code", "references_object", "source_system", "source_field", "is_personal", "data_product", "entity_system_of_record", "product_system_of_record", "refresh_cycle", "owner_role", "owner_user_id", "late_behavior", "interface_id", "description"],
+    "consumers": ["RWB-E1-064 dictionary endpoint (later)"]
+  },
+  "migration": {
+    "file": "backend/src/main/resources/db/modulemigration/recovery/V<seq>__rwb_e1_001_recovery_schema.sql",
+    "seq_rule": "next free at merge; 0001 if first (DL v10 D-RCV-28)",
+    "tables": 93,
+    "sys_objects": 123,
+    "sys_fields": 1379
+  }
+}

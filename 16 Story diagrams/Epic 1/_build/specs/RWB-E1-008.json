@@ -1,0 +1,122 @@
+{
+  "key": "RWB-E1-008",
+  "file_stem": "RWB E1 008 Decision log store append only and hash chained",
+  "title": "Decision log store v1, append only and hash chained",
+  "module": "P7 Decision center and log",
+  "flag": "rwb.decision.log-store",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Hash-chained decision log",
+  "goal": "A tamper-evident, append-only store that keeps every decision once, so any later change is detected",
+  "why": "Audit and Compliance must trust the decision log. Each entry hashes the previous one, and the database refuses UPDATE and DELETE.",
+  "needs": [
+    "E1-001"
+  ],
+  "unblocks": [
+    "E1-027",
+    "E1-039",
+    "TE-008"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "DecisionLogStore.append (from the E1-027 writer)"
+    ],
+    [
+      "API",
+      "GET /api/recovery/v1/decision-log/{entryId}"
+    ],
+    [
+      "API",
+      "GET /api/recovery/v1/decision-log?caseId="
+    ],
+    [
+      "WHO",
+      "RW-AUDIT and RW-COMPLY read"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The decision log is pure Workbench data: it records the rule, version and inputs behind each action.",
+  "writes": [
+    {
+      "t": "decision_log_entry",
+      "note": "append only; chain_seq, prev_hash, entry_hash (SHA-256)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "decision_log_entry",
+      "note": "last chain_seq and hash; range checks"
+    }
+  ],
+  "stores": "PostgreSQL advisory lock 'decision_log_chain'; trigger tr_declog_append_only; ACE incident path and notification to Compliance",
+  "functions": [
+    {
+      "name": "DecisionLogStore",
+      "does": "lock, chain_seq, hash, insert"
+    },
+    {
+      "name": "CanonicalEntryForm",
+      "does": "canonical JSON, sorted keys"
+    },
+    {
+      "name": "HashChainVerifier",
+      "does": "recompute 1,000 at a time"
+    },
+    {
+      "name": "ChainBreakNotifier",
+      "does": "incident + MSG-P7-008"
+    },
+    {
+      "name": "DecisionCenterAndLogController",
+      "does": "two read endpoints"
+    },
+    {
+      "name": "DecisionLogEntry",
+      "does": "immutable entity"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Writer calls append() last"
+    },
+    {
+      "kind": "function",
+      "text": "Advisory lock + read last hash"
+    },
+    {
+      "kind": "function",
+      "text": "CanonicalEntryForm -> SHA-256"
+    },
+    {
+      "kind": "table",
+      "text": "INSERT decision_log_entry"
+    },
+    {
+      "kind": "check",
+      "text": "UPDATE / DELETE refused by trigger"
+    },
+    {
+      "kind": "out",
+      "text": "Verifier flags any break"
+    }
+  ],
+  "rules": [
+    "BR2: never update or delete; a correction is a new entry naming the one it corrects",
+    "BR3: one chain; the first entry's prev_hash is 64 zeros",
+    "BR4: SHA-256 lowercase hex of canonical JSON with sorted keys",
+    "BR5: append is the caller's last statement, so action and entry commit together"
+  ],
+  "risks": [
+    "UPDATE or DELETE attempted -> refused: 'decision_log_entry is append only'",
+    "Tampered entry -> break named, incident, Compliance told within 15 min (MSG-P7-008)",
+    "Store unwritable -> the caller's action rolls back (MSG-P7-003)"
+  ],
+  "example": [
+    "chain_seq 1 | case RW-2026-000123 | final call OWNER_ASSIGNED | prev_hash 000...000",
+    "UPDATE ... SET final_call = 'CASE_TRANSFERRED' -> refused",
+    "DELETE FROM decision_log_entry ... -> refused"
+  ]
+}

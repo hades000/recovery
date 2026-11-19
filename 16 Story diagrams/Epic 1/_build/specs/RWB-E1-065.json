@@ -1,0 +1,148 @@
+{
+  "key": "RWB-E1-065",
+  "file_stem": "RWB E1 065 Sandbox database with synthetic recovery data",
+  "title": "Sandbox database with synthetic recovery data",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.sandbox",
+  "status": "PARTIAL",
+  "status_text": "Ready. Section B views wait for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "Synthetic sandbox DB",
+  "goal": "A DEV sandbox with the ACE schema, recovery schema and synthetic data for view reads",
+  "why": "Developers need realistic ACE-shaped rows to code against the 30 views. Everything is synthetic; the ACE-shaped tables are a test double, never deployed.",
+  "needs": [
+    "E1-001",
+    "E1-069"
+  ],
+  "unblocks": [
+    "TE-004"
+  ],
+  "triggers": [
+    [
+      "BUILD",
+      "Pipeline stage 'Sandbox build' on DDL change"
+    ],
+    [
+      "BUILD",
+      "Applies ACE DDL, Tier 2 DDL, V0001-V0003"
+    ],
+    [
+      "WHO",
+      "RW-TRIBE reads via rwb_sandbox_read"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_* (16 views)",
+      "section": "A",
+      "note": "seeded + verified: account, payment, customer ..."
+    },
+    {
+      "view": "v_ace_* (14 views)",
+      "section": "B",
+      "note": "seeded once the Tier 2 DDL exists"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "recovery_case + links",
+      "note": "2,812 synthetic cases (seed 20261128)"
+    },
+    {
+      "t": "deviation, interaction, document",
+      "note": "exception shapes, 10 cases each"
+    },
+    {
+      "t": "party_ext ... valuation_ext",
+      "note": "extension rows by ACE key"
+    },
+    {
+      "t": "role, permission",
+      "note": "54 roles + test users"
+    },
+    {
+      "t": "public.* (sandbox only)",
+      "note": "22 Tier 1 + 14 Tier 2 ACE-shaped tables"
+    }
+  ],
+  "reads": [
+    {
+      "t": "sys_objects, sys_fields",
+      "note": "every column must be catalogued"
+    },
+    {
+      "t": "lov_value",
+      "note": "valid codes"
+    }
+  ],
+  "stores": "PostgreSQL 17 databases rwb_sandbox and rwb_sandbox_next; role rwb_sandbox_read; ACE Schema PostgreSQL v1.sql; advisory lock",
+  "functions": [
+    {
+      "name": "AceSchemaLoader",
+      "does": "ACE DDL, Tier 2, V0001-V0003"
+    },
+    {
+      "name": "SandboxGenerator",
+      "does": "synthetic rows in FK order"
+    },
+    {
+      "name": "ValueFactory",
+      "does": "seeded values, SYN-FIRST-000123"
+    },
+    {
+      "name": "ExceptionShapeBuilder",
+      "does": "10 cases per shape"
+    },
+    {
+      "name": "SandboxVerifier",
+      "does": "views compile, no PII, 89/90 DPD"
+    },
+    {
+      "name": "AccessSeedLoader",
+      "does": "roles + test users"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "DDL or migration changes"
+    },
+    {
+      "kind": "table",
+      "text": "Build rwb_sandbox_next"
+    },
+    {
+      "kind": "function",
+      "text": "Seed ACE-shaped + recovery rows"
+    },
+    {
+      "kind": "ace",
+      "text": "30 views compile and return rows"
+    },
+    {
+      "kind": "check",
+      "text": "No PII in recovery, keys resolve"
+    },
+    {
+      "kind": "out",
+      "text": "Rename to rwb_sandbox + grant read"
+    }
+  ],
+  "rules": [
+    "BR1: synthetic data only",
+    "BR7: the ACE-shaped tables are a DEV test double, never deployed",
+    "BR8: the 20 removed copy/load tables are absent",
+    "BR9: clear ID only in ACE-shaped tables; recovery sees id_no_masked / id_no_last4"
+  ],
+  "risks": [
+    "Column with no sys_fields row -> build fails",
+    "PII pattern found in recovery -> build fails",
+    "Tier 2 DDL absent -> stop before V0003; Section A is still published"
+  ],
+  "example": [
+    "1,226 Mortgage, 1,296 HP and 290 SSME cases; RW-2026-000001 fully linked",
+    "30 of 30 views compile",
+    "loan_account, party, tracker_row ... do not exist"
+  ]
+}

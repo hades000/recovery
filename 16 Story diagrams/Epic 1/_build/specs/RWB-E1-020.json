@@ -1,0 +1,151 @@
+{
+  "key": "RWB-E1-020",
+  "file_stem": "RWB E1 020 Allocation and assignment engine v1",
+  "title": "Allocation and assignment engine v1",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.allocation",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Morning allocation engine",
+  "goal": "Give every NEW case a queue and an owner by rule before 07:00, ending allocation by spreadsheet",
+  "why": "Owners start the day with their cases ready. The first matching ALLOCATION row picks the queue; the queue's method picks an owner below the cap.",
+  "needs": [
+    "E1-018",
+    "E1-019",
+    "E1-027",
+    "E1-056"
+  ],
+  "unblocks": [
+    "E1-002",
+    "E1-021",
+    "E1-028",
+    "E1-030",
+    "E1-031"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-03 Morning allocation, after JOB-02"
+    ],
+    [
+      "GATE",
+      "Done by 07:00 (deadline watcher, TE-007)"
+    ],
+    [
+      "API",
+      "POST /admin/jobs/{jobId}/rerun"
+    ],
+    [
+      "WHO",
+      "RW-TEAMMGR owns; gets a summary per team"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No direct ACE read. It runs after JOB-02, which is gated on the ACE batch; product, region and band are already on the case.",
+  "writes": [
+    {
+      "t": "recovery_case",
+      "note": "status ASSIGNED, owner_user_id, queue_id, team_code"
+    },
+    {
+      "t": "assignment",
+      "note": "new assignment row per case"
+    },
+    {
+      "t": "queue.rr_cursor_user_id",
+      "note": "round-robin cursor"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "OWNER_ASSIGNED, written last"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "NEW cases, FOR UPDATE SKIP LOCKED"
+    },
+    {
+      "t": "rule_row",
+      "note": "ALLOCATION rows (ALLOC-2026.11)"
+    },
+    {
+      "t": "queue, queue_member",
+      "note": "method, cap, overflow queue"
+    },
+    {
+      "t": "assignment",
+      "note": "open cases per owner (load)"
+    }
+  ],
+  "stores": "Outbox: CaseAllocated (EV-02), CaseAllocationFailed (EV-03); ACE notification (summary to team managers); job record",
+  "functions": [
+    {
+      "name": "AllocationJob",
+      "does": "JOB-03: pick NEW cases, summary"
+    },
+    {
+      "name": "AllocationService",
+      "does": "lock, match, owner, log, update"
+    },
+    {
+      "name": "AllocationRuleEvaluator",
+      "does": "first matching row wins"
+    },
+    {
+      "name": "AssignmentEngine",
+      "does": "ROUND_ROBIN, LOWEST_LOAD, NAMED, SKILL"
+    },
+    {
+      "name": "OwnerLoadRepository",
+      "does": "open cases per owner"
+    },
+    {
+      "name": "AllocationSummaryBuilder",
+      "does": "MSG-P3-011 and MSG-P3-012"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-03 after JOB-02"
+    },
+    {
+      "kind": "table",
+      "text": "recovery_case status NEW"
+    },
+    {
+      "kind": "check",
+      "text": "First ALLOCATION row that matches"
+    },
+    {
+      "kind": "function",
+      "text": "AssignmentEngine: owner below cap"
+    },
+    {
+      "kind": "table",
+      "text": "case ASSIGNED + assignment + log"
+    },
+    {
+      "kind": "out",
+      "text": "EV-02 CaseAllocated + team summary"
+    }
+  ],
+  "rules": [
+    "BR1: the first matching row in row order wins; 'Any' matches all",
+    "BR4: all owners at cap -> the case goes to the overflow queue",
+    "BR5: no row matches -> exception queue RWB-EXC",
+    "BR8: at most one allocation per case per business date"
+  ],
+  "risks": [
+    "All owners at cap -> overflow queue (MSG-P3-011)",
+    "No rule row matches -> RWB-EXC + EV-03 (MSG-P3-012)",
+    "Decision log write fails -> that case rolls back (MSG-P3-013)"
+  ],
+  "example": [
+    "Case RW-2026-000201: MORTGAGE, region BKK, exposure band B2",
+    "Row ALLOC-014 (ALLOC-2026.11) -> queue MTG-BKK-CO (team MTG-BKK, ROUND_ROBIN, cap 150)",
+    "Overflow queue MTG-BKK-OVF if every member is at 150"
+  ]
+}

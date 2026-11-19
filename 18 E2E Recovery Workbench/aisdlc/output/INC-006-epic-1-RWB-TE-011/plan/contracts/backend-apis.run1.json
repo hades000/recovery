@@ -1,0 +1,188 @@
+{
+  "runId": "INC-006-epic-1-RWB-TE-011",
+  "story": "RWB-TE-011",
+  "stage": "plan",
+  "revision": "v1 (2026-11-18): first plan contract for this repository; source plan.md v1, data-model.md v1 and specify/contracts/backend-apis.json (spec run 12).",
+  "specContract": "../../specify/contracts/backend-apis.json (spec run 12) - implemented as written; this file fixes the tool CLI, the file contracts and the verification tasks.",
+  "apiInScope": false,
+  "apiImpactType": "NO_API_CHANGE",
+  "reason": "Build-time lint; no endpoint, schema, status code or message is added or changed. The API Specification v4 file is read as an input (x-personal-data) and is not edited.",
+  "endpointsAdded": [],
+  "endpointsChanged": [],
+  "endpointsRelocated": [],
+  "contractVerificationTask": "TASK-29 (PdpaLintStep and the seven system-test classes verify the CLI contract end to end); TASK-32 (suite and coverage); no frontend task waits on this contract",
+  "buildToolContract": {
+    "id": "CON-TE011-001",
+    "component": "tools/pdpa-lint (th.co.scb.ace.tools.pdpa.PdpaLint)",
+    "invocationLocal": "backend/gradlew -p tools/pdpa-lint pdpaLint -PpdpaLint.changedFrom=develop-recovery -PpdpaLint.branch=<current branch>",
+    "invocationCi": "backend/gradlew -p tools/pdpa-lint clean check pdpaLint -PpdpaLint.changedFrom=origin/<target> -PpdpaLint.branch=<source or commit branch>",
+    "options": [
+      "--repo-root <dir> (default: process working directory)",
+      "--config <file> (default: tools/pdpa-lint/pdpa-lint.yaml, relative to the repository root)",
+      "--rules-out <file> (default: tools/pdpa-lint/build/pdpa-rules.yaml, relative to the repository root)",
+      "--run-date <YYYY-MM-DD> (default: today in Asia/Bangkok; injectable for the expiry tests)",
+      "--changed-files-from-git <target> (optional; when absent the list is not built)",
+      "--branch <name> (required with --changed-files-from-git; missing, empty or HEAD gives exit 2)"
+    ],
+    "trigger": "Every pipeline .gitlab-ci.yml creates: merge request, branch and tag, through the job's own rules. Locally, scripts/dev.ps1 test before the orchestrator's merge, and the pdpa-lint command.",
+    "inputs": [
+      "Dictionary: infra/postgres/schema/03-recovery-physical-schema-v6.sql as the baseline, then every *.sql in the folder from rwb.flyway.location (backend/src/main/resources/db/modulemigration/recovery) in Flyway order, then dictionary.files (empty by default). Recognised forms R1 and R2; the ignored class; every other sys_fields write fails closed with exit 2.",
+      "API specification: api/recovery-api-v4.yaml, properties with x-personal-data: true, object = snake case of the schema name, field = snake case of the property.",
+      "Scan roots, exclusions, lint-fixture roots, fixtureObjects, synthetic prefix, example domains, matcher names, logger names, exception types, masking helpers, entity suffixes: tools/pdpa-lint/pdpa-lint.yaml.",
+      "Allow list: tools/pdpa-lint/pdpa-allow.yaml (empty sequence in production).",
+      "Migration folder: read from rwb.flyway.location in backend/src/main/resources/application.yaml, classpath: mapped to backend/src/main/resources/. The configuration may only repeat it; a mismatch, a missing property or a non-classpath value gives exit 2.",
+      "Changed-file list: git merge-base <target> HEAD and git diff --name-only --diff-filter=AMR <base>..HEAD, built only when the target equals changedFiles.targetBranch (develop-recovery) and the branch is neither that branch nor a protected one (main, develop). Repository metadata only; no database and no network."
+    ],
+    "generated": "tools/pdpa-lint/build/pdpa-rules.yaml on every run that completes the dictionary, before scanning; deterministic; not committed; kept as a CI artifact with the console log.",
+    "rules": [
+      "PDPA-LOG-FIELD",
+      "PDPA-LOG-ENTITY",
+      "PDPA-EXCEPTION",
+      "PDPA-TOSTRING",
+      "PDPA-FIXTURE-FIELD",
+      "PDPA-FIXTURE-ID"
+    ],
+    "outputLine": "{rule}: {file}:{line} uses personal field {field}. Remove it or use the masking helper.",
+    "fieldTokenForm": "{dictionary field name} ({matched token}) when the token differs, for example last_name (lastName)",
+    "expiredAllowLine": "allow entry expired: {rule} {path} since {date}",
+    "exitCodes": {
+      "0": "no unexcused finding; notices allowed",
+      "1": "one or more unexcused findings",
+      "2": "configuration or input error: an unreadable configuration, dictionary or API file; an unsupported sys_fields statement; a duplicate seed field_id across migrations; an UPDATE of an unknown field_id; an empty dictionary; an invalid allow entry or any allow entry whose path would match the migration folder; a scan configuration that excludes or omits the migration folder or lets a lint-fixture root cover it; a lint-fixture root outside the test roots; a migration folder that does not match rwb.flyway.location; a corrective migration naming an unknown file; a source that cannot be parsed; where the list is built, a target that cannot be resolved or has no merge base; --changed-files-from-git with --branch missing, empty or HEAD. A lint-fixture file never gives exit 2 from its content."
+    },
+    "errorLines": [
+      "configuration not readable: {file}",
+      "configuration invalid: {config key}: {problem}",
+      "configuration error: unknown option {name}",
+      "dictionary source not readable: {file}",
+      "dictionary statement not supported: {file}:{line}",
+      "duplicate sys_fields field_id: {field_id} at {file}:{line}",
+      "unknown sys_fields field_id: {field_id} at {file}:{line}",
+      "dictionary is empty",
+      "api specification not readable: {file}",
+      "allow entry invalid: entries[{n}]: {problem}",
+      "allow entry on a migration: entries[{n}]",
+      "scan configuration excludes the migration folder: {config key}",
+      "lint-fixture root outside the test roots: {config key}",
+      "migration folder does not match rwb.flyway.location: {config key}",
+      "corrective migration names unknown file: {file}:2",
+      "changed-file list: target branch {name} not found",
+      "changed-file list: no merge base with {name}",
+      "changed-file list: branch not determined",
+      "source not parsable: {file}:{line}"
+    ],
+    "neverPrinted": "Any value found, any source line or SQL statement text, any fixture value, any secret or credential (BR7; SPEC-TE011-012). Every system test asserts this.",
+    "state": "None between runs; a failed run is repeated by rerunning the pipeline. The same commit, configuration and dictionary give the same output.",
+    "notices": [
+      "PDPA-NOTICE: {field_id} unmarked at {file}:{line}",
+      "PDPA-NOTICE: {file}:{line} object not resolved for {field}; add a fixtureObjects entry or a typed receiver",
+      "PDPA-NOTICE: {file}:{line} seeds {field}, marked personal by a later migration",
+      "PDPA-NOTICE: {file}:{line} {rule} {field} corrected by {corrective file}"
+    ],
+    "noticeCounts": [
+      "PDPA-COUNT: unmarked {n}",
+      "PDPA-COUNT: unresolved {n}",
+      "PDPA-COUNT: later mark {n}",
+      "PDPA-COUNT: corrected {n}"
+    ],
+    "scopeLines": [
+      "PDPA-SCOPE: exclusion {config key} {glob} excludes {n} files",
+      "PDPA-SCOPE: lint fixtures {config key} {glob} holds {n} files",
+      "PDPA-SCOPE: class {class} {n} files",
+      "PDPA-SCOPE: changed-file list against {target}: {n} files",
+      "PDPA-SCOPE: changed-file list not built: target {target}, branch {name}"
+    ],
+    "outputOrder": "findings (sorted by file, line, rule, field), expired-allow lines for matched entries, notices (sorted the same way), four counts, then scope lines (exclusions, lint fixtures, class counts, changed-file decision). Exit 2 prints exactly one error line and nothing else.",
+    "fixtureMatching": "See plan/data-model.md section 5 and spec SPEC-TE011-008: (object, field) keys from object_name.field_name, source_field table.column and API schema.property; a position is resolved only when the dictionary describes that field on that object; unresolved positions use the unambiguous-name rule, with API personal names always findings in API-typed positions and ambiguous names reported as notices. SQL is classified in four classes; columns not named, statements not recognised and DML in a procedural body are findings with those literal field labels. DEFAULT literal positions are checked; NULL, empty string and DEFAULT are never findings.",
+    "correctiveMigration": "See plan/data-model.md section 5.4 and spec SPEC-TE011-018: only files in the recovery migration folder; line 2 of C starts '-- Fix:' with a non-empty reason and names each original as V[0-9]{4}__[A-Za-z0-9_]+.sql; conditions (a) later sequence, (b) same line-1 story key, (c) names O, (d) writes each readable target table (and changes a literal DEFAULT column), (e) O not on the changed-file list where that list is built. An accepted finding becomes a corrected-by notice. An unknown named file gives exit 2.",
+    "changedFiles": {
+      "builtWhen": "target without origin/ equals changedFiles.targetBranch (default develop-recovery) and branch is neither that branch nor a protected branch (default main, develop)",
+      "notBuiltWhen": "any other target, a run on the target or a protected branch, or no option; no git command runs and condition (e) is not evaluated",
+      "gitCommands": ["git merge-base <target> HEAD", "git diff --name-only --diff-filter=AMR <base>..HEAD"],
+      "failClosed": "target not found, no merge base, or --branch missing, empty or HEAD gives exit 2; never an empty list"
+    },
+    "pinnedDependencies": [
+      "org.yaml:snakeyaml:2.6 (YAML input and the allow list)",
+      "tools.jackson.core:jackson-core:3.1.7 (JSON fixture streaming with line numbers)",
+      "org.junit.jupiter:junit-jupiter:6.0.3 (test only)",
+      "org.assertj:assertj-core:3.27.7 (test only)",
+      "org.junit.platform:junit-platform-launcher:6.0.3 (test runtime only)"
+    ],
+    "coverageGate": "JaCoCo LINE, BRANCH, METHOD and INSTRUCTION at 0.80 on every tools/pdpa-lint main class, by jacocoTestCoverageVerification, run by check"
+  },
+  "fileContracts": [
+    {
+      "id": "CON-TE011-002",
+      "file": "tools/pdpa-lint/pdpa-lint.yaml",
+      "reader": "th.co.scb.ace.tools.pdpa.config.ConfigLoader",
+      "schema": "plan/data-model.md section 3",
+      "productionContent": "plan/data-model.md section 3 (11 roots, 6 exclusions, 1 lint-fixture root, the three matcher names, the empty fixtureObjects)",
+      "tests": ["UT-TE011-01", "UT-TE011-02", "UT-TE011-03", "UT-TE011-12", "UT-TE011-13", "UT-TE011-43"],
+      "tasks": ["TASK-01", "TASK-03", "TASK-11", "TASK-31"]
+    },
+    {
+      "id": "CON-TE011-003",
+      "file": "tools/pdpa-lint/pdpa-allow.yaml",
+      "reader": "th.co.scb.ace.tools.pdpa.allow.AllowList",
+      "schema": "plan/data-model.md section 4",
+      "productionContent": "an empty YAML sequence with the header comments",
+      "tests": ["UT-TE011-35"],
+      "tasks": ["TASK-01", "TASK-23"]
+    },
+    {
+      "id": "CON-TE011-004",
+      "file": "tools/pdpa-lint/build/pdpa-rules.yaml",
+      "writer": "th.co.scb.ace.tools.pdpa.report.RulesFileWriter",
+      "schema": "plan/data-model.md section 1",
+      "properties": "generated every run before scanning, deterministic, no timestamp, not committed, kept as a CI artifact",
+      "tests": ["UT-TE011-11"],
+      "tasks": ["TASK-09", "TASK-31"]
+    },
+    {
+      "id": "CON-TE011-005",
+      "file": "backend/src/main/resources/application.yaml",
+      "reader": "th.co.scb.ace.tools.pdpa.config.RepositoryLayout",
+      "property": "rwb.flyway.location = classpath:db/modulemigration/recovery",
+      "rule": "the single source of the migration folder; a missing property, a placeholder or a non-classpath value gives exit 2; dictionary.migrationFolder may only repeat it",
+      "tests": ["UT-TE011-03", "UT-TE011-13"],
+      "tasks": ["TASK-03", "TASK-11"]
+    },
+    {
+      "id": "CON-TE011-006",
+      "file": ".gitlab-ci.yml",
+      "job": "pdpa-lint",
+      "text": "plan/data-model.md section 6.3",
+      "rule": "stage verify; merge request, branch and tag rules; GIT_DEPTH 0; git installed only when absent; delete-then-non-fatal-fetch; PDPA_LINT_TARGET_BRANCH equals changedFiles.targetBranch; artifacts include pdpa-rules.yaml and the console log",
+      "tests": ["UT-TE011-43"],
+      "tasks": ["TASK-30", "TASK-31"]
+    },
+    {
+      "id": "CON-TE011-007",
+      "file": ".gitlab/CODEOWNERS",
+      "line": "/tools/pdpa-lint/ @scb-ace/techx-recovery-tech-leads",
+      "rule": "in section [Recovery module], added in the same change as tools/pdpa-lint, passes the RWB-TE-002 validator V4, V7 and V9",
+      "tests": ["UT-TE011-43", "HV-01"],
+      "tasks": ["TASK-31"]
+    },
+    {
+      "id": "CON-TE011-008",
+      "file": "scripts/dev.ps1",
+      "text": "plan/data-model.md section 8",
+      "rule": "pdpa-lint in ValidateSet; the same lint in test after the Gradle tests; branch from git rev-parse; target develop-recovery; a non-zero tool exit fails the command",
+      "tests": ["UT-TE011-43", "FTS-04"],
+      "tasks": ["TASK-31", "TASK-33"]
+    }
+  ],
+  "security": {
+    "serviceEndpoints": "none",
+    "methodSecurity": "not applicable (no endpoint)",
+    "secrets": "none; the tool reads no credential and calls no network",
+    "personalData": "no personal data in code, fixtures, tests, logs, artifacts or output; failing FIXTURE-ID values are built at run time",
+    "authority": "change control through .gitlab/CODEOWNERS (SPEC-TE011-014)"
+  },
+  "migration": {
+    "productionMigration": "none",
+    "reason": "D-RUN-07 not exercised; the corrective-migration rule is lint logic and creates no script",
+    "checkTask": "TASK-34 (2)"
+  }
+}

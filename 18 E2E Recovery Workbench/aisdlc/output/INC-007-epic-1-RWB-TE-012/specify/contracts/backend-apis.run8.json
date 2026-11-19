@@ -1,0 +1,87 @@
+{
+  "run_id": "INC-007-epic-1-RWB-TE-012",
+  "story": "RWB-TE-012",
+  "revision": "v5 (spec gate round 4: SG-26 only the readiness probe writes readiness; BLOB_MISSING reason; per-operation outcomes never change readiness)",
+  "api_in_scope": "NO",
+  "api_impact": "NO_API_CHANGE",
+  "reason": "Story file RWB-TE-012 v1 section 12: no endpoint of its own.",
+  "source": {
+    "file": "api/recovery-api-v4.yaml",
+    "document_set_copy": "requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v4.yaml"
+  },
+  "changes": [],
+  "dependent_endpoints": [
+    {
+      "operationId": "postCasesCaseidDocuments",
+      "method": "POST",
+      "path": "/api/recovery/v1/cases/{caseId}/documents",
+      "owner_stories": [
+        "RWB-E1-026",
+        "RWB-E1-024"
+      ],
+      "uses": "DocumentStorage.store and readiness (through RWB-E1-024 DocumentStore)",
+      "responses_relevant": {
+        "403": "MSG-P4-002 (existing ApiError.NOT_PERMITTED; TC-TE-012-13)",
+        "503": "MSG-GEN-006 when StorageUnavailableException (NOT_READY, TIMEOUT, UNAVAILABLE, ACCESS_REFUSED, BLOB_MISSING); BLOB_MISSING has no specific message in Error and Message Standard v4"
+      },
+      "verified_in": "RWB-E1-024 / RWB-E1-026"
+    }
+  ],
+  "published_java_interface": {
+    "module": "P5 dochub (RWB-TE-001 v4 module map)",
+    "package": "th.co.scb.ace.demo.recovery.dochub.api",
+    "types": [
+      "DocumentStorage",
+      "BlobRef",
+      "BlobWriteRequest",
+      "StoredBlob",
+      "StorageReadiness",
+      "WriteOnceViolationException",
+      "StorageUnavailableException (+ nested Reason)"
+    ],
+    "signatures": {
+      "DocumentStorage.store": "StoredBlob store(BlobWriteRequest request)",
+      "DocumentStorage.open": "byte[] open(BlobRef ref); missing blob -> StorageUnavailableException(BLOB_MISSING), readiness unchanged",
+      "DocumentStorage.readiness": "StorageReadiness readiness()",
+      "BlobRef": "record BlobRef(String container, String blobName); String storageRef(); static BlobRef fromStorageRef(String)",
+      "BlobWriteRequest": "record BlobWriteRequest(UUID caseId, UUID documentId, int docVersion, boolean writeOnce, BlobRef source)",
+      "StoredBlob": "record StoredBlob(BlobRef ref, String sha256, long size, boolean existing)",
+      "StorageReadiness": "record StorageReadiness(boolean ready, List<String> reasons, Instant checkedAt)",
+      "BlobWriteRequest_source_rule": "source is the intake container (any name), or, only when writeOnce=true, the standard container at the same name {caseId}/{documentId}/v{docVersion} (Decision Log v10 D-RCV-31 re-store into rwb-docs-legal; source object kept). Any other source container -> IllegalArgumentException, no storage call",
+      "flag_off": "DocumentStorage and DocumentContainers beans present; store/open throw StorageUnavailableException(NOT_READY); readiness() ready=false, reasons=[FLAG_OFF]",
+      "store_when_not_ready": "Single-flight readiness probe with a deadline of rwb.dochub.storage.timeout-seconds (10, RWB-TE-012 AC10). Fresh NOT_READY (younger than rwb.dochub.storage.readiness-recheck-seconds, 30, assumed) -> StorageUnavailableException(NOT_READY) at once, no storage call; otherwise the caller joins or starts the one probe and waits at most timeout-seconds: probe NOT_READY -> NOT_READY; wait ended first -> TIMEOUT. Callers map both to 503 MSG-GEN-006.",
+      "StorageUnavailableException.Reason": "NOT_READY, TIMEOUT, UNAVAILABLE, ACCESS_REFUSED, BLOB_MISSING",
+      "readiness_writer": "Only the readiness probe writes readiness. store()/open() outcomes TIMEOUT, transport UNAVAILABLE (5xx/IO after retries) or ContainerNotFound request one background probe (single-flight; none if a probe is in flight or ended within readiness-recheck-seconds); BLOB_MISSING, ACCESS_REFUSED, write-once refusals, conflicts and other 4xx never change readiness. The readiness-recheck-seconds reuse applies to probe results only."
+    },
+    "evolves": [
+      "dochub.api.DocumentStore (relocated by RWB-TE-001)",
+      "DocumentStore.StoredDocument",
+      "DocumentStore.DocumentImmutableException"
+    ],
+    "names_left_for_RWB-E1-024": [
+      "DocumentStore",
+      "StoreRequest",
+      "StoredDocument"
+    ],
+    "boundary": "No com.azure.storage type in dochub.api (BND-5); DocumentContainers stays in non-published dochub.storage",
+    "test_impact": "T-TE001-14 expected dochub.api list replaced by the types above in the same merge request",
+    "source": "Decision Log v10 D-RCV-31; RWB-E1-024 v1 sections 12 and 13; RWB-TE-001 spec v4 SPEC-022, SPEC-025"
+  },
+  "operational": {
+    "endpoint": "/actuator/health",
+    "component": "documentHub",
+    "status_rules": {
+      "flag_off": "UNKNOWN, ready=false, reasons=[FLAG_OFF]; root status unchanged (200 when other components are UP)",
+      "flag_on_ready": "UP",
+      "flag_on_not_ready": "DOWN; root /actuator/health answers 503",
+      "storage_calls_on_read": "none",
+      "emulator_mode": "identity checks EMULATED; READY when the four containers exist (no client IDs needed)",
+      "per_operation_outcome": "never changes documentHub; e.g. open() of a missing blob leaves UP and root 200 (T-TE012-18)",
+      "probe_failure": "NOT_READY (UNREACHABLE or CONTAINER_MISSING:<name>) -> documentHub DOWN, root 503 (T-TE012-18)"
+    },
+    "probe_groups": "not in liveness or readiness",
+    "details_visible_to": "RW-PLATADM (management.endpoint.health.show-details: when-authorized)",
+    "in_api_specification": false,
+    "note": "Operational endpoint outside the API specification, as README decision 6 records for existing operational endpoints."
+  }
+}

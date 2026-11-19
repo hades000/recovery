@@ -1,0 +1,56 @@
+### RWB-E1-069
+- file_stem: RWB E1 069 Read only ACE source views
+- title: Read-only ACE source views, grants and boundary rule
+- module: P1 Recovery data engine | flag: none (the views are the read path) | status: PARTIAL "Ready. 14 Section B views wait for RWB-ACE-001" | theme: default
+- overview_label: ACE views + grants (hub)
+- goal: Recovery code reads ACE only through 30 SELECT-only views
+- why: One copy of source data. ACE cascades deletes on account, so there is no FK into public; links are business keys. Views rename ACE columns for the Workbench.
+- needs: E1-001, E1-044, ACE-001 (Section B) | unblocks: E1-002, E1-016, E1-018 and every story that reads ACE
+- triggers: BUILD "Flyway V0002 (16 views) + V0003 (14)" ; BUILD "ViewConformanceTest in the pipeline" ; BUILD "ArchUnit rule BND-6 on every PR" ; WHO "Recovery squad + ACE DBA grant"
+- ace: v_ace_account A "days_past_due <- public.account.delay_days" ; v_ace_payment A "payment_date <- ace_to_date(pay_date text)" ; v_ace_customer A "id_no_masked + id_no_last4 only; clear ID stays in ACE" ; v_ace_contact A "phone + email + address union, contact_type" ; v_ace_plan A "4 ACE plan tables in one view" ; v_ace_* (11 more) A "efs_action, collateral, holiday, product, branch ..." ; v_ace_batch_status B "over ace_batch_run (Tier 2 table)" ; v_ace_* (13 more) B "valuation, lawsuit, pod, score, iam_group ..."
+- writes: party_ext "vulnerable, deceased_override, bankruptcy, fraud_flag" ; contact_point_ext "consent and quality per phone / email / address" ; account_ext "dispute_open" ; valuation_ext "accepted, stale_flag, age_days"
+- reads: sys_objects, sys_fields "one dictionary row per view column"
+- stores: "flyway_schema_history_recovery; roles ace_view_owner (owns views) and recovery_svc (SELECT on views only); recovery-modules.yaml sourceViews"
+- functions: V0002 ace_source_views "16 Section A views + grants" ; V0003 ace_tier2_views "14 Section B views + grants" ; ViewConformanceTest "compile, no FK, dictionary, grants" ; SourceViewBoundaryRule "BND-6: no class names public.*" ; ace_to_date / ace_to_boolean "text -> date, Y/N -> boolean" ; recovery-modules.yaml "the 30 allowed view names"
+- path: store "ACE public tables (21 + 14)" > function "ace_view_owner: SELECT, owns views" > ace "recovery.v_ace_* (30 views)" > function "recovery_svc: SELECT on views only" > check "BND-6 + conformance test" > out "Every module reads ACE here"
+- rules: "BR1: recovery reads ACE only via the 30 SELECT-only views; it loads, copies and transforms nothing" ; "BR3: recovery_svc holds no privilege in public; PUBLIC holds nothing; no write on a view" ; "BR4: no constraint in recovery references public; links are varchar(255) business keys" ; "BR9: a Section B view is created only after its ACE table exists (V0003 after RWB-ACE-001)"
+- risks: "recovery_svc selects public.account -> SQLSTATE 42501 permission denied" ; "Class AccountReader reads public.account -> build fails: 'Boundary rule BND-6 broken'" ; "V0003 before RWB-ACE-001 -> 'relation public.valuation does not exist', no B view made"
+- example: "ACE account ACC0000017 has delay_days = 95" ; "SELECT days_past_due FROM recovery.v_ace_account WHERE account_code = 'ACC0000017' -> 95" ; "Dictionary: DF-ACE-018, source public.account.delay_days, DP01, DAILY" ; "Second party_ext row for person_key P0000123 -> SQLSTATE 23505, first row unchanged"
+
+### RWB-E1-026
+- file_stem: RWB E1 026 Attach and search screen
+- title: Attach and search screen
+- module: P5 Document hub | flag: rwb.dochub.casedocs | status: READY "Ready for build" | theme: default
+- overview_label: Upload + list case documents
+- goal: Let a case owner upload, list and search a case's documents by type and date from the case record
+- why: Documents stop living in e-mail and shared drives. Every upload is malware-scanned, typed, de-duplicated and logged before it is stored.
+- needs: E1-025, E1-024, E1-041, E1-045, E1-030 | unblocks: E1-040
+- triggers: WHO "Case owner on SCR-30 Documents tab" ; API "POST /cases/{caseId}/documents" ; API "GET /cases/{caseId}/documents?type=&dateFrom=" ; API "GET /cases/{caseId}/document-checklist"
+- ace: [] ; ace_note: "No ACE read. The screen works on Workbench cases and documents only."
+- writes: document "via DocumentStore: source UPLOAD, doc_version 1" ; decision_log_entry "via DocumentStore, before the store"
+- reads: recovery_case "via CaseDirectory" ; document "list and search, newest first" ; document_type "type must be in force" ; document_hub_parameter "INTAKE_MAX_FILE_MB, ALLOWED_TYPES"
+- stores: "Intake blob container; quarantine on malware; Idempotency-Key store (24 h); DocumentStored event (EV-16)"
+- functions: DocumentHubController "POST / GET documents, checklist" ; CaseDocumentUploadService "intake, scan, store, idempotency" ; CaseDocumentQueryService "list + search by type and date" ; ChecklistPlaceholderService "six-type placeholder" ; CaseDocumentsTab "React SCR-30" ; UploadDocumentDialog "file, type, size check"
+- path: trigger "POST /cases/{caseId}/documents" > store "Intake container" > check "Malware scan (E1-041)" > function "DocumentStore.store, source UPLOAD" > table "document + decision log entry" > out "Listed on SCR-30 within 5 s"
+- rules: "BR1: an upload carries a type from the table in force and source UPLOAD" ; "BR2: every upload is malware-scanned first" ; "BR6: the same file, type and case returns the existing document (R-UNI-40)" ; "BR7: no decision log entry, no store (Principle 5)"
+- risks: "Malware found -> 422 and quarantine (MSG-P5-016)" ; "File type not allowed -> 415 (MSG-P5-001)" ; "Decision log write fails -> 503, nothing stored (MSG-P7-003)"
+- example: "TEST-CO-01 uploads court-notice-0007.pdf (2 MB, COURT_NOTICE) to RW-2026-000123" ; "-> 201 Created, source UPLOAD, doc_version 1" ; "Shown in the Documents tab within 5 s, 20 per page, newest first"
+
+### RWB-E1-059
+- file_stem: RWB E1 059 Case intake agent in shadow E1b
+- title: Case intake agent in shadow [E1b]
+- module: P10 Agent runtime | flag: rwb.agent.intake-shadow | status: PARTIAL "Ready. read_valuations needs RWB-ACE-001" | theme: ai
+- overview_label: Intake agent (shadow)
+- goal: An intake agent summarises each new case and flags gaps in shadow, scored against analysts
+- why: Prove the agent is useful and safe before it helps anyone. Shadow output is never shown and changes nothing; it is only scored.
+- needs: E1-030, E1-058, TE-013 | unblocks: E1-061, E2-028
+- triggers: EVENT "EV-01 CaseCreated" ; CALL "INTAKE agent, key INTAKE:<caseId>:<date>" ; API "POST /admin/agent-evaluations (INTAKE-S1)" ; WHO "RW-COE evaluates; owners see nothing"
+- ace: v_ace_contact A "contact_type, usage_code (tool read_contact_points)" ; v_ace_valuation B "appraised_value, appraisal_date (read_valuations)"
+- writes: agent_run "SHADOW output, status, cost" ; agent_evaluation_run "evaluation on sample INTAKE-S1" ; agent_evaluation "agreement, precision, recall per gap type"
+- reads: recovery_case "case_no, product, status, entry date" ; document "documents on the case" ; agent_sample "labelled cases from the analysts"
+- stores: "Outbox EV-28; INT-23 model via the gateway; 5 read tools: read_case, read_accounts, read_documents, read_valuations, read_contact_points"
+- functions: IntakeShadowListener "EV-01 -> orchestrator" ; IntakeInputAssembler "masked inputs from 5 tools" ; IntakeOutputScorer "agent gaps vs labels" ; intake-summary-v1.json "output schema + gap list" ; prompt INTAKE PR1 "the versioned prompt"
+- path: trigger "EV-01 CaseCreated" > function "5 tools read case, docs, contacts" > ace "v_ace_contact + v_ace_valuation" > ai "INTAKE agent in SHADOW" > table "agent_run (no case change)" > out "Scored on INTAKE-S1"
+- rules: "BR1: shadow output is never shown and changes nothing" ; "BR2: one run per case per business date" ; "BR4: a stale ACE input must produce the STALE_INPUT gap" ; "BR5: agreement = matches / labelled cases"
+- risks: "Timeout or guardrail failure -> stored as a failure, no retry" ; "ACE batch not COMPLETE and no STALE_INPUT gap -> SCHEMA_RULE fails" ; "Empty evaluation sample -> 422 (MSG-P10-002)"
+- example: "200 cases created 2026-11-30 to 2026-12-04 -> 200 SHADOW runs" ; "No case, task or decision-log change" ; "Gap types: MISSING_DOCUMENT, NO_VALID_APPRAISAL, NO_CONTACT_POINT, STALE_INPUT"

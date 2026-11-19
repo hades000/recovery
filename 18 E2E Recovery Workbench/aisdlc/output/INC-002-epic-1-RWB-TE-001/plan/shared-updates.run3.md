@@ -1,0 +1,10 @@
+# Shared updates requested: RWB-TE-001 (run INC-002-epic-1-RWB-TE-001, plan, 18 Nov 2026)
+
+Shared files are not written by this stage (RUN-BRIEF). The spec-stage rows SU-01..SU-14 (`../specify/shared-updates.md`, spec v4) stand unchanged. The rows below are added by the plan stage for the owner named.
+
+| ID | Target (owner) | Requested change | Reason |
+|---|---|---|---|
+| SU-P01 | `aisdlc/requirement/Traceability_Matrix.md` (Traceability Manager) | Extend SU-01's RWB-TE-001 rows with the plan tests T-TE001-15 (BR6 → SPEC-003 → `BoundaryRulesTest.toolingHoldsNoRecoveryPackageLiteral`) and T-TE001-16 (BR3 → SPEC-007 → `ModulithFixtureTest.cycleBetweenModulesFailsVerify`), and the named test classes of `tests/scenarios.md` for each AC, BR and SPEC. | PA-08; plan test map |
+| SU-P02 | Specifiers of every later story that adds a public type to a published package or a new published package (for example RWB-E1-028 `casewf.timers`, RWB-E1-042 `casewf.config.api`, RWB-E1-043 `casewf.refdata.api`, RWB-E1-047 `integration.flags.api`, RWB-E1-071 `casewf.workflow`, RWB-E1-072 `casewf.rules`, RWB-TE-003 `integration.generated.*`) | In the same merge request, update the module map entry, the `@NamedInterface` `package-info`, and the expected list in `RecoveryBoundaryTest.publishedSurfaceIsExactlyTheSpecifiedTypes` (T-TE001-14). The test fails by design until the list is updated. | T-TE001-14 fixes the published surface of SPEC-025; later stories widen it on purpose |
+| SU-P03 | Specifiers of later stories that bind `rwb.*` keys (RWB-E1-043, RWB-TE-012 and any spec citing `RecoveryProperties`) | `RecoveryProperties` no longer exists. Bind a module's own keys with a package-private record in that module, registered with `@EnableConfigurationProperties` in the same module (pattern of `data-model.md` §5). | SPEC-023; extends SU-08 with the record names chosen here (PA-06) |
+| SU-P04 | `aisdlc/DOCUMENT-GAPS.md` (orchestrator) | Add PG-01..PG-03 of this stage's `document-gaps.md` (all Blocker = No) with this run's ID. | Plan-stage gaps |

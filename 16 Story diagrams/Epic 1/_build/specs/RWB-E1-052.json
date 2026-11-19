@@ -1,0 +1,158 @@
+{
+  "key": "RWB-E1-052",
+  "file_stem": "RWB E1 052 Notice generation v1",
+  "title": "Notice generation v1",
+  "module": "P6 Communications",
+  "flag": "rwb.comms.notice-generation",
+  "status": "PARTIAL",
+  "status_text": "Ready. Proof of delivery waits for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "Notice generation",
+  "goal": "Generate notices from Legal-approved templates, with name, address and balance read live from ACE",
+  "why": "Notices are legal steps with deadlines. Values are merged straight from ACE views (no copy kept), the PDF is write-once, and the decision is logged first.",
+  "needs": [
+    "E1-015",
+    "E1-018",
+    "E1-027",
+    "E1-046",
+    "E1-069"
+  ],
+  "unblocks": [
+    "E1-055",
+    "E2-021"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "NoticeApi.generate(caseId, type, personKey, lang)"
+    ],
+    [
+      "WHO",
+      "RW-LITOFF / RW-CASEOWN (UI in E2-021)"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_customer",
+      "section": "A",
+      "note": "first_name, last_name (id_no_masked / id_no_last4 only)"
+    },
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "ADDRESS: contact_value, city, post_code by contact_key"
+    },
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "total_balance, data_as_of"
+    },
+    {
+      "view": "v_ace_pod",
+      "section": "B",
+      "note": "later: delivery status for the notice"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "notice",
+      "note": "person_key, template_id, notice_type, state Generated / Held"
+    },
+    {
+      "t": "document",
+      "note": "write-once PDF via DocumentHubApi"
+    },
+    {
+      "t": "task (via P3)",
+      "note": "when a required value is empty"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "D7.1 (R-LIT-03), written first"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "case number, product"
+    },
+    {
+      "t": "case_party",
+      "note": "person_key, party_role"
+    },
+    {
+      "t": "template",
+      "note": "current Approved version"
+    },
+    {
+      "t": "merge_field",
+      "note": "code -> view column"
+    }
+  ],
+  "stores": "Outbox NoticeGenerated (EV-13); DOCX -> PDF renderer; document hub write-once container",
+  "functions": [
+    {
+      "name": "NoticeGenerationService",
+      "does": "NoticeApi: the whole flow"
+    },
+    {
+      "name": "MergeValueResolver",
+      "does": "merge code -> view column"
+    },
+    {
+      "name": "AceSourceReader",
+      "does": "reads 4 views, SELECT only"
+    },
+    {
+      "name": "LetterRenderer",
+      "does": "DOCX -> PDF + footer"
+    },
+    {
+      "name": "NoticeGeneratedPublisher",
+      "does": "EV-13 into the outbox"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "NoticeApi.generate(...)"
+    },
+    {
+      "kind": "table",
+      "text": "Approved template + case party"
+    },
+    {
+      "kind": "ace",
+      "text": "Name, address, balance from views"
+    },
+    {
+      "kind": "check",
+      "text": "Any required value empty -> Held"
+    },
+    {
+      "kind": "table",
+      "text": "Log D7.1 -> PDF -> notice row"
+    },
+    {
+      "kind": "out",
+      "text": "EV-13 NoticeGenerated"
+    }
+  ],
+  "rules": [
+    "BR1: generate only from the current Approved template",
+    "BR9: name and address come only from v_ace_customer and v_ace_contact; no copy kept",
+    "BR10: the clear identification_number is never merged",
+    "BR12: the merge snapshot stores references, never values"
+  ],
+  "risks": [
+    "No Approved template version -> refused (MSG-P6-005)",
+    "Required value empty (e.g. no ADDRESS row) -> Held + task (MSG-P6-007)",
+    "Decision log write fails -> nothing stored (MSG-P7-003)"
+  ],
+  "example": [
+    "Case RW-2026-000123, person_key P-0001, address ADDRESS:A-9001, total_balance 1,250,000.00",
+    "-> DEMAND-MTG v2 PDF, footer 'RW-2026-000123 DEMAND-MTG v2 2026-11-25'",
+    "-> sent_type NPL, D7.1 entry, NoticeGenerated in the outbox"
+  ]
+}

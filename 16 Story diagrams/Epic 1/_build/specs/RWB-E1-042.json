@@ -1,0 +1,125 @@
+{
+  "key": "RWB-E1-042",
+  "file_stem": "RWB E1 042 Central configuration service and parameter catalog",
+  "title": "Central configuration service and parameter catalog",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.configservice",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Parameter service + catalog",
+  "goal": "Every setting and business value is read from one service and catalogued with an owner; no hard-coded numbers",
+  "why": "Business values like the 90-day entry threshold change by approved data, not by release, and each decision records the parameter version it used.",
+  "needs": [
+    "E1-044"
+  ],
+  "unblocks": [
+    "E1-043",
+    "E1-045"
+  ],
+  "triggers": [
+    [
+      "BUILD",
+      "Key added to config/parameter-catalog.csv"
+    ],
+    [
+      "BUILD",
+      "RwbMagicNumberCheck fails business literals"
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (PARAMETER)"
+    ],
+    [
+      "CALL",
+      "ParameterService.get(key, env, date)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Parameters are Workbench configuration; secrets stay in the secret store.",
+  "writes": [
+    {
+      "t": "parameter_catalog",
+      "note": "key, type, range, owner, environments, used-by"
+    },
+    {
+      "t": "parameter_value",
+      "note": "versioned value per environment and date"
+    }
+  ],
+  "reads": [
+    {
+      "t": "parameter_catalog, parameter_value",
+      "note": "typed reads, cached 60 s"
+    }
+  ],
+  "stores": "config/parameter-catalog.csv in the repo; secret store; outbox ParameterVersionApproved",
+  "functions": [
+    {
+      "name": "ParameterService",
+      "does": "typed get + version (published)"
+    },
+    {
+      "name": "ParameterLoadChecks",
+      "does": "key, type, range, environment"
+    },
+    {
+      "name": "ParameterLoadHandler",
+      "does": "load, approve, rollback"
+    },
+    {
+      "name": "ParameterStartupCheck",
+      "does": "no start without required values"
+    },
+    {
+      "name": "RwbMagicNumberCheck",
+      "does": "build fails on business literals"
+    },
+    {
+      "name": "ParameterKeysGenerator",
+      "does": "generates ParameterKeys"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Squad adds key to catalog CSV"
+    },
+    {
+      "kind": "check",
+      "text": "Build: magic-number + completeness"
+    },
+    {
+      "kind": "table",
+      "text": "Flyway seeds catalog + defaults"
+    },
+    {
+      "kind": "check",
+      "text": "Owner approves value (not author)"
+    },
+    {
+      "kind": "table",
+      "text": "parameter_value v2 in force"
+    },
+    {
+      "kind": "out",
+      "text": "Engines read value + log version"
+    }
+  ],
+  "rules": [
+    "BR1: business values are versioned parameter rows, never constants",
+    "BR2: every parameter has an owner, type, default, environments and used-by",
+    "BR6: secrets stay in the secret store only",
+    "BR7: the service does not start without its required parameters"
+  ],
+  "risks": [
+    "Literal business value in code -> build fails",
+    "Required value missing at start -> service does not start (MSG-P3-032)",
+    "Value out of range -> refused (MSG-GEN-002)"
+  ],
+  "example": [
+    "case.entry.dpd: INTEGER 1-365, default 90, owner RW-COE",
+    "PROD v1 = 90",
+    "Entry evaluation on 2026-12-01 reads 90 from the service and records parameter version 1"
+  ]
+}

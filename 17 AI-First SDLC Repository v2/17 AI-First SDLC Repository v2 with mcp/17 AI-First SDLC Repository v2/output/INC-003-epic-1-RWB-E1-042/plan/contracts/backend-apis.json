@@ -1,0 +1,66 @@
+{
+  "contract_id": "CON-RWB-E1-042-001",
+  "story": "RWB-E1-042",
+  "base_path": "/api/recovery/v1",
+  "endpoints": [
+    {
+      "id": "API-E1-042-01",
+      "method": "GET",
+      "path": "/admin/parameters",
+      "purpose": "List the parameter catalog with the value in force for the caller's environment",
+      "auth": "Rules and parameters R",
+      "query": ["environment", "kind", "ownerRole", "page", "size"],
+      "response": "Parameter[]",
+      "errors": ["401 MSG-P4-001", "403 MSG-P4-002"]
+    },
+    {
+      "id": "API-E1-042-02",
+      "method": "POST",
+      "path": "/admin/reference-loads",
+      "purpose": "Load a PARAMETER file (key,environment,value)",
+      "auth": "Reference data C",
+      "request": {"table": "PARAMETER", "fileName": "string", "validFrom": "date"},
+      "response": {"loadId": "uuid", "status": "VALIDATED", "rows": "integer", "findings": "array"},
+      "errors": ["400 MSG-GEN-001", "422 MSG-GEN-002", "422 MSG-P1-002"]
+    },
+    {
+      "id": "API-E1-042-03",
+      "method": "POST",
+      "path": "/admin/reference-loads/{loadId}/approve",
+      "purpose": "Approve a validated parameter load",
+      "auth": "Reference data A",
+      "response": {"loadId": "uuid", "status": "APPROVED", "validFrom": "date", "versions": "array"},
+      "errors": ["409 MSG-P7-002", "403 MSG-P4-002"]
+    },
+    {
+      "id": "API-E1-042-04",
+      "method": "POST",
+      "path": "/admin/reference-loads/{loadId}/rollback",
+      "purpose": "Roll back the value in force to the previous approved version",
+      "auth": "Reference data U",
+      "response": {"loadId": "uuid", "status": "ROLLED_BACK", "restoredVersion": "integer"},
+      "errors": ["409 MSG-P3-015", "403 MSG-P4-002"]
+    }
+  ],
+  "parameter_schema": {
+    "key": "string",
+    "kind": "BUSINESS|ENVIRONMENT",
+    "valueType": "INTEGER|DECIMAL|STRING|BOOLEAN|DURATION|SECRET",
+    "unit": "string|null",
+    "min": "number|null",
+    "max": "number|null",
+    "default": "string|null",
+    "scope": "GLOBAL|PRODUCT",
+    "required": "boolean",
+    "ownerRole": "string",
+    "environments": "string[]",
+    "usedBy": "string",
+    "secret": "boolean",
+    "valueInForce": "string|null (absent when secret=true)",
+    "versionNo": "integer",
+    "validFrom": "date"
+  },
+  "events": [
+    {"name": "ParameterVersionApproved", "payload": {"key": "string", "environment": "string", "versionNo": "integer", "validFrom": "date"}}
+  ]
+}

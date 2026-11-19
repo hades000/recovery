@@ -1,0 +1,120 @@
+{
+  "key": "RWB-E1-061",
+  "file_stem": "RWB E1 061 Intake agent evaluation and L1 proposal E2a",
+  "title": "Intake agent evaluation and L1 proposal [E2a]",
+  "module": "P10 Agent runtime",
+  "flag": "rwb.agent.promotion",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "ai",
+  "overview_label": "Intake agent L1 proposal",
+  "goal": "Turn the intake agent's shadow results into an approval report and a versioned L1 policy proposal for Risk",
+  "why": "Moving an agent from shadow to L1 (it may recommend) is a governed decision with evidence: sample size, agreement, failures, cost and latency.",
+  "needs": [
+    "E1-059"
+  ],
+  "unblocks": [
+    "E1-063"
+  ],
+  "triggers": [
+    [
+      "API",
+      "GET /admin/agent-evaluations/{id}/report"
+    ],
+    [
+      "LOAD",
+      "POST /admin/agent-configs (INTAKE P2 L1)"
+    ],
+    [
+      "API",
+      "POST /admin/agent-configs/{versionId}/approve"
+    ],
+    [
+      "WHO",
+      "RW-COE proposes; RW-RISK approves"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The report reads agent runs and their scores.",
+  "writes": [
+    {
+      "t": "agent_policy",
+      "note": "P2: autonomy L1, conditions, fallback, watch measures"
+    }
+  ],
+  "reads": [
+    {
+      "t": "agent_evaluation_run",
+      "note": "the DONE evaluation"
+    },
+    {
+      "t": "agent_evaluation",
+      "note": "scores per gap type"
+    },
+    {
+      "t": "agent_run",
+      "note": "status, latency_ms, cost_thb"
+    }
+  ],
+  "stores": "CSV and PDF exports for the steering committee",
+  "functions": [
+    {
+      "name": "AgentEvaluationController",
+      "does": "report endpoint"
+    },
+    {
+      "name": "EvaluationReportService",
+      "does": "aggregates runs and scores"
+    },
+    {
+      "name": "EvaluationReportExporter",
+      "does": "CSV and PDF"
+    },
+    {
+      "name": "PromotionProposalValidator",
+      "does": "BR1-BR3 for mode L1"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "RW-COE requests the report"
+    },
+    {
+      "kind": "table",
+      "text": "agent_run + agent_evaluation"
+    },
+    {
+      "kind": "function",
+      "text": "Report: agreement, cost, p95"
+    },
+    {
+      "kind": "check",
+      "text": "Conditions met? 200+ cases?"
+    },
+    {
+      "kind": "check",
+      "text": "RW-RISK approves (not loader)"
+    },
+    {
+      "kind": "out",
+      "text": "agent_policy P2 L1 from valid_from"
+    }
+  ],
+  "rules": [
+    "BR1: the proposal names a DONE run, conditions, fallback and watch measures",
+    "BR2: conditions are checked against the scores",
+    "BR3: at least 200 cases in the evaluation",
+    "BR6: the loader cannot approve"
+  ],
+  "risks": [
+    "Report asked while evaluation runs -> 409 (MSG-P10-008)",
+    "Conditions not met -> refused (MSG-P10-001)",
+    "Loader approves -> 409 (MSG-P7-002)"
+  ],
+  "example": [
+    "EV-INTAKE-001: 200 runs (188 ANSWERED, 7 TIMED_OUT, 3 GUARDRAIL_FAILED, 2 BELOW_FLOOR)",
+    "Cost 412.60 baht (2.063 per case), p50 4,100 ms, p95 9,800 ms",
+    "Proposal P2 L1 requires agreement >= 0.85 per gap type"
+  ]
+}

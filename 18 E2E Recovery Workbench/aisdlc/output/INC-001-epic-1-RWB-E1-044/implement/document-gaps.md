@@ -1,0 +1,8 @@
+# Document gaps: RWB-E1-044 (implementation stage)
+
+| Local ID | Document (name, version, section) | Gap or conflict | Second source that shows it | Blocker? | Why (blocker or not) | How this stage proceeded |
+|---|---|---|---|---|---|---|
+| DG-E044-DYN-01 | Specification `INC-001-epic-1-RWB-E1-044/specify/spec.md` v14-7, SPEC-RWB-E1-044-009 and T-044-20 | `L-GRANT` fails only when GRANT or REVOKE is the first word of a line or of a statement. It does not inspect GRANT/REVOKE inside `EXECUTE`/`DO` dynamic SQL, so `EXECUTE 'GRANT …'`, `EXECUTE $q$GRANT …$q$`, `format('GRANT …')` and a concatenation are not refused by the lint. | `review/security-review.md` §3 SEC-044-03 (Low), reproduced against the compiled test classes; the gated spec text above is the conflicting source | No | SPEC-009 defines the rule exactly and the gate passed on that wording. The rule is a build-time, test-scope control; D-RUN-14 keeps the migrator without any table privilege in `public`, and code review remains the control. Adding dynamic-SQL analysis to `L-GRANT` exceeded the gated spec and was reverted after four review rounds. | The rule is restored to SPEC-009 exactly (line start via the code text, statement start via the identifier statement view). The out-of-spec dynamic-SQL fixtures were removed. The gap is recorded here, not silently accepted. Suggested owner: recovery tech lead / specification owner (the same review that owns the RWB-E1-069 view migrations). Suggested next rule ID: `L-DYNAMIC-SQL`, or a documented ban on dynamic SQL in recovery migrations; that needs its own gated spec change. |
+
+The plan-stage gap file (`plan/document-gaps.md`) is the planner's file and was not edited; the
+orchestrator may copy this row into it or into the shared gap register.

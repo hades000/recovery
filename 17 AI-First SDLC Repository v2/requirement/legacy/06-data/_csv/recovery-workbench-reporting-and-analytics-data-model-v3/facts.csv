@@ -1,0 +1,12 @@
+﻿Fact tables
+Star schema in the data lake for Power BI. ACE source rows are read through recovery.v_ace_* views; Workbench rows come from the recovery tables. No source system is loaded directly.
+Table,Grain,Dimensions,Measures,Source entities,Refresh
+fact_case_daily,One row per open case per day,"case, date, product, stage, route, owner, team, queue","open flag, days in state, breached flag, balance","recovery_case, timer, v_ace_account",Read through v_ace_account; nightly
+fact_decision,One row per decision log entry,"case, date, decision, rule, approver, agent","count, override flag, fallback flag, amount",decision_log_entry,Nightly from the Workbench
+fact_treatment,One row per treatment,"case, date, product, treatment type, status","offer amount, approved amount, booked amount, days to book","treatment, v_ace_plan",Read through v_ace_plan; nightly
+fact_legal,One row per legal action,"case, date, firm, court, status","days to file, days to judgment, court fees","legal_action, v_ace_lawsuit, v_ace_hearing",Read through v_ace_lawsuit and v_ace_hearing; nightly
+fact_asset,One row per asset per month,"asset, month, type, region, status","book value, holding cost, list price, sale price, days held","v_ace_asset, v_ace_npa_asset, listing, asset_sale",Read through v_ace_asset and v_ace_npa_asset; nightly
+fact_lot,One row per lot,"lot, buyer, date","balance, reserve, price, put-backs","debt_sale_lot, debt_sale_account",Nightly from the Workbench
+fact_recovery,One row per receipt,"case, date, route, product, source","amount, principal resolved","proceeds, write_off, v_ace_payment, v_ace_write_off",Read through v_ace_payment and v_ace_write_off; nightly
+fact_partner,One row per instruction,"partner, case, date, type","days to complete, breached flag, fee",partner_instruction,Nightly from the Workbench
+fact_flow,One row per bucket per month,"month, product, bucket","opening balance, forward flow balance, flow rate",v_ace_bucket_log,Read through v_ace_bucket_log; monthly

@@ -1,0 +1,14 @@
+# Assumptions: RWB-E1-044 documentation stage
+
+| ID | Assumption | Basis |
+|---|---|---|
+| A-DOC-E044-01 | The documentation describes the story at branch `feature/RWB-E1-044-db-migrations`, tip `89477bc`, base `f36991a`. Merge had not happened when this stage ran, so every status statement says so. | `../review/code-gate-review.md` (diff, tip, base); `../implement/implementation-report.md` |
+| A-DOC-E044-02 | Gate results are taken from the review artifacts as written. This stage did not re-run a gate, a test or a reviewer. | `../review/spec-gate-review-7.md`, `../review/plan-gate-review-2.md`, `../review/code-gate-review.md`, `../review/security-review.md`, `../review/ponytail-review.md` |
+| A-DOC-E044-03 | `DOC-*` IDs are run-local and numbered `DOC-RWB-E1-044-001`..`-018`; each is mapped in place to `SPEC-*`, `AC*`, `BR*`, `TASK-*` or `CODE-*`. | Traceability Standards, "Technical Documenter: Create `DOC-*`" |
+| A-DOC-E044-04 | No `OPERATIONS.md` is published. The story adds no job, queue, monitor, endpoint, screen or feature flag to operate; the only repeatable procedures are the developer and merge-gate commands, which the README carries. | `README.md` §5; spec v14-7 "API Change Assessment" and "Frontend Specification" |
+| A-DOC-E044-05 | Paths in the three documents are relative to this `docs/` folder; `../` reaches the story's other stage folders. Repository paths are written from the repository root. | Repository layout |
+| A-DOC-E044-06 | The documentation follows the delivered code, including the review-round and code-gate fixes, not an earlier gated draft. The one fixture-count difference from `code-map.md` is stated as a post-gate drift. | `../implement/code-map.md`; `../implement/implementation-report.md`; the delivered `backend/src/test/resources/migration-lint/` tree |
+| A-DOC-E044-07 | No personal data, credential, secret or production value is used. Examples are synthetic table and column names from the fixture corpus. | Spec v14-7 guardrails; code-gate "No PII/credential" check |
+| A-DOC-E044-08 | "Current status" means the state after the code gate: implemented, evidenced and awaiting human review and merge. It does not mean released, accepted or SIT/UAT-cleared. | `../review/code-gate-review.md`; OPEN-016 |
+| A-DOC-E044-09 | The 15-rule list, the finding format and the D-RUN-14 statements are quoted from the gated spec and the delivered code, not re-derived. | Spec v14-7 SPEC-004..-010, SPEC-017; `backend/src/test/java/th/co/scb/ace/demo/recovery/architecture/migration/MigrationRules.java`; `infra/postgres/init/20-grants.sql.inc` |
+| A-DOC-E044-10 | The dynamic-SQL gap is documented as the implementation stage recorded it (`DG-E044-DYN-01`); this stage neither widens nor closes it and claims no new approval. | `../implement/document-gaps.md`; `../review/security-review.md` §3 |

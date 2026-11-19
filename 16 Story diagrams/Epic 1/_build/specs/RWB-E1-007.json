@@ -1,0 +1,171 @@
+{
+  "key": "RWB-E1-007",
+  "file_stem": "RWB E1 007 Integration adapters for outbound files",
+  "title": "Integration adapters for outbound files",
+  "module": "P2 Integration",
+  "flag": "rwb.integration.file-adapters",
+  "status": "PARTIAL",
+  "status_text": "Ready. Inbound removed; gate waits for ACE-001",
+  "theme": "default",
+  "overview_label": "Outbound file adapters",
+  "goal": "One outbound adapter with data-driven retry and an owned exception queue, so failed files surface the same day",
+  "why": "The old inbound loaders are gone: ACE ingests every source. What stays is sending files out (WIN notices, lake extracts, debt-sale tape) safely and visibly.",
+  "needs": [
+    "E1-001",
+    "E1-069",
+    "E1-015"
+  ],
+  "unblocks": [
+    "E1-002",
+    "E1-056",
+    "E1-063",
+    "TE-006"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "OutboundFiles.enqueue from an owning module"
+    ],
+    [
+      "JOB",
+      "JOB-11 outbox sender, every minute"
+    ],
+    [
+      "JOB",
+      "JOB-10 16:00, JOB-13 01:00, JOB-15 01:30"
+    ],
+    [
+      "API",
+      "POST /admin/outbound-items/{itemId}/resend"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "addressee for WIN notices (INT-14) by contact_key"
+    },
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "account_key, account_code for the debt-sale tape (INT-25)"
+    },
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "readiness: build only when the batch is COMPLETE"
+    },
+    {
+      "view": "v_ace_write_off",
+      "section": "B",
+      "note": "write-offs read back (BR11)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "outbound_item",
+      "note": "one row per file; SENT, ACKNOWLEDGED or EXCEPTION"
+    },
+    {
+      "t": "outbox_event, outbox_delivery",
+      "note": "events handed to the sender"
+    },
+    {
+      "t": "processed_event",
+      "note": "consumer dedup with hit_count"
+    },
+    {
+      "t": "task (via P3)",
+      "note": "owner task when the retry limit is reached"
+    }
+  ],
+  "reads": [
+    {
+      "t": "interface_config",
+      "note": "OUTBOUND rows: target, attempts, owner"
+    },
+    {
+      "t": "notice",
+      "note": "approved notices for WIN"
+    },
+    {
+      "t": "document",
+      "note": "file content in the store"
+    },
+    {
+      "t": "debt_sale_account",
+      "note": "debt-sale tape rows"
+    }
+  ],
+  "stores": "SFTP outbound folders + key store; document store container (TE-012); data lake (INT-19/20); WIN (INT-14); Log Analytics alerts on held and failed items",
+  "functions": [
+    {
+      "name": "OutboundFileAdapterImpl",
+      "does": "build file from tables and views"
+    },
+    {
+      "name": "AceBatchReadiness",
+      "does": "batch status -> COMPLETE or HOLD"
+    },
+    {
+      "name": "OutboundFilesImpl",
+      "does": "enqueue in the caller's transaction"
+    },
+    {
+      "name": "OutboundSender",
+      "does": "JOB-11: send, retry, exception"
+    },
+    {
+      "name": "SftpTransport",
+      "does": "the only SFTP class"
+    },
+    {
+      "name": "IdempotencyGuardImpl",
+      "does": "dedup via processed_event"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-10 enqueues WIN notices"
+    },
+    {
+      "kind": "ace",
+      "text": "Addressee from v_ace_contact"
+    },
+    {
+      "kind": "check",
+      "text": "ACE batch COMPLETE?"
+    },
+    {
+      "kind": "table",
+      "text": "outbound_item + file in doc store"
+    },
+    {
+      "kind": "function",
+      "text": "JOB-11 sends over SFTP, retries"
+    },
+    {
+      "kind": "out",
+      "text": "ACKNOWLEDGED or EXCEPTION + task"
+    }
+  ],
+  "rules": [
+    "BR2: ACE is read only via recovery.v_ace_* by business key; the adapter never writes ACE",
+    "BR3: a file is built only when the ACE batch is COMPLETE",
+    "BR9: no inbound adapter; interface_config holds OUTBOUND rows only",
+    "BR10: an item carries case IDs and keys, never names or addresses"
+  ],
+  "risks": [
+    "Batch not COMPLETE -> no file built (MSG-P1-001)",
+    "Transfer fails -> RETRY_QUEUE at 5 / 15 / 45 minutes (MSG-GEN-006)",
+    "Retry limit reached -> exception queue + owner task (MSG-P2-001)"
+  ],
+  "example": [
+    "INT-14 config: max 3 attempts at 5 / 15 / 45 min, owner RW-PLATADM",
+    "85 approved notices for 2026-11-10",
+    "JOB-10 builds WIN_NOTICE_20261110.txt with addressees from v_ace_contact by contact_key",
+    "No read of any public table"
+  ]
+}

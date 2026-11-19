@@ -1,0 +1,134 @@
+{
+  "key": "RWB-E1-019",
+  "file_stem": "RWB E1 019 Roles teams and queues as data",
+  "title": "Roles, teams and queues as data",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.queuetables",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Queues + teams as data",
+  "goal": "Hold queues, members and caps as versioned data with approval and rollback, so org changes need no release",
+  "why": "Team managers reorganise often. Allocation (E1-020) and scope (E1-037) read queues and capacity from data, not code.",
+  "needs": [
+    "E1-038",
+    "E1-043"
+  ],
+  "unblocks": [
+    "E1-020",
+    "E1-022"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (QUEUE, QUEUE_MEMBER)"
+    ],
+    [
+      "API",
+      "POST /admin/reference-loads/{loadId}/approve"
+    ],
+    [
+      "JOB",
+      "QueueVersionApplier daily 00:05"
+    ],
+    [
+      "WHO",
+      "RW-REFADM loads; RW-TEAMMGR approves"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Queues, teams and members are Workbench reference data; members are Entra ID object IDs.",
+  "writes": [
+    {
+      "t": "queue",
+      "note": "team, role, method, cap, overflow; table_version"
+    },
+    {
+      "t": "queue_member",
+      "note": "who works each queue, with capacity"
+    }
+  ],
+  "reads": [
+    {
+      "t": "reference_version, reference_row",
+      "note": "the loaded version"
+    },
+    {
+      "t": "role",
+      "note": "role must exist"
+    },
+    {
+      "t": "lov_value",
+      "note": "LOV-ASSIGN methods"
+    },
+    {
+      "t": "recovery_case",
+      "note": "open cases per owner (capacity)"
+    }
+  ],
+  "stores": "Excel 'Queues' template (sheets QUEUE, QUEUE_MEMBER); Entra ID object IDs",
+  "functions": [
+    {
+      "name": "QueueTableChecks",
+      "does": "team, role, cap, overflow loop"
+    },
+    {
+      "name": "QueueVersionApplier",
+      "does": "applies a version on valid_from"
+    },
+    {
+      "name": "CapacityService",
+      "does": "BELOW_CAP or AT_CAP"
+    },
+    {
+      "name": "QueueMembershipQuery",
+      "does": "teams, regions, queues for scope"
+    },
+    {
+      "name": "ReferenceRollbackHandler",
+      "does": "restores the previous version"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "RW-REFADM uploads the Queues file"
+    },
+    {
+      "kind": "check",
+      "text": "QueueTableChecks: whole file"
+    },
+    {
+      "kind": "check",
+      "text": "RW-TEAMMGR approves (not author)"
+    },
+    {
+      "kind": "function",
+      "text": "QueueVersionApplier 00:05"
+    },
+    {
+      "kind": "table",
+      "text": "queue + queue_member"
+    },
+    {
+      "kind": "out",
+      "text": "CapacityService for E1-020"
+    }
+  ],
+  "rules": [
+    "BR1: each queue has exactly one team and one role",
+    "BR4: the author of a load cannot approve it",
+    "BR6: capacity = min(member capacity, queue cap)",
+    "BR8: cap must be 1-500 (parameter queue.cap.max)"
+  ],
+  "risks": [
+    "Unknown team code -> whole load refused (MSG-P1-002)",
+    "Cap out of range -> refused (MSG-GEN-002)",
+    "Approver is the author -> refused (MSG-P7-002)"
+  ],
+  "example": [
+    "v1 from 2026-11-30: 12 queues, 48 members",
+    "Queue LIT-BKK-OFF -> team LIT-BKK, role RW-LITOFF",
+    "v3 has an error in DIL-BKK-CO -> rollback restores v2"
+  ]
+}

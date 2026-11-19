@@ -1,0 +1,56 @@
+{
+  "run_id": "INC-005-epic-1-RWB-TE-003",
+  "story": "RWB-TE-003",
+  "round": "remediation 1",
+  "api_impact": "NO_API_CHANGE",
+  "source": {
+    "file": "api/recovery-api-v4.yaml",
+    "sha256": "535cb46594190f0bf535a2ad3f034e9f50f987a92fe19c0524a2755f5923b891",
+    "sha256_file": "api/recovery-api-v4.sha256",
+    "openapi": "3.1.0",
+    "specification_version": "4.0.0",
+    "document_set_copy": "requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v4.yaml"
+  },
+  "counts": { "operations_total": 141, "e1": 73, "e2": 38, "e3": 8, "e4": 10, "e5": 8, "e6": 4, "schemas": 172 },
+  "changes": [],
+  "target_stack": { "spring_boot": "4.1.2", "jackson": "3", "java": "21", "spikes": ["S-1", "S-2", "S-4"] },
+  "generated": {
+    "grouping": "one interface per operation, abstract method only, no default method",
+    "server_interfaces": "<P2>.generated.web",
+    "server_models": "<P2>.generated.model",
+    "p2_package_root": "from the merged RWB-TE-001 module map (PRE-2); not assumed",
+    "output_dir": "backend/build/generated/recovery-api/",
+    "committed": false
+  },
+  "enforced_operations": [
+    {
+      "operationId": "postAdminWorkflowsSmoke",
+      "method": "POST",
+      "path": "/admin/workflows/smoke",
+      "x_module": "P3",
+      "capability": { "area": "Platform administration", "right": "C" },
+      "statuses": [202, 401, 403, 404, 503],
+      "owner_story": "RWB-E1-071",
+      "change": "retrofit onto generated interface; HTTP contract unchanged"
+    }
+  ],
+  "outside_specification": [
+    { "method": "GET", "path": "/platform/info", "decision": "README decision 6", "open_item": "NEW-TE003-A" },
+    { "method": "GET", "path": "/admin/temporal/health", "decision": "README decision 6", "open_item": "NEW-TE003-A" }
+  ],
+  "error_changes": [
+    { "handler": "ApiExceptionHandler.unexpected", "change": "add traceId to the 500 Problem; no messageCode (NEW-TE003-B)" }
+  ],
+  "suites": {
+    "lint_task": "recoveryApiLint",
+    "contract_test": "th.co.scb.ace.demo.recovery.contract.RecoveryContractTest",
+    "access_test": "th.co.scb.ace.demo.recovery.contract.RecoveryAccessContractTest",
+    "method_security_test": "th.co.scb.ace.demo.recovery.contract.RecoveryMethodSecurityTest",
+    "generated_guard_test": "th.co.scb.ace.demo.recovery.contract.GeneratedInterfaceGuardTest",
+    "runs_in": "Gradle test task (CI backend-unit)",
+    "report": "backend/build/reports/recovery-contract/contract-report.json",
+    "baseline": "api/recovery-api-implementation.yaml",
+    "ruleset": "api/recovery-api-ruleset.yaml",
+    "live_access_case": "TC-TE-003-09 BLOCKED until RWB-E1-022/RWB-E1-037 (OPEN-040)"
+  }
+}

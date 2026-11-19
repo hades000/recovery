@@ -1,0 +1,131 @@
+{
+  "key": "RWB-E1-017",
+  "file_stem": "RWB E1 017 Retention and archive rule for the data store",
+  "title": "Retention and archive rule for the data store",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.retention",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Retention + archive",
+  "goal": "Archive expired rows monthly to write-once storage, holding retention periods as data and skipping legal holds",
+  "why": "PDPA and records policy need old data removed safely. Rows are deleted only after a verified archive copy; the decision log is never archived.",
+  "needs": [
+    "E1-001",
+    "E1-043",
+    "TE-012",
+    "E1-064"
+  ],
+  "unblocks": [
+    "E1-014"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-17 Retention, first Sunday of month 02:30"
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (retention_rule)"
+    ],
+    [
+      "WHO",
+      "RW-COMPLY owns and approves"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Retention covers Workbench tables only; ACE keeps and ages its own source data.",
+  "writes": [
+    {
+      "t": "retention_rule",
+      "note": "period in months per product and table (RET-2026.11)"
+    },
+    {
+      "t": "interaction (DELETE)",
+      "note": "archived rows removed under retention_purge = on"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "legal_hold via CaseHoldQuery"
+    },
+    {
+      "t": "interaction",
+      "note": "rows older than the period"
+    },
+    {
+      "t": "sys_objects, sys_fields",
+      "note": "named table must exist"
+    },
+    {
+      "t": "data_product",
+      "note": "product codes"
+    }
+  ],
+  "stores": "Write-once archive container (TE-012): retention/YYYY-MM-DD/<table>/ JSON lines + manifest with SHA-256; Quartz",
+  "functions": [
+    {
+      "name": "RetentionJob",
+      "does": "JOB-17, no concurrent run"
+    },
+    {
+      "name": "RetentionService",
+      "does": "select, skip holds, delete"
+    },
+    {
+      "name": "ArchiveWriter",
+      "does": "JSON lines, manifest, read-back"
+    },
+    {
+      "name": "RetentionRuleLoader",
+      "does": "validate + apply a version"
+    },
+    {
+      "name": "RetentionRuleRepository",
+      "does": "rules in force"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-17 first Sunday 02:30"
+    },
+    {
+      "kind": "table",
+      "text": "retention_rule in force"
+    },
+    {
+      "kind": "check",
+      "text": "Skip cases on legal hold"
+    },
+    {
+      "kind": "store",
+      "text": "Write-once archive + manifest"
+    },
+    {
+      "kind": "check",
+      "text": "Read-back verified?"
+    },
+    {
+      "kind": "out",
+      "text": "Rows deleted, summary MSG-P1-020"
+    }
+  ],
+  "rules": [
+    "BR3: a legal hold overrides retention",
+    "BR4: delete only after the archive copy is checked",
+    "BR5: decision_log_entry is never archived by this job",
+    "BR6: a bad rule load is refused whole"
+  ],
+  "risks": [
+    "Case on legal hold -> rows kept and reported (MSG-P1-020)",
+    "Months outside 1-600 -> load refused (MSG-GEN-002)",
+    "Archive or manifest fails -> nothing deleted (MSG-GEN-006)"
+  ],
+  "example": [
+    "Rule RET-2026.11: DP05 interaction, 24 months on occurred_at",
+    "Run date 2026-12-06: 1,250 rows before 2024-12-06 -> retention/2026-12-06/interaction/",
+    "4,800 newer rows kept"
+  ]
+}

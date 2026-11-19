@@ -1,0 +1,101 @@
+{
+  "key": "RWB-TE-011",
+  "file_stem": "RWB TE 011 PDPA lint for code tests and logs",
+  "title": "PDPA lint for code, tests and logs",
+  "module": "P2 Integration (technical enabler)",
+  "flag": "none",
+  "status": "READY",
+  "status_text": "Ready (names pre-ACE party tables)",
+  "theme": "default",
+  "overview_label": "PDPA lint",
+  "goal": "Fail the build when personal data appears in code, logs, exceptions or fixtures",
+  "why": "PDPA leaks usually start in a log line or a test fixture. The rules are generated from the data dictionary, and the lint never prints the value it found.",
+  "needs": [
+    "TE-001"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "BUILD",
+      "PdpaLintStep on every PR and main build"
+    ],
+    [
+      "BUILD",
+      "RuleGenerator rebuilds pdpa-rules.yaml"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No runtime ACE read. Personal fields come from sys_fields and the API spec; note the story still names pre-alignment party / contact_point fields.",
+  "writes": [],
+  "reads": [
+    {
+      "t": "sys_fields",
+      "note": "is_personal seed (definitions only)"
+    },
+    {
+      "t": "API spec",
+      "note": "x-personal-data markers"
+    }
+  ],
+  "stores": "pdpa-rules.yaml (generated); pdpa-allow.yaml (owner, reason, expiry); CI pipeline",
+  "functions": [
+    {
+      "name": "PersonalFieldReader",
+      "does": "personal fields from seed + spec"
+    },
+    {
+      "name": "RuleGenerator",
+      "does": "writes pdpa-rules.yaml"
+    },
+    {
+      "name": "CheckDigitMatcher",
+      "does": "valid Thai national ID check"
+    },
+    {
+      "name": "PdpaLintStep",
+      "does": "scan; print rule, file, line"
+    },
+    {
+      "name": "pdpa-allow.yaml",
+      "does": "allow list with expiry"
+    }
+  ],
+  "path": [
+    {
+      "kind": "table",
+      "text": "sys_fields.is_personal"
+    },
+    {
+      "kind": "function",
+      "text": "RuleGenerator -> pdpa-rules.yaml"
+    },
+    {
+      "kind": "check",
+      "text": "Scan logs, exceptions, fixtures"
+    },
+    {
+      "kind": "check",
+      "text": "Allow-list entry valid?"
+    },
+    {
+      "kind": "out",
+      "text": "Build fails: rule, file, line (no value)"
+    }
+  ],
+  "rules": [
+    "BR1: the personal field list comes from the dictionary",
+    "BR3: fixtures use 'SYN-' values only",
+    "BR6: an allow entry needs an owner, a reason and an unexpired date",
+    "BR7: never print the value found"
+  ],
+  "risks": [
+    "A log writes a personal field -> PDPA-LOG-FIELD",
+    "A fixture holds a valid Thai ID -> PDPA-FIXTURE-ID",
+    "Expired allow entry -> build fails"
+  ],
+  "example": [
+    "recovery.casewf.internal.SampleService logs party.getFirstName()",
+    "-> build fails with PDPA-LOG-FIELD naming first_name",
+    "The value itself is not printed"
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "key": "RWB-TE-006",
+  "file_stem": "RWB TE 006 Outbox and retry for outbound work",
+  "title": "Outbox and retry for outbound work",
+  "module": "P2 Integration (technical enabler)",
+  "flag": "rwb.integration.outbox",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Outbox + retry",
+  "goal": "Events and outbound work are written in the same transaction as the change, then delivered in order with retry",
+  "why": "Nothing is lost and nothing is sent for a change that rolled back. Every event EV-01..EV-28 and every WIN dispatch goes through this one outbox.",
+  "needs": [
+    "E1-044",
+    "E1-027",
+    "E1-007"
+  ],
+  "unblocks": [
+    "E1-067"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "OutboxWriter.publish inside the change's tx"
+    ],
+    [
+      "JOB",
+      "JOB-11 Outbox sender, every minute"
+    ],
+    [
+      "API",
+      "POST /admin/outbox/deliveries/{id}/resend"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The outbox is Workbench plumbing; consumers include win-dispatch, the ledger and reporting.",
+  "writes": [
+    {
+      "t": "outbox_event",
+      "note": "event + case_seq, same transaction as the change"
+    },
+    {
+      "t": "outbox_delivery",
+      "note": "one per consumer: PENDING, DELIVERED, EXCEPTION"
+    },
+    {
+      "t": "task",
+      "note": "RESOLVE_OUTBOX_DELIVERY at the retry limit (P3)"
+    },
+    {
+      "t": "recovery_case.route_state",
+      "note": "SYSTEM_UNAVAILABLE etc."
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "case for case events"
+    }
+  ],
+  "stores": "Consumer idempotency store (IdempotencyGuard, E1-007); ACE audit log on resend; operations alert channel",
+  "functions": [
+    {
+      "name": "OutboxWriter",
+      "does": "event + deliveries in caller tx"
+    },
+    {
+      "name": "OutboxRepository",
+      "does": "skip-locked due rows, case order"
+    },
+    {
+      "name": "OutboxSender",
+      "does": "deliver, retry, exception"
+    },
+    {
+      "name": "ConsumerCatalog",
+      "does": "consumers + retry settings"
+    },
+    {
+      "name": "OutboxSenderEventStep",
+      "does": "JOB-11 event step"
+    },
+    {
+      "name": "OutboxAdminController",
+      "does": "list + resend deliveries"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Service changes a case"
+    },
+    {
+      "kind": "table",
+      "text": "outbox_event + deliveries (same tx)"
+    },
+    {
+      "kind": "function",
+      "text": "JOB-11 picks lowest seq per case"
+    },
+    {
+      "kind": "check",
+      "text": "Consumer OK? else retry 1/5/15 min"
+    },
+    {
+      "kind": "table",
+      "text": "DELIVERED or EXCEPTION + task"
+    },
+    {
+      "kind": "out",
+      "text": "Consumer got it exactly once"
+    }
+  ],
+  "rules": [
+    "BR1: the event and the change commit in the same transaction",
+    "BR4: per-case order is kept for each consumer",
+    "BR5: retry, then the exception queue with a task",
+    "BR8: no decision log entry, no move to exception"
+  ],
+  "risks": [
+    "Resend of a delivery not in EXCEPTION -> 409 (MSG-P2-022)",
+    "Case-less event over the limit -> EXCEPTION + alert (MSG-P2-001)",
+    "Decision log unwritable at the limit -> stays RETRYING (MSG-P7-003)"
+  ],
+  "example": [
+    "Notice NT-SYN-0601 on RW-2026-000601 approved, commit at 2026-12-14 10:00:00",
+    "-> one WIN_DISPATCH event, one delivery for consumer 'win-dispatch'",
+    "Retries at 1, 5 and 15 minutes if WIN does not answer"
+  ]
+}

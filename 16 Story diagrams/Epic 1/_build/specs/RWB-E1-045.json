@@ -1,0 +1,140 @@
+{
+  "key": "RWB-E1-045",
+  "file_stem": "RWB E1 045 Multi product parameters for Mortgage HP and SSME",
+  "title": "Multi product parameters for Mortgage, HP and SSME",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.product-parameters",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Per-product parameters",
+  "goal": "Every product value lives in reference data per product, so a product change needs no code",
+  "why": "Mortgage, HP and SSME differ in notice periods, cure periods and entry rules. The timer, case and allocation engines read these values, never constants.",
+  "needs": [
+    "E1-042",
+    "E1-043"
+  ],
+  "unblocks": [
+    "E1-028",
+    "E1-026"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (PRODUCT_PARAMETER)"
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (SERVICE_LEVEL)"
+    ],
+    [
+      "CALL",
+      "ProductParameterService.get(product, key, date)"
+    ],
+    [
+      "WHO",
+      "RW-COE prepares; approver signs"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_holiday",
+      "section": "A",
+      "note": "WORKING_DAYS units skip ACE holidays (DueDateCalculator)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "timer",
+      "note": "expires_at from the product's value (via timer engine)"
+    },
+    {
+      "t": "recovery_case.queue_id",
+      "note": "exception queue when a value is missing"
+    },
+    {
+      "t": "reference_version, reference_row",
+      "note": "via the E1-043 registry"
+    }
+  ],
+  "reads": [
+    {
+      "t": "reference_row",
+      "note": "PRODUCT, PRODUCT_PARAMETER, SERVICE_LEVEL"
+    },
+    {
+      "t": "parameter_catalog",
+      "note": "scope, required"
+    },
+    {
+      "t": "recovery_case",
+      "note": "open cases per product"
+    }
+  ],
+  "stores": "Exception queue (SCR-09)",
+  "functions": [
+    {
+      "name": "ProductParameterServiceImpl",
+      "does": "values in force, unit conversion"
+    },
+    {
+      "name": "ProductCompletenessCheck",
+      "does": "every product x required key"
+    },
+    {
+      "name": "OpenCaseCounter",
+      "does": "open cases by product"
+    },
+    {
+      "name": "DueDateCalculator",
+      "does": "calendar or working days"
+    },
+    {
+      "name": "Timer, entry, allocation engines",
+      "does": "changed to read the service"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Load PRODUCT_PARAMETER v2"
+    },
+    {
+      "kind": "check",
+      "text": "Completeness: product x key"
+    },
+    {
+      "kind": "table",
+      "text": "reference_row in force"
+    },
+    {
+      "kind": "function",
+      "text": "Timer engine: NOTICE_PERIOD_DAYS"
+    },
+    {
+      "kind": "ace",
+      "text": "Working days via v_ace_holiday"
+    },
+    {
+      "kind": "out",
+      "text": "timer.expires_at + version logged"
+    }
+  ],
+  "rules": [
+    "BR1: no product value or product name in code",
+    "BR2: required ENTRY_DPD, EXCLUSION_LIST, NOTICE_PERIOD_DAYS, CURE_PERIOD_DAYS, EXPOSURE_BAND_SET",
+    "BR6: a running timer keeps the value it started with",
+    "BR7: WORKING_DAYS skip v_ace_holiday dates"
+  ],
+  "risks": [
+    "Product missing a service-level row -> refused (MSG-P3-034)",
+    "Product removed while it has open cases -> refused (MSG-P3-027)",
+    "No row at run time -> case to exception queue (MSG-P3-034)"
+  ],
+  "example": [
+    "PRODUCT_PARAMETER v2: NOTICE_PERIOD_DAYS 30 for MORTGAGE, 60 for HP",
+    "On 2026-12-01: RW-2026-000101 (Mortgage) expires 2026-12-31",
+    "RW-2026-000102 (HP) expires 2027-01-30"
+  ]
+}

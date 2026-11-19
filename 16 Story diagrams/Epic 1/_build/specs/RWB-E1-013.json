@@ -1,0 +1,139 @@
+{
+  "key": "RWB-E1-013",
+  "file_stem": "RWB E1 013 Baseline measures",
+  "title": "Baseline measures",
+  "module": "P9 Reporting",
+  "flag": "rwb.reporting.baseline",
+  "status": "PARTIAL",
+  "status_text": "Ready. Batch gate waits for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "Baseline measures",
+  "goal": "Freeze an agreed baseline of portfolio measures so later epics can prove what they improved",
+  "why": "Six approved measures (route, age, queue, recovery, time in stage, turnaround), computed from Workbench records and frozen on 2026-11-27.",
+  "needs": [
+    "E1-029",
+    "E1-018"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (measure_definition)"
+    ],
+    [
+      "JOB",
+      "JOB-15 Reporting extract, nightly 01:30"
+    ],
+    [
+      "GATE",
+      "Only from a COMPLETED ACE batch"
+    ],
+    [
+      "WHO",
+      "RW-TRIBE approves; RW-BIANAL reads"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_payment",
+      "section": "A",
+      "note": "payment_date, payment_amount since entry (RecoveryDataApi)"
+    },
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "DailyCompletenessGate before computing"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "measure_definition",
+      "note": "6 approved definitions, version MD-2026.11"
+    },
+    {
+      "t": "measure_snapshot",
+      "note": "computed values; baseline rows frozen = true"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "via P3 CaseReportingApi"
+    },
+    {
+      "t": "case_account",
+      "note": "accounts per case"
+    },
+    {
+      "t": "queue",
+      "note": "queue per case"
+    }
+  ],
+  "stores": "Data lake INT-19 extract with trailer and freshness stamp; Power BI; job monitor",
+  "functions": [
+    {
+      "name": "MeasureDefinitionLoadHandler",
+      "does": "loads and validates definitions"
+    },
+    {
+      "name": "MeasureCatalogService",
+      "does": "MeasureCatalog.inForce"
+    },
+    {
+      "name": "MeasureCalculators",
+      "does": "one calculator per measure code"
+    },
+    {
+      "name": "ReportingExtractJob",
+      "does": "JOB-15: compute, snapshot, freeze"
+    },
+    {
+      "name": "DataLakeWriter",
+      "does": "INT-19 files"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-15 nightly 01:30"
+    },
+    {
+      "kind": "table",
+      "text": "measure_definition in force"
+    },
+    {
+      "kind": "ace",
+      "text": "Payments via v_ace_payment"
+    },
+    {
+      "kind": "function",
+      "text": "MeasureCalculators"
+    },
+    {
+      "kind": "table",
+      "text": "measure_snapshot, frozen 2026-11-27"
+    },
+    {
+      "kind": "out",
+      "text": "Lake extract -> Power BI 07:30"
+    }
+  ],
+  "rules": [
+    "BR1: a measure is published only under an approved definition in force",
+    "BR2: the baseline is frozen once written; a trigger refuses UPDATE and DELETE",
+    "BR3: computed from Workbench records through the owning modules (NFR-065)",
+    "BR4: only from a COMPLETED ACE batch"
+  ],
+  "risks": [
+    "Definition without formula or data product -> whole load refused (MSG-GEN-001)",
+    "Baseline published a second time -> refused (MSG-P9-001)",
+    "Batch not COMPLETE -> no baseline that night (MSG-P1-001)"
+  ],
+  "example": [
+    "Business date 2026-11-27: 120 open cases (60 Mortgage, 45 HP, 15 SSME)",
+    "CASES_BY_ROUTE totals 120",
+    "REALIZED_RECOVERY = THB 4,350,000.00",
+    "Definition version MD-2026.11, approver TRB-0001, frozen = true"
+  ]
+}

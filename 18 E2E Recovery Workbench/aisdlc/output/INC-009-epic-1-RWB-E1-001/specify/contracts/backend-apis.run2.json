@@ -1,0 +1,79 @@
+{
+  "run_id": "INC-009-epic-1-RWB-E1-001",
+  "story": "RWB-E1-001",
+  "revision": 2,
+  "api_impact": "NO_API_CHANGE",
+  "source": {
+    "file": "api/recovery-api-v4.yaml",
+    "specification": "API Specification v4"
+  },
+  "changes": [],
+  "operations_used": [
+    {
+      "operationId": "postAdminReferenceLoads",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads",
+      "x-module": "P4",
+      "x-capability": { "area": "Reference data", "right": "C" },
+      "x-first-release": "E1",
+      "built_by": "RWB-E1-043 (D-RUN-10, D-RUN-11)",
+      "request": { "content_type": "multipart/form-data", "fields": { "file": "binary", "table": "data_product", "validFrom": "date" } },
+      "responses": {
+        "201": "ReferenceLoad (id, table, validFrom, status, rows)",
+        "403": "Problem, messageCode MSG-P4-002 (caller without Reference data C; TC-E1-001-11); access-log entry is the RWB-E1-039 seam (GAP-E1001-22)",
+        "422": "Problem, messageCode MSG-GEN-001 | MSG-P3-027 | MSG-P1-004 | MSG-P1-003 | MSG-P1-007; detail lists every finding, file-level first (SPEC-RWB-E1-001-013, -015)"
+      },
+      "repeat": "Identical content: nothing written (asserted). Response is RWB-E1-043's (today 201 with the same ReferenceLoad). MSG-P1-011 on the response is open: GAP-E1001-13, ASM-E1001-15, OPEN-NEW-8 (409 Problem or an API change, not decided here)",
+      "this_story_adds": "DataProductCatalogHandler registered in the RWB-E1-043 table-code registry for 'data_product' when rwb.p1.data-catalog is on"
+    },
+    {
+      "operationId": "postAdminReferenceLoadsLoadidApprove",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads/{loadId}/approve",
+      "x-module": "P4",
+      "x-capability": { "area": "Reference data", "right": "A" },
+      "x-first-release": "E1",
+      "built_by": "RWB-E1-043",
+      "this_story_adds": "DataProductCatalogHandler.apply is called on approval through the registry (ASM-E1001-05)",
+      "inherited_controls": ["maker-checker: 409 MSG-P7-002 when the approver is the loader (API v4)", "decision-log entry AC-VERS on approval (API v4; E1-043 defers to RWB-E1-027)"],
+      "open": "No role holds Reference data A (GAP-E1001-08, OPEN-NEW-2)"
+    }
+  ],
+  "registry_registration": {
+    "decision": "D-RUN-11: RWB-E1-043 publishes a table-code to handler map; RWB-E1-001 registers data_product",
+    "owner_of_types": "RWB-E1-043 (names in Story v7 §12: ReferenceTableHandler, ReferenceLoadFile, ValidationReport; GAP-E1001-07)",
+    "method_set": [
+      "String tableCode()  -> \"data_product\"",
+      "ValidationReport validate(ReferenceLoadFile file)  -> writes nothing; checks K0-K5",
+      "int apply(UUID loadId, ReferenceLoadFile file, LocalDate validFrom)  -> one transaction; returns 14"
+    ],
+    "requirement_on_E1_043": "A code with a registered handler is accepted without a LOV-REF-TABLE value or a refdata.columns definition (OPEN-NEW-3); fallback ASM-E1001-12",
+    "implementation": "th.co.scb.ace.demo.recovery.dataengine.internal.catalog.DataProductCatalogHandler",
+    "flag": "rwb.p1.data-catalog (off: not registered; E1-043 refuses the code)"
+  },
+  "messages_registered": {
+    "seam": "RWB-E1-042 MessageResolver / FixedMessageCatalog (E1-042 spec rev 3 SPEC-022)",
+    "ids": ["MSG-P1-003", "MSG-P1-004", "MSG-P1-007", "MSG-P1-011"]
+  },
+  "database_read_model": {
+    "view": "${recoverySchema}.v_data_dictionary",
+    "columns": ["entity", "field", "field_id", "data_type", "physical_type", "is_mandatory", "lov_code", "references_object", "source_system", "source_field", "is_personal", "data_product", "entity_system_of_record", "product_system_of_record", "refresh_cycle", "owner_role", "owner_user_id", "late_behavior", "interface_id", "description"],
+    "consumers": ["RWB-E1-064 dictionary endpoint (later)", "RWB-E1-016 masking (later)", "RWB-TE-011 PDPA lint (reads the migration's sys_fields INSERT values)"]
+  },
+  "migration": {
+    "file": "backend/src/main/resources/db/modulemigration/recovery/V<seq>__rwb_e1_001_recovery_schema.sql",
+    "seq_rule": "assigned by the orchestrator at merge (D-RUN-07)",
+    "runs_after": ["RWB-E1-042 migration", "RWB-E1-043 migration"],
+    "tables_created": 89,
+    "tables_not_created_D_RUN_12": ["parameter_catalog", "parameter_value", "reference_version", "reference_row"],
+    "tables_in_schema_after": 93,
+    "foreign_keys_created": 91,
+    "indexes_created": 111,
+    "sys_objects": 123,
+    "sys_fields": 1382,
+    "sys_fields_provisional": ["DF-REF-300 parameter_value.load_id", "DF-REF-301 parameter_value.content_hash", "DF-REF-302 parameter_value.rollback_reason"],
+    "is_personal_true": 526,
+    "is_personal_form": "literal value in each sys_fields INSERT row; no UPDATE of sys_fields (RWB-TE-011 lint input)",
+    "data_product_system_of_record": "varchar(200) (ASM-E1001-13, GAP-E1001-17 Blocker = Yes)"
+  }
+}

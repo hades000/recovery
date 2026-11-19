@@ -1,0 +1,17 @@
+﻿-- Probe: the 14 data_product rows that Physical Schema v5 must seed before sys_objects.
+INSERT INTO data_product (product_code, product_name, definition, system_of_record, owner_role, refresh_cycle, expected_by, valid_from) VALUES
+('DP01','Account and arrears','Loan accounts with balances, interest, fees, days past due, bucket, classification, restructure flag and payments','ACE (ingested from ALS via COLLINS)','RW-DATASTEW','DAILY','08:00','2026-11-30'),
+('DP02','Customer and party','Customers, guarantors, co-borrowers and heirs, tokenized identifiers, contact points, consent and flags for vulnerability, death and bankruptcy','ACE (ingested from SCBPDM and the core bank)','RW-DATASTEW','DAILY','08:00','2026-11-30'),
+('DP03','Case and ownership','The case, its accounts and parties, status, stage, route, owner, queue, tasks, timers and deviations','Recovery Workbench','RW-DATASTEW','On change','ON_CHANGE','2026-11-30'),
+('DP04','Treatment and offers','Restructures, settlements, deeds in lieu, buy-backs and guarantee claims, with terms, approval level and outcome','Recovery Workbench; restructure plans in ACE','RW-DATASTEW','On change','ON_CHANGE','2026-11-30'),
+('DP05','Contact and promises','Every contact, letter, promise and hand-over on the case, in order, including the collections history from EFS','ACE (ingested from EFS) and the Workbench','RW-DATASTEW','DAILY','08:00','2026-11-30'),
+('DP06','Collateral and assets','Collateral, appraisals, assets held after repossession or transfer, listings and sale results','ACE (ingested from CCMS, SVAF, AMIS and RPS)','RW-DATASTEW','WEEKLY','MON 08:00','2026-11-30'),
+('DP07','Legal events and cases','Notices and proof of delivery, lawsuits, court case numbers, hearings, judgments and enforcement','ACE (ingested from LIT and WIN); the Workbench for instructions','RW-DATASTEW','DAILY','08:00','2026-11-30'),
+('DP08','Partner performance','Partners on the panel, work placed with each, results, fees and scorecards','Recovery Workbench','RW-DATASTEW','On change','ON_CHANGE','2026-11-30'),
+('DP09','Debt sale','Debt sale lots, the accounts in each lot, buyers, prices, approval and put-backs','Recovery Workbench','RW-DATASTEW','On change','ON_CHANGE','2026-11-30'),
+('DP10','Documents and extracted fields','Documents against the case, the fields read from them, retention class and custody of originals','Recovery Workbench document hub','RW-DATASTEW','On change','ON_CHANGE','2026-11-30'),
+('DP11','Scores and route economics','Risk scores, expected return by route, estimated sale price and sale success rate, restructure scheme suggestions','ACE (ingested from COLLINS)','RW-DATASTEW','DAILY','08:00','2026-11-30'),
+('DP12','Decision log','One entry per decision with the rule, model and agent versions, inputs, recommendation, approval, actions and outcome','Recovery Workbench','RW-DATASTEW','On change','ON_CHANGE','2026-11-30'),
+('DP13','Money and closure','Payments and proceeds matched to the case, write-off postings and recovery after charge-off','ACE (ingested from ALS and GL)','RW-DATASTEW','DAILY','08:00','2026-11-30'),
+('DP14','Reference data','Rules, approval limits, lists of values, roles, permissions and letter templates, each versioned','Recovery Workbench','RW-DATASTEW','BY_LOAD','BY_LOAD','2026-11-30');
+

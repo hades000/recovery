@@ -1,0 +1,140 @@
+{
+  "key": "RWB-E1-053",
+  "file_stem": "RWB E1 053 Field extraction for the six types into the index",
+  "title": "Field extraction for the six types into the index",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.extract",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "ai",
+  "overview_label": "Field extraction",
+  "goal": "Extract each document type's key fields with a confidence, so documents are searchable by content",
+  "why": "A court notice's hearing date or a deed's plot number becomes data. Low-confidence or review-only fields always go to a person before they are trusted.",
+  "needs": [
+    "E1-049",
+    "E1-050",
+    "E1-025"
+  ],
+  "unblocks": [
+    "E1-032",
+    "E1-054",
+    "E1-060"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-12 extractStep (classify -> extract -> match)"
+    ],
+    [
+      "CALL",
+      "Model extractor via P10 gateway (TE-013)"
+    ],
+    [
+      "API",
+      "GET /documents/{documentId} (read fields)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Values come from the document's OCR text.",
+  "writes": [
+    {
+      "t": "document_intake",
+      "note": "extracted_fields, extract_status, attempts"
+    },
+    {
+      "t": "document_field",
+      "note": "value, confidence, extractor_version, OK / REVIEW"
+    },
+    {
+      "t": "document.review_status",
+      "note": "set when any field needs review"
+    }
+  ],
+  "reads": [
+    {
+      "t": "document",
+      "note": "document_type, doc_version"
+    },
+    {
+      "t": "document_text",
+      "note": "OCR text"
+    },
+    {
+      "t": "document_type.field_definitions",
+      "note": "fields per type, review_only"
+    },
+    {
+      "t": "document_hub_parameter",
+      "note": "EXTRACT_FIELD_THRESHOLD 0.80"
+    }
+  ],
+  "stores": "Outbox DocumentFieldsExtracted (EV-17); P10 model gateway; evaluation/extraction/{runDate}.json + proposed DOCTYPE load",
+  "functions": [
+    {
+      "name": "ExtractStep",
+      "does": "SKIP LOCKED select, extract, states"
+    },
+    {
+      "name": "FieldExtractionService",
+      "does": "BR1-BR8 in one transaction"
+    },
+    {
+      "name": "TemplateFieldExtractor",
+      "does": "TEMPLATE method"
+    },
+    {
+      "name": "ModelFieldExtractor",
+      "does": "MODEL method via gateway"
+    },
+    {
+      "name": "ValueNormalizer",
+      "does": "Thai / BE dates, digits, amounts"
+    },
+    {
+      "name": "ExtractionEvaluationRunner",
+      "does": "precision / recall per field"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-12 extractStep"
+    },
+    {
+      "kind": "table",
+      "text": "Typed document + OCR text"
+    },
+    {
+      "kind": "ai",
+      "text": "Template or model extractor"
+    },
+    {
+      "kind": "function",
+      "text": "ValueNormalizer: BE year - 543"
+    },
+    {
+      "kind": "check",
+      "text": "Confidence >= 0.80 and not review_only?"
+    },
+    {
+      "kind": "out",
+      "text": "document_field OK / REVIEW + EV-17"
+    }
+  ],
+  "rules": [
+    "BR2: confidence >= 0.80 -> OK, otherwise REVIEW",
+    "BR3: review_only fields are always REVIEW",
+    "BR4: a field below 0.90 precision / recall is proposed as review-only",
+    "BR6: dates are stored ISO; Buddhist-era year minus 543"
+  ],
+  "risks": [
+    "Confidence below threshold -> REVIEW (MSG-P5-003)",
+    "Value cannot be converted -> confidence 0.0000, REVIEW (MSG-P5-003)",
+    "Extractor times out on every attempt -> FAILED, EXTRACTION_FAILED (MSG-P5-003)"
+  ],
+  "example": [
+    "IN-0001 COURT_NOTICE 0.94: court_name 'Civil Court' 0.96, black_case_no 'Por 1234/2569'",
+    "hearing_date '15 December 2569' -> 2026-12-15 at 0.88, extractor EXT-TPL-1.0",
+    "Evaluation: TITLE_DEED area_sq_wa precision 0.84 -> proposed review-only"
+  ]
+}

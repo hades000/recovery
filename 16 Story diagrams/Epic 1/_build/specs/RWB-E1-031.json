@@ -1,0 +1,123 @@
+{
+  "key": "RWB-E1-031",
+  "file_stem": "RWB E1 031 Queue and owner on the case list with filters",
+  "title": "Queue and owner on the case list with filters",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.caselistqueue",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Case list filters + export",
+  "goal": "Managers see queue and owner, filter by queue, team and status, and export a masked, logged file",
+  "why": "Managers stop rebuilding lists in Excel. Only in-scope cases are shown, and every export is logged before the file is built.",
+  "needs": [
+    "E1-020",
+    "E1-039"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "WHO",
+      "Team manager on SCR-02 Case list"
+    ],
+    [
+      "API",
+      "GET /api/recovery/v1/cases?queue=&team=&status="
+    ],
+    [
+      "API",
+      "GET /cases/export"
+    ],
+    [
+      "EVENT",
+      "AC-EXPT access event"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No direct ACE read. Personal columns in the export are masked through FieldMasker (E1-037).",
+  "writes": [
+    {
+      "t": "decision_log_entry",
+      "note": "access event AC-EXPT (via AccessEventPublisher)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "in-scope cases with owner and status"
+    },
+    {
+      "t": "queue",
+      "note": "queue and team names"
+    }
+  ],
+  "stores": "xlsx download 'Case list YYYYMMDD 1.xlsx'; access log",
+  "functions": [
+    {
+      "name": "CaseAndWorkflowController",
+      "does": "GET /cases, GET /cases/export"
+    },
+    {
+      "name": "CaseQueryService",
+      "does": "scoped, filtered query"
+    },
+    {
+      "name": "CaseExportService",
+      "does": "row limit, log first, masked xlsx"
+    },
+    {
+      "name": "CaseListPage",
+      "does": "React SCR-02"
+    },
+    {
+      "name": "CaseListFilters",
+      "does": "queue, team, status pickers"
+    },
+    {
+      "name": "ExportButton",
+      "does": "starts the export"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Filter on SCR-02"
+    },
+    {
+      "kind": "check",
+      "text": "Scope: Own, Team, Region, All"
+    },
+    {
+      "kind": "table",
+      "text": "recovery_case joined to queue"
+    },
+    {
+      "kind": "check",
+      "text": "Under 10,000 rows?"
+    },
+    {
+      "kind": "table",
+      "text": "AC-EXPT logged first"
+    },
+    {
+      "kind": "out",
+      "text": "Masked xlsx download"
+    }
+  ],
+  "rules": [
+    "BR1: only in-scope cases are returned (Own, Team, Region, All)",
+    "BR3: every export is logged before the file is made (CTL-11)",
+    "BR4: export columns are masked by role",
+    "BR5: caselist.export.maxrows = 10,000"
+  ],
+  "risks": [
+    "No match -> empty state (MSG-P3-020)",
+    "Over the row limit -> 422 (MSG-P3-021)",
+    "Access log unwritable -> no export (MSG-P7-003)"
+  ],
+  "example": [
+    "U-71 (team DIL-BKK, scope Team) filters queue DIL-BKK-CO, status ASSIGNED",
+    "-> 64 cases, none from DIL-BKK-OVF (20 cases)",
+    "Export -> 'Case list 20261202 1.xlsx', AC-EXPT logged first"
+  ]
+}

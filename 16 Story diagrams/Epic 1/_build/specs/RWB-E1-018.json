@@ -1,0 +1,178 @@
+{
+  "key": "RWB-E1-018",
+  "file_stem": "RWB E1 018 Case ID issuance and case record v1",
+  "title": "Case ID issuance and case record v1",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.casecreation",
+  "status": "PARTIAL",
+  "status_text": "Ready. Batch gate waits for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "Case ID + case creation",
+  "goal": "Open one case per borrower and product for ACE accounts at 90+ days past due, with a permanent ID",
+  "why": "Ends manual case opening. Every case gets RW-YYYY-NNNNNN, links to ACE by business key only, and the entry decision is logged.",
+  "needs": [
+    "E1-001",
+    "E1-016",
+    "E1-027",
+    "E1-042",
+    "E1-069"
+  ],
+  "unblocks": [
+    "E1-002",
+    "E1-013",
+    "E1-020",
+    "E1-024",
+    "E1-052",
+    "E1-066"
+  ],
+  "triggers": [
+    [
+      "EVENT",
+      "EV-26 AceDataReady (ALS batch COMPLETED)"
+    ],
+    [
+      "JOB",
+      "JOB-02 Case creation, daily"
+    ],
+    [
+      "API",
+      "GET /api/recovery/v1/cases/{caseId}"
+    ],
+    [
+      "WHO",
+      "RW-CASEOWN reads the new case"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "days_past_due >= 90, product_category, total_balance, tdr_flag"
+    },
+    {
+      "view": "v_ace_ca_relation",
+      "section": "A",
+      "note": "borrower person_key for each account_key"
+    },
+    {
+      "view": "v_ace_customer",
+      "section": "A",
+      "note": "person_key, deceased_flag (exclusion)"
+    },
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "gate: ALS batch COMPLETED"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "recovery_case",
+      "note": "status NEW, case_no RW-YYYY-NNNNNN"
+    },
+    {
+      "t": "case_account",
+      "note": "account_key links (business key, no FK)"
+    },
+    {
+      "t": "case_party",
+      "note": "person_key links"
+    },
+    {
+      "t": "case_entry_exclusion",
+      "note": "accounts kept out, with reason"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "D6 CASE_CREATED (via the writer)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "account_ext",
+      "note": "dispute_open"
+    },
+    {
+      "t": "party_ext",
+      "note": "deceased_override, bankruptcy, fraud_flag"
+    },
+    {
+      "t": "rule_row",
+      "note": "EXCLUSION rules"
+    },
+    {
+      "t": "lov_value",
+      "note": "exposure, status, product lists"
+    }
+  ],
+  "stores": "Outbox: CaseCreated (EV-01); sequence case_no_seq_YYYY; job record",
+  "functions": [
+    {
+      "name": "CaseCreationJob",
+      "does": "JOB-02: entry rule per account_key"
+    },
+    {
+      "name": "EntryRuleEvaluator",
+      "does": "threshold + exclusions"
+    },
+    {
+      "name": "CaseGrouping",
+      "does": "one case per borrower + product"
+    },
+    {
+      "name": "CaseNumberIssuer",
+      "does": "RW-YYYY-NNNNNN, never reused"
+    },
+    {
+      "name": "CaseCreationService",
+      "does": "case, links, outbox, log in 1 tx"
+    },
+    {
+      "name": "AceSourceReader",
+      "does": "SELECT on 4 views"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "EV-26: ALS batch COMPLETED"
+    },
+    {
+      "kind": "ace",
+      "text": "v_ace_account DPD >= 90"
+    },
+    {
+      "kind": "ace",
+      "text": "Borrower via v_ace_ca_relation"
+    },
+    {
+      "kind": "check",
+      "text": "Exclusions: deceased, fraud, dispute"
+    },
+    {
+      "kind": "table",
+      "text": "recovery_case NEW + links"
+    },
+    {
+      "kind": "out",
+      "text": "EV-01 CaseCreated + log entry"
+    }
+  ],
+  "rules": [
+    "BR1: entry at days_past_due >= case.entry.dpd (90, a parameter)",
+    "BR2: one case per borrower person_key and product group",
+    "BR3: exclusions DECEASED, FRAUD, BANKRUPTCY, ACTIVE_PLAN, OPEN_DISPUTE",
+    "BR4/11: ID RW-YYYY-NNNNNN is never reused; ACE links are business keys only"
+  ],
+  "risks": [
+    "ALS batch not COMPLETED -> JOB-02 waits (MSG-P1-001)",
+    "Decision log write fails -> the whole case rolls back (MSG-P7-003)",
+    "RW-2026-999999 reached -> creation stops (MSG-P3-025)"
+  ],
+  "example": [
+    "Account A-5001, HIRE_PURCHASE, 90 days past due, borrower P-0101",
+    "Last number issued: RW-2026-000122",
+    "-> case RW-2026-000123, status NEW, is_primary = true, CaseCreated published"
+  ]
+}

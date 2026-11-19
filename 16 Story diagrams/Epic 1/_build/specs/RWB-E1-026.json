@@ -1,0 +1,140 @@
+{
+  "key": "RWB-E1-026",
+  "file_stem": "RWB E1 026 Attach and search screen",
+  "title": "Attach and search screen",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.casedocs",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Upload + list case documents",
+  "goal": "Let a case owner upload, list and search a case's documents by type and date from the case record",
+  "why": "Documents stop living in e-mail and shared drives. Every upload is malware-scanned, typed, de-duplicated and logged before it is stored.",
+  "needs": [
+    "E1-025",
+    "E1-024",
+    "E1-041",
+    "E1-045",
+    "E1-030"
+  ],
+  "unblocks": [
+    "E1-040"
+  ],
+  "triggers": [
+    [
+      "WHO",
+      "Case owner on SCR-30 Documents tab"
+    ],
+    [
+      "API",
+      "POST /cases/{caseId}/documents"
+    ],
+    [
+      "API",
+      "GET /cases/{caseId}/documents?type=&dateFrom="
+    ],
+    [
+      "API",
+      "GET /cases/{caseId}/document-checklist"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The screen works on Workbench cases and documents only.",
+  "writes": [
+    {
+      "t": "document",
+      "note": "via DocumentStore: source UPLOAD, doc_version 1"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "via DocumentStore, before the store"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "via CaseDirectory"
+    },
+    {
+      "t": "document",
+      "note": "list and search, newest first"
+    },
+    {
+      "t": "document_type",
+      "note": "type must be in force"
+    },
+    {
+      "t": "document_hub_parameter",
+      "note": "INTAKE_MAX_FILE_MB, ALLOWED_TYPES"
+    }
+  ],
+  "stores": "Intake blob container; quarantine on malware; Idempotency-Key store (24 h); DocumentStored event (EV-16)",
+  "functions": [
+    {
+      "name": "DocumentHubController",
+      "does": "POST / GET documents, checklist"
+    },
+    {
+      "name": "CaseDocumentUploadService",
+      "does": "intake, scan, store, idempotency"
+    },
+    {
+      "name": "CaseDocumentQueryService",
+      "does": "list + search by type and date"
+    },
+    {
+      "name": "ChecklistPlaceholderService",
+      "does": "six-type placeholder"
+    },
+    {
+      "name": "CaseDocumentsTab",
+      "does": "React SCR-30"
+    },
+    {
+      "name": "UploadDocumentDialog",
+      "does": "file, type, size check"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "POST /cases/{caseId}/documents"
+    },
+    {
+      "kind": "store",
+      "text": "Intake container"
+    },
+    {
+      "kind": "check",
+      "text": "Malware scan (E1-041)"
+    },
+    {
+      "kind": "function",
+      "text": "DocumentStore.store, source UPLOAD"
+    },
+    {
+      "kind": "table",
+      "text": "document + decision log entry"
+    },
+    {
+      "kind": "out",
+      "text": "Listed on SCR-30 within 5 s"
+    }
+  ],
+  "rules": [
+    "BR1: an upload carries a type from the table in force and source UPLOAD",
+    "BR2: every upload is malware-scanned first",
+    "BR6: the same file, type and case returns the existing document (R-UNI-40)",
+    "BR7: no decision log entry, no store (Principle 5)"
+  ],
+  "risks": [
+    "Malware found -> 422 and quarantine (MSG-P5-016)",
+    "File type not allowed -> 415 (MSG-P5-001)",
+    "Decision log write fails -> 503, nothing stored (MSG-P7-003)"
+  ],
+  "example": [
+    "TEST-CO-01 uploads court-notice-0007.pdf (2 MB, COURT_NOTICE) to RW-2026-000123",
+    "-> 201 Created, source UPLOAD, doc_version 1",
+    "Shown in the Documents tab within 5 s, 20 per page, newest first"
+  ]
+}

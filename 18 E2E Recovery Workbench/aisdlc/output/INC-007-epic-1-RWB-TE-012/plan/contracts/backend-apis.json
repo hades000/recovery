@@ -1,0 +1,132 @@
+{
+  "run_id": "INC-007-epic-1-RWB-TE-012",
+  "story": "RWB-TE-012",
+  "stage": "plan",
+  "revision": "v1 (18 Nov 2026) against spec v10 and plan v1",
+  "api_in_scope": "NO",
+  "api_impact": "NO_API_CHANGE",
+  "reason": "Story file RWB-TE-012 v1 section 12: no endpoint of its own. The spec's API change assessment records no endpoint added or changed.",
+  "source": {
+    "spec": "../specify/spec.md v10",
+    "spec_gate": "../review/spec-gate-review-10.md (PASS 0 Critical, 0 High, 0 Medium, 0 Low)",
+    "api_specification": "requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v4.yaml",
+    "document_set_copy": "requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v4.yaml",
+    "spec_contract": "../specify/contracts/backend-apis.json"
+  },
+  "changes": [],
+  "dependent_endpoints": [
+    {
+      "operationId": "postCasesCaseidDocuments",
+      "method": "POST",
+      "path": "/api/recovery/v1/cases/{caseId}/documents",
+      "owner_stories": ["RWB-E1-026", "RWB-E1-024"],
+      "uses": "DocumentStorage.store and DocumentStorage.readiness, through the RWB-E1-024 DocumentStore",
+      "responses_relevant": {
+        "403": "MSG-P4-002 (existing ApiError.NOT_PERMITTED; TC-TE-012-13, owned by RWB-E1-026)",
+        "503": "MSG-GEN-006 when StorageUnavailableException is raised (NOT_READY, TIMEOUT, UNAVAILABLE, ACCESS_REFUSED, BLOB_MISSING); BLOB_MISSING has no specific message in Error and Message Standard v4"
+      },
+      "verified_in": "RWB-E1-024 and RWB-E1-026",
+      "plan_task": "seam only; no implementation task here"
+    }
+  ],
+  "published_java_interface": {
+    "module": "P5 dochub (RWB-TE-001 v4 module map)",
+    "package": "th.co.scb.ace.demo.recovery.dochub.api",
+    "types": [
+      "DocumentStorage",
+      "BlobRef",
+      "BlobWriteRequest",
+      "StoredBlob",
+      "StorageReadiness",
+      "WriteOnceViolationException",
+      "StorageUnavailableException (+ nested Reason)"
+    ],
+    "signatures": {
+      "DocumentStorage.store": "StoredBlob store(BlobWriteRequest request); throws WriteOnceViolationException or StorageUnavailableException",
+      "DocumentStorage.open": "byte[] open(BlobRef ref); a missing blob is StorageUnavailableException(BLOB_MISSING); readiness is unchanged",
+      "DocumentStorage.readiness": "StorageReadiness readiness()",
+      "BlobRef": "record BlobRef(String container, String blobName); String storageRef(); static BlobRef fromStorageRef(String)",
+      "BlobWriteRequest": "record BlobWriteRequest(UUID caseId, UUID documentId, int docVersion, boolean writeOnce, BlobRef source)",
+      "StoredBlob": "record StoredBlob(BlobRef ref, String sha256, long size, boolean existing)",
+      "StorageReadiness": "record StorageReadiness(boolean ready, List<String> reasons, Instant checkedAt)",
+      "source_rule": "source is the intake container (any name), or, only when writeOnce=true, the standard container at the same name {caseId}/{documentId}/v{docVersion} (D-RCV-31 re-store; source kept). Any other source container raises IllegalArgumentException with no storage call",
+      "flag_off": "DocumentStorage and DocumentContainers beans present; store and open raise StorageUnavailableException(NOT_READY); readiness() returns ready=false and reasons=[FLAG_OFF]",
+      "store_when_not_ready": "Single-flight readiness probe with a deadline of rwb.dochub.storage.timeout-seconds (10, AC10). A fresh NOT_READY (younger than rwb.dochub.storage.readiness-recheck-seconds, 30, assumed) raises NOT_READY at once with no storage call; otherwise the caller joins or starts the one probe and waits at most timeout-seconds: probe NOT_READY raises NOT_READY, the wait ending first raises TIMEOUT",
+      "StorageUnavailableException.Reason": "NOT_READY, TIMEOUT, UNAVAILABLE, ACCESS_REFUSED, BLOB_MISSING",
+      "readiness_writer": "Only the readiness probe writes readiness. store and open outcomes TIMEOUT, transport UNAVAILABLE (5xx or IO after retries) and ContainerNotFound request one background probe (single-flight; none if a probe is in flight or ended within readiness-recheck-seconds); BLOB_MISSING, ACCESS_REFUSED, write-once refusals, conflicts and other 4xx never change readiness"
+    },
+    "evolves": [
+      "dochub.api.DocumentStore (relocated by RWB-TE-001; deleted in TASK-16)",
+      "DocumentStore.StoredDocument (replaced by StoredBlob and BlobRef)",
+      "DocumentStore.DocumentImmutableException (replaced by WriteOnceViolationException)"
+    ],
+    "names_left_for_RWB-E1-024": ["DocumentStore", "StoreRequest", "StoredDocument"],
+    "boundary": "No com.azure.storage type in dochub.api (BND-5). DocumentContainers stays public in the non-published dochub.storage; BND-5 and D-RCV-41 apply to later P5 client packages",
+    "test_impact": "T-TE001-14's expected dochub.api list is replaced by the list above in the same merge request (TASK-15, TASK-16)",
+    "source": "Decision Log v10 D-RCV-31; RWB-E1-024 v1 sections 12 and 13; RWB-TE-001 spec v4 SPEC-022, SPEC-025; spec v10 SPEC-010, SPEC-022"
+  },
+  "operational": {
+    "endpoint": "/actuator/health",
+    "component": "documentHub",
+    "status_rules": {
+      "flag_off": "UNKNOWN with ready=false and reasons=[FLAG_OFF]; the root status is unchanged (200 when the other components are UP)",
+      "flag_on_ready": "UP",
+      "flag_on_not_ready": "DOWN; the root /actuator/health answers 503",
+      "not_evaluated": "UNKNOWN",
+      "storage_calls_on_read": "none",
+      "emulator_mode": "identity checks EMULATED; READY when the four containers exist, with no client IDs needed",
+      "per_operation_outcome": "never changes documentHub; for example open of a missing blob leaves UP and root 200",
+      "probe_failure": "NOT_READY (UNREACHABLE or CONTAINER_MISSING:<name>) makes documentHub DOWN and the root 503"
+    },
+    "probe_groups": "not in liveness or readiness",
+    "details_visible_to": "RW-PLATADM (management.endpoint.health.show-details: when-authorized)",
+    "in_api_specification": false,
+    "note": "Operational endpoint outside the API specification, as README decision 6 records for existing operational endpoints. No API contract file change."
+  },
+  "plan_obligations": [
+    {
+      "id": "CON-TE012-PLAN-01",
+      "assertion": "No endpoint is added, changed or removed; the dependent upload endpoint stays owned by RWB-E1-024 and RWB-E1-026",
+      "tasks": ["TASK-06", "TASK-16", "TASK-23"],
+      "verification": "diff review; no controller or route file in the plan; API Impact Type NO_API_CHANGE"
+    },
+    {
+      "id": "CON-TE012-PLAN-02",
+      "assertion": "The published dochub.api surface after this story is exactly the seven types above, with no Azure type",
+      "tasks": ["TASK-05", "TASK-06", "TASK-15", "TASK-16"],
+      "verification": "T-TE001-14 in RecoveryBoundaryTest; T-TE012-03"
+    },
+    {
+      "id": "CON-TE012-PLAN-03",
+      "assertion": "documentHub is registered under /actuator/health with the status rules above, is not in the liveness or readiness group, and makes no storage call on a health read",
+      "tasks": ["TASK-09", "TASK-10"],
+      "verification": "T-TE012-08, T-TE012-09"
+    },
+    {
+      "id": "CON-TE012-PLAN-04",
+      "assertion": "Only the probe writes readiness; operation outcomes request a background probe only for TIMEOUT, transport UNAVAILABLE and ContainerNotFound",
+      "tasks": ["TASK-11", "TASK-12", "TASK-15", "TASK-16"],
+      "verification": "T-TE012-06, T-TE012-17, T-TE012-18"
+    }
+  ],
+  "test_obligations": [
+    {"id": "T-TE012-03", "class": "BlobRefTest", "task": "TASK-05"},
+    {"id": "T-TE012-04", "class": "BlobStorageAdapterStoreTest", "task": "TASK-15"},
+    {"id": "T-TE012-05", "class": "ContentHashGuardTest", "task": "TASK-13"},
+    {"id": "T-TE012-06", "class": "StorageErrorMapperTest", "task": "TASK-11"},
+    {"id": "T-TE012-07", "class": "BlobStorageAdapterOpenTest", "task": "TASK-15"},
+    {"id": "T-TE012-16", "class": "RecoveryBoundaryTest, ModulithTest", "task": "TASK-15"},
+    {"id": "T-TE012-17", "class": "StorageReadinessProbeTest", "task": "TASK-15"},
+    {"id": "T-TE012-18", "class": "ReadinessIsolationTest", "task": "TASK-15"}
+  ],
+  "migration": {
+    "required": false,
+    "reason": "SPEC-016 and the story section 13 state no table or column; D-RUN-07 is not exercised",
+    "file": null
+  },
+  "frontend": {
+    "in_scope": "NO",
+    "contract_file": "contracts/frontend-integrations.json",
+    "status": "NOT_APPLICABLE"
+  }
+}

@@ -1,0 +1,101 @@
+﻿Glossary terms for labels
+The business glossary terms the labels use.
+Term,Thai,Meaning,Field,Do not use
+Recovery case,กรณีติดตามหนี้,"One case per customer per product, from 90 days past due to close, with its accounts linked",recovery_case,"Ticket, file, job"
+Case number,เลขที่กรณี,"The identifier issued when a case is created, in the form RW-YYYY-NNNNNN, never reused",recovery_case.case_no,Case ID in other systems
+Case owner,ผู้รับผิดชอบกรณี,The person who holds the case from day 90 to close and answers for its outcome,recovery_case.owner_user_id; role RW-CASEOWN,"Collector, handler"
+Case status,สถานะกรณี,"One of New, Assigned, In progress, Waiting customer, Waiting partner, Waiting approval, On hold, Closed",recovery_case.status; LOV-CASE-STATUS,"Stage, step"
+Stage,ขั้นตอนหลัก,"A part of the case lifecycle, such as litigation or asset disposal, in CMMN 1.1 terms",recovery_case.stage_code; LOV-STAGE,"Phase, bucket"
+Route,แนวทางการแก้ไขหนี้,The resolution path chosen for a case: R1 restructure to R8 write-off,recovery_case.route_code; LOV-ROUTE,"Strategy, track"
+Route state,สถานะตามแนวทาง,The state in a route set's decision table that the case is in,recovery_case.route_state,Status
+Milestone,หมุดหมาย,"A point the case reaches that matters to the bank, such as judgment obtained or asset sold",Case model,Checkpoint
+Task,งาน,"A unit of work on a case for a person, a customer, a partner or a decision",task,"Activity, to-do"
+Sentry,เงื่อนไขเปิดปิดขั้นตอน,"A rule that lets a stage, task or milestone start or finish when an event occurs and its condition holds",rule_row,Trigger
+Event listener,ตัวรอเหตุการณ์,"A point in the case model that waits for an outside event, such as a payment or a court date",Case model,Hook
+Case file item,รายการในแฟ้มกรณี,"A piece of information the case holds, such as the account, a document or a decision",Case model,
+Queue,คิวงาน,A list of cases belonging to one team and one role,queue,"Bucket, basket"
+Allocation,การจัดสรรงาน,Placing a new case in a queue and giving it an owner by rule,assignment.reason = ALLOCATION,Distribution
+Transfer,การโอนงาน,Moving a case to another owner or queue with a reason,assignment.reason = TRANSFER,Reassign without a reason
+Caseload cap,จำนวนกรณีสูงสุดต่อคน,The most open cases one person may hold in a queue,queue.capacity_cap,Quota
+Service level,ระยะเวลามาตรฐาน,How long a case may stay in a state before it escalates,timer.timer_type = SERVICE_LEVEL,SLA in free text
+Stage clock,นาฬิกาขั้นตอน,"The time a case has spent in its current state, paused while a deviation is open",recovery_case.stage_clock_start,Aging
+Prescription date,วันขาดอายุความ,The earliest date a legal claim on the case expires. It never pauses,recovery_case.prescription_date,Expiry
+Deviation,เหตุผิดปกติ,An event that stops the normal route: X1 to X7,deviation; LOV-DEVIATION,"Exception, issue"
+Legal hold,การระงับเพื่อเหตุทางกฎหมาย,A hold that stops routing while a legal matter is decided,recovery_case.legal_hold,
+Contact stop,การระงับการติดต่อลูกหนี้,An instruction that no one contacts the customer while it is in force,deviation.contact_stop,Do not call
+Decision,การตัดสินใจ,"One of D1 to D9 or their sub-decisions, made by a rule, a model, an agent or a person",decision_log_entry.decision_code,Approval
+Decision log,บันทึกการตัดสินใจ,"The append-only, hash-chained record of every decision with its inputs, versions, approver and outcome",decision_log_entry,"Audit trail, history"
+Interaction ledger,บันทึกการติดต่อ,"The ordered record of every contact, letter, promise, payment and hand-over on a case",interaction,"Contact history, notes"
+Recommendation,ข้อเสนอแนะ,"The option a rule, model or agent proposes, with reasons and confidence",decision_log_entry.recommendation,Suggestion
+Override,การตัดสินใจต่างจากข้อเสนอแนะ,"A decision that does not follow the recommendation, with the reason recorded",decision_log_entry.override_reason,
+Approval level,ระดับอำนาจอนุมัติ,One of the six levels of the bank approval authority regulation that may approve a decision,delegation_limit.approval_level; LOV-APPROVAL-LEVEL,"Authority, sign-off"
+Delegation of authority table,ตารางมอบอำนาจอนุมัติ,"The limits each approval level may approve, by decision, product and amount",delegation_limit,DOA matrix
+Rule,กฎ,"One row of a decision table: from state, event and condition in; action, next state, owner and timer out",rule_row,"Logic, script"
+Rule version,ฉบับของกฎ,The version of a rule in force when a decision was made,rule_row.rule_version,
+Autonomy level,ระดับการทำงานอัตโนมัติ,"How far an agent may act on a decision, from L0 to L4",Agent runtime,
+Agent,เอเจนต์,An AI component that prepares and recommends through the tool gateway,role SY-AGENT,"Bot, robot"
+Score,คะแนนจากแบบจำลอง,"A value COLLINS returns for an account or a case, such as a risk score or a price estimate",score,
+Return by route,ผลตอบแทนตามแนวทาง,The expected recovery after cost of each route for a case,"score.estimate_value, score.route_code",Net present value
+Party,บุคคลที่เกี่ยวข้อง,A person or company with a role on a case,party,"Customer, when the person is not the borrower"
+Borrower,ผู้กู้,The party the loan was made to,case_party.party_role = BORROWER,Debtor
+Co-borrower,ผู้กู้ร่วม,A party who borrowed jointly with the borrower,case_party.party_role = CO_BORROWER,
+Guarantor,ผู้ค้ำประกัน,A party who guaranteed the loan,case_party.party_role = GUARANTOR,Surety
+Heir,ทายาท,A party who represents a deceased borrower's estate,case_party.party_role = HEIR,
+Vulnerable customer,ลูกหนี้กลุ่มเปราะบาง,"A customer with hardship or vulnerability confirmed, treated under X2",party.vulnerable_flag,
+Contact point,ช่องทางการติดต่อ,"A way to reach a party, with its consent and whether it works",contact_point,"Phone number, address"
+Loan account,บัญชีสินเชื่อ,An account in the core bank,loan_account,"Contract, when the account is meant"
+Days past due,จำนวนวันค้างชำระ,Days since the oldest unpaid installment fell due,loan_account.days_past_due,
+Non-performing loan,หนี้ที่ไม่ก่อให้เกิดรายได้,A loan at 90 days past due or more,loan_account.classification,Bad loan
+Total balance,ยอดหนี้คงค้างรวม,"Principal, interest and fees outstanding",loan_account.total_balance,Outstanding
+Payoff,ยอดปิดบัญชี,The amount that settles the account on a given date,treatment.offer_amount,Settlement figure
+Exposure band,กลุ่มยอดหนี้,The band a case's outstanding balance falls in at entry,recovery_case.exposure_band,Segment
+Treatment,แนวทางการแก้ไขที่เสนอ,A resolution put to the customer or carried out on the case,treatment,"Offer, when a booked plan is meant"
+Restructure,การปรับโครงสร้างหนี้,New terms for the debt agreed with the customer,treatment.treatment_type = RESTRUCTURE,
+Settlement,การชำระหนี้เพื่อปิดบัญชี,Payment of an agreed amount that closes the debt,treatment.treatment_type = SETTLEMENT,Discount
+Haircut,ส่วนลดหนี้,The amount forgiven in a settlement,treatment.haircut_amount,
+Deed in lieu,การโอนทรัพย์ชำระหนี้,Transfer of the collateral to the bank in settlement of the debt,treatment.treatment_type = DEED_IN_LIEU,
+Buy-back,การซื้อทรัพย์คืน,The customer buying back an asset transferred in lieu,treatment.treatment_type = BUY_BACK,
+Guarantee claim,การยื่นขอรับค่าประกันชดเชย,A claim against a Thai Credit Guarantee Corporation guarantee or an insurer,guarantee_claim,"TCG claim, when an insurer is meant"
+Demand notice,หนังสือบอกกล่าวทวงถาม,A notice demanding payment before legal action,notice.notice_type = DEMAND,Letter
+Recall notice,หนังสือบอกเลิกสัญญา,A notice ending the loan and calling the full balance,notice.notice_type = RECALL,
+Proof of delivery,หลักฐานการส่งหนังสือ,Evidence that a registered notice reached the party,"notice.callback_date, notice.delivery_status",
+Lawsuit,การฟ้องร้องคดี,A civil case filed against the borrower or guarantor,legal_action.action_type = CIVIL_CASE,"Litigation, when one suit is meant"
+Black case number,หมายเลขคดีดำ,The court number given when a case is filed,legal_action.black_case_no,
+Red case number,หมายเลขคดีแดง,The court number given at judgment,legal_action.red_case_no,
+Judgment,คำพิพากษา,The court's decision on the claim,"legal_action.judgment_date, judgment_amount",
+Enforcement,การบังคับคดี,Steps after judgment to seize and sell assets,legal_action.action_type = ENFORCEMENT,
+Legal Execution Department,กรมบังคับคดี,The government department that runs enforcement auctions,role PT-LED,
+Collateral,หลักประกัน,Property or a vehicle securing one or more accounts,collateral,Security
+Appraisal,การประเมินราคา,A valuation of collateral or an asset,valuation,Valuation report
+Forced sale value,ราคาขายบังคับ,The value expected in a quick sale,valuation.forced_sale_value,Liquidation value
+Asset held for sale,ทรัพย์สินรอการขาย,"An asset the bank holds after repossession, deed in lieu or auction purchase",asset,
+Book value,มูลค่าตามบัญชี,The value of an asset held for sale in the bank's books,asset.book_value,
+Floor price,ราคาขั้นต่ำ,The lowest price approved for a sale,listing.floor_price,"Reserve price, for an asset"
+Listing,รายการประกาศขาย,"An asset offered for sale, with its prices and rounds",listing,
+Repossession,การยึดรถ,Taking back a vehicle under a hire purchase contract,asset.repossessed_date,
+Debt sale,การขายหนี้,Sale of accounts to a debt buyer,debt_sale_lot,
+Lot,กองหนี้,A group of accounts offered to debt buyers together,debt_sale_lot,"Pool, portfolio"
+Reserve price,ราคาสงวน,The lowest price approved for a debt sale lot,debt_sale_lot.reserve_price,
+Put-back,การขอคืนบัญชี,A buyer returning an account under the sale terms,debt_sale_account.put_back_status,
+Write-off,การตัดหนี้สูญ,Removing the balance from the books after approval,write_off,
+Recovery after charge-off,การติดตามหนี้หลังตัดหนี้สูญ,Money collected after a write-off,write_off.recovered_after,
+Proceeds,เงินที่ได้รับ,Money received on a case and what it was matched to,proceeds,Collection
+Cure,การกลับมาเป็นหนี้ปกติ,Arrears cleared so the account falls below 90 days past due and the case closes,recovery_case.closure_reason = CURED,
+Partner,คู่ค้า,An outside firm the bank places work with,partner,"Vendor, outsource"
+Collection agency,บริษัทติดตามหนี้,A firm placed with accounts to collect,partner.partner_type = AGENCY,
+Law firm,สำนักงานกฎหมาย,A firm instructed to file and run lawsuits,partner.partner_type = LAW_FIRM,"Lawyer, when the firm is meant"
+Partner instruction,คำสั่งงานคู่ค้า,Work placed with a partner on a case,partner_instruction,"Order, assignment"
+Partner portal,หน้าจอสำหรับคู่ค้า,The Workbench screens partners use for their placed cases,P4 partner identities; capability area Partner portal,
+Document hub,ศูนย์เอกสาร,The Workbench store and index for recovery documents,document,"DMS, folder"
+Document type,ประเภทเอกสาร,The class a document belongs to on the document checklist,document.document_type,
+Custody,การเก็บรักษาต้นฉบับ,Where an original document is and who holds it,document_custody,
+Data product,ชุดข้อมูลผลิตภัณฑ์,"A set of entities with one system of record, one way in and one freshness",Conceptual data model,"Data mart, dataset"
+System of record,ระบบต้นทางหลัก,The system whose value is correct when two systems differ,Entity attribute,"Master, when not meant"
+Freshness,ความเป็นปัจจุบันของข้อมูล,"How old a loaded value is, from its business date",data_as_of,
+Role,บทบาท,A job function with the permissions it needs,role,"Profile, group"
+Permission,สิทธิ์,"A letter C, R, U, D or A in one capability area",permission,Right
+Scope,ขอบเขตการเข้าถึง,"Which cases a role sees: own, team, region or all",role.default_scope,
+Masking,การปกปิดข้อมูล,Hiding a personal data field from a role not allowed to see it,Personal data fields,
+Break-glass,การเข้าถึงกรณีฉุกเฉิน,"Emergency access beyond a role, with a reason and a review",Access log,Super user
+List of values,รายการค่าที่กำหนด,A closed set of codes a field may take,lov_value,"Drop-down, lookup"
+Principle 1,หลักการที่ 1,"Every rule, limit, threshold, template, name, queue, role, timer and route is a versioned data row, changed by a validated load without a code release",All reference data,

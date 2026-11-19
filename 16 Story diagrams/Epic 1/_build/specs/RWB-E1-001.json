@@ -1,0 +1,146 @@
+{
+  "key": "RWB-E1-001",
+  "file_stem": "RWB E1 001 Recovery tables for the 14 data products",
+  "title": "Recovery tables for the 14 data products",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.p1.data-catalog",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "92 tables + dictionary",
+  "goal": "Create the 92 recovery tables, the data dictionary and the 14-product catalog",
+  "why": "Every later story builds on these tables. No copy of ACE data: links to ACE are varchar(255) business keys, never foreign keys into public.",
+  "needs": [
+    "E1-044",
+    "E1-043"
+  ],
+  "unblocks": [
+    "E1-007",
+    "E1-008",
+    "E1-015",
+    "E1-016",
+    "E1-017",
+    "E1-018",
+    "E1-022",
+    "E1-024",
+    "E1-047",
+    "E1-058",
+    "E1-064",
+    "E1-065",
+    "E1-069"
+  ],
+  "triggers": [
+    [
+      "BUILD",
+      "Flyway V0001 in the ACE pipeline"
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (data_product)"
+    ],
+    [
+      "WHO",
+      "RW-DATASTEW owns, RW-REFADM loads"
+    ],
+    [
+      "BUILD",
+      "DataDictionaryConformanceTest"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "Reads no view. V0001 pre-seeds dictionary rows for all 30 v_ace_* views (304 fields); the views themselves ship in E1-069.",
+  "writes": [
+    {
+      "t": "recovery.* (92 tables)",
+      "note": "88 Workbench + 4 extension tables keyed by ACE business key"
+    },
+    {
+      "t": "data_product",
+      "note": "14 rows DP01-DP14, one owner and system of record each"
+    },
+    {
+      "t": "sys_objects",
+      "note": "122 rows: 92 tables + 30 views"
+    },
+    {
+      "t": "sys_fields",
+      "note": "1,366 field rows with BR Field IDs"
+    },
+    {
+      "t": "v_data_dictionary",
+      "note": "one view that answers 'what is this field?'"
+    }
+  ],
+  "reads": [
+    {
+      "t": "information_schema",
+      "note": "conformance test compares both ways"
+    }
+  ],
+  "stores": "Append-only triggers on decision_log_entry and interaction. 20 old copy/load tables are not created (loan_account, party, load_run, dq_rule ...).",
+  "functions": [
+    {
+      "name": "V0001__rwb_e1_001_recovery_schema",
+      "does": "92 tables, triggers, dictionary seed"
+    },
+    {
+      "name": "DataDictionaryConformanceTest",
+      "does": "schema vs sys_fields, both ways"
+    },
+    {
+      "name": "DataProductCatalogHandler",
+      "does": "validate + apply the catalog load"
+    },
+    {
+      "name": "DataProductRepository",
+      "does": "reads and writes data_product"
+    },
+    {
+      "name": "v_data_dictionary",
+      "does": "joins product, object and field"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Pipeline runs Flyway V0001"
+    },
+    {
+      "kind": "table",
+      "text": "92 recovery tables + triggers"
+    },
+    {
+      "kind": "table",
+      "text": "sys_objects + sys_fields seeded"
+    },
+    {
+      "kind": "check",
+      "text": "Conformance test: 1,062 fields match"
+    },
+    {
+      "kind": "function",
+      "text": "DataProductCatalogHandler"
+    },
+    {
+      "kind": "out",
+      "text": "data_product: 14 products"
+    }
+  ],
+  "rules": [
+    "BR3: one system of record per product, written like 'ACE (ingested from ALS)', plus one owner",
+    "BR5: a bare source name such as 'CCMS' is refused",
+    "BR8: no copy of source data, no FK into public; ACE links are varchar(255) business keys",
+    "BR9: V0001 seeds dictionary rows for the 30 views before the views exist"
+  ],
+  "risks": [
+    "Catalog row with no owner, or a bare system of record -> whole load refused (MSG-P1-003)",
+    "File without exactly DP01-DP14 -> refused (MSG-P1-004)",
+    "Same file loaded twice -> nothing written (MSG-P1-011)"
+  ],
+  "example": [
+    "SELECT * FROM v_data_dictionary WHERE entity = 'v_ace_account' AND field = 'days_past_due'",
+    "-> DF-ACE-018 | NUMBER / integer | source public.account.delay_days",
+    "-> product DP01 | 'ACE (ingested from ALS)' | DAILY | owner RW-DATASTEW",
+    "account_ext.dispute_open -> DF-EXT-028 | BOOLEAN | source Workbench | DP01"
+  ]
+}

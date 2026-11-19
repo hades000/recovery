@@ -1,0 +1,128 @@
+{
+  "key": "RWB-E1-057",
+  "file_stem": "RWB E1 057 Intake from branches mailroom partner SFTP and email",
+  "title": "Intake from branches, mailroom, partner SFTP and email",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.intake (+ .branch .mailroom .sftp .email)",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Document intake channels",
+  "goal": "Pull branch, mailroom, partner SFTP and mailbox documents into one intake that records the source",
+  "why": "Paper and e-mail arrive through four channels. One intake step de-duplicates, checks type and size, and hands files to scan, OCR and classification.",
+  "needs": [
+    "E1-049",
+    "TE-012",
+    "E1-041"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-12 intakeStep, every 15 min, Mon-Fri 08-17"
+    ],
+    [
+      "CALL",
+      "Branch + mailroom folders, partner SFTP"
+    ],
+    [
+      "CALL",
+      "Mailbox via Microsoft Graph (assumed)"
+    ],
+    [
+      "API",
+      "POST /admin/jobs/{jobId}/rerun"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Intake handles files; case matching happens later (E1-032).",
+  "writes": [
+    {
+      "t": "document_intake",
+      "note": "source SCAN / PARTNER / EMAIL, channel, hash, size"
+    }
+  ],
+  "reads": [
+    {
+      "t": "partner",
+      "note": "panel_status ACTIVE via PartnerDirectory"
+    },
+    {
+      "t": "document_hub_parameter",
+      "note": "PDF / JPG / PNG, 25 MB"
+    },
+    {
+      "t": "holiday table",
+      "note": "skip non-working days"
+    }
+  ],
+  "stores": "Branch and mailroom folders; SFTP inbound subfolders per partner_code; Exchange Online mailbox; blob container rwb-intake",
+  "functions": [
+    {
+      "name": "IntakeStep",
+      "does": "first step of DocumentIntakeJob"
+    },
+    {
+      "name": "FolderChannelReader",
+      "does": "branch + mailroom folders"
+    },
+    {
+      "name": "SftpChannelReader",
+      "does": "partner SFTP, ACTIVE check"
+    },
+    {
+      "name": "MailboxChannelReader",
+      "does": "mailbox attachments"
+    },
+    {
+      "name": "IntakeService",
+      "does": "hash, duplicate, type, size, copy"
+    },
+    {
+      "name": "IntakeAlertService",
+      "does": "MSG-P5-008 on channel failure"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-12 every 15 min"
+    },
+    {
+      "kind": "store",
+      "text": "4 channels: branch, mail, SFTP, email"
+    },
+    {
+      "kind": "check",
+      "text": "Duplicate (30 days), type, size"
+    },
+    {
+      "kind": "store",
+      "text": "Copy to rwb-intake"
+    },
+    {
+      "kind": "table",
+      "text": "document_intake row"
+    },
+    {
+      "kind": "out",
+      "text": "scan -> OCR -> classify -> match"
+    }
+  ],
+  "rules": [
+    "BR1: source is SCAN, PARTNER or EMAIL",
+    "BR3: the malware scan runs before OCR",
+    "BR4: a partner must be ACTIVE",
+    "BR6: the source file is moved only after the commit"
+  ],
+  "risks": [
+    "File type not allowed -> rejected (MSG-P5-001, MSG-P5-007)",
+    "Over 25 MB -> rejected (MSG-P5-017)",
+    "Two failed runs on a channel -> alert (MSG-P5-008)"
+  ],
+  "example": [
+    "scan-0001.pdf (1.2 MB) from branch BR-0123, scanned 2026-11-30 09:12, picked up 09:15",
+    "-> document_intake row: source SCAN, channel_code BR-0123, scan_result empty",
+    "File LF-007 from partner SFTP -> source PARTNER"
+  ]
+}

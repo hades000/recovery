@@ -1,0 +1,139 @@
+{
+  "key": "RWB-E1-062",
+  "file_stem": "RWB E1 062 Deviation screening agent in shadow E2b",
+  "title": "Deviation screening agent in shadow [E2b]",
+  "module": "P10 Agent runtime",
+  "flag": "rwb.agent.screening-shadow",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "ai",
+  "overview_label": "Deviation screening (shadow)",
+  "goal": "An agent proposes deviations X1-X7 with reasons in shadow, so precision and recall are known",
+  "why": "Deviations (vulnerability, dispute, fraud ...) change how a case is handled. The agent only proposes; in shadow nothing is raised.",
+  "needs": [
+    "E1-058",
+    "TE-013"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "EVENT",
+      "EV-01 CaseCreated"
+    ],
+    [
+      "EVENT",
+      "EV-16 DocumentStored"
+    ],
+    [
+      "CALL",
+      "SCREENING agent, key SCREENING:<case>:<event>"
+    ],
+    [
+      "API",
+      "POST /admin/agent-evaluations (SCREEN-S1)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Inputs are the Workbench case, its 180-day interaction ledger and its documents, all masked.",
+  "writes": [
+    {
+      "t": "agent_run",
+      "note": "SHADOW proposals with reasons"
+    },
+    {
+      "t": "agent_evaluation_run",
+      "note": "review_count, failure_counts"
+    },
+    {
+      "t": "agent_evaluation",
+      "note": "precision and recall per code X1-X7"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "product, region, deviation_open"
+    },
+    {
+      "t": "interaction",
+      "note": "180-day ledger via InteractionLedgerReader"
+    },
+    {
+      "t": "document, document_field",
+      "note": "documents and fields"
+    },
+    {
+      "t": "rule_row",
+      "note": "R-DEV-02..06 owner role"
+    },
+    {
+      "t": "agent_sample",
+      "note": "labelled cases"
+    }
+  ],
+  "stores": "Outbox EV-28; model gateway; interaction ledger via P7",
+  "functions": [
+    {
+      "name": "ScreeningShadowListener",
+      "does": "EV-01 and EV-16 -> agent"
+    },
+    {
+      "name": "ScreeningInputAssembler",
+      "does": "case, ledger, docs (masked)"
+    },
+    {
+      "name": "ScreeningOwnerResolver",
+      "does": "owner role from rule rows"
+    },
+    {
+      "name": "ScreeningRuleChecks",
+      "does": "code list, X1 needs a contact"
+    },
+    {
+      "name": "ScreeningScorer",
+      "does": "precision + recall per code"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "EV-01 or EV-16"
+    },
+    {
+      "kind": "table",
+      "text": "Case + ledger + documents"
+    },
+    {
+      "kind": "ai",
+      "text": "SCREENING agent in SHADOW"
+    },
+    {
+      "kind": "check",
+      "text": "Codes X1-X7? X1 has a contact?"
+    },
+    {
+      "kind": "table",
+      "text": "agent_run (no deviation raised)"
+    },
+    {
+      "kind": "out",
+      "text": "Scored on SCREEN-S1"
+    }
+  ],
+  "rules": [
+    "BR1: shadow raises nothing (R-DEV-01 never fires)",
+    "BR3: an unmapped code goes to RW-TEAMMGR, marked 'unmapped'",
+    "BR4: an X1 proposal names the contact in the prior 30 days",
+    "BR6: only proposals at or above the floor (0.80) are scored"
+  ],
+  "risks": [
+    "Code outside X1-X7 -> GUARDRAIL_FAILED",
+    "X1 without a preceding contact -> SCHEMA_RULE fail",
+    "Timeout -> TIMED_OUT, no retry"
+  ],
+  "example": [
+    "200 cases -> proposals stored in SHADOW",
+    "deviation_open stays false on every case",
+    "One score row per code X1-X7, sample size 200"
+  ]
+}

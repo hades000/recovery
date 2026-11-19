@@ -1,0 +1,39 @@
+﻿Gaps and the assumptions taken
+Where the data needed is not available today or waits on a bank decision. The model is built on the assumption shown. The ACE gaps section lists what the ACE team adds under RWB-ACE-001.
+Gap,What is missing,Assumption the model takes,What it affects,Decision
+G1,ACE holds no appraisal and no title deed detail today.,"ACE ingests SVAF and CCMS; valuation and collateral_detail are Tier 2 in RWB-ACE-001. Until they land, DP06 stays behind its feature flag. An appraisal past its age limit is flagged on the case and blocks the route decision until it is replaced.","DP06; D6 route, D8 floor price","DL43, DL06, DL12"
+G2,"ACE holds the collateral asset, not the repossessed or purchased asset.","ACE ingests AMIS and RPS; npa_asset and npa_sale are Tier 2 in RWB-ACE-001. Until they land, the NPA screens stay behind their feature flag.",DP06; D8 disposal,"DL43, DL06, DL12"
+G3,Debt sale data is not available in ACE.,Debt sale lots are built and held in the Workbench. Past lots are migrated once from the bank's debt sale files.,DP09; D8.4 debt sale,None
+G4,The Thai Credit Guarantee quota is not available in ACE.,The guarantee officer records the quota and the claim deadline on the case. The deadline drives a timer.,DP04; D6.5 guarantee claim,DL06
+G5,The full loan history since the account opened is not available.,The model holds the ACE account at its current state and the monthly bucket snapshot. Routing does not need history before collections started.,DP01,DL12
+G6,"How much EFS contact history ACE keeps, and for how long.","The contact outcomes the business lead names, for the period the account was in collections, are read through v_ace_efs_action. Nothing is copied into the Workbench.","DP05; D6 entry, X6",DL29
+G7,Where customer facts come from.,ACE ingests them from SCBPDM and the core bank batch; the Workbench reads v_ace_customer. DL20 is amended by D-RCV-35.,DP02,"DL20, D-RCV-35"
+G8,What counts as one case.,"One case per customer per product, with the accounts linked through case account.",DP03; every entity linked to the case,DL17
+G9,Systems that carry the case identifier.,The Workbench only. The ACE account_key joins the case to ACE and to other systems.,DP03; all inbound and outbound flows,DL21
+G10,"Thai names for fields, labels and list values.",Each list value carries an English and a Thai label. Thai labels are filled as they are approved.,DP14 lists of values; every screen,DL10
+G11,Retention and masking per data product.,"Every field marked as personal data is masked for every role except those the masking rules name. Identification numbers never leave ACE in clear; contact values are full in v_ace_contact because notices need them, and display masking is E1-037. Retention follows the bank schedule once received.",All data products,DL26
+G12,Difference accepted between a view and its ACE source.,"Zero. ACE ingestion refuses a batch that does not reconcile to its control totals, and the Workbench reconciles the case list to v_ace_account and the money movements to v_ace_payment and v_ace_write_off every day (REC-01 to REC-05).",All data products read from ACE views,DL25
+G13,GL write-off postings are not in ACE today.,"ACE ingests the GL file; gl_write_off is Tier 2 in RWB-ACE-001, read through v_ace_write_off and matched to the write-off decision.",DP13; D9,"DL43, DL12"
+G14,Work orders and operational status held in Salesforce are not available.,Not modeled. NPA work orders are raised as tasks on the case.,DP06; D8,DL12
+ACE gaps
+14 ACE tables and 12 ACE columns are not in ACE today. They are raised once in RWB-ACE-001 and read through the 14 Section B views.
+#,ACE object,Kind and columns,Source,Fields read
+1,ace_batch_run,"New table, 9 columns. The per-source business date, completion record, row count and checksum.",All sources,0
+2,valuation,"New table, 11 columns. Appraisal number, type, appraised and forced sale value, appraisal date.",SVAF,5
+3,collateral_detail,"New table, 15 columns. Title deed, plot, area, province, district, insured value, insurance expiry, lien rank.",CCMS,9
+4,npa_asset,"New table, 14 columns. Transfer in, book value, auction purchase price, repossession and stock dates.","AMIS, RPS",8
+5,npa_sale,"New table, 13 columns. Sale contract, sale price, transfer fee, taxes and incentive.",AMIS,7
+6,lawsuit,"New table, 15 columns. Court case numbers, claim, filing, judgment and litigation status.",LIT,9
+7,hearing,"New table, 9 columns. Hearing date, type and next date.",LIT,3
+8,pod_receipt,"New table, 12 columns. Notice reference, sent date, barcode, callback date, delivery status and sent type.",WIN,5
+9,gl_write_off,"New table, 11 columns. Write-off amount, posted date, responsibility centre, cost centre and GL product.",GL,5
+10,collins_score,"New table, 12 columns. Model, version, score, estimate, route and scored date.",COLLINS,6
+11,party_product,"New table, 7 columns. Customer product type and status.",SCBPDM,4
+12,credit_decision,"New table, 10 columns. NLEADS reference, credit result, reason and decision date.",NLEADS,4
+13,esign_request,"New table, 9 columns. Signature external reference, requested date and status.",EasyApp,1
+14,iam_group,"New table, 7 columns. Group-to-role mapping used at sign-in.",Entra ID,1
+15,account,"7 new columns on an existing ACE table: business_unit, principal_outstanding, interest_outstanding, fees_outstanding, daily_bucket, settlement_booked_date, settlement_booked_amount.",ALS,7
+16,customer,"3 new columns on an existing ACE table: party_type, id_type, segment.",SCBPDM,3
+17,efs_action,"2 new columns on an existing ACE table: contact_result, action_contact_status.",EFS,3
+,"Total: 14 new tables, 12 new columns","154 columns in the 14 new tables, 12 on existing tables",,80
+Raised once in RWB-ACE-001. DL43 stays open until the ACE team lead accepts the scope and the 21 November date.

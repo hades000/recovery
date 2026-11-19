@@ -1,0 +1,135 @@
+{
+  "key": "RWB-E1-040",
+  "file_stem": "RWB E1 040 Document checklist per case type as reference data",
+  "title": "Document checklist per case type as reference data",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.checklist",
+  "status": "READY",
+  "status_text": "Ready for build (Should)",
+  "theme": "default",
+  "overview_label": "Document checklist per stage",
+  "goal": "Required documents per stage and route as versioned data, so missing ones show on the case",
+  "why": "Litigation packs stop failing for a missing title deed. The checklist is recomputed when a document arrives, the stage changes, or a version takes effect.",
+  "needs": [
+    "E1-024",
+    "E1-043",
+    "E1-025",
+    "E1-026"
+  ],
+  "unblocks": [
+    "E1-054"
+  ],
+  "triggers": [
+    [
+      "EVENT",
+      "DocumentStored (EV-16)"
+    ],
+    [
+      "EVENT",
+      "CaseStateChanged (EV-05)"
+    ],
+    [
+      "JOB",
+      "JOB-12 checklistRefreshStep on a new version"
+    ],
+    [
+      "API",
+      "GET /cases/{caseId}/document-checklist"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Stage and route come from the Workbench case; documents from the document hub.",
+  "writes": [
+    {
+      "t": "document_checklist_item",
+      "note": "required types per stage and route (CHK-2026.11)"
+    },
+    {
+      "t": "case_document_check",
+      "note": "present / missing per case and type"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "stage_code, route_code via CaseDirectory"
+    },
+    {
+      "t": "document",
+      "note": "active documents on the case"
+    },
+    {
+      "t": "document_type",
+      "note": "type must be in force"
+    }
+  ],
+  "stores": "Exception queue after retries",
+  "functions": [
+    {
+      "name": "ChecklistLoader",
+      "does": "DOCUMENT_CHECKLIST reference load"
+    },
+    {
+      "name": "ChecklistEvaluator",
+      "does": "pick rows, count, write result"
+    },
+    {
+      "name": "DocumentStoredChecklistListener",
+      "does": "EV-16, idempotent by event ID"
+    },
+    {
+      "name": "ChecklistRefreshStep",
+      "does": "JOB-12: recompute on new version"
+    },
+    {
+      "name": "DocumentChecklistPanel",
+      "does": "React SCR-30 panel"
+    },
+    {
+      "name": "MissingDocumentsBadge",
+      "does": "React SCR-02 badge"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "EV-16 or EV-05 arrives"
+    },
+    {
+      "kind": "table",
+      "text": "Case stage + route"
+    },
+    {
+      "kind": "table",
+      "text": "document_checklist_item rows"
+    },
+    {
+      "kind": "function",
+      "text": "ChecklistEvaluator counts docs"
+    },
+    {
+      "kind": "table",
+      "text": "case_document_check"
+    },
+    {
+      "kind": "out",
+      "text": "SCR-30 panel + SCR-02 badge"
+    }
+  ],
+  "rules": [
+    "BR2: case type = stage; rows for the route take precedence over rows with no route",
+    "BR3: a version takes effect on valid_from, no deployment",
+    "BR4: only active documents count, once per type",
+    "BR6: a repeated event changes nothing"
+  ],
+  "risks": [
+    "No rows for the stage -> 'No checklist for this case type'",
+    "Bad type or stage in the load -> refused (MSG-P3-027)",
+    "No Documents R right -> 403 (MSG-P4-002)"
+  ],
+  "example": [
+    "RW-2026-000123 at stage LITIGATION holds a demand letter and a court notice",
+    "-> those 2 present",
+    "-> TITLE_DEED and APPRAISAL_REPORT missing (CHK-2026.11)"
+  ]
+}

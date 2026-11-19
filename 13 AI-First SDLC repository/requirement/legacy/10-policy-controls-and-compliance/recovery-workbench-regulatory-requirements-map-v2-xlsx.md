@@ -1,0 +1,121 @@
+<!-- source: 10 Policy, controls and compliance/Recovery Workbench Regulatory Requirements Map v2.xlsx -->
+<!-- converted: 2026-11-04 from XLSX -->
+
+> **Source:** `10 Policy, controls and compliance/Recovery Workbench Regulatory Requirements Map v2.xlsx`  
+> **Converted from:** XLSX
+
+## Obligations
+
+| Regulatory obligations and how the Workbench meets them |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|
+| 32 obligations from the law, BOT rules and bank policy, each mapped to the L2 process, the rule and the controls that satisfy it. Compliance and Legal confirm the obligations in scope. |  |  |  |  |  |  |  |
+| ID | Source | Obligation | Process | Rule | Controls | Owner | Status |
+| REG-01 | Debt Collection Act B.E. 2558 | Contact the debtor only at the permitted times and places, identify the collector, and do not disclose the debt to third parties | 11.1 Answer customer contacts | Contact rules; R-UNI-04 | CTL-16, CTL-17, CTL-39 | Compliance | To confirm with Compliance |
+| REG-02 | Debt Collection Act B.E. 2558 | No threats, insults, false or misleading statements, or unfair collection practices | 11.1 Answer customer contacts; 16.2 Control conduct | Conduct rules | CTL-39 | Compliance | To confirm with Compliance |
+| REG-03 | Debt Collection Act B.E. 2558 | Collection agencies acting for the bank are registered and the bank oversees their conduct | 12.1 Select and contract partners; 12.4 Govern partners | Panel rules | CTL-35, CTL-37 | Partner and agency manager | To confirm with Compliance |
+| REG-04 | Debt Collection Act B.E. 2558 | Collection fees charged to the debtor are within the permitted rate and disclosed | 14.3 Set fees, charges and waivers; 13.2 Send letters and notices | Fee rules | CTL-14 | Compliance | To confirm with Compliance |
+| REG-05 | BOT Responsible Lending | Offer debt restructuring to a debtor in difficulty before the account becomes non-performing and before legal action or debt sale | 7.2 Decide the route; 7.3 Negotiate settlement or deed in lieu | R-RES-01 to R-RES-09 | CTL-26, CTL-04 | Product heads | To confirm with Compliance |
+| REG-06 | BOT Responsible Lending | Inform the debtor before the debt is sold or transferred | 9.6 Sell debt; 13.2 Send letters and notices | Debt sale rules | CTL-14, CTL-15 | Head of Asset Liquidity | To confirm with Compliance |
+| REG-07 | BOT Responsible Lending | Debtors in difficulty are contacted and offered help; no account is left without contact | 6.1 Take over the case at 90 days past due; 11.1 Answer customer contacts | Allocation rules | CTL-01, CTL-03 | Business lead | To confirm with Compliance |
+| REG-08 | BOT market conduct | Treat vulnerable customers fairly and apply the vulnerable customer treatment | 11.3 X2 Vulnerable customer or hardship | R-UNI-06 | CTL-16, CTL-39 | Hardship and vulnerability specialist | To confirm with Compliance |
+| REG-09 | BOT market conduct | Handle complaints within the set time and stop disputed recovery until resolved | 11.2 X1 Dispute or complaint | R-UNI-04, R-UNI-09 | CTL-16 | Complaint officer | To confirm with Compliance |
+| REG-10 | BOT relief schemes | Apply relief scheme terms correctly, report scheme results accurately and claim compensation only for eligible debtors | 6.1 Take over the case at 90 days past due; 7.3 Negotiate settlement or deed in lieu; 15.1 Report performance | R-UNI-13 | CTL-23, CTL-25 | Product heads | To confirm with Compliance |
+| REG-11 | BOT asset classification and provisioning | Classify, stage and provision accounts correctly, with the right product type for restructured hire purchase | 15.8 Classify, stage and re-age accounts | R-UNI-22 | CTL-02, CTL-25 | Finance and CFO delegate | To confirm with Compliance |
+| REG-12 | BOT asset classification and provisioning | Revalue collateral for Stage 3 accounts within the required period | 9.2 Hold and manage assets | R-DIS-15 | CTL-27 | Head of NPA | To confirm with Compliance |
+| REG-13 | BOT asset classification and provisioning | Write off only accounts that meet the write-off criteria, with the approval required | 10.1 Assess write-off; 10.2 Approve and post | R-WO-01 to R-WO-19 | CTL-33, CTL-04 | Write-off committee | To confirm with Compliance |
+| REG-14 | BOT NPA holding rules | Hold foreclosed assets within the permitted period and provision them on schedule | 9.2 Hold and manage assets | R-DIS-06, R-DIS-09 | CTL-30 | Head of NPA | To confirm with Compliance |
+| REG-15 | BOT reporting | Report repossessed vehicles and loss on sale in the BOT format | 15.1 Report performance | Reporting | CTL-38 | Reporting and BI analyst | To confirm with Compliance |
+| REG-16 | Civil and Commercial Code: guarantee | Send the guarantor notice within the period after the debtor's default | 7.5 Pursue guarantors and co-borrowers | R-GUA-06 | CTL-20, CTL-15 | Guarantee officer | To confirm with Legal |
+| REG-17 | Civil and Commercial Code: mortgage | Send the mortgagor notice and wait the notice period before enforcing the mortgage | 8.1 Prepare pre-litigation | R-LIT-01, R-LIT-07, R-LIT-15 | CTL-14, CTL-15 | Head of Litigation | To confirm with Legal |
+| REG-18 | Civil and Commercial Code: prescription | File before the claim expires under the prescription period for the claim type | 8.1 Prepare pre-litigation; 8.2 Instruct and file | R-UNI-31, R-LIT-11, R-LIT-20 | CTL-18 | Head of Litigation | To confirm with Legal |
+| REG-19 | Civil Procedure Code | Serve the claim correctly and keep proof of service | 8.2 Instruct and file; 8.3 Manage to judgment | R-LIT-07 to R-LIT-10 | CTL-15, CTL-19 | Legal counsel | To confirm with Legal |
+| REG-20 | Hire purchase contract rules | Give the hirer notice before terminating the contract and repossessing, and notify the hirer and guarantor before the vehicle is sold | 9.1 Take assets onto the books; 9.4 Sell assets by Dutch auction | R-DIS-01, R-DIS-04, R-DIS-05 | CTL-14, CTL-15, CTL-38 | Head of Asset Liquidity | To confirm with Legal |
+| REG-21 | Bankruptcy Act | Stop enforcement and file the claim with the official receiver within the deadline | 11.6 X5 Bankruptcy or external seizure | R-UNI-07 | CTL-22 | Legal counsel | To confirm with Legal |
+| REG-22 | Personal Data Protection Act s.24 and s.26 | Process personal data only on a lawful basis; process sensitive data only where the Act allows | 16.5 Control access and data protection | Data classification | CTL-09, CTL-11 | Compliance and PDPA officer | To confirm with Compliance |
+| REG-23 | Personal Data Protection Act | Answer data subject requests within the statutory period | 16.7 Handle data subject requests | R-UNI-11 | CTL-42 | Compliance and PDPA officer | To confirm with Compliance |
+| REG-24 | Personal Data Protection Act | Keep personal data no longer than the retention period and protect it with security measures | 13.3 Store and retain documents; 16.5 Control access and data protection | Retention classes (DL26) | CTL-11, CTL-12 | Compliance and PDPA officer | To confirm with Compliance |
+| REG-25 | Personal Data Protection Act | Notify the regulator of a personal data breach within the required time | 16.6 Manage incidents and continuity | Incident process | CTL-37 | Compliance and PDPA officer | To confirm with Compliance |
+| REG-26 | Personal Data Protection Act | Share personal data with partners and debt buyers only under agreements and masking | 9.6 Sell debt; 12.2 Exchange work with partners | R-DS-10 to R-DS-13 | CTL-31, CTL-32 | Compliance and PDPA officer | To confirm with Compliance |
+| REG-27 | Credit Information Business Act | Report and correct credit information for recovery accounts accurately | 15.8 Classify, stage and re-age accounts | Reporting | CTL-02 | Credit Administration | To confirm with Compliance |
+| REG-28 | Thai Credit Guarantee Corporation rules | Claim within the TCG deadline with the required documents | 7.4 Claim guarantees | R-GUA-01 to R-GUA-07 | CTL-20 | Guarantee officer | To confirm with Compliance |
+| REG-29 | Bank policy: NPL resolution policy (1 Jul 2026) | Resolve non-performing debt by the routes, criteria and approvals the policy sets | 7.2 Decide the route; 14.1 Set strategy and treatment policy | Route rules | CTL-04, CTL-08 | Product heads | In force |
+| REG-30 | Bank regulation: approval authority for problem loans and NPA (กกค.540031, amended by กกค.690070) | Approve each recovery decision at the level and within the limit the regulation sets | 17.1 Route recommendations for approval | Delegation of authority table | CTL-04, CTL-05 | Risk with the product heads | In force |
+| REG-31 | Bank policy and regulation: sale of NPA (1 Jul 2026) | Sell NPA by the permitted channels, at approved prices, with complete public listings | 9.3 Decide the disposal route; 9.4 Sell assets by Dutch auction; 9.5 Other disposal routes | R-DIS-19 to R-DIS-29 | CTL-28, CTL-29 | Head of NPA | In force |
+| REG-32 | BOT IT risk and outsourcing | Control access, keep audit trails and oversee outsourced service providers | 16.5 Control access and data protection; 12.4 Govern partners | Permission matrix | CTL-06, CTL-09, CTL-10, CTL-37 | Application owner | To confirm with Compliance |
+
+## By source
+
+| Obligations by source |  |
+|---|---|
+| Count of obligations per source. |  |
+| Source | Obligations |
+| BOT IT risk and outsourcing | 1 |
+| BOT NPA holding rules | 1 |
+| BOT Responsible Lending | 3 |
+| BOT asset classification and provisioning | 3 |
+| BOT market conduct | 2 |
+| BOT relief schemes | 1 |
+| BOT reporting | 1 |
+| Bank policy | 1 |
+| Bank policy and regulation | 1 |
+| Bank regulation | 1 |
+| Bankruptcy Act | 1 |
+| Civil Procedure Code | 1 |
+| Civil and Commercial Code | 3 |
+| Credit Information Business Act | 1 |
+| Debt Collection Act B.E. 2558 | 4 |
+| Hire purchase contract rules | 1 |
+| Personal Data Protection Act | 5 |
+| Thai Credit Guarantee Corporation rules | 1 |
+
+## By process
+
+| Obligations by process |  |  |
+|---|---|---|
+| Which obligations apply to each L2 process. |  |  |
+| L2 | Process | Obligations |
+| 6.1 | Take over the case at 90 days past due | REG-07, REG-10 |
+| 7.2 | Decide the route | REG-05, REG-29 |
+| 7.3 | Negotiate settlement or deed in lieu | REG-05, REG-10 |
+| 7.4 | Claim guarantees | REG-28 |
+| 7.5 | Pursue guarantors and co-borrowers | REG-16 |
+| 8.1 | Prepare pre-litigation | REG-17, REG-18 |
+| 8.2 | Instruct and file | REG-18, REG-19 |
+| 8.3 | Manage to judgment | REG-19 |
+| 9.1 | Take assets onto the books | REG-20 |
+| 9.2 | Hold and manage assets | REG-12, REG-14 |
+| 9.3 | Decide the disposal route | REG-31 |
+| 9.4 | Sell assets by Dutch auction | REG-20, REG-31 |
+| 9.5 | Other disposal routes | REG-31 |
+| 9.6 | Sell debt | REG-06, REG-26 |
+| 10.1 | Assess write-off | REG-13 |
+| 10.2 | Approve and post | REG-13 |
+| 11.1 | Answer customer contacts | REG-01, REG-02, REG-07 |
+| 11.2 | X1 Dispute or complaint | REG-09 |
+| 11.3 | X2 Vulnerable customer or hardship | REG-08 |
+| 11.6 | X5 Bankruptcy or external seizure | REG-21 |
+| 12.1 | Select and contract partners | REG-03 |
+| 12.2 | Exchange work with partners | REG-26 |
+| 12.4 | Govern partners | REG-03, REG-32 |
+| 13.2 | Send letters and notices | REG-04, REG-06 |
+| 13.3 | Store and retain documents | REG-24 |
+| 14.1 | Set strategy and treatment policy | REG-29 |
+| 14.3 | Set fees, charges and waivers | REG-04 |
+| 15.1 | Report performance | REG-10, REG-15 |
+| 15.8 | Classify, stage and re-age accounts | REG-11, REG-27 |
+| 16.2 | Control conduct | REG-02 |
+| 16.5 | Control access and data protection | REG-22, REG-24, REG-32 |
+| 16.6 | Manage incidents and continuity | REG-25 |
+| 16.7 | Handle data subject requests | REG-23 |
+| 17.1 | Route recommendations for approval | REG-30 |
+
+## Key
+
+| Key |  |  |
+|---|---|---|
+| What each term means. |  |  |
+| Item | Term | Meaning |
+| Status | In force | Bank policy or regulation in force on 1 July 2026 |
+| Status | To confirm with Compliance | Compliance confirms the obligation text and scope |
+| Status | To confirm with Legal | Legal confirms the obligation text, periods and scope |
+| Standard | ISO/IEC/IEEE 29148 | Each obligation is a traceable requirement with its process, rule and control |

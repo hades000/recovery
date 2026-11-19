@@ -1,0 +1,142 @@
+{
+  "key": "RWB-E1-041",
+  "file_stem": "RWB E1 041 Retention classes and virus scan on intake",
+  "title": "Retention classes and virus scan on intake",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.malware-scan + rwb.dochub.retention",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Virus scan + doc retention",
+  "goal": "Block infected files before storage, and keep or archive each document by its retention class",
+  "why": "An infected scan must never reach the store or OCR. Documents age out by policy class; nothing is deleted, REVIEW items go to Compliance.",
+  "needs": [
+    "E1-024",
+    "E1-049"
+  ],
+  "unblocks": [
+    "E1-026",
+    "E1-057"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-12 scanStep (first step, every 15 min)"
+    ],
+    [
+      "CALL",
+      "scanNow() before every upload is stored"
+    ],
+    [
+      "JOB",
+      "JOB-17 Retention, monthly first Sunday"
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (RETENTION_CLASS)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Legal hold comes from the Workbench case (recovery_case.legal_hold).",
+  "writes": [
+    {
+      "t": "document_intake",
+      "note": "scan_result CLEAN / INFECTED, scanned_at"
+    },
+    {
+      "t": "retention_class",
+      "note": "LEGAL10Y 120 m REVIEW, GENERAL05Y 60 m ARCHIVE"
+    },
+    {
+      "t": "retention_action",
+      "note": "what JOB-17 did per document"
+    },
+    {
+      "t": "document.state",
+      "note": "ARCHIVED"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "DOCRET before archive"
+    }
+  ],
+  "reads": [
+    {
+      "t": "document",
+      "note": "stored date, retention class"
+    },
+    {
+      "t": "recovery_case.legal_hold",
+      "note": "via CaseDirectory"
+    }
+  ],
+  "stores": "Intake, quarantine, write-once and archive-tier blob containers; review list retention/review/{runDate}.csv; audit MALWARE_BLOCKED; scanning service",
+  "functions": [
+    {
+      "name": "ScanStep",
+      "does": "JOB-12: scan, quarantine, alert"
+    },
+    {
+      "name": "MalwareScanClient",
+      "does": "calls the scanner, 30 s timeout"
+    },
+    {
+      "name": "QuarantineMover",
+      "does": "moves infected files"
+    },
+    {
+      "name": "RetentionJob",
+      "does": "JOB-17: expiry, hold, archive"
+    },
+    {
+      "name": "RetentionClassLoader",
+      "does": "RETENTION_CLASS load"
+    },
+    {
+      "name": "RetentionReviewWriter",
+      "does": "Compliance review CSV"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "New intake item"
+    },
+    {
+      "kind": "check",
+      "text": "Malware scan"
+    },
+    {
+      "kind": "store",
+      "text": "INFECTED -> quarantine, never stored"
+    },
+    {
+      "kind": "table",
+      "text": "CLEAN -> OCR may read"
+    },
+    {
+      "kind": "function",
+      "text": "JOB-17: expiry by class, skip holds"
+    },
+    {
+      "kind": "out",
+      "text": "ARCHIVE tier or REVIEW list"
+    }
+  ],
+  "rules": [
+    "BR1: scan before store; an infected file is never stored",
+    "BR4: a legal hold stops archive and expiry",
+    "BR5: nothing is deleted; REVIEW items are listed for a decision",
+    "BR7: no decision log entry, no archive"
+  ],
+  "risks": [
+    "Malware found -> quarantine + MALWARE_BLOCKED (MSG-P5-016)",
+    "Scanner down -> item stays unscanned, upload 503 (MSG-P5-022)",
+    "Bad end action or 0 months in the load -> refused (MSG-P3-027)"
+  ],
+  "example": [
+    "eicar-0002.pdf from a branch scanner -> scan_result INFECTED",
+    "-> moved to quarantine, no document row, audit MALWARE_BLOCKED",
+    "Classes: LEGAL10Y 120 months REVIEW | GENERAL05Y 60 months ARCHIVE"
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "key": "RWB-E1-066",
+  "file_stem": "RWB E1 066 Interaction ledger store and writer",
+  "title": "Interaction ledger store and writer",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.ledger-writer",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Interaction ledger writer",
+  "goal": "One append-only, gap-free ledger per case, written inside the transaction of each contact",
+  "why": "'What happened on this case?' must be complete and tamper-proof. The ledger records what happened; the decision log records why. The two are linked.",
+  "needs": [
+    "E1-018",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E1-055",
+    "E1-067",
+    "E1-068"
+  ],
+  "triggers": [
+    [
+      "API",
+      "POST /api/recovery/v1/cases/{caseId}/interactions"
+    ],
+    [
+      "CALL",
+      "InteractionLedgerWriter.append (MANDATORY tx)"
+    ],
+    [
+      "WHO",
+      "Case owner records a call or visit"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. EFS contact history stays in ACE (v_ace_efs_action) and is merged on screen by E1-023, not copied here.",
+  "writes": [
+    {
+      "t": "interaction",
+      "note": "append only; case_seq, event_code, actor, source_ref, decision_log_id"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case.id",
+      "note": "the case must exist"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "the linked decision (why)"
+    }
+  ],
+  "stores": "Trigger tr_interaction_append_only; pg_advisory_xact_lock per case; incident LEDGER_WRITE_FAILED",
+  "functions": [
+    {
+      "name": "InteractionLedgerWriter",
+      "does": "append(), tx MANDATORY (published)"
+    },
+    {
+      "name": "LedgerWriteService",
+      "does": "validate, lock, case_seq, insert"
+    },
+    {
+      "name": "InteractionRepository",
+      "does": "insert and read only"
+    },
+    {
+      "name": "Interaction",
+      "does": "immutable entity"
+    },
+    {
+      "name": "InteractionsHandler (P3)",
+      "does": "API-P3-015 delegates to the writer"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "POST /cases/{caseId}/interactions"
+    },
+    {
+      "kind": "check",
+      "text": "Rights + LOV-LEDGER-EVENT valid"
+    },
+    {
+      "kind": "function",
+      "text": "Advisory lock: case_seq = max + 1"
+    },
+    {
+      "kind": "table",
+      "text": "INSERT interaction (append only)"
+    },
+    {
+      "kind": "check",
+      "text": "Write failed -> rollback + incident"
+    },
+    {
+      "kind": "out",
+      "text": "201 Created, gap-free history"
+    }
+  ],
+  "rules": [
+    "BR4: append-only; a correction is a new entry",
+    "BR5: a failed write stops the action and raises an incident",
+    "BR6: the ledger records what happened, the decision log why; they are linked",
+    "BR7: case_seq has no gaps"
+  ],
+  "risks": [
+    "Ledger write fails -> 503 + incident (MSG-P1-022)",
+    "Missing field -> 422 (MSG-GEN-001)",
+    "Case out of scope -> 404 (MSG-P4-003)"
+  ],
+  "example": [
+    "RW-2026-000201 has 6 entries",
+    "u-owner-02 logs CALL OUTBOUND 2026-12-02 10:15, RIGHT_PARTY, promise 25,000.00 for 2026-12-15",
+    "-> case_seq 7, event CONTACT, source WORKBENCH"
+  ]
+}

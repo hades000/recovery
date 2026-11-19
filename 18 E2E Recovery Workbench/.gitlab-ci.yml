@@ -1,0 +1,69 @@
+# Recovery Workbench local workbench pipeline. In ACE the same gates run in the ACE pipeline on the
+# develop-recovery MR (D-RCV-50). Merge gate (testing-standards §4): unit + integration + lint pass.
+
+stages: [verify, integration]
+
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle-home"
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+backend-unit:
+  stage: verify
+  image: eclipse-temurin:21-jdk
+  cache: { key: gradle, paths: [.gradle-home/] }
+  script:
+    - cd backend && ./gradlew --no-daemon test recoveryCoverageVerification
+  artifacts:
+    when: always
+    reports: { junit: backend/build/test-results/test/*.xml }
+    paths: [backend/build/reports/]
+
+frontend-check:
+  stage: verify
+  image: node:22
+  cache: { key: npm, paths: [.npm/] }
+  script:
+    - cd frontend && npm ci --no-audit --no-fund
+    - npm run check
+    - npm run build
+  artifacts:
+    when: always
+    paths: [frontend/coverage/]
+
+codeowners-validation:
+  stage: verify
+  image: eclipse-temurin:21-jdk
+  # Own cache key (security review F8): a build job cannot seed the governance check's Gradle cache.
+  cache: { key: gradle-codeowners, paths: [.gradle-home/] }
+  script:
+    - cd backend && ./gradlew --no-daemon codeOwnersTest codeOwnersCoverageVerification
+  artifacts:
+    when: always
+    reports: { junit: backend/build/test-results/codeOwnersTest/*.xml }
+    paths: [backend/build/reports/jacoco/codeOwnersCoverageReport/]
+
+# D-RCV-44: must pass before every MR that touches a migration or the Flyway config.
+backend-recovery-it:
+  stage: integration
+  image: eclipse-temurin:21-jdk
+  services: [docker:27-dind]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    TESTCONTAINERS_HOST_OVERRIDE: docker
+  cache: { key: gradle, paths: [.gradle-home/] }
+  script:
+    - cd backend && ./gradlew --no-daemon recoveryIntegrationTest
+  rules:
+    - changes:
+        - backend/src/main/resources/db/**/*
+        - backend/src/main/java/**/RecoveryFlywayConfig.java
+        - backend/src/main/java/**/casewf/config/**/*
+        - backend/src/main/java/**/casewf/migration/**/*
+        - infra/postgres/**/*
+        - backend/src/test/java/**/*IT.java
+        - backend/src/test/resources/flyway-fixtures/**/*
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  artifacts:
+    when: always
+    reports: { junit: backend/build/test-results/recoveryIntegrationTest/*.xml }

@@ -1,0 +1,137 @@
+{
+  "key": "RWB-E1-015",
+  "file_stem": "RWB E1 015 Freshness stamp per data product",
+  "title": "Freshness stamp per data product",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.freshness-stamp",
+  "status": "PARTIAL",
+  "status_text": "Ready. Whole feature waits for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "Freshness stamp + daily gate",
+  "goal": "Stamp each data product with its ACE batch age, flag stale data, and hold daily jobs until sources complete",
+  "why": "Users and decisions must know how old the data is. Freshness comes only from ACE's batch record, never from data_as_of.",
+  "needs": [
+    "E1-001",
+    "E1-069",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E1-002",
+    "E1-007",
+    "E1-011",
+    "E1-034",
+    "E1-052",
+    "E1-056"
+  ],
+  "triggers": [
+    [
+      "EVENT",
+      "New COMPLETED row in v_ace_batch_status (polled)"
+    ],
+    [
+      "JOB",
+      "Cut-off check per product at expected_by"
+    ],
+    [
+      "API",
+      "GET /data-products/freshness?product=&asOf="
+    ],
+    [
+      "CALL",
+      "JOB-04 asks DailyCompletenessGate"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "source_system, business_date, status, is_complete (ace_batch_run)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "data_product_load",
+      "note": "one stamp per product: LOADED or STALE, age in days"
+    }
+  ],
+  "reads": [
+    {
+      "t": "data_product",
+      "note": "refresh_cycle, expected_by"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "inputs_ref (stamps a decision read)"
+    },
+    {
+      "t": "case_list_row",
+      "note": "business_date, publish_status"
+    }
+  ],
+  "stores": "Events EV-26 AceDataReady and EV-27 AceDataLate; operations alert; one Quartz trigger per product",
+  "functions": [
+    {
+      "name": "BatchStatusListener",
+      "does": "polls v_ace_batch_status"
+    },
+    {
+      "name": "FreshnessStampService",
+      "does": "write stamp, set or clear STALE"
+    },
+    {
+      "name": "FreshnessCheckStep",
+      "does": "cut-off check at expected_by"
+    },
+    {
+      "name": "DailyCompletenessGateImpl",
+      "does": "COMPLETE or HOLD for a job"
+    },
+    {
+      "name": "FreshnessQuery",
+      "does": "stampFor, stampsFor (published)"
+    },
+    {
+      "name": "DataFreshnessPanel",
+      "does": "data panel on SCR-03"
+    }
+  ],
+  "path": [
+    {
+      "kind": "ace",
+      "text": "v_ace_batch_status: ALS COMPLETED"
+    },
+    {
+      "kind": "function",
+      "text": "BatchStatusListener"
+    },
+    {
+      "kind": "table",
+      "text": "data_product_load = LOADED"
+    },
+    {
+      "kind": "function",
+      "text": "DailyCompletenessGate: COMPLETE"
+    },
+    {
+      "kind": "out",
+      "text": "EV-26 starts JOB-02, 04, 07, 08"
+    }
+  ],
+  "rules": [
+    "BR4: a multi-source product takes the oldest date (DP06 = CCMS, SVAF, AMIS, RPS)",
+    "BR5: every decision records the stamps it read in inputs_ref",
+    "BR8: no daily job starts until its sources are COMPLETED",
+    "BR9: freshness comes only from v_ace_batch_status, never from data_as_of"
+  ],
+  "risks": [
+    "No COMPLETED batch by expected_by -> STALE + EV-27 AceDataLate (MSG-P1-001)",
+    "FAILED batch -> STALE at once, previous stamp kept (MSG-P1-001)",
+    "Same batch row read twice -> duplicate_count + 1, no second event"
+  ],
+  "example": [
+    "ALS batch 2026-11-30: started 23:30, completed 2026-12-01 05:40, 184,500 records",
+    "-> DP01 LOADED, ageDays 1, EV-26 -> JOB-02, 04, 07 and 08 start",
+    "If ALS is still missing at 08:00 on 2026-12-01 -> DP01 STALE + EV-27"
+  ]
+}

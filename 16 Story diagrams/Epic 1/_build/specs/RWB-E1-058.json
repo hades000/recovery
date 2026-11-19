@@ -1,0 +1,146 @@
+{
+  "key": "RWB-E1-058",
+  "file_stem": "RWB E1 058 Agent platform set up E1a",
+  "title": "Agent platform set-up [E1a]",
+  "module": "P10 Agent runtime",
+  "flag": "rwb.agent.platform",
+  "status": "READY",
+  "status_text": "Ready for build (cites removed E1-003)",
+  "theme": "ai",
+  "overview_label": "Agent platform (gateway)",
+  "goal": "One governed path for every agent: model gateway, versioned prompts and policies, guardrails",
+  "why": "No agent talks to a model directly. Inputs are masked, outputs are checked, every run is recorded with cost, and Risk approves each prompt and policy.",
+  "needs": [
+    "E1-001",
+    "E1-037"
+  ],
+  "unblocks": [
+    "TE-013",
+    "E1-059",
+    "E1-060",
+    "E1-061",
+    "E1-062",
+    "E1-063"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/agent-configs (prompt + policy)"
+    ],
+    [
+      "API",
+      "POST /admin/agent-configs/{versionId}/approve"
+    ],
+    [
+      "CALL",
+      "AgentOrchestrator.run via TE-013 client"
+    ],
+    [
+      "API",
+      "POST /admin/agent-samples, /agent-evaluations"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read in the platform itself. Agents read data only through allowed tools (ToolGateway) that call published module interfaces.",
+  "writes": [
+    {
+      "t": "agent_policy",
+      "note": "autonomy mode, timeout, confidence floor, cost"
+    },
+    {
+      "t": "agent_prompt",
+      "note": "versioned prompt text"
+    },
+    {
+      "t": "agent_run",
+      "note": "one row per run: status, tokens, cost, latency"
+    },
+    {
+      "t": "agent_sample, agent_evaluation_run",
+      "note": "evaluation samples and runs"
+    },
+    {
+      "t": "agent_evaluation",
+      "note": "scores per run"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "via P3 tools only"
+    },
+    {
+      "t": "agent_policy, agent_prompt",
+      "note": "version in force"
+    }
+  ],
+  "stores": "INT-23 model endpoint (private endpoint, DL33 option B via AAL); P4 masking service; outbox EV-28 AgentRunCompleted",
+  "functions": [
+    {
+      "name": "ModelGatewayClient",
+      "does": "INT-23 call with policy timeout"
+    },
+    {
+      "name": "AgentConfigService",
+      "does": "load, validate, loader != approver"
+    },
+    {
+      "name": "AgentOrchestrator",
+      "does": "run one step (published)"
+    },
+    {
+      "name": "GuardrailChecker",
+      "does": "schema -> tools -> confidence floor"
+    },
+    {
+      "name": "ToolGateway + PromptInputMasker",
+      "does": "allowed tools, masked inputs"
+    },
+    {
+      "name": "EvaluationHarness",
+      "does": "shadow scoring"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Caller runs agent (idempotency key)"
+    },
+    {
+      "kind": "function",
+      "text": "PromptInputMasker masks inputs"
+    },
+    {
+      "kind": "ai",
+      "text": "Model via INT-23 gateway"
+    },
+    {
+      "kind": "check",
+      "text": "Guardrails: schema, tools, floor"
+    },
+    {
+      "kind": "table",
+      "text": "agent_run + EV-28"
+    },
+    {
+      "kind": "out",
+      "text": "Answer, or fallback to the rule result"
+    }
+  ],
+  "rules": [
+    "BR3: timeout 60 s -> TIMED_OUT, the rule result is used",
+    "BR4: checks run in order schema -> tools -> confidence floor",
+    "BR7: cost = (tokens in + out) / 1000 x price_per_1k_tokens_thb",
+    "BR8: the loader of a prompt or policy cannot approve it"
+  ],
+  "risks": [
+    "Model timeout -> TIMED_OUT, fallback (no user message)",
+    "Config load check fails -> refused (MSG-P10-001)",
+    "Loader approves own version -> refused (MSG-P7-002)"
+  ],
+  "example": [
+    "Agent ECHO, policy P1 / prompt PR1, model MODEL-A-2026-10, case RW-2026-000101",
+    "-> ANSWERED in 1,200 ms, 900 tokens in, 150 out",
+    "-> cost 0.0525 baht, EV-28 AgentRunCompleted"
+  ]
+}

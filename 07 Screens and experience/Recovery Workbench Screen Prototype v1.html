@@ -1,0 +1,135 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recovery Workbench screen prototype</title><style>
+:root{--p:#4E297F;--pd:#201135;--ph:#3E1F66;--s:#FFFFFF;--sa:#F6F4FA;--hd:#DCD3EB;--ink:#1F1F1F;--mu:#595959;--ru:#C8C8C8;--fo:#2459A8;
+--in:#2459A8;--ok:#1E7B4D;--wa:#9A5200;--da:#B42318;--ac:#FF9900}
+*{box-sizing:border-box}
+body{margin:0;font-family:Aptos,"Segoe UI","Noto Sans Thai",Roboto,Arial,sans-serif;font-size:14px;line-height:1.45;color:var(--ink);background:var(--sa)}
+a{color:var(--p)}
+:focus-visible{outline:2px solid var(--fo);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:4px;border:1px solid var(--p);background:var(--s);color:var(--p);font:inherit;font-weight:600;cursor:pointer}
+.btn.pri{background:var(--p);color:#fff}.btn.pri:hover{background:var(--ph)}.btn:hover{background:#F1ECF8}
+.btn.dan{border-color:var(--da);color:var(--da)}.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.sm{height:28px;padding:0 10px;font-size:13px}
+.fld{display:flex;flex-direction:column;gap:4px;margin:0 0 12px;max-width:420px}
+.fld label{font-weight:600}.fld .help{color:var(--mu);font-size:12px}
+.fld input,.fld select,.fld textarea{font:inherit;height:36px;padding:0 10px;border:1px solid var(--ru);border-radius:4px;background:#fff;color:var(--ink)}
+.fld textarea{height:80px;padding:8px 10px}
+.fld.err input{border-color:var(--da)}.fld .msg{color:var(--da);font-size:12px}
+.fld input[readonly]{background:var(--sa)}
+.tbl{border-collapse:collapse;width:100%;background:#fff}
+.tbl th{background:var(--hd);color:var(--p);text-align:left;padding:7px 10px;font-weight:700;vertical-align:top}
+.tbl td{padding:7px 10px;border-bottom:1px solid var(--ru);vertical-align:top}
+.tbl tr.sel td{background:#F1ECF8}.tbl tbody tr:hover td{background:#FAF8FD;cursor:pointer}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.badge.info{color:var(--in)}.badge.ok{color:var(--ok)}.badge.wa{color:var(--wa)}.badge.da{color:var(--da)}.badge.mu{color:var(--mu)}
+.ban{padding:10px 12px;border-left:4px solid var(--in);background:#fff;margin:0 0 12px}
+.ban.wa{border-color:var(--wa)}.ban.da{border-color:var(--da)}.ban.ok{border-color:var(--ok)}
+.ban b{display:block}
+.pnl{background:#fff;border:1px solid var(--ru);border-radius:4px;padding:12px 14px;margin:0 0 16px}
+.pnl h3{margin:0 0 8px;font-size:16px;color:var(--p)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--ru);margin:0 0 12px;flex-wrap:wrap}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;font:inherit;color:var(--mu);cursor:pointer}
+.tabs button[aria-selected=true]{color:var(--p);border-bottom-color:var(--p);font-weight:700}
+.kv{display:grid;grid-template-columns:180px 1fr;gap:6px 12px}.kv dt{color:var(--mu)}.kv dd{margin:0;font-weight:600}
+.dlg{background:#fff;border:1px solid var(--ru);border-radius:4px;box-shadow:0 8px 24px rgba(32,17,53,.18);padding:16px;max-width:480px}
+.toast{background:var(--pd);color:#fff;padding:10px 14px;border-radius:4px;display:inline-block}
+.skel{background:linear-gradient(90deg,#EEE 25%,#F6F6F6 50%,#EEE 75%);height:14px;border-radius:3px;margin:6px 0}
+.pg{display:flex;gap:6px;align-items:center;margin:8px 0}
+
+header{background:var(--pd);color:#fff;display:flex;align-items:center;gap:16px;padding:10px 16px}
+header .t{font-size:18px;font-weight:700}header .s{color:#D8CFE6;font-size:12px}
+header .sp{flex:1}header select{font:inherit;height:32px;border-radius:4px;border:0;padding:0 8px}
+.wrap{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 56px)}
+aside{background:#fff;border-right:1px solid var(--ru);padding:12px 0}
+aside button{display:block;width:100%;text-align:left;background:none;border:0;border-left:4px solid transparent;padding:9px 16px;font:inherit;color:var(--ink);cursor:pointer}
+aside button[aria-current=page]{border-left-color:var(--p);color:var(--p);font-weight:700;background:#F6F4FA}
+main{padding:16px 20px;min-width:0}h1{font-size:20px;color:var(--p);margin:0 0 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:0 0 12px}.row .fld{margin:0;min-width:160px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0 0 16px}
+.num{font-size:24px;font-weight:700;color:var(--p)}
+.ov{position:fixed;inset:0;background:rgba(32,17,53,.35);display:flex;align-items:center;justify-content:center;z-index:9}
+.tst{position:fixed;bottom:16px;right:16px;z-index:10}
+.note{color:var(--mu);font-size:12px;margin:4px 0 12px}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}aside{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--ru)}aside button{width:auto;border-left:0;border-bottom:3px solid transparent;white-space:nowrap}}
+</style></head><body>
+<header><div><div class="t">Recovery Workbench</div><div class="s">Screen prototype with synthetic data. (C) Siam Commercial Bank and Henka Pte Ltd</div></div><div class="sp"></div>
+<label for="role" class="s">Signed in as</label><select id="role"><option value="owner">Case owner</option><option value="approver">Approver, level 5</option><option value="partner">Law firm user</option></select></header>
+<div class="wrap"><aside id="nav"></aside><main id="main"></main></div><div id="ov"></div><div id="tst" class="tst"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647},pick=a=>a[Math.floor(rnd()*a.length)];
+const PROD=["Mortgage","Hire purchase","SSME"],STAGE=["Receive the case","Restructure","Settlement","Deed in lieu","Litigation","Asset disposal"],
+STATUS=[["Assigned","info"],["In progress","info"],["Waiting on customer","mu"],["Due in 2 days","wa"],["Breached","da"]];
+const CASES=[];for(let i=1;i<=60;i++){const p=pick(PROD),st=pick(STATUS),bal=Math.round((p=="Mortgage"?900000+rnd()*3e6:p=="SSME"?300000+rnd()*2e6:150000+rnd()*600000)/100)*100;
+CASES.push({no:"RW-2026-"+String(1000+i).padStart(6,"0"),cust:"Customer "+String.fromCharCode(65+i%26)+(i>26?i:""),prod:p,stage:pick(STAGE),status:st,days:Math.floor(rnd()*20),
+bal,dpd:90+Math.floor(rnd()*400),presc:"1"+Math.floor(1+rnd()*9)+" "+pick(["Jan","Mar","Jun","Sep"])+" 202"+(8+Math.floor(rnd()*2)),hold:i%11==0,owner:"Case owner "+(1+i%6)})}
+const APPR=CASES.slice(0,8).map((c,k)=>({id:"AP-"+(501+k),c,dec:pick(["D6.4 Settlement amount","D6.3 Route","D8.2 Floor price"]),amt:Math.round(c.bal*(.6+rnd()*.3)/1000)*1000,lvl:k%3==0?4:5,prep:k==2?"me":"Case owner "+(1+k%5)}));
+const DOCS=[["Demand letter","Generated","Confirmed"],["Title deed","Scan","Pending"],["Appraisal report","Partner","Confirmed"],["Settlement agreement","Generated","Not needed"]];
+let view="work",cur=null,role="owner";
+const NAV={owner:[["work","My work"],["cases","Cases"],["docs","Document review"]],approver:[["appr","Approvals"],["cases","Cases"]],partner:[["pp","Instructions"]]};
+function toast(t){$("#tst").innerHTML='<span class="toast" role="status">'+esc(t)+'</span>';setTimeout(()=>$("#tst").innerHTML="",3500)}
+function nav(){$("#nav").innerHTML=NAV[role].map(([k,l])=>`<button data-v="${k}" ${view==k?'aria-current="page"':''}>${l}</button>`).join("");
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{view=b.dataset.v;cur=null;draw()})}
+function badge(s){return `<span class="badge ${s[1]}">${esc(s[0])}</span>`}
+function money(n){return n.toLocaleString("en-US")}
+function work(){const mine=CASES.slice(0,14);return `<h1>My work</h1><div class="grid3"><div class="pnl"><div class="num">${mine.length}</div>Cases I own</div>
+<div class="pnl"><div class="num">${mine.filter(c=>c.status[1]=="wa").length}</div>Due in the next 2 days</div><div class="pnl"><div class="num">${mine.filter(c=>c.status[1]=="da").length}</div>Past their service level</div></div>
+<div class="pnl"><h3>Tasks</h3><table class="tbl"><thead><tr><th>Case</th><th>Task</th><th>Due</th><th>Status</th></tr></thead><tbody>${mine.slice(0,8).map((c,k)=>`<tr data-c="${c.no}"><td>${c.no}</td><td>${pick(["Review the offer","Confirm the appraisal","Verify the litigation pack","Call the customer back","Check the booking"])}</td><td>${1+k} Nov</td><td>${badge(c.status)}</td></tr>`).join("")}</tbody></table></div>`}
+function cases(){const f=window._f||{p:"",s:""};const rows=CASES.filter(c=>(!f.p||c.prod==f.p)&&(!f.s||c.stage==f.s));
+return `<h1>Cases</h1><div class="row"><div class="fld"><label for="fp">Product</label><select id="fp"><option value="">All</option>${PROD.map(p=>`<option ${f.p==p?"selected":""}>${p}</option>`).join("")}</select></div>
+<div class="fld"><label for="fs">Stage</label><select id="fs"><option value="">All</option>${STAGE.map(p=>`<option ${f.s==p?"selected":""}>${p}</option>`).join("")}</select></div></div>
+${rows.length?`<table class="tbl"><thead><tr><th>Case</th><th>Customer</th><th>Product</th><th>Stage</th><th>Days past due</th><th>Balance (THB)</th><th>Days in state</th><th>Status</th></tr></thead><tbody>
+${rows.slice(0,25).map(c=>`<tr data-c="${c.no}" tabindex="0"><td>${c.no}</td><td>${esc(c.cust)}</td><td>${c.prod}</td><td>${c.stage}</td><td>${c.dpd}</td><td>${money(c.bal)}</td><td>${c.days}</td><td>${badge(c.status)}</td></tr>`).join("")}</tbody></table>
+<div class="pg"><button class="btn sm" disabled>Previous</button><span>Page 1 of ${Math.max(1,Math.ceil(rows.length/25))}</span><button class="btn sm" ${rows.length>25?"":"disabled"}>Next</button></div>`
+:`<div class="pnl">No cases match these filters. Clear a filter to see more.</div>`}`}
+function record(c){const t=window._tab||"sum";const tabs=[["sum","Summary"],["acc","Accounts"],["par","Parties"],["doc","Documents"],["tl","Timeline"],["dec","Decisions"]];
+let body="";
+if(t=="sum")body=`<div class="pnl"><h3>Case</h3><dl class="kv"><dt>Owner</dt><dd>${c.owner}</dd><dt>Product</dt><dd>${c.prod}</dd><dt>Stage</dt><dd>${c.stage}</dd><dt>Days past due</dt><dd>${c.dpd}</dd><dt>Total balance (THB)</dt><dd>${money(c.bal)}</dd><dt>Prescription date</dt><dd>${c.presc}</dd><dt>Days in state</dt><dd>${c.days} of 10</dd></dl></div>`;
+if(t=="acc")body=`<table class="tbl"><thead><tr><th>Account</th><th>Product</th><th>Principal</th><th>Interest</th><th>Days past due</th><th>Classification</th><th>Data as of</th></tr></thead><tbody><tr><td>xxxx-xx-${c.no.slice(-4)}</td><td>${c.prod}</td><td>${money(Math.round(c.bal*.82))}</td><td>${money(Math.round(c.bal*.18))}</td><td>${c.dpd}</td><td>Substandard</td><td>27 Oct 2026</td></tr></tbody></table>`;
+if(t=="par")body=`<table class="tbl"><thead><tr><th>Role</th><th>Name</th><th>Identity</th><th>Phone</th><th>Consent</th></tr></thead><tbody><tr><td>Borrower</td><td>${esc(c.cust)}</td><td>x-xxxx-xxxxx-xx-x</td><td>08x-xxx-${c.no.slice(-4)}</td><td>SMS, letter</td></tr><tr><td>Guarantor</td><td>Guarantor of ${esc(c.cust)}</td><td>x-xxxx-xxxxx-xx-x</td><td>08x-xxx-xxxx</td><td>Letter</td></tr></tbody></table><p class="note">Identity and phone are masked for this role.</p>`;
+if(t=="doc")body=`<table class="tbl"><thead><tr><th>Type</th><th>Source</th><th>Review</th><th>Version</th></tr></thead><tbody>${DOCS.map(d=>`<tr><td>${d[0]}</td><td>${d[1]}</td><td>${badge([d[2],d[2]=="Pending"?"wa":"ok"])}</td><td>1</td></tr>`).join("")}</tbody></table><div class="pnl"><h3>Checklist for ${c.stage}</h3>Title deed <span class="badge ok">Present</span> Appraisal report <span class="badge ok">Present</span> Guarantor notice <span class="badge da">Missing</span></div>`;
+if(t=="tl")body=`<table class="tbl"><thead><tr><th>When</th><th>What</th><th>By</th></tr></thead><tbody><tr><td>27 Oct 09:12</td><td>Offer sent by SMS and letter</td><td>Workbench</td></tr><tr><td>25 Oct 14:40</td><td>Settlement approved within level 5</td><td>Approver, level 5</td></tr><tr><td>21 Oct 10:05</td><td>Route set to Settlement</td><td>Case owner, rule R-UNI-14</td></tr><tr><td>14 Oct 06:58</td><td>Case created and allocated</td><td>Workbench, allocation row 12</td></tr></tbody></table>`;
+if(t=="dec")body=`<table class="tbl"><thead><tr><th>Decision</th><th>Recommendation</th><th>Decided</th><th>Rule</th></tr></thead><tbody><tr><td>D6.3 Route</td><td>Settlement, expected return 71%</td><td>Followed, Case owner</td><td>R-SET-01 v2026.11</td></tr></tbody></table>`;
+return `<button class="btn sm" id="back">Back to cases</button><h1 style="margin-top:12px">${c.no} <span style="font-weight:400;color:var(--ink)">${esc(c.cust)}</span> ${badge(c.status)}</h1>
+${c.hold?`<div class="ban wa"><b>On hold for X1 Dispute or complaint</b>The prescription date is still ${c.presc}.</div>`:""}
+<div class="row"><button class="btn" id="tr">Transfer</button><button class="btn" id="dv">Raise deviation</button></div>
+<div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" data-t="${k}" aria-selected="${t==k}">${l}</button>`).join("")}</div>${body}`}
+function appr(){return `<h1>Approvals</h1><table class="tbl"><thead><tr><th>Approval</th><th>Case</th><th>Decision</th><th>Amount (THB)</th><th>Level needed</th><th>Prepared by</th></tr></thead><tbody>
+${APPR.map(a=>`<tr data-a="${a.id}" tabindex="0"><td>${a.id}</td><td>${a.c.no}</td><td>${a.dec}</td><td>${money(a.amt)}</td><td>${a.lvl}</td><td>${a.prep=="me"?"You":a.prep}</td></tr>`).join("")}</tbody></table>`}
+function decide(a){return `<button class="btn sm" id="back">Back to approvals</button><h1 style="margin-top:12px">${a.id} ${a.dec}</h1>
+<div class="grid3"><div class="pnl"><h3>Facts</h3><dl class="kv"><dt>Case</dt><dd>${a.c.no}</dd><dt>Balance (THB)</dt><dd>${money(a.c.bal)}</dd><dt>Proposed (THB)</dt><dd>${money(a.amt)}</dd><dt>Payoff date</dt><dd>27 Oct 2026</dd></dl></div>
+<div class="pnl"><h3>Recommendation</h3><p>Approve. The offer is inside the range and above the floor.</p><p class="note">Settlement agent v1.2, rule R-SET-05 v2026.11</p></div>
+<div class="pnl"><h3>Expected return by route</h3><table class="tbl"><tbody><tr><td>Settlement</td><td>71%</td></tr><tr><td>Litigation</td><td>58%</td></tr><tr><td>Debt sale</td><td>33%</td></tr></tbody></table></div></div>
+<div id="dmsg"></div><div class="fld"><label for="rs">Reason (needed to return or refuse)</label><textarea id="rs"></textarea></div>
+<div class="row"><button class="btn pri" id="ap">Approve</button><button class="btn" id="rt">Return</button><button class="btn dan" id="rf">Refuse</button></div>`}
+function docs(){return `<h1>Document review</h1><table class="tbl"><thead><tr><th>Case</th><th>Type</th><th>Field</th><th>Read as</th><th>Confidence</th><th></th></tr></thead><tbody>
+${CASES.slice(3,9).map((c,k)=>`<tr><td>${c.no}</td><td>${pick(["Title deed","Court notice","Appraisal report"])}</td><td>${pick(["Title number","Hearing date","Market value"])}</td><td><input aria-label="Value" value="${pick(["12345","14 Jan 2027","2,450,000"])}" style="height:28px"></td><td><span class="badge wa">${60+k*4}%</span></td><td><button class="btn sm cf">Confirm</button></td></tr>`).join("")}</tbody></table>`}
+function pp(){const c=CASES[5];return `<h1>Instructions for your firm</h1><div class="ban">You see only the instructions placed with your firm.</div>
+<table class="tbl"><thead><tr><th>Instruction</th><th>Case</th><th>Type</th><th>Due</th><th>Status</th></tr></thead><tbody><tr><td>IN-2207</td><td>${c.no}</td><td>File suit</td><td>12 Nov</td><td>${badge(["New","info"])}</td></tr><tr><td>IN-2190</td><td>${CASES[9].no}</td><td>Enforce</td><td>5 Nov</td><td>${badge(["Due in 2 days","wa"])}</td></tr></tbody></table>
+<div class="pnl" style="margin-top:16px"><h3>Record a result for IN-2207</h3><div class="fld"><label for="r1">Result</label><select id="r1"><option value="">Choose a result</option><option>Filed</option><option>Hearing set</option><option>Judgment</option></select></div>
+<div class="fld"><label for="r2">Black case number</label><input id="r2"></div><div class="fld"><label for="r3">Documents</label><input id="r3" type="file"></div><button class="btn pri" id="sv">Submit result</button></div>`}
+function dialog(title,inner,ok){$("#ov").innerHTML=`<div class="ov"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dt"><h3 id="dt" style="margin:0 0 10px;color:var(--p)">${title}</h3>${inner}<div class="row" style="margin:8px 0 0"><button class="btn pri" id="dok">Save</button><button class="btn" id="dcn">Cancel</button></div></div></div>`;
+$("#dcn").onclick=()=>$("#ov").innerHTML="";$("#dok").onclick=ok;const f=$("#ov select,#ov input,#ov textarea");if(f)f.focus()}
+function draw(){nav();const m=$("#main");
+if(view=="work")m.innerHTML=work();if(view=="cases")m.innerHTML=cur?record(cur):cases();if(view=="appr")m.innerHTML=cur?decide(cur):appr();if(view=="docs")m.innerHTML=docs();if(view=="pp")m.innerHTML=pp();
+m.querySelectorAll("tr[data-c]").forEach(r=>{const go=()=>{view="cases";cur=CASES.find(c=>c.no==r.dataset.c);window._tab="sum";draw()};r.onclick=go;r.onkeydown=e=>{if(e.key=="Enter")go()}});
+m.querySelectorAll("tr[data-a]").forEach(r=>{const go=()=>{cur=APPR.find(a=>a.id==r.dataset.a);draw()};r.onclick=go;r.onkeydown=e=>{if(e.key=="Enter")go()}});
+const fp=$("#fp"),fs=$("#fs");if(fp){fp.onchange=fs.onchange=()=>{window._f={p:fp.value,s:fs.value};draw()}}
+const bk=$("#back");if(bk)bk.onclick=()=>{cur=null;draw()};
+m.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{window._tab=b.dataset.t;draw()});
+const tr=$("#tr");if(tr)tr.onclick=()=>dialog("Transfer the case",`<div class="fld" id="tf"><label for="to">New owner</label><select id="to"><option>Case owner 2</option><option>Case owner 3 (at the cap)</option><option>Team queue</option></select></div><div class="fld" id="rf2"><label for="why">Reason</label><select id="why"><option value="">Choose a reason</option><option>Workload</option><option>Leave</option><option>Skill</option></select></div>`,()=>{
+ const w=$("#why").value,t=$("#to").value;$("#rf2").classList.toggle("err",!w);$("#rf2 .msg")&&$("#rf2 .msg").remove();$("#tf .msg")&&$("#tf .msg").remove();
+ if(!w){$("#rf2").insertAdjacentHTML("beforeend",'<span class="msg">Choose a reason for the transfer.</span>');return}
+ if(t.includes("cap")){$("#tf").classList.add("err");$("#tf").insertAdjacentHTML("beforeend",'<span class="msg">Case owner 3 is at the caseload cap. Choose another owner or the team queue.</span>');return}
+ $("#ov").innerHTML="";cur.owner=t;toast("Transferred to "+t+".");draw()});
+const dv=$("#dv");if(dv)dv.onclick=()=>dialog("Raise a deviation",`<div class="fld"><label for="dx">Deviation</label><select id="dx"><option>X1 Dispute or complaint</option><option>X2 Vulnerable customer or hardship</option><option>X3 Deceased customer</option><option>X4 Fraud</option><option>X5 Bankruptcy or external seizure</option><option>X6 Lost contact</option><option>X7 Collateral event</option></select></div><div class="fld"><label for="dr">Reason</label><textarea id="dr"></textarea></div>`,()=>{
+ $("#ov").innerHTML="";cur.hold=true;toast($("#dx")?"":"");toast("Deviation raised. The case is with the handler.");draw()});
+const ap=$("#ap");if(ap){const say=(cls,b,t)=>$("#dmsg").innerHTML=`<div class="ban ${cls}"><b>${b}</b>${t}</div>`;
+ ap.onclick=()=>{if(cur.prep=="me")return say("da","Not allowed","You prepared this decision, so you cannot approve it.");
+  if(cur.lvl<5)return say("wa","Above your limit","This needs approval at level "+cur.lvl+". It has been sent to the level "+cur.lvl+" approver.");
+  toast("Approved. The case moves to Awaiting booking.");view="appr";cur=null;draw()};
+ $("#rt").onclick=$("#rf").onclick=e=>{if(!$("#rs").value.trim())return say("da","Reason needed","Enter the reason.");toast(e.target.id=="rt"?"Returned to the preparer.":"Refused. The reason is recorded.");cur=null;draw()}}
+m.querySelectorAll(".cf").forEach(b=>b.onclick=()=>{b.closest("tr").remove();toast("Field confirmed.")});
+const sv=$("#sv");if(sv)sv.onclick=()=>{if(!$("#r1").value){toast("Choose a result.");$("#r1").focus();return}toast("Result submitted to the bank.")}}
+$("#role").onchange=e=>{role=e.target.value;view=NAV[role][0][0];cur=null;draw()};draw();
+</script></body></html>

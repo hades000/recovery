@@ -1,0 +1,233 @@
+{
+  "runId": "INC-003-epic-1-RWB-E1-042",
+  "story": "RWB-E1-042",
+  "stage": "plan",
+  "revision": "v1 (2026-11-18)",
+  "sources": {
+    "spec": "../specify/spec.md revision 13 (spec gate round 12, PASS 0/0/0/0)",
+    "apiSpecification": "api/recovery-api-v4.yaml, read on 18 Nov 2026: getAdminParameters line 4857, Parameter line 9823, ReferenceLoad line 8832, RollbackRequest line 9818, approve line 3214, rollback line 5004, E401/E403/E422/E503",
+    "errorsAndMessages": "Error and Message Standard v4, rows 68-208",
+    "moduleMap": "backend/src/test/resources/architecture/recovery-modules.yaml [TE-001]"
+  },
+  "openapiChange": false,
+  "openapiEvidence": "api/recovery-api-v4.yaml is not edited: GET /admin/parameters, its four query parameters and the Parameter schema already exist. No frontend/src/api/schema.d.ts regeneration. The three reference-load operations are exposed by RWB-E1-043 (D-RUN-10), not here.",
+  "apiImpactType": "NEW_API_REQUIRED",
+  "apiImpactNote": "The operation exists in API v4 but has never been implemented in this code base.",
+  "endpoints": [
+    {
+      "id": "API-E1042-01",
+      "operationId": "getAdminParameters",
+      "method": "GET",
+      "path": "/api/recovery/v1/admin/parameters",
+      "module": "P3 casewf",
+      "implementation": "backend/src/main/java/th/co/scb/ace/demo/recovery/casewf/config/ParameterCatalogController.java",
+      "capability": {
+        "area": "Rules and parameters",
+        "right": "R",
+        "enforcement": "@PreAuthorize(\"@capabilityCheck.require(authentication, 'Rules and parameters', 'R', 'read parameters')\") through access.api.CapabilityCheck; the interim implementation is access.internal.InterimCapabilityCheck (bean name capabilityCheck)"
+      },
+      "request": {
+        "queryParameters": [
+          { "name": "key", "type": "string", "required": false, "meaning": "key prefix filter" },
+          { "name": "kind", "type": "string", "required": false, "meaning": "BUSINESS or ENVIRONMENT" },
+          { "name": "owner", "type": "string", "required": false, "meaning": "owner_role filter" },
+          { "name": "environment", "type": "string", "required": false, "meaning": "DEV, SIT, UAT or PROD; defaults to rwb.environment" }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "mediaType": "application/json",
+        "schema": "array of API v4 Parameter",
+        "fields": [
+          { "name": "key", "type": "string" },
+          { "name": "kind", "type": "string" },
+          { "name": "type", "type": "string" },
+          { "name": "unit", "type": "string" },
+          { "name": "min", "type": "string" },
+          { "name": "max", "type": "string" },
+          { "name": "default", "type": "string" },
+          { "name": "scope", "type": "string" },
+          { "name": "required", "type": "boolean" },
+          { "name": "owner", "type": "string" },
+          { "name": "environments", "type": "array of string" },
+          { "name": "usedBy", "type": "array of string" },
+          { "name": "secret", "type": "boolean" },
+          { "name": "valueInForce", "type": "string" },
+          { "name": "versionNo", "type": "integer" },
+          { "name": "validFrom", "type": "string", "format": "date" }
+        ],
+        "rules": [
+          "For a secret key, valueInForce, default, versionNo and validFrom are absent; owner, environments and usedBy are present (SPEC-010).",
+          "For a PRODUCT key, valueInForce, versionNo and validFrom are absent (SPEC-007, §7.5).",
+          "For an ENV key, valueInForce is present only when the requested environment is the running one, else absent (SPEC-007, —24).",
+          "No author or approver user ID is returned (SPEC-027).",
+          "usedBy is the used_by entries split on ';' and trimmed (§7.1)."
+        ]
+      },
+      "errors": [
+        { "status": 401, "messageCode": "MSG-P4-001", "source": "inherited SecurityConfig", "body": "application/problem+json" },
+        { "status": 403, "messageCode": "MSG-P4-002", "action": "read parameters", "source": "CapabilityCheck.require through ApiExceptionHandler.problem", "body": "application/problem+json" },
+        { "status": 503, "messageCode": null, "source": "E7: DataAccessResourceFailureException or CannotCreateTransactionException caught in the controller", "body": "status-only Problem: type urn:rwb:problem:unavailable, title, status, traceId; no messageCode, no detail" }
+      ],
+      "verification": { "tasks": ["TASK-16", "TASK-17", "TASK-20"], "tests": ["TC-E1-042-09", "TC-E1-042-24", "TC-E1-042-31", "TC-E1-042-34"], "functional": "FTS-E1042-03 (API Tester)" }
+    }
+  ],
+  "internalContracts": [
+    {
+      "id": "IC-E1042-01",
+      "type": "access.api.MessageResolver",
+      "visibility": "published (access.api)",
+      "methods": ["String english(String messageId, Map<String,String> placeholders)", "String thai(String messageId, Map<String,String> placeholders)"],
+      "implementedBy": "access.internal.FixedMessageCatalog",
+      "consumers": ["access.internal.ApiExceptionHandler", "access.internal.ProblemFactory"],
+      "reasonInP4": "P4 renders the Problem and P4 may not depend on P3 (SU-08 (d), D-RCV-11)",
+      "tasks": ["TASK-09", "TASK-11"],
+      "tests": ["TC-E1-042-30"]
+    },
+    {
+      "id": "IC-E1042-02",
+      "type": "access.api.CapabilityCheck",
+      "visibility": "published (access.api)",
+      "methods": ["boolean has(Authentication authentication, String area, String right)", "boolean require(Authentication authentication, String area, String right, String action)"],
+      "contract": "require returns true, or throws ApiProblemException(ApiError.NOT_PERMITTED, Map.of(\"action\", action), null); has has no side effect and never throws",
+      "implementedBy": "access.internal.InterimCapabilityCheck, bean name capabilityCheck",
+      "replacementOwner": "RWB-E1-037, which keeps the bean name",
+      "tasks": ["TASK-09", "TASK-13"],
+      "tests": ["TC-E1-042-24"]
+    },
+    {
+      "id": "IC-E1042-03",
+      "type": "access.api.CatalogParameterReader",
+      "visibility": "published (access.api)",
+      "methods": ["<T> Value<T> get(String key, Class<T> type, LocalDate businessDate)", "<T> Value<T> get(String key, Class<T> type)"],
+      "nested": "record Value<T>(String key, T value, int versionNo, LocalDate validFrom, String environment)",
+      "contract": "The only read path for code outside P3 (D-RUN-19). JDK exceptions only: IllegalArgumentException for an unknown key, a wrong type or a PRODUCT key; IllegalStateException for a secret; NoSuchElementException when nothing is in force and there is no default. The message holds the key only. No P1, P2 or P4 to P3 edge.",
+      "implementedBy": "casewf.config.CatalogParameterReaderImpl (P3, package-private, always registered)",
+      "consumers": ["RWB-E1-011 (P1)", "RWB-E1-037 (P4)", "any P1 or P2 reader"],
+      "tasks": ["TASK-09", "TASK-17"],
+      "tests": ["TC-E1-042-46"]
+    },
+    {
+      "id": "IC-E1042-04",
+      "type": "access.api.ApiProblemException (additive)",
+      "visibility": "published (access.api), existing type",
+      "constructor": "ApiProblemException(HttpStatus status, String messageId, Map<String,String> placeholders, String field, String detail, Throwable cause)",
+      "accessors": ["HttpStatus status()", "String messageId()", "String field()", "String detail()"],
+      "contract": "error() returns null for this form; the ApiError constructor is unchanged. Guards: status required; messageId may be null only with 503, and then placeholders must be empty and field and detail null; otherwise IllegalArgumentException. detail is optional and, when set, replaces the resolver's EN text in the Problem.",
+      "callersOfError": ["access.internal.ApiExceptionHandler.problem (two call sites, both guarded by a null check after TASK-11)"],
+      "tasks": ["TASK-10", "TASK-11"],
+      "tests": ["TC-E1-042-30", "TC-E1-042-29", "TC-E1-042-34"]
+    },
+    {
+      "id": "IC-E1042-05",
+      "type": "casewf.config.api.ParameterService",
+      "visibility": "published (casewf.config.api)",
+      "methods": ["<T> ParameterValue<T> get(ParameterKey<T> key, LocalDate businessDate)", "<T> ParameterValue<T> get(ParameterKey<T> key, String productGroup, LocalDate businessDate)", "CatalogEntry entry(String key)"],
+      "record": "ParameterValue<T>(String key, T value, int versionNo, LocalDate validFrom, String environment)",
+      "consumers": "P3 code only (finding 141, D-RUN-19)",
+      "tasks": ["TASK-09", "TASK-17"],
+      "tests": ["TC-E1-042-01", "TC-E1-042-11", "TC-E1-042-26"]
+    },
+    {
+      "id": "IC-E1042-06",
+      "type": "casewf.config.api.ParameterKeys (generated)",
+      "visibility": "published (casewf.config.api)",
+      "members": ["public static final ParameterKey<T> <CONSTANT> per catalog row", "public static List<ParameterKey<?>> all()", "public static <T> Optional<ParameterKey<T>> byName(String key, Class<T> type)"],
+      "generator": "backend/build.gradle.kts task generateParameterKeys; output build/generated/sources/parameterKeys/th/co/scb/ace/demo/recovery/casewf/config/api/ParameterKeys.java",
+      "contract": "byName returns empty when the key is absent or its type differs. The generated keys are the only catalog metadata any Java code reads; parameter_catalog is the persisted mirror.",
+      "tasks": ["TASK-06", "TASK-07"],
+      "tests": ["TC-E1-042-42", "TC-E1-042-26", "TC-E1-042-27"]
+    },
+    {
+      "id": "IC-E1042-07",
+      "type": "casewf.config.api.ParameterLoadHandler",
+      "visibility": "published (casewf.config.api)",
+      "constants": ["String TABLE = \"PARAMETER\""],
+      "methods": [
+        "ParameterLoadResult load(InputStream csv, LocalDate validFrom, UUID authorUserId)",
+        "ParameterLoadResult approve(UUID loadId, UUID approverUserId)",
+        "ParameterLoadResult rollback(UUID loadId, String reason, UUID userId)",
+        "Optional<ParameterLoadResult> find(UUID loadId)"
+      ],
+      "record": "ParameterLoadResult(UUID loadId, String table, LocalDate validFrom, String status, int rows, boolean repeat)",
+      "contract": "Refusals are access.api.ApiProblemException with the message ID, status, placeholders and field of spec §10.2, so the caller's controller renders them unchanged. Unknown loadId: 404 MSG-P4-003 from approve and rollback; find returns Optional.empty(). Each method runs in its own REQUIRES_NEW transaction and does not join a caller's. This story builds no controller for these operations (D-RUN-10).",
+      "exposedBy": "RWB-E1-043 (Build Sequence order 8) through POST /admin/reference-loads, /{loadId}/approve and /{loadId}/rollback, with capability checks C, A and U",
+      "flagOffContract": "With rwb.p3.configservice off the bean is absent; RWB-E1-043 obtains it through ObjectProvider and refuses PARAMETER with 404 MSG-P4-003 (E43S SPEC-018, SPEC-026, TC-PB-01, TC-FL-01). RWB-E1-043 owns that refusal (D-RUN-10, D-RUN-11, D-RUN-20).",
+      "implementsAccessApiType": false,
+      "tasks": ["TASK-09", "TASK-18", "TASK-19"],
+      "tests": ["TC-E1-042-05", "TC-E1-042-07", "TC-E1-042-10", "TC-E1-042-16", "TC-E1-042-17", "TC-E1-042-22", "TC-E1-042-23", "TC-E1-042-33", "TC-E1-042-35", "TC-E1-042-40"]
+    },
+    {
+      "id": "IC-E1042-08",
+      "type": "casewf.config.api.BusinessDateProvider",
+      "visibility": "published (casewf.config.api)",
+      "methods": ["LocalDate today()"],
+      "implementedBy": "casewf.config.InterimBusinessDateProvider (today in Asia/Bangkok)",
+      "replacementOwner": "the story that reads v_ace_batch_status (RWB-E1-069 views; a P3 to P1 read under D-RUN-18)",
+      "tasks": ["TASK-09", "TASK-17"],
+      "tests": ["TC-E1-042-11", "TC-E1-042-23", "TC-E1-042-46"]
+    },
+    {
+      "id": "IC-E1042-09",
+      "type": "casewf.config.VersionDecisionRecorder",
+      "visibility": "NOT published (package-private port in casewf.config)",
+      "methods": ["void recorded(String decisionCode, String table, UUID loadId, List<String> keys, LocalDate validFrom, UUID approverUserId)"],
+      "contract": "Called once per approval, inside the approval transaction before commit; @Transactional(propagation = MANDATORY); throws on failure, which the handler maps to 503 MSG-P7-003. The interim implementation logs one structured line with no user ID. A later implementation in casewf.config calls P7's published DecisionLogWriter and completes its write inside recorded(...) (flush).",
+      "tasks": ["TASK-19"],
+      "tests": ["TC-E1-042-29"]
+    },
+    {
+      "id": "IC-E1042-10",
+      "type": "casewf.config.api.ParameterVersionApproved",
+      "visibility": "published (casewf.config.api) for listeners in other modules later; today consumed inside casewf.config",
+      "fields": ["UUID loadId", "List<String> paramKeys", "LocalDate validFrom", "List<Version> versions (paramKey, environment, versionNo)", "Instant occurredAt"],
+      "contract": "Published as a Spring application event after the approval commits; the instance's cache rebuilds on @TransactionalEventListener(AFTER_COMMIT). No approver ID and no personal data. Outbox publication is RWB-TE-006's.",
+      "tasks": ["TASK-09", "TASK-19"],
+      "tests": ["TC-E1-042-28"]
+    }
+  ],
+  "problemMapping": [
+    { "status": 401, "condition": "no token or no RW- role on GET", "messageCode": "MSG-P4-001", "field": null },
+    { "status": 403, "condition": "GET refused by CapabilityCheck", "messageCode": "MSG-P4-002", "field": null },
+    { "status": 404, "condition": "unknown loadId on approve or rollback", "messageCode": "MSG-P4-003", "field": null },
+    { "status": 409, "condition": "approver is the author", "messageCode": "MSG-P7-002", "field": null },
+    { "status": 409, "condition": "concurrent or repeated approval", "messageCode": "MSG-GEN-004", "field": null },
+    { "status": 409, "condition": "no earlier version to roll back to", "messageCode": "MSG-P3-015", "field": null },
+    { "status": 409, "condition": "content conflict, approval after validFrom, rollback of a non-approved load", "messageCode": "MSG-P3-027", "field": null },
+    { "status": 422, "condition": "load and rollback validation", "messageCode": "MSG-GEN-001, MSG-GEN-002, MSG-P1-002, MSG-P3-027", "field": "the failing input or key" },
+    { "status": 503, "condition": "decision recorder fails during approval", "messageCode": "MSG-P7-003", "field": null },
+    { "status": 503, "condition": "database unavailable on GET", "messageCode": null, "field": null }
+  ],
+  "crossLayerDependencies": [
+    {
+      "consumer": "RWB-E1-043",
+      "consumes": ["ParameterLoadHandler", "ParameterLoadResult", "ParameterKeys (all, byName)", "ParameterService", "BusinessDateProvider"],
+      "importsFrom": "th.co.scb.ace.demo.recovery.casewf.config.api",
+      "alsoImports": ["access.api.CapabilityCheck", "access.api.MessageResolver", "access.api.ApiProblemException", "access.api.ApiError"],
+      "note": "RWB-E1-043's caller of casewf.config.api must sit in P3 (for example casewf.refdata), never in P4 (TE1S SU-08, SU-14; D-RCV-11). Nothing is in platform.api.",
+      "blocking": false
+    },
+    {
+      "consumer": "RWB-E1-037",
+      "consumes": ["CatalogParameterReader"],
+      "note": "Replaces InterimCapabilityCheck and keeps the bean name capabilityCheck; reads parameters through access.api.CatalogParameterReader, never casewf.config.api.",
+      "blocking": false
+    },
+    {
+      "consumer": "RWB-TE-003",
+      "consumes": ["ApiExceptionHandler.problem's second branch"],
+      "note": "Must not dereference error() on the message-ID form; its logging already meets D-RUN-15.",
+      "blocking": false
+    }
+  ],
+  "verification": {
+    "unit": ["TASK-10", "TASK-11", "TASK-12", "TASK-13", "TASK-16", "TASK-17", "TASK-18", "TASK-19"],
+    "system": ["TASK-14", "TASK-15", "TASK-20"],
+    "gates": ["TASK-21", "TASK-22", "TASK-23", "TASK-24", "TASK-25"],
+    "apiTester": "FTS-E1042-03 for the GET read; the interface-only cases stay in ParameterConfigIT until RWB-E1-043 opens the HTTP path",
+    "noContractTestTool": "No OpenAPI contract test is added: the file does not change and RWB-TE-003 owns the contract lint."
+  },
+  "contractTestTask": null,
+  "npmPackagesAdded": [],
+  "newDependencies": []
+}

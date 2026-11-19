@@ -1,0 +1,92 @@
+{
+  "key": "RWB-TE-002",
+  "file_stem": "RWB TE 002 Code owners for the recovery module",
+  "title": "Code owners for the recovery module",
+  "module": "P2 Integration (technical enabler)",
+  "flag": "none",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "CODEOWNERS + branch rule",
+  "goal": "A CODEOWNERS file plus a branch rule make sure every recovery or common change is approved by its owning team",
+  "why": "The recovery module lives in the shared ACE repository. Migrations and common code must be reviewed by the team that owns them.",
+  "needs": [
+    "TE-001"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "BUILD",
+      "CodeOwnersValidation on every pull request"
+    ],
+    [
+      "WHO",
+      "ACE admin sets the branch rule on main"
+    ],
+    [
+      "WHO",
+      "Owners approve before merge"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. It protects the migration folder db/migration/recovery/, owned by the TechX recovery tech leads.",
+  "writes": [],
+  "reads": [],
+  "stores": ".github/CODEOWNERS; GitHub branch rule on main; pipeline",
+  "functions": [
+    {
+      "name": "CODEOWNERS",
+      "does": "path -> owning team, last match wins"
+    },
+    {
+      "name": "CodeOwnersValidation",
+      "does": "fails on missing owner or pattern"
+    },
+    {
+      "name": "Branch rule on main",
+      "does": "1 owner approval, stale dismissed"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Pull request opened"
+    },
+    {
+      "kind": "store",
+      "text": "CODEOWNERS: path -> team"
+    },
+    {
+      "kind": "check",
+      "text": "Validation: owners exist?"
+    },
+    {
+      "kind": "function",
+      "text": "Host requests owning teams"
+    },
+    {
+      "kind": "check",
+      "text": "Owner approved? (not author)"
+    },
+    {
+      "kind": "out",
+      "text": "Merge allowed"
+    }
+  ],
+  "rules": [
+    "BR1: recovery back end, test and migration paths -> @scb-ace/techx-recovery-tech-leads",
+    "BR3: the common module -> @scb-ace/ace-team",
+    "BR5: the last matching pattern wins",
+    "BR6: author approval does not count; a new commit dismisses approvals"
+  ],
+  "risks": [
+    "Approval from a non-owner -> blocked ('Review required from code owners')",
+    "Owner team not found -> validation fails ('owner {team} not found')",
+    "New commit pushed -> approvals dismissed"
+  ],
+  "example": [
+    "PR touches recovery/casewf/internal/AllocationService.java and a common/ file",
+    "-> needs @scb-ace/techx-recovery-tech-leads AND @scb-ace/ace-team",
+    "Typo @scb-ace/recovery-leads-typo -> validation fails"
+  ]
+}

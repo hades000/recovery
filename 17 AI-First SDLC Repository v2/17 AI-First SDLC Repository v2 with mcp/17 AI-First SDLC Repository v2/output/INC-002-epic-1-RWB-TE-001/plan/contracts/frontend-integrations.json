@@ -1,0 +1,95 @@
+{
+  "runId": "INC-002-epic-1-RWB-TE-001",
+  "story": "RWB-TE-001",
+  "uiInScope": false,
+  "frontendChangesRequired": true,
+  "specRefs": [
+    "SPEC-RWB-TE-001-013",
+    "SPEC-RWB-TE-001-014",
+    "SPEC-RWB-TE-001-015",
+    "SPEC-RWB-TE-001-020"
+  ],
+  "integrations": [],
+  "rationale": "No route, screen, component, i18n key, API-service call or generated type is added. The frontend change is a folder, an ESLint rule and its Vitest fixture test.",
+  "importBoundary": {
+    "id": "CON-RWB-TE-001-F01",
+    "file": "frontend/eslint.config.js",
+    "scope": "src/modules/recovery/**/*.{ts,tsx}",
+    "rule": "no-restricted-imports (error)",
+    "decision": "CLAR-002 (recovery tech lead, 2026-11-09); D-RCV-39; D-RCV-43",
+    "allowedOutsideRecovery": [
+      "@/components/ui/**",
+      "@/lib/utils",
+      "@/utils/<top-level file> except names starting with cfsc",
+      "@/contexts/ApiClientContext",
+      "@/api/schema"
+    ],
+    "forbidden": "every import with a `..` path segment at any position (for example ../x, ./../x, ./sub/../../x, a bare ..), every @/modules/** other than @/modules/recovery/**, every other @/ path not in allowedOutsideRecovery; the rule matches import text and does not resolve paths",
+    "notGoverned": "third-party packages",
+    "proof": {
+      "runner": "Vitest (devDependency, D-RCV-06; CLAR-003 A)",
+      "config": "frontend/vitest.config.ts",
+      "test": "src/modules/recovery/__tests__/importBoundary.test.ts (plan may rename); ESLint Node API with ignore: false; fixtures linted under a path inside the recovery folder",
+      "fixtures": "src/modules/recovery/__fixtures__/ (in ESLint ignores; excluded from tsconfig.app.json with __tests__; never imported by the build)",
+      "wiring": "test target hand-defined in frontend/package.json nx.targets (vitest run --coverage); Nx 24 @nx/vite infers none and @nx/vitest is not registered; test added to frontend check dependsOn; nx.json, root package.json and CI unchanged (D-RCV-05, D-RCV-43)",
+      "coverage": "@vitest/coverage-v8, include src/modules/recovery/**/*.{ts,tsx} excluding __tests__ and __fixtures__, thresholds 80 lines/statements/branches/functions (SPEC-020, D-RCV-40); expected result PASS with 0 measurable statements recorded as printed (placeholder file only); rule proven by T-TE001-07"
+    },
+    "allowedInsideRecovery": [
+      "@/modules/recovery/**",
+      "./ (same folder or below)"
+    ],
+    "sharedFiles": [
+      "frontend/eslint.config.js",
+      "frontend/package.json",
+      "frontend/tsconfig.app.json",
+      "frontend/vitest.config.ts (new)",
+      "package-lock.json",
+      "frontend/package-lock.json"
+    ]
+  },
+  "planRefs": {
+    "source": "specify/contracts/frontend-integrations.json (unchanged content above); plan additions below",
+    "placeholder": "frontend/src/modules/recovery/index.ts (comment + export {};)",
+    "ruleForm": "no-restricted-imports patterns[0].regex (not group negations)",
+    "regex": "(?:^|/)\\.\\.(?:/|$)|^@/(?!(?:components/ui(?:/|$)|lib/utils$|contexts/ApiClientContext$|api/schema$|modules/recovery(?:/|$)|utils/(?!cfsc)[^/]+$))",
+    "regexCheckedAgainst": "2026-11-09 node check: T-TE001-07 cases plus ./../x, ./sub/../../x, .., @/modules/recovery/../cfsc/x, @/utils/sub/x, @/modules/recoveryx/y, @/lib/other (forbidden); ./sub/x, react, vitest (not matched)",
+    "fixtures": [
+      "src/modules/recovery/__fixtures__/forbidden.ts (11 imports incl. bare ..)",
+      "src/modules/recovery/__fixtures__/allowed.ts (7 imports)"
+    ],
+    "devDependencies": {
+      "vitest": "4.1.12",
+      "@vitest/coverage-v8": "4.1.12"
+    },
+    "versionBasis": "vitest 4.1.x peer vite ^6 || ^7 || ^8; ACE frontend vite ^8.0.4; CI node:22-trixie",
+    "nxTarget": {
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "vitest run --coverage",
+          "cwd": "{projectRoot}"
+        }
+      },
+      "checkDependsOnAdd": "test"
+    },
+    "coverageReportsDirectory": "frontend/coverage/recovery (lcovonly: no HTML/JS, so eslint:lint is unaffected; REVIEW-RWB-TE-001-021). In frontend/.prettierignore; not in .gitignore, never committed; copied to output/INC-002-epic-1-RWB-TE-001/implement/frontend/",
+    "approvalPending": [
+      "PRE-1 Product Owner spec approval",
+      "PRE-2 OPEN-023 ACE tech lead approval of vitest, @vitest/coverage-v8 and the frontend shared-file edits"
+    ],
+    "tasks": [
+      "TASK-RWB-TE-001-13",
+      "-14",
+      "-15",
+      "-16",
+      "-17"
+    ],
+    "regexNote": "Branch 1 forbids any '..' path segment (no-restricted-imports cannot normalise paths; REVIEW-RWB-TE-001-023). Branch 2 forbids @/ imports outside the allow-list.",
+    "coverageReporters": [
+      "text",
+      "json-summary",
+      "lcovonly"
+    ],
+    "install": "Root package-lock.json is the lockfile CI (npm ci at the root, .gitlab-ci.yml test/test_default_branch) and Dockerfile install from: npm install -D --save-exact vitest@4.1.12 @vitest/coverage-v8@4.1.12 -w frontend (workspace root); blocking check = root lockfile holds both entries and a clean root npm ci succeeds. frontend/package-lock.json is read by no build step but kept in step (ACE convention, SPEC-017): npm install --package-lock-only --workspaces=false in frontend/; result recorded, non-blocking (REVIEW-RWB-TE-001-027, -029)"
+  }
+}

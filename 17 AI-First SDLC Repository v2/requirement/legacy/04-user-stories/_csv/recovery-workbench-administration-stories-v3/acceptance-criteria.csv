@@ -1,0 +1,276 @@
+﻿Acceptance criteria
+Gherkin per story.
+Key,Title,Gherkin
+RWB-AD-001,Map Entra ID groups to Workbench roles,"Feature: Map Entra ID groups to Workbench roles
+
+  Scenario: AC1 Group gives the role
+    Given the group RWB-SIT-RW-CASEOWN mapped to RW-CASEOWN
+    When a member of the group signs in to SIT
+    Then the session holds the role RW-CASEOWN
+
+  Scenario: AC2 Unmapped group
+    Given a person whose only group has no mapping
+    When they sign in
+    Then the system refuses they with MSG-P4-001 and the refusal is in the access log
+
+  Scenario: AC3 Mapping change
+    Given a new mapping version with a valid from date
+    When the date arrives
+    Then sessions from that date use the new mapping"
+RWB-AD-002,Permission matrix as a versioned load,"Feature: Permission matrix as a versioned load
+
+  Scenario: AC1 Load a matrix version
+    Given a matrix file with every role and area
+    When the reference data administrator loads it
+    Then it passes the checks and waits for the application owner's approval
+
+  Scenario: AC2 Incomplete matrix refused
+    Given a file with a role missing
+    When it is loaded
+    Then the system refuses it in full with the missing role named
+
+  Scenario: AC3 Takes effect on its date
+    Given an approved version with a valid from date
+    When the date arrives
+    Then every endpoint checks against the new version"
+RWB-AD-003,Scope per role,"Feature: Scope per role
+
+  Scenario: AC1 Own scope
+    Given a case owner with scope Own
+    When they list cases
+    Then the system returns only cases they own
+
+  Scenario: AC2 Out of scope
+    Given a case owned by another team
+    When a case owner with scope Team opens it
+    Then the system does not find the response and the refusal is logged"
+RWB-AD-004,Masking profiles per role,"Feature: Masking profiles per role
+
+  Scenario: AC1 Masked by default
+    Given a role with no unmasked rule in the version in force
+    When it reads a case
+    Then the identity number shows from v_ace_customer.id_no_masked
+    And the phone number shows from v_ace_contact.contact_value_masked
+
+  Scenario: AC2 Unmask is logged
+    Given a role allowed to unmask the contact value
+    When it unmasks the phone number on a case
+    Then the system fills the field from v_ace_contact.contact_value and writes the read to the PII log
+    And the identity number is still shown from id_no_masked, never in clear
+
+  Scenario: AC3 Profile change
+    Given a new masking_rule version approved by Compliance
+    When its valid from date arrives
+    Then responses use the new version and the access log carries the version in force"
+RWB-AD-005,Separation of duty check at sign-in,"Feature: Separation of duty check at sign-in
+
+  Scenario: AC1 Conflict refused
+    Given a person in the groups for RW-WRITEOFF and RW-WOCOMM
+    When they sign in
+    Then the system refuses the session and an incident goes to the security administrator
+
+  Scenario: AC2 Table as data
+    Given a new separation of duty version
+    When it is approved
+    Then the next sign-in checks against it"
+RWB-AD-006,Break-glass access,"Feature: Break-glass access
+
+  Scenario: AC1 Granted with an incident
+    Given an open incident and a reason of at least 20 characters
+    When the security administrator approves the request
+    Then the system grants access for the window and every action is marked break-glass
+
+  Scenario: AC2 Refused without an incident
+    Given no open incident
+    When the request is made
+    Then the system refuses it
+
+  Scenario: AC3 Ends on its own
+    Given an active grant
+    When the window ends
+    Then the grant ends with no action by anyone"
+RWB-AD-007,Access log search and export,"Feature: Access log search and export
+
+  Scenario: AC1 Search
+    Given sign-ins and refusals for a week
+    When I search by person and date
+    Then the matching entries show with the role and versions in force
+
+  Scenario: AC2 Export
+    Given a search result
+    When I export it
+    Then the file carries the same masking as the screen"
+RWB-AD-008,Access review list,"Feature: Access review list
+
+  Scenario: AC1 List produced
+    Given the review date
+    When the review opens
+    Then each role owner receives the holders of their roles
+
+  Scenario: AC2 Not confirmed
+    Given a holder not confirmed by the end of the review
+    When the review closes
+    Then the system requests removal through the bank IAM and logged"
+RWB-AD-009,Load a list of values version,"Feature: Load a list of values version
+
+  Scenario: AC1 Valid load
+    Given a file for LOV-ROUTE with codes and English labels
+    When I load it
+    Then it passes the checks and waits for the list owner's approval
+
+  Scenario: AC2 Code in use removed
+    Given a load that removes a code used by open cases
+    When it is loaded
+    Then the system refuses it with the count of records using the code"
+RWB-AD-010,Approve a reference data load,"Feature: Approve a reference data load
+
+  Scenario: AC1 Approve
+    Given a loaded version waiting for me
+    When I approve it
+    Then it takes effect from its valid from date and the approval is logged
+
+  Scenario: AC2 Maker cannot approve
+    Given a version I loaded
+    When I try to approve it
+    Then I am refused with MSG-P7-002"
+RWB-AD-011,Load a rule version,"Feature: Load a rule version
+
+  Scenario: AC1 Rule rows tested
+    Given a route set file where every row has a test case ID
+    When I load it
+    Then the rule table tests run in SIT and the result is attached to the version
+
+  Scenario: AC2 Row without a test
+    Given a row with no test case ID
+    When I load it
+    Then the system refuses the version"
+RWB-AD-012,Approve a rule version,"Feature: Approve a rule version
+
+  Scenario: AC1 Approve
+    Given a version with every test passed
+    When I approve it
+    Then it applies to decisions from its valid from date
+
+  Scenario: AC2 Open cases keep their version
+    Given a case decided under the previous version
+    When the new version takes effect
+    Then the decided case keeps the version it was decided under (R-UNI-38)"
+RWB-AD-013,Roll back a rule or reference version,"Feature: Roll back a rule or reference version
+
+  Scenario: AC1 Roll back
+    Given a version in force that causes a breach
+    When I load the previous version with an immediate date and the owner approves
+    Then decisions from that time use the previous version and both changes are logged"
+RWB-AD-014,Configure queues,"Feature: Configure queues
+
+  Scenario: AC1 Queue loaded
+    Given a queue file
+    When it is loaded and approved
+    Then allocation uses the new method and cap from the valid from date
+
+  Scenario: AC2 Overflow must exist
+    Given a queue that names an overflow queue that does not exist
+    When it is loaded
+    Then the system refuses the load"
+RWB-AD-015,Configure service levels and timers,"Feature: Configure service levels and timers
+
+  Scenario: AC1 Service level loaded
+    Given a service level of 10 working days for state LIT_PACK with a warning at 8
+    When it is approved
+    Then new timers in that state use the values
+
+  Scenario: AC2 Running timers
+    Given a timer already running
+    When a new version takes effect
+    Then the running timer keeps its due date unless the rule says to recompute"
+RWB-AD-016,Load the delegation of authority table,"Feature: Load the delegation of authority table
+
+  Scenario: AC1 Limits loaded
+    Given limits by decision, level, product and amount
+    When Risk approves the version
+    Then approvals check against it from its date
+
+  Scenario: AC2 Missing limit
+    Given a decision with no limit at any level
+    When it is submitted
+    Then it goes to the next level up and an incident names the missing limit"
+RWB-AD-017,Manage letter and notice templates,"Feature: Manage letter and notice templates
+
+  Scenario: AC1 Approve
+    Given a new template version in Thai and English
+    When Legal approves it
+    Then notices generated from its date use it
+
+  Scenario: AC2 Withdraw
+    Given a template withdrawn
+    When a notice of that type is due
+    Then generation holds and a task goes to the litigation officer (R-LIT-04)"
+RWB-AD-018,Interface and job monitor,"Feature: Interface and job monitor
+
+  Scenario: AC1 Workbench jobs and their ACE date
+    Given the jobs of the job catalog and the outbound actions for 2026-11-30
+    When I open the monitor
+    Then each shows its job ID, business date, status, duration and the result of each check
+    And each job that reads ACE shows the last complete business date of its source from v_ace_batch_status
+
+  Scenario: AC2 Rerun a Workbench job
+    Given a failed Workbench job
+    When I rerun it from its run book after the cause is fixed
+    Then the job runs again and both runs are in the job log
+
+  Scenario: AC3 A late ACE batch
+    Given v_ace_batch_status shows EFS for business date 2026-12-01 with status FAILED
+    When the dependent job reaches its schedule
+    Then the job is recorded WAITING and is not rerun
+    And its data product shows STALE with MSG-P1-001"
+RWB-AD-019,Data quality and reconciliation console,"Feature: Data quality and reconciliation console
+
+  Scenario: AC1 A reconciliation break
+    Given v_ace_account holds 2,903 SSME accounts at 90 days past due or more less the exclusions and the case list holds 2,891
+    When the reconciliation step of JOB-04 runs
+    Then the REC-01 result for SSME is BREAK with variance 12 and variance percent 0.41
+    And the 12 account keys are on the break list with their days past due from v_ace_account
+
+  Scenario: AC2 Referential completeness
+    Given case_party on case ""RW-2026-000140"" carries person_key ""P0099881"" with no row in v_ace_customer
+    When the REC-05 step runs
+    Then the orphan shows with its table, its column and its key
+    And the case and its case_party row are unchanged
+
+  Scenario: AC3 A stale data product
+    Given a data product past its expected business date
+    When I open the console
+    Then it shows as stale with its last complete ACE business date"
+RWB-AD-020,Autonomy level per decision step,"Feature: Autonomy level per decision step
+
+  Scenario: AC1 Level applied
+    Given step D6.3 at level L1
+    When the route agent answers
+    Then the system shows the answer as a recommendation and a person decides
+
+  Scenario: AC2 Step up recorded
+    Given a committee approval for L2
+    When the new version takes effect
+    Then the change shows the approval reference in the version"
+RWB-AD-021,Retention classes and legal hold,"Feature: Retention classes and legal hold
+
+  Scenario: AC1 Expiry
+    Given a document past its retention period with no hold
+    When the retention job runs
+    Then the system proposes disposal and recorded, never silent
+
+  Scenario: AC2 Hold
+    Given a document under legal hold
+    When its retention period ends
+    Then the system keeps it and the hold is shown"
+RWB-AD-022,Partner firms and partner users,"Feature: Partner firms and partner users
+
+  Scenario: AC1 Firm scope
+    Given a law firm user
+    When they open the partner portal
+    Then only instructions placed with their firm show
+
+  Scenario: AC2 Contract ends
+    Given a firm whose contract ends today
+    When the day ends
+    Then the system disables its user accounts and open instructions are recalled"

@@ -1,0 +1,112 @@
+{
+  "key": "RWB-TE-005",
+  "file_stem": "RWB TE 005 Rule table test harness",
+  "title": "Rule table test harness",
+  "module": "P3 Case and workflow (technical enabler)",
+  "flag": "rwb.p3.rule-harness",
+  "status": "RETIRED",
+  "status_text": "Retired (D-RCV-36 T8) -> RWB-E1-073",
+  "theme": "default",
+  "overview_label": "Rule table test harness",
+  "goal": "Test every rule row against its own test case on load and in every build, just like code",
+  "why": "Retired by D-RCV-36 T8 (rules move to Drools XLS packages); the new home is RWB-E1-073. Shown here so readers see what the story covered.",
+  "needs": [
+    "E1-044"
+  ],
+  "unblocks": [
+    "E1-048"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/rule-versions (runs the harness)"
+    ],
+    [
+      "BUILD",
+      "Gradle task ruleTests per rule ID"
+    ],
+    [
+      "WHO",
+      "RW-COE writes the Tests sheet"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Each test builds a synthetic case file from facts.",
+  "writes": [
+    {
+      "t": "rule_test_case",
+      "note": "one test case per rule row"
+    }
+  ],
+  "reads": [
+    {
+      "t": "rule_row",
+      "note": "route set, from state, event, condition, owner"
+    }
+  ],
+  "stores": "Rule files recovery/src/test/resources/rules/*.xlsx",
+  "functions": [
+    {
+      "name": "RuleTableHarnessImpl",
+      "does": "runs each test via the evaluator"
+    },
+    {
+      "name": "CaseFileFixtureBuilder",
+      "does": "synthetic case from facts"
+    },
+    {
+      "name": "TestsSheetReader",
+      "does": "reads the Tests sheet"
+    },
+    {
+      "name": "RuleTableHarnessTest",
+      "does": "JUnit 5 test per rule ID"
+    },
+    {
+      "name": "RuleTestCaseRepository",
+      "does": "rule_test_case rows"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Load rule version + Tests sheet"
+    },
+    {
+      "kind": "function",
+      "text": "Build synthetic case per test"
+    },
+    {
+      "kind": "check",
+      "text": "Exactly one row hits?"
+    },
+    {
+      "kind": "check",
+      "text": "To state, owner, timer match?"
+    },
+    {
+      "kind": "table",
+      "text": "Version VALIDATED or FAILED"
+    },
+    {
+      "kind": "out",
+      "text": "Same tests in every build"
+    }
+  ],
+  "rules": [
+    "BR1: one test case per rule row",
+    "BR2: pass = exactly one hit, the named row, and expected values",
+    "BR3: any failure -> FAILED; it cannot be approved",
+    "BR5: synthetic facts only"
+  ],
+  "risks": [
+    "Mismatch -> FAILED (MSG-P3-014)",
+    "Rule row without a test -> FAILED (MSG-P3-014)",
+    "Two rows hit -> fail naming both (MSG-P3-014)"
+  ],
+  "example": [
+    "Restructure route set RES-2026.11 (R-RES-01..37)",
+    "-> 37 tests run, all pass",
+    "-> state VALIDATED"
+  ]
+}

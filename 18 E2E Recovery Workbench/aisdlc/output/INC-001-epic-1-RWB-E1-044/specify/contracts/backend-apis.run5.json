@@ -1,0 +1,126 @@
+{
+  "runId": "INC-001-epic-1-RWB-E1-044",
+  "story": "RWB-E1-044",
+  "specVersion": "v14-5",
+  "packageLayout": "RWB-TE-001 v4 (SPEC-022 relocation, SPEC-023 property split, SPEC-020 coverage wiring), merged before RWB-E1-044 by orchestrator decision D-RUN-17 (AI-SDLC-BUILD-LOG.md section 1, 2026-11-18T00:55)",
+  "apiInScope": false,
+  "apiImpactType": "NO_API_CHANGE",
+  "endpoints": [],
+  "backendOnlyContracts": [
+    {
+      "id": "CON-RWB-E1-044-001",
+      "type": "Flyway bean configuration",
+      "owner": "th.co.scb.ace.demo.recovery.casewf.migration.RecoveryFlywayConfig (moved from platform.internal by RWB-TE-001 SPEC-022, merged before this story per D-RUN-17); schema pin on the casewf.migration properties record of RWB-TE-001 SPEC-023 (binds rwb.schema and rwb.flyway.*; class name from RWB-TE-001's plan and code), registered by a package-private configuration class in casewf.migration with no condition",
+      "historyTable": "flyway_schema_history_recovery",
+      "placeholder": {
+        "recoverySchema": "recovery"
+      },
+      "location": "classpath:db/modulemigration/recovery",
+      "settings": {
+        "outOfOrder": false,
+        "baselineVersion": "0",
+        "baselineOnMigrate": true,
+        "cleanDisabled": true,
+        "createSchemas": false,
+        "validateMigrationNaming": true,
+        "validateOnMigrate": true,
+        "ignoreMigrationPatterns": "Flyway default (*:future)"
+      },
+      "schemaPin": "rwb.schema must equal 'recovery'; checked when the casewf.migration properties record binds. The record is registered by a configuration class with no condition, so the check holds whether rwb.flyway.enabled is true or false; otherwise start fails with a configuration error naming rwb.schema, the value and D-RCV-28 (SPEC-RWB-E1-044-002)",
+      "failureReport": "ERROR log: MSG-P3-016 schema=recovery object=<version(s), mandatory for validation and migration failures | recoveryFlyway only when Flyway reports no version>; exception rethrown (SPEC-RWB-E1-044-003)",
+      "specRefs": [
+        "SPEC-RWB-E1-044-001",
+        "SPEC-RWB-E1-044-002",
+        "SPEC-RWB-E1-044-003",
+        "SPEC-RWB-E1-044-013"
+      ]
+    },
+    {
+      "id": "CON-RWB-E1-044-002",
+      "type": "Migration lint finding",
+      "format": "MSG-P3-016 schema=recovery object=<file>:<line> rule=<RULE-ID> <detail>",
+      "ruleIds": [
+        "L-NAME",
+        "L-UNDO",
+        "L-REPEATABLE",
+        "L-SEQ-GAP",
+        "L-SEQ-DUP",
+        "L-HEADER",
+        "L-HEADER-MULTI",
+        "L-KEY-DUP",
+        "L-FIX-LINE2",
+        "L-FIX-NO-BASE",
+        "L-SEARCH-PATH",
+        "L-LITERAL-SCHEMA",
+        "L-FK-OUTSIDE",
+        "L-GRANT",
+        "L-LEX"
+      ],
+      "specRefs": [
+        "SPEC-RWB-E1-044-004",
+        "SPEC-RWB-E1-044-005",
+        "SPEC-RWB-E1-044-006",
+        "SPEC-RWB-E1-044-007",
+        "SPEC-RWB-E1-044-008",
+        "SPEC-RWB-E1-044-009",
+        "SPEC-RWB-E1-044-016"
+      ],
+      "identifiersOnly": "Schema-prefix rules (L-LITERAL-SCHEMA, L-FK-OUTSIDE) check SQL identifiers only; string literals and comments (-- and nested /* */) are ignored (D-RUN-13). Text is prepared by one quote-aware tokenizer pass whose token table is authoritative in SPEC-RWB-E1-044-007. Summary: standard strings '...' with '' as an escaped quote; escape strings E'...', in which a doubled quote ('') and a backslash followed by a quote are each an escaped quote, and two backslashes are one escaped backslash (backslash rules apply only inside E'...'); quoted identifiers \"...\" with \"\" ; Flyway ${...} placeholders (never a dollar quote); $$ and $tag$ bodies scanned as code. An unterminated token is L-LEX. Statements are cut from the identifier text at top-level ; tokens, so a comment or string never supplies the statement kind",
+      "findingMultiplicity": "One finding per (rule, file, line, key). L-LITERAL-SCHEMA key: the disallowed schema name, whichever items 1-4 match. L-FK-OUTSIDE key: the referenced qualifier. L-SEARCH-PATH and L-GRANT: one per line. L-LEX: one per unterminated opener. A qualified REFERENCES outside ${recoverySchema} gives one L-FK-OUTSIDE and one L-LITERAL-SCHEMA finding (L-FK-OUTSIDE only for information_schema or pg_catalog) (SPEC-RWB-E1-044-004, -008)",
+      "extensionPoint": "One rule registry; L-LITERAL-SCHEMA qualifier decision in one method (isAllowedQualifier). Seam SEAM-E044-01 owned by RWB-E1-069: public allowed only inside CREATE [OR REPLACE] VIEW ${recoverySchema}.v_ace_* (not built here). Seam SEAM-E044-02 owned by RWB-E1-069: Section A grants on public hit L-GRANT and L-LITERAL-SCHEMA items 3 and 4 (OI-E044-B)"
+    },
+    {
+      "id": "CON-RWB-E1-044-003",
+      "type": "Schema comparison finding (test scope)",
+      "format": "MSG-P3-016 schema=recovery object=recovery.<table>.<column|constraint|index|view>",
+      "specRefs": [
+        "SPEC-RWB-E1-044-012"
+      ],
+      "components": [
+        "SchemaSnapshotReader (catalog rows to snapshot)",
+        "SchemaComparator (pure comparison)"
+      ]
+    }
+  ],
+  "outOfScopeEndpoints": [
+    {
+      "method": "GET",
+      "path": "/api/recovery/v1/admin/jobs",
+      "query": {
+        "type": "MIGRATION"
+      },
+      "source": "Recovery Workbench API Specification v4 getAdminJobs (x-module P1; 'type' is a free string, migration runs not described); story RWB-E1-044 v7 section 12",
+      "status": "Out of scope for RWB-E1-044 by D-RCV-12 (squad register); no receiving story named or inferred",
+      "owner": null,
+      "documentGap": "DG-L10",
+      "openItem": "OI-E044-G",
+      "relatedTestCase": "TC-E1-044-10",
+      "relatedMessages": [
+        "MSG-P4-002"
+      ],
+      "specRef": "SPEC-RWB-E1-044-017"
+    }
+  ],
+  "declinedPreconditions": [
+    {
+      "item": "ACE DBA role for the recovery migration account, any table privilege in public, CREATE on public, or an ace_view_owner membership that inherits",
+      "claimedBy": "Recovery Workbench user story RWB-E1-069 v7 section 3 (attributed to RWB-E1-044)",
+      "status": "Declined by RWB-E1-044 (D-RCV-35 U3/U4; ADR v3 ADR-010; RWB-E1-044 v7 sections 3 and 10; RWB-E1-069 v7 section 10; RWB-ACE-001 v1; Test Cases v7 TC-ACE-001-04)",
+      "owner": "SELECT grants to ace_view_owner: ACE DBA (D-RUN-14). Route outside this repository: open item OI-E044-I",
+      "documentGap": "DG-L13",
+      "specRef": "SPEC-RWB-E1-044-017"
+    }
+  ],
+  "migratorRights": {
+    "decision": "D-RUN-14 (orchestrator, Claude Code; AI-SDLC-BUILD-LOG.md section 1, 2026-11-18T00:31); recovery tech lead to confirm (OI-E044-J)",
+    "role": "rwb_migrator",
+    "rights": [
+      "GRANT USAGE ON SCHEMA public TO rwb_migrator (no table privilege)",
+      "GRANT ace_view_owner TO rwb_migrator WITH INHERIT FALSE, SET TRUE (ADMIN false)"
+    ],
+    "reason": "RWB-E1-069 view migration resolves public.<table> names and runs ALTER VIEW ... OWNER TO ace_view_owner; PostgreSQL 16 allows an owner change only to a role the current role can SET ROLE to (Environment and Deployment Design v4 section 5; ACE Source Views v1 grant block)",
+    "appliedIn": "infra/postgres/init/20-grants.sql.inc (local stand-in for the environment owner); SIT/UAT/PROD by the environment owner (OI-E044-I)",
+    "test": "T-044-17",
+    "specRef": "SPEC-RWB-E1-044-017"
+  }
+}

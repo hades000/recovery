@@ -1,0 +1,106 @@
+{
+  "runId": "INC-010-epic-1-RWB-E1-069",
+  "story": "RWB-E1-069",
+  "revision": "run 3 (spec gate round 2 remediation, REVIEW-RWB-E1-069-117..121; re-baselined on RWB-E1-044 v14-7 and RWB-E1-001 Revision 4); run 2 kept as backend-apis.run2.json",
+  "apiImpactType": "NO_API_CHANGE",
+  "httpEndpoints": [],
+  "events": [],
+  "note": "There is no endpoint and no event (Story RWB-E1-069 v1, section 12). The contracts below are the non-HTTP interfaces this story publishes. Migration numbers are assigned at merge (D-RUN-07).",
+  "contracts": [
+    {
+      "id": "CON-RWB-E1-069-001",
+      "type": "flyway-migration",
+      "file": "backend/src/main/resources/db/modulemigration/recovery/V<seq>__rwb_e1_069_ace_source_views.sql",
+      "line1": "-- Story: RWB-E1-069",
+      "contents": [
+        "schema-wide REVOKE ALL ON ALL TABLES IN recovery FROM PUBLIC, first, before any view exists (spec SPEC-004 step 1)",
+        "3 helper functions, CREATE OR REPLACE: ace_to_boolean and ace_mask_value as ACE Source Views v1; ace_to_date to the BR6 behaviour table in spec SPEC-002 (not the source body, DG-L23)",
+        "16 Section A views, verbatim from ACE Source Views v1 lines 94-452, qualifier recovery. -> ${recoverySchema}.",
+        "Section A grant block, spec SPEC-004 steps 2-11: EXECUTE revoke/grant; USAGE for recovery_svc; transient USAGE, CREATE for ace_view_owner; per-view REVOKE; per-view GRANT SELECT to recovery_svc BEFORE the owner change; ALTER VIEW OWNER TO ace_view_owner; final REVOKE USAGE, CREATE. No statement on schema public and no grant to rwb_migrator"
+      ],
+      "migrationAccountRights": "exactly D-RUN-14: USAGE ON SCHEMA public with no table privilege, and ace_view_owner membership WITH INHERIT FALSE, SET TRUE. Delivered by RWB-E1-044 v14-7 local init; not restated here. No ACE DBA role, no SELECT on a public table.",
+      "seq": "assigned at merge (D-RCV-28, D-RUN-07)",
+      "spec": ["SPEC-RWB-E1-069-001", "SPEC-RWB-E1-069-002", "SPEC-RWB-E1-069-003", "SPEC-RWB-E1-069-004"]
+    },
+    {
+      "id": "CON-RWB-E1-069-002",
+      "type": "flyway-migration",
+      "file": "backend/src/main/resources/db/modulemigration/recovery/V<seq>__rwb_e1_069_ace_tier2_views.sql",
+      "line1": "-- Story: RWB-E1-069",
+      "contents": [
+        "14 Section B views, verbatim from ACE Source Views v1 lines 461-711",
+        "Owner sequence for the 14 views, spec SPEC-004 steps 5-11: idempotent USAGE; transient USAGE, CREATE; per-view REVOKE; GRANT SELECT before the owner change; ALTER VIEW OWNER TO ace_view_owner; final REVOKE. The schema-wide revoke (step 1) is omitted because the Section A views are already owned by ace_view_owner"
+      ],
+      "precondition": "RWB-ACE-001 deployed with its grants (DL43); merged only after it is deployed (DG-L20)",
+      "spec": ["SPEC-RWB-E1-069-005", "SPEC-RWB-E1-069-006"]
+    },
+    {
+      "id": "CON-RWB-E1-069-003",
+      "type": "published-read-interface",
+      "objects": "30 views ${recoverySchema}.v_ace_* (Story RWB-E1-069 v1, section 11), security_invoker not set",
+      "rules": ["SELECT only", "no PK or FK", "owner ace_view_owner", "recovery_svc SELECT per view", "PUBLIC none"],
+      "fields": "304 fields, DF-ACE-001..304. Columns are cited from ACE Source Views v1 and not copied here.",
+      "dataClassification": "Data Classification and Personal Data Inventory v4: 250 personal fields, 12 Restricted (spec SPEC-019). The RWB-E1-001 Revision 4 seed marks 250 of the 304 true and 54 false (526 in the whole dictionary under its protective union). Identity number exposed only as id_no_masked and id_no_last4. Display masking RWB-E1-037; read audit RWB-E1-016.",
+      "spec": ["SPEC-RWB-E1-069-003", "SPEC-RWB-E1-069-006", "SPEC-RWB-E1-069-019"]
+    },
+    {
+      "id": "CON-RWB-E1-069-004",
+      "type": "database-grants",
+      "grantees": {
+        "ace_view_owner": "owns the 30 views; no USAGE or CREATE on schema recovery after each file; no EXECUTE on the helpers; no privilege on any other recovery relation. ACE-side: USAGE on public and SELECT on the 21 Tier 1 and 14 Tier 2 tables, granted by the ACE DBA (precondition P4(d)), not by these files",
+        "recovery_svc": "USAGE on recovery; SELECT on each v_ace_* view; EXECUTE on the 3 helper functions; nothing in public",
+        "PUBLIC": "nothing on recovery tables or views; no EXECUTE on the helper functions",
+        "migrationAccount": "exactly D-RUN-14: USAGE ON SCHEMA public with no table privilege (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER), and ace_view_owner membership WITH INHERIT FALSE, SET TRUE, ADMIN false; owns schema recovery or may grant CREATE on it (P4(c)). Never the ACE DBA role, SELECT on a public table, CREATE on public, or an inheriting membership. Delivered by RWB-E1-044 v14-7, asserted by T-044-17 and by spec SPEC-008 check 5; D-RUN-14 ratification open (OI-069-M)"
+      },
+      "spec": ["SPEC-RWB-E1-069-002", "SPEC-RWB-E1-069-004", "SPEC-RWB-E1-069-006", "SPEC-RWB-E1-069-015"]
+    },
+    {
+      "id": "CON-RWB-E1-069-005",
+      "type": "test-resource",
+      "file": "backend/src/test/resources/architecture/recovery-modules.yaml",
+      "key": "sourceViews",
+      "shape": {
+        "sectionA": "list of the 16 Section A names, Story RWB-E1-069 v1 section 11 order",
+        "sectionB": "list of the 14 Section B names"
+      },
+      "validation": "name pattern ^v_ace_[a-z0-9_]+$, unique across both lists, counts 16 and 14; migration-folder rules in spec SPEC-013",
+      "owner": "RWB-E1-069 for this key only; the rest of the file and the loader belong to RWB-TE-001 (D-RCV-37)",
+      "spec": ["SPEC-RWB-E1-069-013"]
+    },
+    {
+      "id": "CON-RWB-E1-069-006",
+      "type": "test-resource",
+      "file": "backend/src/test/resources/db/recovery-migration-lint-exceptions.yaml",
+      "shape": {
+        "storyKey": "rwb_e1_069",
+        "decision": "D-RCV-35 3.2/8.2; RWB-E1-044 SEAM-E044-02",
+        "nonFixFiles": ["__rwb_e1_069_ace_source_views.sql", "__rwb_e1_069_ace_tier2_views.sql"],
+        "grantObjects": ["SCHEMA ${recoverySchema}", "${recoverySchema}.<object>", "FUNCTION ${recoverySchema}.<fn>(...)", "ALL TABLES IN SCHEMA ${recoverySchema} (REVOKE only)"],
+        "grantees": ["recovery_svc", "ace_view_owner", "PUBLIC"]
+      },
+      "qualifierSeam": "SEAM-E044-01 is code in isAllowedQualifier, not data: public is allowed only inside CREATE [OR REPLACE] VIEW ${recoverySchema}.v_ace_*",
+      "roleSeam": "No SET ROLE and no role-membership grant appears in either file; GRANT ... TO rwb_migrator fails L-GRANT. The D-RUN-14 rights are RWB-E1-044 v14-7's local init, not this story's SQL.",
+      "spec": ["SPEC-RWB-E1-069-014"]
+    },
+    {
+      "id": "CON-RWB-E1-069-007",
+      "type": "build-message",
+      "rule": "BND-6",
+      "text": "Boundary rule BND-6 broken: <SimpleClassName> reads public.<table>. Read recovery.<view> instead.",
+      "viewResolution": "derived table-to-view map from the view bodies; several views joined with ' or '",
+      "fallback": "Read a recovery.v_ace_* view instead. (derived, not in section 14)",
+      "source": "Story RWB-E1-069 v1, section 14",
+      "spec": ["SPEC-RWB-E1-069-012"]
+    },
+    {
+      "id": "CON-RWB-E1-069-008",
+      "type": "test-input",
+      "test": "ViewConformanceTest",
+      "switch": "RWB_CONFORMANCE_TARGET=external",
+      "variables": ["RWB_DB_URL", "RWB_DB_USER", "RECOVERY_SVC_PASSWORD", "RWB_MIGRATOR_USER", "RWB_MIGRATOR_PASSWORD"],
+      "behaviour": "external: the four read-only checks against the given database, no fixture and no write; otherwise Testcontainers with checks 1-5 and the fixtures. No credential in code.",
+      "flywayMechanism": "RecoveryFlywayTestSupport (test scope) clears initMethodName on the recoveryFlyway bean definition, so tests use the real bean's Flyway configuration with a target and RecoveryFlywayConfig stays unchanged (spec SPEC-018)",
+      "spec": ["SPEC-RWB-E1-069-008", "SPEC-RWB-E1-069-018"]
+    }
+  ]
+}

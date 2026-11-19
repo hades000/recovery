@@ -1,0 +1,118 @@
+{
+  "key": "RWB-TE-004",
+  "file_stem": "RWB TE 004 Masked data in SIT and UAT",
+  "title": "Masked data in SIT and UAT",
+  "module": "P1 Recovery data engine (technical enabler)",
+  "flag": "rwb.dataengine.masked-copy",
+  "status": "READY",
+  "status_text": "Ready (names pre-ACE copy tables)",
+  "theme": "default",
+  "overview_label": "Masked copy for SIT/UAT",
+  "goal": "SIT and UAT tests run on realistic volumes using masked copies, never exposing a real customer",
+  "why": "Testers need production-sized data with real balances and dates, but PDPA forbids real names and IDs. Any personal-looking value refuses the whole load.",
+  "needs": [
+    "E1-065"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "WHO",
+      "RW-PLATADM starts the load for SIT or UAT"
+    ],
+    [
+      "CALL",
+      "PII service drops masked extract + manifest"
+    ],
+    [
+      "JOB",
+      "Masked copy pipeline stage (on request)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No recovery.v_ace_* read. Note: the story still names pre-alignment copy tables (party, loan_account); check against the ACE Data Tier Map when building.",
+  "writes": [
+    {
+      "t": "recovery schema (swap)",
+      "note": "whole-schema swap from recovery_next"
+    },
+    {
+      "t": "tools.masked_copy_load",
+      "note": "load report and counts"
+    }
+  ],
+  "reads": [
+    {
+      "t": "sys_fields",
+      "note": "is_personal columns to verify"
+    },
+    {
+      "t": "masking rules table",
+      "note": "mask version in force"
+    }
+  ],
+  "stores": "Per-environment intake container (masked extract + manifest); staging schema recovery_next; advisory lock; pipeline load report",
+  "functions": [
+    {
+      "name": "MaskedCopyLoader",
+      "does": "env guard, manifest, staging, swap"
+    },
+    {
+      "name": "ManifestValidator",
+      "does": "extract ID, mask version, totals"
+    },
+    {
+      "name": "MaskingVerifier",
+      "does": "Thai ID check digit, phone, email"
+    },
+    {
+      "name": "LoadReportWriter",
+      "does": "the load report"
+    },
+    {
+      "name": "Masked copy stage",
+      "does": "pipeline stage with a lock"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "PII service drops extract"
+    },
+    {
+      "kind": "check",
+      "text": "Target SIT or UAT only"
+    },
+    {
+      "kind": "check",
+      "text": "Manifest + totals match"
+    },
+    {
+      "kind": "check",
+      "text": "No personal-looking values"
+    },
+    {
+      "kind": "table",
+      "text": "Load recovery_next, then swap"
+    },
+    {
+      "kind": "out",
+      "text": "Load report per product"
+    }
+  ],
+  "rules": [
+    "BR1: no production data in DEV; SIT and UAT get masked data only",
+    "BR3: any personal value left -> the whole load is refused",
+    "BR4: balances, dates and keys stay unmasked; totals match the manifest",
+    "BR5: the same customer gets the same token everywhere"
+  ],
+  "risks": [
+    "Personal-looking value found -> refused (MSG-P1-002)",
+    "Totals do not match the manifest -> refused (MSG-P1-002)",
+    "Target is DEV or PROD -> refused (MSG-P1-002)"
+  ],
+  "example": [
+    "Extract PII-SIT-20261120 (business date 2026-11-19, MASK-2026.11): 28,119 accounts",
+    "Mortgage 12,256 | HP 12,960 | SSME 2,903",
+    "Loaded; counts and total_balance per product equal the manifest"
+  ]
+}

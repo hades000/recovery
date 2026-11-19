@@ -1,0 +1,303 @@
+### RWB-E1-041
+- file_stem: RWB E1 041 Retention classes and virus scan on intake
+- title: Retention classes and virus scan on intake
+- module: P5 Document hub | flag: rwb.dochub.malware-scan + rwb.dochub.retention | status: READY "Ready for build" | theme: default
+- overview_label: Virus scan + doc retention
+- goal: Block infected files before storage, and keep or archive each document by its retention class
+- why: An infected scan must never reach the store or OCR. Documents age out by policy class; nothing is deleted, REVIEW items go to Compliance.
+- needs: E1-024, E1-049 | unblocks: E1-026, E1-057
+- triggers: JOB "JOB-12 scanStep (first step, every 15 min)" ; CALL "scanNow() before every upload is stored" ; JOB "JOB-17 Retention, monthly first Sunday" ; LOAD "POST /admin/reference-loads (RETENTION_CLASS)"
+- ace: [] ; ace_note: "No ACE read. Legal hold comes from the Workbench case (recovery_case.legal_hold)."
+- writes: document_intake "scan_result CLEAN / INFECTED, scanned_at" ; retention_class "LEGAL10Y 120 m REVIEW, GENERAL05Y 60 m ARCHIVE" ; retention_action "what JOB-17 did per document" ; document.state "ARCHIVED" ; decision_log_entry "DOCRET before archive"
+- reads: document "stored date, retention class" ; recovery_case.legal_hold "via CaseDirectory"
+- stores: "Intake, quarantine, write-once and archive-tier blob containers; review list retention/review/{runDate}.csv; audit MALWARE_BLOCKED; scanning service"
+- functions: ScanStep "JOB-12: scan, quarantine, alert" ; MalwareScanClient "calls the scanner, 30 s timeout" ; QuarantineMover "moves infected files" ; RetentionJob "JOB-17: expiry, hold, archive" ; RetentionClassLoader "RETENTION_CLASS load" ; RetentionReviewWriter "Compliance review CSV"
+- path: trigger "New intake item" > check "Malware scan" > store "INFECTED -> quarantine, never stored" > table "CLEAN -> OCR may read" > function "JOB-17: expiry by class, skip holds" > out "ARCHIVE tier or REVIEW list"
+- rules: "BR1: scan before store; an infected file is never stored" ; "BR4: a legal hold stops archive and expiry" ; "BR5: nothing is deleted; REVIEW items are listed for a decision" ; "BR7: no decision log entry, no archive"
+- risks: "Malware found -> quarantine + MALWARE_BLOCKED (MSG-P5-016)" ; "Scanner down -> item stays unscanned, upload 503 (MSG-P5-022)" ; "Bad end action or 0 months in the load -> refused (MSG-P3-027)"
+- example: "eicar-0002.pdf from a branch scanner -> scan_result INFECTED" ; "-> moved to quarantine, no document row, audit MALWARE_BLOCKED" ; "Classes: LEGAL10Y 120 months REVIEW | GENERAL05Y 60 months ARCHIVE"
+
+### RWB-E1-042
+- file_stem: RWB E1 042 Central configuration service and parameter catalog
+- title: Central configuration service and parameter catalog
+- module: P3 Case and workflow | flag: rwb.p3.configservice | status: READY "Ready for build" | theme: default
+- overview_label: Parameter service + catalog
+- goal: Every setting and business value is read from one service and catalogued with an owner; no hard-coded numbers
+- why: Business values like the 90-day entry threshold change by approved data, not by release, and each decision records the parameter version it used.
+- needs: E1-044 | unblocks: E1-043, E1-045 and every story that reads a parameter
+- triggers: BUILD "Key added to config/parameter-catalog.csv" ; BUILD "RwbMagicNumberCheck fails business literals" ; LOAD "POST /admin/reference-loads (PARAMETER)" ; CALL "ParameterService.get(key, env, date)"
+- ace: [] ; ace_note: "No ACE read. Parameters are Workbench configuration; secrets stay in the secret store."
+- writes: parameter_catalog "key, type, range, owner, environments, used-by" ; parameter_value "versioned value per environment and date"
+- reads: parameter_catalog, parameter_value "typed reads, cached 60 s"
+- stores: "config/parameter-catalog.csv in the repo; secret store; outbox ParameterVersionApproved"
+- functions: ParameterService "typed get + version (published)" ; ParameterLoadChecks "key, type, range, environment" ; ParameterLoadHandler "load, approve, rollback" ; ParameterStartupCheck "no start without required values" ; RwbMagicNumberCheck "build fails on business literals" ; ParameterKeysGenerator "generates ParameterKeys"
+- path: trigger "Squad adds key to catalog CSV" > check "Build: magic-number + completeness" > table "Flyway seeds catalog + defaults" > check "Owner approves value (not author)" > table "parameter_value v2 in force" > out "Engines read value + log version"
+- rules: "BR1: business values are versioned parameter rows, never constants" ; "BR2: every parameter has an owner, type, default, environments and used-by" ; "BR6: secrets stay in the secret store only" ; "BR7: the service does not start without its required parameters"
+- risks: "Literal business value in code -> build fails" ; "Required value missing at start -> service does not start (MSG-P3-032)" ; "Value out of range -> refused (MSG-GEN-002)"
+- example: "case.entry.dpd: INTEGER 1-365, default 90, owner RW-COE" ; "PROD v1 = 90" ; "Entry evaluation on 2026-12-01 reads 90 from the service and records parameter version 1"
+
+### RWB-E1-043
+- file_stem: RWB E1 043 Reference data service with versioned tables
+- title: Reference data service with versioned tables
+- module: P3 Case and workflow | flag: rwb.p3.refdata-versions | status: PARTIAL "Ready. Business-date check waits for ACE-001" | theme: default
+- overview_label: Versioned reference data
+- goal: 12 reference tables versioned with author, approver and dates, so values change by data release
+- why: Products, regions, queues, service levels and limits all change. One registry decides which version is in force on a date; holidays come from ACE instead.
+- needs: E1-042, E1-044 | unblocks: E1-028, E1-037, E1-038, E1-040, E1-045
+- triggers: LOAD "POST /admin/reference-loads (any of 12 tables)" ; API "POST /admin/reference-loads/{loadId}/approve" ; CALL "ReferenceDataService.rows(table, date)" ; WHO "RW-REFADM loads; Risk approves"
+- ace: v_ace_batch_status B "business date precondition for loads" ; v_ace_holiday A "not served here: holidays are read by E1-028"
+- writes: reference_version "header: table, version, valid_from, author, approver" ; reference_row "the rows of each version (append only)"
+- reads: reference_version, reference_row "version in force for a date" ; lov_value "LOV-REF-TABLE codes"
+- stores: "In-memory ReferenceRowCache (refdata.cache.ttl-seconds); engine log line per table read; daily DQ report (E1-011)"
+- functions: ReferenceVersionRegistryImpl "checks, numbering, write, approve" ; ReferenceDataServiceImpl "version in force for a date" ; ReferenceRowCache "TTL cache" ; ReferenceTableSchemas "columns per table code" ; ReferenceVersionLogger "one log line per table read"
+- path: trigger "Upload EXPOSURE_BAND v4" > check "Schema, keys, date, author" > table "reference_version VALIDATED" > check "Approver is not the author" > table "APPROVED; v3 gets valid_to" > out "Engines read v4 from 2026-12-01"
+- rules: "BR1: 12 tables: PRODUCT, REGION, EXPOSURE_BAND, ROLE, TEAM, QUEUE, SERVICE_LEVEL ... (no holiday)" ; "BR3: in force = approved version with the latest valid_from <= the date" ; "BR4: the approver is never the author" ; "BR9: no version in force -> the engine does not run"
+- risks: "Approved by the author -> stays VALIDATED (MSG-P7-002)" ; "Row fails the table schema -> refused (MSG-P3-027)" ; "No version in force -> engine stops and alerts (MSG-P3-027)"
+- example: "EXPOSURE_BAND v3 (E1-E4) from 2026-11-30" ; "U-REF-01 loads v4 (E1-E5) from 2026-12-01; U-RSK-01 approves" ; "A read for 2026-11-30 returns v3, whose valid_to is now 2026-11-30"
+
+### RWB-E1-044
+- file_stem: RWB E1 044 Database migrations versioned with parameterized schema names
+- title: Database migrations versioned with parameterized schema names
+- module: P3 Case and workflow | flag: rwb.p3.migration-drift-gate | status: READY "Ready (naming per D-RCV-28)" | theme: default
+- overview_label: Flyway migration rules
+- goal: Every schema change is a forward-only Flyway migration with no literal schema name
+- why: DEV, SIT, UAT and PROD must hold the same recovery schema. Files are V<seq>__<story>_<name>.sql with ${recoverySchema}; the views ship as V0002 / V0003.
+- needs: (none) | unblocks: E1-042, E1-043, TE-005, TE-006, TE-007
+- triggers: BUILD "MigrationLint on every pull request" ; BUILD "SchemaDriftCheck: clean vs target" ; JOB "Flyway migrate step at deployment" ; API "GET /admin/jobs?type=MIGRATION"
+- ace: [] ; ace_note: "No ACE read. It fixes how the 30 views ship: Section A in V0002 (E1-069), Section B in V0003 after RWB-ACE-001. No FK into public."
+- writes: flyway_schema_history_recovery "own history table: version + checksum"
+- reads: information_schema "drift check" ; sys_objects "lint: every table catalogued"
+- stores: "PostgreSQL test container in the pipeline; P1 job monitor record per run"
+- functions: RecoveryFlywayConfig "own Flyway instance, clean refused" ; MigrationRunRecorder "job record per run" ; MigrationLint "literal schema, FK into public" ; SchemaDriftCheck "clean build vs target diff" ; V0001__rwb_e1_001_recovery_schema "the baseline (E1-001)"
+- path: trigger "Developer adds V<seq>__<story>.sql" > check "Lint: no literal schema, no FK to public" > check "Apply to a clean container" > check "Drift check vs target" > table "flyway_schema_history_recovery" > out "Same schema in every environment"
+- rules: "BR2: no literal schema name; use ${recoverySchema} (fixed to recovery)" ; "BR4: PROD is forward-only: clean disabled, no undo files" ; "BR6: its own history table flyway_schema_history_recovery" ; "BR8: no foreign key into public (ADR-010)"
+- risks: "Schema drift found -> pipeline fails (MSG-P3-016)" ; "An applied file was edited -> checksum fails, service does not start (MSG-P3-016)" ; "Literal schema name in a file -> build fails (MSG-P3-016)"
+- example: "V12__add_queue_to_case.sql with header '-- Story: RWB-E1-020'" ; "-> applied once; version 12 + checksum in flyway_schema_history_recovery" ; "Second run applies nothing"
+
+### RWB-E1-045
+- file_stem: RWB E1 045 Multi product parameters for Mortgage HP and SSME
+- title: Multi product parameters for Mortgage, HP and SSME
+- module: P3 Case and workflow | flag: rwb.p3.product-parameters | status: READY "Ready for build" | theme: default
+- overview_label: Per-product parameters
+- goal: Every product value lives in reference data per product, so a product change needs no code
+- why: Mortgage, HP and SSME differ in notice periods, cure periods and entry rules. The timer, case and allocation engines read these values, never constants.
+- needs: E1-042, E1-043 | unblocks: E1-028, E1-026
+- triggers: LOAD "POST /admin/reference-loads (PRODUCT_PARAMETER)" ; LOAD "POST /admin/reference-loads (SERVICE_LEVEL)" ; CALL "ProductParameterService.get(product, key, date)" ; WHO "RW-COE prepares; approver signs"
+- ace: v_ace_holiday A "WORKING_DAYS units skip ACE holidays (DueDateCalculator)"
+- writes: timer "expires_at from the product's value (via timer engine)" ; recovery_case.queue_id "exception queue when a value is missing" ; reference_version, reference_row "via the E1-043 registry"
+- reads: reference_row "PRODUCT, PRODUCT_PARAMETER, SERVICE_LEVEL" ; parameter_catalog "scope, required" ; recovery_case "open cases per product"
+- stores: "Exception queue (SCR-09)"
+- functions: ProductParameterServiceImpl "values in force, unit conversion" ; ProductCompletenessCheck "every product x required key" ; OpenCaseCounter "open cases by product" ; DueDateCalculator "calendar or working days" ; Timer, entry, allocation engines "changed to read the service"
+- path: trigger "Load PRODUCT_PARAMETER v2" > check "Completeness: product x key" > table "reference_row in force" > function "Timer engine: NOTICE_PERIOD_DAYS" > ace "Working days via v_ace_holiday" > out "timer.expires_at + version logged"
+- rules: "BR1: no product value or product name in code" ; "BR2: required ENTRY_DPD, EXCLUSION_LIST, NOTICE_PERIOD_DAYS, CURE_PERIOD_DAYS, EXPOSURE_BAND_SET" ; "BR6: a running timer keeps the value it started with" ; "BR7: WORKING_DAYS skip v_ace_holiday dates"
+- risks: "Product missing a service-level row -> refused (MSG-P3-034)" ; "Product removed while it has open cases -> refused (MSG-P3-027)" ; "No row at run time -> case to exception queue (MSG-P3-034)"
+- example: "PRODUCT_PARAMETER v2: NOTICE_PERIOD_DAYS 30 for MORTGAGE, 60 for HP" ; "On 2026-12-01: RW-2026-000101 (Mortgage) expires 2026-12-31" ; "RW-2026-000102 (HP) expires 2027-01-30"
+
+### RWB-E1-046
+- file_stem: RWB E1 046 Template and merge field catalog as data
+- title: Template and merge field catalog as data
+- module: P6 Communications | flag: rwb.comms.template-catalog | status: READY "Ready for build" | theme: default
+- overview_label: Template + merge field catalog
+- goal: Templates and merge fields as versioned data with Legal approval, so a letter change is no release
+- why: Every merge code must point at a known dictionary field, and only a Legal-approved template version can be used to generate a letter.
+- needs: E1-012 | unblocks: E1-034, E1-052, E2-022, E2-026
+- triggers: LOAD "POST /admin/reference-loads (merge_field)" ; LOAD "POST /admin/reference-loads (template)" ; CALL "TemplateCatalog.current(code, lang, date)" ; WHO "RW-REFADM loads; Legal approves"
+- ace: [] ; ace_note: "No ACE read. merge_field rows name dictionary fields (sys_fields); E1-052 later fills them from the ACE views."
+- writes: merge_field "code -> dictionary field ID + source (MF-2026.11)" ; template "versions: DRAFT, APPROVED, WITHDRAWN"
+- reads: sys_fields "field IDs a merge code may use" ; lov_value "LOV-LANG, LOV-PRODUCT, LOV-NOTICE"
+- stores: "ACE audit log; reference load record"
+- functions: MergeFieldLoadHandler "merge_field load, sys_fields check" ; TemplateLoadHandler "template versions, BR1-BR6" ; MergeCodeScanner "reads {{CODE}} from the DOCX" ; TemplateCatalogService "current, version, mergeFields" ; TemplateRepository "template rows"
+- path: trigger "Load merge_field MF-2026.11" > check "Each code -> a sys_fields ID" > trigger "Load template DEMAND-MTG" > check "Merge codes all in catalog?" > table "template v2 APPROVED" > out "TemplateCatalog.current() for E1-052"
+- rules: "BR1: only an Approved version with a Legal approver is used (CTL-14)" ; "BR2: current = highest Approved version with valid_from <= the date" ; "BR3: withdrawn -> no current version, generation holds" ; "BR4: merge codes must be in the catalog and their field IDs in the dictionary"
+- risks: "All versions Draft -> TemplateNotApprovedException (MSG-P6-005)" ; "Unknown merge code -> refused (MSG-P6-006)" ; "Only Approved version withdrawn -> generation holds (MSG-P6-003)"
+- example: "MF-2026.11: CASE_NO, CUSTOMER_NAME, POSTAL_ADDRESS, TOTAL_OUTSTANDING, NOTICE_DATE" ; "DEMAND-MTG / TH approved by LEG-0001 on 2026-11-10 -> v2, current" ; "v1 stays readable"
+
+### RWB-E1-047
+- file_stem: RWB E1 047 Feature flags for module release with a removal date
+- title: Feature flags for module release with a removal date
+- module: P2 Integration | flag: none (ships on) | status: READY "Ready for build" | theme: default
+- overview_label: Feature flags
+- goal: Features ship off and turn on per environment without a deployment; overdue flags are reported
+- why: Every Epic 1 feature sits behind a flag such as rwb.p1.case-list. Off means the old code path; each flag has an owner and a removal date.
+- needs: E1-001 | unblocks: every flagged story
+- triggers: API "POST /admin/feature-flags" ; API "PATCH /admin/feature-flags/{flagKey} (If-Match)" ; CALL "FeatureFlags.isOn(key) and GET /feature-flags" ; JOB "Weekly flag report, Monday 08:00"
+- ace: [] ; ace_note: "No ACE read. Flags are Workbench configuration; Section B features stay behind their flags until RWB-ACE-001."
+- writes: feature_flag "key, owner, value per environment, removal date" ; feature_flag_change "who changed what, when and why"
+- reads: role "who may change a flag"
+- stores: "ACE audit log; e-mail to owners and the RW-PLATADM group; 30 s flag cache"
+- functions: FeatureFlagController "4 flag endpoints" ; FeatureFlagService "create, change, retire, audit" ; FeatureFlagsImpl "isOn with 30 s cache" ; FlagRemovalReportJob "weekly overdue report" ; useFeatureFlag / FlagGate "React hook + component"
+- path: trigger "RW-PLATADM creates a flag" > check "Key rwb.<module>.<name> + removal date" > table "feature_flag: default off everywhere" > table "feature_flag_change + ACE audit" > function "isOn() at runtime" > out "Feature shows; overdue ones reported"
+- rules: "BR1: off means the previous code path" ; "BR2: every flag has a key, owner, value per environment and removal date" ; "BR4: overdue flags are reported every week" ; "BR5: an unknown key or unreadable store means off"
+- risks: "No removal date -> refused (MSG-GEN-001)" ; "Concurrent change -> 409 (MSG-GEN-004)" ; "Unknown key on change -> 404 (MSG-P2-016)"
+- example: "Flag rwb.casewf.case-list-queue-column: default off, owner 'P3 squad', removal 2027-01-31" ; "UAT has no value set -> isOn returns false" ; "-> the queue column on SCR-02 stays hidden"
+
+### RWB-E1-048
+- file_stem: RWB E1 048 Rule change audit report
+- title: Rule change audit report
+- module: P3 Case and workflow | flag: rwb.p3.change-log | status: RETIRED "Retired (D-RCV-36 T8) -> RWB-E2-041" | theme: default
+- overview_label: Rule change audit report
+- goal: One audit report shows every rule change had request, impact, test, approver, verify and rollback
+- why: Retired by D-RCV-36 T8 (rules move to Drools XLS packages); the new home is RWB-E2-041. Shown so readers see what the story covered.
+- needs: E1-037, E1-011, E1-043 | unblocks: (none)
+- triggers: API "POST /admin/reference-loads/{loadId}/approve" ; API "POST /admin/reference-loads/{loadId}/verify" ; API "GET /admin/change-log (json or csv)" ; WHO "RW-AUDIT reads; RW-RISK approves"
+- ace: [] ; ace_note: "No ACE read. The report covers Workbench rule and reference versions."
+- writes: reference_version "change_request_ref, impact, test_result, rollback_plan, verified_by"
+- reads: reference_version "table, version, status, author, approver" ; reference_row "rows to diff against the prior version"
+- stores: "CSV export of the change log"
+- functions: ChangeChecklistValidator "checklist complete inside approve()" ; ChangeEffectCalculator "rows added / changed / removed" ; ChangeLogService "period report, paging, CSV" ; ChangeLogController "change-log + verify endpoints"
+- path: trigger "CR-2026-0042 raised" > table "Version loaded with checklist" > check "Checklist complete + test PASSED?" > check "Approver is not the author" > table "Verified on or after valid_from" > out "GET /admin/change-log"
+- rules: "BR1: approval needs a CR ref, impact, rollback plan and a PASSED test result" ; "BR2: the approver is not the author" ; "BR4: verify only on or after valid_from" ; "BR6: the report shows the change effect in row counts and rule IDs"
+- risks: "Checklist item missing -> approval refused (MSG-P3-022)" ; "Test result FAILED -> refused (MSG-P3-022)" ; "Verify before valid_from -> refused (MSG-GEN-003)"
+- example: "SERVICE_LEVEL v4 for CR-2026-0042: MORTGAGE IN_PROGRESS 10 -> 8 working days" ; "Loaded by U-REF-01, approved by U-RSK-01 on 2026-12-02, valid from 2026-12-10" ; "Log: test PASSED, 1 row changed, 0 added, 0 removed"
+
+### RWB-E1-049
+- file_stem: RWB E1 049 OCR pipeline on the Workbench document hub
+- title: OCR pipeline on the Workbench document hub
+- module: P5 Document hub | flag: rwb.dochub.ocr | status: READY "Ready for build" | theme: default
+- overview_label: OCR pipeline (Thai + English)
+- goal: OCR every inbound scan into Thai and English text, and ask for same-day rescans
+- why: Documents become searchable and classifiable. Only malware-clean files are read; pages below 0.70 quality go back to the case owner for a rescan.
+- needs: TE-012, E1-024, E1-045 | unblocks: E1-050, E1-053, E1-033
+- triggers: JOB "JOB-12 ocrStep, every 15 min (business hours)" ; EVENT "DocumentStored (EV-16, source UPLOAD)" ; API "POST /admin/jobs/{jobId}/rerun"
+- ace: [] ; ace_note: "No ACE read. OCR works on files in the Workbench document hub."
+- writes: document_intake "ocr_status, ocr_quality, languages, rescan_pages" ; document_text "one row per page of OCR text"
+- reads: document "id, case_id, source" ; recovery_case.owner_user_id "who to ask for a rescan" ; document_hub_parameter "OCR_MIN_QUALITY 0.70, OCR_WORKERS 4"
+- stores: "OCR JSON at ocr/{intakeId}.json in the standard container; OCR service (Autonomous Ops); ACE notification path"
+- functions: DocumentIntakeJob "Spring Batch job behind JOB-12" ; OcrStep "SKIP LOCKED, OCR, quality rule" ; OcrClient / OcrServiceAdapter "calls OCR, maps errors" ; DocumentStoredListener "intake item per upload" ; RescanNotifier "MSG-P5-018 to the owner" ; OcrOutputReader "OCR text (published)"
+- path: trigger "JOB-12 ocrStep" > check "Malware scan CLEAN?" > function "OcrClient: th + en per page" > table "document_text per page" > check "Mean confidence >= 0.70?" > out "DONE, or RESCAN + owner told"
+- rules: "BR1: read every file in Thai and English" ; "BR3: OCR runs only after the malware scan is CLEAN" ; "BR4: below 0.70 -> rescan; the threshold is inclusive" ; "BR6: an item read once is not read again"
+- risks: "Page below the threshold -> RESCAN, owner told (MSG-P5-018)" ; "OCR timeout or error -> stays PENDING; alert after 2 failed runs" ; "3 attempts used or file will not open -> FAILED, UNREADABLE_FILE, review queue"
+- example: "180 synthetic documents (30 x 6 types) all reach DONE or RESCAN with document_text rows" ; "500 pages in 125 items finish in under 60 minutes with 4 workers"
+
+### RWB-E1-050
+- file_stem: RWB E1 050 Document classification
+- title: Document classification
+- module: P5 Document hub | flag: rwb.dochub.classify | status: READY "Ready for build" | theme: ai
+- overview_label: Classify into 6 types
+- goal: Classify each scan into one of six types with a confidence; unsure ones go to people
+- why: Typing documents by hand is slow. A model behind the P10 gateway reads masked text; below 0.80 confidence a person decides.
+- needs: E1-049, E1-025 | unblocks: E1-032, E1-054
+- triggers: JOB "JOB-12 classifyStep, after ocrStep" ; CALL "Classifier via the P10 model gateway (DL33)"
+- ace: [] ; ace_note: "No ACE read. National ID, account and phone numbers are masked in the text before it leaves the hub."
+- writes: document_intake "predicted_type, confidence, type_candidates, classifier_version" ; document "document_type (written on attach by E1-032)"
+- reads: document_intake "ocr_status DONE, no type yet" ; document_text "first 3 pages" ; document_type "the 6 codes in DOCTYPE-2026.11" ; document_hub_parameter "CLASSIFY_THRESHOLD 0.80"
+- stores: "P10 model gateway; ACE PII masking service; evaluation/classification/{runDate}.json"
+- functions: ClassifyStep "select, mask, call, rank, threshold" ; ModelGatewayClassifier "gateway call with 60 s timeout" ; TextMasker "masks ID, account, phone" ; ClassificationReader "results (published)" ; ClassificationEvaluationRunner "accuracy + 6x6 confusion"
+- path: trigger "JOB-12 classifyStep" > table "document_text, first 3 pages" > function "TextMasker hides identifiers" > ai "Classifier via P10 gateway" > check "Top score >= 0.80?" > out "Classified, or LOW_CONFIDENCE review"
+- rules: "BR2: below the threshold -> review queue (threshold inclusive)" ; "BR4: timeout -> fall back to review" ; "BR5: at least 90% accuracy before production" ; "BR6: identifiers are masked before text leaves the hub"
+- risks: "Top score below 0.80 -> LOW_CONFIDENCE (MSG-P5-003)" ; "Classifier over 60 s -> MODEL_UNAVAILABLE (MSG-P5-003)" ; "Type not in the table -> UNKNOWN_TYPE (MSG-P5-003)"
+- example: "Scores: COURT_NOTICE 0.62, DEMAND_LETTER 0.21" ; "-> predicted COURT_NOTICE 0.6200, LOW_CONFIDENCE, both candidates stored" ; "Go-live needs at least 162 of 180 labelled documents correct"
+
+### RWB-E1-052
+- file_stem: RWB E1 052 Notice generation v1
+- title: Notice generation v1
+- module: P6 Communications | flag: rwb.comms.notice-generation | status: PARTIAL "Ready. Proof of delivery waits for RWB-ACE-001" | theme: default
+- overview_label: Notice generation
+- goal: Generate notices from Legal-approved templates, with name, address and balance read live from ACE
+- why: Notices are legal steps with deadlines. Values are merged straight from ACE views (no copy kept), the PDF is write-once, and the decision is logged first.
+- needs: E1-015, E1-018, E1-027, E1-046, E1-069 | unblocks: E1-055, E2-021
+- triggers: CALL "NoticeApi.generate(caseId, type, personKey, lang)" ; WHO "RW-LITOFF / RW-CASEOWN (UI in E2-021)"
+- ace: v_ace_customer A "first_name, last_name (id_no_masked / id_no_last4 only)" ; v_ace_contact A "ADDRESS: contact_value, city, post_code by contact_key" ; v_ace_account A "total_balance, data_as_of" ; v_ace_pod B "later: delivery status for the notice"
+- writes: notice "person_key, template_id, notice_type, state Generated / Held" ; document "write-once PDF via DocumentHubApi" ; task (via P3) "when a required value is empty" ; decision_log_entry "D7.1 (R-LIT-03), written first"
+- reads: recovery_case "case number, product" ; case_party "person_key, party_role" ; template "current Approved version" ; merge_field "code -> view column"
+- stores: "Outbox NoticeGenerated (EV-13); DOCX -> PDF renderer; document hub write-once container"
+- functions: NoticeGenerationService "NoticeApi: the whole flow" ; MergeValueResolver "merge code -> view column" ; AceSourceReader "reads 4 views, SELECT only" ; LetterRenderer "DOCX -> PDF + footer" ; NoticeGeneratedPublisher "EV-13 into the outbox"
+- path: trigger "NoticeApi.generate(...)" > table "Approved template + case party" > ace "Name, address, balance from views" > check "Any required value empty -> Held" > table "Log D7.1 -> PDF -> notice row" > out "EV-13 NoticeGenerated"
+- rules: "BR1: generate only from the current Approved template" ; "BR9: name and address come only from v_ace_customer and v_ace_contact; no copy kept" ; "BR10: the clear identification_number is never merged" ; "BR12: the merge snapshot stores references, never values"
+- risks: "No Approved template version -> refused (MSG-P6-005)" ; "Required value empty (e.g. no ADDRESS row) -> Held + task (MSG-P6-007)" ; "Decision log write fails -> nothing stored (MSG-P7-003)"
+- example: "Case RW-2026-000123, person_key P-0001, address ADDRESS:A-9001, total_balance 1,250,000.00" ; "-> DEMAND-MTG v2 PDF, footer 'RW-2026-000123 DEMAND-MTG v2 2026-11-25'" ; "-> sent_type NPL, D7.1 entry, NoticeGenerated in the outbox"
+
+### RWB-E1-053
+- file_stem: RWB E1 053 Field extraction for the six types into the index
+- title: Field extraction for the six types into the index
+- module: P5 Document hub | flag: rwb.dochub.extract | status: READY "Ready for build" | theme: ai
+- overview_label: Field extraction
+- goal: Extract each document type's key fields with a confidence, so documents are searchable by content
+- why: A court notice's hearing date or a deed's plot number becomes data. Low-confidence or review-only fields always go to a person before they are trusted.
+- needs: E1-049, E1-050, E1-025 | unblocks: E1-032, E1-054, E1-060
+- triggers: JOB "JOB-12 extractStep (classify -> extract -> match)" ; CALL "Model extractor via P10 gateway (TE-013)" ; API "GET /documents/{documentId} (read fields)"
+- ace: [] ; ace_note: "No ACE read. Values come from the document's OCR text."
+- writes: document_intake "extracted_fields, extract_status, attempts" ; document_field "value, confidence, extractor_version, OK / REVIEW" ; document.review_status "set when any field needs review"
+- reads: document "document_type, doc_version" ; document_text "OCR text" ; document_type.field_definitions "fields per type, review_only" ; document_hub_parameter "EXTRACT_FIELD_THRESHOLD 0.80"
+- stores: "Outbox DocumentFieldsExtracted (EV-17); P10 model gateway; evaluation/extraction/{runDate}.json + proposed DOCTYPE load"
+- functions: ExtractStep "SKIP LOCKED select, extract, states" ; FieldExtractionService "BR1-BR8 in one transaction" ; TemplateFieldExtractor "TEMPLATE method" ; ModelFieldExtractor "MODEL method via gateway" ; ValueNormalizer "Thai / BE dates, digits, amounts" ; ExtractionEvaluationRunner "precision / recall per field"
+- path: trigger "JOB-12 extractStep" > table "Typed document + OCR text" > ai "Template or model extractor" > function "ValueNormalizer: BE year - 543" > check "Confidence >= 0.80 and not review_only?" > out "document_field OK / REVIEW + EV-17"
+- rules: "BR2: confidence >= 0.80 -> OK, otherwise REVIEW" ; "BR3: review_only fields are always REVIEW" ; "BR4: a field below 0.90 precision / recall is proposed as review-only" ; "BR6: dates are stored ISO; Buddhist-era year minus 543"
+- risks: "Confidence below threshold -> REVIEW (MSG-P5-003)" ; "Value cannot be converted -> confidence 0.0000, REVIEW (MSG-P5-003)" ; "Extractor times out on every attempt -> FAILED, EXTRACTION_FAILED (MSG-P5-003)"
+- example: "IN-0001 COURT_NOTICE 0.94: court_name 'Civil Court' 0.96, black_case_no 'Por 1234/2569'" ; "hearing_date '15 December 2569' -> 2026-12-15 at 0.88, extractor EXT-TPL-1.0" ; "Evaluation: TITLE_DEED area_sq_wa precision 0.84 -> proposed review-only"
+
+### RWB-E1-054
+- file_stem: RWB E1 054 Review queue for low confidence documents
+- title: Review queue for low-confidence documents
+- module: P5 Document hub | flag: rwb.dochub.review | status: READY "Ready for build" | theme: default
+- overview_label: Document review queue
+- goal: One screen to fix the type, case and fields of uncertain documents; each fix becomes training data
+- why: Automation stays safe: what the machine is unsure of, a person confirms. Corrected values are kept beside the extracted ones for the next evaluation.
+- needs: E1-049, E1-035, E1-050, E1-053, E1-032 | unblocks: E1-060, E1-055
+- triggers: WHO "Litigation officer on SCR-31" ; API "GET /review-items (oldest first)" ; API "POST /intake-items/{intakeItemId}/resolve" ; API "PATCH /documents/{documentId}/fields/{fieldId}"
+- ace: [] ; ace_note: "No ACE read. The queue works on intake items, documents and Workbench cases."
+- writes: document_intake "review_outcome ATTACHED / DISCARDED, resolved_by" ; document "review_status CONFIRMED or CORRECTED" ; document_field "corrected field_value, confirmed_by" ; decision_log_entry "DOCATT via DocumentStore"
+- reads: recovery_case "case_no, status via CaseDirectory" ; document_intake "review_reason, candidates, extracted_fields" ; document_text "OCR text beside the image" ; document_field "extracted_value"
+- stores: "Intake and write-once blob containers; outbox DocumentFieldsExtracted (EV-17)"
+- functions: ReviewQueueController "queue, item, resolve, review" ; ReviewQueueService "queue with the scope rule" ; ReviewResolutionService "SET_TYPE / ATTACH / DISCARD" ; LabeledSetReader "fixes as labelled examples" ; ReviewQueuePage / ReviewItemPanel "React SCR-31"
+- path: trigger "Officer opens SCR-31" > table "Review items, oldest first" > check "Keep or change type, pick case" > check "No field left in REVIEW?" > function "DocumentStore.store + DOCATT" > out "CONFIRMED / CORRECTED -> training"
+- rules: "BR3: attach only if no field is in REVIEW, the type is in force and the case is open" ; "BR4: CONFIRMED when unchanged, CORRECTED when any value changed" ; "BR5: the extracted value is kept beside the corrected one" ; "BR9: a discarded item keeps its file and reason"
+- risks: "Type not in force -> 422 (MSG-P5-006)" ; "Case closed -> 422 (MSG-P5-005)" ; "Stale version -> 409 (MSG-GEN-004)"
+- example: "IN-0101 (COURT_NOTICE 0.62 / DEMAND_LETTER 0.21) attached to RW-2026-000201" ; "hearing_date corrected 2026-12-15 -> 2026-12-16" ; "-> state CORRECTED, review_outcome ATTACHED, one DOCATT entry"
+
+### RWB-E1-055
+- file_stem: RWB E1 055 Proof of delivery capture design with WIN
+- title: Proof of delivery capture design with WIN
+- module: P6 Communications | flag: rwb.comms.win-dispatch-v1 | status: PARTIAL "Ready. POD steps wait for RWB-ACE-001" | theme: default
+- overview_label: WIN dispatch + delivery
+- goal: Send notices to WIN for registered mail and record sent and delivered dates, so timers start at delivery
+- why: A legal notice period runs from delivery, not from printing. WIN's proof of delivery is ingested by ACE and read back through v_ace_pod.
+- needs: E1-052, E1-054, E1-028, E1-066 | unblocks: E2-021
+- triggers: JOB "JOB-10 WIN outbound notices, daily 16:00" ; JOB "POD read daily 06:00 after WIN is COMPLETE" ; JOB "BarcodeReconciliation daily (REC-05)"
+- ace: v_ace_account A "contract_no for the WIN record" ; v_ace_contact A "contact_value: postal address" ; v_ace_pod B "sent_date, barcode, callback_date, delivery_status" ; v_ace_batch_status B "WIN source COMPLETE before reading POD"
+- writes: notice "Sent / Delivered, sent_date, barcode, callback_date" ; interaction "LETTER and delivery ledger entries"
+- reads: notice "Generated notices to dispatch" ; case_account.is_primary "contract on the notice" ; template.template_version "printed on the record"
+- stores: "INT-14 outbound file over SFTP to WIN; INT-15 ingested by ACE (not by the Workbench); outbox; Quartz"
+- functions: WinNoticeFileJob "JOB-10: build + send INT-14" ; WinNoticeFileWriter "records + trailer" ; WinAcknowledgmentHandler "Sent, sent date, barcode" ; ProofOfDeliveryReader "reads v_ace_pod per date" ; DeliveryMatcher "barcode, then notice_ref" ; BarcodeReconciliation "REC-05: no barcode after 3 days"
+- path: trigger "JOB-10 at 16:00" > ace "Address from v_ace_contact" > store "INT-14 file over SFTP to WIN" > table "notice Sent + barcode + ledger" > ace "06:00 read v_ace_pod" > out "Delivered -> NOTICE_PERIOD timer"
+- rules: "BR1: only dispatch-eligible notices (GENERATED in E1) are sent" ; "BR2: the notice period starts from the delivery date" ; "BR4: read v_ace_pod only when the WIN batch is COMPLETE" ; "BR5: no barcode after 3 days -> REC-05 break"
+- risks: "No WIN acknowledgement -> resend; task after the 3rd failure (MSG-GEN-006)" ; "WIN batch not COMPLETE or late -> stale (MSG-P1-001)" ; "Unknown barcode or notice_ref -> row held on the exception list"
+- example: "Notice N-0001 (contract CT-77001), JOB-10 run 2026-11-25" ; "WIN acknowledgement 26112026, barcode RR123456789TH, NPL -> Sent" ; "v_ace_pod callback_date 2026-11-28 -> Delivered, NoticeDelivered (EV-15)"
+
+### RWB-E1-056
+- file_stem: RWB E1 056 Run books and monitoring for every Epic 1 job
+- title: Run books and monitoring for every Epic 1 Workbench job
+- module: P2 Integration | flag: rwb.integration.job-monitoring | status: PARTIAL "Ready. Reads a Section B view (ACE-001)" | theme: default
+- overview_label: Job run books + monitoring
+- goal: Every job has an owner, a run book and monitoring, so ops can restart it and see a late ACE batch
+- why: At 06:00, ops must know whether to rerun JOB-02 or wait for ACE. The monitor shows each job's last run beside the ACE business date.
+- needs: E1-007, E1-015, E1-069 | unblocks: E1-014, E1-020, E1-027, TE-007
+- triggers: BUILD "RunbookCompletenessTest in the pipeline" ; EVENT "rwb.job.run at each job start and end" ; API "POST /admin/jobs/{jobId}/rerun" ; WHO "RW-PLATADM operates; owners per job"
+- ace: v_ace_batch_status B "source_system, business_date, completed_at, status"
+- writes: job_catalog "16 rows: one per job, owner, run book link"
+- reads: data_product_load "status, stale_flagged_at" ; case_list_row.business_date "last published list" ; reconciliation_result "last REC results" ; role "job owners"
+- stores: "Quartz + P1 job run log (TE-007); Log Analytics workbook 'Recovery jobs' + alert rules; run books docs/operations/runbooks/<jobId>.md"
+- functions: JobCatalogController "GET /admin/scheduled-jobs" ; JobOperationsImpl "catalog, last run, rerun" ; JobRunEventListener "writes rwb.job.run" ; AceBatchStatusReader "reads v_ace_batch_status only" ; RunbookCompletenessTest "8 headings, forbidden names" ; RecoveryJobsWorkbook "workbook + alert rules"
+- path: trigger "Job starts or ends" > store "rwb.job.run -> Log Analytics" > ace "ACE batch date: v_ace_batch_status" > check "Failed, or ACE late?" > function "Run book: rerun from failed step" > out "Alert MSG-P2-004 / job WAITING"
+- rules: "BR1: no inbound load job is catalogued" ; "BR2: each run book has 8 sections" ; "BR5: rerun of a completed job and business date is refused" ; "BR6: a run book naming a public table fails the build"
+- risks: "Missing run book or section -> pipeline fails (MSG-P2-005)" ; "Rerun while running -> refused (MSG-P2-006)" ; "Late ACE batch -> STALE, EV-27, job WAITING (MSG-P1-001)"
+- example: "JOB-02 fails at 05:40 on 2026-11-30 (v_ace_account returned no row at 90 DPD)" ; "Admin checks v_ace_batch_status: ALS COMPLETED" ; "Rerun at 06:05 -> JOB-02 completes at 06:20"
+
+### RWB-E1-057
+- file_stem: RWB E1 057 Intake from branches mailroom partner SFTP and email
+- title: Intake from branches, mailroom, partner SFTP and email
+- module: P5 Document hub | flag: rwb.dochub.intake (+ .branch .mailroom .sftp .email) | status: READY "Ready for build" | theme: default
+- overview_label: Document intake channels
+- goal: Pull branch, mailroom, partner SFTP and mailbox documents into one intake that records the source
+- why: Paper and e-mail arrive through four channels. One intake step de-duplicates, checks type and size, and hands files to scan, OCR and classification.
+- needs: E1-049, TE-012, E1-041 | unblocks: (none)
+- triggers: JOB "JOB-12 intakeStep, every 15 min, Mon-Fri 08-17" ; CALL "Branch + mailroom folders, partner SFTP" ; CALL "Mailbox via Microsoft Graph (assumed)" ; API "POST /admin/jobs/{jobId}/rerun"
+- ace: [] ; ace_note: "No ACE read. Intake handles files; case matching happens later (E1-032)."
+- writes: document_intake "source SCAN / PARTNER / EMAIL, channel, hash, size"
+- reads: partner "panel_status ACTIVE via PartnerDirectory" ; document_hub_parameter "PDF / JPG / PNG, 25 MB" ; holiday table "skip non-working days"
+- stores: "Branch and mailroom folders; SFTP inbound subfolders per partner_code; Exchange Online mailbox; blob container rwb-intake"
+- functions: IntakeStep "first step of DocumentIntakeJob" ; FolderChannelReader "branch + mailroom folders" ; SftpChannelReader "partner SFTP, ACTIVE check" ; MailboxChannelReader "mailbox attachments" ; IntakeService "hash, duplicate, type, size, copy" ; IntakeAlertService "MSG-P5-008 on channel failure"
+- path: trigger "JOB-12 every 15 min" > store "4 channels: branch, mail, SFTP, email" > check "Duplicate (30 days), type, size" > store "Copy to rwb-intake" > table "document_intake row" > out "scan -> OCR -> classify -> match"
+- rules: "BR1: source is SCAN, PARTNER or EMAIL" ; "BR3: the malware scan runs before OCR" ; "BR4: a partner must be ACTIVE" ; "BR6: the source file is moved only after the commit"
+- risks: "File type not allowed -> rejected (MSG-P5-001, MSG-P5-007)" ; "Over 25 MB -> rejected (MSG-P5-017)" ; "Two failed runs on a channel -> alert (MSG-P5-008)"
+- example: "scan-0001.pdf (1.2 MB) from branch BR-0123, scanned 2026-11-30 09:12, picked up 09:15" ; "-> document_intake row: source SCAN, channel_code BR-0123, scan_result empty" ; "File LF-007 from partner SFTP -> source PARTNER"

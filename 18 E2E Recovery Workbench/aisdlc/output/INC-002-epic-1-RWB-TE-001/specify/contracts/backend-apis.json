@@ -1,0 +1,459 @@
+{
+  "runId": "INC-002-epic-1-RWB-TE-001",
+  "story": "RWB-TE-001",
+  "epic": "EPIC-001",
+  "revision": "v4 (2026-11-18, spec gate round 2: findings 029-032; v3 kept as backend-apis.run2.json)",
+  "apiInScope": false,
+  "apiImpactType": "NO_API_CHANGE",
+  "endpoints": [],
+  "relocatedEndpoints": [
+    {
+      "class": "TemporalAdminController",
+      "from": "recovery.workflow.internal",
+      "to": "recovery.casewf.admin",
+      "paths": "/api/recovery/v1/admin/** unchanged",
+      "contractChange": "none",
+      "specRef": "SPEC-RWB-TE-001-022"
+    },
+    {
+      "class": "PlatformInfoController",
+      "from": "recovery.platform.internal",
+      "to": "recovery.integration.internal",
+      "paths": "/api/recovery/v1/platform/info unchanged",
+      "contractChange": "none",
+      "specRef": "SPEC-RWB-TE-001-022"
+    }
+  ],
+  "movedOut": [
+    {
+      "item": "RecoveryAccessGuard wiring for /api/recovery/v1/**; 403 MSG-P4-002; TC-TE-001-08",
+      "to": "RWB-E1-022 (story v7 X1, AC2)",
+      "decision": "D-RCV-52",
+      "specRef": "SPEC-RWB-TE-001-016"
+    },
+    {
+      "item": "BND-6 and the sourceViews map key",
+      "to": "RWB-E1-069",
+      "decision": "D-RCV-35 section 8.2",
+      "specRef": "SPEC-RWB-TE-001-021 (withdrawn)"
+    }
+  ],
+  "backendOnlyContracts": [
+    {
+      "id": "CON-RWB-TE-001-001",
+      "kind": "module-map",
+      "frontendConsumer": "NONE (backend-only, test scope)",
+      "file": "backend/src/test/resources/architecture/recovery-modules.yaml",
+      "packagedInJar": false,
+      "decision": "D-RCV-37",
+      "readBy": "ModuleMapLoader (test scope)",
+      "specRefs": [
+        "SPEC-RWB-TE-001-002",
+        "SPEC-RWB-TE-001-003",
+        "SPEC-RWB-TE-001-004",
+        "SPEC-RWB-TE-001-025"
+      ],
+      "schema": {
+        "rootPackage": {
+          "type": "string",
+          "required": true
+        },
+        "modules": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "code": {
+              "type": "string",
+              "required": true,
+              "unique": true,
+              "pattern": "^(P([1-9]|10)|S[1-9])$"
+            },
+            "name": {
+              "type": "string",
+              "required": true,
+              "unique": true,
+              "pattern": "^[a-z][a-z0-9]*$",
+              "package": "<rootPackage>.<name>"
+            },
+            "published": {
+              "type": "array<string>",
+              "required": true,
+              "minItems": 1,
+              "itemPattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$",
+              "forbidden": "internal or a sub-package of internal",
+              "declaration": "each entry has package-info with @NamedInterface(name = <entry>, propagate = false); sub-packages are not published unless listed (SPEC-004 (d), ASM-09)",
+              "laterEntries": "added by the owning story with its @NamedInterface in the same merge request, e.g. casewf config.api (RWB-E1-042, D-RUN-10), casewf refdata.api (RWB-E1-043, D-RUN-11), integration generated.web / generated.model (RWB-TE-003)"
+            },
+            "clientPackages": {
+              "type": "array<string>",
+              "required": true,
+              "minItems": 0,
+              "itemPattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)*$",
+              "mustExist": false
+            }
+          }
+        },
+        "external": {
+          "type": "array",
+          "required": true,
+          "items": {
+            "name": {
+              "type": "string",
+              "enum": [
+                "common",
+                "collection"
+              ]
+            },
+            "rootPackage": {
+              "type": "string",
+              "required": true
+            },
+            "published": {
+              "type": "array<string>",
+              "required": true,
+              "minItems": 1
+            }
+          }
+        },
+        "clientLibraries": {
+          "type": "array<string>",
+          "required": true,
+          "minItems": 1,
+          "unique": true,
+          "meaning": "package or class names; dependency n matches entry e when n == e or n starts with e + '.' or e + '$' (SPEC-009)"
+        },
+        "sourceViews": {
+          "required": false,
+          "owner": "RWB-E1-069",
+          "handling": "accepted without validation and carried unchanged (SPEC-003)"
+        },
+        "unknownFields": "rejected (except sourceViews)"
+      },
+      "initialContent": {
+        "rootPackage": "th.co.scb.ace.demo.recovery",
+        "modules": [
+          {
+            "code": "P1",
+            "name": "dataengine",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "P2",
+            "name": "integration",
+            "published": [
+              "api",
+              "flags.api"
+            ],
+            "clientPackages": [
+              "adapter"
+            ]
+          },
+          {
+            "code": "P3",
+            "name": "casewf",
+            "published": [
+              "api",
+              "rules",
+              "timers",
+              "workflow"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "P4",
+            "name": "access",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "P5",
+            "name": "dochub",
+            "published": [
+              "api"
+            ],
+            "clientPackages": [
+              "storage"
+            ]
+          },
+          {
+            "code": "P6",
+            "name": "comms",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "P7",
+            "name": "decision",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "P8",
+            "name": "payments",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "P9",
+            "name": "reporting",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "P10",
+            "name": "agent",
+            "published": [
+              "api"
+            ],
+            "clientPackages": [
+              "client"
+            ]
+          },
+          {
+            "code": "S1",
+            "name": "valuation",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S2",
+            "name": "treatment",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S3",
+            "name": "guarantee",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S4",
+            "name": "litigation",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S5",
+            "name": "asset",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S6",
+            "name": "debtsale",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S7",
+            "name": "writeoff",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S8",
+            "name": "deviation",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          },
+          {
+            "code": "S9",
+            "name": "partner",
+            "published": [
+              "api"
+            ],
+            "clientPackages": []
+          }
+        ],
+        "external": [
+          {
+            "name": "common",
+            "rootPackage": "th.co.scb.ace.demo.common",
+            "published": [
+              "api"
+            ]
+          },
+          {
+            "name": "collection",
+            "rootPackage": "th.co.scb.ace.demo.collection",
+            "published": [
+              "api"
+            ]
+          }
+        ],
+        "clientLibraries": [
+          "java.net.http",
+          "java.net.HttpURLConnection",
+          "java.net.Socket",
+          "java.net.URL",
+          "org.springframework.web.client",
+          "org.springframework.web.reactive.function.client",
+          "org.apache.hc",
+          "org.apache.http",
+          "okhttp3",
+          "com.jcraft.jsch",
+          "org.apache.sshd",
+          "net.schmizz.sshj",
+          "org.apache.commons.net",
+          "com.azure.storage",
+          "org.springframework.kafka",
+          "org.apache.kafka"
+        ]
+      },
+      "personalData": "none",
+      "publishedTypesInitial": {
+        "casewf.rules": [
+          "RuleEngine (+ RuleCompilationException)",
+          "RuleInput",
+          "RuleOutcome",
+          "RuleResult",
+          "CompiledRulePackage"
+        ],
+        "casewf.timers": [
+          "TimerScheduler (+ TimerDue)"
+        ],
+        "casewf.workflow": [
+          "WorkflowIds"
+        ],
+        "integration.flags.api": [
+          "RecoveryFlags"
+        ],
+        "access.api": [
+          "ApiError",
+          "ApiProblemException"
+        ],
+        "dochub.api": [
+          "DocumentStore (+ nested records and exception)"
+        ],
+        "note": "no Temporal, Quartz or Drools implementation type is public in a published package; Temporal and Quartz implementation in non-published casewf.workflow.internal and casewf.timers.internal (SPEC-022 (c), SPEC-025, finding 030)"
+      }
+    },
+    {
+      "id": "CON-RWB-TE-001-002",
+      "kind": "boundary-rule-set",
+      "test": "th.co.scb.ace.demo.recovery.architecture.RecoveryBoundaryTest (existing, extended) and th.co.scb.ace.demo.ModulithTest (existing, unchanged)",
+      "classImport": "main classes only (ArchUnit DO_NOT_INCLUDE_TESTS)",
+      "specRefs": [
+        "SPEC-RWB-TE-001-004",
+        "SPEC-RWB-TE-001-005",
+        "SPEC-RWB-TE-001-006",
+        "SPEC-RWB-TE-001-007",
+        "SPEC-RWB-TE-001-008",
+        "SPEC-RWB-TE-001-009",
+        "SPEC-RWB-TE-001-010",
+        "SPEC-RWB-TE-001-026",
+        "SPEC-RWB-TE-001-012"
+      ],
+      "rules": [
+        {
+          "code": "MAP",
+          "engine": "ArchUnit",
+          "checks": [
+            "every package directly under rootPackage holding a class is a map module",
+            "every map module package exists",
+            "root package holds only package-info",
+            "@NamedInterface packages equal the map's existing published packages",
+            "every @NamedInterface under rootPackage declares propagate = false",
+            "no public type directly in a module base package",
+            "no type-level @NamedInterface under rootPackage"
+          ],
+          "failureText": "package {package} is not in the module map (and SPEC-004 texts)"
+        },
+        {
+          "code": "BND-1",
+          "engine": "ArchUnit",
+          "allowEmptyShould": true,
+          "forbidden": "classes under external.collection.rootPackage outside its published packages"
+        },
+        {
+          "code": "BND-2",
+          "engine": "ArchUnit",
+          "allowEmptyShould": true,
+          "forbidden": "classes under external.common.rootPackage outside its published packages"
+        },
+        {
+          "code": "BND-3",
+          "engine": "Spring Modulith 2.1.1 verify() via existing ModulithTest",
+          "decision": "D-RCV-11, D-RCV-42",
+          "failureText": "Spring Modulith's own text (accepted deviation from story section 14 and AC3)"
+        },
+        {
+          "code": "BND-4",
+          "engine": "ArchUnit",
+          "entity": "@jakarta.persistence.Entity",
+          "repository": "subtype of org.springframework.data.repository.Repository",
+          "allowed": "same recovery module only",
+          "decision": "D-RCV-38"
+        },
+        {
+          "code": "BND-5",
+          "engine": "ArchUnit",
+          "allowedIn": "own module's clientPackages and sub-packages",
+          "decision": "D-RCV-41",
+          "replaces": "blobClientOnlyInDocumentsModule (literal baseline rule)"
+        }
+      ],
+      "keptUnchanged": [
+        "noRecoveryClassNamesAPublicTable (BND-6 regex, owned by RWB-E1-069)"
+      ],
+      "keptRetargeted": [
+        {
+          "rule": "workflowImplementationsAreDeterministic (BS-6.1)",
+          "from": "th.co.scb.ace.demo.recovery.workflow..",
+          "to": "th.co.scb.ace.demo.recovery.casewf.workflow..",
+          "note": "the .. form includes casewf.workflow.internal (PlatformSmokeWorkflow.Impl)"
+        }
+      ],
+      "failureTextTemplate": "Rule {code} broken: {class} depends on {dependency}. Use {module}.api or an application event.",
+      "personalData": "none; class and package names only",
+      "mergeGate": {
+        "local": "./scripts/dev.ps1 test exits non-zero on a boundary violation; the orchestrator merges into develop-recovery only on exit 0 (SPEC-012 (b)); proved by T-TE001-13",
+        "host": "GitLab merge blocking on a failed pipeline is human-verification item HV-01; not tested (no GitLab MCP)"
+      }
+    }
+  ],
+  "coverage": {
+    "specRef": "SPEC-RWB-TE-001-020",
+    "decision": "D-RCV-28 (3), D-RCV-40",
+    "tasks": [
+      "recoveryCoverageReport",
+      "recoveryCoverageVerification"
+    ],
+    "classDirectories": "all main classes under th/co/scb/ace/demo/recovery/** plus the test-scope boundary tooling package; test classes, RecoveryBoundaryTest and fixtures excluded; no main class excluded",
+    "executionData": "test task only",
+    "rules": "80% LINE, INSTRUCTION, BRANCH, METHOD (bundle)",
+    "baseline": "LINE 133/415, BRANCH 25/92, INSTRUCTION 686/2174, METHOD 41/135",
+    "expected": "FAIL at baseline; PASS after SPEC-RWB-TE-001-024",
+    "ciWiring": "not changed (D-RCV-05); audit A-09 owned by RWB-TE-003 / RWB-TE-011"
+  }
+}

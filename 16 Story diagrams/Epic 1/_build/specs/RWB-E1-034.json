@@ -1,0 +1,117 @@
+{
+  "key": "RWB-E1-034",
+  "file_stem": "RWB E1 034 Letter template management",
+  "title": "Letter template management",
+  "module": "P6 Communications",
+  "flag": "rwb.comms.template-admin",
+  "status": "READY",
+  "status_text": "Ready for build (Should)",
+  "theme": "default",
+  "overview_label": "Letter template approval",
+  "goal": "Officers upload template versions; Legal approves or withdraws them on screen, with no developer",
+  "why": "Letter wording is a legal control (CTL-14). Only a Legal-approved version can be current, and the uploader can never approve their own template.",
+  "needs": [
+    "E1-046",
+    "E1-015"
+  ],
+  "unblocks": [
+    "E1-052"
+  ],
+  "triggers": [
+    [
+      "WHO",
+      "RW-LITOFF uploads on SCR-33"
+    ],
+    [
+      "API",
+      "POST /templates (DOCX + metadata)"
+    ],
+    [
+      "API",
+      "POST /templates/{id}/approve or /withdraw"
+    ],
+    [
+      "WHO",
+      "RW-LEGAL approves with a valid-from date"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Templates hold merge codes; the ACE values are filled in later by notice generation (E1-052).",
+  "writes": [
+    {
+      "t": "template",
+      "note": "next version: Draft -> Approved -> Withdrawn"
+    }
+  ],
+  "reads": [
+    {
+      "t": "merge_field",
+      "note": "every merge code must be in the catalog"
+    }
+  ],
+  "stores": "Write-once template body storage (body_ref); ACE audit log",
+  "functions": [
+    {
+      "name": "TemplateController",
+      "does": "5 template endpoints"
+    },
+    {
+      "name": "TemplateAdminService",
+      "does": "upload, approve, withdraw, audit"
+    },
+    {
+      "name": "TemplateBodyStore",
+      "does": "write-once DOCX body"
+    },
+    {
+      "name": "MergeCodeScanner",
+      "does": "reads {{CODE}} (from E1-046)"
+    },
+    {
+      "name": "TemplateApprovalScreen",
+      "does": "React SCR-33"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Upload demand-mtg-th-v3.docx"
+    },
+    {
+      "kind": "check",
+      "text": "DOCX, size, merge codes in catalog"
+    },
+    {
+      "kind": "store",
+      "text": "Write-once body, version v3 Draft"
+    },
+    {
+      "kind": "check",
+      "text": "RW-LEGAL approves (not uploader)"
+    },
+    {
+      "kind": "table",
+      "text": "template Approved from valid_from"
+    },
+    {
+      "kind": "out",
+      "text": "TemplateCatalog returns v3 as current"
+    }
+  ],
+  "rules": [
+    "BR1: only Approved, with approver and time, can be current (CTL-14)",
+    "BR2: the uploader cannot approve (CTL-05)",
+    "BR4: every merge code must be in the catalog",
+    "BR6: a withdrawn template holds generation; there is no fallback"
+  ],
+  "risks": [
+    "Uploader tries to approve -> refused (MSG-P7-002)",
+    "Unknown merge code -> refused (MSG-P6-006)",
+    "File not DOCX -> refused (MSG-P6-010)"
+  ],
+  "example": [
+    "LIT-0101 uploads demand-mtg-th-v3.docx for DEMAND-MTG / TH with CASE_NO, TOTAL_OUTSTANDING",
+    "-> v3 Draft",
+    "LEG-0001 approves with valid from 2026-11-20 -> v3 becomes current"
+  ]
+}

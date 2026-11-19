@@ -1,0 +1,174 @@
+{
+  "key": "RWB-E1-011",
+  "file_stem": "RWB E1 011 Reconciliation and data quality report",
+  "title": "Reconciliation and data quality report",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.p1.reconciliation",
+  "status": "PARTIAL",
+  "status_text": "Ready. Gate reads a Section B view (ACE-001)",
+  "theme": "default",
+  "overview_label": "Reconciliation REC-01..05",
+  "goal": "Check the case list and every business key against ACE daily (REC-01..05) and hold the publish on a break",
+  "why": "Teams must trust the case list. A count or balance gap against v_ace_account, or an orphan key, holds Power BI until it is explained.",
+  "needs": [
+    "E1-002",
+    "E1-015",
+    "E1-069"
+  ],
+  "unblocks": [
+    "E1-048"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-04 reconciliation step, before publish"
+    ],
+    [
+      "GATE",
+      "ACE batch COMPLETE (v_ace_batch_status)"
+    ],
+    [
+      "WHO",
+      "RW-TEAMMGR owns; RW-DATASTEW investigates"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "REC-01/02: count and balance per product group"
+    },
+    {
+      "view": "v_ace_plan",
+      "section": "A",
+      "note": "REC-03: approved restructures not booked after 2 days"
+    },
+    {
+      "view": "v_ace_payment",
+      "section": "A",
+      "note": "REC-04: payments unmatched to proceeds after 1 day"
+    },
+    {
+      "view": "v_ace_customer",
+      "section": "A",
+      "note": "REC-05: every person_key must resolve"
+    },
+    {
+      "view": "v_ace_asset",
+      "section": "A",
+      "note": "REC-05: every asset_key must resolve"
+    },
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "REC-05: every contact_key must resolve"
+    },
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "ALS business date + COMPLETE gate"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "reconciliation_result",
+      "note": "one row per check per product: PASS or BREAK"
+    },
+    {
+      "t": "case_list_row.publish_status",
+      "note": "HELD or RELEASED"
+    }
+  ],
+  "reads": [
+    {
+      "t": "case_list_row",
+      "note": "today's list rows"
+    },
+    {
+      "t": "case_entry_exclusion",
+      "note": "excluded accounts"
+    },
+    {
+      "t": "proceeds",
+      "note": "matched payments"
+    },
+    {
+      "t": "treatment",
+      "note": "approved restructures"
+    },
+    {
+      "t": "notice, listing, document ...",
+      "note": "REC-05 keys"
+    }
+  ],
+  "stores": "Data lake via INT-19: reconciliation/<date>.csv and data-quality/<date>.csv; Power BI 'Reconciliation and data quality'. No dq_rule or dq_exception table.",
+  "functions": [
+    {
+      "name": "ReconciliationStepConfig",
+      "does": "runs REC-01..05 per product"
+    },
+    {
+      "name": "ReconciliationService",
+      "does": "counts, sums, variance vs tolerance"
+    },
+    {
+      "name": "ReferentialCheck",
+      "does": "REC-05 orphan business keys"
+    },
+    {
+      "name": "CaseListPublishGate",
+      "does": "sets HELD or RELEASED"
+    },
+    {
+      "name": "ReconciliationExtractWriter",
+      "does": "two lake extracts"
+    },
+    {
+      "name": "LoadAlertNotifier",
+      "does": "sends MSG-P1-012"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-04 after the case list step"
+    },
+    {
+      "kind": "ace",
+      "text": "Count + sum v_ace_account"
+    },
+    {
+      "kind": "check",
+      "text": "Compare with case_list_row"
+    },
+    {
+      "kind": "table",
+      "text": "reconciliation_result"
+    },
+    {
+      "kind": "check",
+      "text": "Any BREAK -> HELD"
+    },
+    {
+      "kind": "out",
+      "text": "Lake extract -> Power BI 07:30"
+    }
+  ],
+  "rules": [
+    "BR5: every account_key, person_key, asset_key, payment_code and contact_key must resolve",
+    "BR7: a REC-01 or REC-02 break holds the case-list publish",
+    "BR9: nothing runs until the gate is COMPLETE",
+    "BR13: an orphan never changes a Workbench row; it is only reported"
+  ],
+  "risks": [
+    "Variance above tolerance -> BREAK, publish HELD, alert (MSG-P1-012)",
+    "Batch not COMPLETED -> checks not run (MSG-P1-001)",
+    "A view errors -> run FAILED (MSG-GEN-006)"
+  ],
+  "example": [
+    "SSME: v_ace_account 2,903 vs case_list_row 2,891",
+    "-> REC-01 BREAK, variance 12 (0.41%), publish HELD",
+    "Passing day: MORTGAGE 12,256 | HP 12,960 | SSME 2,903 -> 15 PASS rows -> RELEASED"
+  ]
+}

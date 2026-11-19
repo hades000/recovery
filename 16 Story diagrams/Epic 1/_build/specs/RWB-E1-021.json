@@ -1,0 +1,138 @@
+{
+  "key": "RWB-E1-021",
+  "file_stem": "RWB E1 021 Transfer rules and engine v1",
+  "title": "Transfer rules and engine v1",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.transfer",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Transfer engine + legal hold",
+  "goal": "Move cases between queues and teams by rule on eight triggers, or by hand with a reason",
+  "why": "A case must follow its route (e.g. restructure to litigation) without e-mail. Legal hold freezes automated moves; every move is logged with its rule.",
+  "needs": [
+    "E1-028",
+    "E1-020",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E1-035"
+  ],
+  "triggers": [
+    [
+      "EVENT",
+      "EV-05, 06, 07, 09, 12, 16, 18 (8 triggers)"
+    ],
+    [
+      "API",
+      "POST /cases/{caseId}/transfer"
+    ],
+    [
+      "API",
+      "POST /cases/{caseId}/legal-hold"
+    ],
+    [
+      "WHO",
+      "RW-TEAMMGR, RW-LITOFF (manual)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Transfers act on Workbench case state and TRANSFER rule rows only.",
+  "writes": [
+    {
+      "t": "recovery_case",
+      "note": "queue_id, team_code, owner, legal_hold, status_before_hold"
+    },
+    {
+      "t": "assignment",
+      "note": "old one ended, new TRANSFER row + reason code"
+    },
+    {
+      "t": "processed_event",
+      "note": "event ID dedup"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "CASE_TRANSFERRED, written last"
+    }
+  ],
+  "reads": [
+    {
+      "t": "queue",
+      "note": "target queue, method, cap"
+    },
+    {
+      "t": "rule_row",
+      "note": "TRANSFER rows (TRF-2026.11)"
+    },
+    {
+      "t": "lov_value",
+      "note": "LOV-TRANSFER-REASON R01-R06"
+    }
+  ],
+  "stores": "Outbox: CaseTransferred (EV-04), CaseStateChanged (EV-05) for hold and release",
+  "functions": [
+    {
+      "name": "TransferListener",
+      "does": "8 trigger events, dedup by ID"
+    },
+    {
+      "name": "TransferRuleEvaluator",
+      "does": "first matching TRANSFER row"
+    },
+    {
+      "name": "TransferService",
+      "does": "lock, hold check, owner, swap"
+    },
+    {
+      "name": "LegalHoldService",
+      "does": "place or lift a legal hold"
+    },
+    {
+      "name": "AssignmentEngine (E1-020)",
+      "does": "picks the new owner"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Trigger event in the outbox"
+    },
+    {
+      "kind": "check",
+      "text": "Seen before? (processed_event)"
+    },
+    {
+      "kind": "check",
+      "text": "First TRANSFER row matches"
+    },
+    {
+      "kind": "check",
+      "text": "Legal hold? -> skip"
+    },
+    {
+      "kind": "table",
+      "text": "assignment swap + case update"
+    },
+    {
+      "kind": "out",
+      "text": "EV-04 CaseTransferred + log"
+    }
+  ],
+  "rules": [
+    "BR3: a manual transfer needs a reason code from LOV-TRANSFER-REASON",
+    "BR6: no automated transfer while the case is on legal hold (R-UNI-20)",
+    "BR8: the same event ID is processed once",
+    "BR10: a transfer keeps the case status and its clocks"
+  ],
+  "risks": [
+    "Two transfers at once -> version clash (MSG-GEN-004)",
+    "Manual transfer without a reason -> 422 (MSG-P3-001)",
+    "Target owner at cap -> 422 (MSG-P3-002)"
+  ],
+  "example": [
+    "RW-2026-000301 is IN_PROGRESS in TDR-BKK-CO, owner U-21",
+    "Route R4 approved -> row TRF-007 (TRF-2026.11) moves it to LIT-BKK-OFF",
+    "New owner U-31 by lowest load; status and clocks unchanged"
+  ]
+}

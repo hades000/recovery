@@ -1,0 +1,117 @@
+{
+  "key": "RWB-E1-035",
+  "file_stem": "RWB E1 035 Case record view v1 1 with documents and history timeline",
+  "title": "Case record view v1.1 with documents and history timeline",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.timeline",
+  "status": "READY",
+  "status_text": "Ready for build (Should)",
+  "theme": "default",
+  "overview_label": "Case history timeline",
+  "goal": "One timeline of contacts, documents, assignments, transfers and status changes, with who or which rule",
+  "why": "'Why is this case here?' gets one answer. Rule-caused events show their rule ID and version; manual ones show the person and reason.",
+  "needs": [
+    "E1-021",
+    "E1-023",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E2-016"
+  ],
+  "triggers": [
+    [
+      "WHO",
+      "Case owner opens the Timeline panel"
+    ],
+    [
+      "API",
+      "GET /cases/{caseId}/timeline?page=0&size=50"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read here. ACE contact history is shown in the record view (E1-023); this panel reads Workbench sources.",
+  "writes": [],
+  "reads": [
+    {
+      "t": "interaction",
+      "note": "contacts via the interaction ledger"
+    },
+    {
+      "t": "assignment",
+      "note": "assignments and transfers"
+    },
+    {
+      "t": "document",
+      "note": "via P5 DocumentQuery"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "via P7 DecisionLogQuery"
+    }
+  ],
+  "stores": "None. Each section times out at 3,000 ms (caserecord.section.timeout.ms).",
+  "functions": [
+    {
+      "name": "CaseAndWorkflowController",
+      "does": "GET timeline"
+    },
+    {
+      "name": "TimelineService",
+      "does": "read 4 sources, sort, page"
+    },
+    {
+      "name": "TimelineItemMapper",
+      "does": "puts rule + version or person in 'by'"
+    },
+    {
+      "name": "CaseAndWorkflowRepository",
+      "does": "interaction + assignment"
+    },
+    {
+      "name": "TimelinePanel",
+      "does": "React panel on SCR-03"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Open Timeline on SCR-03"
+    },
+    {
+      "kind": "check",
+      "text": "Case record R + in scope?"
+    },
+    {
+      "kind": "table",
+      "text": "interaction + assignment"
+    },
+    {
+      "kind": "function",
+      "text": "P5 documents + P7 decision log"
+    },
+    {
+      "kind": "function",
+      "text": "Sort: time, type order, ID"
+    },
+    {
+      "kind": "out",
+      "text": "Timeline with who / which rule"
+    }
+  ],
+  "rules": [
+    "BR1: time order; ties go decision, status, assignment, transfer, contact, document",
+    "BR2: rule-caused events show the rule ID and version",
+    "BR3: a manual transfer shows its reason",
+    "BR6: under 2 s at the 2031 ledger size (NFR-070)"
+  ],
+  "risks": [
+    "Decision log query does not answer -> other sections shown + section message (MSG-P3-023)",
+    "Case out of scope -> 404 (MSG-P4-003)",
+    "No Case record R right -> 403 (MSG-P4-002)"
+  ],
+  "example": [
+    "RW-2026-000801: 12-02 08:10 transfer by TRF-007 / TRF-2026.11",
+    "12-02 10:30 demand letter | 12-03 09:00 title deed",
+    "12-03 11:15 status IN_PROGRESS by U-81"
+  ]
+}

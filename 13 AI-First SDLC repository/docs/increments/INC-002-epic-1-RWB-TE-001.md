@@ -1,0 +1,157 @@
+# Increment Card — INC-002-epic-1-RWB-TE-001
+
+**RWB-TE-001 — Recovery module folder and boundary test**
+
+## Identification
+
+| Field | Value |
+|---|---|
+| Increment ID | `INC-002` |
+| Title | Recovery module folder and boundary test |
+| Programme / product | Recovery Workbench (recovery module of ACE) |
+| Jira epic / key | `E1` / `RWB-TE-001` |
+| RUN_ID | `INC-002-epic-1-RWB-TE-001` |
+| Parent epic card | `epics/EPIC-001-foundation-1.md` |
+| Module | P2 Integration |
+| Story type | Enabler |
+| Priority | Must |
+| Window | Window 1 |
+| Critical path | No |
+| Depends on | None |
+| Status | In delivery |
+
+## Project type
+
+**Path:** Greenfield development of the Workbench module with brownfield ACE integration constraints. The full 13-question classification is in `epics/EPIC-001-foundation-1.md` and applies to this story.
+
+**Story type:** Enabler. **Module:** P2 Integration. **Build group:** P2.
+
+## Scope
+
+**Story:** As a **squad member (RW-TRIBE)**, I want **the recovery module folder and packages in the ACE repository with a build-time boundary test**, so that **no module calls the inside of another module and no recovery code calls a system of record directly**.
+
+**Main flow:**
+1. Squad member: creates the recovery folders and packages for the 19 Workbench modules, each with an `api` package and an `internal` package.
+2. Squad member: writes the module map `architecture/recovery-modules.yaml` with each module code, its package and its published packages.
+3. Squad member: writes RecoveryBoundaryTest with the rules BR1 to BR5, reading the module map.
+4. Squad member: writes the front end boundary rules for `src/modules/recovery`.
+5. Squad member: wires the common module access check for `/api/recovery/v1/**` through RecoveryAccessGuard.
+6. Pipeline: on each pull request runs the back end tests, including RecoveryBoundaryTest, and the front end dependency check.
+
+**Out of scope:**
+- Code owners for the recovery folders: RWB-TE-002.
+- Types and contract tests from the API specification: RWB-TE-003.
+- Boundaries inside the common and collection modules: the ACE team under DL05 option A.
+- The integration adapter pattern itself: RWB-E1-007.
+
+**Business outcome and value hypothesis:** Three teams build in one ACE service. Without a checked boundary, a change in one team's code breaks another's, and a direct call to a core system could bypass the COLLINS and file load path. The skeleton gives each Workbench module one package with a published part and an internal part, and a test in every build refuses a call into another module's internal part, a cross-module table read and a direct system call outside the integration adapters. It meets REQ-DRI-006 and applies DT08, ADR-002 and DL05 (option B from 2 November: TechX creates the recovery module in its own package). The measure is the count of boundary violations merged to main, which must stay at zero.
+
+**Constraints and guardrails:**
+- No business value in code; module names and packages are in the module map.
+- No personal data in logs, tests or prompts; fixtures hold class names only.
+- No read of another module's tables; this story builds the check that enforces it.
+- The breaking fixtures stay in `src/test` and never ship.
+
+## Reused approved artefacts
+
+| Artefact | Version / link |
+|---|---|
+| Story file | `requirement/legacy/04-user-stories/recovery-workbench-user-stories-epic-1-story-files-v5_extracted/RWB TE 001 Recovery module folder and boundary test v1.md` |
+| Requirement IDs | REQ-DRI-006 |
+| BRD section | Business Requirements Program, section 7 (constraint Modular monolith) and section 5.2 |
+| Epic card | `epics/EPIC-001-foundation-1.md` |
+| Lifecycle tailoring | `epics/EPIC-001-tailoring.md` |
+| Module FSD / PRD | `docs/prds/` |
+| Module TSD | `requirement/legacy/05-technical-architecture/` |
+| Logical data model and data dictionary | `requirement/legacy/06-data/` |
+| API specification | `requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v2.yaml` |
+| Business rules and routing logic | `requirement/legacy/02-business-architecture-and-process/` |
+| Error and message standard | `requirement/legacy/07-screens-and-experience/` |
+| Engineering practices | `AGENTS.md` |
+
+## Lifecycle tailoring
+
+Shared record: `epics/EPIC-001-tailoring.md`. The phase classification is epic-level; this card records the story-specific agents and evidence.
+
+## Story authority
+
+| Role | Rights in this story |
+|---|---|
+| RW-TRIBE, tribe lead and squad members | Create the folders, the module map and the boundary test |
+| TechX tech leads (code owners, RWB-TE-002) | Approve a change to the module map or to the boundary rules |
+| ACE team | Names the common and collection published packages (DL05) |
+| RW-PLATADM, platform administrator | Runs the pipeline |
+| No approval level from the delegation of authority applies | The story takes no business decision |
+
+## Owners and approvals
+
+| Gate | Accountable role | Name | Decision / date |
+|---|---|---|---|
+| Intake approval | Product Owner | TBC | |
+| Context readiness | Forward Deployed Engineer | TBC | |
+| Requirements approval (BRD / PRD) | Product Owner, FDA | TBC | |
+| Design and architecture approval | Forward Deployed Architect | TBC | |
+| Backlog and specification approval | Product Owner | TBC | |
+| Plan approval | Forward Deployed Architect | TBC | |
+| Task approval | Forward Deployed Engineer | TBC | |
+| Pull request approval (code review) | Forward Deployed Engineer | TBC | |
+| Quality and security gate | FDA, Quality Engineer, Security | TBC | |
+| Release readiness | Forward Deployed Engineer | TBC | |
+| Deployment approval | Product Owner / PM | TBC | |
+| Operate and learn review | Ops / System Manager | TBC | |
+
+`TBC` is not an approval (`GAP-006`). The story is in delivery at the specification stage; the human gates remain open until named.
+
+## Agents selected
+
+| Lifecycle group | Agent | Applicable / Optional / Not used | Reason |
+|---|---|---|---|
+| Requirements and discovery | Context Builder | Not used | The context package exists; reuse `.github/contexts/` and `EPIC-001`. |
+| Requirements and discovery | BRD Builder | Not used | The BRD is approved; reuse it. |
+| Requirements and discovery | PRD Builder | Not used | The FSD/PRD is approved; reuse it. |
+| Design, backlog and spec | Jira Backlog Manager | Optional | The local story file is the backlog; Jira import is TBC. |
+| Design, backlog and spec | Technical Specifier | Applicable | Produces the implementation-ready spec. |
+| Plan and build | Implementation Planner | Applicable | Produces `plan.md` and `tasks.md`. |
+| Plan and build | Implementation Builder | Applicable | Builds the approved plan in the ACE repository. |
+| Quality and release | Compliance Reviewer | Applicable | Spec, plan and code gates. |
+| Quality and release | API Tester | Not used | API is not in scope. |
+| Quality and release | Functional Automation Test | Not used | UI is not in scope. |
+| Quality and release | Azure Deploy pipeline | Not used | ACE uses its own pipeline. |
+
+## Risk, rollback and stop signals
+
+- **Rollback route:** feature flag off or redeploy the previous tag; see `epics/EPIC-001-foundation-1.md`.
+- **Feature flag:** None. A build check has no runtime path to switch off.
+- **Critical path:** No; **depends on:** None.
+- **Stop signals:** see the epic card; story guardrails are:
+  - No business value in code; module names and packages are in the module map.
+  - No personal data in logs, tests or prompts; fixtures hold class names only.
+  - No read of another module's tables; this story builds the check that enforces it.
+  - The breaking fixtures stay in `src/test` and never ship.
+
+## Evidence links
+
+| Evidence | Location |
+|---|---|
+| Story file | `requirement/legacy/04-user-stories/recovery-workbench-user-stories-epic-1-story-files-v5_extracted/RWB TE 001 Recovery module folder and boundary test v1.md` |
+| Specification | `output/INC-002-epic-1-RWB-TE-001/specify/spec.md` |
+| Compliance validation | `output/INC-002-epic-1-RWB-TE-001/specify/compliance-validation.md` |
+| Agent run log | `output/INC-002-epic-1-RWB-TE-001/specify/agent-run-log.md` |
+| Plan and tasks | `output/INC-002-epic-1-RWB-TE-001/plan/` (TBC) |
+| Implementation evidence | `output/INC-002-epic-1-RWB-TE-001/implement/` (TBC) |
+| API / functional test reports | `output/INC-002-epic-1-RWB-TE-001/api-tests/`, `functional-tests/` (TBC) |
+| Review findings | `output/INC-002-epic-1-RWB-TE-001/review/` (TBC) |
+| Traceability | `requirement/Traceability_Matrix.md` |
+
+## Card status
+
+| Field | Value |
+|---|---|
+| Status | In delivery |
+| Specification | SUCCESS — cleaned against the current story on 2026-11-05; no removed ACs are mapped |
+| Compliance review | PASS — gate-002 re-run 2026-11-06 (see `output/INC-002-epic-1-RWB-TE-001/specify/compliance-validation.md`) |
+| Acceptance criteria | 0 — engineering enabler; no business ACs (see §7 note) |
+| AC numbering | Not applicable — no ACs |
+| Story source | `requirement/legacy/04-user-stories/recovery-workbench-user-stories-epic-1-story-files-v5_extracted/RWB TE 001 Recovery module folder and boundary test v1.md` |
+| Output run | `output/INC-002-epic-1-RWB-TE-001/specify/` |
+| Card history | Backfilled on 2026-11-04; split from the epic card now at `epics/EPIC-001-foundation-1.md`. Future increments create the story card before the Technical Specifier starts. |

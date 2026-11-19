@@ -1,0 +1,152 @@
+{
+  "key": "RWB-E1-055",
+  "file_stem": "RWB E1 055 Proof of delivery capture design with WIN",
+  "title": "Proof of delivery capture design with WIN",
+  "module": "P6 Communications",
+  "flag": "rwb.comms.win-dispatch-v1",
+  "status": "PARTIAL",
+  "status_text": "Ready. POD steps wait for RWB-ACE-001",
+  "theme": "default",
+  "overview_label": "WIN dispatch + delivery",
+  "goal": "Send notices to WIN for registered mail and record sent and delivered dates, so timers start at delivery",
+  "why": "A legal notice period runs from delivery, not from printing. WIN's proof of delivery is ingested by ACE and read back through v_ace_pod.",
+  "needs": [
+    "E1-052",
+    "E1-054",
+    "E1-028",
+    "E1-066"
+  ],
+  "unblocks": [
+    "E2-021"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-10 WIN outbound notices, daily 16:00"
+    ],
+    [
+      "JOB",
+      "POD read daily 06:00 after WIN is COMPLETE"
+    ],
+    [
+      "JOB",
+      "BarcodeReconciliation daily (REC-05)"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "contract_no for the WIN record"
+    },
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "contact_value: postal address"
+    },
+    {
+      "view": "v_ace_pod",
+      "section": "B",
+      "note": "sent_date, barcode, callback_date, delivery_status"
+    },
+    {
+      "view": "v_ace_batch_status",
+      "section": "B",
+      "note": "WIN source COMPLETE before reading POD"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "notice",
+      "note": "Sent / Delivered, sent_date, barcode, callback_date"
+    },
+    {
+      "t": "interaction",
+      "note": "LETTER and delivery ledger entries"
+    }
+  ],
+  "reads": [
+    {
+      "t": "notice",
+      "note": "Generated notices to dispatch"
+    },
+    {
+      "t": "case_account.is_primary",
+      "note": "contract on the notice"
+    },
+    {
+      "t": "template.template_version",
+      "note": "printed on the record"
+    }
+  ],
+  "stores": "INT-14 outbound file over SFTP to WIN; INT-15 ingested by ACE (not by the Workbench); outbox; Quartz",
+  "functions": [
+    {
+      "name": "WinNoticeFileJob",
+      "does": "JOB-10: build + send INT-14"
+    },
+    {
+      "name": "WinNoticeFileWriter",
+      "does": "records + trailer"
+    },
+    {
+      "name": "WinAcknowledgmentHandler",
+      "does": "Sent, sent date, barcode"
+    },
+    {
+      "name": "ProofOfDeliveryReader",
+      "does": "reads v_ace_pod per date"
+    },
+    {
+      "name": "DeliveryMatcher",
+      "does": "barcode, then notice_ref"
+    },
+    {
+      "name": "BarcodeReconciliation",
+      "does": "REC-05: no barcode after 3 days"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-10 at 16:00"
+    },
+    {
+      "kind": "ace",
+      "text": "Address from v_ace_contact"
+    },
+    {
+      "kind": "store",
+      "text": "INT-14 file over SFTP to WIN"
+    },
+    {
+      "kind": "table",
+      "text": "notice Sent + barcode + ledger"
+    },
+    {
+      "kind": "ace",
+      "text": "06:00 read v_ace_pod"
+    },
+    {
+      "kind": "out",
+      "text": "Delivered -> NOTICE_PERIOD timer"
+    }
+  ],
+  "rules": [
+    "BR1: only dispatch-eligible notices (GENERATED in E1) are sent",
+    "BR2: the notice period starts from the delivery date",
+    "BR4: read v_ace_pod only when the WIN batch is COMPLETE",
+    "BR5: no barcode after 3 days -> REC-05 break"
+  ],
+  "risks": [
+    "No WIN acknowledgement -> resend; task after the 3rd failure (MSG-GEN-006)",
+    "WIN batch not COMPLETE or late -> stale (MSG-P1-001)",
+    "Unknown barcode or notice_ref -> row held on the exception list"
+  ],
+  "example": [
+    "Notice N-0001 (contract CT-77001), JOB-10 run 2026-11-25",
+    "WIN acknowledgement 26112026, barcode RR123456789TH, NPL -> Sent",
+    "v_ace_pod callback_date 2026-11-28 -> Delivered, NoticeDelivered (EV-15)"
+  ]
+}

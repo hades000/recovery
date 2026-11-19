@@ -1,0 +1,133 @@
+{
+  "runId": "INC-008-epic-1-RWB-E1-043",
+  "story": "RWB-E1-043",
+  "revision": "2 (remediation run 1, 2026-11-18; revision 1 kept as backend-apis.run1.json)",
+  "source": "API Specification v4.0.0 (requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v4.yaml); story file v7 RWB-E1-043 sections 9, 12, 13; story file v7 RWB-E1-019 section 12 (rollback); RWB-E1-042 spec revision 3 (output/INC-003-epic-1-RWB-E1-042/specify/spec.md) sections 11.2, 12.1; run decisions D-RUN-10 and D-RUN-11 (orchestrator, Claude Code, an AI agent)",
+  "basePath": "/api/recovery/v1",
+  "openApiDelta": "NONE",
+  "featureFlags": {
+    "rwb.p3.refdata-versions": "registry branch (this story); default false, true in local profile (SPEC-018)",
+    "rwb.p3.configservice": "PARAMETER branch (RWB-E1-042, E42S SPEC-021)",
+    "mapping": "controller mapped when either flag is on; a request routed to a branch whose flag is off gets 404 MSG-P4-003; both off: no mapping"
+  },
+  "dispatch": {
+    "component": "recovery.access.refload ReferenceLoadDispatcher (SPEC-030)",
+    "loadByTable": [
+      "PARAMETER -> RWB-E1-042 ParameterLoadHandler.load (SPEC-026)",
+      "code with a registered ReferenceTableHandler -> registry handler path (SPEC-025, D-RUN-11)",
+      "otherwise -> registry built-in path; unknown code refused 422 MSG-P3-027 'table code is not a reference table' (SPEC-002)"
+    ],
+    "approveOrRollbackByLoadId": [
+      "reference_version.load_id found (ReferenceVersionRegistry.versionByLoadId) -> registry",
+      "else ParameterLoadHandler.find(loadId) present -> PARAMETER branch",
+      "else 404 MSG-P4-003"
+    ],
+    "note": "data_product is not refused by design: RWB-E1-001 registers its handler (D-RUN-11); until then it is an unknown code (TC-HD-03)"
+  },
+  "endpoints": [
+    {
+      "id": "API-E1-043-01",
+      "method": "POST",
+      "path": "/admin/reference-loads",
+      "module": "P4 (recovery.access.refload)",
+      "delegatesTo": "ReferenceVersionRegistry#recordVersion | ReferenceTableHandler#validate (via registry) | ParameterLoadHandler#load",
+      "methodSecurity": "@PreAuthorize(\"@referenceLoadAuthority.mayLoad(authentication, 'Reference data', 'C', #table)\")",
+      "capability": { "area": "Reference data", "right": "C", "tableRight": "role in CODE_LIST rwb.refload.loader.<table>; missing key or empty value refuses (SPEC-027)" },
+      "request": {
+        "contentType": "multipart/form-data",
+        "fields": {
+          "file": "CSV (RFC 4180, UTF-8, header row) or XLSX (first sheet) (A-21)",
+          "table": "one of the 12 story BR1 codes with a column definition, a registered handler code, or PARAMETER",
+          "validFrom": "ISO date, >= current business date (BusinessDateProvider, SPEC-017)"
+        }
+      },
+      "responses": {
+        "201": { "schema": "ReferenceLoad", "fields": ["id (= load_id)", "table", "validFrom", "status=VALIDATED", "rows"], "note": "also returned for an identical repeat (A-06); PARAMETER repeat=true also 201" },
+        "401": { "messageCode": "MSG-P4-001" },
+        "403": { "messageCode": "MSG-P4-002", "audit": "one REFUSED REFERENCE_LOAD_AUDIT event, no user ID (SPEC-028)" },
+        "404": { "messageCode": "MSG-P4-003", "when": "branch flag off (SPEC-018)" },
+        "409": { "messageCode": ["MSG-P3-027", "MSG-GEN-004"], "when": "approved version already has this validFrom; numbering race with different content (A-15)" },
+        "422": { "messageCode": ["MSG-P3-027", "MSG-GEN-001"], "when": "table code, column definition, row, key, handler validate or validFrom check failed; no data rows; missing field; detail lists every failed row (max 100)" },
+        "503": { "messageCode": "MSG-P3-027", "when": "store unavailable or no business date (A-01, A-22)" }
+      },
+      "idempotency": "table_code + valid_from + content_hash",
+      "specRefs": ["SPEC-RWB-E1-043-002", "003", "004", "005", "006", "007", "015", "017", "020", "025", "026", "027", "028", "030", "031"],
+      "tests": ["TC-E1-043-02", "04", "06", "07", "10", "11", "TC-BR1", "TC-HD-01", "TC-HD-03", "TC-PB-01", "SEC-01", "SEC-02", "SEC-05", "SEC-06", "SEC-11", "SEC-14"],
+      "frontendConsumer": "NONE (backend-only; SCR-40 is Epic 8)"
+    },
+    {
+      "id": "API-E1-043-02",
+      "method": "POST",
+      "path": "/admin/reference-loads/{loadId}/approve",
+      "module": "P4 (recovery.access.refload)",
+      "delegatesTo": "ReferenceVersionRegistry#approve (calls ReferenceTableHandler#apply for a handler code; VersionDecisionRecorder) | ParameterLoadHandler#approve",
+      "methodSecurity": "@PreAuthorize(\"@referenceLoadAuthority.mayApprove(authentication, 'Reference data', 'A', #loadId)\")",
+      "capability": { "area": "Reference data", "right": "A", "tableRight": "role in CODE_LIST rwb.refload.approver.<table of loadId> (SPEC-027)" },
+      "request": { "path": { "loadId": "uuid" }, "body": "none" },
+      "responses": {
+        "200": { "schema": "ReferenceLoad", "status": "APPROVED", "note": "registry: repeat approval returns the same body, no change; PARAMETER branch follows RWB-E1-042 (GAP-35)" },
+        "401": { "messageCode": "MSG-P4-001" },
+        "403": { "messageCode": "MSG-P4-002", "audit": "REFUSED event" },
+        "404": { "messageCode": "MSG-P4-003", "when": "unknown loadId or branch flag off" },
+        "409": { "messageCode": ["MSG-P7-002", "MSG-GEN-004", "MSG-P3-027"], "when": "author approves; concurrent change or handler apply failure; not approvable or validFrom passed (A-16, A-17)" },
+        "503": { "messageCode": "MSG-P3-027", "when": "store unavailable or no business date" }
+      },
+      "specRefs": ["SPEC-RWB-E1-043-008", "009", "010", "016", "020", "025", "026", "027", "028", "030", "031"],
+      "tests": ["TC-E1-043-01", "02", "05", "08", "TC-HD-01", "TC-HD-04", "TC-PB-01", "SEC-03", "SEC-07", "SEC-08", "SEC-12", "SEC-13", "SEC-14"],
+      "frontendConsumer": "NONE (backend-only)"
+    },
+    {
+      "id": "API-E1-043-03",
+      "method": "POST",
+      "path": "/admin/reference-loads/{loadId}/rollback",
+      "module": "P4 (recovery.access.refload)",
+      "delegatesTo": "ReferenceVersionRegistry#rollback (calls ReferenceTableHandler#onRolledBack for a handler code) | ParameterLoadHandler#rollback",
+      "methodSecurity": "@PreAuthorize(\"@referenceLoadAuthority.mayRollback(authentication, 'Reference data', 'U', #loadId)\")",
+      "capability": { "area": "Reference data", "right": "U", "tableRight": "role in CODE_LIST rwb.refload.loader.<table of loadId> (SPEC-027)" },
+      "request": {
+        "path": { "loadId": "uuid" },
+        "headers": { "Idempotency-Key": "optional; accepted, not stored (state-based repeat, A-27)" },
+        "body": { "schema": "RollbackRequest", "fields": { "reason": "required, 1-400 characters after trim" } }
+      },
+      "responses": {
+        "200": { "schema": "ReferenceLoad", "status": "ROLLED_BACK", "note": "repeat on a ROLLED_BACK load returns the current body, nothing written" },
+        "401": { "messageCode": "MSG-P4-001" },
+        "403": { "messageCode": "MSG-P4-002", "audit": "REFUSED event" },
+        "404": { "messageCode": "MSG-P4-003", "when": "unknown loadId or branch flag off" },
+        "409": { "messageCode": ["MSG-P3-027", "MSG-P3-015", "MSG-GEN-004"], "when": "load not approved; not the latest approved version; handler without rollback; no earlier approved version (MSG-P3-015); concurrent change" },
+        "422": { "messageCode": "MSG-GEN-001", "field": "reason" }
+      },
+      "specRefs": ["SPEC-RWB-E1-043-001", "013", "020", "024", "025", "026", "027", "028", "030"],
+      "tests": ["TC-RB-01", "TC-RB-02", "TC-HD-01", "TC-PB-01", "SEC-04", "SEC-09", "SEC-10", "SEC-13"],
+      "frontendConsumer": "NONE (backend-only)"
+    }
+  ],
+  "notBuiltHere": [
+    { "path": "GET /admin/lists/{listCode}", "reason": "not in story section 13 build steps; owner to be named (GAP-34, open item)" },
+    { "path": "POST /admin/reference-loads/{loadId}/verify", "reason": "no story v7 behaviour (GAP-11)" }
+  ],
+  "publishedJavaInterfaces": {
+    "package": "th.co.scb.ace.demo.recovery.casewf.refdata.api",
+    "types": [
+      "ReferenceVersionRegistry (recordVersion, approve, rollback, versionByLoadId)",
+      "ReferenceDataService",
+      "ReferenceDataReaders (forReader(name), enabled())",
+      "ReferenceVersion",
+      "VersionedRows",
+      "NoVersionInForceException",
+      "ReferenceTableHandler (SPI: tableCode, validate, apply, supportsRollback, onRolledBack, changeSummary)",
+      "ReferenceLoadFile",
+      "ValidationReport",
+      "RowCheckFailure",
+      "ReferenceTableCodeSource (SPI, A-10)"
+    ],
+    "signatures": "story file v7 section 12 verbatim for the S7 types; ReferenceTableHandler first three methods verbatim from story file v7 RWB-E1-001 section 12; rollback per SPEC-024",
+    "events": "none"
+  },
+  "consumedInterfaces": {
+    "package": "th.co.scb.ace.demo.recovery.platform.api (RWB-E1-042 revision 3; names provisional, A-25)",
+    "types": ["ParameterService", "ParameterKeys", "ParameterLoadHandler", "ParameterLoadResult", "BusinessDateProvider", "MessageResolver", "CapabilityCheck", "VersionDecisionRecorder", "ApiProblemException"]
+  },
+  "audit": "REFERENCE_LOAD_AUDIT structured line per load, approve, rollback, done and refused: operation, table, loadId, area, right, outcome, messageCode, traceId, changes; no user ID (SPEC-028)",
+  "problemBody": "application/problem+json: type, title, status, detail, messageCode, messageTh, field, traceId (API Specification v4 Problem)"
+}

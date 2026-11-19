@@ -1,0 +1,96 @@
+<!-- source: 10 Policy, controls and compliance/Recovery Workbench Controls Catalog v2.xlsx -->
+<!-- converted: 2026-11-04 from XLSX -->
+
+> **Source:** `10 Policy, controls and compliance/Recovery Workbench Controls Catalog v2.xlsx`  
+> **Converted from:** XLSX
+
+## Controls
+
+| Control points on the recovery process |  |  |  |  |  |  |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 42 controls: what each checks, who performs it, the evidence it produces and how it is tested. Each answers an audit finding or a regulatory obligation. |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| ID | L2 | Process | What it checks | Type | How | Performed by | Evidence | How it is tested | Frequency | Rules | Obligations | Audit finding it answers | First in |
+| CTL-01 | 6.1 | Take over the case at 90 days past due | Every account at 90 days past due or more has exactly one open case, reconciled to the core bank each day | Detective | Automated | Rules component; data steward reviews breaks | Daily reconciliation report; decision log entry per case created | Count of accounts at 90 days past due in the load against open cases | Daily | R-UNI-16, R-UNI-17 | REG-07 | EFS did not allocate work and left gaps in follow-up | E1 |
+| CTL-02 | 6.1 | Take over the case at 90 days past due | Each COLLINS load and file load passes the business date, structure, control total, key, reference and list checks before it is used | Preventive | Automated | Data load; data steward | Load check log with the result of each check | Load a file with a wrong control total in SIT; it is refused whole | Each load | Load checks in the interface specifications | REG-11, REG-27 | Collateral data repaired in WIN was recorded wrongly | E1 |
+| CTL-03 | 18.3 | Build and allocate work lists | Each new case is allocated by the allocation table within the caseload cap, with the rule row recorded | Preventive | Automated | Rules component; team manager handles exceptions | Decision log entry with the allocation row and version | Rule table test per allocation row | Each allocation | R-UNI-18, R-UNI-19 | REG-07 | Debtors meeting the criteria were not transferred to the responsible unit | E1 |
+| CTL-04 | 17.1 | Route recommendations for approval | The approver holds the approval level and the amount is within the limit for the decision, product and level | Preventive | Automated | Decision center | Decision log entry with approver, level, limit and version | Approve above the limit in SIT; the decision routes to the next level | Each approval | R-UNI-15, R-SET-05, R-WO-12 | REG-05, REG-13, REG-29, REG-30 | Approval and authority governance findings (9 of 29) | E2 |
+| CTL-05 | 17.1 | Route recommendations for approval | The person who prepared a decision cannot approve it | Preventive | Automated | Decision center | Decision log entry with preparer and approver | Approve own decision in SIT; refused with MSG-P7-002 | Each approval | Separation of duty table | REG-30 | Approval and authority governance findings | E2 |
+| CTL-06 | 17.2 | Keep the decision log | No action proceeds unless its decision log entry is written | Preventive | Automated | Decision log writer | Incident record for every refused write | Make the log store unavailable in SIT; the action is blocked | Each decision | R-UNI-39 | REG-32 | Documentation and audit trail findings (5 of 29) | E1 |
+| CTL-07 | 17.2 | Keep the decision log | A person who departs from the recommendation records a coded reason | Preventive | Automated | Decision center | Decision log entry with the reason code | Override without a reason in SIT; refused with MSG-P7-005 | Each override | R-UNI-14 | None | Collection officers did not record results in EFS in full | E2 |
+| CTL-08 | 14.2 | Set decision rules and limits | A rule, limit or list changes only through a validated load approved by its owner, and by Risk where a limit moves | Preventive | Manual with system enforcement | Reference data administrator; owner; Risk | Version record with loader, approver and valid from date | Load an unapproved version in SIT; it does not take effect | Each change | R-UNI-38 | REG-29 | Collection procedure not followed because rules lived in documents | E1 |
+| CTL-09 | 16.5 | Control access and data protection | Every request is checked against the role, the capability and the scope; out of scope records are refused | Preventive | Automated | ACE access check | Access log | Request a case outside the scope in SIT; refused with MSG-P4-003 | Each request | Permission matrix | REG-22, REG-32 | Unsuitable user access to EFS and the voice bot | E1 |
+| CTL-10 | 16.5 | Control access and data protection | Role owners confirm each person's roles every six months; leavers lose access the same working day | Detective | Manual | Role owners; security administrator | Signed review list; leaver report | Sample of leavers against the access log | Every six months; daily for leavers | Joiner, mover and leaver flow | REG-32 | Unsuitable user access to EFS and the voice bot | E2 |
+| CTL-11 | 16.5 | Control access and data protection | Personal fields are masked unless the role is allowed to see them; no personal data leaves the bank by email | Preventive | Automated | Workbench masking rules; PII service | Masking rule version; access log | Read a masked field as a role without the right in SIT | Each request | Masking rules (DL26) | REG-22, REG-24 | Staff sent debtor data to personal email | E1 |
+| CTL-12 | 13.3 | Store and retain documents | Legal documents cannot be changed or deleted; a new version is added instead | Preventive | Automated | Document hub | Document version history | Change a legal document in SIT; refused with MSG-P5-002 | Each change | Write-once container | REG-24 | Evidence for decisions incomplete or unreliable | E1 |
+| CTL-13 | 13.4 | Control document custody | Each original document has a holder and a due-back date; overdue originals raise a task | Detective | Automated | Document hub; document services | Custody record and overdue list | Advance the date past due-back in SIT; the task is raised | Daily | Custody timers | None | Evidence for decisions incomplete or unreliable | E2 |
+| CTL-14 | 13.2 | Send letters and notices | Every notice is generated from the current template version approved by Legal | Preventive | Automated | Communications | Notice record with template version | Withdraw a template in SIT; generation holds (R-LIT-04) | Each notice | R-LIT-03, R-LIT-04 | REG-04, REG-06, REG-17, REG-20 | Demand fee notice to customers incomplete (BOT finding) | E2 |
+| CTL-15 | 13.2 | Send letters and notices | A notice period starts only from the delivery date on the proof of delivery | Preventive | Automated | Communications; case workflow | Proof of delivery attached to the notice | Load a notice with no proof in SIT; the period does not start | Each notice | R-LIT-07, R-LIT-08 | REG-06, REG-16, REG-17, REG-19, REG-20 | Litigation not filed for debtors meeting the procedure criteria | E2 |
+| CTL-16 | 11.1 | Answer customer contacts | No contact is made while a contact stop is in force; statutory notices continue | Preventive | Automated | Communications | Interaction ledger; contact stop record | Send an SMS to a case with a stop in SIT; refused with MSG-P6-001 | Each contact | R-UNI-04, R-UNI-10, R-LIT-05 | REG-01, REG-08, REG-09 | Debt collection practice findings | E2 |
+| CTL-17 | 11.1 | Answer customer contacts | Messages go only on channels the customer has consented to | Preventive | Automated | Communications | Consent record; interaction ledger | Send on a channel without consent in SIT; refused with MSG-P6-002 | Each message | R-RES-09, R-SET-04, R-UNI-10 | REG-01 | Debt collection practice findings | E2 |
+| CTL-18 | 8.1 | Prepare pre-litigation | Every case has a prescription date; a warning forces a litigation review ahead of other actions | Preventive | Automated | Case workflow | Timer record; decision log entry for the review | Advance a case to the warning date in SIT | Daily | R-UNI-31, R-LIT-11, R-LIT-20 | REG-18 | Litigation not filed for debtors meeting the procedure criteria | E2 |
+| CTL-19 | 8.2 | Instruct and file | The pack holds every required document before filing | Preventive | Automated with officer verification | Legal document agent; litigation officer | Pack checklist with the result per item | File with a missing item in SIT; refused with MSG-S4-001 | Each filing | R-LIT-16, R-LIT-17 | REG-19 | SSME unsecured debt over 180 days not managed effectively | E5 |
+| CTL-20 | 7.4 | Claim guarantees | Each guarantee has a claim deadline timer from the date the default conditions are met | Preventive | Automated | Case workflow; guarantee officer | Timer record; claim record | Advance to the warning date in SIT; the task is raised | Daily | R-GUA-01, R-GUA-06 | REG-16, REG-28 | Collection process delayed TCG claims | E4 |
+| CTL-21 | 11.4 | X3 Deceased customer | A death raises X3, stops contact and routes the case to the specialist and Legal | Preventive | Automated | Rules component | Deviation record; decision log | Raise a death in SIT; X3 opens and contact stops | Each event | R-UNI-05 | None | Deceased debtors and guarantors not followed per procedure | E7 |
+| CTL-22 | 11.6 | X5 Bankruptcy or external seizure | A bankruptcy stops enforcement, starts the claim deadline and ends bad debt follow-up where the rule applies | Preventive | Automated | Rules component; legal counsel | Deviation record; timer | Raise a bankruptcy in SIT; enforcement stops | Each event | R-UNI-07 | REG-21 | Bad debt follow-up not canceled for bankruptcy cases | E7 |
+| CTL-23 | 7.3 | Negotiate settlement or deed in lieu | A settlement below the floor goes for approval with the gap shown | Preventive | Automated | Decision center | Decision log entry with the gap to the floor | Offer below the floor in SIT; routed with MSG-S2-001 | Each offer | R-SET-05, R-SET-07 | REG-10 | Payment and compensation amounts calculated wrongly in relief schemes | E3 |
+| CTL-24 | 7.3 | Negotiate settlement or deed in lieu | A payoff figure older than its limit is refreshed before an offer is sent | Preventive | Automated | Decision center | Offer record with the payoff date | Use a stale payoff in SIT; MSG-S2-002 is shown | Each offer | R-SET-01 | None | Fee, interest and debt amount findings (5 of 29) | E3 |
+| CTL-25 | 6.1 | Take over the case at 90 days past due | Interest is reduced under the restructure terms once the customer has paid as agreed | Detective | Automated | Rules component; Credit Administration | Exception list; booking confirmation | A completed plan with no rate change appears on the exception list | Monthly | Booking confirmation from the ALS load | REG-10, REG-11 | Interest not reduced per TDR conditions after full payment | E2 |
+| CTL-26 | 6.1 | Take over the case at 90 days past due | A restructure covers every account of the customer in the case | Preventive | Automated | Decision center | Treatment record with the accounts covered | Approve a treatment that leaves an account out in SIT; refused | Each treatment | Treatment rules | REG-05 | Some debtors did not have every account restructured | E3 |
+| CTL-27 | 9.2 | Hold and manage assets | An asset is priced only on an appraisal inside its age limit; Stage 3 collateral is revalued on schedule | Preventive | Automated | Case workflow; sale officer | Valuation record and its date | Price on an old appraisal in SIT; MSG-S5-002 | Each pricing; monthly scan | R-DIS-15, R-DIS-16 | REG-12 | Stage 3 collateral not revalued within the required period | E3 |
+| CTL-28 | 9.4 | Sell assets by Dutch auction | The floor price is within the approver's limit as a share of fair market value | Preventive | Automated | Decision center | Decision log entry with the floor and the limit | Set a floor below the limit in SIT; MSG-S5-001 | Each listing | R-DIS-28, R-DIS-29 | REG-31 | Brokers set prices below the bank's listed price | E3 |
+| CTL-29 | 9.4 | Sell assets by Dutch auction | Every asset ready to sell is listed on HOME.SCB and the app with the approved price and details | Detective | Automated | Sale officer | Listing record and the public listing check | Compare assets ready to sell with the public listing | Weekly | Listing rules | REG-31 | NPA listings on the website and app incomplete or wrong | E3 |
+| CTL-30 | 9.1 | Take assets onto the books | An asset whose title has transferred is taken onto the books and moved to sale without delay | Detective | Automated | Case workflow | Asset record; holding age clock | Asset with a transfer date and no take-on appears on the exception list | Daily | R-DIS-02, R-DIS-06 | REG-14 | NPA assets transferred but not actioned or actioned late | E3 |
+| CTL-31 | 9.6 | Sell debt | The data tape passes the masking check before the data room opens | Preventive | Automated | Debt sale agent; debt sale officer | Masking check result | Release an unmasked tape in SIT; refused | Each tape | R-DS-10, R-DS-11, R-DS-13 | REG-26 | Staff sent debtor data to personal email | E5 |
+| CTL-32 | 9.6 | Sell debt | Only buyers who pass KYC, licensing and eligibility and sign the non-disclosure agreement reach the data room | Preventive | Automated with officer review | Debt sale officer | KYC result; NDA record | Admit a buyer with a failed check in SIT; refused | Each buyer | R-DS-14, R-DS-15, R-DS-16 | REG-26 | Outsource agency governance findings | E5 |
+| CTL-33 | 10.1 | Assess write-off | Only cases meeting the eligibility rule and the tax criteria version enter the write-off population; cases with open deviations are held out | Preventive | Automated | Write-off agent; write-off team | Scan result with rule and tax version | Run the scan without a tax version in SIT; it holds (R-WO-03) | Monthly | R-WO-01, R-WO-03, R-WO-06 | REG-13 | Asset write-off not done per the bank's criteria | E6 |
+| CTL-34 | 10.3 | Recover after charge-off | Follow-up on written-off debt ends when the bank's criteria are met, and the case is handed to the right unit | Detective | Automated | Rules component | Decision log entry with the criteria | A written-off account meeting the criteria with follow-up open appears on the exception list | Monthly | Recovery after charge-off rules | None | Bad debt follow-up not canceled per regulation and procedure | E6 |
+| CTL-35 | 12.3 | Track performance and pay fees | Work goes to partners by the scorecard and the panel rules, not by hand | Preventive | Automated | Rules component; partner and agency manager | Instruction record with the scorecard used | Allocate to a suspended partner in SIT; refused | Each instruction | R-LIT-23, R-LIT-27, R-UNI-29 | REG-03 | Work allocation to agencies not based on performance | E6 |
+| CTL-36 | 12.3 | Track performance and pay fees | Every partner instruction has a service level; court fees due back are tracked to receipt | Detective | Automated | Partner and agency manager | Instruction timers; fee ledger | Breach a partner service level in SIT; the breach is raised | Daily | R-LIT-28, R-UNI-25, R-UNI-30 | None | Agency case progress and recoverable court fees not tracked in full | E5 |
+| CTL-37 | 12.4 | Govern partners | Partners meet the bank's security and conduct requirements; a breach suspends allocation and recalls work | Detective | Manual with system enforcement | Partner and agency manager; IT security | Partner review record; suspension record | Sample of partner reviews | Quarterly | R-UNI-28, R-UNI-29 | REG-03, REG-25, REG-32 | Ransomware attack at an outsource agency | E6 |
+| CTL-38 | 9.1 | Take assets onto the books | Each repossessed vehicle has a condition record with photographs in the set standard | Preventive | Automated | Field collector; RPS | Asset record with photographs | Take on a vehicle without photographs in SIT; held | Each repossession | R-DIS-01 | REG-15, REG-20 | Photograph standard for repossessed vehicles unclear | E7 |
+| CTL-39 | 16.2 | Control conduct | A sample of contacts, notices and decisions is checked each month against the conduct rules | Detective | Manual | Conduct and QA officer | QA sample results | Re-perform a sample | Monthly | Conduct rules | REG-01, REG-02, REG-08 | Employee conduct and suspicious transactions | E8 |
+| CTL-40 | 16.2 | Control conduct | Payments from staff accounts to customer loans are flagged for review | Detective | Automated | Conduct and QA officer | Exception list | Post a payment from a staff account in SIT; it is flagged | Daily | Payment matching rules | None | Staff paid installments on behalf of debtors | E8 |
+| CTL-41 | 19.3 | Reconcile and correct | Every receipt is matched to the case and the account, or held on the exception list | Detective | Automated | Reconciliation agent; Credit Administration | Match record; exception list | Load an unmatched receipt in SIT; it is held | Daily | R-UNI-03 | None | Fee, interest and debt amount findings | E4 |
+| CTL-42 | 16.7 | Handle data subject requests | A data subject request holds automated processing on the case and reaches Compliance within the statutory period | Preventive | Automated | Rules component; Compliance and PDPA officer | Request record with dates | Raise a request in SIT; processing holds | Each request | R-UNI-11 | REG-23 | PDPA obligations | E2 |
+
+## By type
+
+| Controls by type |  |  |
+|---|---|---|
+| Preventive controls stop the action; detective controls find it after. |  |  |
+| Type | How | Controls |
+| Detective | Automated | 9 |
+| Detective | Manual | 2 |
+| Detective | Manual with system enforcement | 1 |
+| Preventive | Automated | 27 |
+| Preventive | Automated with officer review | 1 |
+| Preventive | Automated with officer verification | 1 |
+| Preventive | Manual with system enforcement | 1 |
+
+## By release
+
+| Controls by release |  |
+|---|---|
+| The release in which each control first runs. |  |
+| Epic | Controls |
+| E1 | 8 |
+| E2 | 12 |
+| E3 | 7 |
+| E4 | 2 |
+| E5 | 4 |
+| E6 | 4 |
+| E7 | 3 |
+| E8 | 2 |
+
+## Key
+
+| Key |  |  |
+|---|---|---|
+| What each term means. |  |  |
+| Item | Term | Meaning |
+| Type | Preventive | Stops the action before it happens |
+| Type | Detective | Finds the event after it happens and raises a task |
+| How | Automated | The Workbench performs the check on every case |
+| How | Manual with system enforcement | A person performs the check; the Workbench refuses the step without it |
+| Column | Evidence | What an auditor reads to confirm the control ran |
+| Column | How it is tested | The SIT test, and the sample an auditor re-performs |

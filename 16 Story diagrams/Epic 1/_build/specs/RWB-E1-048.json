@@ -1,0 +1,116 @@
+{
+  "key": "RWB-E1-048",
+  "file_stem": "RWB E1 048 Rule change audit report",
+  "title": "Rule change audit report",
+  "module": "P3 Case and workflow",
+  "flag": "rwb.p3.change-log",
+  "status": "RETIRED",
+  "status_text": "Retired (D-RCV-36 T8) -> RWB-E2-041",
+  "theme": "default",
+  "overview_label": "Rule change audit report",
+  "goal": "One audit report shows every rule change had request, impact, test, approver, verify and rollback",
+  "why": "Retired by D-RCV-36 T8 (rules move to Drools XLS packages); the new home is RWB-E2-041. Shown so readers see what the story covered.",
+  "needs": [
+    "E1-037",
+    "E1-011",
+    "E1-043"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "API",
+      "POST /admin/reference-loads/{loadId}/approve"
+    ],
+    [
+      "API",
+      "POST /admin/reference-loads/{loadId}/verify"
+    ],
+    [
+      "API",
+      "GET /admin/change-log (json or csv)"
+    ],
+    [
+      "WHO",
+      "RW-AUDIT reads; RW-RISK approves"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The report covers Workbench rule and reference versions.",
+  "writes": [
+    {
+      "t": "reference_version",
+      "note": "change_request_ref, impact, test_result, rollback_plan, verified_by"
+    }
+  ],
+  "reads": [
+    {
+      "t": "reference_version",
+      "note": "table, version, status, author, approver"
+    },
+    {
+      "t": "reference_row",
+      "note": "rows to diff against the prior version"
+    }
+  ],
+  "stores": "CSV export of the change log",
+  "functions": [
+    {
+      "name": "ChangeChecklistValidator",
+      "does": "checklist complete inside approve()"
+    },
+    {
+      "name": "ChangeEffectCalculator",
+      "does": "rows added / changed / removed"
+    },
+    {
+      "name": "ChangeLogService",
+      "does": "period report, paging, CSV"
+    },
+    {
+      "name": "ChangeLogController",
+      "does": "change-log + verify endpoints"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "CR-2026-0042 raised"
+    },
+    {
+      "kind": "table",
+      "text": "Version loaded with checklist"
+    },
+    {
+      "kind": "check",
+      "text": "Checklist complete + test PASSED?"
+    },
+    {
+      "kind": "check",
+      "text": "Approver is not the author"
+    },
+    {
+      "kind": "table",
+      "text": "Verified on or after valid_from"
+    },
+    {
+      "kind": "out",
+      "text": "GET /admin/change-log"
+    }
+  ],
+  "rules": [
+    "BR1: approval needs a CR ref, impact, rollback plan and a PASSED test result",
+    "BR2: the approver is not the author",
+    "BR4: verify only on or after valid_from",
+    "BR6: the report shows the change effect in row counts and rule IDs"
+  ],
+  "risks": [
+    "Checklist item missing -> approval refused (MSG-P3-022)",
+    "Test result FAILED -> refused (MSG-P3-022)",
+    "Verify before valid_from -> refused (MSG-GEN-003)"
+  ],
+  "example": [
+    "SERVICE_LEVEL v4 for CR-2026-0042: MORTGAGE IN_PROGRESS 10 -> 8 working days",
+    "Loaded by U-REF-01, approved by U-RSK-01 on 2026-12-02, valid from 2026-12-10",
+    "Log: test PASSED, 1 row changed, 0 added, 0 removed"
+  ]
+}

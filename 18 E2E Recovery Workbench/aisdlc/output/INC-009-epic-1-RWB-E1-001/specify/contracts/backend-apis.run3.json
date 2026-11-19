@@ -1,0 +1,110 @@
+{
+  "run_id": "INC-009-epic-1-RWB-E1-001",
+  "story": "RWB-E1-001",
+  "revision": 3,
+  "api_impact": "NO_API_CHANGE",
+  "source": {
+    "file": "api/recovery-api-v4.yaml",
+    "specification": "API Specification v4"
+  },
+  "changes": [],
+  "operations_used": [
+    {
+      "operationId": "postAdminReferenceLoads",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads",
+      "x-module": "P4",
+      "x-capability": { "area": "Reference data", "right": "C" },
+      "x-first-release": "E1",
+      "built_by": "RWB-E1-043 revision 10 (D-RUN-10, D-RUN-11, D-RUN-18, D-RUN-20)",
+      "request": { "content_type": "multipart/form-data", "fields": { "file": "binary", "table": "data_product", "validFrom": "date" } },
+      "responses": {
+        "201": "ReferenceLoad (id, table, validFrom, status, rows); the handler's apply is called at approval, on or after validFrom",
+        "403": "Problem, messageCode MSG-P4-002 (caller without Reference data C, or not in rwb.refload.loader.data_product; TC-E1-001-11). One REFUSED event=REFERENCE_LOAD_AUDIT line with table=data_product (E1-043 SPEC-028); the persistent access log is the RWB-E1-039 seam (GAP-E1001-22)",
+        "409": "Problem, messageCode MSG-P1-011 for an identical repeat (same table, validFrom and content_hash), nothing written, any business date (E1-043 SPEC-025 L9, SPEC-006 rule 1)",
+        "422": "Problem, messageCode MSG-GEN-001 | MSG-P3-027 | MSG-P1-004 | MSG-P1-003 | MSG-P1-007; messageCode is the first finding in SPEC-013 order, detail lists every finding (SPEC-RWB-E1-001-013, -015)",
+        "404": "Problem, messageCode MSG-P4-003 only when RWB-E1-043's own branch flag is off or the PARAMETER branch has no handler bean; not produced by this story's flag"
+      },
+      "repeat": "repeatMessage returns MSG-P1-011 {source=data product catalog, date=validFrom}; answered 409 before the valid-from check, nothing written (GAP-E1001-13, Blocker No). A file equal to the version in force under a different validFrom is not a repeat.",
+      "this_story_adds": "DataProductCatalogHandler, a Spring bean of the P4 SPI recovery.access.api.ReferenceTableHandler, behind rwb.p1.data-catalog; flag off = no bean = unknown code (422 MSG-P3-027), not 404"
+    },
+    {
+      "operationId": "postAdminReferenceLoadsLoadidApprove",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads/{loadId}/approve",
+      "x-module": "P4",
+      "x-capability": { "area": "Reference data", "right": "A" },
+      "x-first-release": "E1",
+      "built_by": "RWB-E1-043 revision 10",
+      "this_story_adds": "DataProductCatalogHandler.apply(loadId, file, validFrom) is called in the approve transaction, only when validFrom is on or before the business date (CURRENT_STATE, E1-043 SPEC-032 rule 6); it writes 14 rows and returns 14",
+      "inherited_controls": ["maker-checker: 409 MSG-P7-002 when the approver is the loader (API v4)", "decision-log entry AC-VERS on approval (API v4; E1-043 defers to RWB-E1-027)"],
+      "open": "No role holds Reference data A in PS v6 (GAP-E1001-08, OPEN-NEW-2); E1-043 rev 10 adds an interim A row for RW-DATASTEW (its A-08) as an assumption"
+    }
+  ],
+  "registry_registration": {
+    "decision": "D-RUN-11 (registry, E1-043) with D-RUN-18 (SPI published by P4 access.api) and D-RUN-20 (PARAMETER is a dispatcher branch, not an SPI handler); orchestrator (AI) run decisions, ratification OPEN-050",
+    "conforms_to": "RWB-E1-043 revision 10 SPEC-019, SPEC-025, SPEC-026, SPEC-030, SPEC-032 and shared-updates.md §3.1 (forward contract to this story)",
+    "spi_type": "recovery.access.api.ReferenceTableHandler (P4, published; D-RUN-18)",
+    "method_set": [
+      "String tableCode()  -> \"data_product\"",
+      "ValidationReport validate(ReferenceLoadFile file)  -> writes nothing; checks K0-H, K0-R, K1-K5",
+      "int apply(UUID loadId, ReferenceLoadFile file, LocalDate validFrom)  -> one transaction; returns 14",
+      "List<String> keyColumns()  -> List.of(\"product_code\")",
+      "Optional<HandlerMessage> repeatMessage(ReferenceLoadFile file)  -> MSG-P1-011 {source, date}",
+      "Dating dating()  -> Dating.CURRENT_STATE",
+      "boolean supportsRollback()  -> false (SPI default; GAP-E1001-24)",
+      "List<String> changeSummary(ReferenceLoadFile file)  -> List.of()"
+    ],
+    "checks_run_before_the_handler": "E1-043 rev 10 SPEC-025 L1-L12 (L12 skipped: no refdata.columns.data_product definition exists), then handler.validate at L13; repeat answered at L9",
+    "what_E1_043_calls": "tableCode() at start-up to build the handler map; validate(file) at load; repeatMessage(file) at the repeat check; apply(loadId, file, validFrom) in the approve transaction; keyColumns() for row_key and content_hash",
+    "requirement_on_E1_043": "none - E1-043 revision 10 already accepts a registered handler code without a LOV-REF-TABLE row and with an optional refdata.columns.<code> definition; OPEN-NEW-3 withdrawn",
+    "parameter_catalog_rows": [
+      "rwb.refload.loader.data_product = RW-REFADM (CODE_LIST, BUSINESS, GLOBAL, required=false, DEV,SIT,UAT,PROD, owner RW-RISK)",
+      "rwb.refload.approver.data_product = RW-DATASTEW (same row shape)"
+    ],
+    "no_rows": ["refdata.columns.data_product (optional, deliberately absent so K2/K3 lead)", "no LOV-REF-TABLE value for data_product", "no PARAMETER handler bean"],
+    "flag_off": "rwb.p1.data-catalog off = no bean = E1-043 sees an unknown code = 422 MSG-P3-027, nothing written; the 404 MSG-P4-003 paths belong to E1-043's branch flag and PARAMETER ObjectProvider",
+    "implementation": "th.co.scb.ace.demo.recovery.dataengine.internal.catalog.DataProductCatalogHandler",
+    "flag": "rwb.p1.data-catalog"
+  },
+  "messages_registered": {
+    "seam": "RWB-E1-042 revision 13 access.api.MessageResolver / access.internal.FixedMessageCatalog (SPEC-022)",
+    "ids": ["MSG-P1-003", "MSG-P1-004", "MSG-P1-007", "MSG-P1-011"],
+    "ac9_texts": [
+      "Row 4: owner_role must be one of the role codes in LOV-ROLE.",
+      "Row 5: refresh_cycle must be one of DAILY, WEEKLY, MONTHLY, ON_CHANGE."
+    ],
+    "k0_ids": ["MSG-GEN-001 for an empty required value", "MSG-P3-027 for a header or width failure"]
+  },
+  "dictionary_seam": {
+    "owner": "RWB-E1-064 (BS v6 order 13), not this story; E1-043 revision 10 SPEC-031 and shared-updates.md §3.2",
+    "protection": "the sys_fields handler refuses an is_personal change and never writes the column, so the 526 marks seeded here cannot be removed by a load; a mark changes only by a reviewed migration",
+    "approver": "RW-COMPLY (E1-043 A-36, inferred); governed path OPEN-NEW-7 / OPEN-NEW-14",
+    "gap": "GAP-E1001-23 (Blocker No)"
+  },
+  "database_read_model": {
+    "view": "${recoverySchema}.v_data_dictionary",
+    "columns": ["entity", "field", "field_id", "data_type", "physical_type", "is_mandatory", "lov_code", "references_object", "source_system", "source_field", "is_personal", "data_product", "entity_system_of_record", "product_system_of_record", "refresh_cycle", "owner_role", "owner_user_id", "late_behavior", "interface_id", "description"],
+    "consumers": ["RWB-E1-064 dictionary endpoint (later)", "RWB-E1-016 masking (later)", "RWB-TE-011 PDPA lint (reads the migration's sys_fields INSERT values)"]
+  },
+  "migration": {
+    "file": "backend/src/main/resources/db/modulemigration/recovery/V<seq>__rwb_e1_001_recovery_schema.sql",
+    "seq_rule": "assigned by the orchestrator at merge (D-RUN-07)",
+    "runs_after": ["RWB-E1-042 migration", "RWB-E1-043 migration"],
+    "tables_created": 89,
+    "tables_not_created_D_RUN_12": ["parameter_catalog", "parameter_value", "reference_version", "reference_row"],
+    "tables_in_schema_after": 93,
+    "foreign_keys_created": 91,
+    "indexes_created": 111,
+    "sys_objects": 123,
+    "sys_fields": 1382,
+    "t8_sys_fields_rows": 53,
+    "t8_comment_statements": 57,
+    "sys_fields_provisional": ["DF-REF-300 parameter_value.load_id", "DF-REF-301 parameter_value.content_hash char(64)", "DF-REF-302 parameter_value.rollback_reason"],
+    "c3_canonical_char": "char(n) (catalog bpchar(n)); both char(n) and character(n) normalise to char(n)",
+    "is_personal_true": 526,
+    "is_personal_form": "literal value in each sys_fields INSERT row; no UPDATE of sys_fields (RWB-TE-011 lint input)",
+    "is_personal_unclassified_ps_v6_fields": "DF-REF-274..299 stay false (GAP-E1001-18; OPEN-NEW-7)",
+    "data_product_system_of_record": "varchar(200) (ASM-E1001-13, GAP-E1001-17 Blocker = Yes); a ruling that widens must also update Logical Data Model and Data Dictionary v8 line 561"
+  }
+}

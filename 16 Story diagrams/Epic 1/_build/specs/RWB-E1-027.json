@@ -1,0 +1,122 @@
+{
+  "key": "RWB-E1-027",
+  "file_stem": "RWB E1 027 Decision log writer v1",
+  "title": "Decision log writer v1",
+  "module": "P7 Decision center and log",
+  "flag": "rwb.decision.log-writer",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Decision log writer",
+  "goal": "One writer records every Epic 1 decision with its rule ID and version, inside the action's transaction",
+  "why": "'No record, no action.' Every module calls one writer so each decision carries who, what rule, which version and which inputs.",
+  "needs": [
+    "E1-008",
+    "E1-056"
+  ],
+  "unblocks": [
+    "E1-021",
+    "E1-032"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "DecisionLogWriter.write(record) inside caller tx"
+    ],
+    [
+      "JOB",
+      "Used by JOB-02 and JOB-03"
+    ],
+    [
+      "WHO",
+      "SY-CASEWF and every calling module"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Callers pass an inputs_ref that points at what they read (for example ACE freshness stamps).",
+  "writes": [
+    {
+      "t": "decision_log_entry",
+      "note": "via DecisionLogStore.append; idempotency_key"
+    },
+    {
+      "t": "outbox",
+      "note": "EV-08 DecisionRecorded"
+    }
+  ],
+  "reads": [
+    {
+      "t": "lov_value",
+      "note": "LOV-DECISION codes"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "idempotency key lookup"
+    }
+  ],
+  "stores": "Outbox (EV-08 for ledger and reporting); metric decision_log_repeats_total; incident on failure",
+  "functions": [
+    {
+      "name": "DecisionLogWriter",
+      "does": "write(); @Transactional(MANDATORY)"
+    },
+    {
+      "name": "DecisionLogWriterService",
+      "does": "tx check, idempotency, append"
+    },
+    {
+      "name": "DecisionLogRecordValidator",
+      "does": "required fields, version group"
+    },
+    {
+      "name": "Epic1DecisionRecords",
+      "does": "builders for 4 Epic 1 events"
+    },
+    {
+      "name": "DecisionRecordedPublisher",
+      "does": "EV-08 into the outbox"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Caller builds DecisionLogRecord"
+    },
+    {
+      "kind": "check",
+      "text": "Transaction open? Key seen?"
+    },
+    {
+      "kind": "check",
+      "text": "Required fields + rule version"
+    },
+    {
+      "kind": "function",
+      "text": "DecisionLogStore.append (E1-008)"
+    },
+    {
+      "kind": "store",
+      "text": "Outbox EV-08 DecisionRecorded"
+    },
+    {
+      "kind": "out",
+      "text": "Caller commits action + entry"
+    }
+  ],
+  "rules": [
+    "BR2: decision code, inputs ref, final call, decided at and actor are required",
+    "BR3: at least one of rule, model or agent version; a rule ID needs its rule version",
+    "BR5: no record, no action",
+    "BR7: decision codes are parameters rwb.decision.code.*"
+  ],
+  "risks": [
+    "Missing version group, inputs ref or case -> refused (MSG-P7-009)",
+    "Store unwritable -> caller rolls back + incident (MSG-P7-003)",
+    "Called outside a transaction -> IllegalTransactionStateException"
+  ],
+  "example": [
+    "JOB-02 creates RW-2026-000123 -> entry CASE_CREATED, actor SY-CASEWF",
+    "JOB-03 assigns owner U-7101 by row ALLOC-MTG-BKK-01 of ALLOC-2026.11 -> entry OWNER_ASSIGNED",
+    "2 entries, 2 DecisionRecorded events in the outbox"
+  ]
+}

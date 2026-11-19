@@ -1,0 +1,256 @@
+{
+  "runId": "INC-008-epic-1-RWB-E1-043",
+  "story": "RWB-E1-043",
+  "stage": "plan",
+  "revision": "v1 (2026-11-18): first plan-stage contract, derived from specify/spec.md revision 10 (spec gate round 10 PASS 0/0/0/0), specify/contracts/backend-apis.json revision 10, API Specification v4, RWB-E1-042 revision 13 and RWB-TE-001 v4. No OpenAPI edit and no frontend consumer.",
+  "sources": {
+    "spec": "../specify/spec.md revision 10 (file 2026-11-18 07:48:54; gate round 10 PASS 0/0/0/0)",
+    "specContract": "../specify/contracts/backend-apis.json revision 10",
+    "apiSpecification": "api/recovery-api-v4.yaml, read on 18 Nov 2026: postAdminReferenceLoads line 3167, approve line 3214, rollback line 5004, ReferenceLoad line 8832, RollbackRequest line 9818, Problem schema",
+    "errorsAndMessages": "Error and Message Standard v4, lines 68, 71, 139, 151, 163, 164, 207, 208",
+    "parameterCatalog": "RWB-E1-042 spec revision 13 sections 10.1, 10.2, 12.2, 12.4, 12.7, 12.10, 12.12; RWB-E1-042 plan v2 data-model sections 2, 4, 7, 9",
+    "moduleMap": "backend/src/test/resources/architecture/recovery-modules.yaml [TE-001], casewf published list [E1-042]",
+    "story": "requirement/legacy/04-user-stories/recovery-workbench-user-stories-epic-1-story-files-v7_extracted/rwb-e1-043-reference-data-service-with-versioned-tables-v2.md sections 9, 12, 13, 16"
+  },
+  "openapiChange": false,
+  "openapiEvidence": "api/recovery-api-v4.yaml is not edited: the three operations, ReferenceLoad and RollbackRequest already exist. No frontend/src/api/schema.d.ts regeneration and no openapi-fetch change. API v4 tags the operations P4; the code is in P3 casewf.refdata (GAP-53; RWB-TE-001 SU-08; retag request R18).",
+  "apiImpactType": "NEW_API_REQUIRED",
+  "apiImpactNote": "The three operations exist in API Specification v4 but have never been implemented in this code base. GET /admin/lists/{listCode} and /verify are not built (GAP-34, GAP-11).",
+  "basePath": "/api/recovery/v1",
+  "featureFlags": {
+    "rwb.p3.refdata-versions": "this story; default false, true in the local profile; bound by the package-private RefdataSettings record (prefix rwb.p3). The read beans (ReferenceDataService, ReferenceDataReaders) and ReferenceTableHandlers exist whatever the flag; ReferenceDataReaders.enabled() returns it; the registry's recordVersion, approve and rollback refuse when it is off; the controller and dispatcher are mapped when this flag OR rwb.p3.configservice is on.",
+    "rwb.p3.configservice": "RWB-E1-042's PARAMETER branch (E42S SPEC-021, section 12.12)",
+    "mapping": "@ConditionalOnExpression(\"${rwb.p3.refdata-versions:false} or ${rwb.p3.configservice:false}\") on ReferenceLoadController and ReferenceLoadDispatcher only. A request routed to a branch whose flag is off gets 404 MSG-P4-003 (not in API v4, GAP-48); both off means no mapping (404 from the security filter). No RecoveryFlags or RecoveryProperties change.",
+    "local": "application-local.yaml sets rwb.p3.refdata-versions to ${RWB_P3_REFDATA_VERSIONS:true}"
+  },
+  "endpoints": [
+    {
+      "id": "API-E1-043-01",
+      "operationId": "postAdminReferenceLoads",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads",
+      "module": "P3 casewf.refdata.internal (API v4 tags the operation P4; GAP-53)",
+      "implementation": "backend/src/main/java/th/co/scb/ace/demo/recovery/casewf/refdata/internal/ReferenceLoadController.java -> ReferenceLoadDispatcher -> ReferenceVersionRegistryImpl or ParameterLoadBranch",
+      "methodSecurity": "@PreAuthorize(\"@referenceLoadAuthority.mayLoad(authentication, 'Reference data', 'C', #table)\")",
+      "capability": {
+        "area": "Reference data",
+        "right": "C",
+        "tableRight": "the caller's role intersects CODE_LIST rwb.refload.loader.<code> read through ParameterService; a missing or empty value refuses 403 (fail closed). An unknown code (no handler, no loader key) passes the table right so the registry answers 422 'table code is not a reference table'; a known code always enforces the list.",
+        "action": "load reference data"
+      },
+      "request": {
+        "contentType": "multipart/form-data",
+        "fields": {
+          "file": "CSV (RFC 4180, UTF-8, header row, optional BOM) or XLSX (first sheet); POI 5.4.1 is transitive through drools-decisiontables (A-21)",
+          "table": "one of the 12 S7 BR1 codes with a column definition, a registered access.api.ReferenceTableHandler code, or PARAMETER",
+          "validFrom": "ISO date, greater than or equal to the business date from BusinessDateProvider (SPEC-017)"
+        }
+      },
+      "response": {
+        "201": {
+          "schema": "ReferenceLoad",
+          "fields": ["id (= reference_version.load_id)", "table", "validFrom", "status = VALIDATED", "rows = row_count"],
+          "note": "also returned, unchanged, for an identical (table, validFrom, content_hash) repeat (A-06); a PARAMETER repeat with repeat=true is also 201"
+        }
+      },
+      "errors": [
+        { "status": 401, "messageCode": "MSG-P4-001", "source": "SecurityConfig filter or ActorIdResolver (ApiError.NO_ROLE)" },
+        { "status": 403, "messageCode": "MSG-P4-002", "action": "load reference data", "source": "CapabilityCheck.require or ApiError.NOT_PERMITTED; one REFUSED audit" },
+        { "status": 404, "messageCode": "MSG-P4-003", "when": "the branch flag is off (SPEC-018); not in API v4 (GAP-48)" },
+        { "status": 409, "messageCodes": ["MSG-P3-027", "MSG-GEN-004", "handler repeat message, e.g. MSG-P1-011"], "when": "an approved version already has this validFrom; a numbering race with different content; a repeat of a handler code whose repeatMessage is present (L9, A-38)" },
+        { "status": 422, "messageCodes": ["MSG-P3-027", "MSG-GEN-001", "MSG-P1-002", "handler message IDs"], "when": "missing table (checked before the table right), unknown code, no definition, malformed definition, unreadable file, no data rows, past validFrom, a failed row or handler check, or a PARAMETER load with an rwb.refload.* key" },
+        { "status": 500, "when": "handler validate throws a non-API exception; the existing ApiExceptionHandler.unexpected body (no traceId in that body; PG-E1-043-03); not in API v4 (GAP-48)" },
+        { "status": 503, "messageCode": "MSG-P3-027", "when": "store unavailable or no business date" }
+      ],
+      "idempotency": "(table_code, valid_from, content_hash); a repeat returns the existing load and writes nothing, or 409 with a handler's repeat message where the handler supplies one",
+      "accessListGuard": "a PARAMETER load whose key column holds any key starting rwb.refload. is refused 422 MSG-P1-002 {source=PARAMETER, date=validFrom, check=key <k> cannot be changed by a reference load}, field=key; ParameterLoadHandler.load is not called; one REFUSED audit (SPEC-026; A-39; SEC-15)",
+      "specRefs": ["SPEC-RWB-E1-043-002", "003", "004", "005", "006", "007", "015", "017", "020", "025", "026", "027", "028", "030", "031"],
+      "tests": ["TC-E1-043-02", "TC-E1-043-04", "TC-E1-043-06", "TC-E1-043-07", "TC-E1-043-10", "TC-E1-043-11", "TC-BR1", "TC-HD-01", "TC-HD-03", "TC-HD-05", "TC-PB-01", "TC-PB-02", "TC-RP-01", "TC-FD-01", "SEC-01", "SEC-02", "SEC-05", "SEC-06", "SEC-11", "SEC-14", "SEC-15", "SEC-16", "TC-FL-01"],
+      "tasks": ["TASK-13", "TASK-14", "TASK-15"],
+      "frontendConsumer": "NONE (backend-only; SCR-40 is Epic 8)"
+    },
+    {
+      "id": "API-E1-043-02",
+      "operationId": "postAdminReferenceLoadsApprove",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads/{loadId}/approve",
+      "module": "P3 casewf.refdata.internal (API v4 tags it P4; GAP-53)",
+      "implementation": "ReferenceLoadController -> ReferenceLoadDispatcher -> ReferenceVersionRegistryImpl (handler apply, SPEC-010, ReferenceDecisionRecorder) or ParameterLoadBranch",
+      "methodSecurity": "@PreAuthorize(\"@referenceLoadAuthority.mayApprove(authentication, 'Reference data', 'A', #loadId)\")",
+      "capability": {
+        "area": "Reference data",
+        "right": "A",
+        "tableRight": "the caller's role intersects CODE_LIST rwb.refload.approver.<code of the load's table>; a missing or empty value refuses 403; an unknown loadId passes with the area right so the controller answers 404",
+        "action": "approve reference data"
+      },
+      "request": { "path": { "loadId": "uuid" }, "body": "none" },
+      "response": {
+        "200": {
+          "schema": "ReferenceLoad",
+          "status": "APPROVED",
+          "note": "a repeat on an APPROVED load returns the same body and writes nothing; a DATED handler's or built-in future-dated version is in force only from validFrom; a CURRENT_STATE handler's version is approved and applied on validFrom (SPEC-032)"
+        }
+      },
+      "errors": [
+        { "status": 401, "messageCode": "MSG-P4-001" },
+        { "status": 403, "messageCode": "MSG-P4-002", "action": "approve reference data", "source": "area A or table approver list; one REFUSED audit" },
+        { "status": 404, "messageCode": "MSG-P4-003", "when": "unknown loadId or an off branch" },
+        { "status": 409, "messageCodes": ["MSG-P7-002", "MSG-GEN-004", "MSG-P3-027"], "when": "the approver is the author; a concurrent change or a handler apply defect; a non-VALIDATED load, validFrom before the business date, an approved twin, or a CURRENT_STATE code whose validFrom is after the business date" },
+        { "status": 503, "messageCodes": ["MSG-P3-027", "MSG-P7-003"], "when": "store unavailable or no business date; the decision recorder fails and the approval rolls back" }
+      ],
+      "specRefs": ["SPEC-RWB-E1-043-008", "009", "010", "016", "020", "025", "026", "027", "028", "030", "031", "032"],
+      "tests": ["TC-E1-043-01", "TC-E1-043-02", "TC-E1-043-05", "TC-E1-043-08", "TC-HD-01", "TC-HD-04", "TC-PB-01", "TC-PB-02", "TC-TM-01", "TC-TM-02", "TC-TM-05", "TC-DR-01", "SEC-03", "SEC-07", "SEC-08", "SEC-12", "SEC-13", "SEC-14", "SEC-17"],
+      "tasks": ["TASK-13", "TASK-14", "TASK-15"],
+      "frontendConsumer": "NONE (backend-only)"
+    },
+    {
+      "id": "API-E1-043-03",
+      "operationId": "postAdminReferenceLoadsRollback",
+      "method": "POST",
+      "path": "/api/recovery/v1/admin/reference-loads/{loadId}/rollback",
+      "module": "P3 casewf.refdata.internal (API v4 tags it P4; GAP-53)",
+      "implementation": "ReferenceLoadController -> ReferenceLoadDispatcher -> ReferenceVersionRegistryImpl (onRolledBack, restored valid_to) or ParameterLoadBranch",
+      "methodSecurity": "@PreAuthorize(\"@referenceLoadAuthority.mayRollback(authentication, 'Reference data', 'U', #loadId)\")",
+      "capability": {
+        "area": "Reference data",
+        "right": "U",
+        "tableRight": "the caller's role intersects CODE_LIST rwb.refload.loader.<code of the load's table> (S7-019 flow step 8: RW-REFADM); a missing or empty value refuses 403",
+        "action": "roll back reference data"
+      },
+      "request": {
+        "path": { "loadId": "uuid" },
+        "headers": { "Idempotency-Key": "optional; accepted and not stored (the repeat is state-based, A-27)" },
+        "body": { "schema": "RollbackRequest", "fields": { "reason": "required, 1-400 characters after trim" } }
+      },
+      "response": {
+        "200": {
+          "schema": "ReferenceLoad",
+          "status": "ROLLED_BACK",
+          "note": "a repeat on a ROLLED_BACK load returns the current body and writes nothing; the restored version's valid_to becomes NULL and the next read serves it"
+        }
+      },
+      "errors": [
+        { "status": 401, "messageCode": "MSG-P4-001" },
+        { "status": 403, "messageCode": "MSG-P4-002", "action": "roll back reference data", "source": "area U or the table loader list; one REFUSED audit" },
+        { "status": 404, "messageCode": "MSG-P4-003", "when": "unknown loadId or an off branch" },
+        { "status": 409, "messageCodes": ["MSG-P3-027", "MSG-P3-015", "MSG-GEN-004"], "when": "the load is not approved; a later approved version exists; the handler does not support rollback; there is no earlier approved version (MSG-P3-015); a concurrent change" },
+        { "status": 422, "messageCode": "MSG-GEN-001", "field": "reason", "when": "the reason is missing, blank or over 400 characters after trim" }
+      ],
+      "specRefs": ["SPEC-RWB-E1-043-001", "013", "020", "024", "025", "026", "027", "028", "030", "032"],
+      "tests": ["TC-RB-01", "TC-RB-02", "TC-HD-01", "TC-HD-04", "TC-PB-01", "TC-PB-02", "TC-TM-03", "TC-TM-04", "TC-TM-05", "SEC-04", "SEC-09", "SEC-10", "SEC-13"],
+      "tasks": ["TASK-13", "TASK-14", "TASK-15"],
+      "frontendConsumer": "NONE (backend-only)",
+      "note": "single-person action by a U holder on the table's loader list; it restores a version a non-author already approved and is not a new approval (A-27)"
+    }
+  ],
+  "notBuiltHere": [
+    { "path": "GET /admin/lists/{listCode}", "reason": "not in story section 13 build steps; no v7 owner (GAP-34; only the Java versions() read is built here)" },
+    { "path": "POST /admin/reference-loads/{loadId}/verify", "reason": "no v7 behaviour (GAP-11)" }
+  ],
+  "publishedJavaInterfaces": {
+    "package": "th.co.scb.ace.demo.recovery.casewf.refdata.api",
+    "namedInterface": "@NamedInterface(name = \"refdata.api\", propagate = false); added to the casewf published list of recovery-modules.yaml (RWB-TE-001 SU-08)",
+    "types": [
+      "ReferenceVersionRegistry (recordVersion(String tableCode, LocalDate validFrom, UUID authorUserId, UUID loadId, List<Map<String, Object>> rows); approve(UUID loadId, UUID approverUserId); rollback(UUID loadId, UUID actorUserId, String reason); versionByLoadId(UUID loadId))",
+      "ReferenceDataService (rows(String tableCode, LocalDate businessDate); versionInForce(String tableCode, LocalDate businessDate); versions(String tableCode))",
+      "ReferenceDataReaders (forReader(String readerName); enabled())",
+      "ReferenceVersion (UUID id, String tableCode, int versionNo, LocalDate validFrom, LocalDate validTo, String status, UUID authorUserId, UUID approverUserId, Instant approvedAt, int rowCount, String contentHash, String rollbackReason)",
+      "VersionedRows (String tableCode, int versionNo, LocalDate validFrom, List<Map<String, Object>> rows)",
+      "NoVersionInForceException (String tableCode, LocalDate businessDate)"
+    ],
+    "events": "none (the story publishes no application event; the outbox carries none)",
+    "p4Addition": "th.co.scb.ace.demo.recovery.access.api.ListOfValuesReader (activeCodes(String lovCode)); interim implementation access.internal.LovValueReader reads lov_value (spec section 11, 17; A-41)"
+  },
+  "p4HandlerSpi": {
+    "package": "th.co.scb.ace.demo.recovery.access.api (P4, published; D-RUN-18; pending recovery tech-lead ratification, OPEN-050)",
+    "types": [
+      "ReferenceTableHandler (tableCode, validate, apply, keyColumns, repeatMessage, supportsRollback, onRolledBack, changeSummary, dating; the first three methods verbatim from story file v7 RWB-E1-001 section 12)",
+      "ReferenceTableHandler.Dating (nested enum DATED, CURRENT_STATE; default CURRENT_STATE)",
+      "ReferenceLoadFile",
+      "HandlerMessage (messageCode, placeholders)",
+      "ValidationReport (failures; ok())",
+      "RowCheckFailure (row, column, messageCode, placeholders; row 0 = file level)"
+    ],
+    "implementedBy": "no P4 class. P1 handlers (RWB-E1-001 data_product, RWB-E1-064 sys_fields) and P3 handlers (RWB-E1-019 QUEUE, QUEUE_MEMBER; A-46; R33 answered by the orchestrator triage of 2026-11-18 05:52:36) implement it. PARAMETER is not an SPI handler: the dispatcher branch ParameterLoadBranch calls ParameterLoadHandler and implements no access.api type; a PARAMETER handler bean fails start-up (SPEC-025, SPEC-026; D-RUN-20; GAP-57 settled).",
+    "tTe001_14": "access.api expected set = RWB-E1-042's merged set (ApiError, ApiProblemException, MessageResolver, CapabilityCheck, CatalogParameterReader, CatalogParameterReader.Value) plus this story's ListOfValuesReader, ReferenceTableHandler, ReferenceTableHandler.Dating, ReferenceLoadFile, HandlerMessage, ValidationReport, RowCheckFailure; casewf named interfaces api, config.api, refdata.api, rules, timers, workflow; casewf.refdata.api the six types above (SPEC-019; R29)"
+  },
+  "consumedInterfaces": {
+    "basis": "RWB-E1-042 spec revision 13 (file 2026-11-18 06:01:50; names unchanged since revision 7), sections 10.1, 10.2, 12.2, 12.4, 12.7, 12.10, 12.12 and SPEC-RWB-E1-042-020 (A-25; findings 144, 148, 160; shared update R6 asks for stable names)",
+    "packages": {
+      "th.co.scb.ace.demo.recovery.casewf.config.api (same module P3)": [
+        "ParameterService (get overloads and entry(String))",
+        "ParameterKeys (byName(String key, Class<T> type), A-26)",
+        "ParameterLoadHandler (load, approve, rollback, find; obtained through ObjectProvider)",
+        "ParameterLoadResult (loadId, table, validFrom, status, rows, repeat)",
+        "BusinessDateProvider (today())"
+      ],
+      "th.co.scb.ace.demo.recovery.access.api (P4; P3 to P4 allowed by RWB-TE-001 SPEC-022 (d))": [
+        "CapabilityCheck (has(Authentication, String area, String right); require(Authentication, String area, String right, String action))",
+        "MessageResolver (english(String, Map<String,String>); thai(String, Map<String,String>))",
+        "ApiProblemException (HttpStatus, String messageId, Map<String,String>, String field, String detail, Throwable cause; accessors status(), messageId(), field(), detail(); and the ApiError form)",
+        "ApiError (NO_ROLE 401 MSG-P4-001, NOT_PERMITTED 403 MSG-P4-002, NOT_IN_SCOPE 404 MSG-P4-003)",
+        "CatalogParameterReader (published by E1-042; not used by this story, counted in T-TE001-14)"
+      ],
+      "th.co.scb.ace.demo.recovery.access.internal": [
+        "ApiExceptionHandler (renders the Problem; unchanged beyond E1-042)",
+        "ProblemFactory (renders both ApiProblemException forms)",
+        "FixedMessageCatalog (nine IDs; the production resolver)",
+        "InterimCapabilityCheck (bean capabilityCheck; reads access/interim-capability-grants.csv)"
+      ]
+    },
+    "notUsed": "VersionDecisionRecorder (package-private in casewf.config, E42S section 12.7; GAP-50). This story has its own package-private ReferenceDecisionRecorder."
+  },
+  "handlerContract": {
+    "spec": "SPEC-RWB-E1-043-025",
+    "loadCheckOrder": [
+      "L1 authenticated; ActorIdResolver resolves oid or sub as a UUID; else 401 MSG-P4-001 (ApiError.NO_ROLE)",
+      "L2 area right Reference data C through CapabilityCheck.require; else 403 MSG-P4-002 with action 'load reference data' and one REFUSED audit",
+      "L3 table present and not blank; the authority grants the table right when it is absent so the controller answers 422 MSG-GEN-001 field=table, with no REFUSED audit (finding 136; TC-FD-01)",
+      "L4a code known: a registered handler, or a catalog row rwb.refload.loader.<code>; an unknown code passes the table right and is refused 422 later (SPEC-002; this keeps TC-BR1's rule/HOLIDAY 422 and SEC-06's 403 both true)",
+      "L4 table right: the caller's role intersects rwb.refload.loader.<code>; missing or empty refuses 403 MSG-P4-002 and one REFUSED audit",
+      "L5 registry branch flag on; else 404 MSG-P4-003",
+      "L6 file and validFrom present and parseable; else 422 MSG-GEN-001 field",
+      "L7 file readable (CSV or XLSX); else 422 MSG-P3-027 check 'the file cannot be read'",
+      "L8 at least one data row; else 422 MSG-GEN-001 rows",
+      "L9 early repeat only for a handler code whose repeatMessage(file) is present: the same (table, validFrom, content_hash) exists gives 409 with that message, nothing written, for any business date (findings 133, 140; A-38; GAP-56)",
+      "L10 validFrom at or after the business date; else 422 MSG-P3-027 check 'valid from is before the business date'",
+      "L11 every other code, in the story order: the same (table, validFrom, content_hash) gives 201 with the existing body, nothing written (A-06); else an APPROVED twin with this validFrom gives 409 MSG-P3-027",
+      "L12 the table code check for a built-in (active LOV code and a definition that is not none; else 422 'table code is not a reference table' or 'no column definition for the table'), then the column definition and row check when a definition exists; a handler code skips the LOV/definition requirement but runs the definition check when one exists",
+      "L13 handler.validate; 422 with the first failure's messageCode, placeholders and field, and detail listing every failure in order, capped at 100 with the total",
+      "L14 row_key unique in the file; else 422 MSG-P3-027 check 'row key repeated'",
+      "L15 record the VALIDATED version in one transaction; audit DONE with changeSummary after commit"
+    ],
+    "messagePassThrough": "handler message IDs and ApiProblemException pass through unchanged; MSG-P3-027 is used only for the registry's own checks; any other exception in validate is a defect (500, nothing written), in apply or onRolledBack the transaction rolls back and the answer is 409 MSG-GEN-004",
+    "rowKey": "keyColumns() joined by a vertical bar; else the definition's K columns; else the 6-digit data row number (A-37); unique per version, max 200 characters",
+    "owningStorySupplies": [
+      "the handler bean of type access.api.ReferenceTableHandler behind its own flag, depending on P4 only, declaring dating() (CURRENT_STATE unless its table holds dated versions; A-42)",
+      "the two parameter_catalog rows rwb.refload.loader.<code> and rwb.refload.approver.<code> (CODE_LIST, BUSINESS, GLOBAL, required=false, owner RW-RISK) in the catalog file and its own migration",
+      "its message IDs in RWB-E1-042's message catalog",
+      "optionally refdata.columns.<code>"
+    ],
+    "dataProduct": "RWB-E1-001: P4 SPI implementation, imports nothing from casewf; keyColumns product_code; dating CURRENT_STATE (PS6 uk_data_product; GAP-54); its K0-K5 messages pass through; repeatMessage MSG-P1-011 (409, early repeat L9); no refdata.columns.data_product; loader RW-REFADM, approver RW-DATASTEW (A-40; GAP-46); no LOV-REF-TABLE change; approved and applied on validFrom, writing data_product.valid_from (S7-001 flow step 10)",
+    "effectiveDate": "DATED: apply (at approval) stores the version dated by validFrom and never changes what a reader gets for an earlier business date; versions are independent; onRolledBack follows the same rule. CURRENT_STATE (default; data_product, sys_fields): approval refused 409 MSG-P3-027 while validFrom is after the business date; apply runs at once when validFrom is at or before the business date (with A-17, on the valid-from date); rollback re-applies the restored version at once; no owner job and no schema change (SPEC-025, SPEC-032 rules 5-6; A-42; finding 138). At most one APPROVED version per validFrom for every code, so a same-day correction of a CURRENT_STATE table needs a rollback first (which needs an earlier approved version, else 409 MSG-P3-015) or waits for a later validFrom (findings 147, 154)."
+  },
+  "decisionRecorder": "ReferenceDecisionRecorder (package-private port in casewf.refdata.internal, MANDATORY propagation): recorded(decisionCode, table, loadId, validFrom, approverUserId); LoggingReferenceDecisionRecorder logs one INFO line without a user ID; a failure rolls the approval back with 503 MSG-P7-003; RWB-E1-027 replaces it (A-43)",
+  "audit": {
+    "line": "event=REFERENCE_LOAD_AUDIT",
+    "fields": ["operation (LOAD, APPROVE, ROLLBACK)", "table", "loadId (absent for a refused load)", "area (Reference data)", "right", "outcome (DONE, REFUSED)", "messageCode", "traceId", "changes (handler changeSummary items, field IDs only)"],
+    "excluded": "no user ID, row content or reason text (BS-4.4, BS-4.6, A-30; GAP-42)",
+    "adapters": "LoggingReferenceLoadAudit (interim); RWB-E1-039 replaces it",
+    "refusals": "ReferenceLoadAuthority records a 403; ReferenceLoadController records a 4xx/5xx business refusal (except a missing table, which has no audit, TC-FD-01)"
+  },
+  "problemBody": "application/problem+json: type, title, status, detail, messageCode, messageTh, field, traceId (API Specification v4 Problem). The 403 uses MSG-P4-002 with {action} 'load reference data', 'approve reference data' or 'roll back reference data', never 'do this' (A-45; finding 142). The 500 is the existing ApiExceptionHandler.unexpected body and carries no traceId (PG-E1-043-03).",
+  "actorId": "ActorIdResolver (seam in casewf.refdata.internal, A-07): the oid claim when it is a UUID, else sub when it is a UUID, else 401 ApiError.NO_ROLE MSG-P4-001; RWB-E1-022 replaces it (SEC-16)",
+  "rights": {
+    "area": "Reference data; C load, A approve, U rollback through E1-042's access.api.CapabilityCheck",
+    "table": "CODE_LIST rwb.refload.loader.<code> for load and rollback; CODE_LIST rwb.refload.approver.<code> for approve; read through ParameterService; missing or empty refuses; the list keys cannot be changed by any PARAMETER load (SPEC-026; A-39)",
+    "grants": "37 rows in access/interim-capability-grants.csv (data-model section 8); A for RW-RISK, RW-COE, RW-DATASTEW, RW-TEAMMGR, RW-COMPLY and RW-SECADM (A-08; assumptions, not source grants); RWB-E1-037 replaces the file",
+    "unknownLoad": "approve and rollback resolve the table from loadId: the registry's versionByLoadId first, then ParameterLoadHandler.find; an unknown loadId passes the table right so the controller answers 404 (A-28)"
+  },
+  "dependencyDirection": "casewf.refdata.internal to access.api and casewf.config.api (P3 to P4 and inside P3) only; no access or integration type refers to casewf; the handler SPI is in access.api (D-RUN-18), so P1 handlers depend on P4 and never on P3; no P1 to P3 edge; P4 depends on neither P1 nor P3, so no cycle (SPEC-019; GAP-51 settled by D-RUN-18, pending tech-lead ratification)",
+  "testEvidence": {
+    "unit": ["T/casewf/refdata/internal/ReferenceTableHandlersTest", "ReferenceTableColumnsTest", "ReferenceRowCheckTest", "ContentHasherTest", "ReferenceLoadFileReaderTest", "ReferenceRowCacheTest", "ReaderLogGateTest", "ReferenceVersionLoggerTest", "ReferenceDataServiceImplTest", "ReferenceDataReadersImplTest", "ReferenceVersionRegistryTest", "ReferenceDecisionRecorderTest", "ReferenceLoadAuditTest", "ReferenceLoadAuthorityTest", "ReferenceLoadDispatcherTest", "ParameterLoadBranchTest", "ActorIdResolverTest", "ReferenceLoadControllerTest", "T/architecture/RecoveryBoundaryTest", "T/architecture/parameters/ReferenceCatalogRowsTest"],
+    "system": ["T/casewf/refdata/ReferenceMigrationIT", "ReferenceLoadIT", "ReferenceLifecycleIT", "ReferenceReadIT", "ReferenceSecurityIT", "ReferenceFlagIT"],
+    "apiTester": "FTS-E1043-01 (the three operations against the local stack)"
+  }
+}

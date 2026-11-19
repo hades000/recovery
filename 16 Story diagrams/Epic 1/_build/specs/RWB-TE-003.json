@@ -1,0 +1,109 @@
+{
+  "key": "RWB-TE-003",
+  "file_stem": "RWB TE 003 Types and contract tests from the API specification",
+  "title": "Types and contract tests from the API specification",
+  "module": "P2 Integration (technical enabler)",
+  "flag": "none",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "OpenAPI types + contract tests",
+  "goal": "Generate server interfaces and TS types from the OpenAPI file, with a contract and 403 test each",
+  "why": "The API spec (79 operations) is the single source of truth. Code cannot drift from it, and every endpoint is proven to refuse the wrong role.",
+  "needs": [
+    "TE-001"
+  ],
+  "unblocks": [],
+  "triggers": [
+    [
+      "BUILD",
+      "Lint api/recovery-api.yaml"
+    ],
+    [
+      "BUILD",
+      "Generate Spring interfaces + TS types"
+    ],
+    [
+      "BUILD",
+      "RecoveryContractTest + AccessContractTest"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Tests use an in-memory database and synthetic fixtures.",
+  "writes": [],
+  "reads": [
+    {
+      "t": "permission (seed)",
+      "note": "role rights used by the 403 tests"
+    }
+  ],
+  "stores": "api/recovery-api.yaml (OpenAPI 3.1, base /api/recovery/v1, x-module, x-capability, x-first-release); build report",
+  "functions": [
+    {
+      "name": "recovery-api rule set",
+      "does": "lint: operationId, x-capability ..."
+    },
+    {
+      "name": "Server generator config",
+      "does": "recovery.generated.web / .model"
+    },
+    {
+      "name": "Front-end generator script",
+      "does": "types + client for ace-web"
+    },
+    {
+      "name": "OperationCatalog",
+      "does": "operation, release, capability"
+    },
+    {
+      "name": "RecoveryContractTest",
+      "does": "request + response vs spec"
+    },
+    {
+      "name": "RecoveryAccessContractTest",
+      "does": "wrong role -> 403 MSG-P4-002"
+    }
+  ],
+  "path": [
+    {
+      "kind": "store",
+      "text": "recovery-api.yaml"
+    },
+    {
+      "kind": "check",
+      "text": "Lint the spec"
+    },
+    {
+      "kind": "function",
+      "text": "Generate server + TS types"
+    },
+    {
+      "kind": "check",
+      "text": "Contract test per operation"
+    },
+    {
+      "kind": "check",
+      "text": "Wrong role -> 403?"
+    },
+    {
+      "kind": "out",
+      "text": "Report: passed / failed / pending"
+    }
+  ],
+  "rules": [
+    "BR1: the OpenAPI file is the only source of endpoints",
+    "BR2: every operation has operationId, x-module, x-capability, x-first-release, Problem schema",
+    "BR3: operations of the current release must be implemented and pass",
+    "BR4: a wrong role gets 403 MSG-P4-002"
+  ],
+  "risks": [
+    "Response schema drift -> 'contract broken' naming the JSON path",
+    "Undocumented status code -> test fails",
+    "Endpoint skips its access check -> 'access not enforced'"
+  ],
+  "example": [
+    "getCasesCaseidTimers returns escalationLevel = 'two' -> fails at $[0].escalationLevel",
+    "getAdminJobs with no controller -> 'has no implementation'",
+    "postQueuesQueueidPlacements (E2) -> pending"
+  ]
+}

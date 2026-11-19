@@ -1,0 +1,124 @@
+{
+  "key": "RWB-E1-014",
+  "file_stem": "RWB E1 014 Decision log copy to the data lake",
+  "title": "Decision log copy to the data lake",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.lake-copy",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Decision log to data lake",
+  "goal": "Copy the decision log to the data lake nightly, matched on count and last hash, so reports avoid the live log",
+  "why": "Reporting and audit need the full decision history without loading the production database. The copy is published only if it matches exactly.",
+  "needs": [
+    "E1-056",
+    "E1-017",
+    "E1-008",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E1-063"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-13 Decision log copy, cron 01:00"
+    ],
+    [
+      "API",
+      "POST /admin/jobs/{jobId}/rerun"
+    ],
+    [
+      "WHO",
+      "RW-COE owns; RW-AUDIT reads the lake"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The source is the Workbench decision log, read only through the P7 DecisionLogExport interface.",
+  "writes": [
+    {
+      "t": "lake_copy_watermark",
+      "note": "last copied chain_seq + hash (copy_name DECISION_LOG)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "decision_log_entry",
+      "note": "only via P7 DecisionLogExport"
+    },
+    {
+      "t": "retention_rule",
+      "note": "DP12 LAKE_COPY period"
+    }
+  ],
+  "stores": "Data lake INT-19: decision-log/business_date=YYYY-MM-DD/ (Parquet + _manifest.json); archive tier for old partitions; Quartz",
+  "functions": [
+    {
+      "name": "DecisionLogLakeCopyJob",
+      "does": "Quartz job, no concurrent run"
+    },
+    {
+      "name": "DecisionLogLakeCopyService",
+      "does": "watermark, cut-off, paging"
+    },
+    {
+      "name": "LakeFileWriter",
+      "does": "Parquet + manifest"
+    },
+    {
+      "name": "LakeCopyReconciler",
+      "does": "REC-08: count + last hash"
+    },
+    {
+      "name": "LakeRetentionService",
+      "does": "old partitions to archive"
+    },
+    {
+      "name": "DecisionLogExport (P7)",
+      "does": "head(), entriesAfter()"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-13 at 01:00"
+    },
+    {
+      "kind": "table",
+      "text": "lake_copy_watermark"
+    },
+    {
+      "kind": "function",
+      "text": "DecisionLogExport pages 5,000"
+    },
+    {
+      "kind": "store",
+      "text": "Parquet + manifest in the lake"
+    },
+    {
+      "kind": "check",
+      "text": "REC-08: count + last hash match?"
+    },
+    {
+      "kind": "out",
+      "text": "Partition complete, watermark moves"
+    }
+  ],
+  "rules": [
+    "BR1: zero-tolerance match on count and last hash, or the partition is not published",
+    "BR2: the log is read only through the P7 interface, never directly",
+    "BR4: partitions older than the retention rule move to the archive tier",
+    "BR6: a failed copy reruns the next night"
+  ],
+  "risks": [
+    "Count or hash mismatch -> not published, watermark kept (MSG-P1-019)",
+    "Export or lake down -> run Failed (MSG-GEN-006)",
+    "Rerun while running -> 409 (MSG-P2-006)"
+  ],
+  "example": [
+    "Live log: 12,480 entries, last hash a3f1...09c2",
+    "Watermark: 12,100, hash 77be...41d0",
+    "2026-11-30: 380 new entries -> partition business_date=2026-11-30 holds 380 rows",
+    "REC-08 matches -> watermark moves to 12,480"
+  ]
+}

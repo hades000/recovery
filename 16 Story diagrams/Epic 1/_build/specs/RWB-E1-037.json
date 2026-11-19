@@ -1,0 +1,152 @@
+{
+  "key": "RWB-E1-037",
+  "file_stem": "RWB E1 037 Role to permission matrix and PDPA field masking by role",
+  "title": "Role to permission matrix as data and PDPA field masking by role",
+  "module": "P4 Access and administration",
+  "flag": "rwb.access.permission-matrix",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Permission matrix + masking",
+  "goal": "Rights, scope and PDPA masking as approved data; personal fields clear only for roles that need them",
+  "why": "Access changes without a deployment, and PDPA masking is decided by Compliance in data. The clear ID number never leaves ACE.",
+  "needs": [
+    "E1-022",
+    "E1-043",
+    "E1-027",
+    "E1-069"
+  ],
+  "unblocks": [
+    "E1-031",
+    "E1-033",
+    "E1-016"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (permission)"
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (masking_rule)"
+    ],
+    [
+      "WHO",
+      "RW-SECADM / RW-COMPLY approve"
+    ],
+    [
+      "CALL",
+      "Every request: ScopeService + FieldMasker"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_customer",
+      "section": "A",
+      "note": "id_no_masked, id_no_last4, cif_no, names, date_of_birth"
+    },
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "contact_value + contact_value_masked (ace_mask_value)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "permission",
+      "note": "role x 14 capability areas, letters CRUDA"
+    },
+    {
+      "t": "masking_rule",
+      "note": "which role sees which personal field clear"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "AC-VERS on each approval"
+    }
+  ],
+  "reads": [
+    {
+      "t": "role",
+      "note": "roles to grant"
+    },
+    {
+      "t": "recovery_case",
+      "note": "owner, team, region for scope"
+    },
+    {
+      "t": "sys_fields",
+      "note": "is_personal flag"
+    }
+  ],
+  "stores": "ACE common module IAM groups (session revalidated every 5 min); access log",
+  "functions": [
+    {
+      "name": "PermissionMatrixLoader",
+      "does": "validates the whole matrix"
+    },
+    {
+      "name": "MaskingRuleLoader",
+      "does": "rules; refuses the clear ID"
+    },
+    {
+      "name": "ReferenceLoadApprovalService",
+      "does": "maker-checker + AC-VERS"
+    },
+    {
+      "name": "ScopeService",
+      "does": "builds ScopeFilter (published)"
+    },
+    {
+      "name": "FieldMasker",
+      "does": "fills @PersonalData fields"
+    },
+    {
+      "name": "SessionRevalidationFilter",
+      "does": "ends sessions on group removal"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "RW-REFADM loads PM-2026.12"
+    },
+    {
+      "kind": "check",
+      "text": "Every role x 14 areas valid"
+    },
+    {
+      "kind": "check",
+      "text": "RW-SECADM approves (not loader)"
+    },
+    {
+      "kind": "table",
+      "text": "permission + AC-VERS entry"
+    },
+    {
+      "kind": "ace",
+      "text": "FieldMasker: masked or clear column"
+    },
+    {
+      "kind": "out",
+      "text": "403 / 404 / masked fields per role"
+    }
+  ],
+  "rules": [
+    "BR1: the matrix version in force is the only source of rights",
+    "BR4: scope first, then permission; out-of-scope data is never returned",
+    "BR6: a personal field is masked unless a rule allows it",
+    "BR10: no tokenization; id_no_last4 is the clearest ID value"
+  ],
+  "risks": [
+    "No right for the area -> 403 (MSG-P4-002)",
+    "Out of scope -> 404 (MSG-P4-003)",
+    "Bad matrix file -> refused in full (MSG-P1-002)"
+  ],
+  "example": [
+    "U-2101 loads PM-2026.12 giving RW-LEGAL 'R' on Queue and allocation; U-2102 (RW-SECADM) approves",
+    "2026-12-01: U-2103 (RW-LEGAL) calls GET /queues -> 200 instead of 403",
+    "No deployment needed"
+  ]
+}

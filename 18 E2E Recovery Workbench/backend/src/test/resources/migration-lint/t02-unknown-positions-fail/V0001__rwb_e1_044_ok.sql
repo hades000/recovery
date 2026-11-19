@@ -1,0 +1,28 @@
+-- Story: RWB-E1-044
+CREATE TABLE rwb_case.t1 (id int);
+CREATE TABLE "rwb_case".t2 (id int);
+CREATE VIEW rwb_case.v1 AS SELECT 1;
+CREATE MATERIALIZED VIEW rwb_case.mv1 AS SELECT 1;
+CREATE SEQUENCE rwb_case.s1;
+CREATE INDEX i1 ON rwb_case.t1 (id);
+CREATE TRIGGER tr1 AFTER INSERT ON rwb_case.t1 FOR EACH ROW EXECUTE FUNCTION ${recoverySchema}.f1();
+CREATE FUNCTION rwb_case.f1() RETURNS int LANGUAGE sql AS $$ SELECT 1 $$;
+CREATE PROCEDURE rwb_case.p1() LANGUAGE sql AS $$ SELECT 1 $$;
+CREATE TYPE rwb_case.ty1 AS (a int);
+CREATE DOMAIN rwb_case.d1 AS int;
+CREATE TABLE ${recoverySchema}.c1 (id int REFERENCES rwb_case.t1(id));
+SELECT 1 FROM rwb_case.t1;
+SELECT 1 FROM ${recoverySchema}.t1 JOIN rwb_case.t1 ON true;
+INSERT INTO rwb_case.t1 VALUES (1);
+UPDATE rwb_case.t1 SET id = 1;
+TRUNCATE rwb_case.t1;
+COMMENT ON TABLE rwb_case.t1 IS 'x';
+COMMENT ON COLUMN rwb_case.t1.id IS 'x';
+COMMENT ON CONSTRAINT k1 ON rwb_case.t1 IS 'x';
+CREATE POLICY p1 ON rwb_case.t1 USING (true);
+ALTER SEQUENCE ${recoverySchema}.s1 OWNED BY rwb_case.t1.id;
+SELECT x::rwb_case.ty1;
+SELECT CAST(x AS rwb_case.ty1);
+GRANT SELECT ON rwb_case.t1 TO rwb_migrator;
+DROP RULE r1 ON rwb_case.t1;
+ALTER RULE r1 ON rwb_case.t1 RENAME TO r2;

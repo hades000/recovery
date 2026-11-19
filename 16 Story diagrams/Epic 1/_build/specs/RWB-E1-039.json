@@ -1,0 +1,127 @@
+{
+  "key": "RWB-E1-039",
+  "file_stem": "RWB E1 039 Access log into the decision log and break glass admin",
+  "title": "Access log into the decision log and break-glass admin",
+  "module": "P4 Access and administration",
+  "flag": "rwb.access.access-log",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Access log + break-glass",
+  "goal": "Every sign-in, refusal, read and export in one audit log; emergency access is time-boxed",
+  "why": "Auditors ask 'who saw this customer?'. The answer is in the hash-chained decision log, and break-glass access is time-boxed and marked on every entry.",
+  "needs": [
+    "E1-008",
+    "E1-022",
+    "E1-027"
+  ],
+  "unblocks": [
+    "E1-031",
+    "E2-005"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "AccessEventPublisher.publish on every read"
+    ],
+    [
+      "API",
+      "POST /admin/break-glass (with incident)"
+    ],
+    [
+      "API",
+      "GET /admin/access-log"
+    ],
+    [
+      "WHO",
+      "RW-PLATADM requests; RW-SECADM approves"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. The log stores field IDs and masked flags, never the personal values read from ACE.",
+  "writes": [
+    {
+      "t": "decision_log_entry",
+      "note": "AC-SIGN, AC-DENY, AC-READ, AC-EXPT, AC-BGON (P7 writer)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "decision_log_entry",
+      "note": "by actor and time (ix_declog_actor_time)"
+    },
+    {
+      "t": "role",
+      "note": "break-glass group"
+    }
+  ],
+  "stores": "ACE audit and SOC log; bank IAM break-glass group; incident system; MSG-P4-004 banner",
+  "functions": [
+    {
+      "name": "AccessLogWriter",
+      "does": "AccessEvent -> DecisionLogRecord"
+    },
+    {
+      "name": "AccessEventPublisher",
+      "does": "called by P3 and P5 (published)"
+    },
+    {
+      "name": "BreakGlassService",
+      "does": "group, incident, reason, AC-BGON"
+    },
+    {
+      "name": "BreakGlassGrantCheck",
+      "does": "grant until endsAt, mark entries"
+    },
+    {
+      "name": "AccessLogQueryService",
+      "does": "maps to the P7 reader"
+    },
+    {
+      "name": "BreakGlassBanner",
+      "does": "React MSG-P4-004 banner"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "User opens RW-2026-000123"
+    },
+    {
+      "kind": "function",
+      "text": "AccessEventPublisher.publish"
+    },
+    {
+      "kind": "function",
+      "text": "AccessLogWriter (same tx)"
+    },
+    {
+      "kind": "table",
+      "text": "decision_log_entry AC-READ"
+    },
+    {
+      "kind": "check",
+      "text": "Logged? else no data"
+    },
+    {
+      "kind": "out",
+      "text": "RW-AUDIT queries AC-READ by case"
+    }
+  ],
+  "rules": [
+    "BR2: no log, no data",
+    "BR3: store field IDs and masked flags only, never values",
+    "BR4: break-glass needs IAM approval, an open incident and a 20+ character reason",
+    "BR5: break-glass window 4 h (assumed) and ends automatically"
+  ],
+  "risks": [
+    "Log unwritable -> 503, no data returned (MSG-P7-003)",
+    "Not in the break-glass group -> 403 (MSG-P4-007)",
+    "Missing incident or short reason -> 422 (MSG-GEN-001 / 002)"
+  ],
+  "example": [
+    "U-4101 (RW-CASEOWN) opens RW-2026-000123 at 10:15 on 2026-12-03",
+    "-> one AC-READ entry",
+    "Fields DF-PTY-007 and DF-PTY-016 recorded as 'masked'"
+  ]
+}

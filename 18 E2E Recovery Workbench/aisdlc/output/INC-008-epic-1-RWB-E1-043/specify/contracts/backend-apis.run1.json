@@ -1,0 +1,72 @@
+{
+  "runId": "INC-008-epic-1-RWB-E1-043",
+  "story": "RWB-E1-043",
+  "source": "API Specification v4.0.0 (requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v4.yaml); story file v7 RWB-E1-043 section 12",
+  "basePath": "/api/recovery/v1",
+  "openApiDelta": "NONE",
+  "featureFlag": "rwb.p3.refdata-versions",
+  "endpoints": [
+    {
+      "id": "API-E1-043-01",
+      "method": "POST",
+      "path": "/admin/reference-loads",
+      "module": "P4 (recovery.access)",
+      "delegatesTo": "recovery.casewf.refdata.api.ReferenceVersionRegistry#recordVersion",
+      "capability": { "area": "REFERENCE_DATA", "right": "C" },
+      "request": {
+        "contentType": "multipart/form-data",
+        "fields": {
+          "file": "CSV (RFC 4180, UTF-8, header row) or XLSX (first sheet)",
+          "table": "LOV-REF-TABLE code with a column definition (one of the 12 in story BR1)",
+          "validFrom": "ISO date, >= current business date"
+        }
+      },
+      "responses": {
+        "201": { "schema": "ReferenceLoad", "fields": ["id (= load_id)", "table", "validFrom", "status=VALIDATED", "rows"], "note": "also returned for an identical repeat (A-06)" },
+        "401": { "messageCode": "MSG-P4-001" },
+        "403": { "messageCode": "MSG-P4-002" },
+        "409": { "messageCode": "MSG-P3-027", "when": "approved version of the table already has this validFrom" },
+        "409b": { "messageCode": "MSG-GEN-004", "when": "numbering race with different content (A-15)" },
+        "422": { "messageCode": ["MSG-P3-027", "MSG-GEN-001"], "when": "table code, row, key or validFrom check failed; no data rows; missing field" },
+        "503": { "messageCode": "MSG-P3-027", "when": "store unavailable or no business date (A-01, A-22)" }
+      },
+      "idempotency": "table_code + valid_from + content_hash",
+      "specRefs": ["SPEC-RWB-E1-043-002", "003", "004", "005", "006", "007", "015", "017", "020"],
+      "tests": ["TC-E1-043-02", "04", "06", "07", "10", "11"],
+      "frontendConsumer": "NONE (backend-only; SCR-40 is Epic 8)"
+    },
+    {
+      "id": "API-E1-043-02",
+      "method": "POST",
+      "path": "/admin/reference-loads/{loadId}/approve",
+      "module": "P4 (recovery.access)",
+      "delegatesTo": "recovery.casewf.refdata.api.ReferenceVersionRegistry#approve",
+      "capability": { "area": "REFERENCE_DATA", "right": "A" },
+      "request": { "path": { "loadId": "uuid" }, "body": "none" },
+      "responses": {
+        "200": { "schema": "ReferenceLoad", "status": "APPROVED", "note": "repeat approval returns the same body, no change" },
+        "401": { "messageCode": "MSG-P4-001" },
+        "403": { "messageCode": "MSG-P4-002" },
+        "404": { "messageCode": "MSG-P4-003" },
+        "409": { "messageCode": ["MSG-P7-002", "MSG-GEN-004", "MSG-P3-027"], "when": "author approves; concurrent change; not approvable or validFrom passed (A-16, A-17)" },
+        "503": { "when": "store unavailable" }
+      },
+      "specRefs": ["SPEC-RWB-E1-043-008", "009", "010", "016", "020"],
+      "tests": ["TC-E1-043-01", "02", "05", "08"],
+      "frontendConsumer": "NONE (backend-only)"
+    }
+  ],
+  "notBuiltHere": [
+    { "path": "GET /admin/lists/{listCode}", "reason": "not in story section 13 build steps (GAP-17)" },
+    { "path": "POST /admin/reference-loads/{loadId}/verify", "reason": "no story v7 behaviour; GAP-11" },
+    { "path": "POST /admin/reference-loads/{loadId}/rollback", "reason": "not in story interface or build steps (GAP-10)" },
+    { "path": "POST /admin/reference-loads with table=PARAMETER or P5 codes", "reason": "owned by RWB-E1-042 / P5 stories (GAP-08)" }
+  ],
+  "publishedJavaInterfaces": {
+    "package": "th.co.scb.ace.demo.recovery.casewf.refdata.api",
+    "types": ["ReferenceVersionRegistry", "ReferenceDataService", "ReferenceVersion", "VersionedRows", "NoVersionInForceException", "ReferenceTableCodeSource (SPI, A-10)"],
+    "signatures": "verbatim from story file v7 section 12",
+    "events": "none"
+  },
+  "problemBody": "application/problem+json: type, title, status, detail, messageCode, messageTh, field, traceId (API Specification v4 Problem)"
+}

@@ -1,0 +1,104 @@
+{
+  "key": "RWB-TE-001",
+  "file_stem": "RWB TE 001 Recovery module folder and boundary test",
+  "title": "Recovery module folder and boundary test",
+  "module": "P2 Integration (technical enabler)",
+  "flag": "none",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Module boundary test",
+  "goal": "Module packages plus a build-time ArchUnit test, so no module reaches another's internals",
+  "why": "19 modules stay separable. The build fails the moment a class imports another module's internals; E1-069 adds BND-6 so nobody reads public.* tables.",
+  "needs": [],
+  "unblocks": [
+    "TE-002",
+    "TE-003",
+    "TE-011",
+    "TE-012",
+    "E1-069"
+  ],
+  "triggers": [
+    [
+      "BUILD",
+      "RecoveryBoundaryTest on every pull request"
+    ],
+    [
+      "BUILD",
+      "Front-end rule no-collection-import"
+    ],
+    [
+      "CALL",
+      "RecoveryAccessGuard on /api/recovery/v1/**"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. This story sets the rules; RWB-E1-069 adds BND-6 'read recovery.v_ace_*, never public.*' to this same test.",
+  "writes": [],
+  "reads": [],
+  "stores": "architecture/recovery-modules.yaml (module map); front-end src/modules/recovery; CI pipeline",
+  "functions": [
+    {
+      "name": "recovery-modules.yaml",
+      "does": "module, package, published packages"
+    },
+    {
+      "name": "RecoveryBoundaryTest",
+      "does": "ArchUnit rules BND-1..BND-5"
+    },
+    {
+      "name": "ModuleMapLoader",
+      "does": "fails on an unlisted package"
+    },
+    {
+      "name": "Boundary fixtures",
+      "does": "one breaking class per rule"
+    },
+    {
+      "name": "RecoveryAccessGuard",
+      "does": "common access check for the API"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Developer opens a pull request"
+    },
+    {
+      "kind": "store",
+      "text": "recovery-modules.yaml"
+    },
+    {
+      "kind": "check",
+      "text": "RecoveryBoundaryTest BND-1..6"
+    },
+    {
+      "kind": "check",
+      "text": "Breaks a rule?"
+    },
+    {
+      "kind": "function",
+      "text": "Fix via <module>.api or an event"
+    },
+    {
+      "kind": "out",
+      "text": "Build passes"
+    }
+  ],
+  "rules": [
+    "BND-1: the collection module only through its published packages",
+    "BND-3: recovery modules meet only through published packages or events",
+    "BND-4: a module uses only its own entities and repositories",
+    "BND-5: HTTP, SFTP and file clients only in recovery.integration.adapter"
+  ],
+  "risks": [
+    "Import of a collection internal class -> build fails (BND-1)",
+    "Using another module's entity -> build fails (BND-4)",
+    "Endpoint called without the right -> 403 (MSG-P4-002)"
+  ],
+  "example": [
+    "recovery.casewf.internal.SampleService imports collection.internal.CollectorRepository -> BND-1 fails",
+    "recovery.integration.internal imports recovery.decision.internal.DecisionLogRepository -> BND-3 fails",
+    "Using recovery.decision.writer.DecisionLogWriter instead -> passes"
+  ]
+}

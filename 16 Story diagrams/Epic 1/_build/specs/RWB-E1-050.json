@@ -1,0 +1,126 @@
+{
+  "key": "RWB-E1-050",
+  "file_stem": "RWB E1 050 Document classification",
+  "title": "Document classification",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.classify",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "ai",
+  "overview_label": "Classify into 6 types",
+  "goal": "Classify each scan into one of six types with a confidence; unsure ones go to people",
+  "why": "Typing documents by hand is slow. A model behind the P10 gateway reads masked text; below 0.80 confidence a person decides.",
+  "needs": [
+    "E1-049",
+    "E1-025"
+  ],
+  "unblocks": [
+    "E1-032",
+    "E1-054"
+  ],
+  "triggers": [
+    [
+      "JOB",
+      "JOB-12 classifyStep, after ocrStep"
+    ],
+    [
+      "CALL",
+      "Classifier via the P10 model gateway (DL33)"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. National ID, account and phone numbers are masked in the text before it leaves the hub.",
+  "writes": [
+    {
+      "t": "document_intake",
+      "note": "predicted_type, confidence, type_candidates, classifier_version"
+    },
+    {
+      "t": "document",
+      "note": "document_type (written on attach by E1-032)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "document_intake",
+      "note": "ocr_status DONE, no type yet"
+    },
+    {
+      "t": "document_text",
+      "note": "first 3 pages"
+    },
+    {
+      "t": "document_type",
+      "note": "the 6 codes in DOCTYPE-2026.11"
+    },
+    {
+      "t": "document_hub_parameter",
+      "note": "CLASSIFY_THRESHOLD 0.80"
+    }
+  ],
+  "stores": "P10 model gateway; ACE PII masking service; evaluation/classification/{runDate}.json",
+  "functions": [
+    {
+      "name": "ClassifyStep",
+      "does": "select, mask, call, rank, threshold"
+    },
+    {
+      "name": "ModelGatewayClassifier",
+      "does": "gateway call with 60 s timeout"
+    },
+    {
+      "name": "TextMasker",
+      "does": "masks ID, account, phone"
+    },
+    {
+      "name": "ClassificationReader",
+      "does": "results (published)"
+    },
+    {
+      "name": "ClassificationEvaluationRunner",
+      "does": "accuracy + 6x6 confusion"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "JOB-12 classifyStep"
+    },
+    {
+      "kind": "table",
+      "text": "document_text, first 3 pages"
+    },
+    {
+      "kind": "function",
+      "text": "TextMasker hides identifiers"
+    },
+    {
+      "kind": "ai",
+      "text": "Classifier via P10 gateway"
+    },
+    {
+      "kind": "check",
+      "text": "Top score >= 0.80?"
+    },
+    {
+      "kind": "out",
+      "text": "Classified, or LOW_CONFIDENCE review"
+    }
+  ],
+  "rules": [
+    "BR2: below the threshold -> review queue (threshold inclusive)",
+    "BR4: timeout -> fall back to review",
+    "BR5: at least 90% accuracy before production",
+    "BR6: identifiers are masked before text leaves the hub"
+  ],
+  "risks": [
+    "Top score below 0.80 -> LOW_CONFIDENCE (MSG-P5-003)",
+    "Classifier over 60 s -> MODEL_UNAVAILABLE (MSG-P5-003)",
+    "Type not in the table -> UNKNOWN_TYPE (MSG-P5-003)"
+  ],
+  "example": [
+    "Scores: COURT_NOTICE 0.62, DEMAND_LETTER 0.21",
+    "-> predicted COURT_NOTICE 0.6200, LOW_CONFIDENCE, both candidates stored",
+    "Go-live needs at least 162 of 180 labelled documents correct"
+  ]
+}

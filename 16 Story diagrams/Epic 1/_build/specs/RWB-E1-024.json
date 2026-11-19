@@ -1,0 +1,145 @@
+{
+  "key": "RWB-E1-024",
+  "file_stem": "RWB E1 024 Document store and index",
+  "title": "Document store and index",
+  "module": "P5 Document hub",
+  "flag": "rwb.dochub.store",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Document store + index",
+  "goal": "Store every document against its case with its type, index fields and versions; legal types are write-once",
+  "why": "Litigation needs one trusted home for notices and deeds. The type table, not the caller, decides write-once and retention; no store without a log entry.",
+  "needs": [
+    "E1-027",
+    "E1-018",
+    "E1-025",
+    "TE-012",
+    "E1-001"
+  ],
+  "unblocks": [
+    "E1-026",
+    "E1-032",
+    "E1-033",
+    "E1-040",
+    "E1-041",
+    "E1-049"
+  ],
+  "triggers": [
+    [
+      "CALL",
+      "DocumentStore.store (upload E1-026, intake E1-032)"
+    ],
+    [
+      "API",
+      "GET /documents/{documentId} (+ /content)"
+    ],
+    [
+      "API",
+      "POST /documents/{documentId}/versions"
+    ],
+    [
+      "JOB",
+      "JOB-12 CopyPendingStep retries blob copy"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. Documents link to Workbench cases; any person link uses person_key, a business key with no FK.",
+  "writes": [
+    {
+      "t": "document",
+      "note": "v1 COPY_PENDING -> STORED; version chain, content_sha256"
+    },
+    {
+      "t": "document_field",
+      "note": "index fields, e.g. black_case_no"
+    },
+    {
+      "t": "decision_log_entry",
+      "note": "DOCATT / STORED before the store"
+    }
+  ],
+  "reads": [
+    {
+      "t": "recovery_case",
+      "note": "via CaseDirectory"
+    },
+    {
+      "t": "document_type",
+      "note": "write_once, retention_class (DOCTYPE-2026.11)"
+    },
+    {
+      "t": "document_hub_parameter",
+      "note": "size and type limits"
+    }
+  ],
+  "stores": "Blob containers rwb-docs, rwb-docs-legal (write-once), rwb-quarantine, intake (TE-012); path {container}/{caseId}/{documentId}/v1; outbox DocumentStored (EV-16)",
+  "functions": [
+    {
+      "name": "DocumentStoreService",
+      "does": "validate, dedup, log, insert, copy"
+    },
+    {
+      "name": "DocumentStore",
+      "does": "store, addVersion, findById"
+    },
+    {
+      "name": "DocumentHubController",
+      "does": "3 document endpoints"
+    },
+    {
+      "name": "DocumentHubRepository",
+      "does": "document + document_field"
+    },
+    {
+      "name": "CopyPendingStep",
+      "does": "JOB-12: retry blob copy"
+    },
+    {
+      "name": "DocumentDetailPanel",
+      "does": "React panel from SCR-30"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "DocumentStore.store(...)"
+    },
+    {
+      "kind": "check",
+      "text": "Case + type + hash dedup"
+    },
+    {
+      "kind": "table",
+      "text": "decision log + document + fields"
+    },
+    {
+      "kind": "store",
+      "text": "Blob: rwb-docs-legal or rwb-docs"
+    },
+    {
+      "kind": "table",
+      "text": "document state STORED"
+    },
+    {
+      "kind": "out",
+      "text": "EV-16 DocumentStored"
+    }
+  ],
+  "rules": [
+    "BR3: write-once and retention come from the type table, never from the caller",
+    "BR4: a write-once document is never changed; a change is a new version",
+    "BR6: the same case + type + hash returns the existing document",
+    "BR8: no store without a decision log entry"
+  ],
+  "risks": [
+    "Delete or replace of a write-once document -> refused (MSG-P5-002)",
+    "Wrong file type -> 415 (MSG-P5-001)",
+    "Blob copy fails -> stays COPY_PENDING, 503 on content (MSG-GEN-006)"
+  ],
+  "example": [
+    "notice-0001.pdf, 1.2 MB, type COURT_NOTICE (write-once, LEGAL10Y), source SCAN",
+    "Case RW-2026-000123 -> rwb-docs-legal/RW-2026-000123/{documentId}/v1",
+    "Index field black_case_no = BC-TEST-0456"
+  ]
+}

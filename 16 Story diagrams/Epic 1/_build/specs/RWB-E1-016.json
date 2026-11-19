@@ -1,0 +1,151 @@
+{
+  "key": "RWB-E1-016",
+  "file_stem": "RWB E1 016 Access control per data product and catalog entries",
+  "title": "Access control per data product and catalog entries",
+  "module": "P1 Recovery data engine",
+  "flag": "rwb.dataengine.product-access",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Data product access + PDPA",
+  "goal": "Role-based read per data product: personal data masked, every read logged, each product findable in a catalog",
+  "why": "PDPA: people see only the products their role needs, the ID number never leaves ACE in clear, and a read that cannot be logged is refused.",
+  "needs": [
+    "E1-037",
+    "E1-001",
+    "E1-064",
+    "E1-069"
+  ],
+  "unblocks": [
+    "E1-018"
+  ],
+  "triggers": [
+    [
+      "API",
+      "GET /data-products/{code}/records?caseId="
+    ],
+    [
+      "API",
+      "GET /admin/data-products?product="
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (data_product_access)"
+    ],
+    [
+      "WHO",
+      "RW-DATASTEW owns; RW-COMPLY sets masking"
+    ]
+  ],
+  "ace": [
+    {
+      "view": "v_ace_customer",
+      "section": "A",
+      "note": "cif_no, names, date_of_birth, id_no_masked, id_no_last4"
+    },
+    {
+      "view": "v_ace_contact",
+      "section": "A",
+      "note": "contact_value (full) + contact_value_masked, usage_code"
+    },
+    {
+      "view": "v_ace_account",
+      "section": "A",
+      "note": "account_key (catalog covers all 30 views)"
+    }
+  ],
+  "ace_note": "",
+  "writes": [
+    {
+      "t": "data_product_access",
+      "note": "who may read which product (versioned, approved)"
+    }
+  ],
+  "reads": [
+    {
+      "t": "party_ext, contact_point_ext",
+      "note": "Workbench flags by key"
+    },
+    {
+      "t": "account_ext, valuation_ext",
+      "note": "Workbench decisions by key"
+    },
+    {
+      "t": "sys_fields",
+      "note": "is_personal flag per field"
+    },
+    {
+      "t": "masking_rule",
+      "note": "which role sees a field clear"
+    },
+    {
+      "t": "data_product, retention_rule",
+      "note": "catalog entries"
+    }
+  ],
+  "stores": "PII access log via the ACE common module to PII Kafka (INT-22). No tokenization anywhere.",
+  "functions": [
+    {
+      "name": "DataProductController",
+      "does": "records + catalog endpoints"
+    },
+    {
+      "name": "DataProductAccessService",
+      "does": "capability, access row, scope, log"
+    },
+    {
+      "name": "DataProductRecordService",
+      "does": "read views by key, mask fields"
+    },
+    {
+      "name": "DataProductCatalogService",
+      "does": "builds catalog entries"
+    },
+    {
+      "name": "DataProductAccessLoader",
+      "does": "applies an approved access version"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "GET /data-products/DP02/records"
+    },
+    {
+      "kind": "check",
+      "text": "Access row in force + case scope?"
+    },
+    {
+      "kind": "ace",
+      "text": "Read v_ace_customer + v_ace_contact"
+    },
+    {
+      "kind": "function",
+      "text": "FieldMasker masks is_personal"
+    },
+    {
+      "kind": "store",
+      "text": "PII access log (names, no values)"
+    },
+    {
+      "kind": "out",
+      "text": "Masked rows + freshness stamp"
+    }
+  ],
+  "rules": [
+    "BR1: read only through a data_product_access row in force",
+    "BR3: with no masking rules loaded, every personal field is masked",
+    "BR4: a read that cannot be logged is refused",
+    "BR8/9: ID masked inside v_ace_customer; phone, email, address masked at the API"
+  ],
+  "risks": [
+    "No access row for the role -> 403 (MSG-P4-002)",
+    "Bad access load -> refused whole (MSG-P1-002)",
+    "PII log down -> 503, no data returned (MSG-GEN-006)"
+  ],
+  "example": [
+    "RW-AUDIT user u-audit-01 reads DP02 for case RW-2026-000102 (person_key P0000102)",
+    "Mobile shows ******5678, ID shows *********0123",
+    "One PII access log entry written: field names only, no values"
+  ]
+}

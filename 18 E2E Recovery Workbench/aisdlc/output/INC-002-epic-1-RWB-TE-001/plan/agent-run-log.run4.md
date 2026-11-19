@@ -1,0 +1,68 @@
+# Agent run log: RWB-TE-001 plan stage (run INC-002-epic-1-RWB-TE-001)
+
+## Round 1 (18 Nov 2026), Implementation Planner
+
+Agent: Implementation Planner (`.claude/agents/implementation-planner.md`), started by the orchestrator (Claude Code). The run stopped once on a usage limit after `plan.md` was written; the orchestrator resumed it and the stage continued from the same state.
+
+Inputs read: `aisdlc/RUN-BRIEF.md`; `specify/spec.md` v4 with `assumptions.md`, `document-gaps.md`, `shared-updates.md`, `contracts/`; `review/spec-gate-review.md` (round-1 plan inputs), `-2.md` (plan inputs 1–5, 7), `-3.md` (plan inputs 1–6), `-5.md` (PASS, RG5-01); increment card `aisdlc/docs/increments/INC-002-epic-1-RWB-TE-001.md`; `aisdlc/evidence/phase0-standards-audit.md` (A-01, A-02); AGENTS.md; `planning-execution-gates.md`; the code (`backend/build.gradle.kts`, every file under `backend/src/main/java/th/co/scb/ace/demo/recovery/`, the backend tests, `application.yaml`, `scripts/dev.ps1`, `.gitlab-ci.yml`, `frontend/eslint.config.js`, `frontend/vite.config.ts`).
+
+Read-only checks run (no file outside `plan/` written, no git):
+- `./gradlew --offline -q dependencies --configuration testCompileClasspath`: SnakeYAML 2.6, ArchUnit 1.5.1, Spring Modulith 2.1.1, spring-data-commons, jakarta.persistence-api, Mockito 5.23 present.
+- `javap` on `spring-modulith-api-2.1.1.jar` (`NamedInterface`: `value`, `name`, `propagate`) and `spring-modulith-core-2.1.1.jar` (`ApplicationModules.of(String, ImportOption)` uses only the given option; `NamedInterface.isUnnamed`, `ApplicationModule.getNamedInterfaces`).
+- File listing of the four baseline packages: 35 files (27 classes, 8 `package-info.java`); search for old-package names outside Java: none.
+
+Decisions taken in this stage (all recorded as PA-01..PA-12 in `assumptions.md`): fixture root and tooling package; source-file check for unannotated `package-info`; failure texts the spec leaves open (PG-01, PG-02); bounded-set assertion for T-TE001-14 (PG-03); property record names; SPEC-024 tests as characterization tests after the move; two plan-level tests T-TE001-15 and T-TE001-16; one-module reading.
+
+Outputs written: `plan.md`, `tasks.md` (TASK-00..TASK-18, `## Pre-submit checks`), `data-model.md`, `contracts/backend-apis.json`, `contracts/frontend-integrations.json`, `tests/scenarios.md`, `assumptions.md`, `document-gaps.md` (PG-01..PG-03, no blocker), `shared-updates.md` (SU-P01..SU-P04), this log.
+
+Status: `PLANNER_STATUS_DETAIL: SUCCESS`; `PLAN_REQUIREMENT_COVERAGE_RESULT: SUCCESS [TOTAL_RULES: 13] [TASK_COVERED_RULES: 13] [MISSING_TASK_RULES: 0]`.
+
+Gate: Compliance Reviewer spawned as a subagent (general-purpose, model opus, effort high); result in `review/plan-gate-review.md`.
+
+## Round 2 (18 Nov 2026), Implementation Planner: plan gate round 1 findings
+
+Plan gate round 1 (`review/plan-gate-review.md`): `FAIL`, Critical 0, High 0, Medium 0, Low 7 (REVIEW-RWB-TE-001-PLAN-001..007). The orchestrator (Claude Code) does not accept Low-only results (D-RUN-09), so every finding was fixed and the plan re-gated. The run stopped once on a usage limit during this round; the orchestrator resumed it.
+
+Backups of round 1: `plan.run1.md`, `tasks.run1.md`, `data-model.run1.md`, `assumptions.run1.md`, `document-gaps.run1.md`, `agent-run-log.run1.md`, `tests/scenarios.run1.md`.
+
+| Finding | Fix |
+|---|---|
+| PLAN-001 TASK-13 row malformed | Search command moved to note N-1 under the task table (and referenced from `tests/scenarios.md` T-TE001-06); a second unescaped pipe in `plan.md` "Plan-time verification" also removed; every table row checked for its cell count by script. Pre-submit check added. |
+| PLAN-002 TASK-01 `check` wiring check | Reworded: `check --dry-run` does not list `:recoveryCoverageVerification`, lists `:recoveryCoverageReport` only as the existing finalizer of `test`, and equals the baseline dry-run saved in TASK-00 (new step 4). |
+| PLAN-003 T-TE001-13 evidence source | Run 1 line quoted from the JUnit XML report `TEST-th.co.scb.ace.demo.recovery.architecture.RecoveryBoundaryTest.xml`; no `testLogging` edit (TASK-17, `tests/scenarios.md`). |
+| PLAN-004 "stricter BND-5" | Reworded in `plan.md` and the pre-submit check: replacement required by SPEC-009 / SPEC-026 (finding 022, D-RCV-41); 16 libraries, allowed in the three map client packages. |
+| PLAN-005 empty-selection guard | New test `determinismRuleSelectsTheSmokeWorkflowImpl` (TASK-11 step 5, `plan.md`, T-TE001-05); the rule itself unchanged. |
+| PLAN-006 violation unit | `data-model.md` §4 and `plan.md` "Tooling design": one distinct (origin, target) pair per rule; exact counts in `tests/scenarios.md` (AC4 three, AC5 four). BND-4 excludes the Spring Data base types themselves. |
+| PLAN-007 BND-5 `{module}` order | `{module}` is the map module with code `P2`; fixture `bnd5` lists P2 last after another client package; PA-04 and PG-02 updated. |
+
+Review observations also taken up: smoke-ID test asserts the format, not the date; frontend `beforeAll` hook timeout and the `setup.ts` check named in `plan.md`.
+
+Gate: Compliance Reviewer spawned again (general-purpose, model opus, effort high); result in `review/plan-gate-review-2.md`.
+
+## Round 3 (18 Nov 2026), Implementation Planner: plan gate round 2 findings
+
+Plan gate round 2 (`review/plan-gate-review-2.md`): `FAIL`, Critical 0, High 0, Medium 0, Low 4 (PLAN-008..011); PLAN-001..007 all RESOLVED. Every Low was fixed (D-RUN-09). Backups of round 2: `plan.run2.md`, `tasks.run2.md`, `data-model.run2.md`, `assumptions.run2.md`, `agent-run-log.run2.md`, `tests/scenarios.run2.md`.
+
+| Finding | Fix |
+|---|---|
+| PLAN-008 guard written in the code task | `determinismRuleSelectsTheSmokeWorkflowImpl` moved into red TASK-09 (description and red Verification); TASK-11 step 5 and its file entry removed; TASK-11 Trace adds SPEC-026 and T-TE001-05. |
+| PLAN-009 BND-5 fallback untested | Fallback completed in `data-model.md` §4 (no P2: origin module; origin in no module: origin package); fixture map `bnd5-nop2.yaml` and test `BoundaryRulesTest.bnd5TextWithoutP2UsesTheOriginModule` added (TASK-05, TASK-06, `tests/scenarios.md`, PA-04); `plan.md` map count 9. |
+| PLAN-010 dry-run baseline location | TASK-00 saves `implement/backend/check-dryrun-baseline.txt`; TASK-01 saves `check-dryrun-after.txt` and records an empty `diff`. |
+| PLAN-011 stale source version | `tasks.md` source is `plan.md` v3; plan, tasks, data-model and scenarios revised to v3. |
+
+Table rows re-checked by script. The brief allows this stage two gate rounds, and both are used, so these fixes are not yet gated. A third gate round (`review/plan-gate-review-3.md`) is left to the orchestrator.
+
+## Round 4 (18 Nov 2026), Implementation Planner: plan gate round 3 findings
+
+Plan gate round 3 (`../review/plan-gate-review-3.md`): `FAIL`, Critical 0, High 0, Medium 1 (PLAN-012), Low 4 (PLAN-013..016); PLAN-001..011 all RESOLVED. Triage by the orchestrator (Claude Code), logged at 05:12: PLAN-012 confirmed and to be fixed without editing `.env.example` or weakening any assertion; PLAN-013..015 fixed as the gate states; PLAN-016 aligned through a shared-update row, a requested open item and gap GC-1 (Blocker = No); D-RUN-19 noted for the T-TE001-14 wording. Backups of round 3 taken before any edit: `plan.run3.md`, `tasks.run3.md`, `data-model.run3.md`, `assumptions.run3.md`, `document-gaps.run3.md`, `shared-updates.run3.md`, `agent-run-log.run3.md`, `tests/scenarios.run3.md`, `contracts/backend-apis.run3.json`.
+
+| Finding | Fix |
+|---|---|
+| PLAN-012 (Medium) binding tests read `.env` under `dev.ps1 test` | New test helper `T/testsupport/ApplicationYamlEnvironment.java`: a `StandardEnvironment` with the system environment and system-property sources removed, plus `application.yaml` loaded by `YamlPropertySourceLoader`; every `ApplicationContextRunner` uses it, so placeholders resolve to their `application.yaml` defaults. Named tests: the five T-TE001-12 methods and the other runner cases of `PlatformConfigTest` and `TemporalConfigTest`; the `SecurityConfigTest` MVC slice pins its `rwb.security.*` keys in `@WebMvcTest(properties = …)`. `ConfigDataApplicationContextInitializer` dropped. TASK-17 Run 3 is the `./scripts/dev.ps1 test` run with `.env` imported and records the five binding tests as passed; TASK-13 keeps the direct `./gradlew test`. T-TE001-12 wording: "the `application.yaml` placeholder defaults". `.env.example` untouched; no assertion changed. |
+| PLAN-013 fallback branches | `bnd5TextWithoutP2UsesTheOriginModule` asserts exactly six lines (four origin-module, two origin-package for `PartnerHttpAdapter`). `bnd4` adds `legacy.ArchivedLoanEntity` outside every module and external root; AC4 now exactly four lines, one with the target-package text. `data-model.md` §4, PA-04 and the SPEC-010 rows (`plan.md`, `tests/scenarios.md` §5) corrected. |
+| PLAN-014 T-TE001-15 unpassable | The scan strips the `package` line, `import` lines and comments, then checks string literals and annotation values only; self-test `packageLiteralScanSeesLiteralsOnly` on inline samples. |
+| PLAN-015 compile-red ordering | TASK-05 ← TASK-04; TASK-08 ← TASK-07; TASK-10 ← TASK-08, TASK-09; note that compile-red tasks (03, 06, 10) run directly before their green tasks (04, 07, 11); graph redrawn. |
+| PLAN-016 one-module reading | SU-P05 (orchestrator settles one reading for all stories; cites PA-12 and RWB-E1-042 CLAR-025), SU-P06 (open item requested for the tech lead), PG-04 / GC-1 in `document-gaps.md` with the gate's citations, Blocker = No; PA-12 kept; `plan.md` "Scope" points to them. |
+| D-RUN-19 note | T-TE001-14 (`tests/scenarios.md`, `plan.md` "`RecoveryBoundaryTest` changes", contract note) states each published list is exact, `access.api` included, and that RWB-E1-042 (D-RUN-19 parameter read interface) and RWB-E1-043 (D-RUN-18 reference-load SPI) extend it in their own merge request; SU-P02 examples updated. |
+
+Revisions set to v4 (plan, tasks, data-model, scenarios). Table rows re-checked by script. Gate: Compliance Reviewer spawned (general-purpose, model opus, effort high); result in `../review/plan-gate-review-4.md`, findings numbered from PLAN-017.

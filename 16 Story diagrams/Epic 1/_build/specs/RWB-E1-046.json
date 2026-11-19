@@ -1,0 +1,127 @@
+{
+  "key": "RWB-E1-046",
+  "file_stem": "RWB E1 046 Template and merge field catalog as data",
+  "title": "Template and merge field catalog as data",
+  "module": "P6 Communications",
+  "flag": "rwb.comms.template-catalog",
+  "status": "READY",
+  "status_text": "Ready for build",
+  "theme": "default",
+  "overview_label": "Template + merge field catalog",
+  "goal": "Templates and merge fields as versioned data with Legal approval, so a letter change is no release",
+  "why": "Every merge code must point at a known dictionary field, and only a Legal-approved template version can be used to generate a letter.",
+  "needs": [
+    "E1-012"
+  ],
+  "unblocks": [
+    "E1-034",
+    "E1-052",
+    "E2-022",
+    "E2-026"
+  ],
+  "triggers": [
+    [
+      "LOAD",
+      "POST /admin/reference-loads (merge_field)"
+    ],
+    [
+      "LOAD",
+      "POST /admin/reference-loads (template)"
+    ],
+    [
+      "CALL",
+      "TemplateCatalog.current(code, lang, date)"
+    ],
+    [
+      "WHO",
+      "RW-REFADM loads; Legal approves"
+    ]
+  ],
+  "ace": [],
+  "ace_note": "No ACE read. merge_field rows name dictionary fields (sys_fields); E1-052 later fills them from the ACE views.",
+  "writes": [
+    {
+      "t": "merge_field",
+      "note": "code -> dictionary field ID + source (MF-2026.11)"
+    },
+    {
+      "t": "template",
+      "note": "versions: DRAFT, APPROVED, WITHDRAWN"
+    }
+  ],
+  "reads": [
+    {
+      "t": "sys_fields",
+      "note": "field IDs a merge code may use"
+    },
+    {
+      "t": "lov_value",
+      "note": "LOV-LANG, LOV-PRODUCT, LOV-NOTICE"
+    }
+  ],
+  "stores": "ACE audit log; reference load record",
+  "functions": [
+    {
+      "name": "MergeFieldLoadHandler",
+      "does": "merge_field load, sys_fields check"
+    },
+    {
+      "name": "TemplateLoadHandler",
+      "does": "template versions, BR1-BR6"
+    },
+    {
+      "name": "MergeCodeScanner",
+      "does": "reads {{CODE}} from the DOCX"
+    },
+    {
+      "name": "TemplateCatalogService",
+      "does": "current, version, mergeFields"
+    },
+    {
+      "name": "TemplateRepository",
+      "does": "template rows"
+    }
+  ],
+  "path": [
+    {
+      "kind": "trigger",
+      "text": "Load merge_field MF-2026.11"
+    },
+    {
+      "kind": "check",
+      "text": "Each code -> a sys_fields ID"
+    },
+    {
+      "kind": "trigger",
+      "text": "Load template DEMAND-MTG"
+    },
+    {
+      "kind": "check",
+      "text": "Merge codes all in catalog?"
+    },
+    {
+      "kind": "table",
+      "text": "template v2 APPROVED"
+    },
+    {
+      "kind": "out",
+      "text": "TemplateCatalog.current() for E1-052"
+    }
+  ],
+  "rules": [
+    "BR1: only an Approved version with a Legal approver is used (CTL-14)",
+    "BR2: current = highest Approved version with valid_from <= the date",
+    "BR3: withdrawn -> no current version, generation holds",
+    "BR4: merge codes must be in the catalog and their field IDs in the dictionary"
+  ],
+  "risks": [
+    "All versions Draft -> TemplateNotApprovedException (MSG-P6-005)",
+    "Unknown merge code -> refused (MSG-P6-006)",
+    "Only Approved version withdrawn -> generation holds (MSG-P6-003)"
+  ],
+  "example": [
+    "MF-2026.11: CASE_NO, CUSTOMER_NAME, POSTAL_ADDRESS, TOTAL_OUTSTANDING, NOTICE_DATE",
+    "DEMAND-MTG / TH approved by LEG-0001 on 2026-11-10 -> v2, current",
+    "v1 stays readable"
+  ]
+}

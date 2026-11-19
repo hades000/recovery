@@ -1,0 +1,7 @@
+<!-- source: 07 Screens and experience/Recovery Workbench Screen Prototype v1.html -->
+<!-- converted: 2026-11-04 from HTML -->
+
+> **Source:** `07 Screens and experience/Recovery Workbench Screen Prototype v1.html`  
+> **Converted from:** HTML
+
+Recovery Workbench screen prototype

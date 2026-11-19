@@ -1,0 +1,156 @@
+{
+  "run_id": "INC-005-epic-1-RWB-TE-003",
+  "story": "RWB-TE-003",
+  "round": "remediation 3",
+  "api_impact": "NO_API_CHANGE",
+  "source": {
+    "file": "api/recovery-api-v4.yaml",
+    "sha256": "535cb46594190f0bf535a2ad3f034e9f50f987a92fe19c0524a2755f5923b891",
+    "sha256_file": "api/recovery-api-v4.sha256",
+    "openapi": "3.1.0",
+    "specification_version": "4.0.0",
+    "document_set_copy": "requirement/legacy/05-technical-architecture/recovery-workbench-api-specification-v4.yaml"
+  },
+  "counts": {
+    "operations_total": 141,
+    "e1": 73,
+    "e2": 38,
+    "e3": 8,
+    "e4": 10,
+    "e5": 8,
+    "e6": 4,
+    "schemas": 172
+  },
+  "changes": [],
+  "target_stack": {
+    "spring_boot": "4.1.2",
+    "jackson": "3",
+    "java": "21",
+    "spikes": [
+      "S-1",
+      "S-2",
+      "S-3",
+      "S-4"
+    ],
+    "generator_options": {
+      "primary": [
+        "interfaceOnly",
+        "skipDefaultInterface",
+        "useTags",
+        "useSpringBoot4",
+        "useJackson3",
+        "useJakartaEe",
+        "requestMappingMode=none",
+        "normalizer SET_TAGS_TO_OPERATIONID=true"
+      ],
+      "fallback_F_1a": "useSpringBoot3 without useSpringBoot4/useJackson3",
+      "pin": "generator version pinned and options re-checked at the plan gate (OPEN-039 amendment)"
+    }
+  },
+  "generated": {
+    "grouping": "one interface per operation, abstract method only, no default or static method, no class-level @RequestMapping, no supporting class",
+    "server_interfaces": "th.co.scb.ace.demo.recovery.integration.generated.web",
+    "server_models": "th.co.scb.ace.demo.recovery.integration.generated.model",
+    "named_interfaces": "generated.web and generated.model on P2 (integration), propagate=false (TE-001 v4 SPEC-004 (d), SU-08)",
+    "output_dir": "backend/build/generated/recovery-api/",
+    "committed": false,
+    "coverage": "measured, no exclusion (SPEC-017 (b); TE003-SP2-DG-01)"
+  },
+  "enforced_operations": [
+    {
+      "operationId": "postAdminWorkflowsSmoke",
+      "method": "POST",
+      "path": "/admin/workflows/smoke",
+      "x_module": "P3",
+      "capability": {
+        "area": "Platform administration",
+        "right": "C"
+      },
+      "statuses": [
+        202,
+        401,
+        403,
+        404,
+        503
+      ],
+      "owner_story": "RWB-E1-071",
+      "change": "retrofit onto generated interface; class mapping /api/recovery/v1, health method mapping /admin/temporal/health; full paths and HTTP contract unchanged",
+      "controller": "th.co.scb.ace.demo.recovery.casewf.admin.TemporalAdminController",
+      "fixture_roles": {
+        "holds": "RW-PLATADM (PRODUCTION)",
+        "lacks": "RW-CASEOWN (PRODUCTION)",
+        "source": "spec §7.7"
+      }
+    }
+  ],
+  "outside_specification": [
+    {
+      "method": "GET",
+      "path": "/platform/info",
+      "decision": "README decision 6",
+      "open_item": "NEW-TE003-A"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/temporal/health",
+      "decision": "README decision 6",
+      "open_item": "NEW-TE003-A"
+    }
+  ],
+  "error_changes": [
+    {
+      "handler": "th.co.scb.ace.demo.recovery.access.internal.ApiExceptionHandler.unexpected",
+      "change": "add traceId to the 500 Problem as API v4 Problem.traceId defines it; no messageCode (NEW-TE003-B)",
+      "spec": "SPEC-013"
+    },
+    {
+      "handler": "th.co.scb.ace.demo.recovery.access.internal.ApiExceptionHandler (all handlers)",
+      "change": "safe logging (audit A-07, D-RUN-15): fixed text, messageCode, exception and root-cause class names, traceId only; no exception message, no Throwable passed to the logger",
+      "spec": "SPEC-022",
+      "test": "T-TE003-35"
+    }
+  ],
+  "suites": {
+    "lint_task": "recoveryApiLint",
+    "contract_test": "th.co.scb.ace.demo.recovery.contract.RecoveryContractTest",
+    "access_test": "th.co.scb.ace.demo.recovery.contract.RecoveryAccessContractTest",
+    "method_security_test": "th.co.scb.ace.demo.recovery.contract.RecoveryMethodSecurityTest",
+    "generated_guard_test": "th.co.scb.ace.demo.recovery.contract.GeneratedInterfaceGuardTest",
+    "runs_in": "Gradle test task (CI backend-unit)",
+    "report": "backend/build/reports/recovery-contract/contract-report.json",
+    "baseline": "api/recovery-api-implementation.yaml",
+    "ruleset": "api/recovery-api-ruleset.yaml",
+    "live_access_case": "TC-TE-003-09 BLOCKED until RWB-E1-022/RWB-E1-037 (OPEN-040)",
+    "handler_mapping_test": "th.co.scb.ace.demo.recovery.contract.HandlerMappingCoverageTest (SPEC-001 (b) live check in the contract context; SPEC-001 (c) static check for sources the slice does not load; list handlerMappingSources in api/recovery-api-implementation.yaml, empty today)",
+    "generated_model_test": "th.co.scb.ace.demo.recovery.contract.GeneratedModelRoundTripTest (each property changed and nulled in turn, default instance, enum fromValue, collection helpers)",
+    "logging_test": "th.co.scb.ace.demo.recovery.access.internal.ApiExceptionHandlerLoggingTest",
+    "fixture_matrix": "backend/src/test/resources/contract/permission-matrix.fixture.yaml"
+  },
+  "dependency_spec": "RWB-TE-001 spec revision v4 (passed its spec gate, round 5)",
+  "headers": {
+    "X-Correlation-Id": "not built: absent from API Specification v4 (TE003-SP2-DG-04; D-RUN-15); correlation by Problem.traceId",
+    "trace": "no new header; trace starts at the service or continues an incoming W3C trace context (ASM-TE003-18); front-end propagation out of scope (NEW-TE003-G, TE003-SG4-DG-01)"
+  },
+  "coverage": {
+    "task": "recoveryCoverageVerification (existing; TE-001 v4 SPEC-020)",
+    "metrics": {
+      "LINE": 0.8,
+      "INSTRUCTION": 0.8,
+      "BRANCH": 0.8,
+      "METHOD": 0.8
+    },
+    "added_class_directories": [
+      "apiTooling output (th.co.scb.ace.tooling.recoveryapi)",
+      "test-scope recovery.contract.support"
+    ],
+    "exclusions": "none",
+    "in_check": false,
+    "run_by": "Implementation Builder: ./gradlew test recoveryCoverageVerification",
+    "ci_job": "not added (D-RCV-05); NEW-TE003-F",
+    "decisions": [
+      "D-RCV-28 (3)",
+      "D-RCV-40"
+    ],
+    "spike_record": "S-1 records the four metrics for the bundle and separately for integration/generated/model"
+  }
+}
