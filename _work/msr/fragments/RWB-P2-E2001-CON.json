@@ -1,0 +1,186 @@
+{
+  "id": "RWB-P2-E2001-CON",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-001",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 The nine contract tables are complete and attributed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 The AceDataReady intake is fixed with its envelope, key and dedupe (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The hand-over activity and its run summary are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The six consumed rwb-source-data elements are fixed and no ACE view is read (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The consumed rwb-case and rwb-decision elements are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 The error envelope, the three keys and the ordering rule are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC7",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC7 The four fakes match this document and drift fails the build (new, D-RCV-60)"
+    },
+    {
+      "id": "AC8",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC8 No cross-schema read and no foreign key leave this service (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2001-CON-01",
+    "TC-P2-E2001-CON-02",
+    "TC-P2-E2001-CON-03",
+    "TC-P2-E2001-CON-04",
+    "TC-P2-E2001-CON-05",
+    "TC-P2-E2001-CON-06",
+    "TC-P2-E2001-CON-07",
+    "TC-P2-E2001-CON-08"
+  ],
+  "reqs": [
+    "REQ-DRI-013",
+    "REQ-CHO-001",
+    "REQ-CHO-005",
+    "REQ-RDF-003"
+  ],
+  "ops_provided": [],
+  "ops_consumed": [
+    "GET /api/recovery/source-data/v1/data-products/freshness",
+    "GET the eligible-account read of the rwb-source-data contract",
+    "GET the customer read of the rwb-source-data contract",
+    "POST /api/recovery/source-data/v1/cases/{caseId}/interactions",
+    "POST the reconciliation-result write of the rwb-source-data contract",
+    "POST /api/recovery/source-data/v1/admin/jobs/{jobId}/rerun",
+    "POST the case-creation operation of the rwb-case contract",
+    "GET /api/recovery/case/v1/cases and GET /api/recovery/case/v1/cases/{caseId}",
+    "GET the parameter and reference-data reads of the rwb-case contract",
+    "GET /api/recovery/decision/v1/decision-log",
+    "GET /api/recovery/access/v1/me/session"
+  ],
+  "events_published": [],
+  "events_consumed": [
+    "rwb.source-data.AceDataReady.v1"
+  ],
+  "workflows": [
+    "EfsHandoverWorkflow",
+    "acceptAceDataReady",
+    "readFreshness",
+    "listCandidates",
+    "buildGroups",
+    "createOrLinkCase",
+    "appendEfsHistory",
+    "writeRunSummary",
+    "recordRunDecision",
+    "releaseRunLock"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (FR-P2-019)",
+  "gaps": [
+    "GAP-0652"
+  ],
+  "assumptions": [
+    "ASM-1087",
+    "ASM-1093",
+    "ASM-1095",
+    "ASM-1096"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2001 CON EFS hand-over with full history - contract v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0652",
+      "title": "rwb-integration EFS hand-over contract: the activity contract, the consumed element shapes, the provided surface and the fakes have no source text",
+      "source": "WP B-P2-01; legacy RWB-E2-001 section 12; RWB-P2-E2001-APP; RWB-P2-E2001-CON; Architecture v5 Text Extract v1 slide 16 (P2 IN: GET /interface-runs, POST /interface-runs/{id}/retry; OUT: FileDelivered, FileFailed); TSD P2 Integration v3 T-A.1; Ownership Map v1",
+      "section": "1, 2, 3, 4, 5, 7, 10, 11, 12.1, 12.2, 12.4, 12.5, 12.7, 12.8, 13, 16",
+      "description": "The contract this slice needs does not exist in the source set. (1) The legacy story fixes a Java interface HandoverRun with one method returning a summary of read, created, linked, repeats, held and gap dates, and four in-process interfaces; nothing fixes a workflow name, activity names, inputs, outputs, a retry policy or a summary element list, so every one of them is a default of this story. (2) Architecture v5 slide 16 and TSD P2 v3 T-A.1 give rwb-integration only the interface-run operations and the outbound-file events; no source gives a hand-over operation, and the step is event-started, so the slice provides no REST operation at all. (3) The element names of the six consumed rwb-source-data operations, the rwb-case case-creation answer (created or linked, linked from, is primary) and the decision-record failure class are not in any source. (4) The error mapping from a failing owner answer to MSG-P1-001, MSG-P2-007, MSG-P7-003, MSG-P2-006, MSG-P4-002 and MSG-GEN-006 is implied by the legacy exception table and by the FSD exception flows, and is fixed here as a default. (5) MSG-P1-001 has two wordings; the FSD P2 Integration v3 wording is used and the legacy wording is not repaired.",
+      "evidence": "Legacy RWB-E2-001 section 12 ('Published interface built (package recovery.integration.handover.api): public interface HandoverRun { HandoverSummary run(LocalDate businessDate); }') and the exception table MSG-P1-001, MSG-P2-007, MSG-P7-003, MSG-P2-006, MSG-P4-002. FSD P2 Integration v3 AC-EXC-P2-007-03, AC-EXC-P2-007-06, AC-EXC-P2-007-07 and VR-P2-001-1. Architecture v5 slide 16 (P2 contract, no hand-over path) and slide 44 (JOB-02 with rwb-case). TSD P2 Integration v3 T-A.1 API-P2-001 to API-P2-014 (no hand-over operation).",
+      "type": "Missing",
+      "area": "Service contract",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-001",
+      "owner_role": "Tech lead",
+      "asm": "ASM-1095, ASM-1096",
+      "proposed": "Fix the workflow, the nine activities, the twelve summary elements and the retry policy in contract/handover-run-activities.yaml; fix the six P1 elements and the P3 element in the two consumed contracts with the element names of this story as the default; carry the placeholder for every path and field name the source does not give; publish the six fakes from the owners' OpenAPI documents and fail the build on drift.",
+      "wp": "B-P2-01"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1087",
+      "text": "The rwb-integration service runs as one login created with the rwb_integration schema by the platform DB work (DP-02); the three stories of this key name it \"the rwb-integration login\" until the name is agreed, and carry it as a secret reference in the chart.",
+      "why": "No source gives the login name and every DP-02 row requires one login per service; the legacy story ran on the shared recovery_svc login.",
+      "read": "RWB-P2-E2001-APP sections 3, 10 and 13; RWB-P2-E2001-CON section 10; RWB-P2-E2001-OPS sections 10 and 11; DP-02 in Template and Rules section R5.5; Architecture v5 slide 41 (one schema and one login per service).",
+      "gap": "GAP-0651",
+      "applied_in": "APP 3, 10, 13; CON 10; OPS 10, 11",
+      "confidence": "High",
+      "confirm": "ACE DB owner and the platform DB story, before the rwb_integration baseline is created",
+      "impact": "None on behaviour: the login is named by role and swapped for the agreed name without a content change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1093",
+      "text": "MSG-P1-001 keeps the wording of FSD P2 Integration v3, \"{product} is from {date}. Today's data is not yet complete.\", and every other message keeps the legacy text of RWB-E2-001 unchanged.",
+      "why": "The legacy story and the FSD carry two different texts for the same message id, and a message renderer can only hold one.",
+      "read": "Legacy RWB-E2-001 section 14 ('{product} is from {date}. Today's load has not arrived.'); FSD P2 Integration v3 VR-P2-001-1 ('{product} is from {date}. Today's data is not yet complete.'); RWB-ITG-E2001-ITG section 14.",
+      "gap": "GAP-0651",
+      "applied_in": "APP 14; CON 14; OPS 14",
+      "confidence": "High",
+      "confirm": "Error and Message Standard owner, before the message catalogue is frozen",
+      "impact": "One alert and one screen text change; no behaviour changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1095",
+      "text": "The activity contract, the twelve HandoverSummary elements and the element names of the consumed rwb-source-data and rwb-case answers are fixed by RWB-P2-E2001-CON as the default for the build, and each owner confirms or corrects them at the contract review without changing the behaviour of the step.",
+      "why": "No source declares a workflow, an activity, a summary element or an owner answer shape for this journey; the app story cannot be built or contract-tested without one agreed shape.",
+      "read": "Legacy RWB-E2-001 section 12 (HandoverRun and the summary element list); RWB-P2-E2001-CON sections 11 and 12.5; Architecture v5 slide 11 (OpenAPI 3.1 contract-first, one hop); Template and Rules section R9.",
+      "gap": "GAP-0652",
+      "applied_in": "CON 1, 7, 11, 12.2, 12.5, 13",
+      "confidence": "Medium",
+      "confirm": "Owners of RWB-P1-E1015-CON, RWB-P3-E2001-CON and RWB-PLT-E1027-CON at the contract review",
+      "impact": "A renamed element touches one client, one activity and its fake; no business value changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1096",
+      "text": "This slice provides no REST operation of its own: the hand-over step is event-started and answers an activity, and the run is observed through the activity result, the run's local decision record and the REC-01 row of rwb-source-data.",
+      "why": "Architecture v5 slide 16 and TSD P2 v3 T-A.1 give rwb-integration only the interface-run and outbox operations, no source gives a hand-over endpoint, and the Ownership Map publishes none; inventing a path would create an unowned resource, and the run is already observable without one.",
+      "read": "Architecture v5 slide 16 (P2 IN: GET /interface-runs, POST /interface-runs/{id}/retry) and slide 44 (JOB-02 owner rwb-case); TSD P2 Integration v3 T-A.1 API-P2-001 to API-P2-014; Ownership Map v1 (GET /admin/scheduled-jobs owner P2; no hand-over path); RWB-ITG-E2001-ITG section 12.2.",
+      "gap": "GAP-0652",
+      "applied_in": "APP 12.1; CON 12.1, 12.9; OPS 12.1",
+      "confidence": "Medium",
+      "confirm": "Solution architect at the Service Contract Catalog review",
+      "impact": "If an operator endpoint is required later, it is an additive change to the integration base with one new gap and no change to the step.",
+      "wp": "B-P2-01"
+    }
+  ]
+}

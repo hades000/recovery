@@ -1,0 +1,25 @@
+﻿How a deviation is handled and cleared
+22 rules in the deviation route set.
+Rule,From state,Event,Condition,Action,To state,Owner,Timer
+R-DEV-01,ANY_STATE,DEVIATION_FLAGGED,deviation_code in (X1..X7),"Pause the stage clock, keep the prescription clock running, route to the named owner",DEV_FLAGGED,Workbench,same day
+R-DEV-02,DEV_FLAGGED,OWNER_ASSIGNED,deviation_code = X1,Assign to the complaint officer,DEV_WITH_OWNER,Complaint officer,None
+R-DEV-03,DEV_FLAGGED,OWNER_ASSIGNED,"deviation_code in (X2,X3)",Assign to the specialist; Legal joins X3 for the estate claim,DEV_WITH_OWNER,"Specialist, Legal",None
+R-DEV-04,DEV_FLAGGED,OWNER_ASSIGNED,deviation_code = X4,Assign to the fraud team and refer to Aric,DEV_WITH_OWNER,Fraud team,None
+R-DEV-05,DEV_FLAGGED,OWNER_ASSIGNED,deviation_code = X5,Assign to Legal; file with the official receiver or the LED before the deadline,DEV_WITH_OWNER,Legal,deadline driven
+R-DEV-06,DEV_FLAGGED,OWNER_ASSIGNED,"deviation_code in (X6,X7)",Agent handles within policy; a person approves an insurance claim,DEV_WITH_OWNER,"Agent, case owner",None
+R-DEV-07,DEV_FLAGGED,FLAG_REJECTED,owner marks the flag as not a deviation,"Clear the flag, record the reason, resume the clock",DEV_REJECTED,Workbench,None
+R-DEV-08,DEV_REJECTED,CLOCK_RESUMED,Any,Return the case to the state it paused in,RESUMED,Previous owner,None
+R-DEV-09,DEV_WITH_OWNER,DEVIATION_RESOLVED,"deviation_code in (X1,X7)",Record the outcome; the same decision resumes,DEV_RESOLVED,Case owner,None
+R-DEV-10,DEV_WITH_OWNER,DEVIATION_RESOLVED,deviation_code = X2,Route to the restructure assessment,DEV_REROUTE,Restructuring officer,None
+R-DEV-11,DEV_WITH_OWNER,INSURANCE_SETTLED,deviation_code = X3 and insurance clears the balance,Close the case,CASE_ENDED,Workbench,None
+R-DEV-12,DEV_WITH_OWNER,ESTATE_CONFIRMED,deviation_code = X3 and insurance does not clear,Return to the route decision against the estate,DEV_REROUTE,Case owner,None
+R-DEV-13,DEV_WITH_OWNER,FRAUD_CONFIRMED,deviation_code = X4 and fraud confirmed,Route to write-off; recovery continues under the fraud case,DEV_REROUTE,Write-off team,None
+R-DEV-14,DEV_WITH_OWNER,FRAUD_NOT_CONFIRMED,deviation_code = X4 and fraud not confirmed,Return to the collections decision,DEV_REROUTE,Case owner,None
+R-DEV-15,DEV_WITH_OWNER,BANKRUPTCY_FILED,deviation_code = X5,"Route to litigation, then to write-off after the receiver reports",DEV_REROUTE,"Legal, litigation officer",None
+R-DEV-16,DEV_WITH_OWNER,CONTACT_RESTORED,deviation_code = X6 and a contact point is verified,Close X6 and return to the paused state,DEV_RESOLVED,Case owner,None
+R-DEV-17,DEV_WITH_OWNER,CONTACT_NOT_FOUND,deviation_code = X6 and skip trace exhausted,Route to escalation or to the route decision,DEV_REROUTE,Case owner,30 days
+R-DEV-18,DEV_RESOLVED,CLOCK_RESUMED,Any,Resume the stage clock and return the case,RESUMED,Previous owner,None
+R-DEV-19,DEV_REROUTE,ROUTE_REOPENED,Any,Recompute the segment and re-run the hard gates,ROUTE_D6,Case owner,None
+R-DEV-20,DEV_WITH_OWNER,SLA_BREACHED,time in DEV_WITH_OWNER exceeds the deviation service level,Escalate to the team manager and report the breach,DEV_WITH_OWNER,Team manager,10 working days
+R-DEV-21,DEV_FLAGGED,OWNER_ASSIGNED,"deviation_code is not one of X1 to X7, or no owner is set for the code",Assign to the case owner's team manager and log the unmapped code,DEV_WITH_OWNER,Team manager,same day
+R-DEV-22,DEV_WITH_OWNER,DEVIATION_RESOLVED,"otherwise, the outcome does not name a next step",Return the case to the route decision and record that the outcome was not mapped,DEV_REROUTE,Case owner,2 working days

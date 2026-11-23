@@ -1,0 +1,529 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-asset (Asset)"
+  version: 5.0.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-asset (Asset, module S5, service wave 2) under
+    Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16 November 2026)
+    by the D-RCV-60 microservice realignment.
+    This document holds 4 operations under REST base /api/recovery/asset/v1; schema rwb_asset; topic
+    rwb.asset.events.v1; Temporal task queue rwb-asset in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: POST /assets/{assetKey}/valuations (now rwb-valuation, owner
+    S1).
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-asset.asyncapi.yaml.
+servers:
+- url: "/api/recovery/asset/v1"
+  description: "Relative to the rwb-asset service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Assets"
+x-service:
+  code: "S5"
+  service: "rwb-asset"
+  name: "Asset"
+  wave: 2
+  schema: "rwb_asset"
+  rest-base: "/api/recovery/asset/v1"
+  topic: "rwb.asset.events.v1"
+  task-queue: "rwb-asset"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-asset.asyncapi.yaml"
+  operations: 4
+paths:
+  /assets:
+    get:
+      tags:
+      - Assets
+      summary: List assets held with age, holding cost and sale status
+      operationId: getAssets
+      x-module: S5
+      x-owner: "S5"
+      x-capability:
+        area: Asset and disposal
+        right: R
+      x-first-release: E3
+      parameters:
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: region
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /assets/{assetKey}:
+    get:
+      tags:
+      - Assets
+      summary: Read one asset with title, condition, valuations, costs and listing
+      operationId: getAssetsAssetkey
+      x-module: S5
+      x-owner: "S5"
+      x-capability:
+        area: Asset and disposal
+        right: R
+      x-first-release: E3
+      parameters:
+      - name: assetKey
+        in: path
+        required: true
+        schema: &id001
+          type: string
+          maxLength: 255
+        description: ACE asset_key of the held asset (v_ace_npa_asset)
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Asset'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /assets/{assetKey}/listings:
+    post:
+      tags:
+      - Assets
+      summary: Set the list price and floor and send for approval
+      operationId: postAssetsAssetkeyListings
+      x-module: S5
+      x-owner: "S5"
+      x-capability:
+        area: Asset and disposal
+        right: C
+      x-first-release: E3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListingRequest'
+      parameters:
+      - name: assetKey
+        in: path
+        required: true
+        schema:
+          type: string
+          maxLength: 255
+        description: ACE asset_key of the held asset (v_ace_npa_asset)
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /listings/{listingId}/rounds:
+    post:
+      tags:
+      - Assets
+      summary: Record an auction round and its result
+      operationId: postListingsListingidRounds
+      x-module: S5
+      x-owner: "S5"
+      x-capability:
+        area: Asset and disposal
+        right: U
+      x-first-release: E4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuctionRoundRequest'
+      parameters:
+      - name: listingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetSale'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Asset:
+      type: object
+      description: An asset the bank holds after repossession, deed in lieu or auction purchase, read from ACE through v_ace_npa_asset (AMIS,
+        RPS).
+      properties:
+        assetKey:
+          type: string
+          maxLength: 255
+          description: ACE asset_key of the held asset; business key
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case the asset is recovered under
+        assetRef:
+          type: string
+          maxLength: 20
+          description: Asset reference
+        assetCode:
+          type: string
+          maxLength: 20
+          description: Asset code
+        assetType:
+          type: string
+          maxLength: 20
+          enum:
+          - DETACHED_HOUSE
+          - TOWNHOUSE
+          - CONDOMINIUM
+          - LAND
+          - COMMERCIAL_BUILDING
+          - VEHICLE
+          description: Detached house, townhouse, condominium, land, vehicle
+        transferInType:
+          type: string
+          maxLength: 20
+          enum:
+          - AUCTION_PURCHASE
+          - DEED_IN_LIEU
+          - REPOSSESSION
+          description: Auction purchase, deed in lieu, repossession
+        fromSegment:
+          type: string
+          maxLength: 20
+          enum:
+          - RETAIL
+          - SSME
+          - CORPORATE
+          description: Segment the asset came from
+        transferInDate:
+          type: string
+          format: date
+          description: Date ownership passed to the bank
+        bookValue:
+          type: number
+          description: Book value, baht
+        auctionPurchasePrice:
+          type: number
+          description: Price paid at auction, baht
+        repossessedDate:
+          type: string
+          format: date
+          description: Date the vehicle was repossessed
+        stockDate:
+          type: string
+          format: date
+          description: Date the vehicle entered stock
+        holdingStatus:
+          type: string
+          maxLength: 15
+          enum:
+          - HELD
+          - LISTED
+          - UNDER_OFFER
+          - SOLD
+          - TRANSFERRED
+          - RENTED
+          description: Held, listed, under offer, sold, transferred, rented
+        holdingCostToDate:
+          type: number
+          description: Holding cost to date, baht
+      required:
+      - assetKey
+      - assetRef
+      - assetType
+      - transferInType
+      - transferInDate
+      - bookValue
+      - holdingStatus
+    AssetSale:
+      type: object
+      description: The sale of an asset.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the asset sale
+          readOnly: true
+        assetKey:
+          type: string
+          maxLength: 255
+          description: ACE asset_key of the asset sold (v_ace_npa_asset)
+        listingId:
+          type: string
+          format: uuid
+          description: The listing this record belongs to
+        contractDate:
+          type: string
+          format: date
+          description: Sale contract date
+        saleDate:
+          type: string
+          format: date
+          description: Sale date
+        salePrice:
+          type: number
+          description: Sale price, baht
+        transferFee:
+          type: number
+          description: Transfer fee, baht
+        specificBusinessTax:
+          type: number
+          description: Specific business tax, baht
+        corporateIncomeTax:
+          type: number
+          description: Corporate income tax, baht
+        gainLoss:
+          type: number
+          description: Sale price less book value and costs
+        incentiveAmount:
+          type: number
+          description: Incentive paid on the sale, baht
+      required:
+      - id
+      - assetKey
+      - contractDate
+      - saleDate
+      - salePrice
+    Listing:
+      type: object
+      description: An asset offered for sale, with its prices and rounds.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the listing
+          readOnly: true
+        assetKey:
+          type: string
+          maxLength: 255
+          description: ACE asset_key of the asset offered (v_ace_npa_asset)
+        saleChannel:
+          type: string
+          maxLength: 15
+          enum:
+          - DUTCH_AUCTION
+          - BROKER
+          - DIRECT
+          - LED_AUCTION
+          - RAMC
+          description: Dutch auction, broker, direct, LED auction, RAMC
+        startPrice:
+          type: number
+          description: Start price, baht
+        floorPrice:
+          type: number
+          description: Floor price approved, baht
+        roundNo:
+          type: integer
+          description: Current price round
+        listedAt:
+          type: string
+          format: date-time
+          description: When listed
+        status:
+          type: string
+          maxLength: 12
+          enum:
+          - DRAFT
+          - LIVE
+          - UNDER_OFFER
+          - SOLD
+          - WITHDRAWN
+          description: Draft, live, under offer, sold, withdrawn
+      required:
+      - id
+      - assetKey
+      - saleChannel
+      - startPrice
+      - floorPrice
+      - roundNo
+      - status
+    ListingRequest:
+      type: object
+      properties:
+        channel:
+          type: string
+          enum:
+          - DUTCH_AUCTION
+          - BROKER
+          - DIRECT
+          - LED_AUCTION
+          - RAMC
+        listPrice:
+          type: number
+        floorPrice:
+          type: number
+    AuctionRoundRequest:
+      type: object
+      properties:
+        roundNo:
+          type: integer
+        heldOn:
+          type: string
+          format: date
+        result:
+          type: string
+        price:
+          type: number
+    Approval:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        decision:
+          type: string
+        preparedBy:
+          type: string
+        level:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        messageCode:
+          type: string
+        messageTh:
+          type: string
+        field:
+          type: string
+        traceId:
+          type: string
+    AssetPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer

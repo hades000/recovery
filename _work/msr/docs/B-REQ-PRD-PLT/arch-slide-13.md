@@ -1,0 +1,50 @@
+
+Who calls whom: the full connection matrix
+
+Row = the service that starts the interaction; column = the service it calls or listens to
+
+| starts ↓ / target → | P3 | P7 | P4 | S8 | S1 | S2 | S3 | S4 | S5 | S6 | S7 | P5 | P6 | P8 | S9 | P2 | P1 | P9 | P10 | ACE Cmn | ACE DB | Outside |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| P3 Case |  | E | R | T E | T E | T E | T E | T E | T E | T E | T E | E | E | E | E |  | T E |  |  |  |  |  |
+| P7 Decision |  |  | R |  |  |  |  |  |  |  |  |  | E |  |  |  |  |  | E |  |  | F |
+| P4 Access |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | R |  |  |
+| S8 Deviation | E |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | R E |  | T E |  |  |  |
+| S1 Valuation |  | T E |  |  |  |  |  |  |  |  |  |  |  |  |  |  | R |  | T |  |  |  |
+| S2 Treatment |  | T E |  | E |  |  |  |  |  |  |  | T |  | T E |  |  |  |  |  | N |  |  |
+| S3 Guarantee |  | T |  |  |  |  |  |  |  |  |  |  | T E | E |  |  |  |  |  |  |  |  |
+| S4 Litigation |  | T |  |  |  |  |  |  |  |  |  |  | T E |  | T E |  |  |  |  |  |  |  |
+| S5 Asset |  | T |  |  |  |  |  | E |  |  |  |  |  | T E | T E |  |  |  |  |  |  |  |
+| S6 Debt sale |  | T |  |  |  |  |  |  |  |  |  | T |  | T E |  | T |  |  |  |  |  |  |
+| S7 Write-off |  | T |  |  |  |  |  |  |  |  |  |  |  | T E |  |  | R E |  |  |  |  |  |
+| P5 Document |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | T E |  |  | F |
+| P6 Comms | E | T |  | E |  | E |  |  |  |  |  | T |  | E |  | T |  |  |  | R |  |  |
+| P8 Payment |  | E |  |  |  | E |  |  | E | E | E |  |  |  |  | T | T E |  |  |  |  |  |
+| S9 Partner |  |  |  |  |  |  |  |  |  |  |  | R |  |  |  |  |  |  |  |  |  | R |
+| P2 Integration |  |  |  |  |  |  |  |  |  |  |  | R |  |  |  |  |  |  |  |  |  | F |
+| P1 Source data |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | S |  |
+| P9 Reporting | E |  |  |  |  | E | E |  |  | E | E |  | E |  |  | T | T |  |  |  |  |  |
+| P10 Agent | E |  |  |  |  |  |  |  |  |  |  | R E |  |  |  |  | R |  |  |  |  | R |
+
+
+Cells
+
+T Temporal / N Nexus
+
+R REST
+
+E listens to events
+
+S SQL views
+
+F file
+
+Route services reach shared capabilities through Temporal, never REST; only rwb-source-data touches ACE's tables.
+
+13
+
+Notes: Letters: R = REST call; T = Temporal (activity on the owner's queue or child workflow there); N = Nexus operation into ACE; E = subscribes to the column's Kafka events; S = SQL views; F = file. Built from the per-service contracts on the next slides.
+
+Not shown because every service does it: audit and PII logs to ACE Common (Kafka), DecisionRecorded to rwb-decision, permission data cached from rwb-access, traces to OpenTelemetry.
+
+Reading tips: rwb-case's row shows it orchestrates the route services through Temporal children; rwb-decision and rwb-reporting listen widely (ledger and projections) but call almost nobody; route services call shared capabilities (decision, document, payment, partner, comms) through Temporal, never through REST.
+

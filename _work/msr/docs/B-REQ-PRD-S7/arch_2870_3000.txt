@@ -1,0 +1,130 @@
+2870:| Module | Service | Owns | Schema | First API path | Kafka topic | Task queue | Wave |
+2871:|---|---|---|---|---|---|---|---|
+2872:| P3 | rwb-case | case, CMMN state, queues, tasks, allocation, timers | rwb_case | /cases/{id} | rwb.case.events.v1 | rwb-case | 1 |
+2873:| P7 | rwb-decision | approvals, central decision ledger, DMN model registry | rwb_decision | /decisions | rwb.decision.events.v1 | rwb-decision | 1 |
+2874:| P4 | rwb-access | Recovery roles as data, scope, masking policy, DoA table, access log | rwb_access | /authorise | rwb.access.events.v1 | rwb-access | 1 |
+2875:| S8 | rwb-deviation | X1-X7 screening, pause, handling, return | rwb_deviation | /deviations | rwb.deviation.events.v1 | rwb-deviation | 2 |
+2876:| P1 | rwb-source-data | ACE view contract, extension tables, freshness, reconciliation | rwb_source_data | /customers/{id} | rwb.source-data.events.v1 | rwb-source-data | 1 |
+2877:| P9 | rwb-reporting | measures, snapshots, steering dashboard, regulatory reports | rwb_reporting | /dashboards/{id} | rwb.reporting.events.v1 | rwb-reporting | 1 |
+2878:| P10 | rwb-agent | agent policies, prompts, runs, guardrails, evaluations | rwb_agent | /agent-runs/{id} | rwb.agent.events.v1 | rwb-agent | 1 |
+2879:| P2 | rwb-integration | interface config, file runs, outbound items, ACE integration paths | rwb_integration | /interface-runs | rwb.integration.events.v1 | rwb-integration | 1 |
+2880:| P5 | rwb-document | metadata, custody, OCR text and fields, signatures, retention | rwb_document | /documents | rwb.document.events.v1 | rwb-document | 1 |
+2881:| P6 | rwb-comms | notices, templates, merge fields, proof of delivery | rwb_comms | /notices | rwb.comms.events.v1 | rwb-comms | 1 |
+2882:| P8 | rwb-payment | payment and proceeds matching, fees, bookings, posting files | rwb_payment | /cases/{id}/payments | rwb.payment.events.v1 | rwb-payment | 2 |
+2883:| S9 | rwb-partner | panel, partner users, instructions, results, fees, scorecards | rwb_partner | /partners | rwb.partner.events.v1 | rwb-partner | 4 |
+2884:| S1 | rwb-valuation | valuations, D6 route decision, route agent output | rwb_valuation | /cases/{id}/valuation | rwb.valuation.events.v1 | rwb-valuation | 3 |
+2885:| S2 | rwb-treatment | treatments, contracts, settlement and deed-in-lieu agreements, plan timers | rwb_treatment | /treatments | rwb.treatment.events.v1 | rwb-treatment | 2 |
+2886:| S3 | rwb-guarantee | TCG and insurance claims, guarantor notices and pursuit | rwb_guarantee | /guarantee-claims | rwb.guarantee.events.v1 | rwb-guarantee | 3 |
+2887:| S4 | rwb-litigation | legal actions, hearings, judgments, enforcement, LED auction ladder | rwb_litigation | /legal-actions | rwb.litigation.events.v1 | rwb-litigation | 3 |
+2888:| S5 | rwb-asset | assets taken on, holding, floor price, listings, auction rounds | rwb_asset | /assets | rwb.asset.events.v1 | rwb-asset | 2 |
+2889:| S6 | rwb-debtsale | lots, data room, buyer terms, bids, award, transfer | rwb_debtsale | /lots | rwb.debtsale.events.v1 | rwb-debtsale | 3 |
+2890:| S7 | rwb-writeoff | eligibility, committee, posting, recovery after charge-off | rwb_writeoff | /write-offs | rwb.writeoff.events.v1 | rwb-writeoff | 4 |
+2891:
+2892:
+2893:41
+2894:
+2895:Notes: Every service follows the same naming: schema rwb_<name> in the ACE database with its own login; REST under /api/recovery/<name>/v1 behind gateway-bff; Kafka topic rwb.<name>.events.v1; Temporal task queue rwb-<name> in namespace rwb-recovery. Wave = the delivery wave in which the service is created (Wave 1 = Epic 1).
+2896:
+2897:## Slide 42
+2898:
+2899:A2 · Event catalogue 1/2
+2900:
+2901:Every business event: producer topic and consuming services (CloudEvents on Kafka, key caseId)
+2902:
+2903:| # | Event | Producer | Topic | Consumers |
+2904:|---|---|---|---|---|
+2905:| 01 | CaseCreated | rwb-case | rwb.case.events.v1 | rwb-agent, rwb-deviation, rwb-reporting |
+2906:| 02 | CaseAllocated | rwb-case | rwb.case.events.v1 | rwb-reporting |
+2907:| 03 | CaseAllocationFailed | rwb-case | rwb.case.events.v1 | rwb-case |
+2908:| 04 | CaseTransferred | rwb-case | rwb.case.events.v1 | rwb-reporting |
+2909:| 05 | CaseStateChanged | rwb-case | rwb.case.events.v1 | rwb-comms, rwb-reporting |
+2910:| 06 | DeviationRaised | rwb-deviation | rwb.deviation.events.v1 | rwb-case, rwb-comms, rwb-treatment |
+2911:| 07 | DeviationCleared | rwb-deviation | rwb.deviation.events.v1 | rwb-case, rwb-comms |
+2912:| 08 | DecisionRecorded | all 19 | rwb.decision-record.v1 | rwb-decision, rwb-reporting |
+2913:| 09 | ApprovalRequested | rwb-decision | rwb.decision.events.v1 | gateway-bff (inbox) |
+2914:| 10 | TreatmentApproved | rwb-treatment | rwb.treatment.events.v1 | rwb-comms, rwb-payment |
+2915:| 11 | TreatmentBooked | rwb-payment | rwb.payment.events.v1 | rwb-case, rwb-treatment |
+2916:| 12 | PaymentMissed | rwb-payment | rwb.payment.events.v1 | rwb-case, rwb-treatment, rwb-comms |
+2917:| 13 | NoticeGenerated | rwb-comms | rwb.comms.events.v1 | rwb-decision |
+2918:| 14 | NoticeDispatched | rwb-comms | rwb.comms.events.v1 | rwb-reporting |
+2919:| 15 | NoticeDelivered | rwb-comms | rwb.comms.events.v1 | rwb-litigation, rwb-guarantee, rwb-case |
+2920:| 16 | DocumentStored | rwb-document | rwb.document.events.v1 | rwb-agent, rwb-case |
+2921:| 17 | DocumentFieldsExtracted | rwb-document | rwb.document.events.v1 | rwb-case |
+2922:| 18 | TimerDue | durable timer | — | (retired: timer inside the workflow) |
+2923:| 19 | TimerBreached | rwb-case | rwb.case.events.v1 | gateway-bff (inbox) |
+2924:
+2925:
+2926:42
+2927:
+2928:Notes: Events carry IDs and facts, never personal data. Each producer writes to its outbox in the same transaction as its state change; a relay publishes to its topic. Consumers dedupe through their inbox table. Schemas are versioned in the registry with BACKWARD compatibility; the AsyncAPI document per service is the contract.
+2929:
+2930:## Slide 43
+2931:
+2932:A3 · Event catalogue 2/2
+2933:
+2934:Every business event: producer topic and consuming services (CloudEvents on Kafka, key caseId)
+2935:
+2936:| # | Event | Producer | Topic | Consumers |
+2937:|---|---|---|---|---|
+2938:| 20 | InstructionIssued | rwb-partner | rwb.partner.events.v1 | partner portal |
+2939:| 21 | PartnerResultSubmitted | rwb-partner | rwb.partner.events.v1 | rwb-litigation, rwb-asset, rwb-case |
+2940:| 22 | AssetTakenOn | rwb-asset | rwb.asset.events.v1 | rwb-case, rwb-payment |
+2941:| 23 | LotAwarded | rwb-debtsale | rwb.debtsale.events.v1 | rwb-case, rwb-payment |
+2942:| 24 | WriteOffApproved | rwb-writeoff | rwb.writeoff.events.v1 | rwb-case, rwb-payment, rwb-reporting |
+2943:| 25 | ProceedsMatched | rwb-payment | rwb.payment.events.v1 | rwb-case, rwb-asset, rwb-debtsale, rwb-writeoff, rwb-guarantee |
+2944:| 26 | AceDataReady | rwb-source-data | rwb.source-data.events.v1 | rwb-case, rwb-payment, rwb-deviation, rwb-writeoff |
+2945:| 27 | AceDataLate | rwb-source-data | rwb.source-data.events.v1 | alerts, gateway-bff banner |
+2946:| 28 | AgentRunCompleted | rwb-agent | rwb.agent.events.v1 | rwb-decision, rwb-document, rwb-deviation |
+2947:| 29 | CaseEvent (signal) | case router | — | CaseWorkflow (Temporal signal) |
+2948:| 30 | RulePackageInForce | rwb-decision | rwb.decision.events.v1 | rwb-case, rwb-valuation, rwb-treatment, rwb-payment |
+2949:| + | RouteDecided | rwb-valuation | rwb.valuation.events.v1 | rwb-case |
+2950:| + | AssetSold | rwb-asset | rwb.asset.events.v1 | rwb-payment, rwb-case |
+2951:| + | JudgmentRecorded, AuctionResult | rwb-litigation | rwb.litigation.events.v1 | rwb-asset, rwb-case |
+2952:| + | TreatmentClosed, GuaranteeClaim* | rwb-treatment / guarantee | — | rwb-case, rwb-reporting |
+2953:| + | AccountsTransferred | rwb-debtsale | rwb.debtsale.events.v1 | rwb-case, rwb-reporting |
+2954:| + | AccessPolicyChanged, DoaLimitChanged | rwb-access | rwb.access.events.v1 | all (cache refresh) |
+2955:| + | FileDelivered, FileFailed | rwb-integration | rwb.integration.events.v1 | requesting service |
+2956:
+2957:
+2958:43
+2959:
+2960:Notes: Events carry IDs and facts, never personal data. Each producer writes to its outbox in the same transaction as its state change; a relay publishes to its topic. Consumers dedupe through their inbox table. Schemas are versioned in the registry with BACKWARD compatibility; the AsyncAPI document per service is the contract.
+2961:
+2962:## Slide 44
+2963:
+2964:A4 · Job map: every scheduled or triggered job and its owner
+2965:
+2966:No shared Quartz tables: a Temporal Schedule or event-started workflow in the owning service; bank Airflow triggers the edges
+2967:
+2968:| Job | Name | When | Owner | Mechanism |
+2969:|---|---|---|---|---|
+2970:| JOB-02 | Case creation | Airflow: ACE data ready | rwb-case | AceDataReady → DailyCaseRun |
+2971:| JOB-03 | Morning allocation | after 02, by 07:00 | rwb-case | DailyCaseRun step |
+2972:| JOB-04 | Reconciliation | Airflow: ACE data ready | rwb-source-data | event-triggered workflow |
+2973:| JOB-05 | Timer check | every 5 min | all | durable timers (retired) |
+2974:| JOB-06 | Rebalancing | 06:30 | rwb-case | Schedule |
+2975:| JOB-07 | Payment matching | Airflow: ACE data ready | rwb-payment | event-triggered workflow |
+2976:| JOB-08 | Booking confirmation | Airflow: ACE data ready | rwb-payment | event-triggered workflow |
+2977:| JOB-10 | WIN notices | 16:00 | rwb-comms + integration | Airflow file window + workers |
+2978:| JOB-11 | Outbox sender | every minute | every service | outbox relay to Kafka |
+2979:| JOB-12 | Document intake | every 15 min | rwb-document | event + KEDA workers |
+2980:| JOB-13 | Decision log copy | 01:00 | rwb-decision | ingest is continuous (Kafka) |
+2981:| JOB-14 | Hash-chain check | 02:00 | rwb-decision | Schedule |
+2982:| JOB-15 | Reporting extract | 01:30 | rwb-reporting | Airflow trigger (no data lake) |
+2983:| JOB-16 | Write-off scan | monthly, 3rd working day | rwb-writeoff | Schedule |
+2984:| JOB-17 | Retention | monthly, 1st Sunday | rwb-document | Schedule |
+2985:| JOB-18 | Access review list | six-monthly | rwb-access | Schedule |
+2986:| JOB-19 | Re-appraisal | monthly | rwb-asset | Schedule |
+2987:| JOB-20 | Rule promote | 00:01 | rwb-decision | Schedule → RulePackageInForce |
+2988:| JOB-21 | Stuck workflow scan | every 5 min | platform | visibility query + alert |
+2989:| JOB-22 | Smoke workflow | 06:00 | platform | Schedule |
+2990:
+2991:
+2992:44
+2993:
+2994:Notes: The ACE shared Quartz and batch tables are no longer used by Recovery. Each job runs in its owning service: a Temporal Schedule (cron, with overlap policy SKIP and catch-up window) or a workflow started by an event such as AceDataReady. The bank's Airflow (replacing Control-M; for discussion) owns only the cross-system edges: it runs the ACE ingestion DAG and signals 'business date ready', so JOB-02, 04, 07 and 08 start from AceDataReady; it opens the WIN and debt-buyer file windows (JOB-10); and it triggers the regulatory extract (JOB-15) with reruns by business date.
+2995:
+2996:## Slide 45
+2997:
+2998:A5 · Questions architects ask 1/2
+2999:

@@ -1,0 +1,45 @@
+140: Write-off
+143: rwb-writeoff · S7
+203: Write-off & recovery
+204: S7 · rwb-writeoff
+328: Write-off
+354: v5 keeps roles 1, 2 and 4 as shared platform, keeps 5 and 6 as rwb-document (P5) and rwb-agent (P10), and splits recovery-core into the other 17 module services. Business schedules (case creation, rule promotion, write-off scan) run as Temporal Schedules in the owning service; Role 4 becomes the ban
+585: Write-off
+929: | S7 Write-off |  | T |  |  |  |  |  |  |  |  |  |  |  | T E |  |  | R E |  |  |  |  |  |
+973: EVT  RouteDecided · DeviationRaised / Cleared · PaymentMissed, TreatmentBooked, ProceedsMatched · LotAwarded, AssetTakenOn, WriteOffApproved · AceDataReady, RulePackageInForce
+978: TMP  Source data: listEligibleAccounts(businessDate) · Valuation: child: RouteDecisionWorkflow · Treatment: child: stage workflows · Litigation, Asset, Debt sale, Write-off, Guarantee: child · Deviation: child: DeviationWorkflow
+1026: IN: REST GET /cases/{id}, /cases?queue=; POST /cases/{id}/actions; GET /tasks · POST /tasks/{id}/complete; GET /case-summary/{id} (for ACE shared case view) | events RouteDecided; DeviationRaised / Cleared; PaymentMissed, TreatmentBooked, ProceedsMatched; LotAwarded, AssetTakenOn, WriteOffApproved; 
+1027: OUT: schema rwb_case (case, CMMN state, queues, tasks, allocation, timers) | topic rwb.case.events.v1: CaseCreated, CaseAllocated, CaseAllocationFailed, CaseTransferred, CaseStateChanged, TimerBreached | TMP Source data: listEligibleAccounts(businessDate) · Valuation: child: RouteDecisionWorkflow · 
+1221: EVT  AceDataReady · TreatmentApproved, LotAwarded · AssetSold, WriteOffApproved
+1259: IN: REST GET /cases/{id}/payments; POST /proceeds/{id}/allocate (manual) | events AceDataReady; TreatmentApproved, LotAwarded; AssetSold, WriteOffApproved | Temporal Act: matchPayments, confirmBookings; Act: postProceeds (saga step)
+1422: Service contracts 7/7 · Write-off, the gateway, and what every service does
+1430: REST  GET/POST /write-offs · POST /write-offs/{id}/submit
+1431: EVT  AceDataReady (GL write-off) · ProceedsMatched
+1432: TMP  WriteOffWorkflow · Schedule: scan, 3rd working day
+1434: DB  writes schema rwb_writeoff: eligibility, committee, posting, recovery after charge-off
+1435: EVT  rwb.writeoff.events.v1: WriteOffApproved
+1439: S7 · rwb-writeoff
+1440: Write-off & recovery
+1441: queue rwb-writeoff
+1442: rwb.writeoff.events.v1
+1481: rwb-writeoff (S7, Write-off & recovery)
+1482: IN: REST GET/POST /write-offs; POST /write-offs/{id}/submit | events AceDataReady (GL write-off); ProceedsMatched | Temporal WriteOffWorkflow; Schedule: scan, 3rd working day
+1483: OUT: schema rwb_writeoff (eligibility, committee, posting, recovery after charge-off) | topic rwb.writeoff.events.v1: WriteOffApproved | TMP Decision: child: committee approval · Payment: postProceeds | REST Source data: GL outcome
+1633: CaseWorkflow (rwb-case) · RouteDecision, Treatment, Litigation, AssetDisposal, DebtSale, WriteOff, Deviation
+1752: rwb-writeoff
+1837: Write-off
+1838: rwb-writeoff
+1857: Notes: CaseWorkflow (rwb-case, workflow ID = case ID) is the parent from entry to closure. Each stage is a child workflow started on the owner's task queue: RouteDecisionWorkflow (rwb-valuation, with ApprovalWorkflow from the kit on rwb-decision), DeviationWorkflow (rwb-deviation, can start at any t
+2026: Debt transfer, write-off, auction sale and title transfer wait until the central ledger confirms the record. Everything else carries on at full speed.
+2037: Strict mode: irreversible steps (debt transfer, write-off, auction sale, title transfer) wait for the ledger acknowledgement before executing.
+2095: rwb_writeoff
+2455: Write-off
+2626: Write-off & recovery
+2627: S7 · rwb-writeoff
+2647: Recovery-specific: Case and workflow (P3, the pattern is reusable), Treatment (S2), Guarantees (S3), Litigation (S4), Write-off (S7).
+2774: S7 · Write-off
+2890: | S7 | rwb-writeoff | eligibility, committee, posting, recovery after charge-off | rwb_writeoff | /write-offs | rwb.writeoff.events.v1 | rwb-writeoff | 4 |
+2942: | 24 | WriteOffApproved | rwb-writeoff | rwb.writeoff.events.v1 | rwb-case, rwb-payment, rwb-reporting |
+2943: | 25 | ProceedsMatched | rwb-payment | rwb.payment.events.v1 | rwb-case, rwb-asset, rwb-debtsale, rwb-writeoff, rwb-guarantee |
+2944: | 26 | AceDataReady | rwb-source-data | rwb.source-data.events.v1 | rwb-case, rwb-payment, rwb-deviation, rwb-writeoff |
+2983: | JOB-16 | Write-off scan | monthly, 3rd working day | rwb-writeoff | Schedule |

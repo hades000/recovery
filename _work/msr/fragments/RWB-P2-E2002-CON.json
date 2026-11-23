@@ -1,0 +1,168 @@
+{
+  "id": "RWB-P2-E2002-CON",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-002",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 The plan-status resource and the operation are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 The ACE interface and the consumed reads are published with one budget (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The status validation and the error envelope are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The consumed read of the case and the access check are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The five fakes answer every declared shape (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 The split is stated and the ownership conflicts are reconciled (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2002-CON-01",
+    "TC-P2-E2002-CON-02",
+    "TC-P2-E2002-CON-03",
+    "TC-P2-E2002-CON-04",
+    "TC-P2-E2002-CON-05",
+    "TC-P2-E2002-CON-06"
+  ],
+  "reqs": [
+    "REQ-DRI-013",
+    "REQ-CHO-002"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/integration/v1/cases/{caseId}/plan-status"
+  ],
+  "ops_consumed": [
+    "GET the case read of the rwb-case contract, by case reference",
+    "GET the reference-data read of RWB-P3-E1043-CON",
+    "GET the parameters read of RWB-P3-E1042-CON",
+    "POST /api/recovery/access/v1/authorise",
+    "CALL RestructurePlanQuery.statusFor(List<String> accountNos) of the ACE common module"
+  ],
+  "events_published": [],
+  "events_consumed": [],
+  "workflows": [],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (FR-P2-019)",
+  "gaps": [
+    "GAP-0655"
+  ],
+  "assumptions": [
+    "ASM-1105",
+    "ASM-1106",
+    "ASM-1107",
+    "ASM-1108",
+    "ASM-1109"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2002 CON ACE plan status on the case - contract v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0655",
+      "title": "The plan-status contract baseline: the accountNo field, the meaning and owner of live and messageCode, the interface null rules, the consumed read shapes, the composite route and the two specification conflicts are not fixed by any one source",
+      "source": "WP B-P2-01; legacy RWB-E2-002; Ownership Map v1 (GET /cases/{caseId}/plan-status owner P2, basis API Specification v4 and TSD v5 P2 appendix T-A); API Specification v4 /cases/{caseId}/plan-status, the PlanStatus schema and x-capability Case record R; 22 Microservice Realignment/Recovery Workbench Architecture v5 Text Extract v1.md slides 10, 11, 12, 13, 16, 41, 43, 44 and 45; 22 Microservice Realignment/Recovery Workbench Temporal and Drools Design Text Extract v1.md slides 11 and 27; _work/msr/extract/Recovery Workbench Technical Specifications by Module v5/Recovery Workbench TSD P2 Integration v3.md T1.1 and T-A.2 API-P2-010; RWB-P3-E2002-APP; RWB-ITG-E2002-ITG",
+      "section": "3, 4, 7, 8, 11, 12.1, 12.2, 12.5, 12.6, 12.7, 12.8, 13, 15",
+      "description": "One combined gap covers the six things a contract cannot be faked without. (1) The answer shape: the API Specification PlanStatus carries planRef, status, statusDate, live and messageCode and no accountNo, while the legacy interface answer carries accountNo and the sibling case story joins on it; this contract adds the field and nothing in the source set settles whether it belongs in the resource. (2) The two flag fields: live and messageCode have a type and no rule; the legacy story says live is true when read from ACE now, the sibling story answers live false with MSG-P2-008 and the stored date, and no source says which provider fills the message, so the two-provider resource has no agreed rule. (3) The interface: the legacy story publishes the statusFor signature and four element names, and nothing about the null rules, the empty answer, the error classes, the batch boundary or the retry, all of which the app story has to implement. (4) The consumed reads: the case read, the authorise answer and the two reference answers have no paths, no element names and no types in any source; the reference-data and parameter contracts are named by DP-07 and DP-06 and their shapes are pending. (5) The composite route: the case record plan section is composed at the edge from this answer and the stored answer of rwb-case, and no source gives the route path, the merge order or the field precedence. (6) The two specification conflicts: the Technical Specification reads v_ace_plan with a fallback to the case columns, which ADR-010, DP-05 and the view rule refuse, and the Ownership Map and the API Specification keep the operation with P2 while the base changes to the integration base; both are reconciled here and recorded, not silently applied.",
+      "evidence": "Legacy RWB-E2-002 section 12 (the endpoint row: PlanStatus planRef, status, statusDate, live; the published interfaces with RestructurePlanQuery.statusFor(List<String>) returning planRef, accountNo, status, statusDate; the errors 401, 403, 404 and the authorization Case record R; read only, writes nothing) and section 4 step 8. API Specification v4 /cases/{caseId}/plan-status (x-module P2, x-capability Case record R, operationId getCasesCaseidPlanStatus, errors 401, 403, 404, 503) and the PlanStatus schema (planRef, status, statusDate, live, messageCode). TSD P2 v3 T1.1 (v_ace_plan tier 1, API-P2-010) and T-A.2 API-P2-010 (read from v_ace_plan with fallback to plan_status and plan_status_as_of; errors 401, 403, 404, 503; Idempotency not applicable). Arch v5 slide 13 (P2 row: no cell to ACE Common, no cell from P3 to P2), slide 16 (P2 IN and OUT contract), slide 41 (rwb_integration and the base), slide 44 (JOB-02 owner rwb-case) and slide 45 (only rwb-source-data reads the views). RWB-P3-E2002-APP section 12.1 (the stored answer on the rwb-case base, live false and MSG-P2-008) and RWB-ITG-E2002-ITG section 12.5 (a plan-status step listed on rwb-integration).",
+      "type": "Conflict",
+      "area": "API contract",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-002",
+      "owner_role": "Solution architect",
+      "asm": "ASM-1105",
+      "proposed": "Approve the four assumptions of RWB-P2-E2002-CON at the contract review before the baseline is tagged: the answer shape with accountNo, the live and messageCode rule on a two-provider resource, the interface contract with its batch, budget and answer rules, and the consumed read shapes with the composite route. Reconcile the interface-versus-view wording of the technical specification in the Service Contract Catalog, and record the re-basing of the operation on the integration base.",
+      "wp": "B-P2-01"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1105",
+      "text": "The plan-status answer is taken as planRef, accountNo, status, statusDate, live and messageCode, with the legacy PlanStatus field set and accountNo added; the plan-reference, account-number and status-date types are the legacy ones (a reference up to thirty characters, an account code, a date), and the contract names the fields and leaves lengths and null rules to the review with the owners.",
+      "why": "The API Specification fixes five field names and no accountNo, the legacy interface answer carries the account, and the sibling case story joins on it; a contract cannot be faked without deciding whether the field is in the answer.",
+      "read": "Legacy RWB-E2-002 section 12 (PlanStatus: planRef, status, statusDate, live, messageCode; RestructurePlanQuery returning accountNo); API Specification v4 PlanStatus; RWB-P3-E2002-APP section 12.2 (the answer carries planRef, accountNo, status, statusDate, live).",
+      "gap": "GAP-0655",
+      "applied_in": "7 AC1; 11 Data; 12.1; 12.8",
+      "confidence": "Medium",
+      "confirm": "Solution architect and the case owner at the contract review",
+      "impact": "If the field is removed, the case side joins on the plan reference it already receives; no business value changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1106",
+      "text": "The consumed reads are taken as follows: the case read answers the case reference, its account numbers, the owner, the queue and the closed flag; the reference read answers the LOV-PLAN-STATUS rows with the version in force; the parameter read answers the two setting rows with the version in force; the authorise answer grants or refuses Case record R and says whether the case is in the caller's scope. Each is one hop with a 2 s budget, and none is declared as provided by this service.",
+      "why": "The paths and element names of the four reads are given nowhere, and the fakes cannot be written without them; the owners are fixed by the Ownership Map and the dependencies by DP-06, DP-07 and DP-11.",
+      "read": "Ownership Map v1 (recovery_case, case_account, reference_row, reference_version, parameter_catalog, parameter_value owner P3; the authorise path owner P4); DP-06, DP-07 and DP-11 in Template and Rules section R5.5; RWB-P3-E2002-APP section 12.2.",
+      "gap": "GAP-0655",
+      "applied_in": "7 AC2 and AC4; 11 Data; 12.2; 12.8",
+      "confidence": "Medium",
+      "confirm": "The rwb-case contract owner (RWB-P3-E1042-CON and RWB-P3-E1043-CON) and the rwb-access owner at the contract review",
+      "impact": "A renamed element touches one client and one fake; no behaviour changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1107",
+      "text": "live and messageCode are taken as follows: live is true on every 200 answer that read the ACE common module, and false on the flag-off answer, which reads nothing and carries no plan; messageCode is empty on every answer of this service, because it holds no stored value and has no older date to name; live false with MSG-P2-008 and the stored date is the rwb-case answer on its own base, and the composite route prefers the live answer when it has one.",
+      "why": "Both fields exist in the API Specification and neither has a rule; the split into two providers makes the flag the only way to tell a live value from a stored one, and the message has a date that only the case side holds.",
+      "read": "Legacy RWB-E2-002 section 12 (live is true when read from ACE now) and section 5 X2; API Specification v4 PlanStatus; RWB-P3-E2002-APP AC5 and section 12.1; DP-19 in Template and Rules section R5.5.",
+      "gap": "GAP-0655",
+      "applied_in": "7 AC1 and AC3; 8 Business rules BR4; 12.1; 12.8",
+      "confidence": "Medium",
+      "confirm": "The edge owner (RWB-PLT-N001-CON) and the case owner at the contract review",
+      "impact": "If the message moves to this service, the stored date has to be passed in or read from the case; the flag and the shape do not change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1108",
+      "text": "The interface is taken as follows: RestructurePlanQuery.statusFor receives a list of account numbers and answers a list of plans, each with planRef, accountNo, status and statusDate, in batches of 500 with a 2000 ms budget per call, a breaker per downstream and one retry of a read with jitter; an account with no plan is absent from the list, an interface failure is an error and not an empty answer, and an answer larger than the batch is split and merged by account.",
+      "why": "The legacy story publishes the signature and four names and nothing about batching, null rules, error classes or the empty answer; the Technical Specification instead reads a view, which ADR-010 and DP-05 refuse, so the interface contract has to be written down here.",
+      "read": "Legacy RWB-E2-002 section 4 step 3 (batches of 500, assumed; DL11), section 5 X1 and section 12; TSD P2 v3 T-A.2 API-P2-010; Arch v5 slide 45 and ADR-010; DP-05 and DP-11 in Template and Rules section R5.5; RWB-ITG-E2002-ITG section 12.5.",
+      "gap": "GAP-0655",
+      "applied_in": "7 AC2 and AC6; 8 Business rules BR7; 12.2; 12.5; 13",
+      "confidence": "Medium",
+      "confirm": "The ACE team at the interface review of RWB-P2-E2002-CON",
+      "impact": "If the interface answers one plan per call, the client loops and the batch value has no effect; the answer and the criteria do not change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1109",
+      "text": "The composite route for the case record is taken as one edge answer that calls rwb-integration and rwb-case in parallel, one hop each, prefers the live answer when live is true, and otherwise shows the stored answer with MSG-P2-008 and its date; the route path and its merge order are the edge contract's and are not fixed here.",
+      "why": "The legacy screen was served by the monolith; the split gives the plan section two providers, and no source fixes the route path or the merge, so a readable default is recorded rather than invented in code.",
+      "read": "Arch v5 slides 10 and 12 (the BFF composes a few parallel calls, one hop each, and merges at the BFF); DP-19 in Template and Rules section R5.5; RWB-P3-E2002-APP section 15.",
+      "gap": "GAP-0655",
+      "applied_in": "7 AC5; 12.8; 15 Screens and states",
+      "confidence": "Medium",
+      "confirm": "The edge and gateway owner (RWB-PLT-N001-CON) with the screen design",
+      "impact": "The route and the merge may change; the two provider answers and their fields do not.",
+      "wp": "B-P2-01"
+    }
+  ]
+}

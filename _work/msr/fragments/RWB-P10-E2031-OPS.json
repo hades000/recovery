@@ -1,0 +1,113 @@
+{
+  "id": "RWB-P10-E2031-OPS",
+  "epic": "RWB-SVC-P10",
+  "service": "rwb-agent",
+  "wt": "OPS",
+  "lane": "L-P10-F",
+  "ready": "Day 1",
+  "owner": "DEVOPS",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-031",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the rwb-agent Helm chart and its values files for DEV, SIT and UAT"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the provisioning step and the worker deployment"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the Schedule registration step"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the provisioning step"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the rwb_agent schema and the per-service login"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the values files, the config map and the egress declaration of the release"
+    },
+    {
+      "id": "AC7",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given a running pod of the api and of the worker, the published dashboards and the alert rules"
+    },
+    {
+      "id": "AC8",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the route publication step, the runbook, the rollback plan and the capacity plan"
+    }
+  ],
+  "tcs": [
+    "TC-P10-E2031-OPS-01",
+    "TC-P10-E2031-OPS-02",
+    "TC-P10-E2031-OPS-03",
+    "TC-P10-E2031-OPS-04",
+    "TC-P10-E2031-OPS-05",
+    "TC-P10-E2031-OPS-06",
+    "TC-P10-E2031-OPS-07",
+    "TC-P10-E2031-OPS-08"
+  ],
+  "reqs": [
+    "REQ-DRI-009",
+    "REQ-APD-005"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/agent/v1/admin/agent-metrics (version 2 element, published behind the gateway-bff pass-through route)",
+    "GET /api/recovery/agent/v1/admin/agent-runs (baseline, published on the same route)",
+    "GET /api/recovery/agent/v1/cases/{caseId}/agent-outputs (baseline, published on the same route)"
+  ],
+  "ops_consumed": [
+    "rwb-decision GET /api/recovery/decision/v1/decision-log (RWB-P7-E2005-CON)",
+    "rwb-case GET /api/recovery/case/v1/admin/lists/{listCode} (RWB-P3-E1043-CON)",
+    "rwb-reporting GET /api/recovery/reporting/v1/reports/measures",
+    "rwb-comms POST the notification operation (path not specified; RWB-P6-E1063-APP)"
+  ],
+  "events_published": [
+    "rwb.agent.events.v1 provisioned with the retry topic and the .dlt topic, the publish right of rwb-agent and the relay interval; EV-28 relayed by the outbox of rwb-agent"
+  ],
+  "events_consumed": [],
+  "workflows": [
+    "Schedule AgentRunDailyRollup registered in namespace rwb-recovery on the queue rwb-agent at 01:30 Asia/Bangkok with overlap SKIP, the one-business-date catch-up window and the four steps (daily rollup, cost sweep, drift check, notice)",
+    "AgentRunDailyRollupWorkflow (workflow ID = business date)",
+    "aggregateAgentRuns (activity)",
+    "raiseCostAlerts (activity)",
+    "agentDrift (activity)",
+    "dispatchAgentAlerts (activity)",
+    "KEDA scaler on the rwb-agent task-queue backlog"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P10 rwb-agent v1.md (FR-P10-018, FR-P10-026)",
+  "gaps": [
+    "GAP-0631"
+  ],
+  "assumptions": [
+    "ASM-0958",
+    "ASM-0961",
+    "ASM-0966",
+    "ASM-0967",
+    "ASM-0969",
+    "ASM-0972",
+    "ASM-0973",
+    "ASM-0974"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2031 OPS Agent monitoring dashboard v2 [E3d] - deployment v1.md"
+}

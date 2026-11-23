@@ -1,0 +1,139 @@
+{
+  "id": "RWB-P10-E2028-APP",
+  "epic": "RWB-SVC-P10",
+  "service": "rwb-agent",
+  "wt": "APP",
+  "lane": "L-P10-A",
+  "ready": "After RWB-P10-E2031-APP",
+  "owner": "TechX",
+  "business_epic": "EP03",
+  "wave": 2,
+  "release": "31 January 2027",
+  "legacy": "RWB-E2-028",
+  "disposition": "Split (rework)",
+  "H": [
+    "RWB-P10-E2028-CON",
+    "RWB-PLT-E1027-CON",
+    "RWB-PLT-E1043-CON",
+    "RWB-PLT-TE006-CON",
+    "RWB-PLT-E1071-CON",
+    "RWB-PLT-E1044-CON",
+    "RWB-PLT-N001-CON",
+    "RWB-P10-E2031-APP",
+    "RWB-P10-E1061-CON"
+  ],
+  "C": [
+    "RWB-P3-E1043-CON",
+    "RWB-P3-E1035-CON",
+    "RWB-P7-E1027-CON"
+  ],
+  "I": [],
+  "X": [
+    "RWB-P10-E2028-OPS"
+  ],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "legacy RWB-E2-028 AC1",
+      "text_first_line": "Scenario: AC1 Summary shown (legacy RWB-E2-028 AC1)"
+    },
+    {
+      "id": "AC2",
+      "origin": "legacy RWB-E2-028 AC2",
+      "text_first_line": "Scenario: AC2 Acceptance measured (legacy RWB-E2-028 AC2)"
+    },
+    {
+      "id": "AC3",
+      "origin": "legacy RWB-E2-028 AC3",
+      "text_first_line": "Scenario: AC3 Fallback (legacy RWB-E2-028 AC3)"
+    },
+    {
+      "id": "AC4",
+      "origin": "legacy RWB-E2-028 AC4",
+      "text_first_line": "Scenario: AC4 Correction without a reason (legacy RWB-E2-028 AC4)"
+    },
+    {
+      "id": "AC5",
+      "origin": "legacy RWB-E2-028 AC5",
+      "text_first_line": "Scenario: AC5 The decision cannot be recorded (legacy RWB-E2-028 AC5)"
+    },
+    {
+      "id": "AC6",
+      "origin": "legacy RWB-E2-028 AC6",
+      "text_first_line": "Scenario: AC6 Feedback given twice (legacy RWB-E2-028 AC6)"
+    },
+    {
+      "id": "AC7",
+      "origin": "legacy RWB-E2-028 AC7",
+      "text_first_line": "Scenario: AC7 A case outside the user's scope (legacy RWB-E2-028 AC7)"
+    },
+    {
+      "id": "AC8",
+      "origin": "legacy RWB-E2-028 AC8",
+      "text_first_line": "Scenario: AC8 A segment still in shadow (legacy RWB-E2-028 AC8)"
+    },
+    {
+      "id": "AC9",
+      "origin": "legacy RWB-E2-028 AC9",
+      "text_first_line": "Scenario: AC9 Stale input (legacy RWB-E2-028 AC9)"
+    }
+  ],
+  "tcs": [
+    "TC-E2-028-10",
+    "TC-E2-028-01",
+    "TC-E2-028-02",
+    "TC-E2-028-03",
+    "TC-E2-028-04",
+    "TC-E2-028-05",
+    "TC-E2-028-06",
+    "TC-E2-028-07",
+    "TC-E2-028-08",
+    "TC-E2-028-09",
+    "TC-E2-028-11"
+  ],
+  "reqs": [
+    "REQ-DRI-001",
+    "REQ-ACA-005"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/agent/v1/cases/{caseId}/agent-outputs: the L1 agent outputs of a case, an empty array for a case with no L1 output or a segment in shadow (API-P10-010 of TSD P10 Agent runtime v2 T-A.1; shape fixed by RWB-P10-E2028-CON)",
+    "POST /api/recovery/agent/v1/agent-runs/{runId}/feedback: the owner's verdict on the summary item, with the If-Match row version (API-P10-011 of the same T-A.1; shape fixed by RWB-P10-E2028-CON)"
+  ],
+  "ops_consumed": [
+    "rwb-case GET /api/recovery/case/v1/cases/{caseId}: the case facts, the owner and the team scope (RWB-P3-E1035-CON)",
+    "rwb-case the case-decision proposal operation: the verdict proposed to the case record (path not named by a source; RWB-P3-E1035-CON; GAP-0623)",
+    "rwb-case GET /api/recovery/case/v1/admin/lists/{listCode}: LOV-PRODUCT, LOV-REGION, LOV-AUTONOMY, LOV-FEEDBACK, LOV-DECISION, LOV-AGENT and LOV-AGENT-RUN (RWB-P3-E1043-CON)",
+    "rwb-decision GET /api/recovery/decision/v1/decision-log/{entryId}: the sealed entry of a verdict (RWB-P7-E1027-CON)",
+    "rwb-source-data GET /api/recovery/source-data/v1/freshness: the business date compared with agent_run.data_as_of (the GET /freshness of Arch v5 slide 15; GAP-0622; ASM-0918)"
+  ],
+  "events_published": [
+    "rwb.agent.AgentRunCompleted.v1 (EV-28) on rwb.agent.events.v1 with the retry topic and the .dlt topic (DP-09)",
+    "rwb.agent.AgentFeedbackRecorded.v1 on rwb.agent.events.v1 with the retry topic and the .dlt topic (name fixed under §R4; GAP-0623)",
+    "DecisionRecorded, the decision-record type of the library, on rwb.decision-record.v1 with retry and .dlt (DP-03; ASM-0922)"
+  ],
+  "events_consumed": [
+    "rwb.case.CaseCreated.v1 (EV-01) on rwb.case.events.v1"
+  ],
+  "workflows": [
+    "AgentRunWorkflow (workflow, event-started, one execution per case and event, queue rwb-agent, namespace rwb-recovery; restated from the run path)",
+    "ResolveIntakeMode (activity, added by this story)",
+    "RecordIntakeFeedback (activity, workflow kit, one transaction)"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P10 rwb-agent v1.md (FR-P10-001, FR-P10-002, FR-P10-004, FR-P10-008, FR-P10-009, FR-P10-010, FR-P10-011, FR-P10-015, FR-P10-024, FR-P10-025, FR-P10-026)",
+  "gaps": [
+    "GAP-0622",
+    "GAP-0623"
+  ],
+  "assumptions": [
+    "ASM-0916",
+    "ASM-0917",
+    "ASM-0918",
+    "ASM-0919",
+    "ASM-0920",
+    "ASM-0921",
+    "ASM-0922",
+    "ASM-0923",
+    "ASM-0929"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2028 APP Case intake agent live at L1 [E3a] v1.md"
+}

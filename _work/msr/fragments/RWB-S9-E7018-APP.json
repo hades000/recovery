@@ -1,0 +1,79 @@
+{
+  "id": "RWB-S9-E7018-APP",
+  "epic": "RWB-SVC-S9",
+  "service": "rwb-partner",
+  "wt": "APP",
+  "lane": "L-S9-T",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP07",
+  "wave": 4,
+  "release": "31 May 2027",
+  "legacy": "RWB-E7-018",
+  "disposition": "Split (rework)",
+  "H": [
+    "RWB-S9-E7018-CON",
+    "RWB-PLT-E1027-CON",
+    "RWB-PLT-N001-CON"
+  ],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "legacy RWB-E7-018 AC1",
+      "text_first_line": "Scenario: AC1 Capture field work through the field app (legacy RWB-E7-018 AC1)"
+    },
+    {
+      "id": "AC2",
+      "origin": "legacy RWB-E7-018 AC2",
+      "text_first_line": "Scenario: AC2 Not recorded (legacy RWB-E7-018 AC2)"
+    }
+  ],
+  "tcs": [
+    "TC-E7-018-01",
+    "TC-E7-018-02",
+    "TC-E7-018-03",
+    "TC-E7-018-04"
+  ],
+  "reqs": [
+    "REQ-S9-009"
+  ],
+  "ops_provided": [
+    "POST /api/recovery/partner/v1/partner/instructions/{instructionId}/results (API-S9-005; the field-work branch, multipart result and files, right U, Idempotency-Key header)",
+    "GET /api/recovery/partner/v1/partners (API-S9-001; the panel read behind SCR-35, right R)"
+  ],
+  "ops_consumed": [
+    "The interaction entry of the visit, rwb-source-data (P1), /api/recovery/source-data/v1, operation name placeholder",
+    "The document intake of the photographs and the bills, rwb-document (P5), /api/recovery/document/v1, operation name placeholder",
+    "The rule in force, rwb-decision (P7), /api/recovery/decision/v1, operation name placeholder"
+  ],
+  "events_published": [
+    "EV-21 PartnerResultSubmitted, rwb.partner.PartnerResultSubmitted.v1 on rwb.partner.events.v1, keyed by the case, payload instructionId, result, documents and the submitted time, written to the outbox"
+  ],
+  "events_consumed": [],
+  "workflows": [
+    "InstructionWorkflow on queue rwb-partner in namespace rwb-recovery, one execution per partner instruction, carrying the field-work step behind the resultSubmitted signal",
+    "recordFieldWorkResult activity on queue rwb-partner, the one field-work step: the record, the instruction row, the outbox row and the key in one transaction",
+    "the stage outcome on the parent-child edge to CaseWorkflow on queue rwb-case; the case stage and its clock are P3's; no Schedule and no job"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD S9 rwb-partner v1.md (no FR mapped to no REQ IDs)",
+  "gaps": [
+    "GAP-3135"
+  ],
+  "assumptions": [
+    "ASM-5491",
+    "ASM-5492",
+    "ASM-5493",
+    "ASM-5494",
+    "ASM-5495",
+    "ASM-5496",
+    "ASM-5497",
+    "ASM-5498",
+    "ASM-5499",
+    "ASM-5500",
+    "ASM-5501"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7018 APP Capture field work through the field app v1.md"
+}

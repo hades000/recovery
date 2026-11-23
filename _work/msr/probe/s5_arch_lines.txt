@@ -1,0 +1,30 @@
+134: rwb-asset · S5
+199: S5 · rwb-asset
+256: First epic per service: Epic 1: P1, P2, P3, P4, P5, P6, P7, P9, P10. Epics 2-3: P8, S2, S5, S8. Epics 4-5: S1, S3, S4, S6. Epics 6-7: S7, S9.
+322: S5
+579: S5
+918: | starts ↓ / target → | P3 | P7 | P4 | S8 | S1 | S2 | S3 | S4 | S5 | S6 | S7 | P5 | P6 | P8 | S9 | P2 | P1 | P9 | P10 | ACE Cmn | ACE DB | Outside |
+928: | S5 Asset |  | T |  |  |  |  |  | E |  |  |  |  |  | T E | T E |  |  |  |  |  |  |  |
+974: EVT  RouteDecided · DeviationRaised / Cleared · PaymentMissed, TreatmentBooked, ProceedsMatched · LotAwarded, AssetTakenOn, WriteOffApproved · AceDataReady, RulePackageInForce
+1027: IN: REST GET /cases/{id}, /cases?queue=; POST /cases/{id}/actions; GET /tasks · POST /tasks/{id}/complete; GET /case-summary/{id} (for ACE shared case view) | events RouteDecided; DeviationRaised / Cleared; PaymentMissed, TreatmentBooked, ProceedsMatched; LotAwarded, AssetTakenOn, WriteOffApproved; AceDataReady, RulePackageInForce | Temporal CaseWorkflow (parent, one per case); DailyCaseRun (Schedule + AceDataReady); Act: allocate, transfer, rebalance
+1377: DB  writes schema rwb_asset: assets taken on, holding, floor price, listings, auction rounds
+1378: EVT  rwb.asset.events.v1: AssetTakenOn, AssetSold
+1381: S5 · rwb-asset
+1383: queue rwb-asset
+1411: rwb-asset (S5, Assets & auction)
+1413: OUT: schema rwb_asset (assets taken on, holding, floor price, listings, auction rounds) | topic rwb.asset.events.v1: AssetTakenOn, AssetSold | TMP Partner: issueInstruction (auction vendor) · Decision: child: approval · Payment: postProceeds
+1749: rwb-asset
+1836: rwb-asset · rwb-debtsale
+1858: Notes: CaseWorkflow (rwb-case, workflow ID = case ID) is the parent from entry to closure. Each stage is a child workflow started on the owner's task queue: RouteDecisionWorkflow (rwb-valuation, with ApprovalWorkflow from the kit on rwb-decision), DeviationWorkflow (rwb-deviation, can start at any time and pauses the stage clock), TreatmentWorkflow (rwb-treatment) and GuaranteeClaimWorkflow (rwb-guarantee), LitigationWorkflow (rwb-litigation, can run for years), AssetDisposalWorkflow (rwb-asset) and DebtSaleWorkflow (rwb-debtsale), WriteOffWorkflow (rwb-writeoff).
+2092: rwb_asset
+2605: S5 · rwb-asset
+2646: Reusable with configuration: Partner management (S9), Payments and posting (P8), Deviation handling (S8), Valuation (S1), Assets and auction (S5), Debt sale (S6), Source data (P1, as a pattern for reading ACE).
+2757: S5 · Asset
+2787: Waves follow the first epic of each module: Epic 1: P1, P2, P3, P4, P5, P6, P7, P9, P10 (9 services). Epics 2-3: P8, S2, S5, S8 (+4). Epics 4-5: S1, S3, S4, S6 (+4). Epics 6-7: S7, S9 (+2). A service is created when its epic starts, so nothing is built twice.
+2889: | S5 | rwb-asset | assets taken on, holding, floor price, listings, auction rounds | rwb_asset | /assets | rwb.asset.events.v1 | rwb-asset | 2 |
+2940: | 21 | PartnerResultSubmitted | rwb-partner | rwb.partner.events.v1 | rwb-litigation, rwb-asset, rwb-case |
+2941: | 22 | AssetTakenOn | rwb-asset | rwb.asset.events.v1 | rwb-case, rwb-payment |
+2944: | 25 | ProceedsMatched | rwb-payment | rwb.payment.events.v1 | rwb-case, rwb-asset, rwb-debtsale, rwb-writeoff, rwb-guarantee |
+2951: | + | AssetSold | rwb-asset | rwb.asset.events.v1 | rwb-payment, rwb-case |
+2952: | + | JudgmentRecorded, AuctionResult | rwb-litigation | rwb.litigation.events.v1 | rwb-asset, rwb-case |
+2987: | JOB-19 | Re-appraisal | monthly | rwb-asset | Schedule |

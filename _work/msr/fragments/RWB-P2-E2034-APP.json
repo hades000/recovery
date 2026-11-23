@@ -1,0 +1,203 @@
+{
+  "id": "RWB-P2-E2034-APP",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "APP",
+  "lane": "L-P2-A",
+  "ready": "After RWB-P2-E1007-APP",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-034",
+  "disposition": "Split (rework)",
+  "H": [
+    "RWB-P2-E2034-CON",
+    "RWB-PLT-E1027-CON",
+    "RWB-PLT-E1042-CON",
+    "RWB-PLT-E1043-CON",
+    "RWB-PLT-E1037-CON",
+    "RWB-PLT-TE006-CON",
+    "RWB-PLT-E1071-CON",
+    "RWB-PLT-E1044-CON",
+    "RWB-PLT-N001-CON",
+    "RWB-P2-E1007-APP"
+  ],
+  "C": [
+    "RWB-P3-E1042-CON",
+    "RWB-P3-E1043-CON",
+    "RWB-P4-E1037-CON",
+    "RWB-P7-E1027-CON",
+    "RWB-P3-E2016-CON",
+    "RWB-P1-E1066-CON",
+    "RWB-P1-E1067-CON"
+  ],
+  "I": [],
+  "X": [
+    "RWB-P2-E2034-OPS"
+  ],
+  "acs": [
+    {
+      "id": "AC8",
+      "origin": "legacy RWB-E2-034 AC8",
+      "text_first_line": "Given event InstructionIssued names an instruction whose case does not exist"
+    }
+  ],
+  "tcs": [
+    "TC-E2-034-12",
+    "TC-E2-034-01",
+    "TC-E2-034-02",
+    "TC-E2-034-03",
+    "TC-E2-034-04",
+    "TC-E2-034-05",
+    "TC-E2-034-06",
+    "TC-E2-034-07",
+    "TC-E2-034-08",
+    "TC-E2-034-09",
+    "TC-E2-034-10",
+    "TC-E2-034-11"
+  ],
+  "reqs": [
+    "REQ-ILG-009",
+    "REQ-ILG-010",
+    "REQ-ILG-011",
+    "REQ-ILG-012",
+    "REQ-ILG-013",
+    "REQ-ILG-014",
+    "REQ-ILG-007",
+    "REQ-ILG-008",
+    "REQ-ILG-006"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/integration/v1/admin/outbox/deliveries",
+    "POST /api/recovery/integration/v1/admin/outbox/deliveries/{deliveryId}/resend"
+  ],
+  "ops_consumed": [
+    "POST /api/recovery/source-data/v1/cases/{caseId}/interactions",
+    "GET the EFS contact-outcome read of the rwb-source-data contract",
+    "GET the contact-fact read of the rwb-source-data contract",
+    "GET /api/recovery/case/v1/cases/{caseId}",
+    "GET /api/recovery/case/v1/cases",
+    "GET /api/recovery/comms/v1/notices/{noticeId}",
+    "GET the instruction-fact read of the rwb-partner contract",
+    "GET /api/recovery/treatment/v1/treatments/{treatmentId}",
+    "GET the proceeds-fact read of the rwb-payment contract",
+    "POST /api/recovery/access/v1/authorise"
+  ],
+  "events_published": [
+    "rwb.decision-record.DecisionRecorded.v1"
+  ],
+  "events_consumed": [
+    "rwb.treatment.TreatmentApproved.v1",
+    "rwb.comms.NoticeDispatched.v1",
+    "rwb.comms.NoticeDelivered.v1",
+    "rwb.partner.InstructionIssued.v1",
+    "rwb.partner.PartnerResultSubmitted.v1",
+    "rwb.payment.ProceedsMatched.v1",
+    "rwb.source-data.AceDataReady.v1"
+  ],
+  "workflows": [
+    "LedgerChannelIntakeWorkflow",
+    "mapChannelEvent",
+    "resolveChannelFacts",
+    "appendLedgerEntry",
+    "parkDeliveryInException",
+    "EfsLedgerReadWorkflow",
+    "readEfsOutcomes",
+    "appendEfsEntries",
+    "writeEfsReadSummary"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-ILG-009, REQ-ILG-010, REQ-ILG-011, REQ-ILG-012, REQ-ILG-013, REQ-ILG-014, REQ-ILG-007, REQ-ILG-008, REQ-ILG-006)",
+  "gaps": [
+    "GAP-0664"
+  ],
+  "assumptions": [
+    "ASM-1168",
+    "ASM-1169",
+    "ASM-1170",
+    "ASM-1171",
+    "ASM-1172"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2034 APP Interaction ledger on the case and from every channel v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0664",
+      "title": "The rwb-integration login, the entry and fact JSON field names, the admin bodies, the mapping detail, the retry intervals and the ownership split of the ledger intake are not fixed in the source documents",
+      "source": "22 Microservice Realignment/Recovery Workbench Architecture v5 Text Extract v1.md (slides 14 to 20, 41, 42, 43 and 44); 22 Microservice Realignment/Recovery Workbench Temporal and Drools Design Text Extract v1.md (slides 11 and 13); _work/msr/plan/ownership.json (rulings on interaction, efs_ledger_outcome, processed_event, outbox_delivery, idempotency_key and the interaction operations); 04 User stories/Recovery Workbench User Stories Epic 2 Story Files v5/RWB E2 034 Interaction ledger on the case and from every channel v1.md; _work/msr/extract/Recovery Workbench Functional Specifications by Module v6/Recovery Workbench FSD P2 Integration v3.md; _work/msr/extract/Recovery Workbench Technical Specifications by Module v5/Recovery Workbench TSD P2 Integration v3.md",
+      "section": "3 Preconditions; 8 Business rules; 10 Authority; 11 Data; 12.1; 12.2; 13 Solution plan; 14 Validation and messages",
+      "description": "Six values the app story needs are missing from every source. First, the login: DP-02 gives one login per service but no source names the rwb-integration login, its grants or its secret reference. Second, the JSON field names: the legacy story names the Java interfaces (InteractionLedgerWriter.append with LedgerEntryCommand, EfsContactHistory.outcomesFor, ContactQuery.byKey, CaseQuery.byId, CaseQuery.openCaseIdsForAccount, NoticeQuery.byId, InstructionQuery.byId) and the FSD and TSD name the tables, but no source gives the JSON field names, types, lengths or required flags of the append command, of the P1 EFS outcome read, of the P1 contact read, or of the rwb-case, rwb-comms, rwb-partner, rwb-treatment and rwb-payment fact answers. Third, the admin operations: TSD P2 v3 T-A.1 names API-P2-003 and API-P2-004 under the monolith base, and the Ownership Map keeps them in P2, but no source gives the request query parameters, the page envelope, the response bodies or the error bodies of the two operations on the /api/recovery/integration/v1 base, and no source fixes the shape of the RESOLVE_OUTBOX_DELIVERY task beyond its name and the role RW-PLATADM that receives it. Fourth, the mapping: BR1 of the legacy story gives the event-to-code mapping (InstructionIssued to HANDOVER, PartnerResultSubmitted to PARTNER_RESULT, NoticeDispatched and NoticeDelivered to LETTER, TreatmentApproved to OFFER, ProceedsMatched to PAYMENT, an EFS row to CONTACT) and those codes are kept unchanged, but no source states which payload element supplies the occurred time, the delivery status, the external reference, the from and to holder references or the source system of each entry, nor which of them an OFFER or a PAYMENT entry carries. Fifth, the intervals: no source fixes the retry intervals of the six ledger deliveries; the legacy story of this module uses retry windows of 1 minute, 10 minutes and 1 hour, the FSD P2 v3 fixes 5 and 15 minutes for the WIN outbound file only, and the attempt limit of three appears in the legacy story and in the TSD but not as a rule of this consumer. Sixth, the split: the legacy story keeps the ledger, the EFS read step, the timeline and the masking in module P2, while the R-PREC default ruling and the Ownership Map move the ledger and the EFS intake rule to rwb-source-data (P1), the timeline to rwb-case (P3), the masking to rwb-access (P4) and the portal to rwb-partner (S9), and TSD P3 v3 defines the interaction table in P3 and TSD P2 v3 defines efs_ledger_outcome in P2; the intake slice that is left in P2 is therefore a reading of the default ruling over those documents and not a statement of one of them.",
+      "evidence": "Legacy RWB-E2-034 section 12 names the Java interfaces and the tables but no wire shape; section 13 adds six columns to interaction and keeps the append-only trigger and efs_ledger_outcome; AC8 fixes three retries and the task for RW-PLATADM but no interval; BR1 gives the codes only. FSD P2 v3 A2.7 AC-EXC-P2-007-03 and AC-EXC-P2-007-07 give the dedupe key shapes EV-10:TRT-0001:v1 and EV-26:ALS:2026-11-10 and the hit count rule. TSD P2 v3 T3.2 gives LOV-OUTBOX-DELIVERY PENDING, RETRYING, DELIVERED and EXCEPTION and T4 gives the last-failure task; T-A.1 gives API-P2-003 and API-P2-004 with their rights and no body. Arch v5 slide 41 gives the schema rwb_integration, the first path /interface-runs and the queue rwb-integration but no login; slides 42 and 43 give the seven producer topics and the consumers; slide 44 gives JOB-02 and JOB-04 as event-started. The ownership rulings on interaction, efs_ledger_outcome, processed_event, outbox_delivery, idempotency_key, GET /cases/{caseId}/interactions and POST /cases/{caseId}/interactions carry the conflicting x-module and the default ruling.",
+      "type": "Missing",
+      "area": "Integration and events",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-034",
+      "owner_role": "Solution architect",
+      "asm": "ASM-1168",
+      "proposed": "Approve the five assumptions of RWB-P2-E2034-APP in the contract review of RWB-P2-E2034-CON before the app story starts: the login from the ACE DB story, the element names of the append command and of the five fact answers, the bodies of the two admin operations and the RESOLVE_OUTBOX_DELIVERY task, the per-type mapping of the occurred time, the delivery status, the external reference and the holder references, the retry intervals of 1 minute, 10 minutes and 1 hour with the limit of three attempts, and the reading of the default ruling that leaves the ledger in P1, the timeline in P3, the masking in P4 and the portal in S9.",
+      "wp": "B-P2-02"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1168",
+      "text": "The rwb-integration login, the element names of the append command, of the P1 EFS and contact reads and of the five fact answers, the bodies of the two admin operations and the shape of the RESOLVE_OUTBOX_DELIVERY task are taken as follows. The service runs as the rwb-integration login (DP-02), granted on schema rwb_integration only, its name supplied by the ACE DB story of the service and never written in a story or a value. The append command carries caseId, eventCode, channel, direction, occurredAt, sourceSystem, contactKey, fromHolderRef, toHolderRef, treatmentId, proceedsId, deliveryStatus, externalRef and idempotencyKey. The append answers 201 with an entry reference, 200 with the same reference for a key already held, 409 for a conflicting key, 422 for an invalid command and 503 when the store is unavailable. The admin list answers the delivery id, the event type, the consumer, the status, the attempt count, the next attempt time, the last error code, the delivered time, the task id and the page envelope, and the resend answers the same delivery with status PENDING and attempt count 0. The task carries the delivery id, the consumer, the event type, the failure class and the owner role RW-PLATADM.",
+      "why": "DP-02 fixes one login per service and the legacy story names the writer interfaces only; the FSD and the TSD give the tables, the states and the rights but no wire shape. Without element names the mapper, the client and the fakes cannot be built, and the names used here are the element names of the legacy LedgerEntryCommand and of the TSD P2 v3 T3.1 columns, so no business value is invented.",
+      "read": "_work/msr/plan/ownership.json rulings on interaction, processed_event, outbox_delivery and idempotency_key; legacy RWB-E2-034 sections 11 to 13; TSD P2 v3 T3.1 and T-A.2; Template and Rules section R5.5 DP-01, DP-02 and DP-18",
+      "gap": "GAP-0664",
+      "applied_in": "3 Preconditions; 7 AC8; 10 Authority; 11 Data; 12.2; 13 Solution plan; 14 Validation and messages",
+      "confidence": "Medium",
+      "confirm": "Solution architect and the rwb-source-data owner in the contract review of RWB-P2-E2034-CON, with the ACE DB owner for the login name",
+      "impact": "No business value changes: the codes, the channels, the directions, the three attempts and the task role are the legacy values, and the ledger stays append-only and owned by rwb-source-data.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1169",
+      "text": "The per-type mapping of the entry fields is taken as follows. TreatmentApproved gives an OFFER entry with the treatment id as its link and the event time as its occurred time. NoticeDispatched gives a LETTER entry with delivery status SENT and the barcode as its external reference. NoticeDelivered gives a LETTER entry with delivery status DELIVERED and the barcode as its external reference. InstructionIssued gives a HANDOVER entry with channel PORTAL, direction OUTBOUND, the case holder before the move as the from reference and PARTNER:<partnerCode> as the to reference. PartnerResultSubmitted gives a PARTNER_RESULT entry with channel PORTAL and direction INBOUND. ProceedsMatched gives a PAYMENT entry with the proceeds id as its link. An EFS action row gives a CONTACT entry with source system EFS and the channel of the EFS ledger outcome list. Every other entry has source system WORKBENCH. The event time is the time the event says the interaction happened, carried unchanged and never replaced by the time of receipt. The event codes are the legacy codes and are sent character for character.",
+      "why": "The legacy BR1, BR2 and BR4 fix the codes, the channels, the directions and the source system but not which payload element fills each field, and the payloads belong to five other services. The occurred time is the one field the timeline order depends on (BR9 of the legacy story), so it must be stated rather than left to each mapper.",
+      "read": "Legacy RWB-E2-034 BR1, BR2, BR4, BR9 and AC1 to AC4; FSD P2 v3 A2.7; Arch v5 slides 42 and 43 for the producers of the seven types",
+      "gap": "GAP-0664",
+      "applied_in": "8 Business rules BR1, BR3 and BR4; 12.4; 13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "Solution architect with the owners of the five fact contracts at the contract review",
+      "impact": "The legacy behaviour is kept: one entry per event, one code per event type, the contact point as a reference and the occurred time of the channel, never the receipt time.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1170",
+      "text": "The retry policy of a ledger delivery is 1 minute before attempt 2, 10 minutes before attempt 3 and, where a fourth interval is configured, 1 hour, with an attempt limit of three, and the intervals are rows of the environment configuration and not code. After the third failed attempt the delivery moves to EXCEPTION with the last error code and raises the task RESOLVE_OUTBOX_DELIVERY for role RW-PLATADM. A 4xx of the append other than 409 is non-retryable and parks the delivery at once; a 5xx, a timeout and an unresolvable case are retryable and take the three attempts.",
+      "why": "The legacy story of this module fixes three attempts and the task for RW-PLATADM and the retry windows of 1 minute, 10 minutes and 1 hour; the FSD fixes 5 and 15 minutes for the WIN outbound file only; neither applies to this consumer as a stated rule, so the intervals are an assumption and a configuration row.",
+      "read": "Legacy RWB-E2-034 AC7, AC8 and BR8; FSD P2 v3 A2.1.4.3 AC-EXC-P2-001-01 and A2.7.3; TSD P2 v3 T4 and T3.2; Template and Rules section R5.5 DP-09",
+      "gap": "GAP-0664",
+      "applied_in": "8 Business rules BR6; 9 State transitions; 12.5; 13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "Solution architect and the platform event owner at the contract review; the values are confirmed per environment by the DevOps lead",
+      "impact": "No delivery is lost and none is parked before its third attempt; the intervals are tuning values and a change of interval needs no code change.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1171",
+      "text": "The EFS read step is EfsLedgerReadWorkflow started by rwb.source-data.AceDataReady.v1 for the EFS source, writes one CONTACT entry per kept row under the key EFS:<efs_record_key>, and closes with the summary businessDate, rowsRead, written, excluded, notOnCase. The summary is the workflow result and a dashboard series; no summary table is created, because no source names one, and a rerun for the same business date writes only the rows not yet written.",
+      "why": "The legacy story gives the summary counts and the read key but names no table for the summary, and the split removes the EFS read from the writer that used to hold it. The counts and the key are the legacy values; the landing of the summary is the only new element.",
+      "read": "Legacy RWB-E2-034 AC6, section 12 (EFS contact read step) and section 13; Arch v5 slide 44 JOB-02 and JOB-04; EV-26",
+      "gap": "GAP-0664",
+      "applied_in": "8 Business rules BR7 and BR8; 11 Data; 12.5; 13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "Solution architect and the rwb-source-data owner, because the EFS rows and the outcome list are that service's",
+      "impact": "The read summary stays visible and comparable between runs without a new table; the exclusion and not-on-a-case rules of the legacy story are unchanged.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1172",
+      "text": "The ownership split is read as follows and is not re-opened by this story: the ledger store, its append operation, its append-only trigger, the EFS ledger outcome list and the retention classes belong to rwb-source-data (P1, DP-18); the case timeline, the sequence order and the scope check belong to rwb-case (P3); the masking by role belongs to rwb-access (P4); the partner instruction, the partner result and the portal belong to rwb-partner (S9). rwb-integration keeps only the channel intake, the delivery trail, the inbox and the exception queue, and reads every fact through its owner's contract.",
+      "why": "The legacy story keeps all of these in module P2, TSD P3 v3 defines the interaction table in P3 and TSD P2 v3 defines the EFS ledger outcome list in P2, while the R-PREC default ruling and the Ownership Map move the ledger and its intake rule to P1. The intake slice is a reading of the higher ruling over those documents and has to be stated once so that four teams do not each build a ledger writer.",
+      "read": "Template and Rules section R3 default rulings and section R5.5 DP-18; _work/msr/plan/ownership.json rulings on interaction, efs_ledger_outcome and the two interaction operations; Arch v5 slide 41",
+      "gap": "GAP-0664",
+      "applied_in": "1 Story; 8 Business rules BR9; 12.7; 19 Out of scope",
+      "confidence": "High",
+      "confirm": "Solution architect at the contract review; the ruling is the higher source, so any change is a decision-log change and not a story change",
+      "impact": "No business behaviour changes; the ledger, the timeline, the masking and the portal are built once by their owners, and this story guarantees the transport between the channels and that ledger.",
+      "wp": "B-P2-02"
+    }
+  ]
+}

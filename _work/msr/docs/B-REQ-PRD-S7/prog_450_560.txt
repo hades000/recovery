@@ -1,0 +1,115 @@
+450:# 6. Non-functional requirements
+451:
+452:78 non-functional requirements. Proposed targets apply until the bank sets a value. Open targets are held under DL11, and retention and protection targets under DL26.
+453:
+454:## 6.1 Volume and capacity
+455:
+456:| ID | Requirement | Target | Status | Owner |
+457:|---|---|---|---|---|
+458:| NFR-001 | The case store holds one case per customer and product for every account at 90 or more days past due across Mortgage, Hire Purchase and SSME. | About 23,600 open cases at go-live and 26,500 at the end of 2027, from 3,110 new accounts at 90 days past due a month. Confirmed under DL15 | Proposed from the volume forecast | Risk with the data product owner |
+459:| NFR-002 | The system supports the peak number of staff users signed on at once. | About 370 staff online in the busiest hour, of 914 named users | Proposed from the volume forecast | Business lead |
+460:| NFR-003 | The system supports the peak number of partner users signed on at once across 73 agencies, 11 to 12 law firms, 4 auction vendors and 35 buyers. | About 50 partner users online in the busiest hour, of about 320 named users | Proposed from the volume forecast | Partner and agency manager |
+461:| NFR-004 | The document store holds the annual inbound document volume with its growth rate. | About 860,000 documents in 2027, rising with 15 percent inflow growth a year | Proposed from the volume forecast | Legal with Autonomous Ops |
+462:| NFR-005 | The restructure path carries the monthly case volume reaching the Workbench. | About 3,000 restructure accounts a month reach the bank's restructure process today | Proposed | Solution architect |
+463:| NFR-006 | The deed in lieu path carries its target monthly volume. | 1,000 cases a month in 2027, from 685 today | Proposed | Solution architect |
+464:| NFR-007 | The decision log holds one record for every decision on every case for the full retention period without degrading query time. | About 36 GB for the decision log and the interaction ledger by the end of 2031; a single case history query under 2 seconds at that size | Proposed, DL11 | Compliance with the solution architect |
+465:| NFR-069 | The document hub holds the full recovery document estate as a system of record, including every version and every held document, with storage sized for growth. | About 5.8 million documents and 2.8 TB by the end of 2031, with every version and held document | Proposed, DL11 | Solution architect with Compliance |
+466:| NFR-070 | The interaction ledger holds every interaction on every open and closed case within its retention period, and reads a single case history inside the user wait. | One case history reads in under 2 seconds with the ledger at its 2031 size | Proposed, DL11 | Data lead with the solution architect |
+467:
+468:
+469:## 6.2 Response time
+470:
+471:| ID | Requirement | Target | Status | Owner |
+472:|---|---|---|---|---|
+473:| NFR-008 | A screen responds within its target under normal load. | Under 2 seconds | Proposed | Solution architect |
+474:| NFR-009 | The case record view loads for a case with 50 documents. | Under 2 seconds | Proposed | Solution architect |
+475:| NFR-010 | An agent returns an answer within its target, after which the rule result is used and the case still routes. | Under 60 seconds | Proposed | Solution architect |
+476:| NFR-011 | A rule evaluation at a routing decision completes inside the user's wait. | Under 300 milliseconds per rule evaluation at the 95th percentile | Proposed, DL11 | Solution architect |
+477:| NFR-012 | A search across cases and documents returns within its target. | Under 3 seconds for a search across cases; under 5 seconds across documents | Proposed, DL11 | Business lead |
+478:
+479:
+480:## 6.3 ACE ingestion and freshness
+481:
+482:The Workbench runs no inbound load (D-RCV-35, U1). Work that depends on source data starts when ACE records the batch for that source and business date as complete in v_ace_batch_status: case creation and the case list on the ALS batch, hand-over on the EFS batch. A late batch delays the work and raises an alert; it never starts a Workbench load. NFR-016, NFR-017 and NFR-019 are Workbench document and scheduling jobs; they load no source data.
+483:
+484:| ID | Requirement | Target | Status | Owner |
+485:|---|---|---|---|---|
+486:| NFR-013 | Under D-RCV-35 (U1 and U4) and ADR-010, the Workbench reads source data only through the recovery.v_ace_* views, and every case list and decision states the business date and load time of the ACE source batches behind it. | Case list available by 07:00 on the latest completed ACE batch | Proposed, DL43 | Solution architect |
+487:| NFR-014 | Freshness is read from recovery.v_ace_batch_status, one row per source and business date; a missing, failed or late batch is visible on the case list and alerts the data steward. | Start of day, on the ACE business date | Proposed, DL43 | Solution architect |
+488:| NFR-015 | The Workbench holds no load window: a late ACE batch delays the case list and raises an alert rather than starting a Workbench load, catch-up job or staging table. | End of day; in the Workbench the next morning. Same-day needs are named under DL06 | Proposed | Solution architect |
+489:| NFR-016 | The document intake pipeline processes its throughput in the test environment. | 500 pages per hour | Proposed | Solution architect |
+490:| NFR-017 | Document classification is correct on the labeled sample, and anything below the confidence threshold goes to a review queue. | 90 percent correct | Proposed | Solution architect |
+491:| NFR-018 | The case list reconciles to the ACE account view daily. | No unexplained variance; tolerance per data product under DL25 | Proposed, DL25 | Solution architect |
+492:| NFR-019 | The daily rebalancing job completes before the working day starts. | Complete by 07:00 | Proposed, DL11 | Team manager |
+493:
+494:
+495:## 6.4 Availability and recovery
+496:
+497:| ID | Requirement | Target | Status | Owner |
+498:|---|---|---|---|---|
+499:| NFR-020 | The Workbench is available during business hours. | 99.9 percent in business hours | Proposed | Solution architect |
+500:| NFR-021 | Availability outside business hours, when batch, dispatch and partner exchange run. | 99.5 percent outside business hours, excluding the change window | Proposed, DL11 | IT lead |
+501:| NFR-022 | Recovery point objective: the maximum data loss the business accepts. | The ACE recovery point objective | Open, DL11 | IT lead with Operational Risk |
+502:| NFR-023 | Recovery time objective: the maximum time to restore service. | The ACE recovery time objective | Open, DL11 | IT lead with Operational Risk |
+503:| NFR-024 | An agent or model outage falls back to the rule result, and the case still routes. | Fallback always on | Proposed | Solution architect |
+504:| NFR-025 | A system of record outage queues the outbound action and retries on a schedule, and does not lose it. | Queue and retry | Proposed | Solution architect |
+505:| NFR-026 | An interface failure after the retry limit moves the item to an exception queue with a task for a named owner. | Three retries per item, then the exception queue | Proposed, DL11 | Platform administrator |
+506:| NFR-027 | A production release rolls back by redeploying the previous tag. | Rollback by previous tag | Proposed | Solution architect |
+507:| NFR-071 | Documents in the hub are backed up on a stated schedule, and a restore is tested before the first production release and at each release after it. | Backup on the bank schedule; restore tested before the first production release and at each release | Open, DL27 | IT lead |
+508:
+509:
+510:## 6.5 Retention
+511:
+512:| ID | Requirement | Target | Status | Owner |
+513:|---|---|---|---|---|
+514:| NFR-028 | Every document type carries a retention class, and the class sets how long the document is kept. | Retention classes defined per type; periods not set | Open, DL26 | Compliance with Legal |
+515:| NFR-029 | Legal documents are held in a write-once container and cannot be altered or deleted inside their retention period. | Write-once for legal types | Proposed | Solution architect |
+516:| NFR-030 | The decision log is retained for the period the regulator and internal audit require. | Log retention is set by Compliance | Open, DL26 | Compliance |
+517:| NFR-031 | Case records carry a retention and archive rule by record class, and a case closes after its retention period. | Not set | Open, DL26 | Compliance |
+518:| NFR-032 | Under D-RCV-35 (U5), retired local files and Excel and SharePoint trackers are handled through the Cutover plan, which keeps each as a read-only archive at a recorded location. The Workbench loads and holds no tracker. | Archive location recorded per file in the Cutover plan | Proposed | Solution architect |
+519:| NFR-072 | A legal hold stops deletion and expiry for the case or document it covers, for as long as it is in place, overriding the retention class. | Hold overrides retention | Proposed | Solution architect |
+520:| NFR-073 | An electronic discovery request is answered with every document for a named population, its metadata, its version history and the date each version was created. | Not set as a response time | Open, DL26 | Legal counsel |
+521:| NFR-074 | A document reaching the end of its retention period is disposed of or extended by a recorded decision, and is never removed silently. | Recorded decision on every disposal | Proposed | Solution architect |
+522:| NFR-075 | Interaction ledger entries carry their own retention period, set independently of the decision log. | Not set | Open, DL26 | Compliance |
+523:
+524:
+525:## 6.6 Auditability
+526:
+527:| ID | Requirement | Target | Status | Owner |
+528:|---|---|---|---|---|
+529:| NFR-033 | Every decision is reproducible from the log, including the rule, model, agent and prompt versions and the inputs used. | Every decision reproducible | Proposed | Solution architect |
+530:| NFR-034 | Every action carries the rule version applied and the approver who allowed it. | Every action | Proposed | Solution architect |
+531:| NFR-035 | The decision log hash chain is checked daily, and a break is reported to Compliance the same day. | Daily check, same-day report | Proposed | Solution architect |
+532:| NFR-036 | An audit or regulatory request is answered inside its deadline with the decision history and the supporting documents. | Inside the deadline set by the requester | Proposed | Solution architect |
+533:| NFR-037 | Quality assurance reaches first-time-right on case packs and write-off returns. | 90 percent | Proposed | Solution architect |
+534:| NFR-038 | Every outbound contact carries a conduct check result, and a contact without one is held. | Every contact | Proposed | Solution architect |
+535:| NFR-076 | A document produced from the hub carries its origin, the date it entered the hub, whether it has been altered since, and who has read it, to the standard a court applies. | Every document produced | Proposed | Solution architect |
+536:| NFR-077 | A failed write to the interaction ledger raises an incident, and no entry is discarded. | No silent gaps | Proposed | Solution architect |
+537:| NFR-078 | A model or agent write to a queue is logged with the model or agent version, on the same terms as a decision taken by a person. | Every write | Proposed | Solution architect |
+538:
+539:
+540:## 6.7 Data protection
+541:
+542:| ID | Requirement | Target | Status | Owner |
+543:|---|---|---|---|---|
+544:| NFR-039 | Party identifiers are masked at rest in the case store, and on every screen and every agent call, by role. | Masked at rest and in use | Proposed | Solution architect |
+545:| NFR-040 | Each screen and each agent receives only the personal data it needs. | Data minimization per screen and per agent | Proposed | Solution architect |
+546:| NFR-041 | The debt sale data tape is masked before it reaches the data room. | Masked tape | Proposed | Solution architect |
+547:| NFR-042 | Every read of the case store, the document store and the data lake copy is logged. | Every read | Proposed | Solution architect |
+548:| NFR-043 | A data subject access, correction or erasure request is answered inside the statutory period. | Statutory period, Not set as a working service level | Open, DL26 | Compliance |
+549:| NFR-044 | Consent state per channel is held and applied, and statutory notices continue when consent is withdrawn. | Applied on every send | Proposed | Solution architect |
+550:| NFR-045 | No production data is used in the development environment, and the user acceptance environment uses masked copies. | Synthetic in development, masked in user acceptance | Proposed | Solution architect |
+551:
+552:
+553:## 6.8 Data residency and classification
+554:
+555:| ID | Requirement | Target | Status | Owner |
+556:|---|---|---|---|---|
+557:| NFR-046 | Workbench data stays in the bank's own cloud tenancy in the agreed region. | SCB Azure, Southeast Asia | Proposed | Solution architect |
+558:| NFR-047 | Every data product and every document type carries a data classification, and the classification sets its handling. | Classification scheme to be applied | Open, DL26 | Compliance with Security |
+559:| NFR-048 | The approved large language model endpoint is reached over a private endpoint inside the bank's tenancy. | Private endpoint | Proposed | Solution architect |
+560:
+561:
+562:## 6.9 Security
+563:
+564:| ID | Requirement | Target | Status | Owner |

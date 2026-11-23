@@ -1,0 +1,80 @@
+1600:Envelope
+1601:CloudEvents 1.0, binary mode
+1602:
+1603:Schema
+1604:JSON Schema registry, backward compatible
+1605:
+1606:Producer
+1607:outbox · idempotent · acks=all
+1608:
+1609:Payload
+1610:IDs and business facts, no PII
+1611:
+1612:The producer writes once and moves on; each listener reacts in its own time and a duplicate never acts twice.
+1613:
+1614:22
+1615:
+1616:Notes: Producer: rwb-payment's matchPayments activity updates its tables and inserts the event into its outbox table in the same database transaction (schema rwb_payment). The outbox relay publishes it with an idempotent producer (acks=all, min.insync.replicas=2) and marks it sent. If Kafka is down, events wait in the outbox.
+1617:
+1618:Topic: rwb.payment.events.v1, 12 partitions, replication factor 3, 7-day retention, key caseId. CloudEvents 1.0 Kafka binding in binary mode: ce_id, ce_type, ce_source, ce_subject as headers, W3C traceparent header, JSON body validated against the registry (BACKWARD compatibility).
+1619:
+1620:Consumers: one consumer group per service. Each records ce_id in its inbox table (processed_event) in the same transaction as its own change, so a redelivered event has no second effect. Failures go to retry topics (1 min, 10 min, 1 h) and then to the dead-letter topic with an alert and a replay tool.
+1621:
+1622:rwb-case does not act itself: its case router turns the event into a Temporal signal (signalWithStart) on the CaseWorkflow.
+1623:
+1624:## Slide 23
+1625:
+1626:Temporal in five layers: the bottom four are reusable by any workbench
+1627:
+1628:Platform layers are owned once; each workbench writes only its own domain workflows
+1629:
+1630:L5
+1631:
+1632:Domain workflows
+1633:CaseWorkflow (rwb-case) · RouteDecision, Treatment, Litigation, AssetDisposal, DebtSale, WriteOff, Deviation
+1634:
+1635:each service team
+1636:
+1637:L4
+1638:
+1639:Service activity contracts
+1640:Typed interface per service on queue rwb-<svc>, e.g. Payment.postProceeds, Partner.issueInstruction · Nexus endpoints
+1641:
+1642:each service team
+1643:
+1644:L3
+1645:
+1646:Workflow kit (versioned library)
+1647:Approval (maker-checker, DoA) · Notify · Document intake · Agent run + fallback · Human task with SLA · Saga runner · Scheduled job · Partner instruction
+1648:
+1649:platform team
+1650:
+1651:L2
+1652:
+1653:Namespaces
+1654:ace-collection · rwb-recovery · next workbench: own retention, quotas, certificates and codec keys
+1655:
+1656:platform team
+1657:
+1658:L1
+1659:
+1660:Temporal cluster
+1661:One per environment on ACE AKS; own persistence DB; UI, metrics, codec server; version 1.30+
+1662:
+1663:platform team
+1664:
+1665:ANOTHER WORKBENCH REUSES IT IN FOUR STEPS
+1666:
+1667:1
+1668:
+1669:Get a namespace
+1670:platform team sets quotas, certificates and keys
+1671:
+1672:2
+1673:
+1674:Add the workflow kit
+1675:e.g. Approval with its own DoA table
+1676:
+1677:3
+1678:
+1679:Call existing services

@@ -1,0 +1,11 @@
+import json, io
+
+g = {"id": "CG-B-REQ-PRD-S8-19", "title": "The change notes of FSD S8 versions 1 and 2 are not in the sources read", "source": "Recovery Workbench FSD S8 Deviation handling v3 Document control; _work/msr/extract/Recovery Workbench Functional Specifications by Module v6", "section": "Document control, change note", "description": "The change note of FSD S8 v3 says what v3 changed and that everything else is unchanged from v2. The v1 and v2 change notes, their dates and their contents are not in the sources read, so the inherited history of this requirement set cannot be reconstructed and is carried as an open item rather than written from memory.", "evidence": "FSD S8 Document control: 'Change note v3, 15 November 2026 ... Everything else unchanged from v2'. The FSD v6 extract folder holds one file per module, at version 3; no v1 or v2 of S8 is present.", "type": "Missing", "area": "Document history", "severity": "P3", "needed_by_wave": "2", "legacy_ref": "RWB-E2-015, RWB-E1-062", "owner_role": "Business analyst, S8", "asm": "ASM-B-REQ-PRD-S8-22", "proposed": "Carry the version history as 'not specified' in the inherited history table, and let the FSD owner add the v1 and v2 rows when the folder is completed.", "wp": "B-REQ-PRD-S8"}
+
+a = {"id": "ASM-B-REQ-PRD-S8-22", "text": "The change notes and dates of FSD S8 versions 1 and 2 are not in the sources read and are carried as 'Not specified in the source documents' rather than reconstructed.", "why": "Only FSD S8 v3 is present in the extract folder and its change note refers back to v2 without restating it.", "read": "The v3 change note as the boundary of what this document can assert about the earlier versions.", "gap": "CG-B-REQ-PRD-S8-19", "applied_in": "Section 1.3", "confidence": "High", "confirm": "Business analyst, S8, when the folder is completed", "impact": "None on the requirements; the history table is incomplete until then.", "wp": "B-REQ-PRD-S8"}
+
+with io.open('_work/msr/gaps/B-REQ-PRD-S8.jsonl', 'a', encoding='utf-8', newline='\n') as f:
+    f.write(json.dumps(g, ensure_ascii=False) + "\n")
+with io.open('_work/msr/assumptions/B-REQ-PRD-S8.jsonl', 'a', encoding='utf-8', newline='\n') as f:
+    f.write(json.dumps(a, ensure_ascii=False) + "\n")
+print("appended")

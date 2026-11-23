@@ -1,0 +1,247 @@
+{
+  "id": "RWB-P2-E2003-APP",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "APP",
+  "lane": "L-P2-A",
+  "ready": "After RWB-P2-E1007-APP",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-003",
+  "disposition": "Split (rework)",
+  "H": [
+    "RWB-PLT-E1043-CON",
+    "RWB-PLT-E1037-CON",
+    "RWB-PLT-E1044-CON",
+    "RWB-PLT-N001-CON",
+    "RWB-P2-E1007-APP"
+  ],
+  "C": [
+    "RWB-P3-E1043-CON",
+    "RWB-P4-E1037-CON"
+  ],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "legacy RWB-E2-003 AC1",
+      "text_first_line": "Given \"C-0410\" holds a revolving credit line \"A-0411\" with status \"ACTIVE\" and a personal loan \"A-0412\" with status \"DELINQUENT\" in v_ace_party_product, both with data as of 2026-12-14"
+    },
+    {
+      "id": "AC2",
+      "origin": "legacy RWB-E2-003 AC2",
+      "text_first_line": "Given v_ace_party_product holds no row for 2026-12-14 and its last rows are for 2026-12-13"
+    },
+    {
+      "id": "AC3",
+      "origin": "legacy RWB-E2-003 AC3",
+      "text_first_line": "Given a phone collector (RW-PHONECOL) with the case in scope"
+    },
+    {
+      "id": "AC4",
+      "origin": "legacy RWB-E2-003 AC4",
+      "text_first_line": "Given borrower \"C-0420\" of case \"RW-2026-000420\" holds no product other than the case account"
+    },
+    {
+      "id": "AC5",
+      "origin": "legacy RWB-E2-003 AC5",
+      "text_first_line": "Given a case owner with scope \"Own\" and case \"RW-2026-000410\" owned by another person"
+    },
+    {
+      "id": "AC6",
+      "origin": "legacy RWB-E2-003 AC6",
+      "text_first_line": "Given the ACE PII logging service does not accept the access event"
+    }
+  ],
+  "tcs": [
+    "TC-E2-003-07",
+    "TC-E2-003-01",
+    "TC-E2-003-02",
+    "TC-E2-003-03",
+    "TC-E2-003-04",
+    "TC-E2-003-05",
+    "TC-E2-003-06"
+  ],
+  "reqs": [
+    "REQ-CHO-003",
+    "REQ-RDF-010",
+    "REQ-RDF-009",
+    "REQ-CHO-010"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/integration/v1/cases/{caseId}/customer-products"
+  ],
+  "ops_consumed": [
+    "GET /api/recovery/case/v1/cases/{caseId}/parties",
+    "GET /api/recovery/case/v1/cases/{caseId}/accounts",
+    "rwb-source-data contract: the customer products of a person_key (path not specified in the sources)",
+    "GET /api/recovery/source-data/v1/freshness",
+    "POST /api/recovery/access/v1/authorise",
+    "GET /api/recovery/access/v1/masking-policies",
+    "ACE Common PII logging path (INT-22)"
+  ],
+  "events_published": [],
+  "events_consumed": [],
+  "workflows": [],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-CHO-003, REQ-RDF-010, REQ-RDF-009, REQ-CHO-010)",
+  "gaps": [
+    "GAP-0662"
+  ],
+  "assumptions": [
+    "ASM-1148",
+    "ASM-1149",
+    "ASM-1150",
+    "ASM-1151",
+    "ASM-1152",
+    "ASM-1153",
+    "ASM-1154",
+    "ASM-1155",
+    "ASM-1156",
+    "ASM-1157"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2003 APP Customer's other products on the case v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0662",
+      "title": "rwb-integration customer products read: login, contract field names, ACE view owner, endpoint and route names, masking rows and flag switch not settled",
+      "source": "Architecture v5 Text Extract v1 slides 8, 9, 13, 14, 15, 29, 37 and 41; TSD P2 Integration v3 T1.1, T5.2, T6.2, API-P2-011 and Appendix T-B DL43; Ownership Map tables (masking_rule, feature_flag) and API (GET /cases/{caseId}/customer-products); legacy RWB-E2-003 sections 3, 12, 13 and 14; FSD P2 Integration v3 change note and A1.5; Template and Rules v1 §R3",
+      "section": "§3 Preconditions, §11 Data, §12.1 REST provided, §12.2 REST consumed, §13 Solution plan, §14 Messages, §15 Screens and states",
+      "description": "One combined row for the unsettled points of the read. (1) Login: no source names the per-service login of rwb-integration under DP-02, and the legacy story runs as the shared recovery_svc identity. (2) Product, party and freshness contract field names: the sources name the legacy Java types PartyProductView, CasePartyView and DataProductFreshness and the LDM fields DF-ACE-280 to DF-ACE-285, not the JSON field names of the target contracts, and Architecture v5 slide 15 gives rwb-source-data /customers/{id} and /accounts/{id} only, so the product read path appears in no source. (3) Source conflict on the ACE view: Architecture v5 slides 8, 9, 13, 29 and 37 and ADR-010 say that only rwb-source-data reads the thirty recovery.v_ace_* views, while TSD P2 Integration v3 T1.1 (view B11), T5.2 and API-P2-011 say P2 reads v_ace_party_product directly; by R-PREC the architecture wins and the TSD wording is superseded. (4) Endpoint field names: the response type CustomerProducts and its items are named, but the JSON field names and the problem body shape are fixed by no source. (5) Panel route: SCR-03's other products panel is served by the gateway-bff composite route under DP-19, and the route path, the screen-model field list and the merge order are not specified. (6) Masking row shape: masking_rule is owned by rwb-access in the Ownership Map, the legacy story marks the role split as assumed under DL26, and the row shape behind the policy is not specified. (7) Flag switch: feature flags belong to the platform library by the R-PREC default ruling (Ownership Map feature_flag is PLT), while TSD P2 v3 T3.1 defines feature_flag and feature_flag_change in rwb_integration, and the legacy flag name rwb.integration.customer-products has to be carried to that library. An eighth point sits in the same row: the FSD P2 Integration v3 change note rewrites MSG-P1-001, and the FSD outranks the story master under R-PREC, so the story uses the FSD wording.",
+      "evidence": "TSD P2 Integration v3 T5.2 'P2 reads the views in T1.1 directly and calls nothing in P1 for inbound data' and T6.2 'The recovery service identity holds SELECT on the recovery.v_ace_* views only' against Architecture v5 slide 9 'only rwb-source-data reads the 30 recovery.v_ace_* views' and slide 37 'Views read only by rwb-source-data'; TSD P2 v3 API-P2-011 'Read the other products of the case's borrowers from v_ace_party_product, joined on case_party.person_key, masked by role'; Ownership Map tables feature_flag 'Feature flags stay with the platform library (PLT, R-PREC default ruling); P2 serves the admin API against the library, despite TSD P2 v3 defining feature_flag and feature_flag_change'; legacy RWB-E2-003 section 3 '(assumed: unmasked for RW-CASEOWN, RW-TEAMMGR, RW-RESTRUCT, RW-SPECIAL and RW-GUARANT, masked to the last four digits for every other role)'; TSD P2 v3 Appendix T-B DL43 blocks v_ace_party_product until RWB-ACE-001 lands.",
+      "type": "Conflict",
+      "area": "Integration (P2) customer products read: contract, access and edge",
+      "severity": "P2",
+      "needed_by_wave": 2,
+      "legacy_ref": "RWB-E2-003",
+      "owner_role": "Solution architect",
+      "asm": "ASM-1148, ASM-1149, ASM-1150, ASM-1151, ASM-1152, ASM-1153, ASM-1154, ASM-1157",
+      "proposed": "Keep the endpoint with P2 on the base /api/recovery/integration/v1 (Ownership Map row, DP-13); read the holding and the DP02 freshness through the rwb-source-data contract, because Architecture v5 and ADR-010 outrank TSD P2 v3; read the parties and the linked accounts through the rwb-case contract; read the authorise check and the masking rule through the rwb-access contract; write the PII access event through ACE Common (INT-22); keep rwb.integration.customer-products as the flag name on the platform flag library; fix the contract field names in the P1, P3 and P4 contract stories and the response names in the rwb-integration baseline; fix the composite route in RWB-PLT-N001-CON; adopt the FSD P2 v3 wording of MSG-P1-001. Confirm with the ACE team that rwb_integration needs no grant on the recovery schema.",
+      "wp": "B-P2-02"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1148",
+      "text": "rwb-integration runs as its own ACE database login with grants on its own schema only (DP-02), replacing the legacy shared recovery_svc identity; the login follows the rwb_integration schema name of Architecture v5 slide 29.",
+      "why": "No source document names the per-service login, while DP-02 requires one login per service and Architecture v5 slide 29 shows one login per schema.",
+      "read": "Architecture v5 Text Extract v1 slides 8, 29 and 41; Template and Rules v1 §R5.5 DP-02; legacy RWB-E2-003 section 10 (the recovery service identity).",
+      "gap": "GAP-0662",
+      "applied_in": "§3 Preconditions, §10 Authority, §13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "ACE team, DBA (schema and login provisioning, RWB-PLT-DB)",
+      "impact": "The story builds and tests against the rwb-integration login once it is allocated; no behaviour of the read changes.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1149",
+      "text": "Only rwb-source-data reads the recovery.v_ace_* views (Architecture v5 slides 8, 9, 13, 29 and 37; ADR-010), so rwb-integration reads the customer product holding v_ace_party_product and the DP02 freshness through the rwb-source-data contract; the TSD P2 Integration v3 wording that P2 reads the view directly (T1.1 view B11, T5.2, API-P2-011) is superseded.",
+      "why": "Two sources disagree: Architecture v5 is precedence 1 and TSD P2 Integration v3 is precedence 6, so R-PREC makes the architecture win and the loser a conflict row.",
+      "read": "Architecture v5 Text Extract v1 slides 8, 9, 13, 29, 37 and 41; TSD P2 Integration v3 T1.1, T5.2, T6.2 and API-P2-011; ADR-010; Template and Rules v1 §R3.",
+      "gap": "GAP-0662",
+      "applied_in": "§1 Story, §2 Business rationale, §8 BR1 and BR8, §11 Data, §12.2 REST consumed",
+      "confidence": "High",
+      "confirm": "Solution architect; ACE team for the view grant",
+      "impact": "rwb-integration needs no SELECT grant on the recovery schema, adds one contract hop to the read and builds against the rwb-source-data fake.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1150",
+      "text": "The consumed contracts use personKey and partyRole for a case party, personKey, productType, accountNo, productStatus and dataAsOf for a customer product, and dataAsOf, expectedBusinessDate and stale for the DP02 freshness; the product read of rwb-source-data is an operation of that contract because Architecture v5 slide 15 lists only /customers/{id} and /accounts/{id}.",
+      "why": "The sources name the legacy Java types PartyProductView, CasePartyView and DataProductFreshness and the LDM fields DF-ACE-280 to DF-ACE-285, not the JSON names of the target contracts.",
+      "read": "Legacy RWB-E2-003 section 12 (published interfaces called); TSD P2 Integration v3 T3.1 (DF-ACE-280 to DF-ACE-285); Architecture v5 slide 15 (P1 IN); Logical Data Model and Data Dictionary v8.",
+      "gap": "GAP-0662",
+      "applied_in": "§11 Data, §12.2 REST consumed",
+      "confidence": "Medium",
+      "confirm": "rwb-source-data and rwb-case contract owners (the P1 and P3 contract stories)",
+      "impact": "The names are fixed in the P1 and P3 contract baselines; the response of this endpoint is unaffected.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1151",
+      "text": "SCR-03's other products panel is served by the gateway-bff composite route of RWB-PLT-N001-CON, and the route path, the screen-model field list and the merge order are that platform story's to fix.",
+      "why": "DP-19 puts every screen behind the gateway-bff composite route and no source fixes the route of this panel.",
+      "read": "Architecture v5 slides 8, 10 and 20 (gateway-bff composes at most a few parallel calls); Template and Rules v1 §R5.5 DP-19; legacy RWB-E2-003 section 15 (SCR-03 states).",
+      "gap": "GAP-0662",
+      "applied_in": "§4 Flow, §12.1, §15 Screens and states",
+      "confidence": "Medium",
+      "confirm": "Platform edge owner (RWB-PLT-N001-CON)",
+      "impact": "The panel is built against the composite-route stub and the route is agreed in the platform story; the endpoint is unchanged.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1152",
+      "text": "The masking rule of account_no is a row of masking_rule owned by rwb-access (P4) and read through its contract with the version in force; rwb-integration holds no copy. The legacy assumed split stands as data: clear for RW-CASEOWN, RW-TEAMMGR, RW-RESTRUCT, RW-SPECIAL and RW-GUARANT, the last four digits for every other role.",
+      "why": "The Ownership Map gives masking_rule to P4 and the legacy story marks the role split as assumed under DL26; the row shape is not specified in any source.",
+      "read": "Ownership Map masking_rule (owner P4); Architecture v5 slides 14 and 41 (masking policy); legacy RWB-E2-003 section 3 and BR4; CTL-11; DL26.",
+      "gap": "GAP-0662",
+      "applied_in": "§3 Preconditions, §8 BR4, §12.2 REST consumed",
+      "confidence": "Medium",
+      "confirm": "RW-COMPLY owns the rows (DL26); the P4 access stories own the contract",
+      "impact": "No rule value sits in code; a change of who sees a clear account number is a data change in rwb-access.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1153",
+      "text": "The endpoint publishes CustomerProducts with dataAsOf, stale, messageCode and items[] of personKey, partyRole, productType, accountNo masked by role, productStatus and dataAsOf, and returns errors as RFC 9457 problem details; the JSON field names and the problem body shape are taken from the legacy response shape.",
+      "why": "The sources name the response type CustomerProducts and its members but fix no JSON field names and no error body.",
+      "read": "Legacy RWB-E2-003 section 12 (endpoint API-P2-011); Architecture v5 slide 11 (RFC 9457 problem details); Template and Rules v1 §R7.2 s12.",
+      "gap": "GAP-0662",
+      "applied_in": "§4 Flow, §12.1 REST provided",
+      "confidence": "Medium",
+      "confirm": "rwb-integration contract owner (RWB-P2-E1007-APP)",
+      "impact": "The names are fixed in the rwb-integration contract baseline; no behaviour of the read changes.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1154",
+      "text": "The legacy flag rwb.integration.customer-products stays the name of the switch, and the switch itself is a feature flag of the platform flag library read by rwb-integration (R-PREC default ruling; the Ownership Map gives feature_flag to PLT), not a row of a Workbench table.",
+      "why": "Feature flags belong to the platform library by the default ruling, while TSD P2 v3 defines feature_flag and feature_flag_change in rwb_integration.",
+      "read": "Template and Rules v1 §R3 default rulings; Ownership Map feature_flag (owner PLT, ruling on TSD P2 v3); TSD P2 v3 T3.1 and API-P2-005 to API-P2-008.",
+      "gap": "GAP-0662",
+      "applied_in": "§8 BR11, §13 Solution plan (feature switch)",
+      "confidence": "High",
+      "confirm": "Platform library owner (RWB-PLT-E1047)",
+      "impact": "The flag value comes from the library; the legacy name is kept so the switch stays traceable to the legacy story.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1155",
+      "text": "The party roles shown are BORROWER and CO_BORROWER, read as rows of LOV-PARTY-ROLE through the rwb-case reference-data contract, and the product status list is LOV-PRODUCT-STATUS through the same contract; the legacy property rwb.customer.products.party-roles is replaced by those rows.",
+      "why": "DP-07 moves reference data and lists of values to rwb-case, while the legacy story held the party roles as a service property.",
+      "read": "Legacy RWB-E2-003 sections 3 and 13; Template and Rules v1 §R5.5 DP-07; Ownership Map lov_value and reference_row (owner P3); DQ-020 and DQ-027.",
+      "gap": "GAP-0662",
+      "applied_in": "§3 Preconditions, §8 BR10, §13 Configuration and reference data",
+      "confidence": "Medium",
+      "confirm": "P3 reference-data owner (RWB-P3-E1043-CON)",
+      "impact": "Adding a party role or a product status is a data change, not a code change.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1156",
+      "text": "This story adds no table and no migration: the read copies nothing into rwb_integration (BR7), so DP-15 applies to the service baseline only and RWB-PLT-E1044-CON is a build dependency for the migration conventions, not for a migration of this story.",
+      "why": "DP-15 is in the pattern list of the legacy key, while the Ownership Map lists no P2 table for the customer products read and the legacy story writes no row.",
+      "read": "Ownership Map tables (no party-product table under P2); Template and Rules v1 §R5.5 DP-15; legacy RWB-E2-003 BR7 and section 13 (database: no new table).",
+      "gap": "GAP-0662",
+      "applied_in": "§12.7 Tables owned, §13 Solution plan (database and migrations)",
+      "confidence": "High",
+      "confirm": "ACE team, DBA",
+      "impact": "No schema change and no Flyway file; the rwb_integration baseline is carried by RWB-P2-E1007-APP.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1157",
+      "text": "MSG-P1-001 uses the FSD P2 Integration v3 change-note wording, '{product} is from {date}. Today's data is not yet complete.', in place of the legacy story wording '{product} is from {date}. Today's load has not arrived.'.",
+      "why": "R-PREC ranks the FSD (7) above the story masters (9), and the FSD P2 Integration v3 change note records the rewording of the stale-data message.",
+      "read": "FSD P2 Integration v3 change note, version 3 ('Stale-data message MSG-P1-001 reworded') and VR-P2-001-1; legacy RWB-E2-003 section 14.",
+      "gap": "GAP-0662",
+      "applied_in": "§14 Validation and messages",
+      "confidence": "High",
+      "confirm": "Business analyst, P2 (message catalogue owner)",
+      "impact": "The message text shown on the stale banner changes under the realignment; no identifier and no behaviour changes.",
+      "wp": "B-P2-02"
+    }
+  ]
+}

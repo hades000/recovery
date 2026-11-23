@@ -1,0 +1,142 @@
+===== Read me (57x1)
+1 SCB Collections and Recovery. Henka Group, 22 November 2026.
+2 (C) Siam Commercial Bank and Henka Pte Ltd
+4 Recovery Workbench Users Roles and Permissions v5 (D-RCV-60 microservice realignment)
+5 Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash. Status: Draft. Supersedes v4 of 15 November 2026.
+6 Source: Recovery Workbench Users Roles and Permissions v4.xlsx. Every sheet, role row, letter, number and date of v4 is kept word for word. The realignment adds this sheet, the Authorise contract and Area owners sheets at the end, one column on the Roles tab, two rows on the Access flow tab and one note row on each of the Separation of duty, Single sign-on and Systems by role tabs.
+8 Change log
+9 Version | Date | Change | Decision | Tool
+10 | 5 | 22 November 2026 | D-RCV-60 microservice realignment | D-RCV-60 | T3 Code / OpenCode / DeepSeek v4.1 Flash |
+11 | 4 | 15 November 2026 | the COLLINS data load actor is removed under D-RCV-35 (U1); SY-RECOVERY added; supersedes v3 | D-RCV-35 | not named in the source |
+12 Change-log row (Template and Rules R8.1): 5, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+14 What changed in v5
+15 1. New sheet Authorise contract: the one access contract of the target architecture. P4 rwb-access provides POST /authorise, GET /me/permissions, GET /doa-limits and GET /masking-policies; every service checks the object itself with cached permission data, a 2 s timeout and a circuit breaker (Architecture v5 slides 14, 35 and 41; Template and Rules DP-08).
+16 2. New sheet Area owners: the 14 capability areas of the Permissions tab, each with the service that owns its data and its enforcement, taken from the Microservice Ownership Map v1 (Tables, Endpoints, Events, Jobs and Parameters sheets).
+17 3. Roles tab: one new column K, Enforcing services (D-RCV-60), computed from the letters the role already holds on the Permissions tab. No existing cell changes.
+18 4. Access flow tab: two rows added. Review step 3 is the six-monthly JOB-18 access review list, a Temporal Schedule in rwb-access. Break-glass step 5 is AccessPolicyChanged, published so every service refreshes its cached permissions and DoA limits.
+19 5. Separation of duty tab: one note row. The eight pairs are rows in rwb_access.role_conflict, owned by P4; the grant check and the sign-in check read the same rows.
+20 6. Single sign-on tab: one note row. rwb-access resolves each Entra ID group above to a role code at sign-in through ACE Common group-to-role (Architecture v5 slides 14, 30 and 41).
+21 7. Systems by role tab: one note row. ACE and TDR data reaches a role through the contract of P1 rwb-source-data or the recovery.v_ace_* views, never by a direct table read (DP-05).
+22 8. Key tab: six rows added, for column K, the two new sheets, the tentative-release rule, the access check and version v5.
+24 What did not change
+25 All 54 role rows of the Roles tab, with every role code, name, class, group, unit, description, L1 process, screen, default scope and first release.
+26 The permission matrix: 54 roles against 14 capability areas, every letter of every row. Every approve right still works within the delegation of authority table.
+27 The 8 separation-of-duty pairs, the 15 access-flow rows, the 49 single sign-on rows and the 37 systems-by-role rows of the bank roles.
+28 The Counts tab (blank in v4, kept as it is), the 16 Key rows of v4, the Roles tab note row of 15 November 2026 and the Key version row v4.
+29 No date is added, changed or removed. v4 states no release date. The release labels E1 to E8 are copied unchanged, and every one of them is tentative (D-RCV-60, U7).
+30 No table, column, function, message or rule name of the source is renamed.
+32 Owners (Microservice Ownership Map v1)
+33 Every owner named in v5 is taken from the Microservice Ownership Map v1 Services, Tables, Endpoints, Jobs, Events and Parameters sheets, or from Architecture v5 slides 14, 35, 41, 42, 43 and 44. P4 rwb-access owns the roles, permissions, role conflicts, masking, DoA limits and the access log.
+34 Where v4 says 'the Workbench', v5 names the service behind it and leaves the v4 sentence in place.
+36 Contract stories (Template and Rules DP-08, R5.4 and R5.7)
+37 RWB-P4-E1037-CON: the rwb-access contract, P4, wave 1, Day 1.
+38 RWB-PLT-E1037-CON: the access guard library every service builds against.
+39 Every service carries the contract as a C dependency and builds against its fake, so no service waits for P4 to be built.
+41 Open points (placeholders of Template and Rules R9)
+42 1. Request and response schema of the four authorise operations: Not specified in the source documents (CG-B-BIZ-38-1; ASM-B-BIZ-38-1).
+43 2. Contract name of the sign-in read, /me/permissions or /me/session: Not specified in the source documents (CG-B-BIZ-38-2; ASM-B-BIZ-38-2).
+44 3. Cache lifetime and the rule on a failed authorise call: Not specified in the source documents (CG-B-BIZ-38-3; ASM-B-BIZ-38-3).
+45 4. DoA limit amounts: Not specified in the source documents (CG-B-BIZ-38-4; ASM-B-BIZ-38-4).
+46 5. Masking rules per role, area and field group: Not specified in the source documents (CG-B-BIZ-38-5; ASM-B-BIZ-38-5).
+47 6. Partner user to role mapping between S9 and P4: Not specified in the source documents (CG-B-BIZ-38-6; ASM-B-BIZ-38-6).
+48 7. Access log table in rwb_access: Not specified in the source documents (CG-B-BIZ-38-7; ASM-B-BIZ-38-7).
+49 8. Credential of the six non-human actors: Not specified in the source documents (CG-B-BIZ-38-8; ASM-B-BIZ-38-8).
+50 9. Counts tab values: Not specified in the source documents (CG-B-BIZ-38-9; ASM-B-BIZ-38-9).
+51 10. Scope values, Own/Team/All/Placed cases against the legacy REGION: Not specified in the source documents (CG-B-BIZ-38-10; ASM-B-BIZ-38-10).
+52 11. Approval and status of this document: Not specified in the source documents (CG-B-BIZ-38-11; ASM-B-BIZ-38-11).
+54 Counts of this version
+55 Sheets: 11 (the 8 sheets of v4 in the v4 order, plus Read me, Authorise contract and Area owners).
+56 Roles: 54, of which 37 bank users, 7 partner users, 4 customer parties and 6 non-human actors (unchanged).
+57 Capability areas: 14 (unchanged). Separation-of-duty pairs: 8 (unchanged). Access-flow rows: 17 (15 of v4 plus 2).
+===== Authorise contract (81x6)
+1 Authorise contract of P4 rwb-access (D-RCV-60)
+2 The one access contract of the target architecture: every service asks rwb-access, then checks the object itself. Owner P4 rwb-access (Microservice Ownership Map v1 Services, Endpoints and Tables sheets; Architecture v5 slides 14, 35 and 41). REST base /api/recovery/access/v1; schema rwb_access; topic rwb.access.events.v1; task queue rwb-access; wave 1. Patterns DP-08 and DP-11 of the Template and Rules; contract stories RWB-P4-E1037-CON and RWB-PLT-E1037-CON.
+4 A1. REST operations provided by rwb-access
+5 Operation | Purpose | Caller | Inputs named in a source | Response | Note
+6 POST /authorise | Decide one action of one subject on one object, with the scope and the DoA limit applied | every service, through the access guard library (RWB-PLT-E1037-CON) | role, scope and DoA (Architecture v5 slide 14); the object is the record the calling service holds; the request body is Not specified in the source documents (CG-B-BIZ-38-1; ASM-B-BIZ-38-1) | the decision with the effective scope and the DoA limit; the body is Not specified in the source documents (CG-B-BIZ-38-1; ASM-B-BIZ-38-1) | cached reference read; 2 s timeout; circuit breaker per downstream (Architecture v5 slide 35); a POST is not retried
+7 GET /me/permissions | Resolve the signed-in user's roles, each with its scope, masking and DoA limit, at sign-in | gateway-bff; every service | the subject of the JWT; the exact request body is Not specified in the source documents (CG-B-BIZ-38-1; ASM-B-BIZ-38-1) | roles with scope, masking policy, DoA limit and policy version; the body is Not specified in the source documents (CG-B-BIZ-38-1; ASM-B-BIZ-38-1) | Architecture v5 slides 14 and 41 name /me/permissions; the API catalogue names GET /me/session for the same read, and the resolution of the two names is Not specified in the source documents (CG-B-BIZ-38-2; ASM-B-BIZ-38-2)
+8 GET /doa-limits | Read the DoA limit of a role for a product and an action | P7 rwb-decision (ApprovalWorkflow DoA lookup); the services with an approval step | role, product group, action and business date are implied by the delegation_limit rows; the parameters are Not specified in the source documents (CG-B-BIZ-38-1; ASM-B-BIZ-38-1) | the limit in force with its version and effective dates; the amounts are Not specified in the source documents (CG-B-BIZ-38-4; ASM-B-BIZ-38-4) | delegation_limit is owned by P4 (Ownership Map v1); P7 reads it through this operation (Architecture v5 slide 14, P7 OUT 'REST Access: DoA limits')
+9 GET /masking-policies | Read the masking rule of a role for an area and a field group | every service, before it renders personal data | role, area and field group; the parameters are Not specified in the source documents (CG-B-BIZ-38-1; ASM-B-BIZ-38-1) | mask type and field list for the role; the rules themselves are Not specified in the source documents (CG-B-BIZ-38-5; ASM-B-BIZ-38-5) | masking_rule is owned by P4 (Ownership Map v1); a field with no rule is masked (Compliance sets the values, DL26)
+10 GET /admin/roles | List the role rows and their permission rows | RW-SECADM (role owner); RW-REFADM and RW-AUDIT (read) | filter and page | role rows | API Specification v4, x-module P4 (Ownership Map v1 Endpoints)
+11 GET /admin/access-log | Query the access log | RW-SECADM; RW-AUDIT; RW-COMPLY | subject, date range, area and outcome | access log rows, with no personal data value | the log is named by Architecture v5 slides 14 and 41; the table name, columns and retention are Not specified in the source documents (CG-B-BIZ-38-7; ASM-B-BIZ-38-7)
+12 POST /admin/break-glass-grants | Open a break-glass grant naming the incident, area, scope and reason | RW-PLATADM requests it; RW-SECADM approves it | incident, area, scope, reason and window | grant ID and expiry | Access flow tab, Break-glass steps 1 to 4; the grant ends when its window ends
+13 GET /me/session | Read the current session (the API Specification v4 name of the sign-in read) | gateway-bff | none | session, roles and expiry | kept for the v4 catalogue; whether the two names are one operation is Not specified in the source documents (CG-B-BIZ-38-2; ASM-B-BIZ-38-2), and ASM-B-BIZ-38-2 reads them as one
+15 A2. REST operations consumed by rwb-access
+16 Operation | Provider | Purpose | Call type | On failure | Note
+17 Sign-in, user JWT and group to role | ACE Common (ACE team), through gateway-bff | Entra ID sign-in with MFA, and the group membership that resolves to a role code | REST / OIDC | no token and no session: the request ends at the gateway with 401 | Architecture v5 slide 14 (P4 OUT) and slide 30
+18 None other | - | rwb-access reads no other service; the role, permission, conflict, masking and DoA data it serves is its own | - | - | Architecture v5 slide 14: events none, the reference-data owner
+20 A3. Events published (topic rwb.access.events.v1, CloudEvents)
+21 Event | Key | Published when | Consumers | Payload | Note
+22 AccessPolicyChanged | roleCode | a role, permission, role-conflict, scope or masking row changes, including a break-glass grant | all 19 services (cache refresh); gateway-bff | role code, policy version and the changed areas; no personal data | Architecture v5 slide 43 additions row; no EV number is assigned in the source
+23 DoaLimitChanged | roleCode + product group | a delegation_limit row changes, or a new DoA rule version is in force (DOA-2026.11 to DOA-2027.01) | P7 rwb-decision (ApprovalWorkflow); the services with an approval step | limit, version and effective dates | Architecture v5 slide 43 additions row
+25 A4. Events consumed
+26 None. rwb-access is the reference-data owner for access, so it consumes no event (Architecture v5 slide 14: events none).
+28 A5. Workflow and schedule
+29 Item | Type | When | Task queue | Purpose | Note
+30 JOB-18 access review list | Temporal Schedule | six-monthly | rwb-access | publish the list of every holder of every role for the role owner to recertify (Access flow, Review steps 1 to 3) | Architecture v5 slide 44; Ownership Map v1 Jobs
+31 Workflow | none | - | - | no workflow is specified for rwb-access; the authorise call is a synchronous read | Architecture v5 slide 14 lists a Schedule only
+33 A6. Tables owned (schema rwb_access, owner P4)
+34 Table | Holds | Written by | Read by | Note
+35 role | role code, name, class, group, unit, default scope and first release — the Roles tab | a versioned reference load with an approver | GET /me/permissions, POST /authorise | Ownership Map v1 Tables
+36 permission | the 54 roles against the 14 capability areas, letters C R U D A or - — the Permissions tab | a versioned reference load with an approver (RW-SECADM) | POST /authorise | Ownership Map v1 Tables
+37 role_conflict | the eight separation-of-duty pairs — the Separation of duty tab | a versioned reference load with an approver | the grant check and the sign-in check | Ownership Map v1 Tables
+38 masking_rule | the masking rule per role, area and field group | a versioned reference load with an approver (RW-COMPLY, DL26) | GET /masking-policies | Ownership Map v1 Tables
+39 delegation_limit | the DoA limit per role, product and action, with its version and effective dates | a DoA change with an approver; publishes DoaLimitChanged | GET /doa-limits | Ownership Map v1 Tables; the amounts are Not specified in the source documents (CG-B-BIZ-38-4; ASM-B-BIZ-38-4)
+40 access log | every sign-in, authorise decision, refusal and break-glass action, append-only | the service on every decision | GET /admin/access-log | named by Architecture v5 slides 14 and 41; the table name, columns and retention are Not specified in the source documents (CG-B-BIZ-38-7; ASM-B-BIZ-38-7)
+42 A7. Contract fake and the build rule
+43 Fake | Covers | Fixtures | Used by | Note
+44 rwb-access stub v1 | POST /authorise, GET /me/permissions, GET /doa-limits, GET /masking-policies | 54 role fixtures taken from the Roles tab; allow and deny per area; unknown role; policy version mismatch; a 2 s timeout | the contract tests of every service (C dependency on RWB-P4-E1037-CON) | contract first: the fake is generated from the OpenAPI document of the contract story, so no service waits for P4 to be built (Template and Rules R5.7 rule 2; DP-08)
+46 A8. Call-type summary
+47 Call type | Use in the authorise path | Rule | Note
+48 REST | POST /authorise; GET /me/permissions, /doa-limits, /masking-policies; the four administration operations of A1 | one hop; 2 s timeout; circuit breaker per downstream; GET retry once with jitter; POST not retried | Architecture v5 slide 35 note
+49 Kafka | AccessPolicyChanged and DoaLimitChanged to every service; audit and PII logs on the ACE PII path | CloudEvents, outbox in the same transaction, key roleCode, BACKWARD schema | Architecture v5 slides 30 and 43
+50 Temporal | JOB-18 access review list only | Schedule in rwb-access, namespace rwb-recovery | Architecture v5 slide 44
+51 File | None | - | -
+53 A9. Check sequence on every action
+54 Step | What happens | Source
+55 1 | Sign-in at gateway-bff with Entra ID and MFA; an idle session ends after 15 minutes | Architecture v5 slides 30 and 35
+56 2 | ACE Common returns the group membership; rwb-access resolves each Entra ID group of the Single sign-on tab to a role code, one group per role per environment | Architecture v5 slides 14, 30 and 41; Single sign-on tab
+57 3 | The service resolves the subject's roles, scope, DoA limit and masking from rwb-access and caches the answer; the cache lifetime is Not specified in the source documents (CG-B-BIZ-38-3; ASM-B-BIZ-38-3) | Architecture v5 slide 35: cached permission data from rwb-access
+58 4 | The service checks the object itself (OWASP API1 object-level authorisation) against the scope the answer names: Own, Team, All or Placed cases | Architecture v5 slide 35; Key tab of this document
+59 5 | An approve action is compared with the DoA limit for the role, product and action; above the limit the action routes to the approver role through ApprovalWorkflow in P7 | Architecture v5 slide 14 (P7 IN); Temporal and Drools design, L3 kit Approval template
+60 6 | Personal data is masked by the masking rule before it leaves the service; a field with no rule is masked | Architecture v5 slides 35 and 41
+61 7 | The decision, the role code, the policy version, the area and the outcome go to the access log and to the ACE PII path (Kafka to the SOC) | Architecture v5 slides 30, 35 and 41
+62 8 | A change of role, permission, scope, masking or DoA publishes AccessPolicyChanged or DoaLimitChanged; every service refreshes its cache on the event | Architecture v5 slides 14, 41 and 43
+64 A10. Refusal and failure model
+65 Case | Response | Message | Seen by
+66 No token, or a session that has ended | 401 | MSG-P4-001 | the user
+67 The role holds no letter in the area | 403 | MSG-P4-002 | the user
+68 The record is outside the role's scope | 404, and the excluded count is never shown | MSG-P4-003 | the user
+69 An approve action above the DoA limit | the action is routed to the approver role named for the limit | - | the user and the approver
+70 rwb-access does not answer inside 2 s, or the circuit is open | the action is refused and logged, which is the fail-closed reading recorded as ASM-B-BIZ-38-3; the source states the timeout and the breaker but not the outcome (CG-B-BIZ-38-3) | - | the user and RW-PLATADM
+71 An unknown role code, or a policy version the caller does not hold | the action is refused and logged | - | RW-SECADM
+72 Message IDs are those of the access story RWB-E1-037 and are kept unchanged.
+74 A11. Owner, dependency and wave
+75 Item | Value
+76 Owner | P4 rwb-access (Microservice Ownership Map v1 Services sheet; Architecture v5 slides 14, 35 and 41)
+77 Contract stories | RWB-P4-E1037-CON for P4 rwb-access; RWB-PLT-E1037-CON for the access guard library (Template and Rules DP-08)
+78 Consumers | all 19 services; gateway-bff; the Approval template of the workflow kit in P7
+79 Wave and readiness | wave 1 (P4, Architecture v5 slide 41); the contract is Day 1 and every consumer builds against its fake (Template and Rules R5.4 and R5.7)
+80 Non-human actors | the six SY roles of the Roles tab are authorised on the same path; their credential is Not specified in the source documents (CG-B-BIZ-38-8; ASM-B-BIZ-38-8) (Architecture v5 slide 35: mTLS, identified both ways)
+81 Partner roles | the seven PT roles are held as role rows by P4 while the partner user record is S9 rwb-partner; the mapping is Not specified in the source documents (CG-B-BIZ-38-6; ASM-B-BIZ-38-6) (Ownership Map v1 ruling)
+===== Area owners (22x6)
+1 Capability areas of the Permissions tab and the service that owns each one (D-RCV-60)
+2 Every owner is taken from the Microservice Ownership Map v1 (Services, Tables, Endpoints, Jobs, Events and Parameters sheets) and Architecture v5 slide 41. The letters of the Permissions tab are not changed; this sheet says where each area's data and enforcement live.
+4 Capability area | Owning service | Schema | REST base | What the owner holds (Ownership Map v1) | Roles with a letter in this area (of 54)
+5 Case record | P3 rwb-case | rwb_case | /api/recovery/case/v1 | recovery_case, case_account, case_party, task, timer (Tables); EV-01 CaseCreated, EV-04 CaseTransferred (Events); GET /cases/{id} (Endpoints) | 42
+6 Queue and allocation | P3 rwb-case | rwb_case | /api/recovery/case/v1 | queue, queue_member, assignment, queue_measure (Tables); JOB-03 morning allocation, JOB-06 rebalancing (Jobs) | 27
+7 Treatment and offer | S2 rwb-treatment | rwb_treatment | /api/recovery/treatment/v1 | treatment (Tables); EV-10 TreatmentApproved (Events); TreatmentWorkflow (Workflows and activities) | 20
+8 Litigation | S4 rwb-litigation | rwb_litigation | /api/recovery/litigation/v1 | legal_action, hearing (Tables); LitigationWorkflow; JudgmentRecorded and AuctionResult (Architecture v5 slide 43, additions row); Partner instruction in the kit (S4) | 30
+9 Asset and disposal | S5 rwb-asset | rwb_asset | /api/recovery/asset/v1 | asset_sale, listing (Tables); EV-22 AssetTakenOn (Events); JOB-19 re-appraisal (Jobs); AssetDisposalWorkflow | 31
+10 Debt sale | S6 rwb-debtsale | rwb_debtsale | /api/recovery/debtsale/v1 | debt_sale_lot, debt_sale_account (Tables); EV-23 LotAwarded (Events); DebtSaleWorkflow | 21
+11 Write-off and posting | S7 rwb-writeoff | rwb_writeoff | /api/recovery/writeoff/v1 | write_off (Tables); EV-24 WriteOffApproved (Events); WriteOffWorkflow; JOB-16 write-off scan (Jobs) | 17
+12 Documents | P5 rwb-document | rwb_document | /api/recovery/document/v1 | document, document_custody, document_text, signature_request, retention_rule (Tables); EV-16 and EV-17 (Events); DocumentIntakeWorkflow; JOB-12 document intake, JOB-17 retention (Jobs) | 42
+13 Rules and parameters | P7 rwb-decision (rules) + P3 rwb-case (parameters) | rwb_decision; rwb_case | /api/recovery/decision/v1; /api/recovery/case/v1 | rule_package, rule_package_version, rule_row, rule_test_case (P7); parameter_catalog, parameter_value (P3; contract RWB-P3-E1042-CON); JOB-20 rule promote | 38
+14 Reference data | P3 rwb-case | rwb_case | /api/recovery/case/v1 | reference_row, reference_version, lov_value (Tables); contract RWB-P3-E1043-CON; R-PREC default ruling, DP-07 | 42
+15 Decision log | P7 rwb-decision | rwb_decision | /api/recovery/decision/v1 | decision_log_entry, approval (Tables); EV-08 DecisionRecorded on rwb.decision-record.v1; JOB-14 hash-chain check | 39
+16 Partner portal | S9 rwb-partner | rwb_partner | /api/recovery/partner/v1 | partner, partner_instruction, partner_user (Tables); EV-20 InstructionIssued, EV-21 PartnerResultSubmitted (Events); InstructionWorkflow | 29
+17 Reporting | P9 rwb-reporting | rwb_reporting | /api/recovery/reporting/v1 | measure_definition, measure_snapshot, measure_publish (Tables); JOB-15 reporting extract (Jobs) | 36
+18 Platform administration | P2 rwb-integration + PLT platform library | rwb_integration | /api/recovery/integration/v1 | interface_config, outbound_item, job_catalog (P2); feature_flag, feature_flag_change (PLT, R-PREC default ruling) | 6
+19 Not an area of the matrix: the role, permission, scope, DoA and masking data itself | P4 rwb-access | rwb_access | /api/recovery/access/v1 | role, permission, role_conflict, masking_rule, delegation_limit (Tables); POST /authorise, GET /me/permissions, /doa-limits, /masking-policies (Architecture v5 slide 14); JOB-18 access review | 54 (every role is resolved here)
+21 Note - partner and customer roles: the seven PT roles and the four CU roles are held as role rows by P4, while the partner user record is owned by S9 rwb-partner (Ownership Map v1 ruling) and a customer reaches the Workbench through the bank channels; the mapping of a partner user to role codes is Not specified in the source documents (CG-B-BIZ-38-6; ASM-B-BIZ-38-6).
+22 Note - derived counts: the last column counts the non-dash letters of each column of the Permissions tab, so it is a count of roles, not of rights. It is computed here and no cell of the Permissions tab changes.

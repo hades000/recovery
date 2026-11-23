@@ -1,0 +1,334 @@
+[
+ [
+  "Service volumes, 2027 (D-RCV-60)"
+ ],
+ [
+  "The forecast on the other sheets, split by the service that owns each driver. Every figure is a cell on Inputs, Monthly, Five years or Route activity, so the totals on those sheets do not move. Owner, topic and queue come from the Ownership Map v1 sheet Services; the wave is the Arch v5 wave. No driver is shared between two services."
+ ],
+ [],
+ [
+  "Code",
+  "Service",
+  "Wave",
+  "Volume driver",
+  "Volume, 2027",
+  "Unit",
+  "Basis",
+  "Kafka topic",
+  "Task queue",
+  "Consumers of its events"
+ ],
+ [
+  "P1",
+  "rwb-source-data",
+  1,
+  "Eligible accounts listed for each business day and the ACE view reads behind the screens",
+  "=Inputs!C5+Inputs!C6+Inputs!C8",
+  "accounts a day",
+  "Inputs!C5, C6 and C8 (active inventory); the peak view read rate is Read path!B10",
+  "rwb.source-data.events.v1",
+  "rwb-source-data",
+  "rwb-case, rwb-payment, rwb-deviation, rwb-writeoff"
+ ],
+ [
+  "P2",
+  "rwb-integration",
+  1,
+  "WIN registered-letter file (INT-14) and the debt-buyer files (INT-25)",
+  "=Inputs!C26",
+  "registered letters a month",
+  "Inputs!C26; one WIN outbound file a day (JOB-10)",
+  "rwb.integration.events.v1",
+  "rwb-integration",
+  "the service that requested the file (FileDelivered, FileFailed)"
+ ],
+ [
+  "P3",
+  "rwb-case",
+  1,
+  "New cases created, allocated and rebalanced (JOB-02, JOB-03, JOB-06), with the parent CaseWorkflow per case",
+  "='Five years'!C5/12",
+  "cases a month",
+  "Five years!C5 / 12, the 2027 inflow",
+  "rwb.case.events.v1",
+  "rwb-case",
+  "rwb-agent, rwb-deviation, rwb-reporting, gateway-bff (inbox)"
+ ],
+ [
+  "P4",
+  "rwb-access",
+  1,
+  "Authorise calls behind every screen action, served from the permission cache",
+  "='Users and load'!E8",
+  "requests a second at peak",
+  "Users and load!E8; one authorise call per request, cached per session",
+  "rwb.access.events.v1",
+  "rwb-access",
+  "all 19 services (cache refresh on AccessPolicyChanged and DoaLimitChanged)"
+ ],
+ [
+  "P5",
+  "rwb-document",
+  1,
+  "Documents stored, OCR and classified (JOB-12, DocumentIntakeWorkflow)",
+  "='Five years'!E5/12",
+  "documents a month",
+  "Five years!E5 / 12, the 2027 document additions",
+  "rwb.document.events.v1",
+  "rwb-document",
+  "rwb-agent, rwb-case"
+ ],
+ [
+  "P6",
+  "rwb-comms",
+  1,
+  "Notices generated and dispatched; WIN letters at 16:00 (JOB-10)",
+  "=Inputs!C26",
+  "registered letters a month",
+  "Inputs!C26; SMS and LINE go through ACE Common and are not counted here",
+  "rwb.comms.events.v1",
+  "rwb-comms",
+  "rwb-decision, rwb-reporting, rwb-litigation, rwb-guarantee, rwb-case"
+ ],
+ [
+  "P7",
+  "rwb-decision",
+  1,
+  "Decision records collected into the central ledger, approvals and rule promotion (JOB-14, JOB-20)",
+  "='Five years'!H5/12",
+  "decision-log entries a month",
+  "Five years!H5 / 12; the ledger is fed by DecisionRecorded from all 19 services",
+  "rwb.decision.events.v1",
+  "rwb-decision",
+  "gateway-bff (inbox); rwb-case, rwb-valuation, rwb-treatment, rwb-payment (RulePackageInForce)"
+ ],
+ [
+  "P8",
+  "rwb-payment",
+  2,
+  "Payment matching and booking confirmation (JOB-07, JOB-08)",
+  "Not specified in the source documents (CG-B-DATA-26-5; ASM-B-DATA-26-5)",
+  "payments a month",
+  "No payment count on Inputs; the match and the booking run once per business day from AceDataReady",
+  "rwb.payment.events.v1",
+  "rwb-payment",
+  "rwb-case, rwb-treatment, rwb-comms, rwb-asset, rwb-debtsale, rwb-writeoff, rwb-guarantee"
+ ],
+ [
+  "P9",
+  "rwb-reporting",
+  1,
+  "Measures published at 01:30 (JOB-15) and the regulatory extract",
+  1,
+  "measure publish a day",
+  "Slide 44 JOB-15; the dashboard and report read volume is not specified (CG-B-DATA-26-5; ASM-B-DATA-26-5)",
+  "rwb.reporting.events.v1",
+  "rwb-reporting",
+  "Not specified in the source documents (CG-B-DATA-26-4; ASM-B-DATA-26-4)"
+ ],
+ [
+  "P10",
+  "rwb-agent",
+  1,
+  "Agent runs: screening on CaseCreated and classification on DocumentStored (AgentRunWorkflow)",
+  "=('Five years'!C5+'Five years'!E5)/12",
+  "agent runs a month",
+  "Five years!C5 and E5 / 12; one run for each new case and one for each document (slide 16)",
+  "rwb.agent.events.v1",
+  "rwb-agent",
+  "rwb-decision, rwb-document, rwb-deviation"
+ ],
+ [
+  "S1",
+  "rwb-valuation",
+  3,
+  "Appraisals and the D6 route decision (RouteDecisionWorkflow) for each new case",
+  "='Five years'!C5*0.5/12",
+  "valuations a month",
+  "ACE growth!B6 basis: one appraisal for every second new case",
+  "rwb.valuation.events.v1",
+  "rwb-valuation",
+  "rwb-case"
+ ],
+ [
+  "S2",
+  "rwb-treatment",
+  2,
+  "Accounts under restructure monitored and the treatment plans (TreatmentWorkflow)",
+  "=Inputs!C30",
+  "accounts under restructure",
+  "Inputs!C30, a stock at 30 June 2026, not a monthly flow",
+  "rwb.treatment.events.v1",
+  "rwb-treatment",
+  "rwb-comms, rwb-payment"
+ ],
+ [
+  "S3",
+  "rwb-guarantee",
+  3,
+  "Guarantee and insurance claims and guarantor notices (GuaranteeClaimWorkflow)",
+  "Not specified in the source documents (CG-B-DATA-26-5; ASM-B-DATA-26-5)",
+  "claims a month",
+  "No guarantee count on Inputs or Route activity",
+  "rwb.guarantee.events.v1",
+  "rwb-guarantee",
+  "rwb-case, rwb-reporting"
+ ],
+ [
+  "S4",
+  "rwb-litigation",
+  3,
+  "Lawsuits filed and the hearings that follow (LitigationWorkflow, years)",
+  "=Inputs!C24",
+  "lawsuits a month",
+  "Inputs!C24; two hearings for each lawsuit (ACE growth!B11 basis)",
+  "rwb.litigation.events.v1",
+  "rwb-litigation",
+  "rwb-asset, rwb-case"
+ ],
+ [
+  "S5",
+  "rwb-asset",
+  2,
+  "Vehicles repossessed, properties taken on, held and sold (AssetDisposalWorkflow)",
+  "=Inputs!C25",
+  "assets a month",
+  "Inputs!C25 a month; holdings Inputs!C27 and property sales Inputs!C28",
+  "rwb.asset.events.v1",
+  "rwb-asset",
+  "rwb-case, rwb-payment"
+ ],
+ [
+  "S6",
+  "rwb-debtsale",
+  3,
+  "Accounts sold in debt sales, with lots, bids and the award (DebtSaleWorkflow, saga)",
+  "='Route activity'!B9",
+  "accounts a month",
+  "Route activity!B9 (Inputs!C29 / 12); the number of lots is not specified (CG-B-DATA-26-5; ASM-B-DATA-26-5)",
+  "rwb.debtsale.events.v1",
+  "rwb-debtsale",
+  "rwb-case, rwb-payment, rwb-reporting"
+ ],
+ [
+  "S7",
+  "rwb-writeoff",
+  4,
+  "Write-offs scanned monthly (JOB-16) and posted (WriteOffWorkflow)",
+  "='Five years'!C5*0.3/12",
+  "write-offs a month",
+  "ACE growth!B13 basis: three write-offs for every ten new cases",
+  "rwb.writeoff.events.v1",
+  "rwb-writeoff",
+  "rwb-case, rwb-payment, rwb-reporting"
+ ],
+ [
+  "S8",
+  "rwb-deviation",
+  2,
+  "Deviation screening after CaseCreated and AceDataReady (DeviationWorkflow)",
+  "='Five years'!C5/12",
+  "screenings a month",
+  "One screening for each new case (slide 15); the share of cases that raise a deviation is not specified (CG-B-DATA-26-5; ASM-B-DATA-26-5)",
+  "rwb.deviation.events.v1",
+  "rwb-deviation",
+  "rwb-case, rwb-comms, rwb-treatment"
+ ],
+ [
+  "S9",
+  "rwb-partner",
+  4,
+  "Partner users served through the partner gateway (InstructionWorkflow, SLA timers)",
+  "=Inputs!C33",
+  "partner users",
+  "Inputs!C33; the instruction and result volume is not specified (CG-B-DATA-26-5; ASM-B-DATA-26-5)",
+  "rwb.partner.events.v1",
+  "rwb-partner",
+  "partner portal; rwb-litigation, rwb-asset, rwb-case"
+ ],
+ [],
+ [
+  "Totals and cross-checks"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Item",
+  "Value",
+  "Unit",
+  "Check"
+ ],
+ [
+  "",
+  "",
+  "",
+  "New cases a month, 2027",
+  "='Five years'!C5/12",
+  "cases a month",
+  "Equals the P3 row; slide 48 states 3,110 a month, higher because the source divides accounts by 1.2 (CG-B-DATA-26-6; ASM-B-DATA-26-6)"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Documents a month, 2027",
+  "='Five years'!E5/12",
+  "documents a month",
+  "Equals the P5 row; slide 48 gives 64-74k, the same range"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Decision-log entries a month, 2027",
+  "='Five years'!H5/12",
+  "entries a month",
+  "Equals the P7 row; slide 48 gives 55-62k, slightly below the computed rate (CG-B-DATA-26-6; ASM-B-DATA-26-6)"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Rule evaluations a month, 2027",
+  "='Five years'!D5*Inputs!C21",
+  "evaluations a month",
+  "Evaluated inside the owning service, never on a shared rule server (DP-04); slide 48 gives 283-318k, slightly below the computed rate (CG-B-DATA-26-6; ASM-B-DATA-26-6)"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Peak requests a second",
+  "='Users and load'!E8",
+  "requests a second",
+  "Slide 48 gives about 21; the two agree"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Events a day across the 19 topics",
+  "Tens of thousands",
+  "events",
+  "Architecture v5 slide 21 note; the capacity is to confirm with the ACE platform team (CG-B-DATA-26-4; ASM-B-DATA-26-4)"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Task queues",
+  19,
+  "queues",
+  "One per service in namespace rwb-recovery"
+ ],
+ [
+  "",
+  "",
+  "",
+  "Topics",
+  20,
+  "topics",
+  "19 rwb.<name>.events.v1 plus the shared rwb.decision-record.v1"
+ ]
+]

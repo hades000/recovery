@@ -1,0 +1,24 @@
+235: S7  Write-off
+365: Prescription: last payment 15 Mar 2026 → prescription date 15 Mar 2028, warning 17 Sep 2027 (FSD P3 AC-ALT-P3-011); 90 days or less escalates (R-LIT-11/20); R-UNI-31 forces a litigation review. A second deferral with no asset goes to write-off (R-LIT-57).
+567: S1 route · S2, S3, S5–S7 approvals
+575: S2 settlement · S5 auction · S6 · S7
+579: JOB-16 write-off scan · overnight jobs
+601: How S1 to S9 use the kit: Approval for route approval (S1), DoA approvals (S2, S3, S5, S6, S7) and rule sign-off; Human task with SLA for every officer task; Saga runner for settlement and deed in lieu (S2), auction (S5), debt sale (S6) and write-off posting (S7); Scheduled job for JOB-16 write-off scan (S7) and the overnight jobs; Partner instruction for law firms, auction vendors and agencies (S
+651: Write-off
+652: rwb-writeoff  ·  WO 51
+663: Notes: Aligned to Recovery Microservice Architecture v5 (slides 23 to 25). CaseWorkflow (workflow ID = case ID; ADR-011 writes it as case-{caseId}) runs on task queue rwb-case in namespace rwb-recovery from entry to closure. Each stage is a child workflow started on the owner's queue: RouteDecisionWorkflow (rwb-valuation, with ApprovalWorkflow from the kit on rwb-decision), TreatmentWorkflow (rwb-
+1246: 2nd deferral, no asset → write-off (R-LIT-57)
+1462: S7 · Write-off and recovery
+1464: Monthly write-off scan, committee, posting, and recovery after charge-off
+1466: Starts when  JOB-16 runs on the 3rd working day after EV-26 AceDataReady (R-WO-01)
+1511: rwb-writeoff
+1512: WriteOffWorkflow
+1530: Write-off route set, 51 rules (package Phase 2)
+1550: S7 is batch-shaped: a schedule starts it, Drools selects the population, Temporal retries the posting.
+1554: Notes: Source: FSD S7 Write-off and recovery v3; Routing Logic v4 (R-WO, 51 rules). Scan holds if tax criteria are missing (R-WO-03). Recovery of written-off debt (2.1.11): L6 up to 50m and at least 15%. Posting failure: re-post, return to scan, or refer to committee (R-WO-44/45/46). In v5 JOB-16 is a Temporal Schedule in rwb-writeoff (monthly, 3rd working day); there are no shared Quartz tables. 
+1791: S7 Write-off
+1819: S7 write-off: posting to ALS/GL is the pivot (R-WO-21); failures are re-posted, returned to scan or referred to committee (R-WO-44/45/46).
+1821: Aligned to v5 slides 26 and 28: each step is an activity on the owning service's queue, run by the kit's Saga runner (for example DebtSaleWorkflow in rwb-debtsale, settlement and deed in lieu in rwb-treatment). Every step writes its decision record with its change in one transaction (R-UNI-39). Strict mode at the point of no return: debt transfer, write-off posting, auction sale and title transfer
+1927: Central ledger late or down: services carry on and the ledger catches up from rwb.decision-record.v1; only points of no return (debt transfer, write-off, auction sale, title transfer) wait for its confirmation (strict mode, v5 slide 28).
+2139: 3. Drools packages for S1 and S3 to S9: the route sets exist (448 rules) but package codes are Phase 2; each needs one owning service (rwb-valuation, rwb-guarantee, rwb-litigation, rwb-asset, rwb-debtsale, rwb-writeoff, rwb-deviation).
+2142: 6. Platform: Temporal 1.30+ for Nexus and Worker Versioning (local stack 1.29.7, ADR-011 1.28.1), and Quartz jobs such as JOB-16 become Temporal Schedules in the owning service (Phase 1 note T2 keeps Quartz).

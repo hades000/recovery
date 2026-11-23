@@ -1,0 +1,168 @@
+[
+ [
+  "Workflow model v5: CaseWorkflow parent with a child workflow per stage"
+ ],
+ [
+  "CaseWorkflow (P3 rwb-case, task queue rwb-case, namespace rwb-recovery, workflow ID = case ID) is the parent from entry to closure. Each stage runs as a child workflow in the service that owns it. The parent forwards events from the case router; children use parent close policy ABANDON; Continue-As-New runs at every stage end and at least every 28 days."
+ ],
+ [
+  "Version 6, 22 November 2026. D-RCV-60. Previous: Version 5, 16 November 2026."
+ ],
+ [],
+ [
+  "Role",
+  "Workflow",
+  "Stage in the v5 model",
+  "Owner (code)",
+  "Service",
+  "Service epic",
+  "Task queue",
+  "Schema",
+  "Tables owned (Ownership Map)",
+  "Pattern",
+  "Note"
+ ],
+ [
+  "Parent",
+  "CaseWorkflow",
+  "Case, entry to closure; case router",
+  "P3",
+  "rwb-case",
+  "RWB-SVC-P3",
+  "rwb-case",
+  "rwb_case",
+  "recovery_case, case_party, case_account, case_entry_exclusion, assignment, queue, queue_member, queue_measure, task, timer, parameter_catalog, parameter_value, lov_value, reference_row, reference_version",
+  "DP-12",
+  "One per case; workflow ID = case ID; forwards events from the case router to the running child; Continue-As-New at every stage end and at least every 28 days."
+ ],
+ [
+  "Child (entry)",
+  "RouteDecisionWorkflow",
+  "Route decision D6, before the first stage",
+  "S1",
+  "rwb-valuation",
+  "RWB-SVC-S1",
+  "rwb-valuation",
+  "rwb_valuation",
+  "None in the Ownership Map; the route outcome is recorded as decision_log_entry (P7) (CG-BIZ-37-1; ASM-BIZ-37-1)",
+  "DP-12, DP-04",
+  "Started with ApprovalWorkflow from the kit on rwb-decision (P7) for the route approval."
+ ],
+ [
+  "Kit child",
+  "ApprovalWorkflow",
+  "Approvals raised by any stage (route approval S1; DoA approvals S2, S3, S5, S6, S7; rule sign-off)",
+  "P7",
+  "rwb-decision",
+  "RWB-SVC-P7",
+  "rwb-decision",
+  "rwb_decision",
+  "approval, decision_log_entry",
+  "DP-12, DP-04",
+  "Kit template; not a route stage. Routed by authority (DoA) from P4."
+ ],
+ [
+  "Child",
+  "TreatmentWorkflow",
+  "Restructure, TDR; Settlement; Deed in lieu and voluntary surrender",
+  "S2",
+  "rwb-treatment",
+  "RWB-SVC-S2",
+  "rwb-treatment",
+  "rwb_treatment",
+  "treatment",
+  "DP-12, DP-04",
+  "Settlement and deed in lieu are sagas."
+ ],
+ [
+  "Child",
+  "GuaranteeClaimWorkflow",
+  "Guarantee claim, D6.5 and D6.6",
+  "S3",
+  "rwb-guarantee",
+  "RWB-SVC-S3",
+  "rwb-guarantee",
+  "rwb_guarantee",
+  "guarantee_claim",
+  "DP-12, DP-04",
+  "None."
+ ],
+ [
+  "Child",
+  "LitigationWorkflow",
+  "Litigation and enforcement, D7",
+  "S4",
+  "rwb-litigation",
+  "RWB-SVC-S4",
+  "rwb-litigation",
+  "rwb_litigation",
+  "legal_action, hearing",
+  "DP-12, DP-04",
+  "Can run for years; Continue-As-New."
+ ],
+ [
+  "Child",
+  "AssetDisposalWorkflow",
+  "Asset disposal, D8.1 to D8.3",
+  "S5",
+  "rwb-asset",
+  "RWB-SVC-S5",
+  "rwb-asset",
+  "rwb_asset",
+  "asset_sale, listing",
+  "DP-12, DP-04",
+  "Temporal Schedule: re-appraisal monthly (Architecture v5 slide 19)."
+ ],
+ [
+  "Child",
+  "DebtSaleWorkflow",
+  "Debt sale, D8.4",
+  "S6",
+  "rwb-debtsale",
+  "RWB-SVC-S6",
+  "rwb-debtsale",
+  "rwb_debtsale",
+  "debt_sale_lot, debt_sale_account",
+  "DP-12, DP-04",
+  "Saga, pivot = transfer."
+ ],
+ [
+  "Child",
+  "WriteOffWorkflow",
+  "Write off and recover after charge-off, D9",
+  "S7",
+  "rwb-writeoff",
+  "RWB-SVC-S7",
+  "rwb-writeoff",
+  "rwb_writeoff",
+  "write_off",
+  "DP-12, DP-04",
+  "Temporal Schedule: scan, 3rd working day (Architecture v5 slide 20)."
+ ],
+ [
+  "Child (any time)",
+  "DeviationWorkflow",
+  "Deviations X1 to X7",
+  "S8",
+  "rwb-deviation",
+  "RWB-SVC-S8",
+  "rwb-deviation",
+  "rwb_deviation",
+  "deviation",
+  "DP-12, DP-04",
+  "Can start at any time; pauses the stage clock."
+ ],
+ [
+  "Parent (always on)",
+  "Universal rules, any state",
+  "Universal rules, any state",
+  "P3 and every service",
+  "rwb-case and every service",
+  "RWB-SVC-P3",
+  "rwb-case",
+  "rwb_case",
+  "See the parent row (P3 case tables)",
+  "DP-04",
+  "R-UNI rules apply in every service; there is no universal-rules child workflow."
+ ]
+]

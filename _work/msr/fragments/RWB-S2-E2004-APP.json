@@ -1,0 +1,119 @@
+{
+  "id": "RWB-S2-E2004-APP",
+  "epic": "RWB-SVC-S2",
+  "service": "rwb-treatment",
+  "wt": "APP",
+  "lane": "L-S2-A",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-004",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [
+    "RWB-P3-E2004-CON"
+  ],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC1 The treatment table is created in rwb_treatment with the fields of the module data model"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC2 The plan facts are held on the row and one running plan per case is enforced"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC3 The approved write is one transaction of row, decision record, outbox row and inbox row"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC4 TreatmentApproved carries the terms the clock needs and no personal data"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC5 The state follows the case and payment signals and never drives them"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC6 The migration is one version of this service's own sequence in one schema"
+    },
+    {
+      "id": "AC7",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC7 The treatment read answers from rwb_treatment alone"
+    },
+    {
+      "id": "AC8",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC8 The retired timer mechanism is absent from the schema and the code"
+    },
+    {
+      "id": "AC9",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC9 No package version in force is a refusal and never a default"
+    }
+  ],
+  "tcs": [
+    "TC-S2-E2004-APP-01",
+    "TC-S2-E2004-APP-02",
+    "TC-S2-E2004-APP-03",
+    "TC-S2-E2004-APP-04",
+    "TC-S2-E2004-APP-05",
+    "TC-S2-E2004-APP-06",
+    "TC-S2-E2004-APP-07",
+    "TC-S2-E2004-APP-08",
+    "TC-S2-E2004-APP-09",
+    "TC-S2-E2004-APP-10"
+  ],
+  "reqs": [
+    "REQ-CHO-006",
+    "REQ-CHO-007",
+    "REQ-RDF-014",
+    "REQ-CWC-011"
+  ],
+  "ops_provided": [
+    "POST /api/recovery/treatment/v1/cases/{caseId}/treatments — writes the treatment row and its plan facts; right Treatment and offer C, Idempotency-Key required",
+    "GET /api/recovery/treatment/v1/treatments/{treatmentId} — reads the treatment with its terms, plan facts and outcome; right Treatment and offer R"
+  ],
+  "ops_consumed": [
+    "the parameters read of rwb-case for CURE_PERIOD_DAYS and plan.warn-days, one hop with a 2 s timeout (DP-06, DP-11); operation name Not specified in the source documents (GAP-2688; ASM-4433)",
+    "the reference-data read of rwb-case for LOV-TREATMENT, LOV-PROPOSER, LOV-APPROVAL-LEVEL, LOV-TRT-OUTCOME, LOV-TRT-SIGNATURE, LOV-CREDIT-RESULT and LOV-TIMER, one hop with a 2 s timeout (DP-07, DP-11); operation name Not specified in the source documents (GAP-2688; ASM-4433)"
+  ],
+  "events_published": [
+    "rwb.treatment.TreatmentApproved.v1 on rwb.treatment.events.v1 (EV-10), keyed by caseId, with treatmentId, caseId, treatmentType, approvalLevel, decisionLogId, firstDueDate, installments and offerAmount",
+    "rwb.decision-record.DecisionRecorded.v1 on rwb.decision-record.v1 (written through the RWB-PLT-E1027-CON library in the same transaction, DP-03)"
+  ],
+  "events_consumed": [
+    "rwb.case.CaseStateChanged.v1 on rwb.case.events.v1 (the route state that moves the treatment state)",
+    "rwb.payment.PaymentMissed.v1 on rwb.payment.events.v1 (the missed due date on the plan facts)",
+    "rwb.decision.RulePackageInForce.v1 on rwb.decision.events.v1 (the package version kept for the next write)"
+  ],
+  "workflows": [
+    "TreatmentWorkflow (child of CaseWorkflow, task queue rwb-treatment, namespace rwb-recovery)",
+    "recordTreatment (activity)",
+    "applyCaseSignal (activity)"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD S2 rwb-treatment v1.md (FR-S2-024)",
+  "gaps": [
+    "GAP-2687",
+    "GAP-2688"
+  ],
+  "assumptions": [
+    "ASM-4432",
+    "ASM-4433",
+    "ASM-4434",
+    "ASM-4435"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2004 APP Treatment entity and plan timers data model v1.md"
+}

@@ -1,0 +1,193 @@
+{
+  "id": "RWB-P2-E4046-APP",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "APP",
+  "lane": "L-P2-L",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP04",
+  "wave": 3,
+  "release": "28 February 2027",
+  "legacy": "RWB-E4-046",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [],
+  "tcs": [
+    "TC-E4-046-01",
+    "TC-E4-046-02",
+    "TC-E4-046-03",
+    "TC-E4-046-04"
+  ],
+  "reqs": [],
+  "ops_provided": [],
+  "ops_consumed": [
+    "GET /api/recovery/document/v1/documents/{id} (SAS link of the stored booking file, for payload_ref)",
+    "POST /api/recovery/case/v1/cases/{caseId}/actions (the one owner task of the exception queue)",
+    "POST /api/recovery/access/v1/authorise (Platform administration U on the resend)",
+    "INT-22 audit and PII logging, ACE Common path (the resend record with the user and the time)"
+  ],
+  "events_published": [
+    "rwb.integration.FileDelivered.v1",
+    "rwb.integration.FileFailed.v1",
+    "rwb.decision-record.DecisionRecorded.v1"
+  ],
+  "events_consumed": [],
+  "workflows": [
+    "deliverFile(manifest) (reused from RWB-P2-E1007-APP, ALS branch added)",
+    "buildOutboundFile",
+    "storeOutboundFile",
+    "sendFileOverMft",
+    "parkItemInException",
+    "recordItemDecision",
+    "resendItem"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to no REQ IDs)",
+  "gaps": [
+    "GAP-0673"
+  ],
+  "assumptions": [
+    "ASM-1212",
+    "ASM-1213",
+    "ASM-1214",
+    "ASM-1215",
+    "ASM-1216",
+    "ASM-1217",
+    "ASM-1218",
+    "ASM-1219",
+    "ASM-1220"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E4046 APP Post a settlement booking to ALS v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0673",
+      "title": "rwb-integration ALS settlement booking: the interface itself, the modelling of INT-03, the field mapping, the metadata rows and the login are not settled by any one source",
+      "source": "WP B-P2-03; legacy RWB-E4-046; RWB-ITG-E4046-ITG sections 4, 11, 12 and 19; Ownership Map v1 (interface_config, outbound_item and job_catalog to P2; treatment to S2; document to P5; recovery_case and task to P3; decision_log_entry to P7); FSD P2 Integration v3 A1.5 (outbound interface register: INT-14, INT-19, INT-20, INT-25 only) and T5.1 note; TSD P2 Integration v3 T1 (INT-03 core bank bookings are manual, no Workbench interface), T3.1, T4, T5.1, T6.1 and T-A.1; Architecture v5 Text Extract v1 slides 11, 16, 20, 41, 43 and 44; Template and Rules v1 section R7.1, R5.5 DP-02, DP-03 and DP-19",
+      "section": "1, 2, 3, 4, 6, 7, 9, 10, 11, 12.1, 12.2, 12.5, 12.6, 12.8, 12.9, 13, 14, 15, 16",
+      "description": "One combined gap covers everything this slice cannot read from a single source. (a) The FSD P2 Integration v3 A1.5 register and the TSD P2 Integration v3 T1 and T5.1 say INT-03 core-bank bookings have NO Workbench interface: the officer books the restructure, settlement or write-off in the core bank and the booking is confirmed on the next ACE batch through v_ace_account. The legacy story RWB-E4-046 and RWB-ITG-E4046-ITG model the ALS booking as an outbound item on an interface configuration row. This story follows the legacy key and the integration story, and records the conflict instead of repairing it: one row of the register and one line of the TSD are superseded for this legacy key, and the read-back half of the legacy journey stays with rwb-source-data after the next ACE batch. (b) The ALS interface id, its transport, the message or file layout, its result codes and its retry intervals and maximum attempts are given by no source: the FSD register names four interfaces only (INT-14, INT-19, INT-20, INT-25) and the retry values it shows are the example values of the WIN file (attempt 2 five minutes after attempt 1, attempt 3 fifteen minutes after attempt 2, three attempts for INT-14 and INT-25), not the ALS values. This story therefore builds the reader and the lifecycle and leaves every value a row of the interface configuration, cited as the placeholder. (c) The metadata H row of the story is None, as the plan fixes it, while DP-03 adds H RWB-PLT-E1027-CON and DP-19 adds H RWB-PLT-N001-CON; both platform contracts are delivered by the platform wave and neither blocks Day 1. (d) The story is given no C row at all, although the journey touches the rwb-treatment contract at its caller and the rwb-document, rwb-case and rwb-access contracts at its consumed edges; the row stays None because the story owns no build wait of another service. (e) The rwb-integration login name of DP-02 is given nowhere; the legacy story ran on the shared recovery_svc identity. (f) Which field ID of outbound_item carries each element of the ALS message or file is not specified: TSD P2 v3 T3.1 publishes the ten fields of the table but not the mapping of the ALS layout to them, and no source gives the task code of the owner task the exception queue raises.",
+      "evidence": "FSD P2 Integration v3 A1.5 (the outbound register holds INT-14, INT-19, INT-20 and INT-25, each an interface_config row with direction OUT) and A2.1.4.3 AC-EXC-P2-001-01 and AC-EXC-P2-001-04 (the retry and exception behaviour, the 5 and 15 minute example intervals, the resend to PENDING with attempt count 0 and MSG-GEN-005); TSD P2 Integration v3 T1 ('INT-03 core bank bookings are manual: the officer books the restructure, settlement or write-off in the core bank, and the booking is confirmed on the next ACE batch through v_ace_account') and T5.1 (INT-03 'Workbench: no interface'), T3.1 (interface_config DF-OPS-136 to DF-OPS-148, outbound_item DF-OPS-168 to DF-OPS-177), T4 ('a failed send or failed outbound check moves to RETRY at the retry_intervals_min of its interface_config version; after max_attempts (three for INT-14 and INT-25) it moves to EXCEPTION and a task goes to owner_role') and T-A.1/T-A.2 (API-P2-001 and API-P2-002); Architecture v5 slides 11 (Idempotency-Key on every POST, claim-check file, FileFailed event and operator retry), 16 and 41 (rwb-integration owns interface config, file runs and outbound items, topic rwb.integration.events.v1 with FileDelivered and FileFailed, 'events (none: called as a task)', queue rwb-integration), 20 (every service: own schema with outbox, inbox and decision_record), 43 (FileDelivered and FileFailed consumed by the requesting service) and 44 (no shared Quartz table; no ALS file window); legacy RWB-E4-046 AC1 and AC2 (outbound_item, v_ace_account and v_ace_payment read-back, MSG-P7-003) and legacy RWB-E1-007 section 14 (MSG-P2-001 and MSG-GEN-005 texts, the task for the owner role, SCR-09); RWB-ITG-E4046-ITG steps 4, 5, 10 and section 19 (the ALS booking as an outbound item, the exception queue, 'The rwb-integration interface build, the outbound item lifecycle, the retry and the exception queue') and its section 3 and 7 (the ALS interface ID, transport, layout and test endpoint are not specified); Ownership Map v1 rows for interface_config, outbound_item, job_catalog, treatment, document, recovery_case, task and decision_log_entry.",
+      "type": "Conflict",
+      "area": "Outbound interface configuration, item lifecycle and integration boundary",
+      "severity": "P2",
+      "needed_by_wave": "3",
+      "legacy_ref": "RWB-E4-046",
+      "owner_role": "Solution architect",
+      "asm": "ASM-1212, ASM-1213, ASM-1214, ASM-1215, ASM-1216, ASM-1217, ASM-1218, ASM-1219, ASM-1220",
+      "proposed": "Keep the reading of RWB-ITG-E4046-ITG and of the legacy key: the ALS settlement booking is one outbound item on an interface configuration row of rwb-integration, and the FSD A1.5 register and the TSD T1 and T5.1 line on INT-03 are marked superseded for this legacy key in the Service Contract Catalog, with the date and the decision. Agree the ALS interface id, transport, layout, result codes, maximum attempts and retry intervals with the interface owner and load them as one versioned interface_config row per environment, citing them instead of naming them in code or in a story. Keep the metadata H row at None and record that DP-03 and DP-19 add the two platform contracts that the platform wave delivers. Name the rwb-integration login before the rwb_integration baseline is created, and agree the task code of the owner task and the field mapping of the ALS layout with the rwb-case owner and the interface owner at the contract review of RWB-P2-E1007-CON.",
+      "wp": "B-P2-03"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1212",
+      "text": "The rwb-integration service runs as one login created with the rwb_integration schema by the platform DB work (DP-02); this story names it \"the rwb-integration login\" until the name is agreed and carries it as a secret reference in the chart.",
+      "why": "No source gives the login name and every DP-02 row requires one login per service; the legacy story ran on the shared recovery_svc identity.",
+      "read": "RWB-P2-E4046-APP sections 3, 10 and 13; DP-02 in Template and Rules section R5.5; Architecture v5 slide 41 (one schema and one login per service); RWB-P2-E1007-APP section 3.",
+      "gap": "GAP-0673",
+      "applied_in": "APP 3, 10, 13",
+      "confidence": "High",
+      "confirm": "ACE DB owner and the platform DB story, before the rwb_integration baseline is created",
+      "impact": "None on behaviour: the login is named by role and swapped for the agreed name without a content change.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1213",
+      "text": "The ALS settlement booking is modelled as one outbound item on an interface configuration row of rwb-integration, as the legacy key RWB-E4-046 and RWB-ITG-E4046-ITG state it; the FSD P2 Integration v3 A1.5 register and the TSD P2 Integration v3 T1 and T5.1 line that give INT-03 core-bank bookings no Workbench interface are read as superseded for this legacy key, and the booked position is still read back from the ACE data by rwb-source-data after the next ACE batch.",
+      "why": "Two sources disagree and a story has to be built on one reading. The FSD and the TSD describe the booking as manual and confirmed through v_ace_account; the legacy story, the integration story and the Ownership Map put the outbound item and its lifecycle in rwb-integration. Taking the FSD line would leave the legacy key with no outbound interface at all and would contradict the integration story this slice is bound by.",
+      "read": "FSD P2 Integration v3 A1.5; TSD P2 Integration v3 T1 and T5.1; legacy RWB-E4-046 sections Story and AC1; RWB-ITG-E4046-ITG steps 4, 5, 10 and section 19; Architecture v5 slide 41 (rwb-integration owns interface config and outbound items); Ownership Map v1 rows for interface_config and outbound_item.",
+      "gap": "GAP-0673",
+      "applied_in": "APP 1, 2, 7, 12.1, 12.9, 15",
+      "confidence": "Medium",
+      "confirm": "Solution architect at the Service Contract Catalog review, with the P2, P8, P1 and S2 owners, before the wave 3 entry check",
+      "impact": "If the FSD reading were kept, this story would shrink to nothing and the legacy key would lose its outbound interface; the read-back half and the case and ledger halves do not change either way.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1214",
+      "text": "The ALS interface id, its transport, its message or file layout and file pattern, the control totals of the layout, the maximum attempts, the retry intervals, the owner role and the alert role are values of one versioned interface_config row loaded per environment through the reference-data load; the story and its criteria assert \"the version in force\" and name no value, and an absent or not-yet-valid row is refused with MSG-GEN-001 naming the field and writes no item.",
+      "why": "No source gives any of these values for the ALS booking. The FSD register names four interfaces only and the retry values it shows belong to the WIN file example. A story cannot be built or contract-tested without a default, and naming a value would be inventing a business value.",
+      "read": "FSD P2 Integration v3 A1.5 and A2.1.4.3; TSD P2 Integration v3 T3.1 (interface_config DF-OPS-136 to DF-OPS-148) and T4; RWB-ITG-E4046-ITG section 3 ('The ALS interface ID, its transport, the message or file layout and the test endpoint are not specified'); Template and Rules section R9 (placeholder).",
+      "gap": "GAP-0673",
+      "applied_in": "APP 3, 4, 7, 12.5, 12.6, 12.8, 12.9, 13, 14",
+      "confidence": "Medium",
+      "confirm": "Interface owner of the ALS booking and the reference-data administrator, at the contract review of RWB-P2-E1007-CON",
+      "impact": "The values arrive as one row per environment and are changed without a release; if the interface turns out not to be a file, the transport component changes and the item lifecycle does not.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1215",
+      "text": "Each state change of the item that matters writes one local decision record in rwb_integration in the same local transaction as the change: the creation of the item, its move to EXCEPTION and its resend. The record carries the interface id, the item id, the business date, the attempt count and the outcome, and the library publishes DecisionRecorded on rwb.decision-record.v1; the record takes the default decision code of the library until the rule registry publishes one for the outbound path, and the treatment record and the central ledger entry stay with rwb-treatment and rwb-decision.",
+      "why": "DP-03 writes the record locally in the owning service in the same transaction as that service's own change, and this is the service whose change is the sending of the booking. The legacy story declares no decision of its own ('Decision: None') and no source says which of the three outbound state changes carries a record or which code it takes.",
+      "read": "Temporal and Drools Design Text Extract v1 slide 18 and slide 26 (local record with the state change, central ledger, point of no return) and slide 14 (record fields); Template and Rules section R5.5 DP-03; Architecture v5 slide 20 (own schema with decision_record) and slide 43 (DecisionRecorded); legacy RWB-E4-046 metadata row Decision.",
+      "gap": "GAP-0673",
+      "applied_in": "APP 2, 4, 9, 12.3, 12.7, 13, 14",
+      "confidence": "Medium",
+      "confirm": "Risk and Internal Audit at the ADR-022 review, with the rwb-decision ledger owner",
+      "impact": "If only the exception and the resend need a record, the creation drops one write and the blocking rule of AC6 is unchanged.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1216",
+      "text": "The ten fields of outbound_item (DF-OPS-168 to DF-OPS-177) and the thirteen fields of interface_config (DF-OPS-136 to DF-OPS-148) as published in TSD P2 Integration v3 T3.1 carry the slice; no column is added to either table, the treatment id and the document id ride in case_ids and payload_ref, and the mapping of each element of the ALS message or file to a field is left to the layout of the interface row.",
+      "why": "The TSD publishes the field sets but not the mapping of the ALS layout to them, and no source gives a column this story would need beyond the ten and the thirteen. Adding a column would break DP-15 and the boundary rule for no proven need.",
+      "read": "TSD P2 Integration v3 T3.1 (interface_config and outbound_item field sets) and T3.3 (relationships); legacy RWB-E4-046 data table (outbound_item DF-OPS-168 to DF-OPS-177); RWB-ITG-E4046-ITG section 11 ('Which of the ten outbound_item field IDs carries each field the harness reads ... are not specified'); Architecture v5 slide 41.",
+      "gap": "GAP-0673",
+      "applied_in": "APP 11, 12.7, 13",
+      "confidence": "Medium",
+      "confirm": "Solution architect and the data model owner, before the rwb_integration migration sequence is frozen",
+      "impact": "A field the ALS layout needs beyond the ten is a column added by one migration of the service's own sequence and touches no other schema.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1217",
+      "text": "The one task the exception queue raises is created through the rwb-case contract with the case ids of the item, the owner role of the interface row and the item and treatment named in its text; its task code is agreed with the rwb-case owner at the contract review and no code is assumed here.",
+      "why": "The FSD and the TSD say a task goes to owner_role and name no task code for an outbound item; the legacy build notes raise a task for the role in owner_role and name a code only for the outbox delivery path, which is not this one.",
+      "read": "FSD P2 Integration v3 AC-EXC-P2-001-01 ('a task for role RW-PLATADM'); TSD P2 Integration v3 T4 ('a task goes to owner_role') and T-A; legacy RWB-E4-046 permission checks; RWB-P2-E1007-APP section 4 step 9 and section 12.2 (the task raised through the rwb-case action).",
+      "gap": "GAP-0673",
+      "applied_in": "APP 4, 5, 10, 12.2, 12.8, 13",
+      "confidence": "Medium",
+      "confirm": "rwb-case contract owner, at the contract review of the P3 action operation",
+      "impact": "A different task code touches one call and its fake; the item state and the exception queue do not change.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1218",
+      "text": "A positive acknowledgement result sets the item ACKNOWLEDGED and publishes FileDelivered; a negative result or a timeout counts as a failed attempt and follows the retry path, and only a result the row's own code list marks non-retryable skips the retries and moves the item to EXCEPTION at once. The result codes are a list of the interface row, not an enumeration in code.",
+      "why": "No source gives the ALS acknowledgement codes or says how a rejection maps to the retry ladder. R-RES-23 requires a rejection to become visible on the officer queue and the FSD requires the retry and exception behaviour for a failed send, so a mapping is needed and a non-retryable list is the only reading that keeps both.",
+      "read": "FSD P2 Integration v3 A2.2, A2.3 and AC-EXC-P2-001-01; TSD P2 Integration v3 T4 and T5.1 ('acknowledgement by the receiver'); Business Rules and Routing Logic v4 R-RES-22 and R-RES-23; RWB-ITG-E4046-ITG steps 10 and 11.",
+      "gap": "GAP-0673",
+      "applied_in": "APP 3, 4, 5, 9, 12.8, 13",
+      "confidence": "Low",
+      "confirm": "Interface owner of the ALS booking, with the operations booking team, before wave 3 build",
+      "impact": "If every rejection must be retried in full, the non-retryable list is empty and one branch of the mapper is dropped; the exception queue and the task are unchanged.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1219",
+      "text": "The metadata H row of the story stays None as the plan fixes it, while DP-03 and DP-19 add H RWB-PLT-E1027-CON and H RWB-PLT-N001-CON: both are platform contract stories delivered by the platform wave, the story builds against them and their fakes from Day 1, and neither blocks the start. The legacy key names no feature switch, so the slice runs behind the platform flag library's key for the outbound path, whose value is not named here.",
+      "why": "The plan writes the H row as None and the DP table adds two platform contracts, so the two statements have to be reconciled without changing the plan's row. The flag key is named by no source, and inventing one would put a business value in a story.",
+      "read": "WP B-P2-03 story line for RWB-P2-E4046-APP (\"H\": []); Template and Rules section R5.5 DP-03 and DP-19 and section R5.7 (H points only to the same service or a platform CON story); Architecture v5 slide 20 (every service from the service template and shared libraries); legacy RWB-E4-046 (no feature flag row).",
+      "gap": "GAP-0673",
+      "applied_in": "APP 3, 13",
+      "confidence": "High",
+      "confirm": "Solution architect at the wave 3 entry check",
+      "impact": "None on behaviour: the platform wave delivers both contracts before wave 3 and the flag only gates the path.",
+      "wp": "B-P2-03"
+    },
+    {
+      "id": "ASM-1220",
+      "text": "One outbound item exists per interface and Idempotency-Key. The key is minted by the caller, this service neither rewrites nor derives it, a repeat of the same key returns the existing item and creates no second row, file or event, and the pair is enforced by a unique index on outbound_item (interface_id, idempotency_key) added by one migration of the rwb-integration sequence where the base does not already carry it.",
+      "why": "Architecture v5 slide 11 requires an Idempotency-Key on every POST and a unique file id, and the FSD resend case needs one item per key to be meaningful; no source gives the key format or the constraint that enforces the pair for this table.",
+      "read": "Architecture v5 slide 11 (Idempotency-Key on every POST; fileId unique; re-delivery safe); TSD P2 Integration v3 T3.1 (outbound_item.idempotency_key, required) and T3.0; FSD P2 Integration v3 AC-EXC-P2-001-04; legacy RWB-E4-046 guardrails; RWB-ITG-E4046-ITG step 4 (one item for the treatment and one Idempotency-Key).",
+      "gap": "GAP-0673",
+      "applied_in": "APP 4, 7, 12.1, 12.4, 13",
+      "confidence": "High",
+      "confirm": "Contract owner of RWB-P2-E1007-CON, before the activity contract is frozen",
+      "impact": "A caller that mints a new key per attempt would create several items for one treatment; the caller's workflow id is what prevents that and is stated in the story.",
+      "wp": "B-P2-03"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+
+Five call types, each with a fixed contract
+
+What every call between services must follow: transport, contract, identity, failure handling
+
+REST
+
+BFF
+
+svc
+
+Event (Kafka)
+
+svc
+
+topic
+
+group
+
+Temporal
+
+wf
+
+queue
+
+worker
+
+File
+
+svc
+
+Blob
+
+party
+
+SQL view
+
+P1
+
+v_ace_*
+
+|  | REST | Event (Kafka) | Temporal | File | SQL view |
+|---|---|---|---|---|---|
+| Use when | A person waits for the answer | A fact others may react to | A step in another service, or a long process | Bulk data, or a party outside the bank | Reading ACE data (rwb-source-data only) |
+| Transport | HTTPS/JSON, mesh mTLS | Kafka over TLS; CloudEvents 1.0, binary mode | Temporal gRPC over mTLS; queue rwb-<svc> | Blob + MFT/SFTP; PGP for outside parties | PostgreSQL TLS; read-only login |
+| Contract | OpenAPI 3.1; /v1 in the path | AsyncAPI 3.0; JSON Schema registry, backward compatible | Typed activity / workflow interface in a contract jar | Manifest: fileId, batchId, sha256, record count | 30 recovery.v_ace_* views (ADR-010) |
+| Identity | User JWT from BFF + workload identity | OAUTHBEARER (Entra) or mTLS; topic ACLs | Namespace mTLS; worker identity per service | SAS link, one file, 15 minutes | One login: rwb_source_data |
+| Timeout, retry | 2 s; retry GET only (once, jitter); breaker + bulkhead | Retry topics 1 min / 10 min / 1 h, then .dlt + alert | Start-to-close per activity; backoff; heartbeats | Retried by the workflow; checksum on receipt | 5 s statement timeout |
+| Duplicates, order | Idempotency-Key on every POST | Key = caseId (order per case); inbox dedupe | Workflow ID = business key; activities idempotent | fileId unique; re-delivery safe | Read only |
+| Errors | RFC 9457 problem details | Dead-letter topic; replay tool | Typed failures; non-retryable list; saga undo | FileFailed event; operator retry | Mapped to domain errors by P1 |
+| Never | Call chains (depth > 1) | Personal data in events | I/O or PII in workflow code or payloads | Data inside the message | Any other service reading the views |
+
+
+Every service publishes its contracts (OpenAPI, AsyncAPI, activity jar) before code; contract tests run in every build.
+
+11
+
+Notes: These are engineering standards for every team; the architecture review checks them per service.
+
+REST: depth one only (browser → BFF → owner, or a cached reference read). Commands carry Idempotency-Key; errors as RFC 9457 problem details; Resilience4j circuit breaker and bulkhead per downstream.
+
+Event: Kafka, CloudEvents 1.0 Kafka binding in binary mode (ce_* headers), JSON Schema registry with BACKWARD compatibility, AsyncAPI 3.0 per topic. Transactional outbox in the producer's schema; idempotent producer with acks=all; inbox table (processed_event) in each consumer; retry topics and dead-letter topic with alert.
+
+Temporal: activity and workflow interfaces are published as a contract jar per service; callers import only the interface and call the owner's task queue. Payloads pass through the codec (AES-GCM, keys in Key Vault). Nexus for calls into another namespace (ACE).
+
+File: claim-check. The message carries a SAS link and a manifest, never the data. Outside parties via MFT/SFTP with PGP.
+
+SQL view: only rwb-source-data, read-only login, 30 views, statement timeout.
+

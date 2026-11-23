@@ -1,0 +1,247 @@
+{
+  "id": "RWB-P2-E2001-APP",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "APP",
+  "lane": "L-P2-A",
+  "ready": "After RWB-P2-E1007-APP",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-001",
+  "disposition": "Split (rework)",
+  "H": [
+    "RWB-P2-E2001-CON",
+    "RWB-PLT-E1027-CON",
+    "RWB-PLT-E1042-CON",
+    "RWB-PLT-E1043-CON",
+    "RWB-PLT-TE006-CON",
+    "RWB-PLT-E1071-CON",
+    "RWB-PLT-N001-CON",
+    "RWB-P2-E1007-APP"
+  ],
+  "C": [
+    "RWB-P3-E1042-CON",
+    "RWB-P3-E1043-CON",
+    "RWB-P1-E1015-CON"
+  ],
+  "I": [],
+  "X": [
+    "RWB-P2-E2001-OPS"
+  ],
+  "acs": [
+    {
+      "id": "AC2",
+      "origin": "legacy RWB-E2-001 AC2",
+      "text_first_line": "Scenario: AC2 Repeat run (legacy RWB-E2-001 AC2)"
+    },
+    {
+      "id": "AC4",
+      "origin": "legacy RWB-E2-001 AC4",
+      "text_first_line": "Scenario: AC4 Account linked to the open case (legacy RWB-E2-001 AC4)"
+    },
+    {
+      "id": "AC7",
+      "origin": "legacy RWB-E2-001 AC7",
+      "text_first_line": "Scenario: AC7 Decision log write fails (legacy RWB-E2-001 AC7)"
+    },
+    {
+      "id": "AC8",
+      "origin": "legacy RWB-E2-001 AC8",
+      "text_first_line": "Scenario: AC8 Second start refused (legacy RWB-E2-001 AC8)"
+    }
+  ],
+  "tcs": [
+    "TC-E2-001-09",
+    "TC-E2-001-01",
+    "TC-E2-001-02",
+    "TC-E2-001-03",
+    "TC-E2-001-04",
+    "TC-E2-001-05",
+    "TC-E2-001-06",
+    "TC-E2-001-07",
+    "TC-E2-001-08",
+    "TC-E2-001-10"
+  ],
+  "reqs": [
+    "REQ-DRI-013",
+    "REQ-CHO-001",
+    "REQ-CHO-005",
+    "REQ-RDF-003"
+  ],
+  "ops_provided": [],
+  "ops_consumed": [
+    "GET /api/recovery/source-data/v1/data-products/freshness",
+    "GET the eligible-account read of the rwb-source-data contract",
+    "GET the customer read of the rwb-source-data contract",
+    "POST /api/recovery/source-data/v1/cases/{caseId}/interactions",
+    "POST the reconciliation-result write of the rwb-source-data contract",
+    "POST the case-creation operation of the rwb-case contract",
+    "GET the parameter read of the rwb-case contract",
+    "GET the reference-data read of the rwb-case contract",
+    "POST /api/recovery/source-data/v1/admin/jobs/{jobId}/rerun"
+  ],
+  "events_published": [
+    "rwb.decision-record.DecisionRecorded.v1"
+  ],
+  "events_consumed": [
+    "rwb.source-data.AceDataReady.v1"
+  ],
+  "workflows": [
+    "EfsHandoverWorkflow",
+    "acceptAceDataReady",
+    "readFreshness",
+    "listCandidates",
+    "buildGroups",
+    "createOrLinkCase",
+    "appendEfsHistory",
+    "writeRunSummary",
+    "recordRunDecision"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (FR-P2-019)",
+  "gaps": [
+    "GAP-0651"
+  ],
+  "assumptions": [
+    "ASM-1087",
+    "ASM-1088",
+    "ASM-1089",
+    "ASM-1090",
+    "ASM-1091",
+    "ASM-1092",
+    "ASM-1093",
+    "ASM-1094",
+    "ASM-1096"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2001 APP EFS hand-over with full history v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0651",
+      "title": "rwb-integration EFS hand-over: the mount of the step, the split across four owners, the consumed contract paths, the run summary store and the level of the decision record are not settled by any one source",
+      "source": "WP B-P2-01; legacy RWB-E2-001; Ownership Map v1 (interaction, efs_ledger_outcome and reconciliation_result to P1; recovery_case and case_account to P3; decision_log_entry to P7; GET /admin/jobs, POST /admin/jobs/{jobId}/rerun, GET /data-products/freshness and POST /cases/{caseId}/interactions to P1); FSD P2 Integration v3 A1.1 (inbound source loads and EFS out of scope) and AC-EXC-P2-007-07; TSD P2 Integration v3 T1.1 (P2 reads the views) and T5.2 (P2 calls nothing in P1 for inbound data); Architecture v5 Text Extract v1 slides 13, 15, 16, 41, 43, 44 and 45; RWB-ITG-E2001-ITG section 3 and section 11",
+      "section": "3, 4, 5, 7, 8, 11, 12.2, 12.4, 12.5, 12.7, 13, 14, 16",
+      "description": "One combined gap covers everything this slice cannot read from a single source. (1) The legacy story is one Quartz job inside one service; under D-RCV-60 the same journey is four owners, and the split is fixed only by the plan, the Ownership Map and RWB-ITG-E2001-ITG: case creation, the account link and CaseCreated to rwb-case; the EFS history read and the interaction append to rwb-source-data; the central ledger to rwb-decision; the hand-over step, the group builder and the run summary stay with rwb-integration. (2) Two sources place the work elsewhere: FSD P2 Integration v3 A1.1 puts every inbound source load, EFS included, out of P2 scope because ACE ingests it, and TSD P2 Integration v3 T5.2 still has P2 reading the ACE views directly and calling nothing in P1; both are superseded by DP-05 and ADR-010, and the conflict is recorded, not hidden. (3) The rwb-integration login name (DP-02) is given nowhere; the legacy story ran on the shared recovery_svc login. (4) The paths, query parameters and JSON field names of the consumed rwb-source-data operations for the eligible accounts, the customer row and the reconciliation result are not in any source, and neither is the rwb-case case-creation path (the Ownership Map publishes GET /cases and POST /cases/{caseId}/actions but no create operation), although the legacy interface CaseCreation.createOrLink names the operation. (5) JOB-02 stays rwb-case's per the Ownership Map and Arch v5 slide 44, while the legacy story started JOB-02 for the hand-over; the step therefore runs on AceDataReady in rwb-integration and the rerun operation POST /admin/jobs/{jobId}/rerun is P1's, so the refusal of a second start is split between P1's door and this step's run lock. (6) The legacy run summary was written to reconciliation_result and to the batch step; in the target reconciliation_result is P1's and job_catalog holds a catalogue row, not a run, so no table of rwb-integration holds a run summary. (7) The legacy story left the creation decision to the decision log writer; with DP-03 each owner writes its own record, and no source says whether the hand-over step writes a record of its own run or only the case owner writes one. (8) MSG-P1-001 is worded differently in the legacy story and in FSD P2 Integration v3 VR-P2-001-1.",
+      "evidence": "Legacy RWB-E2-001 section 4 step 1 (JOB-02 starts when AceDataReady arrives) and step 9 (run summary to reconciliation_result); section 12 (Job JOB-02, HandoverRun, and the four in-process interfaces CaseCreation, InteractionLedger, AccountQuery, EfsHistoryQuery); section 13 (HandoverJob, no new table, processed_event and reconciliation_result written). TSD P2 Integration v3 T1.1 ('P2 reads source data only through recovery.v_ace_* views') and T5.2 ('P2 reads the views in T1.1 directly and calls nothing in P1 for inbound data'). FSD P2 Integration v3 A1.1 ('Out of scope: Every inbound source load: ALS, SCBPDM, EFS ...') and VR-P2-001-1 (MSG-P1-001 '{product} is from {date}. Today's data is not yet complete.'). Architecture v5 slide 44 (JOB-02 owner rwb-case, mechanism AceDataReady -> DailyCaseRun) and slide 45 ('Only rwb-source-data reads the 30 recovery.v_ace_* views (ADR-010)'). Ownership Map v1 rows for interaction, efs_ledger_outcome, reconciliation_result, recovery_case, case_account, decision_log_entry, job_catalog and the four P1 operations.",
+      "type": "Conflict",
+      "area": "Integration ownership, consumed contracts and run record",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-001",
+      "owner_role": "Solution architect",
+      "asm": "ASM-1087, ASM-1088, ASM-1089, ASM-1090, ASM-1091, ASM-1092, ASM-1093, ASM-1094",
+      "proposed": "Keep the split recorded by RWB-ITG-E2001-ITG and the Ownership Map and mark TSD P2 v3 T5.2 and the P2 inbound exclusion as superseded by DP-05 and ADR-010 in the Service Contract Catalog; agree the consumed operation paths and field names at the contract review of RWB-P2-E2001-CON with the P1 and P3 owners; hold the run summary in the activity result, one local decision record and the REC-01 row written through P1, with no table of rwb-integration; name the login before the rwb_integration baseline is created.",
+      "wp": "B-P2-01"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1087",
+      "text": "The rwb-integration service runs as one login created with the rwb_integration schema by the platform DB work (DP-02); the three stories of this key name it \"the rwb-integration login\" until the name is agreed, and carry it as a secret reference in the chart.",
+      "why": "No source gives the login name and every DP-02 row requires one login per service; the legacy story ran on the shared recovery_svc login.",
+      "read": "RWB-P2-E2001-APP sections 3, 10 and 13; RWB-P2-E2001-CON section 10; RWB-P2-E2001-OPS sections 10 and 11; DP-02 in Template and Rules section R5.5; Architecture v5 slide 41 (one schema and one login per service).",
+      "gap": "GAP-0651",
+      "applied_in": "APP 3, 10, 13; CON 10; OPS 10, 11",
+      "confidence": "High",
+      "confirm": "ACE DB owner and the platform DB story, before the rwb_integration baseline is created",
+      "impact": "None on behaviour: the login is named by role and swapped for the agreed name without a content change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1088",
+      "text": "The legacy story is split across four owners as RWB-ITG-E2001-ITG and the Ownership Map state: rwb-source-data owns the EFS history read and the interaction ledger append in rwb_source_data, rwb-case owns case creation, the account link and CaseCreated, rwb-decision owns the central ledger, and rwb-integration owns the hand-over step, the group builder and the run summary. JOB-02 stays with rwb-case while the hand-over step runs in rwb-integration on AceDataReady, and the rerun operation POST /admin/jobs/{jobId}/rerun is rwb-source-data's; the step refuses a second concurrent run for the same business date through its inbox key and its run lock.",
+      "why": "The legacy story held the whole journey in one service and no single source states the target split; the Ownership Map, the plan and the sibling integration story are the only statements of it, and the rerun operation and JOB-02 appear in sources that predate the split.",
+      "read": "Ownership Map v1 (interaction, efs_ledger_outcome and reconciliation_result to P1; recovery_case, case_account and job_catalog basis to P3 and P2; POST /admin/jobs/{jobId}/rerun to P1); RWB-ITG-E2001-ITG sections 3, 11 and 12.5; Architecture v5 slide 44 (JOB-02 owner rwb-case); Template and Rules section R5.5 DP-10 and DP-18; legacy RWB-E2-001 section 4.",
+      "gap": "GAP-0651",
+      "applied_in": "APP 1, 2, 4, 7, 9, 12.2, 12.5, 13; CON 2, 8, 12.4, 12.5; OPS 3, 12.5",
+      "confidence": "Medium",
+      "confirm": "Solution architect at the Service Contract Catalog review, with the P1, P3, P7 and P2 owners",
+      "impact": "If the split moves again, the four app stories and the integration harness re-baseline together; the behaviour of the journey does not change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1089",
+      "text": "TSD P2 Integration v3 T5.2 and the inbound exclusion of FSD P2 Integration v3 A1.1 are superseded for this slice: only rwb-source-data reads the thirty recovery.v_ace_* views, every read of ACE data by this step is one call to the rwb-source-data contract with a 2 s timeout, and rwb_integration holds no grant on recovery.",
+      "why": "Two sources disagree with the Architecture v5 catalogue and the ADR set. TSD P2 v3 has P2 reading the views directly and calling nothing in P1 for inbound data, and FSD P2 v3 puts every inbound source out of P2 scope; DP-05, ADR-010 and Architecture v5 slides 15, 41 and 45 make rwb-source-data the only reader, and the sibling integration story is built on that reading.",
+      "read": "TSD P2 Integration v3 T1.1 and T5.2; FSD P2 Integration v3 A1.1 (in scope and out of scope); Architecture v5 slide 15 (P1 owns the ACE view contract and freshness), slide 41 and slide 45 ('Who reads ACE's data?'); Architecture Decision Records v3 ADR-010; Template and Rules section R5.5 DP-05 and DP-11.",
+      "gap": "GAP-0651",
+      "applied_in": "APP 2, 4, 12.2, 12.7, 13; CON 8, 12.2, 12.7; OPS 2, 12.7",
+      "confidence": "High",
+      "confirm": "Solution architect and the rwb-source-data owner at the architecture review, before wave 2 build",
+      "impact": "The step gains one contract dependency and loses every view read; if the sources were followed instead, the boundary test would fail and the service would need a grant on recovery.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1090",
+      "text": "The consumed rwb-source-data and rwb-case elements are fixed with the element names of this story and the legacy interface names, and their paths, query parameters and JSON field names are agreed with each owner at the contract review; the two paths a source does give are used as published, the freshness read GET /api/recovery/source-data/v1/data-products/freshness and the interaction append POST /api/recovery/source-data/v1/cases/{caseId}/interactions.",
+      "why": "The legacy story names only Java interfaces and the Ownership Map publishes no path for the eligible-account read, the customer read, the reconciliation write or the case creation; a story cannot be built or contract-tested without a default, and inventing a path would be worse than carrying the placeholder.",
+      "read": "Legacy RWB-E2-001 section 12 (AccountQuery.findAtOrAboveDpd, EfsHistoryQuery.forAccount, CaseCreation.createOrLink, InteractionLedger.appendEfsHistory); Ownership Map v1 API rows for GET /data-products/freshness, POST /cases/{caseId}/interactions, GET /cases and POST /cases/{caseId}/actions; TSD P2 Integration v3 T-A.1; Template and Rules section R9 (placeholder).",
+      "gap": "GAP-0651",
+      "applied_in": "APP 3, 12.2, 12.8; CON 11, 12.2, 12.8",
+      "confidence": "Medium",
+      "confirm": "Contract owner of RWB-P1-E1015-CON and RWB-P3-E2001-CON at the contract review",
+      "impact": "A renamed path or field touches one client and one fake; no business value changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1091",
+      "text": "The run summary has no table of its own: it is the activity result, one local decision record in rwb_integration and the REC-01 row written through the rwb-source-data contract; the step's catalogue entry is not written to job_catalog because the step is event-started and not a Schedule, and the slice provides no summary endpoint.",
+      "why": "The legacy story wrote the counts to reconciliation_result and to the batch step, but reconciliation_result is P1's and job_catalog holds a job catalogue with no run fields; no source gives a run table for rwb-integration, and inventing one would break DP-01 and DP-15.",
+      "read": "Legacy RWB-E2-001 section 4 step 9, section 12 (HandoverSummary) and section 13 (HandoverSummaryWriter, no new table); TSD P2 Integration v3 T3.1 (reconciliation_result, processed_event, job_catalog field sets); Ownership Map v1 (reconciliation_result to P1, job_catalog to P2); Architecture v5 slide 44.",
+      "gap": "GAP-0651",
+      "applied_in": "APP 11, 12.1, 12.7, 13; CON 12.1, 12.5; OPS 11, 12.7",
+      "confidence": "Medium",
+      "confirm": "rwb-source-data owner (REC-01 row) and the solution architect, before wave 2 build",
+      "impact": "The operator reads the summary through the dashboard, the decision record and the REC-01 read of rwb-source-data; no table is added or dropped.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1092",
+      "text": "The hand-over step writes one local decision record per run with decision code \"D6 entry\", the business date, the freshness answer of DP01 and DP05 and the counts, in rwb_integration through the decision-record library, while the case-creation record stays rwb-case's and the central ledger stays rwb-decision's.",
+      "why": "DP-03 writes the record locally in the owning service in the same transaction as that service's own change, and the split puts one change in each of three services; the legacy story recorded only the creation, and no source says whether a step that writes no case keeps a record of its own.",
+      "read": "Temporal and Drools Design Text Extract v1 slides 11, 14, 15 and 16 (local record, same transaction, central ledger); Template and Rules section R5.5 DP-03; legacy RWB-E2-001 metadata row Decision 'D6 entry', section 4 step 6 and AC1; RWB-ITG-E2001-ITG AC9.",
+      "gap": "GAP-0651",
+      "applied_in": "APP 4, 8, 9, 12.3, 12.7, 13; CON 12.3, 12.5, 12.7",
+      "confidence": "Medium",
+      "confirm": "Risk and Internal Audit at the ADR-009 and ADR-022 review, with the rwb-decision ledger owner",
+      "impact": "If one record per decision is required, the step keeps only the summary and the case owner writes the only record; the blocking rule and the incident are unchanged.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1093",
+      "text": "MSG-P1-001 keeps the wording of FSD P2 Integration v3, \"{product} is from {date}. Today's data is not yet complete.\", and every other message keeps the legacy text of RWB-E2-001 unchanged.",
+      "why": "The legacy story and the FSD carry two different texts for the same message id, and a message renderer can only hold one.",
+      "read": "Legacy RWB-E2-001 section 14 ('{product} is from {date}. Today's load has not arrived.'); FSD P2 Integration v3 VR-P2-001-1 ('{product} is from {date}. Today's data is not yet complete.'); RWB-ITG-E2001-ITG section 14.",
+      "gap": "GAP-0651",
+      "applied_in": "APP 14; CON 14; OPS 14",
+      "confidence": "High",
+      "confirm": "Error and Message Standard owner, before the message catalogue is frozen",
+      "impact": "One alert and one screen text change; no behaviour changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1094",
+      "text": "The threshold case.entry.dpd_threshold = 90, the hold time handover.hold_until = 09:00 and the product code to product group map are read at run time through the rwb-case parameter and reference-data contracts with the version in force; none of them is a constant, a values-file entry or a default in code, and their row identifiers are agreed with the rwb-case owner.",
+      "why": "DP-06 and DP-07 move parameters and reference data to rwb-case, and the legacy story held both as data rows; no source gives the row identifiers of the target tables.",
+      "read": "Legacy RWB-E2-001 sections 3, 4 and 13 (parameter case.entry.dpd_threshold = 90, DL16; product code map, RW-REFADM; parameter handover.hold_until = 09:00); Template and Rules section R5.5 DP-06 and DP-07 and section R3 default ruling; Ownership Map v1 (parameter_value and reference_row to P3).",
+      "gap": "GAP-0651",
+      "applied_in": "APP 3, 4, 13; CON 12.2; OPS 13",
+      "confidence": "High",
+      "confirm": "Reference-data and parameter owner of rwb-case (RWB-P3-E1042-CON, RWB-P3-E1043-CON)",
+      "impact": "A value change is data and needs no release; the story behaviour is unaffected.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1096",
+      "text": "This slice provides no REST operation of its own: the hand-over step is event-started and answers an activity, and the run is observed through the activity result, the run's local decision record and the REC-01 row of rwb-source-data.",
+      "why": "Architecture v5 slide 16 and TSD P2 v3 T-A.1 give rwb-integration only the interface-run and outbox operations, no source gives a hand-over endpoint, and the Ownership Map publishes none; inventing a path would create an unowned resource, and the run is already observable without one.",
+      "read": "Architecture v5 slide 16 (P2 IN: GET /interface-runs, POST /interface-runs/{id}/retry) and slide 44 (JOB-02 owner rwb-case); TSD P2 Integration v3 T-A.1 API-P2-001 to API-P2-014; Ownership Map v1 (GET /admin/scheduled-jobs owner P2; no hand-over path); RWB-ITG-E2001-ITG section 12.2.",
+      "gap": "GAP-0652",
+      "applied_in": "APP 12.1; CON 12.1, 12.9; OPS 12.1",
+      "confidence": "Medium",
+      "confirm": "Solution architect at the Service Contract Catalog review",
+      "impact": "If an operator endpoint is required later, it is an additive change to the integration base with one new gap and no change to the step.",
+      "wp": "B-P2-01"
+    }
+  ]
+}

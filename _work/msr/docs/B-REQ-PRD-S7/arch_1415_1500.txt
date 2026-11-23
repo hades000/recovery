@@ -1,0 +1,85 @@
+1415:IN: REST GET/POST /lots; POST /lots/{id}/bids · /award | events ProceedsMatched | Temporal DebtSaleWorkflow (saga, pivot = transfer)
+1416:OUT: schema rwb_debtsale (lots, data room, buyer terms, bids, award, transfer) | topic rwb.debtsale.events.v1: LotAwarded, AccountsTransferred | TMP Document: data room pack · Decision: child: approval · Integration: deliverFile (buyer file) · Payment: postProceeds
+1417:
+1418:Tags: REST = synchronous HTTPS (OpenAPI 3.1); EVT = Kafka topic (CloudEvents, AsyncAPI); TMP = Temporal activity or child workflow on the owner's task queue; NEXUS = Temporal Nexus operation into another namespace; SQL = read-only view; FILE = claim-check file; DB = the service's own schema in the ACE database.
+1419:
+1420:## Slide 20
+1421:
+1422:Service contracts 7/7 · Write-off, the gateway, and what every service does
+1423:
+1424:IN = what the service accepts; OUT = what it writes and sends; the tag is the call type
+1425:
+1426:IN
+1427:
+1428:OUT
+1429:
+1430:REST  GET/POST /write-offs · POST /write-offs/{id}/submit
+1431:EVT  AceDataReady (GL write-off) · ProceedsMatched
+1432:TMP  WriteOffWorkflow · Schedule: scan, 3rd working day
+1433:
+1434:DB  writes schema rwb_writeoff: eligibility, committee, posting, recovery after charge-off
+1435:EVT  rwb.writeoff.events.v1: WriteOffApproved
+1436:TMP  Decision: child: committee approval · Payment: postProceeds
+1437:REST  Source data: GL outcome
+1438:
+1439:S7 · rwb-writeoff
+1440:Write-off & recovery
+1441:queue rwb-writeoff
+1442:rwb.writeoff.events.v1
+1443:
+1444:IN
+1445:
+1446:OUT
+1447:
+1448:REST  Browser: /api/recovery/** via App Gateway, session cookie (opaque, 15 min idle)
+1449:EVT  ApprovalRequested, TimerBreached → officer inbox push
+1450:REST  Partners do not use it: partner gateway → rwb-partner
+1451:
+1452:REST  Owner service, one hop, in parallel for composite screens (2 s timeout, breaker per service)
+1453:REST  ACE Common sign-in: session → short-lived user JWT
+1454:DB  Redis: sessions only; no business data
+1455:
+1456:gateway-bff
+1457:shared platform
+1458:Spring Cloud Gateway
+1459:Redis session
+1460:
+1461:IN
+1462:
+1463:OUT
+1464:
+1465:EVT  AccessPolicyChanged, DoaLimitChanged, RulePackageInForce → cache refresh
+1466:TMP  Own task queue rwb-<svc>; its own Schedules
+1467:REST  /health, /metrics for the platform
+1468:
+1469:DB  Own schema: business tables + outbox + inbox + decision_record
+1470:EVT  DecisionRecorded → rwb.decision-record.v1 (ledger in rwb-decision)
+1471:REST  ACE Common audit and PII logging; OpenTelemetry traces, metrics, logs
+1472:
+1473:Every service
+1474:from the service template
+1475:and shared libraries
+1476:
+1477:20
+1478:
+1479:Notes: Contracts in full (also in the service catalogue in the appendix):
+1480:
+1481:rwb-writeoff (S7, Write-off & recovery)
+1482:IN: REST GET/POST /write-offs; POST /write-offs/{id}/submit | events AceDataReady (GL write-off); ProceedsMatched | Temporal WriteOffWorkflow; Schedule: scan, 3rd working day
+1483:OUT: schema rwb_writeoff (eligibility, committee, posting, recovery after charge-off) | topic rwb.writeoff.events.v1: WriteOffApproved | TMP Decision: child: committee approval · Payment: postProceeds | REST Source data: GL outcome
+1484:
+1485:gateway-bff: the only entry for staff screens. Composes at most a few parallel calls; never calls a service that then calls another.
+1486:
+1487:Every service: built from one template (Spring Boot, outbox relay, inbox, Temporal worker, codec, OpenTelemetry, contract tests). Writes its own decision records locally and publishes DecisionRecorded.
+1488:
+1489:Tags: REST = synchronous HTTPS (OpenAPI 3.1); EVT = Kafka topic (CloudEvents, AsyncAPI); TMP = Temporal activity or child workflow on the owner's task queue; NEXUS = Temporal Nexus operation into another namespace; SQL = read-only view; FILE = claim-check file; DB = the service's own schema in the ACE database.
+1490:
+1491:## Slide 21
+1492:
+1493:Event broker: Kafka, on the platform ACE already runs
+1494:
+1495:Recovery gets its own business-event topics and access rules, separate from ACE's PII logging topics
+1496:
+1497:Recommended: Apache Kafka on the bank / ACE platform
+1498:dedicated Recovery topics and ACLs · fallback: Event Hubs Premium (Kafka API)
+1499:

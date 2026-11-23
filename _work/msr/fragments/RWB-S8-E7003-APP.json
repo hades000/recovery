@@ -1,0 +1,84 @@
+{
+  "id": "RWB-S8-E7003-APP",
+  "epic": "RWB-SVC-S8",
+  "service": "rwb-deviation",
+  "wt": "APP",
+  "lane": "L-S8-N",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP07",
+  "wave": 4,
+  "release": "31 May 2027",
+  "legacy": "RWB-E7-003",
+  "disposition": "Split (rework)",
+  "H": [
+    "RWB-S8-E7003-CON",
+    "RWB-PLT-E1027-CON",
+    "RWB-PLT-N001-CON"
+  ],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC2",
+      "origin": "legacy RWB-E7-003 AC2",
+      "text_first_line": "Scenario: AC2 Rule R-DEV-03 (legacy RWB-E7-003 AC2)"
+    },
+    {
+      "id": "AC3",
+      "origin": "legacy RWB-E7-003 AC3",
+      "text_first_line": "Scenario: AC3 Rule R-DEV-06 (legacy RWB-E7-003 AC3)"
+    },
+    {
+      "id": "AC4",
+      "origin": "legacy RWB-E7-003 AC4",
+      "text_first_line": "Scenario: AC4 Not recorded (legacy RWB-E7-003 AC4)"
+    }
+  ],
+  "tcs": [
+    "TC-E7-003-01",
+    "TC-E7-003-02",
+    "TC-E7-003-03",
+    "TC-E7-003-04",
+    "TC-E7-003-05",
+    "TC-E7-003-06"
+  ],
+  "reqs": [],
+  "ops_provided": [
+    "POST /api/recovery/deviation/v1/cases/{caseId}/deviations",
+    "PATCH /api/recovery/deviation/v1/deviations/{deviationId}"
+  ],
+  "ops_consumed": [
+    "The customer and deceased-status read of rwb-source-data (P1), /api/recovery/source-data/v1, operation name placeholder",
+    "GET the case state and the timer read of rwb-case (P3), /api/recovery/case/v1, operation names placeholder",
+    "POST /authorise of rwb-access (P4), /api/recovery/access/v1",
+    "The rule-package and claim-approval read of rwb-decision (P7), /api/recovery/decision/v1, operation name placeholder"
+  ],
+  "events_published": [
+    "rwb.deviation.DeviationRaised.v1 (EV-06) on rwb.deviation.events.v1, payload caseId, deviationCode, raisedBy, through the outbox, consumed by rwb-comms for the contact stop and by rwb-case for the clock pause and banner; DeviationCleared (EV-07) is the clearing story's"
+  ],
+  "events_consumed": [
+    "The rwb-case case event that opens or resumes a stage (name not published; placeholder), consumed through the inbox"
+  ],
+  "workflows": [
+    "DeviationWorkflow on queue rwb-deviation in namespace rwb-recovery, one execution per deviation, continues-as-new, the X3 branch",
+    "raiseDeviation, routeToOwner, applyContactStop, openEstatePath and recordOutcome activities on queue rwb-deviation",
+    "No Schedule: the ownership rows give S8 no job, and the R-DEV-20 escalation is a durable timer inside the workflow"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD S8 rwb-deviation v1.md (no FR mapped to no REQ IDs)",
+  "gaps": [
+    "GAP-3055"
+  ],
+  "assumptions": [
+    "ASM-5154",
+    "ASM-5155",
+    "ASM-5156",
+    "ASM-5157",
+    "ASM-5158",
+    "ASM-5159",
+    "ASM-5160",
+    "ASM-5161"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7003 APP Run X3 deceased customer end to end v1.md"
+}

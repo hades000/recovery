@@ -1,0 +1,34 @@
+44
+
+A4 · Job map: every scheduled or triggered job and its owner
+
+No shared Quartz tables: a Temporal Schedule or event-started workflow in the owning service; bank Airflow triggers the edges
+
+| Job | Name | When | Owner | Mechanism |
+|---|---|---|---|---|
+| JOB-02 | Case creation | Airflow: ACE data ready | rwb-case | AceDataReady → DailyCaseRun |
+| JOB-03 | Morning allocation | after 02, by 07:00 | rwb-case | DailyCaseRun step |
+| JOB-04 | Reconciliation | Airflow: ACE data ready | rwb-source-data | event-triggered workflow |
+| JOB-05 | Timer check | every 5 min | all | durable timers (retired) |
+| JOB-06 | Rebalancing | 06:30 | rwb-case | Schedule |
+| JOB-07 | Payment matching | Airflow: ACE data ready | rwb-payment | event-triggered workflow |
+| JOB-08 | Booking confirmation | Airflow: ACE data ready | rwb-payment | event-triggered workflow |
+| JOB-10 | WIN notices | 16:00 | rwb-comms + integration | Airflow file window + workers |
+| JOB-11 | Outbox sender | every minute | every service | outbox relay to Kafka |
+| JOB-12 | Document intake | every 15 min | rwb-document | event + KEDA workers |
+| JOB-13 | Decision log copy | 01:00 | rwb-decision | ingest is continuous (Kafka) |
+| JOB-14 | Hash-chain check | 02:00 | rwb-decision | Schedule |
+| JOB-15 | Reporting extract | 01:30 | rwb-reporting | Airflow trigger (no data lake) |
+| JOB-16 | Write-off scan | monthly, 3rd working day | rwb-writeoff | Schedule |
+| JOB-17 | Retention | monthly, 1st Sunday | rwb-document | Schedule |
+| JOB-18 | Access review list | six-monthly | rwb-access | Schedule |
+| JOB-19 | Re-appraisal | monthly | rwb-asset | Schedule |
+| JOB-20 | Rule promote | 00:01 | rwb-decision | Schedule → RulePackageInForce |
+| JOB-21 | Stuck workflow scan | every 5 min | platform | visibility query + alert |
+| JOB-22 | Smoke workflow | 06:00 | platform | Schedule |
+
+
+44
+
+Notes: The ACE shared Quartz and batch tables are no longer used by Recovery. Each job runs in its owning service: a Temporal Schedule (cron, with overlap policy SKIP and catch-up window) or a workflow started by an event such as AceDataReady. The bank's Airflow (replacing Control-M; for discussion) owns only the cross-system edges: it runs the ACE ingestion DAG and signals 'business date ready', so JOB-02, 04, 07 and 08 start from AceDataReady; it opens the WIN and debt-buyer file windows (JOB-10); and it triggers the regulatory extract (JOB-15) with reruns by business date.
+

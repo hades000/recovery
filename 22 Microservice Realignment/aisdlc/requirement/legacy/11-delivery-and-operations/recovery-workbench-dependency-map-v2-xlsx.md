@@ -1,0 +1,74 @@
+<!-- source: 11 Delivery and operations/Recovery Workbench Dependency Map v2.xlsx -->
+<!-- converted: 2026-11-16 from XLSX -->
+
+> **Source:** `11 Delivery and operations/Recovery Workbench Dependency Map v2.xlsx`  
+> **Converted from:** XLSX
+
+## Dependencies
+
+| Dependencies outside the recovery squads |  |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|---|
+| 33 dependencies on the ACE team, the collection squad, the architecture team, data engineering, SCB IT security, the AI teams, the business and the partners. |  |  |  |  |  |  |  |  |
+| ID | On | What is needed | For epic | Needed by | Owner | Decision | If late | Status |
+| DEP-01 | ACE team | Recovery module folder, package and boundary test in the ACE repository | E1 | 46328 | ACE team | DL05 | The squads cannot merge into ACE | Open |
+| DEP-02 | ACE team | Code owners file and merge rules for the recovery module | E1 | 46328 | ACE team | DL04, DL37 | Reviews stall and changes cross module folders | Open |
+| DEP-03 | ACE team | Deployment slots: one DEV and one SIT for the recovery squads | E1 | 46332 | ACE team | DL35 | Squads queue for one slot and SIT runs late | Open |
+| DEP-04 | ACE team | Common module services: sign-in, access check, audit and PII logging, the shared case view | E1 | 46335 | ACE team | None | Every screen and service waits for the access check | Open |
+| DEP-05 | ACE team | Monthly release window and the release owner | E1 | 46339 | SCB IT | DL34 | The first release date moves | Open |
+| DEP-06 | ACE team | Restructure calculator and plan status from the common module | E2 | 46357 | ACE team with the collection squad | DL14, DL30 | The treatment record shows no live plan | Open |
+| DEP-07 | Collection squad | EFS hand-over data and contact history in the COLLINS load | E2 | 46356 | Collection squad with data engineering | DL29 | Cases start with no collections history | Open |
+| DEP-08 | Collection squad | Shared Epic 2 items: notice path, customer contact stop, shared tasks | E2 | 46356 | IT lead with the product owner | DL30 | Both squads build the same item | Open |
+| DEP-09 | Collection squad | TDR and DIL split between the collection squad, the Enterprise AI team and TechX | E3 | 46371 | IT lead | DL14 | Epic 3 has no confirmed builder | Open |
+| DEP-10 | Architecture team | Partner access from outside the bank through the external gateway | E5 | 46419 | Architecture team | DL03 | Law firms cannot use the partner portal at Epic 5 | Open |
+| DEP-11 | Architecture team | Model endpoint the agents call, inside the SCB tenant | E1 | 46332 | CTO with Enterprise AI | DL33 | The agent runtime cannot run in shadow | Open |
+| DEP-12 | Architecture team | Non-functional targets for availability, recovery point and recovery time | E1 | 46339 | Solution architect with Risk | DL11 | Sizing and tests run against proposed values | Open |
+| DEP-13 | Architecture team | Legacy systems kept, changed or retired | E2 | 46346 | IT lead | DL12 | Interfaces are built for systems that may be retired | Open |
+| DEP-14 | Data engineering | COLLINS load of account, payment, customer and score data into the ACE database for recovery accounts | E1 | 46335 | Data engineering | DL06, DL20 | No case can be opened from bank data | Open |
+| DEP-15 | Data engineering | File layouts and test files for CCMS, SVAF, AMIS, RPS, WIN and GL | E1 | 46339 | Data engineering with the system owners | DL12 | File loads are built against assumed layouts | Open |
+| DEP-16 | Data engineering | Masked test data in SIT and UAT from the PII service | E1 | 46339 | Data engineering | DL26 | SIT and UAT run on synthetic data only | Open |
+| DEP-17 | Data engineering | Reconciliation tolerance per data product | E1 | 46339 | Data lead | DL25 | Loads are checked without agreed tolerances | Open |
+| DEP-18 | SCB IT security | Entra ID groups for the Workbench roles in each environment | E1 | 46335 | SCB IT security | DL40 | No one can sign in to SIT or UAT | Open |
+| DEP-19 | SCB IT security | Access timers: session, inactivity and break-glass | E2 | 46346 | SCB IT security | DL38 | Session rules use the ACE defaults | Open |
+| DEP-20 | Enterprise AI team | Agent platform: orchestrator, tool gateway, prompt store and evaluation | E1 | 46342 | Enterprise AI team | DL33 | Agents stay off; the rule result is used | Open |
+| DEP-21 | Enterprise AI team | Route return models by route for the route decision | E4 | 46412 | Enterprise AI team with Model Risk | None | The route decision runs on rules only | Open |
+| DEP-22 | Autonomous Ops team | OCR and extraction for the first document types | E1 | 46342 | Autonomous Ops team | DL19 | Documents are stored without extracted fields | Open |
+| DEP-23 | Business | Delegation of authority: holders, limits and substitutes | E2 | 46356 | Risk with the product heads | DL18 | Approval routing uses provisional limits | Open |
+| DEP-24 | Business | Service levels per case state and caseload caps | E2 | 46339 | Business lead; product owner | DL22, DL23 | Timers and caps load as placeholders | Open |
+| DEP-25 | Business | Letter templates approved by Legal in Thai and English | E2 | 46339 | Legal counsel | DL28 | Notices cannot be generated | Open |
+| DEP-26 | Business | Business testers named for each release | E1 | 46332 | Business lead | DL09 | UAT has no testers | Open |
+| DEP-27 | Business | Thai labels and message wording | E2 | 46331 | Business lead with Legal and Compliance | DL10 | Screens release with English labels only | Open |
+| DEP-28 | Partners | Panel law firms onboarded to the partner portal with user accounts | E5 | 46447 | Partner and agency manager | DL03 | Instructions go by email for another month | Open |
+| DEP-29 | Partners | Valuers, auction vendors and RAMC onboarded to the partner portal | E4 | 46419 | Partner and agency manager; Head of Asset Liquidity | DL03 | Results are keyed by bank staff | Open |
+| DEP-30 | Partners | Debt buyers' data room access and confidentiality agreements | E5 | 46447 | Head of Asset Liquidity | DL03 | Lot data goes by file transfer | Open |
+| DEP-31 | Partners | Collection agencies onboarded with placement and outcome capture | E6 | 46478 | Partner and agency manager | DL03 | Agency placements stay on spreadsheets | Open |
+| DEP-32 | Business | TCG claim rules and the guarantee quota | E4 | 46412 | Guarantee officer | None | Claims are tracked by hand | Open |
+| DEP-33 | Business | Write-off tax criteria version from Finance | E6 | 46468 | Finance and CFO delegate | None | The write-off scan holds (R-WO-03) | Open |
+
+## By team and epic
+
+| Dependencies by team and epic |  |  |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|---|---|
+| Count of dependencies each team must meet before each epic. |  |  |  |  |  |  |  |  |  |
+| On | E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8 | Total |
+| ACE team | 5 | 1 |  |  |  |  |  |  |  |
+| Architecture team | 2 | 1 |  |  | 1 |  |  |  |  |
+| Autonomous Ops team | 1 |  |  |  |  |  |  |  |  |
+| Business | 1 | 4 |  | 1 |  | 1 |  |  |  |
+| Collection squad |  | 2 | 1 |  |  |  |  |  |  |
+| Data engineering | 4 |  |  |  |  |  |  |  |  |
+| Enterprise AI team | 1 |  |  | 1 |  |  |  |  |  |
+| Partners |  |  |  | 1 | 2 | 1 |  |  |  |
+| SCB IT security | 1 | 1 |  |  |  |  |  |  |  |
+| Total |  |  |  |  |  |  |  |  |  |
+
+## How they are tracked
+
+| How dependencies are tracked |  |
+|---|---|
+| Applies to every row. |  |
+| Step | What happens |
+| 1 | Each dependency has one owner outside the squads and a date |
+| 2 | The program manager reviews open dependencies every week with each owner |
+| 3 | A dependency late by more than five working days goes to the sponsor review with its effect on the release |
+| 4 | A dependency tied to a decision closes when the decision is taken in the decision log |
+| 5 | Where a dependency is late, the squads build on the stated assumption behind a flag |

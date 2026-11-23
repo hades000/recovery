@@ -1,0 +1,145 @@
+SCB Collections and Recovery. Henka Group, 22 November 2026.
+(C) Siam Commercial Bank and Henka Pte Ltd
+Recovery Workbench
+Audit and logging design
+Item | Detail
+Document | Recovery Workbench audit and logging design
+Version | 3
+Date | 22 November 2026
+Change | 3, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+Prepared by | Henka Group
+Structure | arc42 crosscutting concepts, C4 component view
+Source version | 1, 28 October 2026. The metadata table of the source reads version 1; the source file name reads v2 (CG-B-TECH-12-1; ASM-B-TECH-12-2)
+Status | Draft. No approval is recorded for this version (ASM-B-TECH-12-1)
+Tool | T3 Code / OpenCode / DeepSeek v4.1 Flash. Decision D-RCV-60
+Change log
+Version | Date | Change
+3 | 22 November 2026 | D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash. The local decision record plus the central ledger (ADR-022); one owner per record from the Microservice Ownership Map v1; the access log in rwb-access (P4); the data lake copy removed (ADR-018); the ingest and the chain check are the jobs of rwb-decision (P7). Sections 1 to 9, with the change table at the end of the document
+1 | 28 October 2026 | The records, the decision log entry, tracing, integrity, retention and what is never logged (sections 1 to 6). This is the version that version 3 realigns; the metadata table reads 1 while the file name reads v2 (CG-B-TECH-12-1; ASM-B-TECH-12-2)
+1. The records
+The Workbench keeps the seven records of the source, and the structure of the source is kept with three sections added at the end (ASM-B-TECH-12-3). In the target the decision log is written twice by design: a local decision record in the schema of the service that took the decision, written in the same transaction as the state change, and the same entry in the central ledger of rwb-decision (P7), collected from the DecisionRecorded event on topic rwb.decision-record.v1 (ADR-022; Architecture v5 slides 20 and 28). The interaction ledger stays with rwb-source-data (P1), the access log moves to rwb-access (P4) and the application logs are collected per service. Every row of the source is kept; the Where column carries the store of the target.
+Record | What it holds | Form | Where | Read by
+Decision log | Every decision: inputs, rule and model versions, recommendation, approver, action | Append only, hash chained, one entry per decision | The local record in the schema of the service that took the decision, sealed into the central ledger in rwb_decision (P7); the nightly copy to the data lake is removed (ADR-022, ADR-018; DP-03, DP-17; CG-B-TECH-12-5; ASM-B-TECH-12-8) | Internal audit, Risk, center of excellence
+Interaction ledger | Every contact, letter, promise, payment and hand-over | Append only, one entry per interaction | rwb_source_data (P1), the ledger owner of record; rwb-case and the other services read it through the P1 contract (DP-18; CG-B-TECH-12-6; ASM-B-TECH-12-7) | Case owners in scope; Conduct and QA
+Access log | Sign-ins, refusals, grants, removals, break-glass, versions in force | Append only | rwb_access (P4), its own store, served by GET /admin/access-log (DP-08) | Application owner, security administrator, Compliance, internal audit
+ACE audit log | Every change made through the service | ACE pattern | ACE logging | Security administrator, internal audit
+PII log | Every read and unmask of a personal field | Event per read | PII Kafka | Compliance, internal audit
+SOC log | Security events | Event per incident | SCB security operations | Security operations
+Application logs | Errors, warnings and traces with no personal data | Structured JSON | Log Analytics, one stream per service, collected by the observability platform (PLT) (ADR-023) | Platform administrator, squads
+One record, one owner. The decision record is the only record with more than one writer: each of the 19 services writes its own, in its own schema, and rwb-decision (P7) holds the central ledger. Section 7 names the owner, the store and the contract of every record.
+2. The decision log entry
+Version 3 keeps the eleven fields of the entry. The entry is written once, in one transaction with the state change and the outbox row (R-UNI-39), and it is then collected, not rewritten, in the central ledger. The table is the table of the source; the target names of the same information are given in 2.1.
+Field | Meaning
+entry_id, case_id | The entry and its case
+decision_code | D1 to D9, a sub-decision or a deviation
+rule_id, rule_version | The rule that fired and its version
+model_version, agent_version, prompt_version | Where a model or agent took part
+inputs | References to the data and its business date, not copies of personal data
+recommendation, reasons | What was proposed and why
+decided_by, approval_level, limit_applied | Who decided, at which level, under which limit
+action | What the Workbench did
+previous_hash, hash | The chain that shows no entry has been changed
+corrects_entry_id | Set when the entry corrects an earlier one (R-UNI-24)
+2.1 Field correspondence with the target record
+The target record carries the fields in the second column, as the owning service writes them in its own schema (Temporal and Drools Design v1; Architecture v5 slide 28). The source field names are kept in the first column so that a reader of the two versions can follow one entry through.
+Source field | Target field | Note
+entry_id, case_id | chain_seq, with the case reference and the trace ID held in inputsRef | The entry ID of the source becomes the position of the entry in the chain of its service; the record has no separate case column (CG-B-TECH-12-2; ASM-B-TECH-12-4)
+decision_code | ruleId with ruleVersion, and outcome | D1 to D9 is the outcome of the decision
+rule_id, rule_version | ruleId, ruleVersion | The rule that fired and the version in force
+model_version, agent_version, prompt_version | ruleVersion, plus the model and prompt versions inside inputsRef | One version per artefact; the list stays as the source writes it
+inputs | inputsRef | References to the data and its business date, never a copy of personal data
+recommendation, reasons | recommendation, outcome | What was proposed and what was decided
+decided_by, approval_level, limit_applied | approverUserId, approvalLevel, finalCall | The limit applied is read from rwb-access (P4) and the row is kept
+action | actions | What the Workbench did
+previous_hash, hash | prev_hash, entry_hash | The chain of the local record; the ledger chains the entry again on ingest
+corrects_entry_id | the reference to the entry it corrects | Append only: the original stays (R-UNI-24)
+The target record adds decidedAt, the moment of the decision, and the trace ID of section 3. Neither is a new business value.
+3. Tracing an action end to end
+Every request carries a trace ID from the front end through the service, the outbox and the outbound file.
+The decision log entry stores the trace ID.
+The interaction ledger entry stores the decision log entry ID where a decision caused it.
+Outbound files carry the case number and the entry ID, so a notice in WIN can be traced to its decision.
+Internal audit searches by case, rule, approver or date on the decision log query screen and exports with masking.
+Version 3 adds three points, because one action now crosses services:
+Each service propagates the W3C Trace Context header, so one trace covers the 19 services, the Kafka events and the Temporal workflow of the case (Architecture v5 slide 49; ADR-023).
+The local decision record carries the trace ID and the chain position, and the ledger entry keeps both, so a ledger entry is traced back to the workflow run that wrote it. The case reference travels in inputsRef (2.1).
+The audit search is answered by rwb-decision (P7) on GET /decision-log and GET /decision-log/{entryId}; the export applies the masking rows of rwb-access (P4) (DP-08).
+4. Integrity
+The decision log, the interaction ledger and the access log accept inserts only. Migrations cannot update or delete their rows.
+A daily job checks the hash chain and reports a break to Compliance the same day.
+A correction is a new entry that names the entry it corrects; the original stays.
+A failed write to the decision log stops the action; a failed write to the ledger raises an incident.
+Version 3 keeps those four rules and says where each one runs:
+The daily chain check is JOB-14, a Temporal Schedule in rwb-decision (P7). The ingest that feeds it is JOB-13, continuous over Kafka in the same service (Architecture v5 slide 44; DP-10).
+The local record, the state change and the outbox row are one transaction in the schema of the owning service. If the write fails, nothing moves (R-UNI-39; Temporal and Drools Design v1).
+Strict mode at the points of no return: debt transfer, write-off posting, auction sale and title transfer wait for the confirmation of the central ledger before they execute. Every other step carries on at full speed while the ledger catches up (Architecture v5 slides 26 and 28; ASM-B-TECH-12-10).
+The ledger is anchored daily: a fingerprint of the ledger chain is written to write-once storage, and a missing record raises an alert inside the five-minute completeness target (Architecture v5 slides 14 and 28).
+The chain of the local record and the chain of the ledger are both verified; what an auditor treats as the chain of record is still open (CG-B-TECH-12-8; ASM-B-TECH-12-10).
+While the ledger lags, the local record is authoritative for the audit trail and the ledger entry is shown as not yet sealed; the audit search of section 3 reads the ledger only (CG-B-TECH-12-9; ASM-B-TECH-12-16).
+5. Retention
+Record | Retention
+Decision log | Set by Compliance (DL26); proposed as the life of the case plus the bank records period
+Interaction ledger | Set by Compliance, separately from the decision log (DL26)
+Access log | Per the bank retention schedule (DL26)
+Application logs | 90 days in Log Analytics, then archived
+The periods of the source are unchanged. Version 3 records where the retention data sits: retention_rule and retention_action are tables of rwb-document (P5) and JOB-17 is the retention Schedule in rwb-document; that is document retention, not ledger retention. No source states where the retention period of the decision ledger, of the interaction ledger and of the access log is held, or which job enforces it (CG-B-TECH-12-4; ASM-B-TECH-12-9). The access log is retained with its own store in rwb_access (P4); the application logs are retained per service in Log Analytics (ADR-023).
+6. What is never logged
+Clear national ID or passport numbers.
+Personal fields in application logs, traces or agent prompts.
+Secrets, tokens or keys.
+Version 3 adds three rules of the same kind, because the decision record now travels as an event:
+Personal data in Kafka events. The events carry references, and a payload is encrypted by the codec before it leaves the service (ADR-015; T1; ASM-B-TECH-12-13).
+Personal data in workflow inputs or workflow history. The payloads are encrypted by the codec and the workflow holds the case ID and references (ADR-016).
+Personal fields in the inputs of a decision record, which hold references and the business date only (section 2).
+The approver of a decision is recorded as an identifier, not as a name, and the field is masked in an export under the masking rows of rwb-access (CG-B-TECH-12-7; ASM-B-TECH-12-11).
+7. Owners and contracts
+Every row of this table takes its owner from the Microservice Ownership Map v1 and the plan ownership file, and every owner is a service code or the platform, never a team type and never a person (ASM-B-TECH-12-12).
+Record | Owner | Store | Contract or topic
+Decision record, local | Each of the 19 services, for the decisions it takes | Its own schema rwb_<name>, written in the same transaction as the state change (CG-B-TECH-12-2; ASM-B-TECH-12-4) | The decision-record library (DP-03; H RWB-PLT-E1027-CON)
+Decision ledger, central | P7 rwb-decision | rwb_decision, table decision_log_entry (ASM-B-TECH-12-6) | Consumes rwb.decision-record.v1 (EV-08); GET /decision-log and GET /decision-log/{entryId}
+Interaction ledger | P1 rwb-source-data | rwb_source_data, tables interaction and efs_ledger_outcome (ASM-B-TECH-12-7) | GET /cases/{caseId}/interactions and POST /cases/{caseId}/interactions of P1 (DP-18)
+Access log | P4 rwb-access | rwb_access (CG-B-TECH-12-3; ASM-B-TECH-12-5); the versions in force are those the owning service applied (CG-B-TECH-12-10; ASM-B-TECH-12-17) | GET /admin/access-log and the authorise contract (DP-08; H RWB-PLT-E1037-CON; C RWB-P4-E1037-CON)
+ACE audit log and PII log | ACE Common, outside the 19 services | ACE logging and PII Kafka | The ACE Common contract INT-34
+SOC log | SCB security operations | The SOC log, reached through the PII Kafka path | The ACE Common contract INT-34
+Application logs | PLT, the observability platform | Log Analytics, one stream per service | OpenTelemetry (ADR-023)
+Rule and model versions | P7 rwb-decision | rwb_decision, tables rule_package, rule_package_version and rule_row | EV-30 RulePackageInForce; the owning service loads the version in force (DP-04)
+7.1 Dependencies
+The local record needs the decision-record library of the platform, a contract story of wave 0: H RWB-PLT-E1027-CON (DP-03). The same library writes the outbox row: H RWB-PLT-TE006-CON (DP-09).
+A service that searches the central ledger depends on the contract of rwb-decision as a C dependency. A C dependency never blocks a build: the service builds against the published contract and its fake (Rules v1 R5.4).
+The access log is reached through the authorise contract of rwb-access: H RWB-PLT-E1037-CON and C RWB-P4-E1037-CON (DP-08).
+The interaction ledger is reached through the P1 contract: C against RWB-P1 (DP-18). No service reads another service's ledger, access-log or decision-record table (DP-01).
+8. Decisions
+The realignment is decided once, on 22 November 2026, and applied here. The table names only the decisions that change something in this document; the identifiers come from the plan ids file (ids.json).
+Decision | What it settles in this design
+D-RCV-60 | Adopt Architecture v5 and realign the documents and the stories. This version is the realignment of the audit and logging design
+ADR-009, amended | The central log written inside every call becomes a local record plus a central ledger. The amendment needs the sign-off of Risk and Internal Audit (Architecture v5 slides 28 and 47)
+ADR-013 | 19 services inside ACE, one per module, each with its own worker, queue and schema
+ADR-014 | One schema and one login per service in the ACE database; no cross-schema read
+ADR-015 | Kafka with outbox, inbox and CloudEvents: EV-08 travels on rwb.decision-record.v1 through the outbox of the writer
+ADR-016 | The reusable Temporal layer: every rule and every record is written in an activity, never in workflow code, so the workflow stays deterministic and a replay reuses the recorded result
+ADR-018 | No data lake. The nightly copy of the decision log is removed and rwb-reporting builds its read model from the events
+ADR-022 | Local decision record plus central ledger, strict mode at the points of no return, daily seal. This is the decision of this document
+ADR-023 | Observability per service: one trace across the services, events and workflows, application logs and alerts per service
+Decision log row | Decision, 22 November 2026
+DL44 | Adopt Arch v5
+DL45 | Service epics plus business-epic tags
+DL46 | Soft ownership by team type
+DL47 | Epic 1 preservation rule
+DL48 | Dates unchanged and tentative
+DL49 | Gap and assumption registers
+Built work is preserved. The Epic 1 decision-log writer and the append-only table are kept as built, and the local record and the central ledger are delta work in the owning services and in rwb-decision (U2; DL47). RWB-E1-014, the decision log copy to the data lake, is retired: there is no data lake in Architecture v5 and the dependencies on it are dropped (Rules v1 R6; DP-17; ASM-B-TECH-12-8).
+No date of the source is moved. The source date of 28 October 2026 is kept, no release date is added, and a date later read as a release is tentative (U7; DL48; ASM-B-TECH-12-14). The realignment plan places this work in a programme of 1,034 stories over 358 legacy keys, 939 of them ready on Day 1 (split_plan.json, stats).
+9. Realignment changes in version 3 (D-RCV-60)
+# | Section | Version 2 value | Version 3 value | Decision
+1 | Whole document | One decision log, written by the decision log writer of the monolith into the ACE database | A local decision record in the schema of the owning service, in one transaction with the state change, plus the central ledger in rwb-decision (P7) | ADR-022, ADR-009 amended; Architecture v5 slides 20 and 28
+2 | 1, decision log and application logs | ACE database with a nightly copy to the data lake; one Log Analytics workspace | The owning service's schema plus rwb_decision; Log Analytics per service | ADR-018, ADR-023; DP-17
+3 | 1, interaction ledger | ACE database, no owner of record | rwb_source_data (P1), the ledger owner of record | DP-18; Rules v1 R3 default ruling
+4 | 1, access log | Inside the decision log store | rwb_access (P4), served by GET /admin/access-log | DP-08
+5 | 2 and 2.1 | Eleven fields, one store | The same eleven fields, written locally and collected centrally, with the target names in 2.1 | Architecture v5 slides 20 and 28
+6 | 3 | A trace ID from the front end to the outbound file | W3C Trace Context across the 19 services, the events and the workflows; the ledger entry carries the trace ID | ADR-023; Architecture v5 slide 49
+7 | 4 | A daily job checks the hash chain | JOB-14 chain check and JOB-13 continuous ingest in rwb-decision; one transaction; strict mode; daily seal to write-once storage | Architecture v5 slides 26, 28 and 44
+8 | 5 | Retention set by Compliance | Periods unchanged; the retention tables are rwb-document (P5); where ledger and access-log retention is held is open | DL26; CG-B-TECH-12-4
+9 | 6 | Personal fields in logs and prompts | The same three rules, plus no personal data in events or workflow history | ADR-015, ADR-016
+10 | 7 | None | The owner, the store and the contract of every record, from the Ownership Map | DP-03, DP-08, DP-18
+11 | 8 | None | D-RCV-60, the ADR rows named in section 8 and DL44 to DL49 | ids.json; Rules v1 R8.4
+12 | 9 | None | This table | -

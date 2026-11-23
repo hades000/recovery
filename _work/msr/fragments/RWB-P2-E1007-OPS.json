@@ -1,0 +1,180 @@
+{
+  "id": "RWB-P2-E1007-OPS",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "OPS",
+  "lane": "L-P2-B",
+  "ready": "Day 1",
+  "owner": "DEVOPS",
+  "business_epic": "EP01",
+  "wave": 1,
+  "release": "30 November 2026",
+  "legacy": "RWB-E1-007",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 One chart, one login, one schema and one queue are deployed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 The topic and its retry and dead-letter topics are provisioned with their ACLs (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The two file windows belong to the bank Airflow and not to a Schedule (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The held-file and failed-file alerts fire with their identifiers (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The dashboards show the six series with their dimensions (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 The runbook and the smoke run cover the operational failures (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E1007-OPS-01",
+    "TC-P2-E1007-OPS-02",
+    "TC-P2-E1007-OPS-03",
+    "TC-P2-E1007-OPS-04",
+    "TC-P2-E1007-OPS-05",
+    "TC-P2-E1007-OPS-06"
+  ],
+  "reqs": [
+    "REQ-DRI-006",
+    "REQ-DRI-007",
+    "REQ-DRI-008"
+  ],
+  "ops_provided": [],
+  "ops_consumed": [],
+  "events_published": [],
+  "events_consumed": [
+    "rwb.source-data.AceDataReady.v1"
+  ],
+  "workflows": [
+    "OutboundFileWorkflow",
+    "deliverFile(manifest)",
+    "receiveFile"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (FR-P2-001, FR-P2-002, FR-P2-003, FR-P2-004, FR-P2-005, FR-P2-006, FR-P2-007, FR-P2-008, FR-P2-009, FR-P2-010, FR-P2-011, FR-P2-012, FR-P2-013, FR-P2-014, FR-P2-015, FR-P2-016, FR-P2-017, FR-P2-018, FR-P2-020, FR-P2-021, FR-P2-022)",
+  "gaps": [
+    "GAP-0650"
+  ],
+  "assumptions": [
+    "ASM-1070",
+    "ASM-1074",
+    "ASM-1075",
+    "ASM-1079",
+    "ASM-1085",
+    "ASM-1086"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E1007 OPS Integration adapters for outbound files - deployment v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0650",
+      "title": "Outbound-file deployment: chart values, replica counts, KEDA threshold, lag and alert thresholds, dashboard names, build ID format, Airflow trigger contract of the two file windows and the message identifiers of the lag and window alerts not specified in any source",
+      "source": "Architecture v5 Text Extract v1 slides 9, 16, 31, 32, 33, 41, 44 and 45; Temporal and Drools Design Text Extract v1 slide 11; ADR-023; TSD P2 Integration v3 T3.1 and T-A.1; RWB-ITG-E1007-ITG section 12.6; Template and Rules v1 §R7.2 s14 and §R9",
+      "section": "§11 Data, §12.6 Schedules, §14 Validation and messages, §13 Solution plan (alert mapping and artefacts)",
+      "description": "One combined row for the deployment values and identifiers of this key. Architecture v5 slides 9, 33 and 41 fix the topic settings, the KEDA scaling shape and one login per service, and slides 16, 31, 32 and 44 fix the 16:00 WIN window and the per-lot buyer window as bank-Airflow work with rwb-integration building and sending the files, but no source fixes the chart values, the replica counts, the resource sizes, the KEDA backlog threshold, the consumer quotas, the lag and alert thresholds, the dashboard names, the build ID format or the trigger contract of the two windows (the call, its parameters and its idempotency key). The lag alert and the window and endpoint alert also have no message identifier and no agreed text in the source set, so both carry the §R9 placeholder until the Error and Message Standard names them.",
+      "evidence": "Architecture v5 slide 44 'JOB-10 WIN notices 16:00 rwb-comms + integration Airflow file window + workers' and slide 32 'rwb-integration still builds the files and manifests; Airflow owns the window, the transfer and the retry' with no call contract; Architecture v5 slide 9 'Kafka: topic per service rwb.<name>.events.v1, 12 partitions, replication factor 3, 7-day retention, key caseId, CloudEvents binary mode, outbox and inbox, retry 1 min, 10 min, 1 h then .dlt' with no lag threshold; Temporal and Drools design slide 11 names worker versioning and a build ID without a format; the legacy RWB-E1-007 section 14 lists MSG-P1-001, MSG-GEN-004, MSG-GEN-005, MSG-GEN-006, MSG-P2-001, MSG-P4-002 and MSG-P4-003 and no lag or window alert identifier.",
+      "type": "Missing",
+      "area": "Integration (P2) outbound files: deployment values, Airflow windows and alert identifiers",
+      "severity": "P2",
+      "needed_by_wave": 1,
+      "legacy_ref": "RWB-E1-007",
+      "owner_role": "DevOps team",
+      "asm": "ASM-1070, ASM-1073, ASM-1074, ASM-1075, ASM-1079, ASM-1085, ASM-1086",
+      "proposed": "Set the chart values, the replica counts, the KEDA backlog threshold, the lag and alert thresholds and the build ID format as environment values of the operations story. Confirm the two windows with the bank Airflow owner as calls to the requesting services on their own APIs, and record that the deployment registers no Schedule and no timer for either. Fix the trigger contract of the two windows and the message identifiers of the lag and window alerts with the Airflow owner and the platform observability owner, and keep the §R9 placeholder until they are named.",
+      "wp": "B-P2-01"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1070",
+      "text": "rwb-integration is the service of legacy key RWB-E1-007 in wave 1 under epic RWB-SVC-P2, with schema rwb_integration, REST base /api/recovery/integration/v1, topic rwb.integration.events.v1, event names rwb.integration.<Event>.v1, task queue rwb-integration in namespace rwb-recovery and Java package th.co.scb.ace.workbench.recovery.integration; it runs as its own ACE database login with grants on its own schema only (DP-02), replacing the legacy shared recovery_svc identity, and the login name follows the rwb_integration schema name of Architecture v5 slide 29.",
+      "why": "The legacy story runs as the shared recovery_svc identity and names the package recovery.integration.adapter; the target naming comes from Architecture v5 slides 20, 29 and 41 and from the naming rule of Template and Rules v1 §R4, and no source names the per-service login.",
+      "read": "Architecture v5 Text Extract v1 slides 8, 16, 20, 29 and 41; Template and Rules v1 §R4 and §R5.5 DP-02; legacy RWB-E1-007 sections 3, 10 and 13.",
+      "gap": "GAP-0647",
+      "applied_in": "§1 Story, §3 Preconditions, §10 Authority, §13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "ACE team and DBA (schema and login provisioning, RWB-PLT-DB)",
+      "impact": "No behaviour changes; the story builds and tests against the rwb-integration login and the service package once both are allocated.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1074",
+      "text": "Job ownership follows DP-17 and Architecture v5 slide 44: JOB-11 is the platform outbox relay that runs every minute in every service, JOB-10 is a bank-Airflow file window whose file is built and sent by rwb-integration (the slide 44 owner cell reads rwb-comms + integration, read here as the request and execute split), and JOB-13 and JOB-15 are removed with the data lake; the two file windows are not Temporal Schedules of this service.",
+      "why": "Architecture v5 slide 44 names two owners for JOB-10 and retires the shared job table, while the legacy story assumes one Quartz scheduler with the item table; the split has to be stated once for the app, infrastructure and operations stories.",
+      "read": "Architecture v5 Text Extract v1 slides 16, 31, 32 and 44; Template and Rules v1 §R5.5 DP-10; Batch and Scheduling Design v4 (JOB-10, JOB-11, JOB-13, JOB-15); legacy RWB-E1-007 section 3 and section 12.",
+      "gap": "GAP-0647",
+      "applied_in": "§12.6 Schedules, §13 Solution plan, and the operations story §12.6",
+      "confidence": "Medium",
+      "confirm": "Platform event and workflow owners, and the bank Airflow owner",
+      "impact": "The release registers no Schedule and no Quartz job; the window is a bank scheduler call and the relay is a platform interval.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1075",
+      "text": "MSG-P1-001 uses the FSD P2 Integration v3 wording, '{product} is from {date}. Today's data is not yet complete.', in place of the legacy story wording '{product} is from {date}. Today's ACE batch has not arrived.'.",
+      "why": "R-PREC ranks the FSD (7) above the story masters (9), and the FSD P2 Integration v3 change note records the rewording of the stale-data message.",
+      "read": "FSD P2 Integration v3 change note (version 3, 'Stale-data message MSG-P1-001 reworded') and VR-P2-001-1; legacy RWB-E1-007 section 14.",
+      "gap": "GAP-0647",
+      "applied_in": "§14 Validation and messages",
+      "confidence": "High",
+      "confirm": "Business analyst, P2 (message catalogue owner)",
+      "impact": "The stale-file message text changes under the realignment; no identifier, no trigger and no behaviour changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1079",
+      "text": "The interface_config version IF-2026.11 holds the outbound rows for INT-14, INT-19, INT-20 and INT-25 with direction OUTBOUND, max attempts 3 and retry intervals 5, 15 and 45 minutes loaded by RW-REFADM, and the load refuses a row with direction INBOUND; whether the job_catalog holds rows for JOB-10 and JOB-11 is not settled, so this key writes no job_catalog row and leaves the question to the job catalog read of the service baseline.",
+      "why": "The legacy story states the configuration version and its four outbound rows and refuses an INBOUND row, while no source says whether the two jobs of this key are catalogued after DP-17 and the slide 44 split.",
+      "read": "Legacy RWB-E1-007 sections 3, 12 and 13; FSD P2 Integration v3 A1.5; TSD P2 Integration v3 T3.1 (interface_config, job_catalog) and API-P2-009; Architecture v5 slide 44.",
+      "gap": "GAP-0647",
+      "applied_in": "§3 Preconditions, §12.7 Tables owned, §13 Configuration and reference data",
+      "confidence": "Medium",
+      "confirm": "Reference data administrator (RW-REFADM) and the platform administrator (RW-PLATADM)",
+      "impact": "The attempts, the intervals, the folders and the roles stay data; if the catalog needs the two rows, it is a data load and not a code change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1085",
+      "text": "The chart values, the replica counts, the resource sizes, the KEDA backlog threshold, the consumer quotas, the lag and alert thresholds, the dashboard names and the build ID format are environment values of the operations story and are not fixed by any source; the release fixes their names, the rule that they are never hard-coded, and one runbook entry per alert.",
+      "why": "Architecture v5 slides 9, 33 and 41 fix the topic settings, the KEDA scaling shape and one login per service, but no source fixes replica counts, thresholds or a build ID format for this service.",
+      "read": "Architecture v5 Text Extract v1 slides 9, 33, 41 and 44; Temporal and Drools Design Text Extract v1 slide 11 (worker versioning and the build ID); ADR-023.",
+      "gap": "GAP-0650",
+      "applied_in": "§11 Data, §13 Solution plan (artefacts and alert mapping)",
+      "confidence": "Medium",
+      "confirm": "DevOps team, the platform event owner and the platform observability owner",
+      "impact": "A threshold or a replica count is a values change; no behaviour of the file path changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1086",
+      "text": "The trigger contract of the WIN window at 16:00 and of the debt-buyer window per lot is not fixed by any source: the bank Airflow DAG opens the window and calls the requesting service through its API only, and the deployment registers no Schedule and no timer for either window.",
+      "why": "Architecture v5 slides 16, 31, 32 and 44 give the window times and say Airflow calls the services and never reads a rwb_* schema, but no source fixes the call, the parameters or the idempotency key of the window.",
+      "read": "Architecture v5 Text Extract v1 slides 16, 31, 32 and 44; Batch and Scheduling Design v4 (16:00 window); RWB-ITG-E1007-ITG precondition 8.",
+      "gap": "GAP-0650",
+      "applied_in": "§12.6 Schedules, §13 Solution plan (window step), and the operations story AC3",
+      "confidence": "Medium",
+      "confirm": "Bank Airflow owner and the requesting service owners",
+      "impact": "The window is proved by the smoke run through the way the Airflow task calls; a change of the trigger is an Airflow change and not a release of this service.",
+      "wp": "B-P2-01"
+    }
+  ]
+}

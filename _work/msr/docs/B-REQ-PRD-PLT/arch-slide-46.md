@@ -1,0 +1,43 @@
+
+A6 · Questions architects ask 2/2
+
+Short answers; the detail is in the main slides
+
+| Question | Answer |
+|---|---|
+| How is Temporal reusable by others? | Three reusable layers: the shared cluster, a versioned workflow kit (approval, notice, document intake, agent run, saga, schedule) and service activity contracts. A new workbench gets a namespace and composes them. |
+| How do services call each other through Temporal? | A workflow calls a typed activity interface on the owner's task queue, or starts a child workflow there. Across workbenches it uses a Nexus operation. No service imports another's code, only its contract jar. |
+| How is data kept consistent without one transaction? | Each step is a local transaction plus an outbox event. Multi-step deals are sagas in Temporal with compensation before the point of no return. |
+| How does the case screen stay under 2 s? | The gateway calls rwb-case and rwb-source-data in parallel (one hop each); other tabs load on click from their own services. Budget about 1.2 s. |
+| How is personal data kept out of events and workflows? | Events and workflow inputs carry IDs and business facts only; Temporal payloads are encrypted by the codec (AES-GCM, Key Vault keys); masking is applied by rwb-source-data. |
+| What stops call chains from growing? | REST is one hop: gateway to service, or a cached reference read (rwb-access, rwb-source-data). Anything longer is a workflow. Trace analysis flags call depth above one. |
+| How do you test 19 services? | Contract tests per API, event and activity (OpenAPI, AsyncAPI, contract jars); Temporal replay tests; Testcontainers for Kafka and PostgreSQL; a daily journey smoke workflow (JOB-22). |
+| Does this need BOT approval? | Possibly: FPG 19/2560 cl. 5.5 requires prior approval for significant technology change. Compliance to confirm. |
+
+
+46
+
+Notes: Q: How is Temporal reusable by others?
+A: Three reusable layers: the shared cluster, a versioned workflow kit (approval, notice, document intake, agent run, saga, schedule) and service activity contracts. A new workbench gets a namespace and composes them.
+
+Q: How do services call each other through Temporal?
+A: A workflow calls a typed activity interface on the owner's task queue, or starts a child workflow there. Across workbenches it uses a Nexus operation. No service imports another's code, only its contract jar.
+
+Q: How is data kept consistent without one transaction?
+A: Each step is a local transaction plus an outbox event. Multi-step deals are sagas in Temporal with compensation before the point of no return.
+
+Q: How does the case screen stay under 2 s?
+A: The gateway calls rwb-case and rwb-source-data in parallel (one hop each); other tabs load on click from their own services. Budget about 1.2 s.
+
+Q: How is personal data kept out of events and workflows?
+A: Events and workflow inputs carry IDs and business facts only; Temporal payloads are encrypted by the codec (AES-GCM, Key Vault keys); masking is applied by rwb-source-data.
+
+Q: What stops call chains from growing?
+A: REST is one hop: gateway to service, or a cached reference read (rwb-access, rwb-source-data). Anything longer is a workflow. Trace analysis flags call depth above one.
+
+Q: How do you test 19 services?
+A: Contract tests per API, event and activity (OpenAPI, AsyncAPI, contract jars); Temporal replay tests; Testcontainers for Kafka and PostgreSQL; a daily journey smoke workflow (JOB-22).
+
+Q: Does this need BOT approval?
+A: Possibly: FPG 19/2560 cl. 5.5 requires prior approval for significant technology change. Compliance to confirm.
+

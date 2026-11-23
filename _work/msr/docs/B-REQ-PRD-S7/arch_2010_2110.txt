@@ -1,0 +1,100 @@
+2010:
+2011:3
+2012:
+2013:Collected centrally
+2014:rwb-decision reads rwb.decision-record.v1 into the ledger within 5 minutes
+2015:
+2016:4
+2017:
+2018:Sealed daily
+2019:A fingerprint is stored in write-once storage
+2020:
+2021:inside each of the 19 services
+2022:
+2023:in rwb-decision (P7)
+2024:
+2025:Strict mode for points of no return
+2026:Debt transfer, write-off, auction sale and title transfer wait until the central ledger confirms the record. Everything else carries on at full speed.
+2027:
+2028:What auditors get
+2029:One place to search every decision, with the rule version and approver; alerts for missing records; the chain checked every day.
+2030:
+2031:This changes ADR-009, so it needs Risk and Internal Audit sign-off.
+2032:
+2033:28
+2034:
+2035:Notes: Proposal (changes ADR-009): (1) each service writes a decision record in its own schema in the same transaction as the state change, hash-linked to the previous record, plus DecisionRecorded through its outbox to topic rwb.decision-record.v1; (2) rwb-decision consumes it idempotently into the central ledger, with a 5-minute completeness target, gap alerts and chain verification; (3) daily anchor of the ledger hash to immutable (WORM) storage.
+2036:
+2037:Strict mode: irreversible steps (debt transfer, write-off, auction sale, title transfer) wait for the ledger acknowledgement before executing.
+2038:
+2039:Why not today's design: writing the central log synchronously inside every call becomes a distributed transaction once there are 19 services. Needs Risk and Internal Audit sign-off.
+2040:
+2041:## Slide 29
+2042:
+2043:Data: one ACE database, one schema and one login per service
+2044:
+2045:Ownership is enforced by grants, not by separate servers
+2046:
+2047:rwb-case
+2048:
+2049:login rwb_case
+2050:
+2051:schema rwb_case: read and write
+2052:
+2053:rwb-source-data
+2054:
+2055:login rwb_source_data
+2056:
+2057:recovery.v_ace_* views: SELECT only
+2058:
+2059:rwb-litigation
+2060:
+2061:login rwb_litigation
+2062:
+2063:schema rwb_payment: no grant, refused
+2064:
+2065:ACE POSTGRESQL SERVER · PgBouncer pool and connection cap per login
+2066:
+2067:ACE-OWNED
+2068:
+2069:ACE schemas: customer, account, payment, collateral, …
+2070:
+2071:schema recovery: 30 v_ace_* views, SELECT only, for rwb_source_data
+2072:
+2073:19 RECOVERY SCHEMAS · ONE LOGIN EACH
+2074:
+2075:rwb_case
+2076:
+2077:rwb_decision
+2078:
+2079:rwb_access
+2080:
+2081:rwb_deviation
+2082:
+2083:rwb_valuation
+2084:
+2085:rwb_treatment
+2086:
+2087:rwb_guarantee
+2088:
+2089:rwb_litigation
+2090:
+2091:rwb_asset
+2092:
+2093:rwb_debtsale
+2094:
+2095:rwb_writeoff
+2096:
+2097:rwb_document
+2098:
+2099:rwb_comms
+2100:
+2101:rwb_payment
+2102:
+2103:rwb_partner
+2104:
+2105:rwb_integration
+2106:
+2107:rwb_source_data
+2108:
+2109:rwb_reporting

@@ -1,0 +1,546 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-litigation (Litigation)"
+  version: 5.0.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-litigation (Litigation, module S4, service wave
+    3) under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16
+    November 2026) by the D-RCV-60 microservice realignment.
+    This document holds 5 operations under REST base /api/recovery/litigation/v1; schema rwb_litigation; topic
+    rwb.litigation.events.v1; Temporal task queue rwb-litigation in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-litigation.asyncapi.yaml.
+servers:
+- url: "/api/recovery/litigation/v1"
+  description: "Relative to the rwb-litigation service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Litigation"
+x-service:
+  code: "S4"
+  service: "rwb-litigation"
+  name: "Litigation"
+  wave: 3
+  schema: "rwb_litigation"
+  rest-base: "/api/recovery/litigation/v1"
+  topic: "rwb.litigation.events.v1"
+  task-queue: "rwb-litigation"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-litigation.asyncapi.yaml"
+  operations: 5
+paths:
+  /notices/{noticeId}/approve:
+    post:
+      tags:
+      - Litigation
+      summary: Approve a generated notice for dispatch
+      operationId: postNoticesNoticeidApprove
+      x-module: S4
+      x-owner: "S4"
+      x-capability:
+        area: Litigation
+        right: A
+      x-first-release: E2
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notice'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/legal-actions:
+    post:
+      tags:
+      - Litigation
+      summary: Open a legal action and its pack
+      operationId: postCasesCaseidLegalActions
+      x-module: S4
+      x-owner: "S4"
+      x-capability:
+        area: Litigation
+        right: C
+      x-first-release: E5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegalActionRequest'
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalAction'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /legal-actions/{legalActionId}:
+    get:
+      tags:
+      - Litigation
+      summary: Read a legal action with pack, instruction, hearings and judgment
+      operationId: getLegalActionsLegalactionid
+      x-module: S4
+      x-owner: "S4"
+      x-capability:
+        area: Litigation
+        right: R
+      x-first-release: E5
+      parameters:
+      - name: legalActionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalAction'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+    patch:
+      tags:
+      - Litigation
+      summary: Record a filing, judgment or enforcement step
+      operationId: patchLegalActionsLegalactionid
+      x-module: S4
+      x-owner: "S4"
+      x-capability:
+        area: Litigation
+        right: U
+      x-first-release: E5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegalActionUpdate'
+      parameters:
+      - name: legalActionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalAction'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /legal-actions/{legalActionId}/hearings:
+    post:
+      tags:
+      - Litigation
+      summary: Add a hearing date
+      operationId: postLegalActionsLegalactionidHearings
+      x-module: S4
+      x-owner: "S4"
+      x-capability:
+        area: Litigation
+        right: U
+      x-first-release: E5
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HearingRequest'
+      parameters:
+      - name: legalActionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hearing'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Notice:
+      type: object
+      description: A demand, recall or statutory notice and its proof of delivery.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the notice
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        documentId:
+          type: string
+          format: uuid
+          description: The generated notice
+        noticeType:
+          type: string
+          maxLength: 25
+          enum:
+          - DEMAND
+          - RECALL
+          - STATUTORY_SALE_NOTICE
+          - GUARANTOR_NOTICE
+          description: Demand, recall, statutory sale notice, guarantor notice
+        sentDate:
+          type: string
+          format: date
+          description: Date sent
+        barcode:
+          type: string
+          maxLength: 40
+          description: Registered mail barcode
+        callbackDate:
+          type: string
+          format: date
+          description: Date the proof of delivery came back
+        deliveryStatus:
+          type: string
+          maxLength: 15
+          enum:
+          - DELIVERED
+          - REFUSED
+          - UNDELIVERABLE
+          - PENDING
+          description: Delivered, refused, undeliverable, pending
+        sentType:
+          type: string
+          maxLength: 10
+          enum:
+          - BEFORE_NPL
+          - NPL
+          description: Before NPL or NPL
+        personKey:
+          type: string
+          maxLength: 255
+          description: ACE person_key of the customer the notice is addressed to
+        templateId:
+          type: string
+          format: uuid
+          description: Template version the notice was generated from
+        holdReason:
+          type: string
+          maxLength: 30
+          description: 'Why the notice is held: missing merge field, TEMPLATE_WITHDRAWN, CONTACT_STOP_Xn, LEGAL_HOLD'
+        dispatchFileId:
+          type: string
+          format: uuid
+          description: WIN file the notice was last written to
+        dispatchAttempts:
+          type: integer
+          description: Number of WIN files the notice has been sent in without acknowledgment
+      required:
+      - id
+      - caseId
+      - noticeType
+      - dispatchAttempts
+    LegalAction:
+      type: object
+      description: A notice, lawsuit, appeal, enforcement or bankruptcy action on a case.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the legal action
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        lawFirmId:
+          type: string
+          format: uuid
+          description: The law firm instructed
+        actionType:
+          type: string
+          maxLength: 20
+          enum:
+          - NOTICE
+          - CIVIL_CASE
+          - APPEAL
+          - ENFORCEMENT
+          - BANKRUPTCY_PETITION
+          - LED_AUCTION
+          description: Notice, civil case, appeal, enforcement, bankruptcy petition, LED auction
+        lawsuitNo:
+          type: string
+          maxLength: 30
+          description: Lawsuit reference in LIT
+        blackCaseNo:
+          type: string
+          maxLength: 30
+          description: Court black case number
+        redCaseNo:
+          type: string
+          maxLength: 30
+          description: Court red case number after judgment
+        courtName:
+          type: string
+          maxLength: 120
+          description: Court
+        claimAmount:
+          type: number
+          description: Amount sued for, baht
+        filedDate:
+          type: string
+          format: date
+          description: Date filed
+        judgmentDate:
+          type: string
+          format: date
+          description: Date of judgment
+        judgmentAmount:
+          type: number
+          description: Amount awarded, baht
+        litStatus:
+          type: string
+          maxLength: 200
+          description: Latest status text in LIT
+        status:
+          type: string
+          maxLength: 15
+          enum:
+          - OPEN
+          - FILED
+          - JUDGMENT
+          - ENFORCING
+          - CLOSED
+          - WITHDRAWN
+          description: Open, filed, judgment, enforcing, closed, withdrawn
+      required:
+      - id
+      - caseId
+      - actionType
+      - status
+    Hearing:
+      type: object
+      description: A court hearing on a legal action.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the hearing
+          readOnly: true
+        legalActionId:
+          type: string
+          format: uuid
+          description: The legal_action this record belongs to
+        hearingDate:
+          type: string
+          format: date-time
+          description: Hearing date
+        hearingType:
+          type: string
+          maxLength: 20
+          enum:
+          - FIRST_HEARING
+          - WITNESS
+          - JUDGMENT_READING
+          - MEDIATION
+          description: First hearing, witness, judgment reading, mediation
+        outcome:
+          type: string
+          maxLength: 20
+          enum:
+          - HELD
+          - ADJOURNED
+          - SETTLED
+          - JUDGMENT
+          description: Held, adjourned, settled, judgment
+        nextDate:
+          type: string
+          format: date-time
+          description: Next date set
+      required:
+      - id
+      - legalActionId
+      - hearingDate
+    LegalActionRequest:
+      type: object
+      properties:
+        actionType:
+          type: string
+          enum:
+          - NOTICE
+          - CIVIL_CASE
+          - APPEAL
+          - ENFORCEMENT
+          - BANKRUPTCY_PETITION
+          - LED_AUCTION
+        accountKeys:
+          type: array
+          items:
+            type: string
+            maxLength: 255
+          description: ACE account_key values (v_ace_account)
+    LegalActionUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - OPEN
+          - FILED
+          - JUDGMENT
+          - ENFORCING
+          - CLOSED
+          - WITHDRAWN
+        courtCaseNo:
+          type: string
+        judgmentDate:
+          type: string
+          format: date
+        judgmentAmount:
+          type: number
+    HearingRequest:
+      type: object
+      properties:
+        hearingDate:
+          type: string
+          format: date
+        court:
+          type: string
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        messageCode:
+          type: string
+        messageTh:
+          type: string
+        field:
+          type: string
+        traceId:
+          type: string

@@ -1,0 +1,1395 @@
+﻿Data dictionary
+"1392 fields in 123 entities. Every source field is resolved in the ACE mapping tab: 52 already in ACE, 80 added by RWB-ACE-001, 1 in an extension table."
+BR Field ID,Entity,Field,Data type,Physical type,Length,Mandatory,Default,List of values,Key,Refers to,Source system,Source field,Personal data,Meaning
+DF-CAS-001,recovery_case,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the case
+DF-CAS-002,recovery_case,case_no,TEXT,varchar(18),18,Yes,None,None,UK,None,Workbench,None,No,"Case number RW-YYYY-NNNNNN, issued at creation and never reused"
+DF-CAS-003,recovery_case,product_group,LOV,varchar(15),15,Yes,None,LOV-PRODUCT,None,None,Core bank (ALS) via COLLINS,Product_Category_Host,No,"Mortgage, hire purchase, SSME or unsecured"
+DF-CAS-004,recovery_case,primary_person_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_customer (business key; no foreign key),ACE,public.customer.primary_person_key,No,The borrower the case is opened for
+DF-CAS-005,recovery_case,status,LOV,varchar(20),20,Yes,NEW,LOV-CASE-STATUS,None,None,Workbench,None,No,"Case status: new, assigned, in progress, waiting customer, waiting partner, waiting approval, on hold, closed"
+DF-CAS-006,recovery_case,stage_code,LOV,varchar(20),20,No,None,LOV-STAGE,None,None,Workbench,None,No,The stage the case is on
+DF-CAS-007,recovery_case,route_state,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,"The routing state from the rule set, for example FIRM_INSTRUCTED"
+DF-CAS-008,recovery_case,route_code,LOV,varchar(4),4,No,None,LOV-ROUTE,None,None,Workbench,None,No,The approved route R1 to R8
+DF-CAS-009,recovery_case,owner_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,The case owner
+DF-CAS-010,recovery_case,queue_id,CROSS_REF,uuid,,No,None,None,FK,queue,Workbench,None,No,The queue the case is in
+DF-CAS-011,recovery_case,team_code,LOV,varchar(20),20,No,None,LOV-TEAM,None,None,Workbench,None,No,"The owning team, used by scope rules"
+DF-CAS-012,recovery_case,region_code,LOV,varchar(10),10,No,None,LOV-REGION,None,None,Workbench,None,No,"The owning region, used by scope rules"
+DF-CAS-013,recovery_case,entry_date,DATE,date,,Yes,None,None,None,None,Workbench,None,No,The date the case entered recovery
+DF-CAS-014,recovery_case,dpd_at_entry,NUMBER,integer,,Yes,None,None,None,None,Core bank (ALS) via COLLINS,DELAY_DAYS,No,Days past due on the entry date
+DF-CAS-015,recovery_case,exposure_band,LOV,varchar(10),10,No,None,LOV-EXPOSURE,None,None,Workbench,None,No,Exposure band set from the outstanding balance at entry
+DF-CAS-016,recovery_case,total_outstanding_at_entry,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,Core bank (ALS) via COLLINS,TOTAL_BALANCE,No,"Total outstanding across linked accounts at entry, in baht"
+DF-CAS-017,recovery_case,prescription_date,DATE,date,,No,None,None,None,None,Workbench,None,No,The earliest date a legal claim on the case expires
+DF-CAS-018,recovery_case,stage_clock_start,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,"When the current state started, for the service level"
+DF-CAS-019,recovery_case,deviation_open,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True while any deviation X1 to X7 is open
+DF-CAS-020,recovery_case,legal_hold,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True while a legal hold stops normal routing
+DF-CAS-021,recovery_case,rule_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,The rule version the current state was entered under
+DF-CAS-022,recovery_case,closed_date,DATE,date,,No,None,None,None,None,Workbench,None,No,The date the case closed
+DF-CAS-023,recovery_case,closure_reason,LOV,varchar(20),20,No,None,LOV-CLOSURE,None,None,Workbench,None,No,"Cured, settled, realized, sold, written off, insurance settled, merged, canceled"
+DF-CAS-046,recovery_case,plan_ref,TEXT,varchar(30),30,No,None,None,None,None,ACE,None,No,Reference of the ACE restructure plan on the case
+DF-CAS-047,recovery_case,plan_status,LOV,varchar(10),10,No,None,LOV-PLAN-STATUS,None,None,ACE,None,No,"ACE plan status: created, approved, booked or broken"
+DF-CAS-048,recovery_case,plan_status_as_of,DATE,date,,No,None,None,None,None,ACE,None,No,Date of the plan status in ACE
+DF-CAS-049,recovery_case,next_action_text,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,"The next action, copied from action_text of the rule that moved the case"
+DF-CAS-050,recovery_case,next_action_owner_role,LOV,varchar(20),20,No,None,LOV-ROLE,None,None,Workbench,None,No,"Owner role of the next action, from owner_role of the rule"
+DF-CAS-051,recovery_case,next_action_due_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Due date from the rule's timer_spec or the service levels and timers table
+DF-CAS-052,recovery_case,next_action_rule_id,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Rule ID that set the next action
+DF-CAS-053,recovery_case,next_action_waiting,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,"True when the next action waits on a customer, party or partner"
+DF-CAS-054,recovery_case,last_allocation_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Business date of the last allocation run that decided the case
+DF-CAS-055,recovery_case,status_before_hold,LOV,varchar(20),20,No,None,LOV-CASE-STATUS,None,None,Workbench,None,No,"The case status when a legal hold was placed, restored when it is lifted"
+DF-CAS-024,case_account,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the case account link
+DF-CAS-025,case_account,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-CAS-026,case_account,account_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_account (business key; no foreign key),ACE,public.account.account_key,No,The loan_account this record belongs to
+DF-CAS-027,case_account,is_primary,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True for the account the case was opened on
+DF-CAS-028,case_account,linked_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the account joined the case
+DF-CAS-029,case_account,linked_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Date the account left the case
+DF-CAS-030,case_party,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the case party link
+DF-CAS-031,case_party,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-CAS-032,case_party,person_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_customer (business key; no foreign key),ACE,public.customer.person_key,No,The party this record belongs to
+DF-CAS-033,case_party,party_role,LOV,varchar(20),20,Yes,None,LOV-PARTY-ROLE,None,None,Workbench,None,No,"Borrower, co-borrower, guarantor, authorized signatory, heir"
+DF-CAS-034,case_party,role_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the role starts
+DF-CAS-035,case_party,role_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Date the role ends
+DF-CAS-036,deviation,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the deviation
+DF-CAS-037,deviation,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-CAS-038,deviation,deviation_code,LOV,varchar(3),3,Yes,None,LOV-DEVIATION,None,None,Workbench,None,No,X1 to X7
+DF-CAS-039,deviation,raised_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When it was raised
+DF-CAS-040,deviation,raised_by,LOV,varchar(20),20,Yes,None,LOV-RAISED-BY,None,None,Workbench,None,No,"Screening agent, rule, officer, customer contact"
+DF-CAS-041,deviation,paused_state,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,The routing state the case was in when paused
+DF-CAS-042,deviation,handler_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,The named handler
+DF-CAS-043,deviation,contact_stop,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when customer contact is stopped
+DF-CAS-044,deviation,cleared_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When it cleared
+DF-CAS-045,deviation,outcome,LOV,varchar(20),20,No,None,LOV-DEV-OUTCOME,None,None,Workbench,None,No,"Returned, re-routed, case ended"
+DF-WRK-001,queue,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the queue
+DF-WRK-002,queue,queue_code,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,Queue code
+DF-WRK-003,queue,queue_name,TEXT,varchar(100),100,Yes,None,None,None,None,Workbench,None,No,Queue name
+DF-WRK-004,queue,team_code,LOV,varchar(20),20,Yes,None,LOV-TEAM,None,None,Workbench,None,No,Team the queue belongs to
+DF-WRK-005,queue,role_code,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Role that works the queue
+DF-WRK-006,queue,assignment_method,LOV,varchar(20),20,Yes,ROUND_ROBIN,LOV-ASSIGN,None,None,Workbench,None,No,"Round robin, lowest load, named owner, skill"
+DF-WRK-007,queue,capacity_cap,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Most open cases one person may hold in the queue
+DF-WRK-008,queue,overflow_queue_id,CROSS_REF,uuid,,No,None,None,FK,queue,Workbench,None,No,Queue that receives overflow
+DF-WRK-037,queue,rr_cursor_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,The member last given a case by round robin in the queue
+DF-WRK-038,queue,table_version,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,The QUEUE reference version applied to the row
+DF-WRK-009,assignment,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the assignment
+DF-WRK-010,assignment,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-WRK-011,assignment,task_id,CROSS_REF,uuid,,No,None,None,FK,task,Workbench,None,No,The task this record belongs to
+DF-WRK-012,assignment,assignee_user_id,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,The person or service identity assigned
+DF-WRK-013,assignment,assigned_at,DATE,timestamptz,,Yes,now(),None,None,None,Workbench,None,No,When assigned
+DF-WRK-014,assignment,ended_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the assignment ended
+DF-WRK-015,assignment,reason,LOV,varchar(20),20,Yes,None,LOV-ASSIGN-REASON,None,None,Workbench,None,No,"Allocation, transfer, rebalance, manual, escalation"
+DF-WRK-016,assignment,rule_id,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,The rule that made the assignment
+DF-WRK-039,assignment,queue_id,CROSS_REF,uuid,,No,None,None,FK,queue,Workbench,None,No,The queue the assignment placed the case in
+DF-WRK-040,assignment,transfer_reason_code,LOV,varchar(20),20,No,None,LOV-TRANSFER-REASON,None,None,Workbench,None,No,Coded reason for a manual transfer or move
+DF-WRK-017,task,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the task
+DF-WRK-018,task,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-WRK-019,task,task_code,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,"The task in the case model, for example VERIFY_PACK"
+DF-WRK-020,task,element_type,LOV,varchar(20),20,Yes,None,LOV-ELEMENT,None,None,Workbench,None,No,"Human, customer, partner or decision task, milestone, event listener"
+DF-WRK-021,task,discretion,LOV,varchar(15),15,Yes,None,LOV-DISCRETION,None,None,Workbench,None,No,"Automatic, discretionary, required"
+DF-WRK-022,task,status,LOV,varchar(15),15,Yes,OPEN,LOV-TASK-STATUS,None,None,Workbench,None,No,"Open, in progress, done, canceled"
+DF-WRK-023,task,owner_role,LOV,varchar(20),20,No,None,LOV-ROLE,None,None,Workbench,None,No,Role that owns the task
+DF-WRK-024,task,due_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the task is due
+DF-WRK-025,task,completed_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When it completed
+DF-WRK-026,task,outcome_code,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,The event the task produced
+DF-WRK-027,timer,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the timer
+DF-WRK-028,timer,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-WRK-029,timer,task_id,CROSS_REF,uuid,,No,None,None,FK,task,Workbench,None,No,The task this record belongs to
+DF-WRK-030,timer,timer_type,LOV,varchar(20),20,Yes,None,LOV-TIMER,None,None,Workbench,None,No,"Service level, notice period, cure period, prescription, hearing deadline, offer validity, holding age, claim deadline"
+DF-WRK-031,timer,started_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When it started
+DF-WRK-032,timer,expires_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When it expires
+DF-WRK-033,timer,warn_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the warning is raised
+DF-WRK-034,timer,paused,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True while paused by a deviation. A prescription timer never pauses
+DF-WRK-035,timer,status,LOV,varchar(15),15,Yes,RUNNING,LOV-TIMER-STATUS,None,None,Workbench,None,No,"Running, paused, expired, stopped"
+DF-WRK-036,timer,escalation_level,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,How many times it has escalated
+DF-WRK-041,timer,warned_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,"When the warning was sent, so it is sent once"
+DF-WRK-042,timer,treatment_id,CROSS_REF,uuid,,No,None,None,FK,treatment,Workbench,None,No,The treatment a plan timer belongs to
+DF-WRK-043,timer,escalated_to_role,LOV,varchar(20),20,No,None,LOV-ROLE,None,None,Workbench,None,No,Role the breach was last escalated to
+DF-WRK-044,timer,escalated_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the timer last escalated
+DF-TRT-001,treatment,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the treatment
+DF-TRT-002,treatment,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-TRT-003,treatment,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,The decision that approved it
+DF-TRT-004,treatment,treatment_type,LOV,varchar(20),20,Yes,None,LOV-TREATMENT,None,None,Workbench,None,No,"Restructure, settlement, deed in lieu, buy-back, guarantee claim, repossession, auction, debt sale, write-off, RAMC transfer, rental"
+DF-TRT-005,treatment,proposed_by,LOV,varchar(10),10,Yes,None,LOV-PROPOSER,None,None,Workbench,None,No,"Agent, rule, person"
+DF-TRT-006,treatment,proposed_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When proposed
+DF-TRT-007,treatment,offer_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Amount offered or agreed, baht"
+DF-TRT-008,treatment,haircut_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Amount forgiven, baht"
+DF-TRT-009,treatment,installments,NUMBER,integer,,No,None,None,None,None,ACE,None,No,Number of installments in a plan
+DF-TRT-010,treatment,valid_until,DATE,date,,No,None,None,None,None,Workbench,None,No,Offer validity
+DF-TRT-011,treatment,approval_level,LOV,varchar(4),4,No,None,LOV-APPROVAL-LEVEL,None,None,Workbench,None,No,Approval level that approved it
+DF-TRT-012,treatment,booked_at,DATE,timestamptz,,No,None,None,None,None,Core bank (ALS) via COLLINS,None,No,When booked in the core
+DF-TRT-013,treatment,outcome,LOV,varchar(12),12,No,None,LOV-TRT-OUTCOME,None,None,Workbench,None,No,"Kept, broken, completed, canceled, declined"
+DF-TRT-014,treatment,outcome_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the outcome was recorded
+DF-TRT-027,treatment,interest_rate,NUMBER,"numeric(7,4)","7,4",No,None,None,None,None,Workbench,None,No,"Approved interest rate of the plan, percent"
+DF-TRT-028,treatment,booking_difference,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Each term that differs between approval and booking: term, approved, booked, business date"
+DF-TRT-029,treatment,first_due_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Date the first installment is due
+DF-TRT-030,treatment,signature_status,LOV,varchar(12),12,No,None,LOV-TRT-SIGNATURE,None,None,Workbench,None,No,"Pending, signed or not signed, read by the routing rules"
+DF-TRT-031,treatment,installment_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Amount due per plan installment, baht"
+DF-TRT-032,treatment,installments_paid,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Installments matched so far
+DF-TRT-033,treatment,installment_shortfall,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Shortfall left on the plan by a partial payment, baht"
+DF-TRT-015,guarantee_claim,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the guarantee claim
+DF-TRT-016,guarantee_claim,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-TRT-017,guarantee_claim,claim_type,LOV,varchar(25),25,Yes,None,LOV-CLAIM-TYPE,None,None,Workbench,None,No,"TCG, credit life insurance, mortgage insurance, collateral insurance"
+DF-TRT-018,guarantee_claim,claim_deadline,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Last date the claim can be filed
+DF-TRT-019,guarantee_claim,claimed_amount,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,Workbench,None,No,"Amount claimed, baht"
+DF-TRT-020,guarantee_claim,filed_at,DATE,date,,No,None,None,None,None,Workbench,None,No,Date filed
+DF-TRT-021,guarantee_claim,paid_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Amount paid, baht"
+DF-TRT-022,guarantee_claim,status,LOV,varchar(12),12,Yes,PREPARING,LOV-CLAIM-STATUS,None,None,Workbench,None,No,"Preparing, filed, defect, paid, rejected"
+DF-LEG-001,legal_action,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the legal action
+DF-LEG-002,legal_action,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-LEG-003,legal_action,law_firm_id,CROSS_REF,uuid,,No,None,None,FK,partner,Workbench,None,No,The law firm instructed
+DF-LEG-004,legal_action,action_type,LOV,varchar(20),20,Yes,None,LOV-LEGAL-TYPE,None,None,Workbench,None,No,"Notice, civil case, appeal, enforcement, bankruptcy petition, LED auction"
+DF-LEG-005,legal_action,lawsuit_no,TEXT,varchar(30),30,No,None,None,None,None,LIT,LAWSUIT_NO / LAWSUIT_RUN,No,Lawsuit reference in LIT
+DF-LEG-006,legal_action,black_case_no,TEXT,varchar(30),30,No,None,None,None,None,LIT,เลขที่คดีดำ,No,Court black case number
+DF-LEG-007,legal_action,red_case_no,TEXT,varchar(30),30,No,None,None,None,None,LIT,None,No,Court red case number after judgment
+DF-LEG-008,legal_action,court_name,TEXT,varchar(120),120,No,None,None,None,None,LIT,NCOURT,No,Court
+DF-LEG-009,legal_action,claim_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,LIT,AAMT_SUIT,No,"Amount sued for, baht"
+DF-LEG-010,legal_action,filed_date,DATE,date,,No,None,None,None,None,LIT,None,No,Date filed
+DF-LEG-011,legal_action,judgment_date,DATE,date,,No,None,None,None,None,LIT,Judgment date,No,Date of judgment
+DF-LEG-012,legal_action,judgment_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,LIT,None,No,"Amount awarded, baht"
+DF-LEG-013,legal_action,lit_status,TEXT,varchar(200),200,No,None,None,None,None,LIT via COLLINS,STATE_RES_NAME,No,Latest status text in LIT
+DF-LEG-014,legal_action,status,LOV,varchar(15),15,Yes,OPEN,LOV-LEGAL-STATUS,None,None,Workbench,None,No,"Open, filed, judgment, enforcing, closed, withdrawn"
+DF-LEG-015,notice,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the notice
+DF-LEG-016,notice,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-LEG-017,notice,document_id,CROSS_REF,uuid,,No,None,None,FK,document,Workbench,None,No,The generated notice
+DF-LEG-018,notice,notice_type,LOV,varchar(25),25,Yes,None,LOV-NOTICE,None,None,Workbench,None,No,"Demand, recall, statutory sale notice, guarantor notice"
+DF-LEG-019,notice,sent_date,DATE,date,,No,None,None,None,None,WIN,DDMMYYYY,No,Date sent
+DF-LEG-020,notice,barcode,TEXT,varchar(40),40,No,None,None,None,None,WIN,Barcode,No,Registered mail barcode
+DF-LEG-021,notice,callback_date,DATE,date,,No,None,None,None,None,WIN,DDMMYYYY_callBack,No,Date the proof of delivery came back
+DF-LEG-022,notice,delivery_status,LOV,varchar(15),15,No,None,LOV-DELIVERY,None,None,WIN,None,No,"Delivered, refused, undeliverable, pending"
+DF-LEG-023,notice,sent_type,LOV,varchar(10),10,No,None,LOV-SENT-TYPE,None,None,WIN,Sent Type,No,Before NPL or NPL
+DF-LEG-030,notice,person_key,TEXT,varchar(255),255,No,None,None,FK,v_ace_customer (business key; no foreign key),ACE,public.customer.person_key,No,Party the notice is addressed to
+DF-LEG-031,notice,template_id,CROSS_REF,uuid,,No,None,None,FK,template,Workbench,None,No,Template version the notice was generated from
+DF-LEG-032,notice,hold_reason,TEXT,varchar(30),30,No,None,None,None,None,Workbench,None,No,"Why the notice is held: missing merge field, TEMPLATE_WITHDRAWN, CONTACT_STOP_Xn, LEGAL_HOLD"
+DF-LEG-033,notice,dispatch_file_id,CROSS_REF,uuid,,No,None,None,FK,outbound_item,Workbench,None,No,WIN file the notice was last written to
+DF-LEG-034,notice,dispatch_attempts,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Number of WIN files the notice has been sent in without acknowledgment
+DF-LEG-024,hearing,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the hearing
+DF-LEG-025,hearing,legal_action_id,CROSS_REF,uuid,,Yes,None,None,FK,legal_action,Workbench,None,No,The legal_action this record belongs to
+DF-LEG-026,hearing,hearing_date,DATE,timestamptz,,Yes,None,None,None,None,LIT,None,No,Hearing date
+DF-LEG-027,hearing,hearing_type,LOV,varchar(20),20,No,None,LOV-HEARING,None,None,LIT,None,No,"First hearing, witness, judgment reading, mediation"
+DF-LEG-028,hearing,outcome,LOV,varchar(20),20,No,None,LOV-HEARING-OUTCOME,None,None,Workbench,None,No,"Held, adjourned, settled, judgment"
+DF-LEG-029,hearing,next_date,DATE,timestamptz,,No,None,None,None,None,LIT,None,No,Next date set
+DF-PRT-001,partner,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the partner
+DF-PRT-002,partner,partner_code,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,OACode,No,Partner code
+DF-PRT-003,partner,partner_name,TEXT,varchar(160),160,Yes,None,None,None,None,Workbench,REPOSS_NAME / Investor,No,Registered name
+DF-PRT-004,partner,partner_type,LOV,varchar(15),15,Yes,None,LOV-PARTNER-TYPE,None,None,Workbench,None,No,"Agency, law firm, valuer, auction vendor, broker, debt buyer, AMC, RAMC"
+DF-PRT-005,partner,panel_status,LOV,varchar(12),12,Yes,ACTIVE,LOV-PANEL,None,None,Workbench,None,No,"Active, on notice, suspended, exited"
+DF-PRT-006,partner,contract_end,DATE,date,,No,None,None,None,None,Workbench,None,No,Contract end date
+DF-PRT-007,partner,score,NUMBER,"numeric(5,2)","5,2",No,None,None,None,None,Workbench,None,No,Latest scorecard result
+DF-PRT-008,partner_instruction,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the partner instruction
+DF-PRT-009,partner_instruction,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-PRT-010,partner_instruction,partner_id,CROSS_REF,uuid,,Yes,None,None,FK,partner,Workbench,None,No,The partner this record belongs to
+DF-PRT-011,partner_instruction,instruction_type,LOV,varchar(20),20,Yes,None,LOV-INSTRUCTION,None,None,Workbench,None,No,"Collect, file suit, enforce, appraise, repossess, list, sell"
+DF-PRT-012,partner_instruction,instructed_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When instructed
+DF-PRT-013,partner_instruction,due_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the result is due
+DF-PRT-014,partner_instruction,status,LOV,varchar(12),12,Yes,SENT,LOV-INSTR-STATUS,None,None,Workbench,None,No,"Sent, accepted, declined, in progress, done, recalled"
+DF-PRT-015,partner_instruction,result_code,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Result reported by the partner
+DF-PRT-016,partner_instruction,fee_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Fee payable, baht"
+DF-SAL-001,listing,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the listing
+DF-SAL-002,listing,asset_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_asset (business key; no foreign key),ACE,public.asset.asset_key,No,The asset this record belongs to
+DF-SAL-003,listing,sale_channel,LOV,varchar(15),15,Yes,None,LOV-SALE-CHANNEL,None,None,Workbench,Sale By,No,"Dutch auction, broker, direct, LED auction, RAMC"
+DF-SAL-004,listing,start_price,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,Workbench,None,No,"Start price, baht"
+DF-SAL-005,listing,floor_price,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,Workbench,None,No,"Floor price approved, baht"
+DF-SAL-006,listing,round_no,NUMBER,integer,,Yes,1,None,None,None,Workbench,None,No,Current price round
+DF-SAL-007,listing,listed_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When listed
+DF-SAL-008,listing,status,LOV,varchar(12),12,Yes,DRAFT,LOV-LISTING,None,None,Workbench,None,No,"Draft, live, under offer, sold, withdrawn"
+DF-SAL-009,asset_sale,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the asset sale
+DF-SAL-010,asset_sale,asset_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_asset (business key; no foreign key),ACE,public.asset.asset_key,No,The asset this record belongs to
+DF-SAL-011,asset_sale,listing_id,CROSS_REF,uuid,,No,None,None,FK,listing,Workbench,None,No,The listing this record belongs to
+DF-SAL-012,asset_sale,contract_date,DATE,date,,Yes,None,None,None,None,AMIS,Contract Date,No,Sale contract date
+DF-SAL-013,asset_sale,sale_date,DATE,date,,Yes,None,None,None,None,AMIS,Sale Date,No,Sale date
+DF-SAL-014,asset_sale,sale_price,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,AMIS,Sale Price,No,"Sale price, baht"
+DF-SAL-015,asset_sale,transfer_fee,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,AMIS,Sale Transfer Fee,No,"Transfer fee, baht"
+DF-SAL-016,asset_sale,specific_business_tax,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,AMIS,Specific Business Tax,No,"Specific business tax, baht"
+DF-SAL-017,asset_sale,corporate_income_tax,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,AMIS,Corporate Income Tax,No,"Corporate income tax, baht"
+DF-SAL-018,asset_sale,gain_loss,FORMULA,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,Sale price less book value and costs
+DF-SAL-019,asset_sale,incentive_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,AMIS,Incentive Amount,No,"Incentive paid on the sale, baht"
+DF-SAL-020,debt_sale_lot,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the debt sale lot
+DF-SAL-021,debt_sale_lot,lot_no,TEXT,varchar(15),15,Yes,None,None,UK,None,Workbench,Lot,No,"Lot number, for example 1/2024"
+DF-SAL-022,debt_sale_lot,cut_off_date,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Balance cut-off date
+DF-SAL-023,debt_sale_lot,segment,LOV,varchar(20),20,Yes,None,LOV-SEGMENT,None,None,Workbench,Segment,No,Segment of the lot
+DF-SAL-024,debt_sale_lot,reserve_price,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Reserve price, baht"
+DF-SAL-025,debt_sale_lot,buyer_partner_id,CROSS_REF,uuid,,No,None,None,FK,partner,Workbench,Investor,No,Winning buyer
+DF-SAL-026,debt_sale_lot,buyer_class,LOV,varchar(10),10,No,None,LOV-BUYER-CLASS,None,None,Workbench,AMC/NON AMC,No,AMC or non-AMC
+DF-SAL-027,debt_sale_lot,signing_date,DATE,date,,No,None,None,None,None,Workbench,SigningYear,No,Date the sale was signed
+DF-SAL-028,debt_sale_lot,approval_authority,TEXT,varchar(60),60,No,None,None,None,None,Workbench,Debt Sale Approval Authority,No,Authority that approved the sale
+DF-SAL-029,debt_sale_lot,payment_terms,TEXT,varchar(400),400,No,None,None,None,None,Workbench,Payment Terms and Conditions,No,Deposit and payment terms
+DF-SAL-030,debt_sale_lot,status,LOV,varchar(12),12,Yes,BUILDING,LOV-LOT-STATUS,None,None,Workbench,None,No,"Building, offered, awarded, transferred, closed"
+DF-SAL-031,debt_sale_account,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the debt sale account
+DF-SAL-032,debt_sale_account,lot_id,CROSS_REF,uuid,,Yes,None,None,FK,debt_sale_lot,Workbench,None,No,The debt_sale_lot this record belongs to
+DF-SAL-033,debt_sale_account,account_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_account (business key; no foreign key),ACE,public.account.account_key,No,The loan_account this record belongs to
+DF-SAL-034,debt_sale_account,borrower_code,TEXT,varchar(20),20,No,None,None,None,None,Workbench,BorrCode,No,Borrower code
+DF-SAL-035,debt_sale_account,outstanding,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,Core bank (ALS) via COLLINS,OS By Acct,No,"Outstanding at cut-off, baht"
+DF-SAL-036,debt_sale_account,selling_price,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,SellingPriceByAcct,No,"Price allocated to the account, baht"
+DF-SAL-037,debt_sale_account,put_back_status,LOV,varchar(12),12,No,None,LOV-PUTBACK,None,None,Workbench,None,No,"None, claimed, accepted, rejected"
+DF-INT-001,interaction,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the interaction
+DF-INT-002,interaction,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-INT-003,interaction,person_key,TEXT,varchar(255),255,No,None,None,FK,v_ace_customer (business key; no foreign key),ACE,public.customer.person_key,No,The party this record belongs to
+DF-INT-004,interaction,occurred_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When it happened
+DF-INT-005,interaction,channel,LOV,varchar(15),15,No,None,LOV-CHANNEL,None,None,Workbench,None,No,"Call, visit, SMS, LINE, email, letter, portal, branch; empty for Workbench events such as CASE_CREATED"
+DF-INT-006,interaction,direction,LOV,varchar(8),8,No,None,LOV-DIRECTION,None,None,Workbench,None,No,Inbound or outbound; empty for Workbench events such as CASE_CREATED
+DF-INT-007,interaction,action_code,LOV,varchar(10),10,No,None,LOV-ACTION-CODE,None,None,EFS via COLLINS,Actioncode ID,No,Action code
+DF-INT-008,interaction,contact_result,LOV,varchar(20),20,No,None,LOV-CONTACT-RESULT,None,None,EFS via COLLINS,Call Result,No,"Right party, third party, no answer, wrong number"
+DF-INT-009,interaction,promise_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Amount promised, baht"
+DF-INT-010,interaction,promise_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Date promised
+DF-INT-011,interaction,summary,TEXT,varchar(2000),2000,No,None,None,None,None,Workbench,None,Yes,Summary of what was said
+DF-INT-012,interaction,conduct_check,LOV,varchar(15),15,No,None,LOV-CONDUCT,None,None,Workbench,None,No,"Passed, blocked, not applicable"
+DF-INT-013,interaction,source_system,LOV,varchar(10),10,Yes,WORKBENCH,LOV-SOURCE,None,None,Workbench,None,No,"EFS for collections history, or the Workbench"
+DF-INT-014,interaction,event_code,LOV,varchar(40),40,No,None,LOV-LEDGER-EVENT,None,None,Workbench,None,No,Ledger event
+DF-INT-015,interaction,actor_type,LOV,varchar(10),10,No,None,LOV-ACTOR-TYPE,None,None,Workbench,None,No,"User, service or partner"
+DF-INT-016,interaction,actor_ref,TEXT,varchar(64),64,No,None,None,None,None,Workbench,None,No,User ID or service identity code that acted
+DF-INT-017,interaction,source_ref,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,"Producing module and event, or the interface, for example EV-02 CaseAllocated or INT-07"
+DF-INT-018,interaction,idempotency_key,TEXT,varchar(120),120,No,None,None,UK,None,Workbench,None,No,Unique key of the event or request; repeats are rejected; unique on its own
+DF-INT-019,interaction,case_seq,NUMBER,bigint,,No,None,None,None,None,Workbench,None,No,Gap-free sequence of the entry within its case; unique with case_id
+DF-INT-020,interaction,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,"Decision log entry the entry records, for DECISION_TAKEN"
+DF-INT-021,interaction,corrects_entry_id,CROSS_REF,uuid,,No,None,None,FK,interaction,Workbench,None,No,Entry this entry corrects
+DF-INT-022,interaction,contact_key,TEXT,varchar(255),255,No,None,None,FK,v_ace_contact (business key; no foreign key),ACE,public.contact.contact_key,No,The contact point reached; the number or address stays masked in contact_point
+DF-INT-023,interaction,from_holder_ref,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,Who held the case before a hand-over: USER:<user id> or PARTNER:<partner code>
+DF-INT-024,interaction,to_holder_ref,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,Who holds the case after a hand-over: USER:<user id> or PARTNER:<partner code>
+DF-INT-025,interaction,treatment_id,CROSS_REF,uuid,,No,None,None,FK,treatment,Workbench,None,No,"The treatment offered, for an OFFER entry"
+DF-INT-026,interaction,proceeds_id,CROSS_REF,uuid,,No,None,None,FK,proceeds,Workbench,None,No,"The proceeds matched, for a PAYMENT entry"
+DF-INT-027,interaction,retention_class,LOV,varchar(10),10,No,None,LOV-RETENTION,None,None,Workbench,None,No,"Retention class of the entry, set by entry type"
+DF-INT-028,interaction,delivery_status,LOV,varchar(15),15,No,None,LOV-SEND-STATUS,None,None,Workbench,None,No,"Delivery state of an outbound SMS, LINE message or letter"
+DF-INT-029,interaction,external_ref,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,"Reference returned by NSS, LINE OA or WIN"
+DF-DOC-001,document,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the document
+DF-DOC-002,document,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-DOC-003,document,person_key,TEXT,varchar(255),255,No,None,None,FK,v_ace_customer (business key; no foreign key),ACE,public.customer.person_key,No,The party this record belongs to
+DF-DOC-004,document,document_type,LOV,varchar(30),30,Yes,None,LOV-DOC-TYPE,None,None,Workbench,None,No,Type from the document checklist
+DF-DOC-005,document,source,LOV,varchar(12),12,Yes,None,LOV-DOC-SOURCE,None,None,Workbench,None,No,"Scan, upload, generated, partner, email"
+DF-DOC-006,document,storage_ref,ATTACHMENT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Reference to the stored file
+DF-DOC-007,document,classification_confidence,NUMBER,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,OCR classification confidence
+DF-DOC-008,document,review_status,LOV,varchar(12),12,Yes,NOT_NEEDED,LOV-REVIEW,None,None,Workbench,None,No,"Not needed, pending, confirmed, corrected"
+DF-DOC-009,document,retention_class,LOV,varchar(10),10,Yes,None,LOV-RETENTION,None,None,Workbench,None,No,Retention class
+DF-DOC-010,document,write_once,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True for legal documents held write-once
+DF-DOC-011,document,doc_version,NUMBER,integer,,Yes,1,None,None,None,Workbench,None,No,Document version
+DF-DOC-025,document,previous_version_id,CROSS_REF,uuid,,No,None,None,FK,document,Workbench,None,No,The document row this version supersedes; empty for version 1
+DF-DOC-026,document,content_sha256,TEXT,char(64),64,Yes,None,None,None,None,Workbench,None,No,"SHA-256 of the stored file, for the duplicate check and the integrity check"
+DF-DOC-027,document,captured_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,Device time when the field app captured the file
+DF-DOC-028,document,capture_latitude,NUMBER,"numeric(9,6)","9,6",No,None,None,None,None,Workbench,None,Yes,GPS latitude at capture
+DF-DOC-029,document,capture_longitude,NUMBER,"numeric(9,6)","9,6",No,None,None,None,None,Workbench,None,Yes,GPS longitude at capture
+DF-DOC-030,document,client_file_id,TEXT,varchar(64),64,No,None,None,None,None,Workbench,None,No,"Field app file ID, unique per case, for repeat syncs"
+DF-DOC-031,document,capture_kind,LOV,varchar(12),12,No,None,LOV-CAPTURE-KIND,None,None,Workbench,None,No,"Photo, bill or checklist"
+DF-DOC-032,document,template_id,CROSS_REF,uuid,,No,None,None,FK,template,Workbench,None,No,Template version a generated document was made from
+DF-DOC-033,document,treatment_id,CROSS_REF,uuid,,No,None,None,FK,treatment,Workbench,None,No,Treatment a generated document belongs to
+DF-DOC-012,document_field,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the document field
+DF-DOC-013,document_field,document_id,CROSS_REF,uuid,,Yes,None,None,FK,document,Workbench,None,No,The document this record belongs to
+DF-DOC-014,document_field,field_name,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Field name from the document type
+DF-DOC-015,document_field,field_value,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,Yes,"Value read, masked where personal"
+DF-DOC-016,document_field,confidence,NUMBER,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,Extraction confidence
+DF-DOC-017,document_field,confirmed_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who confirmed a low confidence value
+DF-DOC-034,document_field,extracted_value,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,Yes,"The value as first read by the extractor, kept when a person corrects field_value; masked by role"
+DF-DOC-035,document_field,extractor_version,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Extraction approach and model version that produced the value
+DF-DOC-018,document_custody,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the custody movement
+DF-DOC-019,document_custody,document_id,CROSS_REF,uuid,,Yes,None,None,FK,document,Workbench,None,No,The document this record belongs to
+DF-DOC-020,document_custody,moved_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When it moved
+DF-DOC-021,document_custody,from_location,LOV,varchar(20),20,Yes,None,LOV-CUSTODY,None,None,Workbench,None,No,"Vault, branch, post, lawyer, court, land office"
+DF-DOC-022,document_custody,to_location,LOV,varchar(20),20,Yes,None,LOV-CUSTODY,None,None,Workbench,None,No,Where it went
+DF-DOC-023,document_custody,held_by,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,Person or firm holding it
+DF-DOC-024,document_custody,due_back,DATE,date,,No,None,None,None,None,Workbench,None,No,When it is due back
+DF-DEC-001,decision_log_entry,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the decision log entry
+DF-DEC-002,decision_log_entry,case_id,CROSS_REF,uuid,,No,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to; empty only for access events (decision code AC-...) with no case
+DF-DEC-003,decision_log_entry,decision_code,LOV,varchar(8),8,Yes,None,LOV-DECISION,None,None,Workbench,None,No,"D5.1 to D9.3, X1 to X7, or an access event"
+DF-DEC-004,decision_log_entry,rule_id,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Rule that fired
+DF-DEC-005,decision_log_entry,rule_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Rule version
+DF-DEC-006,decision_log_entry,model_version,TEXT,varchar(40),40,No,None,None,None,None,COLLINS,None,No,Model version used
+DF-DEC-007,decision_log_entry,agent_version,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Agent and prompt version used
+DF-DEC-008,decision_log_entry,inputs_ref,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,"Reference to the inputs snapshot, with the freshness of each input"
+DF-DEC-009,decision_log_entry,recommendation,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Option, reasons, confidence and alternatives"
+DF-DEC-010,decision_log_entry,approver_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who approved
+DF-DEC-011,decision_log_entry,approval_level,LOV,varchar(4),4,No,None,LOV-APPROVAL-LEVEL,None,None,Workbench,None,No,Approval level applied
+DF-DEC-012,decision_log_entry,final_call,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,The option decided
+DF-DEC-013,decision_log_entry,override_reason,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,Reason when the person did not follow the recommendation
+DF-DEC-014,decision_log_entry,actions,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Target system, result and timestamps of each action"
+DF-DEC-015,decision_log_entry,outcome,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Cash, cure, loss and time, written when known"
+DF-DEC-016,decision_log_entry,decided_at,DATE,timestamptz,,Yes,now(),None,None,None,Workbench,None,No,When decided
+DF-DEC-017,decision_log_entry,prev_hash,TEXT,char(64),64,Yes,None,None,None,None,Workbench,None,No,Hash of the previous entry
+DF-DEC-018,decision_log_entry,entry_hash,TEXT,char(64),64,Yes,None,None,UK,None,Workbench,None,No,Hash of this entry
+DF-DEC-028,decision_log_entry,chain_seq,NUMBER,bigint,,Yes,None,None,UK,None,Workbench,None,No,Position of the entry in the hash chain; prev_hash is the entry_hash of chain_seq minus 1; unique on its own
+DF-DEC-029,decision_log_entry,corrects_entry_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,The entry this entry corrects
+DF-DEC-030,decision_log_entry,actor_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,"The person or service identity whose action, preparation or access the entry records"
+DF-DEC-031,decision_log_entry,idempotency_key,TEXT,varchar(80),80,No,None,None,UK,None,Workbench,None,No,Event ID of the calling module; a repeat returns the first entry; unique on its own
+DF-FIN-001,proceeds,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the proceeds
+DF-FIN-002,proceeds,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-FIN-003,proceeds,treatment_id,CROSS_REF,uuid,,No,None,None,FK,treatment,Workbench,None,No,The treatment this record belongs to
+DF-FIN-004,proceeds,payment_code,TEXT,varchar(255),255,No,None,None,FK,v_ace_payment (business key; no foreign key),ACE,public.payment.payment_code,No,The account_payment this record belongs to
+DF-FIN-005,proceeds,source,LOV,varchar(12),12,Yes,None,LOV-PROCEEDS-SRC,None,None,Workbench,None,No,"Customer, LED, auction, buyer, agency, insurer, guarantor"
+DF-FIN-006,proceeds,amount,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,Core bank (ALS) via COLLINS,Payment_Amount,No,"Amount, baht"
+DF-FIN-007,proceeds,received_date,DATE,date,,Yes,None,None,None,None,Core bank (ALS) via COLLINS,Payment_Date,No,Date received
+DF-FIN-008,proceeds,matched_to,LOV,varchar(15),15,Yes,UNMATCHED,LOV-MATCH,None,None,Workbench,None,No,"Installment, settlement, fee, sale proceeds, unmatched"
+DF-FIN-009,proceeds,posting_ref,TEXT,varchar(40),40,No,None,None,None,None,Core bank (ALS) via COLLINS,None,No,Posting reference in the core or GL
+DF-FIN-010,write_off,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the write-off
+DF-FIN-011,write_off,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The recovery_case this record belongs to
+DF-FIN-012,write_off,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,The decision_log_entry this record belongs to
+DF-FIN-013,write_off,amount,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,GL,AMT,No,"Amount written off, baht"
+DF-FIN-014,write_off,tax_criteria_met,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when the tax criteria are met
+DF-FIN-015,write_off,committee_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Committee approval date
+DF-FIN-016,write_off,posted_date,DATE,date,,No,None,None,None,None,GL,DATE,No,Posting date
+DF-FIN-017,write_off,responsibility_center,TEXT,varchar(10),10,No,None,None,None,None,GL,RC,No,Responsibility center
+DF-FIN-018,write_off,cost_center,TEXT,varchar(10),10,No,None,None,None,None,GL,OC,No,Operating cost center
+DF-FIN-019,write_off,gl_product,TEXT,varchar(10),10,No,None,None,None,None,GL,PRODUCT,No,GL product code
+DF-FIN-020,write_off,recovered_after,NUMBER,"numeric(18,2)","18,2",Yes,0,None,None,None,Workbench,None,No,"Recovered after charge-off to date, baht"
+DF-REF-274,rule_package,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the rule package
+DF-REF-275,rule_package,package_code,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,"Package code, for example PAYMENT_MATCH"
+DF-REF-276,rule_package,title,TEXT,varchar(200),200,Yes,None,None,None,None,Workbench,None,No,Package title shown to the rule author
+DF-REF-277,rule_package,owner_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,"Role that owns the package, RW-COE"
+DF-REF-278,rule_package,hit_policy,TEXT,varchar(10),10,Yes,FIRST,None,None,None,Workbench,None,No,"Hit policy, FIRST: exactly one row decides"
+DF-REF-279,rule_package_version,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the rule package version
+DF-REF-280,rule_package_version,package_id,CROSS_REF,uuid,,Yes,None,None,FK,rule_package,Workbench,None,No,The rule_package this version belongs to
+DF-REF-281,rule_package_version,version_label,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,"Version label, for example ALLOC-2026.12"
+DF-REF-282,rule_package_version,status,TEXT,varchar(20),20,Yes,LOADED,None,None,None,Workbench,None,No,"LOADED, APPROVED, IN_FORCE, SUPERSEDED, ROLLED_BACK or REFUSED"
+DF-REF-283,rule_package_version,source_blob_ref,TEXT,varchar(500),500,Yes,None,None,None,None,Workbench,None,No,Blob path of the uploaded XLS workbook
+DF-REF-284,rule_package_version,drl_source,TEXT,text,,Yes,None,None,None,None,Workbench,None,No,"DRL generated from the workbook, compiled to a KieBase"
+DF-REF-285,rule_package_version,checksum,TEXT,varchar(64),64,Yes,None,None,None,None,Workbench,None,No,SHA-256 of the workbook and the generated DRL
+DF-REF-286,rule_package_version,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version comes into force
+DF-REF-287,rule_package_version,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-REF-288,rule_package_version,author,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who loaded the version; never the approver
+DF-REF-289,rule_package_version,approver,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,RW-RISK approver of the version
+DF-REF-290,rule_package_version,loaded_at,DATE,timestamptz,,Yes,now(),None,None,None,Workbench,None,No,When the version was loaded
+DF-REF-291,rule_package_version,approved_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the version was approved
+DF-REF-292,rule_package_version,test_result,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,PASSED or FAILED from the scenario and dry run checks
+DF-REF-293,rule_package_version,dry_run_counts,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Counts of open cases each changed row would move, from the dry run"
+DF-REF-294,rule_package_version,rollback_of,CROSS_REF,uuid,,No,None,None,FK,rule_package_version,Workbench,None,No,The version this one rolls back to
+DF-REF-295,rule_package_version,change_checklist,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Request, impact, test result, approver, load, verify and rollback plan"
+DF-REF-001,rule_row,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the rule row
+DF-REF-002,rule_row,rule_id,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Rule ID, for example R-LIT-12"
+DF-REF-003,rule_row,rule_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,Version
+DF-REF-004,rule_row,route_set,LOV,varchar(15),15,Yes,None,LOV-ROUTE-SET,None,None,Workbench,None,No,Route set
+DF-REF-005,rule_row,from_state,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,From state
+DF-REF-006,rule_row,event_code,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Event
+DF-REF-007,rule_row,condition_expr,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,Condition
+DF-REF-008,rule_row,action_text,TEXT,varchar(1000),1000,Yes,None,None,None,None,Workbench,None,No,Action
+DF-REF-009,rule_row,to_state,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,To state
+DF-REF-010,rule_row,owner_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Owner of the next state
+DF-REF-011,rule_row,timer_spec,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,Timer
+DF-REF-012,rule_row,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Valid from
+DF-REF-013,rule_row,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Valid to
+DF-REF-014,rule_row,approved_by,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who approved the version
+DF-REF-015,rule_row,test_case_id,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,Test case that proves the rule
+DF-REF-052,rule_row,rule_table,LOV,varchar(15),15,No,None,LOV-RULE-TABLE,None,None,Workbench,None,No,The Epic 1 rule table a row belongs to
+DF-REF-053,rule_row,row_order,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Order in which rows of one rule table are evaluated; first match wins
+DF-REF-054,rule_row,target_queue_code,TEXT,varchar(30),30,No,None,None,None,None,Workbench,None,No,The queue an allocation or transfer row places the case in
+DF-REF-296,rule_row,package_version_id,CROSS_REF,uuid,,No,None,None,FK,rule_package_version,Workbench,None,No,The rule_package_version the row was parsed from
+DF-REF-297,rule_row,drools_rule_name,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,"Rule name in the DRL, the rule ID, for example ALLOC-031"
+DF-REF-298,rule_row,outputs,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Output columns of the decision-table row as JSON
+DF-REF-016,delegation_limit,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the delegation limit
+DF-REF-017,delegation_limit,decision_code,LOV,varchar(8),8,Yes,None,LOV-DECISION,None,None,Workbench,None,No,Decision the limit applies to
+DF-REF-018,delegation_limit,approval_level,LOV,varchar(4),4,Yes,None,LOV-APPROVAL-LEVEL,None,None,Workbench,None,No,Level 1 to 6 under Regulation กกค.540031
+DF-REF-019,delegation_limit,product_group,LOV,varchar(15),15,Yes,None,LOV-PRODUCT,None,None,Workbench,None,No,Product group
+DF-REF-020,delegation_limit,principal_limit,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Principal limit, baht; empty means no limit"
+DF-REF-021,delegation_limit,loss_pct_limit,NUMBER,"numeric(5,2)","5,2",No,None,None,None,None,Workbench,None,No,Loss limit as a percentage
+DF-REF-022,delegation_limit,min_price_pct_fmv,NUMBER,"numeric(5,2)","5,2",No,None,None,None,None,Workbench,None,No,Lowest sale price as a percentage of fair market value
+DF-REF-023,delegation_limit,holder_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Person holding the level
+DF-REF-024,delegation_limit,substitute_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Substitute when the holder is absent
+DF-REF-025,delegation_limit,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Valid from
+DF-REF-026,delegation_limit,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Valid to
+DF-REF-055,delegation_limit,limit_version,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,"Delegation version the row belongs to, for example DOA-2026.11"
+DF-REF-056,delegation_limit,regulation_item,TEXT,varchar(10),10,Yes,None,None,None,None,Workbench,None,No,"Item of Regulation กกค.540031, for example 2.1.1; one decision code covers several items"
+DF-REF-057,delegation_limit,applies_when,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,"Case condition that selects the row, WO_CRITERIA_MET or WO_CRITERIA_NOT_MET for item 2.1.10"
+DF-REF-058,delegation_limit,max_loss_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Maximum loss the level may approve, baht"
+DF-REF-059,delegation_limit,max_delay_count,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,"Most delays of legal action, seizure or auction the level may approve on a case"
+DF-REF-060,delegation_limit,min_price_pct_principal,NUMBER,"numeric(5,2)","5,2",No,None,None,None,None,Workbench,None,No,Lowest sale price as a percentage of principal outstanding
+DF-REF-061,delegation_limit,min_received_pct,NUMBER,"numeric(5,2)","5,2",No,None,None,None,None,Workbench,None,No,"Lowest amount received against the total debt, percent"
+DF-REF-062,delegation_limit,max_term_years,NUMBER,"numeric(4,1)","4,1",No,None,None,None,None,Workbench,None,No,"Longest lease term the level may approve, years"
+DF-REF-027,lov_value,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the list value
+DF-REF-028,lov_value,lov_code,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,"List code, for example LOV-ROUTE"
+DF-REF-029,lov_value,value_code,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,Value code
+DF-REF-030,lov_value,label_en,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,English label
+DF-REF-031,lov_value,label_th,TEXT,varchar(120),120,No,None,None,None,None,Workbench,None,No,Thai label
+DF-REF-032,lov_value,sort_order,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Display order
+DF-REF-033,lov_value,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Valid from
+DF-REF-034,role,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the role
+DF-REF-035,role,role_code,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Role code, for example RW-CASEOWN"
+DF-REF-036,role,role_name,TEXT,varchar(80),80,Yes,None,None,None,None,Workbench,None,No,Role name
+DF-REF-037,role,role_class,LOV,varchar(15),15,Yes,None,LOV-ROLE-CLASS,None,None,Workbench,None,No,"Bank user, partner user, non-human actor"
+DF-REF-038,role,default_scope,LOV,varchar(8),8,Yes,None,LOV-SCOPE,None,None,Workbench,None,No,"Own, team, region, all"
+DF-REF-040,permission,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the permission
+DF-REF-041,permission,role_id,CROSS_REF,uuid,,Yes,None,None,FK,role,Workbench,None,No,The role this record belongs to
+DF-REF-042,permission,capability_area,LOV,varchar(30),30,Yes,None,LOV-CAPABILITY,None,None,Workbench,None,No,One of the 14 capability areas
+DF-REF-043,permission,letters,TEXT,varchar(5),5,Yes,-,None,None,None,Workbench,None,No,"C, R, U, D and A, or a dash for none"
+DF-REF-044,permission,matrix_version,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,Permission matrix version
+DF-REF-045,template,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the template
+DF-REF-046,template,template_code,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,Template code
+DF-REF-047,template,template_version,NUMBER,integer,,Yes,1,None,UK,None,Workbench,None,No,"Version; unique with template_code, since a template holds several versions"
+DF-REF-048,template,language,LOV,varchar(2),2,Yes,TH,LOV-LANG,None,None,Workbench,None,No,Thai or English
+DF-REF-049,template,product_group,LOV,varchar(15),15,No,None,LOV-PRODUCT,None,None,Workbench,None,No,Product group it applies to
+DF-REF-050,template,body_ref,ATTACHMENT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Stored template body
+DF-REF-051,template,approved_by_legal,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True once Legal approves the wording
+DF-REF-063,template,approved_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Legal counsel who approved the version
+DF-REF-064,template,approved_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the version was approved
+DF-REF-065,template,valid_from,DATE,date,,No,None,None,None,None,Workbench,None,No,Date from which the approved version is current
+DF-REF-066,template,channel,LOV,varchar(15),15,No,None,LOV-CHANNEL,None,None,Workbench,None,No,"Channel the template is for: letter, SMS or LINE"
+DF-REF-067,template,notice_type,LOV,varchar(25),25,No,None,LOV-NOTICE,None,None,Workbench,None,No,Notice type for a notice template; empty for other documents
+DF-REF-068,template,signature_basis,LOV,varchar(20),20,No,None,LOV-SIGNATURE-BASIS,None,None,Workbench,None,No,How Legal allows the document to be signed
+DF-REF-069,template,merge_codes,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,The merge codes the template body uses
+DF-REF-070,data_product,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the data product
+DF-REF-071,data_product,product_code,LOV,varchar(25),25,Yes,None,LOV-DATA-PRODUCT,UK,None,Workbench,None,No,Data product code DP01 to DP14
+DF-REF-072,data_product,product_name,TEXT,varchar(80),80,Yes,None,None,None,None,Workbench,None,No,"Data product name, for example Account and arrears"
+DF-REF-073,data_product,definition,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Definition of the product
+DF-REF-074,data_product,system_of_record,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,The one system of record for the product
+DF-REF-075,data_product,owner_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,"Role of the owner, normally RW-DATASTEW"
+DF-REF-076,data_product,owner_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,"The named owner of the product; required by the catalog load, empty in the seed"
+DF-REF-077,data_product,refresh_cycle,LOV,varchar(10),10,Yes,None,LOV-REFRESH,None,None,Workbench,None,No,"Daily, weekly, monthly or on change"
+DF-REF-078,data_product,expected_by,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,"Time the load is expected by, for example 08:00 or MON 08:00"
+DF-REF-079,data_product,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the catalog version comes into force
+DF-REF-080,data_product_access,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the data product access row
+DF-REF-081,data_product_access,product_code,LOV,varchar(25),25,Yes,None,LOV-DATA-PRODUCT,UK,None,Workbench,None,No,Data product the row grants
+DF-REF-082,data_product_access,role_code,LOV,varchar(20),20,Yes,None,LOV-ROLE,UK,None,Workbench,None,No,Role the row applies to
+DF-REF-083,data_product_access,can_read,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when the role may read the product
+DF-REF-084,data_product_access,access_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Version of the access table, for example DPA-2026.11"
+DF-REF-085,data_product_access,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the row comes into force
+DF-REF-086,data_product_access,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Date the row ends
+DF-OPS-001,data_product_load,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the freshness stamp
+DF-OPS-002,data_product_load,product_code,LOV,varchar(25),25,Yes,None,LOV-DATA-PRODUCT,UK,None,Workbench,None,No,Data product loaded
+DF-OPS-003,data_product_load,source_system,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,Source system of the load
+DF-OPS-004,data_product_load,business_date,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Business date of the load
+DF-OPS-005,data_product_load,source_extracted_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,"When the source extract was taken, from the COLLINS control record or the file"
+DF-OPS-006,data_product_load,loaded_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the load committed in the Workbench
+DF-OPS-007,data_product_load,status,LOV,varchar(10),10,Yes,LOADED,LOV-FRESHNESS,None,None,Workbench,None,No,Loaded or stale
+DF-OPS-008,data_product_load,stale_flagged_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the product was flagged stale
+DF-OPS-009,data_product_load,duplicate_count,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Repeat stamps ignored for the same product and business date
+DF-OPS-010,data_contract,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the data contract
+DF-OPS-011,data_contract,contract_code,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Contract code per source system, for example DC-ALS"
+DF-OPS-012,data_contract,source_system,TEXT,varchar(80),80,Yes,None,None,None,None,Workbench,None,No,Source system
+DF-OPS-013,data_contract,interface_id,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,"Interfaces covered, for example INT-01, INT-02"
+DF-OPS-014,data_contract,contract_version,NUMBER,integer,,Yes,None,None,UK,None,Workbench,None,No,Contract version
+DF-OPS-015,data_contract,status,LOV,varchar(10),10,Yes,DRAFT,LOV-CONTRACT-STATUS,None,None,Workbench,None,No,"Draft, published or superseded"
+DF-OPS-016,data_contract,confirmed_by_role,TEXT,varchar(80),80,No,None,None,None,None,Workbench,None,No,"Role of the system owner who confirmed, for example ALS system owner"
+DF-OPS-017,data_contract,confirmed_on,DATE,date,,No,None,None,None,None,Workbench,None,No,Date of the confirmation
+DF-OPS-018,data_contract,confirmation_document_ref,ATTACHMENT,varchar(400),400,No,None,None,None,None,Workbench,None,No,Stored confirmation from the system owner
+DF-OPS-019,data_contract,published_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the contract was published
+DF-OPS-020,data_contract,published_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who published the contract
+DF-REF-087,sys_objects,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the registered object
+DF-REF-088,sys_objects,object_name,TEXT,varchar(60),60,Yes,None,None,UK,None,Workbench,None,No,Table name
+DF-REF-089,sys_objects,business_name,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,Business name of the object
+DF-REF-090,sys_objects,subject_area,TEXT,varchar(10),10,Yes,None,None,None,None,Workbench,None,No,Subject area code
+DF-REF-091,sys_objects,data_product,TEXT,varchar(10),10,Yes,None,None,None,None,Workbench,None,No,"Data product the object belongs to, DP01 to DP14 or None"
+DF-REF-092,sys_objects,system_of_record,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,System of record of the object
+DF-REF-093,sys_objects,description,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,What the object holds
+DF-REF-094,sys_fields,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the registered field
+DF-REF-095,sys_fields,field_id,TEXT,varchar(16),16,Yes,None,None,UK,None,Workbench,None,No,"BR Field ID, for example DF-CAS-001"
+DF-REF-096,sys_fields,object_name,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,"Table the field belongs to, from sys_objects"
+DF-REF-097,sys_fields,field_name,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Column name; unique with object_name
+DF-REF-098,sys_fields,data_type,TEXT,varchar(12),12,Yes,None,None,None,None,Workbench,None,No,"TSD data type: TEXT, NUMBER, DATE, BOOLEAN, LOV, USER_REF, CROSS_REF, FORMULA or ATTACHMENT"
+DF-REF-099,sys_fields,physical_type,TEXT,varchar(30),30,Yes,None,None,None,None,Workbench,None,No,PostgreSQL type
+DF-REF-100,sys_fields,is_mandatory,BOOLEAN,boolean,,Yes,None,None,None,None,Workbench,None,No,True when the field is required
+DF-REF-101,sys_fields,lov_code,TEXT,varchar(30),30,No,None,None,None,None,Workbench,None,No,List of values the field takes its values from
+DF-REF-102,sys_fields,references_object,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,Table a cross-reference field points to
+DF-REF-103,sys_fields,source_system,TEXT,varchar(80),80,Yes,None,None,None,None,Workbench,None,No,Source system of the value
+DF-REF-104,sys_fields,source_field,TEXT,varchar(80),80,No,None,None,None,None,Workbench,None,No,Field name in the source system
+DF-REF-105,sys_fields,is_personal,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True for personal data under PDPA
+DF-REF-106,sys_fields,description,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Meaning of the field
+DF-REF-107,sys_fields,owner_role,LOV,varchar(20),20,No,None,LOV-ROLE,None,None,Workbench,None,No,Owner of the field definition
+DF-REF-108,sys_fields,refresh_cycle,TEXT,varchar(30),30,No,None,None,None,None,Workbench,None,No,"Refresh frequency, for example Daily, end of day"
+DF-REF-109,sys_fields,late_behavior,TEXT,varchar(200),200,No,None,None,None,None,Workbench,None,No,What the Workbench does when the value is missing or late
+DF-REF-110,sys_fields,interface_id,TEXT,varchar(10),10,No,None,None,None,None,Workbench,None,No,"Interface that carries the field, INT-01 to INT-34; empty for Workbench fields"
+DF-REF-111,sys_field_version,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the field version
+DF-REF-112,sys_field_version,field_id,TEXT,varchar(16),16,Yes,None,None,UK,None,Workbench,None,No,"Field the version belongs to, from sys_fields"
+DF-REF-113,sys_field_version,field_version,NUMBER,integer,,Yes,None,None,UK,None,Workbench,None,No,Version number
+DF-REF-114,sys_field_version,definition,TEXT,jsonb,,Yes,None,None,None,None,Workbench,None,No,The full field definition at this version
+DF-REF-115,sys_field_version,change_reason,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Reason for the change
+DF-RPT-001,case_list_row,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the case list row
+DF-RPT-002,case_list_row,business_date,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Business date of the list
+DF-RPT-003,case_list_row,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,Case
+DF-RPT-004,case_list_row,case_no,TEXT,varchar(18),18,Yes,None,None,None,None,Workbench,None,No,Case number
+DF-RPT-005,case_list_row,account_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_account (business key; no foreign key),ACE,public.account.account_key,No,Loan account; unique with business_date
+DF-RPT-006,case_list_row,account_no,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,Account number
+DF-RPT-007,case_list_row,product_group,LOV,varchar(15),15,Yes,None,LOV-PRODUCT,None,None,Workbench,None,No,Product group
+DF-RPT-008,case_list_row,stage_code,LOV,varchar(20),20,No,None,LOV-STAGE,None,None,Workbench,None,No,Stage
+DF-RPT-009,case_list_row,status,LOV,varchar(20),20,Yes,None,LOV-CASE-STATUS,None,None,Workbench,None,No,Case status
+DF-RPT-010,case_list_row,owner_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Case owner
+DF-RPT-011,case_list_row,queue_code,TEXT,varchar(30),30,No,None,None,None,None,Workbench,None,No,Queue code
+DF-RPT-012,case_list_row,team_code,LOV,varchar(20),20,No,None,LOV-TEAM,None,None,Workbench,None,No,Team
+DF-RPT-013,case_list_row,route_code,LOV,varchar(4),4,No,None,LOV-ROUTE,None,None,Workbench,None,No,Route
+DF-RPT-014,case_list_row,total_balance,NUMBER,"numeric(18,2)","18,2",Yes,0,None,None,None,Workbench,None,No,"Total balance, baht"
+DF-RPT-015,case_list_row,days_past_due,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Days past due
+DF-RPT-016,case_list_row,refreshed_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the row was built
+DF-RPT-017,case_list_row,last_contact_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,Latest EFS contact across the case's accounts
+DF-RPT-018,case_list_row,last_action_code,LOV,varchar(10),10,No,None,LOV-ACTION-CODE,None,None,Workbench,None,No,Action code of the latest contact
+DF-RPT-019,case_list_row,publish_status,LOV,varchar(10),10,Yes,PENDING,LOV-PUBLISH-STATUS,None,None,Workbench,None,No,"Pending, held or released for the date's extract"
+DF-OPS-118,reconciliation_result,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the reconciliation result
+DF-OPS-119,reconciliation_result,rec_code,TEXT,varchar(6),6,Yes,None,None,UK,None,Workbench,None,No,"Reconciliation, REC-01 or REC-02"
+DF-OPS-120,reconciliation_result,business_date,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Business date
+DF-OPS-121,reconciliation_result,product_group,LOV,varchar(15),15,Yes,None,LOV-PRODUCT,UK,None,Workbench,None,No,Product group
+DF-OPS-122,reconciliation_result,source_count,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,ALS count
+DF-OPS-123,reconciliation_result,workbench_count,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Case list count
+DF-OPS-124,reconciliation_result,source_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"ALS balance sum, baht"
+DF-OPS-125,reconciliation_result,workbench_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Case list balance sum, baht"
+DF-OPS-126,reconciliation_result,variance_count,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Count difference
+DF-OPS-127,reconciliation_result,variance_pct,NUMBER,"numeric(9,4)","9,4",Yes,None,None,None,None,Workbench,None,No,"Variance, percent"
+DF-OPS-128,reconciliation_result,tolerance_pct,NUMBER,"numeric(9,4)","9,4",Yes,None,None,None,None,Workbench,None,No,"Tolerance used, percent"
+DF-OPS-129,reconciliation_result,result,LOV,varchar(8),8,Yes,None,LOV-REC-RESULT,None,None,Workbench,None,No,Pass or break
+DF-OPS-130,lake_copy_watermark,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the lake copy watermark
+DF-OPS-131,lake_copy_watermark,copy_name,TEXT,varchar(40),40,Yes,None,None,UK,None,Workbench,None,No,Name of the copy; DECISION_LOG for the decision log lake copy
+DF-OPS-132,lake_copy_watermark,last_entry_hash,TEXT,char(64),64,No,None,None,None,None,Workbench,None,No,Entry hash of the last decision log entry copied and matched
+DF-OPS-133,lake_copy_watermark,last_decided_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,decided_at of the last entry copied
+DF-OPS-134,lake_copy_watermark,rows_copied_total,NUMBER,bigint,,Yes,0,None,None,None,Workbench,None,No,Cumulative count of entries in the lake copy
+DF-OPS-135,lake_copy_watermark,business_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Business date of the last complete partition
+DF-REF-116,retention_rule,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the retention rule
+DF-REF-117,retention_rule,product_code,LOV,varchar(25),25,Yes,None,LOV-DATA-PRODUCT,None,None,Workbench,None,No,Data product the rule applies to
+DF-REF-118,retention_rule,table_name,TEXT,varchar(60),60,Yes,None,None,UK,None,Workbench,None,No,"Table the rule applies to, from sys_objects; never decision_log_entry"
+DF-REF-119,retention_rule,record_class,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Retention class from LOV-RETENTION, or LAKE_COPY for the decision log lake copy"
+DF-REF-120,retention_rule,retention_months,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,"Retention period in months, 1 to 600"
+DF-REF-121,retention_rule,age_basis_field,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,"Field the age is measured from, for example interaction.occurred_at"
+DF-REF-122,retention_rule,end_action,LOV,varchar(12),12,Yes,ARCHIVE,LOV-RETENTION-END,None,None,Workbench,None,No,Archive or review at the end of the period
+DF-REF-123,retention_rule,rule_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Version, for example RET-2026.11"
+DF-REF-124,retention_rule,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version comes into force
+DF-REF-125,retention_rule,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-REF-126,retention_rule,approved_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who approved the version
+DF-REF-127,retention_rule,reference_version_id,CROSS_REF,uuid,,No,None,None,FK,reference_version,Workbench,None,No,Reference version that brought the row
+DF-TRT-034,dp_treatment,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the treatment copy
+DF-TRT-035,dp_treatment,treatment_id,CROSS_REF,uuid,,Yes,None,None,FK,treatment,Workbench,treatment.id,No,The treatment copied; unique with business_date
+DF-TRT-036,dp_treatment,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,treatment.case_id,No,The case of the treatment
+DF-TRT-037,dp_treatment,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,treatment.decision_log_id,No,The decision that approved the treatment
+DF-TRT-038,dp_treatment,treatment_type,LOV,varchar(20),20,Yes,None,LOV-TREATMENT,None,None,Workbench,treatment.treatment_type,No,Treatment type
+DF-TRT-039,dp_treatment,proposed_by,LOV,varchar(10),10,Yes,None,LOV-PROPOSER,None,None,Workbench,treatment.proposed_by,No,"Agent, rule or person"
+DF-TRT-040,dp_treatment,proposed_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,treatment.proposed_at,No,When proposed
+DF-TRT-041,dp_treatment,offer_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,treatment.offer_amount,No,"Amount offered or agreed, baht"
+DF-TRT-042,dp_treatment,haircut_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,treatment.haircut_amount,No,"Amount forgiven, baht"
+DF-TRT-043,dp_treatment,installments,NUMBER,integer,,No,None,None,None,None,Workbench,treatment.installments,No,Number of installments in a plan
+DF-TRT-044,dp_treatment,valid_until,DATE,date,,No,None,None,None,None,Workbench,treatment.valid_until,No,Offer validity
+DF-TRT-045,dp_treatment,approval_level,LOV,varchar(4),4,No,None,LOV-APPROVAL-LEVEL,None,None,Workbench,treatment.approval_level,No,Approval level that approved it
+DF-TRT-046,dp_treatment,booked_at,DATE,timestamptz,,No,None,None,None,None,Workbench,treatment.booked_at,No,When booked in the core
+DF-TRT-047,dp_treatment,outcome,LOV,varchar(12),12,No,None,LOV-TRT-OUTCOME,None,None,Workbench,treatment.outcome,No,"Kept, broken, completed, canceled or declined"
+DF-TRT-048,dp_treatment,outcome_at,DATE,timestamptz,,No,None,None,None,None,Workbench,treatment.outcome_at,No,When the outcome was recorded
+DF-TRT-049,dp_treatment,business_date,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Business date of the build
+DF-TRT-050,dp_treatment,contract_no,TEXT,varchar(20),20,No,None,None,None,None,Core bank (ALS) via COLLINS,ContractNo,No,Contract number of the case's primary account
+DF-TRT-051,dp_treatment,contract_date,DATE,date,,No,None,None,None,None,Core bank (ALS) via COLLINS,CONTRACT_DATE,No,Contract date of the case's primary account
+DF-TRT-052,dp_guarantee_claim,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the guarantee claim copy
+DF-TRT-053,dp_guarantee_claim,guarantee_claim_id,CROSS_REF,uuid,,Yes,None,None,FK,guarantee_claim,Workbench,guarantee_claim.id,No,The guarantee claim copied; unique with business_date
+DF-TRT-054,dp_guarantee_claim,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,guarantee_claim.case_id,No,The case of the claim
+DF-TRT-055,dp_guarantee_claim,claim_type,LOV,varchar(25),25,Yes,None,LOV-CLAIM-TYPE,None,None,Workbench,guarantee_claim.claim_type,No,"TCG, credit life insurance, mortgage insurance or collateral insurance"
+DF-TRT-056,dp_guarantee_claim,claim_deadline,DATE,date,,Yes,None,None,None,None,Workbench,guarantee_claim.claim_deadline,No,Last date the claim can be filed
+DF-TRT-057,dp_guarantee_claim,claimed_amount,NUMBER,"numeric(18,2)","18,2",Yes,None,None,None,None,Workbench,guarantee_claim.claimed_amount,No,"Amount claimed, baht"
+DF-TRT-058,dp_guarantee_claim,filed_at,DATE,date,,No,None,None,None,None,Workbench,guarantee_claim.filed_at,No,Date filed
+DF-TRT-059,dp_guarantee_claim,paid_amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,guarantee_claim.paid_amount,No,"Amount paid, baht"
+DF-TRT-060,dp_guarantee_claim,status,LOV,varchar(12),12,Yes,None,LOV-CLAIM-STATUS,None,None,Workbench,guarantee_claim.status,No,"Preparing, filed, defect, paid or rejected"
+DF-TRT-061,dp_guarantee_claim,business_date,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Business date of the build
+DF-OPS-136,interface_config,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the interface setting
+DF-OPS-137,interface_config,interface_id,TEXT,varchar(10),10,Yes,None,None,UK,None,Workbench,None,No,"Interface ID, for example INT-10"
+DF-OPS-138,interface_config,direction,LOV,varchar(8),8,Yes,None,LOV-DIRECTION,None,None,Workbench,None,No,Inbound or outbound
+DF-OPS-139,interface_config,transport,LOV,varchar(10),10,Yes,None,LOV-TRANSPORT,None,None,Workbench,None,No,SFTP or COLLINS
+DF-OPS-140,interface_config,inbound_path,TEXT,varchar(200),200,No,None,None,None,None,Workbench,None,No,Inbound or outbound folder
+DF-OPS-141,interface_config,file_pattern,TEXT,varchar(120),120,No,None,None,None,None,Workbench,None,No,File name pattern with the business date
+DF-OPS-142,interface_config,data_product,LOV,varchar(25),25,No,None,LOV-DATA-PRODUCT,None,None,Workbench,None,No,"Data product the file feeds, for example DP06"
+DF-OPS-143,interface_config,max_attempts,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Most send attempts before the exception queue
+DF-OPS-144,interface_config,retry_intervals_min,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,"Minutes between attempts, comma separated, for example 5,15,45"
+DF-OPS-145,interface_config,owner_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Role that receives the exception task
+DF-OPS-146,interface_config,alert_role,LOV,varchar(20),20,No,None,LOV-ROLE,None,None,Workbench,None,No,Role alerted on a refused or missing file
+DF-OPS-147,interface_config,valid_from,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Date the version comes into force
+DF-OPS-148,interface_config,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-OPS-168,outbound_item,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the outbound item
+DF-OPS-169,outbound_item,interface_id,TEXT,varchar(10),10,Yes,None,None,None,None,Workbench,None,No,Interface ID
+DF-OPS-170,outbound_item,idempotency_key,TEXT,varchar(120),120,Yes,None,None,UK,None,Workbench,None,No,Unique key of the outbound work
+DF-OPS-171,outbound_item,payload_ref,ATTACHMENT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Stored file to send
+DF-OPS-172,outbound_item,case_ids,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Cases whose step waits on the file
+DF-OPS-173,outbound_item,attempt_count,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Attempts made
+DF-OPS-174,outbound_item,next_attempt_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the next attempt is due
+DF-OPS-175,outbound_item,status,LOV,varchar(12),12,Yes,PENDING,LOV-OUTBOUND-STATUS,None,None,Workbench,None,No,"Pending, sent, retry, exception or acknowledged"
+DF-OPS-176,outbound_item,last_error,TEXT,varchar(400),400,No,None,None,None,None,Workbench,None,No,"Last transfer error, no personal data"
+DF-OPS-177,outbound_item,owner_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Role that owns the exception task
+DF-OPS-178,processed_event,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the processed event
+DF-OPS-179,processed_event,consumer,TEXT,varchar(60),60,Yes,None,None,UK,None,Workbench,None,No,Consumer name
+DF-OPS-180,processed_event,idempotency_key,TEXT,varchar(120),120,Yes,None,None,UK,None,Workbench,None,No,Event or work key
+DF-OPS-181,processed_event,event_id,CROSS_REF,uuid,,No,None,None,FK,outbox_event,Workbench,None,No,"Outbox event of the first delivery, where the key came from an event"
+DF-OPS-182,processed_event,hit_count,NUMBER,integer,,Yes,1,None,None,None,Workbench,None,No,"Deliveries seen, 1 on first"
+DF-OPS-183,processed_event,last_seen_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the last repeat arrived
+DF-OPS-184,idempotency_key,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the idempotent request
+DF-OPS-185,idempotency_key,idempotency_key,TEXT,uuid,,Yes,None,None,UK,None,Workbench,None,No,Idempotency-Key header value
+DF-OPS-186,idempotency_key,endpoint,TEXT,varchar(100),100,Yes,None,None,None,None,Workbench,None,No,Method and path of the request
+DF-OPS-187,idempotency_key,request_hash,TEXT,char(64),64,Yes,None,None,None,None,Workbench,None,No,SHA-256 of the request body
+DF-OPS-188,idempotency_key,response,TEXT,jsonb,,Yes,None,None,None,None,Workbench,None,No,Stored response returned to a repeat
+DF-OPS-189,outbox_event,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the outbox event
+DF-OPS-190,outbox_event,event_type,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,"Event name from EV-01 to EV-28, or an outbound work request type such as WIN_DISPATCH"
+DF-OPS-191,outbox_event,schema_version,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Schema version of the payload; consumers accept the current and previous version
+DF-OPS-192,outbox_event,case_id,CROSS_REF,uuid,,No,None,None,FK,recovery_case,Workbench,None,No,The case the event belongs to; empty for events with no case; unique with case_seq
+DF-OPS-193,outbox_event,case_seq,NUMBER,bigint,,No,None,None,UK,None,Workbench,None,No,Order of the event among the events of its case
+DF-OPS-194,outbox_event,idempotency_key,TEXT,varchar(120),120,Yes,None,None,UK,None,Workbench,None,No,Key passed to every consumer so a repeat is dropped; unique on its own
+DF-OPS-195,outbox_event,payload,TEXT,jsonb,,Yes,None,None,None,None,Workbench,None,No,References and codes only; no personal data
+DF-OPS-196,outbox_event,actor_ref,TEXT,varchar(64),64,No,None,None,None,None,Workbench,None,No,User ID or service identity that caused the event
+DF-OPS-197,outbox_event,occurred_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the change happened
+DF-OPS-198,outbox_delivery,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the outbox delivery
+DF-OPS-199,outbox_delivery,event_id,CROSS_REF,uuid,,Yes,None,None,FK,outbox_event,Workbench,None,No,The outbox event delivered
+DF-OPS-200,outbox_delivery,consumer,TEXT,varchar(60),60,Yes,None,None,UK,None,Workbench,None,No,Consumer name from the consumer list; unique with event_id
+DF-OPS-201,outbox_delivery,status,LOV,varchar(12),12,Yes,PENDING,LOV-OUTBOX-DELIVERY,None,None,Workbench,None,No,"Pending, retrying, delivered or exception"
+DF-OPS-202,outbox_delivery,attempt_count,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Delivery attempts made
+DF-OPS-203,outbox_delivery,next_attempt_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the next attempt is due
+DF-OPS-204,outbox_delivery,last_error_code,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Code of the last failure returned by the consumer
+DF-OPS-205,outbox_delivery,delivered_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the consumer succeeded
+DF-OPS-206,outbox_delivery,task_id,CROSS_REF,uuid,,No,None,None,FK,task,Workbench,None,No,The RESOLVE_OUTBOX_DELIVERY task raised when the delivery entered the exception queue
+DF-OPS-207,feature_flag,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the feature flag
+DF-OPS-208,feature_flag,flag_key,TEXT,varchar(80),80,Yes,None,None,UK,None,Workbench,None,No,Flag key rwb.<module>.<short-name>
+DF-OPS-209,feature_flag,description,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,What the flag switches
+DF-OPS-210,feature_flag,owner_user_id,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Owner of the flag
+DF-OPS-211,feature_flag,owner_team,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,Owning squad
+DF-OPS-212,feature_flag,default_on,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,Default value
+DF-OPS-213,feature_flag,dev_on,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,Value in DEV
+DF-OPS-214,feature_flag,sit_on,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,Value in SIT
+DF-OPS-215,feature_flag,uat_on,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,Value in UAT
+DF-OPS-216,feature_flag,prod_on,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,Value in PROD
+DF-OPS-217,feature_flag,removal_date,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date by which the flag and its old path are removed
+DF-OPS-218,feature_flag_change,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the feature flag change
+DF-OPS-219,feature_flag_change,flag_key,TEXT,varchar(80),80,Yes,None,None,None,None,Workbench,None,No,Flag changed
+DF-OPS-220,feature_flag_change,environment,LOV,varchar(4),4,Yes,None,LOV-ENVIRONMENT,None,None,Workbench,None,No,"DEV, SIT, UAT or PROD"
+DF-OPS-221,feature_flag_change,old_value,BOOLEAN,boolean,,Yes,None,None,None,None,Workbench,None,No,Value before
+DF-OPS-222,feature_flag_change,new_value,BOOLEAN,boolean,,Yes,None,None,None,None,Workbench,None,No,Value after
+DF-OPS-223,feature_flag_change,reason,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Reason for the change
+DF-OPS-224,job_catalog,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the job
+DF-OPS-225,job_catalog,job_id,TEXT,varchar(6),6,Yes,None,None,UK,None,Workbench,None,No,Job ID JOB-nn
+DF-OPS-226,job_catalog,job_name,TEXT,varchar(80),80,Yes,None,None,None,None,Workbench,None,No,Job name from the batch schedule
+DF-OPS-227,job_catalog,owner_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Role that owns failures
+DF-OPS-228,job_catalog,schedule_text,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,Schedule as in the batch schedule
+DF-OPS-229,job_catalog,runbook_path,TEXT,varchar(200),200,No,None,None,None,None,Workbench,None,No,Path of the run book in the repository
+DF-OPS-230,job_catalog,expected_minutes,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Expected duration in minutes
+DF-OPS-231,job_catalog,alert_after_minutes,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Duration after which the owner is alerted
+DF-OPS-232,job_catalog,first_release,TEXT,varchar(3),3,No,None,None,None,None,Workbench,None,No,"Epic of first release, for example E1"
+DF-REF-128,efs_ledger_outcome,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the EFS ledger outcome row
+DF-REF-129,efs_ledger_outcome,action_code,LOV,varchar(10),10,Yes,None,LOV-ACTION-CODE,UK,None,Workbench,None,No,EFS action code named for the ledger
+DF-REF-130,efs_ledger_outcome,channel,LOV,varchar(15),15,Yes,CALL,LOV-CHANNEL,None,None,Workbench,None,No,Ledger channel for the action code
+DF-REF-131,efs_ledger_outcome,in_ledger,BOOLEAN,boolean,,Yes,true,None,None,None,Workbench,None,No,True when rows with this action code enter the ledger
+DF-CAS-056,case_entry_exclusion,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the case entry exclusion
+DF-CAS-057,case_entry_exclusion,account_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_account (business key; no foreign key),ACE,public.account.account_key,No,The account excluded; unique with business_date
+DF-CAS-058,case_entry_exclusion,business_date,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Business date of the exclusion
+DF-CAS-059,case_entry_exclusion,reason_code,LOV,varchar(20),20,Yes,None,LOV-EXCLUSION-REASON,None,None,Workbench,None,No,"Deceased, fraud, bankruptcy, active plan or open dispute"
+DF-CAS-060,case_entry_exclusion,rule_id,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,Exclusion rule that blocked the entry
+DF-CAS-061,case_entry_exclusion,rule_version,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,Version of that rule
+DF-WRK-045,queue_member,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the queue member
+DF-WRK-046,queue_member,queue_id,CROSS_REF,uuid,,Yes,None,None,FK,queue,Workbench,None,No,The queue
+DF-WRK-047,queue_member,user_id,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,The person
+DF-WRK-048,queue_member,capacity,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Most open cases the person may hold in the queue
+DF-WRK-049,queue_member,skill_codes,TEXT,varchar(200),200,No,None,None,None,None,Workbench,None,No,"Skills of the person, comma separated"
+DF-WRK-050,queue_member,table_version,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,QUEUE_MEMBER reference version the row belongs to
+DF-WRK-051,queue_member,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the row comes into force
+DF-WRK-052,queue_member,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the row is in force
+DF-RPT-020,queue_measure,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the queue measure
+DF-RPT-021,queue_measure,queue_id,CROSS_REF,uuid,,Yes,None,None,FK,queue,Workbench,None,No,The queue measured; unique with as_of
+DF-RPT-022,queue_measure,as_of,DATE,timestamptz,,Yes,None,None,UK,None,Workbench,None,No,When the snapshot was taken
+DF-RPT-023,queue_measure,depth,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Open cases in the queue
+DF-RPT-024,queue_measure,unassigned,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Open cases with no owner
+DF-RPT-025,queue_measure,avg_age_days,NUMBER,"numeric(7,2)","7,2",No,None,None,None,None,Workbench,None,No,"Average age of the open cases, days"
+DF-RPT-026,queue_measure,max_age_days,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,"Age of the oldest open case, days"
+DF-RPT-027,queue_measure,owner_min,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Fewest open cases held by one owner
+DF-RPT-028,queue_measure,owner_max,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Most open cases held by one owner
+DF-RPT-029,queue_measure,breached,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Open cases past their service level
+DF-RPT-030,queue_measure,status,LOV,varchar(15),15,Yes,TAKEN,LOV-SNAPSHOT-STATUS,None,None,Workbench,None,No,"Taken, published or held"
+DF-REF-132,parameter_catalog,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the parameter definition
+DF-REF-133,parameter_catalog,param_key,TEXT,varchar(100),100,Yes,None,None,UK,None,Workbench,None,No,"Parameter key, for example case.entry.dpd"
+DF-REF-134,parameter_catalog,kind,TEXT,varchar(15),15,Yes,None,None,None,None,Workbench,None,No,"Kind of parameter, for example ENVIRONMENT for an environment setting"
+DF-REF-135,parameter_catalog,value_type,TEXT,varchar(15),15,Yes,None,None,None,None,Workbench,None,No,Type of the value
+DF-REF-136,parameter_catalog,unit,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,"Unit, for example CALENDAR_DAYS, WORKING_DAYS, BAHT, PERCENT, COUNT, CODE_LIST"
+DF-REF-137,parameter_catalog,min_value,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Lowest allowed value
+DF-REF-138,parameter_catalog,max_value,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Highest allowed value
+DF-REF-139,parameter_catalog,default_value,TEXT,varchar(400),400,No,None,None,None,None,Workbench,None,No,Default value
+DF-REF-140,parameter_catalog,scope,LOV,varchar(10),10,Yes,GLOBAL,LOV-PARAM-SCOPE,None,None,Workbench,None,No,"Product, when the parameter is keyed by product group, or global"
+DF-REF-141,parameter_catalog,required,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when every product in force must have a row
+DF-REF-142,parameter_catalog,owner_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Role that owns the parameter
+DF-REF-143,parameter_catalog,environments,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Environments the parameter is set in
+DF-REF-144,parameter_catalog,used_by,TEXT,varchar(400),400,No,None,None,None,None,Workbench,None,No,Modules and stories that read the parameter
+DF-REF-145,parameter_catalog,secret,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True for a secret; its value is never returned
+DF-REF-146,parameter_catalog,description,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,What the parameter controls
+DF-REF-147,parameter_value,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the parameter value
+DF-REF-148,parameter_value,param_key,TEXT,varchar(100),100,Yes,None,None,UK,None,Workbench,None,No,"Parameter, from parameter_catalog"
+DF-REF-149,parameter_value,environment,LOV,varchar(4),4,Yes,None,LOV-ENVIRONMENT,UK,None,Workbench,None,No,"DEV, SIT, UAT or PROD"
+DF-REF-150,parameter_value,param_value,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Value as text
+DF-REF-151,parameter_value,product_group,LOV,varchar(15),15,No,None,LOV-PRODUCT,UK,None,Workbench,None,No,Product group for a product-scoped parameter
+DF-REF-152,parameter_value,version_no,NUMBER,integer,,Yes,None,None,UK,None,Workbench,None,No,Version number
+DF-REF-153,parameter_value,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the value comes into force
+DF-REF-154,parameter_value,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the value is in force
+DF-REF-155,parameter_value,status,LOV,varchar(15),15,Yes,VALIDATED,LOV-VERSION-STATUS,None,None,Workbench,None,No,"Validated, approved, in force, superseded, rolled back or refused"
+DF-REF-156,parameter_value,author_user_id,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who loaded the value
+DF-REF-157,parameter_value,approver_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who approved the value; never the author
+DF-REF-158,parameter_value,approved_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the value was approved
+DF-REF-159,reference_version,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the reference version
+DF-REF-160,reference_version,table_code,LOV,varchar(30),30,Yes,None,LOV-REF-TABLE,UK,None,Workbench,None,No,"The reference or rule table the version belongs to, for example EXPOSURE_BAND or ALLOCATION"
+DF-REF-161,reference_version,version_no,NUMBER,integer,,Yes,None,None,UK,None,Workbench,None,No,"Version number, one above the previous version of the table"
+DF-REF-162,reference_version,version_label,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,"Version label the rows carry, for example DOCTYPE-2026.11"
+DF-REF-163,reference_version,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version comes into force
+DF-REF-164,reference_version,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force; set when the next version is approved
+DF-REF-165,reference_version,status,LOV,varchar(15),15,Yes,VALIDATED,LOV-VERSION-STATUS,None,None,Workbench,None,No,"Validated, approved, in force, superseded, rolled back or refused"
+DF-REF-166,reference_version,author_user_id,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who loaded the version
+DF-REF-167,reference_version,approver_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who approved the version; never the author
+DF-REF-168,reference_version,approved_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the version was approved
+DF-REF-169,reference_version,row_count,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Rows in the version
+DF-REF-170,reference_version,content_hash,TEXT,char(64),64,Yes,None,None,None,None,Workbench,None,No,SHA-256 of the rows sorted by key; used for idempotency
+DF-REF-171,reference_version,load_id,TEXT,uuid,,Yes,None,None,None,None,Workbench,None,No,Identifier of the reference load request that created the version
+DF-REF-172,reference_version,dry_run_counts,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Counts of live cases each changed rule row would move, from the dry run"
+DF-REF-173,reference_version,rollback_reason,TEXT,varchar(400),400,No,None,None,None,None,Workbench,None,No,Reason given for a rollback
+DF-REF-174,reference_version,change_request_ref,TEXT,varchar(30),30,No,None,None,None,None,Workbench,None,No,Reference of the change request in the bank's request tool
+DF-REF-175,reference_version,impact_summary,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,"What the change affects, for example the open cases it touches"
+DF-REF-176,reference_version,test_result,LOV,varchar(10),10,No,None,LOV-TEST-RESULT,None,None,Workbench,None,No,"Passed or failed, from the load checks or the rule table test harness"
+DF-REF-177,reference_version,rollback_plan,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,How to return to the previous version
+DF-REF-178,reference_version,verified_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who verified the change after it took effect
+DF-REF-179,reference_version,verified_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the change was verified
+DF-REF-180,reference_version,verify_note,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,What was checked
+DF-REF-181,reference_row,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the reference row
+DF-REF-182,reference_row,version_id,CROSS_REF,uuid,,Yes,None,None,FK,reference_version,Workbench,None,No,The reference version the row belongs to; unique with row_key
+DF-REF-183,reference_row,row_key,TEXT,varchar(200),200,Yes,None,None,UK,None,Workbench,None,No,Key of the row inside its table
+DF-REF-184,reference_row,row_data,TEXT,jsonb,,Yes,None,None,None,None,Workbench,None,No,Column values of the row
+DF-REF-185,rule_test_case,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the rule test case
+DF-REF-186,rule_test_case,test_case_id,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,The test case named by rule_row.test_case_id
+DF-REF-187,rule_test_case,route_set,LOV,varchar(15),15,Yes,None,LOV-ROUTE-SET,None,None,Workbench,None,No,Route set
+DF-REF-188,rule_test_case,rule_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,Rule version tested
+DF-REF-189,rule_test_case,rule_id,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,Rule the test expects to hit
+DF-REF-190,rule_test_case,from_state,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Input state
+DF-REF-191,rule_test_case,event_code,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Input event
+DF-REF-192,rule_test_case,facts,TEXT,jsonb,,Yes,None,None,None,None,Workbench,None,No,Synthetic case file facts the condition reads
+DF-REF-193,rule_test_case,expected_to_state,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Expected to state
+DF-REF-194,rule_test_case,expected_owner_role,LOV,varchar(20),20,No,None,LOV-ROLE,None,None,Workbench,None,No,Expected owner role
+DF-REF-195,rule_test_case,expected_timer_spec,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,Expected timer
+DF-REF-196,rule_test_case,result,LOV,varchar(10),10,No,None,LOV-TEST-RESULT,None,None,Workbench,None,No,Passed or failed
+DF-REF-197,rule_test_case,result_detail,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,"Expected against actual, and the rows that hit"
+DF-REF-299,rule_test_case,package_version_id,CROSS_REF,uuid,,No,None,None,FK,rule_package_version,Workbench,None,No,The rule_package_version the test case runs against
+DF-REF-198,masking_rule,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the masking rule
+DF-REF-199,masking_rule,role_code,LOV,varchar(20),20,Yes,None,LOV-ROLE,UK,None,Workbench,None,No,Role the rule applies to
+DF-REF-200,masking_rule,field_id,TEXT,varchar(16),16,Yes,None,None,UK,None,Workbench,None,No,BR Field ID of a personal data field (sys_fields.is_personal true)
+DF-REF-201,masking_rule,unmasked,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when the role sees the field unmasked; no row means masked
+DF-REF-202,masking_rule,masking_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Version of the masking rules, for example MASK-2026.11"
+DF-REF-203,masking_rule,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version comes into force
+DF-REF-204,masking_rule,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-REF-205,role_conflict,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the role conflict
+DF-REF-206,role_conflict,role_code,LOV,varchar(20),20,Yes,None,LOV-ROLE,UK,None,Workbench,None,No,Role that may not be held with the other
+DF-REF-207,role_conflict,conflicts_with,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,"Role code, or ANY_BUSINESS_ROLE or ANY_OTHER_ROLE, per the Separation of duty sheet"
+DF-REF-208,role_conflict,reason,TEXT,varchar(200),200,Yes,None,None,None,None,Workbench,None,No,Why the pair is not allowed
+DF-REF-209,role_conflict,conflict_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Version of the conflict table, for example SOD-2026.11"
+DF-REF-210,role_conflict,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version comes into force
+DF-REF-211,role_conflict,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-REF-212,partner_user,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the partner user
+DF-REF-213,partner_user,identity_ref,TEXT,varchar(64),64,Yes,None,None,UK,None,Workbench,None,No,Partner identity directory ID
+DF-REF-214,partner_user,partner_id,CROSS_REF,uuid,,Yes,None,None,FK,partner,Workbench,None,No,The firm the partner user works for
+DF-REF-215,partner_user,role_code,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,"The one partner role held, for example PT-LAWFIRM"
+DF-REF-216,partner_user,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the binding starts
+DF-REF-217,partner_user,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Date the binding ends; no later than the firm's contract end
+DF-REF-218,document_type,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the document type
+DF-REF-219,document_type,doc_type_code,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,"Document type code, the value set of LOV-DOC-TYPE"
+DF-REF-220,document_type,label_en,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,English label
+DF-REF-221,document_type,label_th,TEXT,varchar(120),120,No,None,None,None,None,Workbench,None,No,Thai label
+DF-REF-222,document_type,write_once,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True for a legal type held in the write-once container
+DF-REF-223,document_type,retention_class,LOV,varchar(10),10,Yes,None,LOV-RETENTION,None,None,Workbench,None,No,Retention class of the type
+DF-REF-224,document_type,field_definitions,TEXT,jsonb,,Yes,None,None,None,None,Workbench,None,No,"Fields extracted from the type: name, label, data type, personal flag, required flag, extraction method (TEMPLATE or MODEL), review only flag and optional pattern"
+DF-REF-225,document_type,legal_signoff_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Legal counsel user who signed the type and its fields
+DF-REF-226,document_type,legal_signoff_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Date of the Legal sign-off
+DF-REF-227,document_type,npa_signoff_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Head of NPA user who signed the type and its fields
+DF-REF-228,document_type,npa_signoff_date,DATE,date,,No,None,None,None,None,Workbench,None,No,Date of the NPA sign-off
+DF-REF-229,document_type,table_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Version of the type table, for example DOCTYPE-2026.11"
+DF-REF-230,document_type,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version comes into force
+DF-REF-231,document_type,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-REF-232,document_type,reference_version_id,CROSS_REF,uuid,,No,None,None,FK,reference_version,Workbench,None,No,Reference version that brought the row
+DF-REF-233,document_type,classify_threshold,NUMBER,"numeric(4,3)","4,3",No,None,None,None,None,Workbench,None,No,Confidence below which a document of this type goes to the review queue
+DF-REF-234,document_checklist_item,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the checklist item
+DF-REF-235,document_checklist_item,stage_code,LOV,varchar(20),20,Yes,None,LOV-STAGE,UK,None,Workbench,None,No,Case stage the row applies to
+DF-REF-236,document_checklist_item,route_code,LOV,varchar(4),4,No,None,LOV-ROUTE,UK,None,Workbench,None,No,Route the row applies to; empty for every route
+DF-REF-237,document_checklist_item,document_type,LOV,varchar(30),30,Yes,None,LOV-DOC-TYPE,UK,None,Workbench,None,No,Document type
+DF-REF-238,document_checklist_item,required,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when the type is required for the stage and route
+DF-REF-239,document_checklist_item,sort_order,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Order of the item on the checklist
+DF-REF-240,document_checklist_item,table_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Version of the checklist, for example CHK-2026.11"
+DF-REF-241,document_checklist_item,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version comes into force
+DF-REF-242,document_checklist_item,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-REF-243,document_checklist_item,reference_version_id,CROSS_REF,uuid,,No,None,None,FK,reference_version,Workbench,None,No,Reference version that brought the row
+DF-DOC-036,case_document_check,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the completeness check
+DF-DOC-037,case_document_check,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,Case checked; one row per case; unique
+DF-DOC-038,case_document_check,checklist_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Checklist version used
+DF-DOC-039,case_document_check,required_count,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Number of required types
+DF-DOC-040,case_document_check,present_count,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Number of required types present
+DF-DOC-041,case_document_check,missing_types,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Required types not present
+DF-DOC-042,case_document_check,complete,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True when every required type is present; empty when the stage has no checklist
+DF-DOC-043,case_document_check,checked_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the check last ran
+DF-DOC-044,case_document_check,last_event_id,CROSS_REF,uuid,,No,None,None,FK,outbox_event,Workbench,None,No,"Event that triggered the last check, for repeat detection"
+DF-REF-244,document_hub_parameter,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the document hub parameter
+DF-REF-245,document_hub_parameter,param_code,TEXT,varchar(40),40,Yes,None,None,UK,None,Workbench,None,No,"Parameter code, for example INTAKE_MAX_FILE_MB, OCR_MIN_QUALITY, CLASSIFY_THRESHOLD, CASE_NO_PATTERN, SEARCH_MAX_RESULTS"
+DF-REF-246,document_hub_parameter,param_value,TEXT,varchar(200),200,Yes,None,None,None,None,Workbench,None,No,"Parameter value as text, typed by the reader"
+DF-REF-247,document_hub_parameter,unit,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,"Unit of the value, for example MB, seconds, ratio"
+DF-REF-248,document_hub_parameter,table_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,Version of the parameter load
+DF-REF-249,document_hub_parameter,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the value comes into force
+DF-REF-250,document_hub_parameter,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the value is in force
+DF-REF-251,document_hub_parameter,reference_version_id,CROSS_REF,uuid,,No,None,None,FK,reference_version,Workbench,None,No,Reference version that brought the row
+DF-DOC-045,document_intake,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the intake item
+DF-DOC-046,document_intake,source,LOV,varchar(12),12,Yes,None,LOV-DOC-SOURCE,None,None,Workbench,None,No,Source of the file
+DF-DOC-047,document_intake,source_ref,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,"Path, partner reference or email message ID at the channel"
+DF-DOC-048,document_intake,channel_code,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,"Branch code, MAILROOM, partner code or mailbox code"
+DF-DOC-049,document_intake,file_name,TEXT,varchar(255),255,No,None,None,None,None,Workbench,None,Yes,File name as received; personal where it names a customer
+DF-DOC-050,document_intake,file_size,NUMBER,bigint,,No,None,None,None,None,Workbench,None,No,File size in bytes
+DF-DOC-051,document_intake,captured_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,"Scan time recorded by the scanner, for scanner files"
+DF-DOC-052,document_intake,sender_address,TEXT,varchar(320),320,No,None,None,None,None,Workbench,None,Yes,Sender email address for mailbox items; masked by role
+DF-DOC-053,document_intake,partner_id,CROSS_REF,uuid,,No,None,None,FK,partner,Workbench,None,No,Partner that sent the file by SFTP
+DF-DOC-054,document_intake,run_id,CROSS_REF,uuid,,No,None,None,FK,load_run,Workbench,None,No,JOB-12 run that took the item in
+DF-DOC-055,document_intake,received_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the Workbench received the file
+DF-DOC-056,document_intake,file_sha256,TEXT,char(64),64,Yes,None,None,None,None,Workbench,None,No,SHA-256 of the file
+DF-DOC-057,document_intake,intake_ref,ATTACHMENT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Received file in the intake container
+DF-DOC-058,document_intake,scan_result,LOV,varchar(10),10,No,None,LOV-SCAN-RESULT,None,None,Workbench,None,No,Malware scan result: clean or infected; empty until scanned
+DF-DOC-059,document_intake,scanned_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the malware scan ran
+DF-DOC-060,document_intake,case_id,CROSS_REF,uuid,,No,None,None,FK,recovery_case,Workbench,None,No,Case the item belongs to once known
+DF-DOC-061,document_intake,document_id,CROSS_REF,uuid,,No,None,None,FK,document,Workbench,None,No,"Document created from the item, or the uploaded document"
+DF-DOC-062,document_intake,ocr_ref,ATTACHMENT,varchar(400),400,No,None,None,None,None,Workbench,None,No,OCR JSON output (text and layout) in the standard container
+DF-DOC-063,document_intake,ocr_status,LOV,varchar(12),12,Yes,PENDING,LOV-OCR-STATUS,None,None,Workbench,None,No,"Pending, done, rescan or failed"
+DF-DOC-064,document_intake,ocr_attempts,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Number of OCR calls made for the item
+DF-DOC-065,document_intake,page_count,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Number of pages read
+DF-DOC-066,document_intake,rescan_pages,TEXT,varchar(200),200,No,None,None,None,None,Workbench,None,No,Page numbers below the OCR quality threshold
+DF-DOC-067,document_intake,ocr_quality,NUMBER,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,Lowest page quality of the item
+DF-DOC-068,document_intake,languages,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,"Languages found, for example th,en"
+DF-DOC-069,document_intake,ocr_engine_version,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Version of the OCR service that read the item
+DF-DOC-070,document_intake,predicted_type,LOV,varchar(30),30,No,None,LOV-DOC-TYPE,None,None,Workbench,None,No,Type with the highest classification score
+DF-DOC-071,document_intake,classification_confidence,NUMBER,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,Score of the predicted type
+DF-DOC-072,document_intake,type_candidates,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Top two types with their scores
+DF-DOC-073,document_intake,classifier_version,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Model version that classified the item
+DF-DOC-074,document_intake,classify_fallback,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when the classifier did not answer and the item went to a person
+DF-DOC-075,document_intake,match_status,LOV,varchar(12),12,Yes,PENDING,LOV-INTAKE-MATCH,None,None,Workbench,None,No,"Pending, matched, no match, multiple, conflict, case closed or no type"
+DF-DOC-076,document_intake,candidate_case_ids,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Cases found for the item when more than one or none can be chosen by rule
+DF-DOC-077,document_intake,extracted_fields,TEXT,jsonb,,No,None,None,None,None,Workbench,None,Yes,"Fields read before the item is attached: field name, value, extracted value, confidence, state, extractor version, personal flag"
+DF-DOC-078,document_intake,extract_status,LOV,varchar(12),12,No,None,LOV-EXTRACT-STATUS,None,None,Workbench,None,No,"Pending, done or failed"
+DF-DOC-079,document_intake,extract_attempts,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Number of extraction attempts
+DF-DOC-080,document_intake,review_reason,LOV,varchar(20),20,No,None,LOV-INTAKE-REVIEW,None,None,Workbench,None,No,"Why the item needs a person: rescan, unreadable file, low confidence, model unavailable, unknown type"
+DF-DOC-081,document_intake,review_outcome,LOV,varchar(12),12,No,None,LOV-INTAKE-OUTCOME,None,None,Workbench,None,No,Attached or discarded once a person resolves the review item
+DF-DOC-082,document_intake,resolved_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who resolved the review item
+DF-DOC-083,document_intake,resolved_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the review item was resolved
+DF-DOC-084,document_intake,discard_reason,TEXT,varchar(400),400,No,None,None,None,None,Workbench,None,No,Reason given when a review item is discarded
+DF-DOC-085,document_text,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the page text
+DF-DOC-086,document_text,intake_id,CROSS_REF,uuid,,Yes,None,None,FK,document_intake,Workbench,None,No,Intake item the page belongs to; unique with page_no
+DF-DOC-087,document_text,document_id,CROSS_REF,uuid,,No,None,None,FK,document,Workbench,None,No,Document the page belongs to once attached
+DF-DOC-088,document_text,page_no,NUMBER,integer,,Yes,None,None,UK,None,Workbench,None,No,Page number
+DF-DOC-089,document_text,text_content,TEXT,text,,Yes,None,None,None,None,Workbench,None,Yes,OCR text of the page; masked by role on read
+DF-DOC-090,document_text,quality,NUMBER,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,Mean word confidence of the page
+DF-DOC-091,retention_action,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the retention action
+DF-DOC-092,retention_action,document_id,CROSS_REF,uuid,,Yes,None,None,FK,document,Workbench,None,No,Document acted on; unique with run_month
+DF-DOC-093,retention_action,run_month,TEXT,char(7),7,Yes,None,None,UK,None,Workbench,None,No,"Month of the JOB-17 run, YYYY-MM"
+DF-DOC-094,retention_action,action,LOV,varchar(12),12,Yes,None,LOV-RETENTION-ACTION,None,None,Workbench,None,No,"Archived, listed, held or exception"
+DF-DOC-095,retention_action,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,DOCRET decision log entry for an archive
+DF-REF-252,merge_field,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the merge field
+DF-REF-253,merge_field,merge_code,TEXT,varchar(40),40,Yes,None,None,UK,None,Workbench,None,No,"Code written in the template body, for example CASE_NO"
+DF-REF-254,merge_field,source_entity,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Entity that holds the value
+DF-REF-255,merge_field,source_field,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,Field that holds the value
+DF-REF-256,merge_field,field_id,TEXT,varchar(16),16,Yes,None,None,None,None,Workbench,None,No,BR Field ID of the source field in the data dictionary
+DF-REF-257,merge_field,is_required,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when generation holds on an empty value
+DF-REF-258,merge_field,personal_data,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,"True when the value is personal data, detokenized only at generation"
+DF-REF-259,merge_field,catalog_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,Version of the catalog load
+DF-REF-260,merge_field,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the catalog version comes into force
+DF-DOC-096,signature_request,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the signature request
+DF-DOC-097,signature_request,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,Case
+DF-DOC-098,signature_request,treatment_id,CROSS_REF,uuid,,No,None,None,FK,treatment,Workbench,None,No,Treatment the agreement belongs to
+DF-DOC-099,signature_request,document_id,CROSS_REF,uuid,,Yes,None,None,FK,document,Workbench,None,No,Generated document sent for signature
+DF-DOC-100,signature_request,person_key,TEXT,varchar(255),255,Yes,None,None,FK,v_ace_customer (business key; no foreign key),ACE,public.customer.person_key,No,Signing party
+DF-DOC-101,signature_request,method,LOV,varchar(15),15,Yes,None,LOV-SIGN-METHOD,None,None,Workbench,None,No,"E-signature, branch or paper"
+DF-DOC-102,signature_request,status,LOV,varchar(15),15,Yes,QUEUED,LOV-SIGN-STATUS,None,None,Workbench,None,No,"Queued, sent, signed, declined or expired"
+DF-DOC-104,signature_request,sent_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the request was sent
+DF-DOC-105,signature_request,signed_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the party signed
+DF-DOC-106,signature_request,signed_document_id,CROSS_REF,uuid,,No,None,None,FK,document,Workbench,None,No,Signed copy or branch scan
+DF-DOC-107,signature_request,expires_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,End of the offer validity
+DF-DEC-032,approval,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the approval
+DF-DEC-033,approval,case_id,CROSS_REF,uuid,,Yes,None,None,FK,recovery_case,Workbench,None,No,The case
+DF-DEC-034,approval,decision_code,LOV,varchar(8),8,Yes,None,LOV-DECISION,None,None,Workbench,None,No,Decision to approve
+DF-DEC-035,approval,regulation_item,TEXT,varchar(10),10,No,None,None,None,None,Workbench,None,No,"Delegation item, for example 2.1.1"
+DF-DEC-036,approval,capability_area,LOV,varchar(30),30,Yes,None,LOV-CAPABILITY,None,None,Workbench,None,No,Area whose A letter the approver needs
+DF-DEC-037,approval,route_role_code,LOV,varchar(20),20,No,None,LOV-ROLE,None,None,Workbench,None,No,"Role for a decision with no amount limit, for example RW-LITOFF"
+DF-DEC-038,approval,approval_level,LOV,varchar(4),4,No,None,LOV-APPROVAL-LEVEL,None,None,Workbench,None,No,Required level L1 to L6
+DF-DEC-039,approval,delegation_limit_id,CROSS_REF,uuid,,No,None,None,FK,delegation_limit,Workbench,None,No,Delegation row that covers the item
+DF-DEC-040,approval,limit_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Delegation version the item routed under
+DF-DEC-041,approval,product_group,LOV,varchar(15),15,Yes,None,LOV-PRODUCT,None,None,Workbench,None,No,Product group
+DF-DEC-042,approval,amount,NUMBER,"numeric(18,2)","18,2",No,None,None,None,None,Workbench,None,No,"Principal used for the limit, baht"
+DF-DEC-043,approval,terms,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Proposed and changed terms
+DF-DEC-044,approval,prepared_by,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Person or service identity that prepared the item
+DF-DEC-045,approval,assigned_user_id,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Holder the item is assigned to; empty for a role route
+DF-DEC-046,approval,status,LOV,varchar(20),20,Yes,WAITING,LOV-APPROVAL-STATUS,None,None,Workbench,None,No,"Waiting, held with no limit, approved, refused or returned"
+DF-DEC-047,approval,due_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the service level ends
+DF-DEC-048,approval,escalation_level,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Times escalated
+DF-DEC-049,approval,source_type,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,"What asked for approval, for example NOTICE or TREATMENT"
+DF-DEC-050,approval,source_ref,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,"ID of the source record, for example the notice ID"
+DF-DEC-051,approval,rule_id,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Rule that asked for approval
+DF-DEC-052,approval,rule_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Version of that rule
+DF-DEC-053,approval,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,Decision log entry of the outcome
+DF-REF-261,payment_match_rule,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Retired by D-RCV-36. Record identifier of the payment match rule
+DF-REF-262,payment_match_rule,rule_code,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Retired by D-RCV-36. Row code, for example EXACT"
+DF-REF-263,payment_match_rule,rule_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Retired by D-RCV-36. Parameter version, for example PM-2026.12"
+DF-REF-264,payment_match_rule,match_type,LOV,varchar(15),15,Yes,None,LOV-MATCH-TYPE,None,None,Workbench,None,No,"Retired by D-RCV-36. Exact, window or partial"
+DF-REF-265,payment_match_rule,amount_tolerance_pct,NUMBER,"numeric(5,2)","5,2",Yes,0,None,None,None,Workbench,None,No,"Retired by D-RCV-36. Allowed difference from the installment, 0 to 100 percent"
+DF-REF-266,payment_match_rule,window_days_before,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Retired by D-RCV-36. Days before the due date a payment may arrive
+DF-REF-267,payment_match_rule,window_days_after,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Retired by D-RCV-36. Days after the due date a payment may arrive
+DF-REF-268,payment_match_rule,grace_days,NUMBER,integer,,Yes,0,None,None,None,Workbench,None,No,Retired by D-RCV-36. Days after the due date before PaymentMissed is raised
+DF-REF-269,payment_match_rule,partial_floor_pct,NUMBER,"numeric(5,2)","5,2",No,None,None,None,None,Workbench,None,No,"Retired by D-RCV-36. Lowest share of the installment matched as partial, percent"
+DF-REF-270,payment_match_rule,priority,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Retired by D-RCV-36. Order in which rows are tried
+DF-REF-271,payment_match_rule,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Retired by D-RCV-36. Date the version comes into force
+DF-REF-272,payment_match_rule,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Retired by D-RCV-36. Last date the version is in force
+DF-REF-273,payment_match_rule,approved_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Retired by D-RCV-36. Credit Administration approver
+DF-RPT-031,measure_definition,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the measure definition
+DF-RPT-032,measure_definition,measure_code,TEXT,varchar(40),40,Yes,None,None,UK,None,Workbench,None,No,Measure code
+DF-RPT-033,measure_definition,name,TEXT,varchar(120),120,Yes,None,None,None,None,Workbench,None,No,Measure name
+DF-RPT-034,measure_definition,formula,TEXT,varchar(1000),1000,Yes,None,None,None,None,Workbench,None,No,Formula in plain terms
+DF-RPT-035,measure_definition,data_product,LOV,varchar(25),25,Yes,None,LOV-DATA-PRODUCT,None,None,Workbench,None,No,Data product the measure reads
+DF-RPT-036,measure_definition,unit,LOV,varchar(10),10,Yes,None,LOV-MEASURE-UNIT,None,None,Workbench,None,No,"Count, baht, days or percent"
+DF-RPT-037,measure_definition,definition_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Definition version, for example MD-2026.11"
+DF-RPT-038,measure_definition,approved_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Tribe lead who approved
+DF-RPT-039,measure_definition,approved_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,Approval time
+DF-RPT-040,measure_definition,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the definition comes into force
+DF-RPT-041,measure_snapshot,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the measure snapshot
+DF-RPT-042,measure_snapshot,measure_code,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,"Measure, from measure_definition"
+DF-RPT-043,measure_snapshot,definition_version,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,Definition version used
+DF-RPT-044,measure_snapshot,business_date,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Business date measured
+DF-RPT-045,measure_snapshot,product_group,LOV,varchar(15),15,No,None,LOV-PRODUCT,None,None,Workbench,None,No,Product group
+DF-RPT-046,measure_snapshot,dimension_code,LOV,varchar(20),20,No,None,LOV-MEASURE-DIM,None,None,Workbench,None,No,"Dimension: route, age band, queue, stage or agent"
+DF-RPT-047,measure_snapshot,dimension_value,TEXT,varchar(60),60,No,None,None,None,None,Workbench,None,No,Value of the dimension
+DF-RPT-048,measure_snapshot,value,NUMBER,"numeric(18,4)","18,4",Yes,None,None,None,None,Workbench,None,No,Measure value
+DF-RPT-049,measure_snapshot,case_count,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Cases behind the value
+DF-RPT-050,measure_snapshot,is_baseline,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True for a row of the baseline date
+DF-RPT-051,measure_snapshot,frozen,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when the row may not change
+DF-RPT-052,measure_snapshot,published_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When published
+DF-RPT-053,measure_publish,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the measure publish
+DF-RPT-054,measure_publish,business_date,DATE,date,,Yes,None,None,UK,None,Workbench,None,No,Business date
+DF-RPT-055,measure_publish,status,LOV,varchar(10),10,Yes,None,LOV-MEASURE-PUBLISH,None,None,Workbench,None,No,Published or held
+DF-RPT-056,measure_publish,case_list_count,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Open cases on the case list at the cut-off
+DF-RPT-057,measure_publish,dashboard_count,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Open cases in the dashboard facts
+DF-RPT-058,measure_publish,held_reason,TEXT,varchar(200),200,No,None,None,None,None,Workbench,None,No,Why the publish is held
+DF-AGT-001,agent_policy,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the agent policy version
+DF-AGT-002,agent_policy,agent_code,LOV,varchar(30),30,Yes,None,LOV-AGENT,UK,None,Workbench,None,No,"Agent or model, for example INTAKE, SCREENING, LEGAL_DOC, EXTRACT, TDR_OFFER"
+DF-AGT-003,agent_policy,policy_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Policy version, for example P1"
+DF-AGT-004,agent_policy,model_code,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,Model deployment the agent calls through the gateway
+DF-AGT-005,agent_policy,model_version,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,Model version the policy uses
+DF-AGT-006,agent_policy,output_schema_ref,TEXT,varchar(400),400,Yes,None,None,None,None,Workbench,None,No,Reference to the JSON Schema the answer must meet
+DF-AGT-007,agent_policy,allowed_tools,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Tools the agent may call through the tool gateway
+DF-AGT-008,agent_policy,autonomy_mode,LOV,varchar(10),10,Yes,OFF,LOV-AUTONOMY,None,None,Workbench,None,No,"Off, shadow or L1"
+DF-AGT-009,agent_policy,segment_product_group,LOV,varchar(15),15,No,None,LOV-PRODUCT,None,None,Workbench,None,No,Product group the mode applies to; empty for all
+DF-AGT-010,agent_policy,segment_region_code,LOV,varchar(10),10,No,None,LOV-REGION,None,None,Workbench,None,No,Region the mode applies to; empty for all
+DF-AGT-011,agent_policy,confidence_floor,NUMBER,"numeric(5,4)","5,4",Yes,None,None,None,None,Workbench,None,No,Answers below this confidence fall back or are marked for review
+DF-AGT-012,agent_policy,timeout_seconds,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Seconds the gateway waits before the rule result is used
+DF-AGT-013,agent_policy,daily_cost_cap_thb,NUMBER,"numeric(12,2)","12,2",Yes,None,None,None,None,Workbench,None,No,"Daily model cost limit per agent, baht"
+DF-AGT-014,agent_policy,price_per_1k_tokens_thb,NUMBER,"numeric(10,4)","10,4",Yes,None,None,None,None,Workbench,None,No,"Model price per 1,000 tokens, baht"
+DF-AGT-015,agent_policy,alert_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Role that receives cost and drift alerts
+DF-AGT-016,agent_policy,review_date,DATE,date,,No,None,None,None,None,Workbench,None,No,"Date the version is reviewed again, for a parked or shadow agent"
+DF-AGT-017,agent_policy,evaluation_run_id,CROSS_REF,uuid,,No,None,None,FK,agent_evaluation_run,Workbench,None,No,Evaluation run an autonomy step is based on
+DF-AGT-018,agent_policy,promotion_conditions,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Conditions the evaluation must meet for the stated mode
+DF-AGT-019,agent_policy,watch_measures,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Measures and limits to watch after the step, including the drift threshold and minimum feedback"
+DF-AGT-020,agent_policy,fallback_rule,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,"Rule applied when the agent does not answer, for example R-UNI-32"
+DF-AGT-021,agent_policy,status,LOV,varchar(12),12,Yes,LOADED,LOV-CONFIG-STATUS,None,None,Workbench,None,No,"Loaded, approved or retired"
+DF-AGT-022,agent_policy,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version takes effect
+DF-AGT-023,agent_policy,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-AGT-024,agent_policy,loaded_by,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who loaded the version
+DF-AGT-025,agent_policy,approved_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who approved the version
+DF-AGT-026,agent_prompt,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the agent prompt version
+DF-AGT-027,agent_prompt,agent_code,LOV,varchar(30),30,Yes,None,LOV-AGENT,UK,None,Workbench,None,No,"Agent or model, for example INTAKE, SCREENING, LEGAL_DOC, EXTRACT, TDR_OFFER"
+DF-AGT-028,agent_prompt,prompt_version,TEXT,varchar(20),20,Yes,None,None,UK,None,Workbench,None,No,"Prompt version, for example PR1"
+DF-AGT-029,agent_prompt,body_text,TEXT,text,,Yes,None,None,None,None,Workbench,None,No,Prompt text with placeholders; no personal data
+DF-AGT-030,agent_prompt,body_hash,TEXT,char(64),64,Yes,None,None,None,None,Workbench,None,No,SHA-256 of the prompt text
+DF-AGT-031,agent_prompt,status,LOV,varchar(12),12,Yes,LOADED,LOV-CONFIG-STATUS,None,None,Workbench,None,No,"Loaded, approved or retired"
+DF-AGT-032,agent_prompt,valid_from,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Date the version takes effect
+DF-AGT-033,agent_prompt,valid_to,DATE,date,,No,None,None,None,None,Workbench,None,No,Last date the version is in force
+DF-AGT-034,agent_prompt,loaded_by,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who loaded the version
+DF-AGT-035,agent_prompt,approved_by,USER_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who approved the version
+DF-AGT-036,agent_run,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the agent run
+DF-AGT-037,agent_run,agent_code,LOV,varchar(30),30,Yes,None,LOV-AGENT,None,None,Workbench,None,No,"Agent or model, for example INTAKE, SCREENING, LEGAL_DOC, EXTRACT, TDR_OFFER"
+DF-AGT-038,agent_run,agent_version,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,"Agent, policy and prompt version as <agent>@<policy>/<prompt>"
+DF-AGT-039,agent_run,prompt_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Prompt version used
+DF-AGT-040,agent_run,model_version,TEXT,varchar(40),40,Yes,None,None,None,None,Workbench,None,No,Model version used
+DF-AGT-041,agent_run,case_id,CROSS_REF,uuid,,No,None,None,FK,recovery_case,Workbench,None,No,The case the run is for
+DF-AGT-042,agent_run,subject_id,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,"Document, legal action or treatment the run is about, where not the case"
+DF-AGT-043,agent_run,autonomy_mode,LOV,varchar(10),10,Yes,None,LOV-AUTONOMY,None,None,Workbench,None,No,Mode the run used: shadow or L1
+DF-AGT-044,agent_run,trigger_event,TEXT,varchar(30),30,Yes,None,None,None,None,Workbench,None,No,"CaseCreated, DocumentStored, STEP or EVALUATION"
+DF-AGT-045,agent_run,idempotency_key,TEXT,varchar(120),120,Yes,None,None,UK,None,Workbench,None,No,Unique key of the run request
+DF-AGT-046,agent_run,status,LOV,varchar(20),20,Yes,None,LOV-AGENT-RUN,None,None,Workbench,None,No,"Answered, timed out, guardrail failed, below floor, tool unavailable, model error or disabled"
+DF-AGT-047,agent_run,fallback,BOOLEAN,boolean,,Yes,false,None,None,None,Workbench,None,No,True when the rule result was used instead of the answer
+DF-AGT-048,agent_run,guardrail_result,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Failed check codes and details
+DF-AGT-049,agent_run,output,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,"Checked answer, masked; never returned for shadow runs"
+DF-AGT-050,agent_run,confidence,NUMBER,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,Confidence of the answer
+DF-AGT-051,agent_run,latency_ms,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,"Time from call to answer or timeout, milliseconds"
+DF-AGT-052,agent_run,tokens_in,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Input tokens returned by the endpoint
+DF-AGT-053,agent_run,tokens_out,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Output tokens returned by the endpoint
+DF-AGT-054,agent_run,cost_thb,NUMBER,"numeric(12,4)","12,4",No,None,None,None,None,Workbench,None,No,"Cost of the run, baht"
+DF-AGT-055,agent_run,data_as_of,DATE,date,,No,None,None,None,None,Workbench,None,No,Oldest business date of the inputs used
+DF-AGT-056,agent_run,run_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the run started
+DF-AGT-057,agent_run,evaluation_run_id,CROSS_REF,uuid,,No,None,None,FK,agent_evaluation_run,Workbench,None,No,"Evaluation run the run belongs to, if any"
+DF-AGT-058,agent_run,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,Decision log entry written for the step that used the run
+DF-AGT-059,agent_run,segment_product_group,LOV,varchar(15),15,No,None,LOV-PRODUCT,None,None,Workbench,None,No,Product group of the case at run time
+DF-AGT-060,agent_run,segment_region_code,LOV,varchar(10),10,No,None,LOV-REGION,None,None,Workbench,None,No,Region of the case at run time
+DF-AGT-061,agent_sample,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the sample row
+DF-AGT-062,agent_sample,agent_code,LOV,varchar(30),30,Yes,None,LOV-AGENT,None,None,Workbench,None,No,"Agent or model, for example INTAKE, SCREENING, LEGAL_DOC, EXTRACT, TDR_OFFER"
+DF-AGT-063,agent_sample,sample_code,TEXT,varchar(30),30,Yes,None,None,UK,None,Workbench,None,No,"Sample code, for example INTAKE-S1"
+DF-AGT-064,agent_sample,sample_version,NUMBER,integer,,Yes,None,None,UK,None,Workbench,None,No,Version of the sample
+DF-AGT-065,agent_sample,subject_type,LOV,varchar(15),15,Yes,None,LOV-SUBJECT-TYPE,None,None,Workbench,None,No,"Case, document or legal action"
+DF-AGT-066,agent_sample,subject_id,CROSS_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,"The case, document or legal action labeled"
+DF-AGT-067,agent_sample,label_key,TEXT,varchar(60),60,Yes,None,None,UK,None,Workbench,None,No,"Gap type, deviation code, field name or checklist item"
+DF-AGT-068,agent_sample,expected_value,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,Labeled value; SHA-256 hash for personal values
+DF-AGT-069,agent_sample,labeled_by,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who labeled the row
+DF-AGT-070,agent_evaluation_run,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the evaluation run
+DF-AGT-071,agent_evaluation_run,agent_code,LOV,varchar(30),30,Yes,None,LOV-AGENT,None,None,Workbench,None,No,"Agent or model, for example INTAKE, SCREENING, LEGAL_DOC, EXTRACT, TDR_OFFER"
+DF-AGT-072,agent_evaluation_run,sample_code,TEXT,varchar(30),30,Yes,None,None,None,None,Workbench,None,No,Sample used
+DF-AGT-073,agent_evaluation_run,sample_version,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Sample version used
+DF-AGT-074,agent_evaluation_run,policy_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Policy version evaluated
+DF-AGT-075,agent_evaluation_run,prompt_version,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Prompt version evaluated
+DF-AGT-076,agent_evaluation_run,model_version,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Model version evaluated
+DF-AGT-077,agent_evaluation_run,status,LOV,varchar(12),12,Yes,RUNNING,LOV-EVAL-STATUS,None,None,Workbench,None,No,"Running, done or failed"
+DF-AGT-078,agent_evaluation_run,started_at,DATE,timestamptz,,Yes,None,None,None,None,Workbench,None,No,When the run started
+DF-AGT-079,agent_evaluation_run,finished_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the run ended
+DF-AGT-080,agent_evaluation_run,requested_by,USER_REF,uuid,,Yes,None,None,None,None,Workbench,None,No,Who started the run
+DF-AGT-081,agent_evaluation_run,total_cost_thb,NUMBER,"numeric(12,4)","12,4",No,None,None,None,None,Workbench,None,No,"Cost of all runs in the evaluation, baht"
+DF-AGT-082,agent_evaluation_run,p95_latency_ms,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,"95th percentile latency, milliseconds"
+DF-AGT-083,agent_evaluation_run,failure_counts,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Count of runs by failure status and check code
+DF-AGT-084,agent_evaluation_run,proposal,TEXT,jsonb,,No,None,None,None,None,Workbench,None,No,Proposed approach and confidence threshold per document type
+DF-AGT-085,agent_evaluation_run,review_count,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,"Proposals below the confidence floor, scored separately"
+DF-AGT-086,agent_evaluation,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the evaluation score
+DF-AGT-087,agent_evaluation,evaluation_run_id,CROSS_REF,uuid,,Yes,None,None,FK,agent_evaluation_run,Workbench,None,No,Evaluation run the score belongs to
+DF-AGT-088,agent_evaluation,approach,LOV,varchar(20),20,Yes,None,LOV-EXTRACT-APPROACH,None,None,Workbench,None,No,"Agent, OCR template, model, or OCR and model"
+DF-AGT-089,agent_evaluation,label_key,TEXT,varchar(60),60,Yes,None,None,None,None,Workbench,None,No,"Gap type, code, field or item scored"
+DF-AGT-090,agent_evaluation,sample_size,NUMBER,integer,,Yes,None,None,None,None,Workbench,None,No,Labeled subjects scored
+DF-AGT-091,agent_evaluation,true_positive,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,True positives
+DF-AGT-092,agent_evaluation,false_positive,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,False positives
+DF-AGT-093,agent_evaluation,false_negative,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,False negatives
+DF-AGT-094,agent_evaluation,agreement_rate,NUMBER,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,Share of subjects where the answer equals the label
+DF-AGT-095,agent_evaluation,precision_value,FORMULA,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,TP / (TP + FP)
+DF-AGT-096,agent_evaluation,recall_value,FORMULA,"numeric(5,4)","5,4",No,None,None,None,None,Workbench,None,No,TP / (TP + FN)
+DF-AGT-097,agent_feedback,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the feedback
+DF-AGT-098,agent_feedback,agent_run_id,CROSS_REF,uuid,,Yes,None,None,FK,agent_run,Workbench,None,No,Agent run the feedback is on
+DF-AGT-099,agent_feedback,item_key,TEXT,varchar(20),20,Yes,None,None,None,None,Workbench,None,No,"SUMMARY for the intake summary, or the deviation code"
+DF-AGT-100,agent_feedback,verdict,LOV,varchar(10),10,Yes,None,LOV-FEEDBACK,None,None,Workbench,None,No,"Accepted, corrected or rejected"
+DF-AGT-101,agent_feedback,reason,TEXT,varchar(1000),1000,No,None,None,None,None,Workbench,None,No,Reason for a correction or a rejection
+DF-AGT-102,agent_feedback,decision_log_id,CROSS_REF,uuid,,No,None,None,FK,decision_log_entry,Workbench,None,No,Decision log entry written for the feedback
+DF-AGT-103,agent_alert,id,TEXT,uuid,,Yes,gen_random_uuid(),None,PK,None,Workbench,None,No,Record identifier of the alert
+DF-AGT-104,agent_alert,agent_code,LOV,varchar(30),30,Yes,None,LOV-AGENT,None,None,Workbench,None,No,"Agent or model, for example INTAKE, SCREENING, LEGAL_DOC, EXTRACT, TDR_OFFER"
+DF-AGT-105,agent_alert,alert_type,LOV,varchar(12),12,Yes,None,LOV-AGENT-ALERT,None,None,Workbench,None,No,Cost cap or drift
+DF-AGT-106,agent_alert,segment,TEXT,varchar(30),30,Yes,None,None,None,None,Workbench,None,No,"Product group and region, or ALL"
+DF-AGT-107,agent_alert,business_date,DATE,date,,Yes,None,None,None,None,Workbench,None,No,Business date measured
+DF-AGT-108,agent_alert,measured_value,NUMBER,"numeric(14,4)","14,4",Yes,None,None,None,None,Workbench,None,No,Cost in baht or acceptance rate measured
+DF-AGT-109,agent_alert,threshold_value,NUMBER,"numeric(14,4)","14,4",Yes,None,None,None,None,Workbench,None,No,Limit the value was compared with
+DF-AGT-110,agent_alert,sent_to_role,LOV,varchar(20),20,Yes,None,LOV-ROLE,None,None,Workbench,None,No,Role notified
+DF-AGT-111,agent_alert,sent_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the notification was sent; empty until sent
+DF-ACE-001,v_ace_account,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.account_key,No,Read from ACE through v_ace_account
+DF-ACE-002,v_ace_account,account_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.account_code,No,Read from ACE through v_ace_account
+DF-ACE-003,v_ace_account,account_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.account_name,No,Read from ACE through v_ace_account
+DF-ACE-004,v_ace_account,account_status,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.account_status,No,Read from ACE through v_ace_account
+DF-ACE-005,v_ace_account,account_status_date,DATE,date,,No,None,None,None,None,ACE,public.account.account_status_date,No,Read from ACE through v_ace_account
+DF-ACE-006,v_ace_account,contract_no,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.contract_number,No,Read from ACE through v_ace_account
+DF-ACE-007,v_ace_account,contract_date,DATE,date,,No,None,None,None,None,ACE,public.account.contract_date,No,Read from ACE through v_ace_account
+DF-ACE-008,v_ace_account,product_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.product_key,No,Read from ACE through v_ace_account
+DF-ACE-009,v_ace_account,product_type,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.product_type,No,Read from ACE through v_ace_account
+DF-ACE-010,v_ace_account,product_category,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.product_category,No,Read from ACE through v_ace_account
+DF-ACE-011,v_ace_account,product_category_efs,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.product_category_efs,No,Read from ACE through v_ace_account
+DF-ACE-012,v_ace_account,branch_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.current_branch,No,Read from ACE through v_ace_account
+DF-ACE-013,v_ace_account,branch_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.branch.branch_name,No,Read from ACE through v_ace_account
+DF-ACE-014,v_ace_account,oc_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.oc_code,No,Read from ACE through v_ace_account
+DF-ACE-015,v_ace_account,company_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.company_code,No,Read from ACE through v_ace_account
+DF-ACE-016,v_ace_account,collection_officer,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.collection_officer,No,Read from ACE through v_ace_account
+DF-ACE-017,v_ace_account,collection_phase,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.collection_phase,No,Read from ACE through v_ace_account
+DF-ACE-018,v_ace_account,days_past_due,NUMBER,integer,,No,None,None,None,None,ACE,public.account.delay_days,No,Read from ACE through v_ace_account
+DF-ACE-019,v_ace_account,classification,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.loan_classification,No,Read from ACE through v_ace_account
+DF-ACE-020,v_ace_account,total_balance,NUMBER,integer,,No,None,None,None,None,ACE,public.account.total_balance,No,Read from ACE through v_ace_account
+DF-ACE-021,v_ace_account,accounting_balance,NUMBER,integer,,No,None,None,None,None,ACE,public.account.accounting_balance,No,Read from ACE through v_ace_account
+DF-ACE-022,v_ace_account,past_due_amount,NUMBER,integer,,No,None,None,None,None,ACE,public.account.past_due_amount,No,Read from ACE through v_ace_account
+DF-ACE-023,v_ace_account,total_interest_fin_charge,NUMBER,integer,,No,None,None,None,None,ACE,public.account.total_interest_fin_charge,No,Read from ACE through v_ace_account
+DF-ACE-024,v_ace_account,collections_fee,NUMBER,integer,,No,None,None,None,None,ACE,public.account.collections_fee,No,Read from ACE through v_ace_account
+DF-ACE-025,v_ace_account,interest_rate,NUMBER,integer,,No,None,None,None,None,ACE,public.account.interest_rate,No,Read from ACE through v_ace_account
+DF-ACE-026,v_ace_account,last_payment_date,DATE,date,,No,None,None,None,None,ACE,public.account.last_payment_date,No,Read from ACE through v_ace_account
+DF-ACE-027,v_ace_account,last_payment_amount,NUMBER,integer,,No,None,None,None,None,ACE,public.account.last_payment_amount,No,Read from ACE through v_ace_account
+DF-ACE-028,v_ace_account,next_installment_date,DATE,date,,No,None,None,None,None,ACE,public.account.next_installment_date,No,Read from ACE through v_ace_account
+DF-ACE-029,v_ace_account,next_installment_amount,NUMBER,integer,,No,None,None,None,None,ACE,public.account.next_installment_amount,No,Read from ACE through v_ace_account
+DF-ACE-030,v_ace_account,last_tdr_date,DATE,date,,No,None,None,None,None,ACE,public.account.last_tdr_date,No,Read from ACE through v_ace_account
+DF-ACE-031,v_ace_account,tdr_flag,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.is_restructured,No,Read from ACE through v_ace_account
+DF-ACE-032,v_ace_account,rescheduled_flag,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.is_rescheduled,No,Read from ACE through v_ace_account
+DF-ACE-033,v_ace_account,number_reschedules,NUMBER,integer,,No,None,None,None,None,ACE,public.account.number_reschedules,No,Read from ACE through v_ace_account
+DF-ACE-034,v_ace_account,tdr_aging,NUMBER,integer,,No,None,None,None,None,ACE,public.account.tdr_aging,No,Read from ACE through v_ace_account
+DF-ACE-035,v_ace_account,principle_not_reduce,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.principle_not_reduce,No,Read from ACE through v_ace_account
+DF-ACE-036,v_ace_account,data_as_of,DATE,date,,No,None,None,None,None,ACE,public.account.core_banking_system_date,No,Read from ACE through v_ace_account
+DF-ACE-037,v_ace_account,days_since_last_contact,NUMBER,integer,,No,None,None,None,None,ACE,public.account.days_since_last_contact,No,Read from ACE through v_ace_account
+DF-ACE-038,v_ace_account,days_since_last_collection_activity,NUMBER,integer,,No,None,None,None,None,ACE,public.account.days_since_last_collection_activity,No,Read from ACE through v_ace_account
+DF-ACE-039,v_ace_account,relationship_manager,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.rm_name,No,Read from ACE through v_ace_account
+DF-ACE-040,v_ace_account,relationship_manager_phone,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.rm_phone_number,No,Read from ACE through v_ace_account
+DF-ACE-041,v_ace_account,special_memo,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.special_memo,No,Read from ACE through v_ace_account
+DF-ACE-042,v_ace_account,expiry_date,DATE,date,,No,None,None,None,None,ACE,public.account.expiry_date,No,Read from ACE through v_ace_account
+DF-ACE-043,v_ace_payment,payment_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.pay_key,No,Read from ACE through v_ace_payment
+DF-ACE-044,v_ace_payment,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.account_key,No,Read from ACE through v_ace_payment
+DF-ACE-045,v_ace_payment,payment_date,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.pay_date,No,Read from ACE through v_ace_payment
+DF-ACE-046,v_ace_payment,payment_amount,NUMBER,integer,,No,None,None,None,None,ACE,public.payment.total_amount,No,Read from ACE through v_ace_payment
+DF-ACE-047,v_ace_payment,capital_amount,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.capital_amount,No,Read from ACE through v_ace_payment
+DF-ACE-048,v_ace_payment,interest_amount,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.payinterest,No,Read from ACE through v_ace_payment
+DF-ACE-049,v_ace_payment,expense_amount,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.payexpenses,No,Read from ACE through v_ace_payment
+DF-ACE-050,v_ace_payment,commission_amount,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.paycommission,No,Read from ACE through v_ace_payment
+DF-ACE-051,v_ace_payment,payment_channel,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.pay_type,No,Read from ACE through v_ace_payment
+DF-ACE-052,v_ace_payment,description,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.description,No,Read from ACE through v_ace_payment
+DF-ACE-053,v_ace_payment,comments,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.payment.comments,No,Read from ACE through v_ace_payment
+DF-ACE-054,v_ace_payment,data_as_of,DATE,date,,No,None,None,None,None,ACE,public.account.core_banking_system_date,No,Read from ACE through v_ace_payment
+DF-ACE-055,v_ace_customer,cif_no,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.person_key,No,Read from ACE through v_ace_customer
+DF-ACE-056,v_ace_customer,person_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.person_key,No,Read from ACE through v_ace_customer
+DF-ACE-057,v_ace_customer,first_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.first_name,No,Read from ACE through v_ace_customer
+DF-ACE-058,v_ace_customer,last_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.surname,No,Read from ACE through v_ace_customer
+DF-ACE-059,v_ace_customer,date_of_birth,DATE,date,,No,None,None,None,None,ACE,public.customer.birth_date,No,Read from ACE through v_ace_customer
+DF-ACE-060,v_ace_customer,deceased_date,DATE,date,,No,None,None,None,None,ACE,public.customer.deceased_date,No,Read from ACE through v_ace_customer
+DF-ACE-061,v_ace_customer,deceased_flag,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.is_deceased,No,Read from ACE through v_ace_customer
+DF-ACE-062,v_ace_customer,gender,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.gender,No,Read from ACE through v_ace_customer
+DF-ACE-063,v_ace_customer,nationality,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.nationality,No,Read from ACE through v_ace_customer
+DF-ACE-064,v_ace_customer,marital_status,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.marital_status,No,Read from ACE through v_ace_customer
+DF-ACE-065,v_ace_customer,occupation,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.occupation,No,Read from ACE through v_ace_customer
+DF-ACE-066,v_ace_customer,spouse_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.spouse_name,No,Read from ACE through v_ace_customer
+DF-ACE-067,v_ace_customer,customer_status,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.status,No,Read from ACE through v_ace_customer
+DF-ACE-068,v_ace_customer,category,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.category,No,Read from ACE through v_ace_customer
+DF-ACE-069,v_ace_customer,country_of_residence,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.country_of_residence,No,Read from ACE through v_ace_customer
+DF-ACE-070,v_ace_customer,is_staff,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.is_staff,No,Read from ACE through v_ace_customer
+DF-ACE-071,v_ace_customer,branch_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.branch,No,Read from ACE through v_ace_customer
+DF-ACE-072,v_ace_customer,vat_number,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.vat_number,No,Read from ACE through v_ace_customer
+DF-ACE-073,v_ace_customer,id_no_masked,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.identification_number,No,Read from ACE through v_ace_customer
+DF-ACE-074,v_ace_customer,id_no_last4,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.customer.identification_number,No,Read from ACE through v_ace_customer
+DF-ACE-075,v_ace_contact,contact_type,TEXT,integer,,No,None,None,None,None,ACE,None,No,Read from ACE through v_ace_contact
+DF-ACE-076,v_ace_contact,contact_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.phone.phone_key,No,Read from ACE through v_ace_contact
+DF-ACE-077,v_ace_contact,person_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.phone.person_key,No,Read from ACE through v_ace_contact
+DF-ACE-078,v_ace_contact,contact_value,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.phone.phone_number,No,Read from ACE through v_ace_contact
+DF-ACE-079,v_ace_contact,contact_value_masked,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.phone.phone_number,No,Read from ACE through v_ace_contact
+DF-ACE-080,v_ace_contact,usage_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.phone.contact_usage,No,Read from ACE through v_ace_contact
+DF-ACE-081,v_ace_contact,city,TEXT,integer,,No,None,None,None,None,ACE,None,No,Read from ACE through v_ace_contact
+DF-ACE-082,v_ace_contact,post_code,TEXT,integer,,No,None,None,None,None,ACE,None,No,Read from ACE through v_ace_contact
+DF-ACE-083,v_ace_contact,country,TEXT,integer,,No,None,None,None,None,ACE,None,No,Read from ACE through v_ace_contact
+DF-ACE-084,v_ace_ca_relation,person_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.ca_relation.person_key,No,Read from ACE through v_ace_ca_relation
+DF-ACE-085,v_ace_ca_relation,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.ca_relation.account_key,No,Read from ACE through v_ace_ca_relation
+DF-ACE-086,v_ace_ca_relation,relation_type,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.ca_relation.relation_type,No,Read from ACE through v_ace_ca_relation
+DF-ACE-087,v_ace_ca_relation,amount_of_guarantee,NUMBER,integer,,No,None,None,None,None,ACE,public.ca_relation.amount_of_guarantee,No,Read from ACE through v_ace_ca_relation
+DF-ACE-088,v_ace_ca_relation,date_of_guarantee,DATE,date,,No,None,None,None,None,ACE,public.ca_relation.date_of_guarantee,No,Read from ACE through v_ace_ca_relation
+DF-ACE-089,v_ace_aa_relation,parent_account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.aa_relation.parent_account_key,No,Read from ACE through v_ace_aa_relation
+DF-ACE-090,v_ace_aa_relation,child_account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.aa_relation.child_account_key,No,Read from ACE through v_ace_aa_relation
+DF-ACE-091,v_ace_collateral,collateral_no,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.collateral.asset_key,No,Read from ACE through v_ace_collateral
+DF-ACE-092,v_ace_collateral,asset_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.collateral.asset_key,No,Read from ACE through v_ace_collateral
+DF-ACE-093,v_ace_collateral,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.collateral.account_key,No,Read from ACE through v_ace_collateral
+DF-ACE-094,v_ace_collateral,collateral_value,NUMBER,integer,,No,None,None,None,None,ACE,public.collateral.collateral_value,No,Read from ACE through v_ace_collateral
+DF-ACE-095,v_ace_collateral,register_date,DATE,date,,No,None,None,None,None,ACE,public.collateral.register_date,No,Read from ACE through v_ace_collateral
+DF-ACE-096,v_ace_collateral,in_active,BOOLEAN,boolean,,No,None,None,None,None,ACE,public.collateral.in_active,No,Read from ACE through v_ace_collateral
+DF-ACE-097,v_ace_collateral,collateral_type,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.asset_type,No,Read from ACE through v_ace_collateral
+DF-ACE-098,v_ace_collateral,description,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.description,No,Read from ACE through v_ace_collateral
+DF-ACE-099,v_ace_asset,asset_ref,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.asset_key,No,Read from ACE through v_ace_asset
+DF-ACE-100,v_ace_asset,asset_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.asset_key,No,Read from ACE through v_ace_asset
+DF-ACE-101,v_ace_asset,asset_type,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.asset_type,No,Read from ACE through v_ace_asset
+DF-ACE-102,v_ace_asset,description,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.description,No,Read from ACE through v_ace_asset
+DF-ACE-103,v_ace_asset,address,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.address,No,Read from ACE through v_ace_asset
+DF-ACE-104,v_ace_asset,town,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.town,No,Read from ACE through v_ace_asset
+DF-ACE-105,v_ace_asset,post_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.zipcode,No,Read from ACE through v_ace_asset
+DF-ACE-106,v_ace_asset,county,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.county,No,Read from ACE through v_ace_asset
+DF-ACE-107,v_ace_asset,country,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.asset.country,No,Read from ACE through v_ace_asset
+DF-ACE-108,v_ace_efs_action,efs_record_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.action_id,No,Read from ACE through v_ace_efs_action
+DF-ACE-109,v_ace_efs_action,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.account_key,No,Read from ACE through v_ace_efs_action
+DF-ACE-110,v_ace_efs_action,person_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.customer_key,No,Read from ACE through v_ace_efs_action
+DF-ACE-111,v_ace_efs_action,action_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.action_code,No,Read from ACE through v_ace_efs_action
+DF-ACE-112,v_ace_efs_action,action_code_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.action_code_name,No,Read from ACE through v_ace_efs_action
+DF-ACE-113,v_ace_efs_action,action_date,DATE,date,,No,None,None,None,None,ACE,public.efs_action.action_date,No,Read from ACE through v_ace_efs_action
+DF-ACE-114,v_ace_efs_action,contact_at,TEXT,integer,,No,None,None,None,None,ACE,public.efs_action.action_timestamp,No,Read from ACE through v_ace_efs_action
+DF-ACE-115,v_ace_efs_action,user_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.user_code,No,Read from ACE through v_ace_efs_action
+DF-ACE-116,v_ace_efs_action,comments,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.comments,No,Read from ACE through v_ace_efs_action
+DF-ACE-117,v_ace_efs_action,is_call,BOOLEAN,boolean,,No,None,None,None,None,ACE,public.efs_action.is_call,No,Read from ACE through v_ace_efs_action
+DF-ACE-118,v_ace_efs_action,is_rpc,BOOLEAN,boolean,,No,None,None,None,None,ACE,public.efs_action.is_rpc,No,Read from ACE through v_ace_efs_action
+DF-ACE-119,v_ace_efs_action,is_ptp,BOOLEAN,boolean,,No,None,None,None,None,ACE,public.efs_action.is_ptp,No,Read from ACE through v_ace_efs_action
+DF-ACE-120,v_ace_efs_action,promise_status,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.promise_status,No,Read from ACE through v_ace_efs_action
+DF-ACE-121,v_ace_efs_action,promise_eval_status,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.promise_eval_status,No,Read from ACE through v_ace_efs_action
+DF-ACE-122,v_ace_efs_action,promise_date,DATE,date,,No,None,None,None,None,ACE,public.efs_action.settlement_due_date,No,Read from ACE through v_ace_efs_action
+DF-ACE-123,v_ace_efs_action,promise_amount,NUMBER,integer,,No,None,None,None,None,ACE,public.efs_action.settle_total_amount,No,Read from ACE through v_ace_efs_action
+DF-ACE-124,v_ace_efs_action,collection_phase,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action.collection_phase,No,Read from ACE through v_ace_efs_action
+DF-ACE-125,v_ace_efs_action,act_date_bucket,NUMBER,integer,,No,None,None,None,None,ACE,public.efs_action.act_date_bucket,No,Read from ACE through v_ace_efs_action
+DF-ACE-126,v_ace_efs_action,act_date_past_due_days,NUMBER,integer,,No,None,None,None,None,ACE,public.efs_action.act_date_past_due_days,No,Read from ACE through v_ace_efs_action
+DF-ACE-127,v_ace_efs_action,last_tdr_date,DATE,date,,No,None,None,None,None,ACE,public.efs_action.last_tdr_date,No,Read from ACE through v_ace_efs_action
+DF-ACE-128,v_ace_efs_action_code,action_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action_code.action_code,No,Read from ACE through v_ace_efs_action_code
+DF-ACE-129,v_ace_efs_action_code,action_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action_code.description,No,Read from ACE through v_ace_efs_action_code
+DF-ACE-130,v_ace_efs_action_code,category,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_action_code.category,No,Read from ACE through v_ace_efs_action_code
+DF-ACE-131,v_ace_efs_assignment,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_assignment.account_key,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-132,v_ace_efs_assignment,assignment_scheme,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_assignment.assignment_scheme,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-133,v_ace_efs_assignment,assignee_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_assignment.assignee_code,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-134,v_ace_efs_assignment,assignee_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_assignment.assignee_name,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-135,v_ace_efs_assignment,assignment_start_date,DATE,date,,No,None,None,None,None,ACE,public.efs_assignment.assignment_start_date,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-136,v_ace_efs_assignment,assignment_end_date,DATE,date,,No,None,None,None,None,ACE,public.efs_assignment.assignment_end_date,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-137,v_ace_efs_assignment,assignment_start_total_balance,NUMBER,integer,,No,None,None,None,None,ACE,public.efs_assignment.assignment_start_total_balance,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-138,v_ace_efs_assignment,assignment_end_total_balance,NUMBER,integer,,No,None,None,None,None,ACE,public.efs_assignment.assignment_end_total_balance,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-139,v_ace_efs_assignment,distribution_area,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.efs_assignment.distribution_area,No,Read from ACE through v_ace_efs_assignment
+DF-ACE-140,v_ace_bucket_log,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.account_key,No,Read from ACE through v_ace_bucket_log
+DF-ACE-141,v_ace_bucket_log,snapshot_year,NUMBER,integer,,No,None,None,None,None,ACE,public.bucket_log_snapshot.snapshot_year,No,Read from ACE through v_ace_bucket_log
+DF-ACE-142,v_ace_bucket_log,snapshot_month,NUMBER,integer,,No,None,None,None,None,ACE,public.bucket_log_snapshot.snapshot_month,No,Read from ACE through v_ace_bucket_log
+DF-ACE-143,v_ace_bucket_log,bucket,NUMBER,integer,,No,None,None,None,None,ACE,public.bucket_log_snapshot.bucket,No,Read from ACE through v_ace_bucket_log
+DF-ACE-144,v_ace_bucket_log,past_due_amount,NUMBER,integer,,No,None,None,None,None,ACE,public.bucket_log_snapshot.past_due_amount,No,Read from ACE through v_ace_bucket_log
+DF-ACE-145,v_ace_bucket_log,snapshot_month_start,NUMBER,integer,,No,None,None,None,None,ACE,public.bucket_log_snapshot.snapshot_year,No,Read from ACE through v_ace_bucket_log
+DF-ACE-146,v_ace_product,product_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.product_key,No,Read from ACE through v_ace_product
+DF-ACE-147,v_ace_product,product_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.description,No,Read from ACE through v_ace_product
+DF-ACE-148,v_ace_product,product_type,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.product_type,No,Read from ACE through v_ace_product
+DF-ACE-149,v_ace_product,product_category,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.product_category,No,Read from ACE through v_ace_product
+DF-ACE-150,v_ace_product,product_category_efs,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.product.product_category_efs,No,Read from ACE through v_ace_product
+DF-ACE-151,v_ace_branch,branch_code,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.branch.oc_code,No,Read from ACE through v_ace_branch
+DF-ACE-152,v_ace_branch,branch_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.branch.branch_name,No,Read from ACE through v_ace_branch
+DF-ACE-153,v_ace_branch,address,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.branch.address,No,Read from ACE through v_ace_branch
+DF-ACE-154,v_ace_branch,phone,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.branch.phone,No,Read from ACE through v_ace_branch
+DF-ACE-155,v_ace_holiday,holiday_date,DATE,date,,No,None,None,None,None,ACE,public.bot_holiday.holiday_date,No,Read from ACE through v_ace_holiday
+DF-ACE-156,v_ace_holiday,holiday_year,NUMBER,integer,,No,None,None,None,None,ACE,public.bot_holiday.holiday_year,No,Read from ACE through v_ace_holiday
+DF-ACE-157,v_ace_holiday,holiday_name,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.bot_holiday.holiday_description,No,Read from ACE through v_ace_holiday
+DF-ACE-158,v_ace_holiday,holiday_name_thai,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.bot_holiday.holiday_description_thai,No,Read from ACE through v_ace_holiday
+DF-ACE-159,v_ace_holiday,holiday_weekday,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.bot_holiday.holiday_weekday,No,Read from ACE through v_ace_holiday
+DF-ACE-160,v_ace_plan,plan_ref,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.ace_case.case_business_id,No,Read from ACE through v_ace_plan
+DF-ACE-161,v_ace_plan,ace_case_id,NUMBER,integer,,No,None,None,None,None,ACE,public.ace_case.id,No,Read from ACE through v_ace_plan
+DF-ACE-162,v_ace_plan,plan_status,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.ace_case.current_station_name,No,Read from ACE through v_ace_plan
+DF-ACE-163,v_ace_plan,plan_created_at,TEXT,integer,,No,None,None,None,None,ACE,public.ace_case.created_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-164,v_ace_plan,tdr_calculation_id,NUMBER,integer,,No,None,None,None,None,ACE,public.tdr_calculation.id,No,Read from ACE through v_ace_plan
+DF-ACE-165,v_ace_plan,plan_published_at,TEXT,integer,,No,None,None,None,None,ACE,public.tdr_calculation.published_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-166,v_ace_plan,associated_account_id,NUMBER,integer,,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.associated_account_id,No,Read from ACE through v_ace_plan
+DF-ACE-167,v_ace_plan,account_key,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.account.account_key,No,Read from ACE through v_ace_plan
+DF-ACE-168,v_ace_plan,booked_at,TEXT,integer,,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.plan_setup_completed_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-169,v_ace_plan,approved_at,TEXT,integer,,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.approval_completed_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-170,v_ace_plan,submitted_at,TEXT,integer,,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.submitted_for_approval_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-171,v_ace_plan,closed_at,TEXT,integer,,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.closed_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-172,v_ace_plan,closed_reason,TEXT,varchar(255),255,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.closed_reason,No,Read from ACE through v_ace_plan
+DF-ACE-173,v_ace_plan,ca_approved_at,TEXT,integer,,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.ca_approved_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-174,v_ace_plan,installments,TEXT,integer,,No,None,None,None,None,ACE,None,No,Read from ACE through v_ace_plan
+DF-ACE-175,v_ace_plan,recommended_installment,TEXT,integer,,No,None,None,None,None,ACE,None,No,Read from ACE through v_ace_plan
+DF-ACE-176,v_ace_plan,recommended_package,TEXT,integer,,No,None,None,None,None,ACE,None,No,Read from ACE through v_ace_plan
+DF-ACE-177,v_ace_plan,plan_status_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.cfsc_mg_ssme_tdr_case.approval_completed_timestamp,No,Read from ACE through v_ace_plan
+DF-ACE-178,v_ace_batch_status,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.source_system,No,Read from ACE through v_ace_batch_status
+DF-ACE-179,v_ace_batch_status,business_date,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.business_date,No,Read from ACE through v_ace_batch_status
+DF-ACE-180,v_ace_batch_status,started_at,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.started_at,No,Read from ACE through v_ace_batch_status
+DF-ACE-181,v_ace_batch_status,completed_at,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.completed_at,No,Read from ACE through v_ace_batch_status
+DF-ACE-182,v_ace_batch_status,status,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.status,No,Read from ACE through v_ace_batch_status
+DF-ACE-183,v_ace_batch_status,record_count,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.record_count,No,Read from ACE through v_ace_batch_status
+DF-ACE-184,v_ace_batch_status,checksum,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.checksum,No,Read from ACE through v_ace_batch_status
+DF-ACE-185,v_ace_batch_status,feed_version,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.feed_version,No,Read from ACE through v_ace_batch_status
+DF-ACE-186,v_ace_batch_status,is_complete,TEXT,integer,,No,None,None,None,None,ACE,public.ace_batch_run.status,No,Read from ACE through v_ace_batch_status
+DF-ACE-187,v_ace_valuation,valuation_key,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.valuation_key,No,Read from ACE through v_ace_valuation
+DF-ACE-188,v_ace_valuation,asset_key,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.asset_key,No,Read from ACE through v_ace_valuation
+DF-ACE-189,v_ace_valuation,appraisal_no,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.appraisal_no,No,Read from ACE through v_ace_valuation
+DF-ACE-190,v_ace_valuation,appraisal_type,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.appraisal_type,No,Read from ACE through v_ace_valuation
+DF-ACE-191,v_ace_valuation,appraised_value,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.appraised_value,No,Read from ACE through v_ace_valuation
+DF-ACE-192,v_ace_valuation,forced_sale_value,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.forced_sale_value,No,Read from ACE through v_ace_valuation
+DF-ACE-193,v_ace_valuation,appraisal_date,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.appraisal_date,No,Read from ACE through v_ace_valuation
+DF-ACE-194,v_ace_valuation,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.source_system,No,Read from ACE through v_ace_valuation
+DF-ACE-195,v_ace_valuation,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.valuation.business_date,No,Read from ACE through v_ace_valuation
+DF-ACE-196,v_ace_collateral_detail,asset_key,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.asset_key,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-197,v_ace_collateral_detail,title_doc_no,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.title_doc_no,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-198,v_ace_collateral_detail,plot_no,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.plot_no,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-199,v_ace_collateral_detail,area_text,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.area_text,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-200,v_ace_collateral_detail,province,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.province,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-201,v_ace_collateral_detail,district,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.district,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-202,v_ace_collateral_detail,subdistrict,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.subdistrict,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-203,v_ace_collateral_detail,insured_value,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.insured_value,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-204,v_ace_collateral_detail,insurance_expiry,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.insurance_expiry,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-205,v_ace_collateral_detail,lien_rank,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.lien_rank,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-206,v_ace_collateral_detail,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.source_system,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-207,v_ace_collateral_detail,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.collateral_detail.business_date,No,Read from ACE through v_ace_collateral_detail
+DF-ACE-208,v_ace_npa_asset,asset_ref,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.asset_key,No,Read from ACE through v_ace_npa_asset
+DF-ACE-209,v_ace_npa_asset,asset_key,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.asset_key,No,Read from ACE through v_ace_npa_asset
+DF-ACE-210,v_ace_npa_asset,asset_code,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.asset_code,No,Read from ACE through v_ace_npa_asset
+DF-ACE-211,v_ace_npa_asset,transfer_in_type,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.transfer_in_type,No,Read from ACE through v_ace_npa_asset
+DF-ACE-212,v_ace_npa_asset,from_segment,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.from_segment,No,Read from ACE through v_ace_npa_asset
+DF-ACE-213,v_ace_npa_asset,transfer_in_date,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.transfer_in_date,No,Read from ACE through v_ace_npa_asset
+DF-ACE-214,v_ace_npa_asset,book_value,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.book_value,No,Read from ACE through v_ace_npa_asset
+DF-ACE-215,v_ace_npa_asset,auction_purchase_price,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.auction_purchase_price,No,Read from ACE through v_ace_npa_asset
+DF-ACE-216,v_ace_npa_asset,repossessed_date,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.repossessed_date,No,Read from ACE through v_ace_npa_asset
+DF-ACE-217,v_ace_npa_asset,stock_date,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.stock_date,No,Read from ACE through v_ace_npa_asset
+DF-ACE-218,v_ace_npa_asset,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.source_system,No,Read from ACE through v_ace_npa_asset
+DF-ACE-219,v_ace_npa_asset,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.npa_asset.business_date,No,Read from ACE through v_ace_npa_asset
+DF-ACE-220,v_ace_npa_sale,npa_sale_key,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.npa_sale_key,No,Read from ACE through v_ace_npa_sale
+DF-ACE-221,v_ace_npa_sale,npa_asset_key,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.npa_asset_key,No,Read from ACE through v_ace_npa_sale
+DF-ACE-222,v_ace_npa_sale,contract_date,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.contract_date,No,Read from ACE through v_ace_npa_sale
+DF-ACE-223,v_ace_npa_sale,sale_date,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.sale_date,No,Read from ACE through v_ace_npa_sale
+DF-ACE-224,v_ace_npa_sale,sale_price,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.sale_price,No,Read from ACE through v_ace_npa_sale
+DF-ACE-225,v_ace_npa_sale,transfer_fee,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.transfer_fee,No,Read from ACE through v_ace_npa_sale
+DF-ACE-226,v_ace_npa_sale,specific_business_tax,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.specific_business_tax,No,Read from ACE through v_ace_npa_sale
+DF-ACE-227,v_ace_npa_sale,corporate_income_tax,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.corporate_income_tax,No,Read from ACE through v_ace_npa_sale
+DF-ACE-228,v_ace_npa_sale,incentive_amount,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.incentive_amount,No,Read from ACE through v_ace_npa_sale
+DF-ACE-229,v_ace_npa_sale,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.source_system,No,Read from ACE through v_ace_npa_sale
+DF-ACE-230,v_ace_npa_sale,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.npa_sale.business_date,No,Read from ACE through v_ace_npa_sale
+DF-ACE-231,v_ace_lawsuit,lawsuit_key,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.lawsuit_key,No,Read from ACE through v_ace_lawsuit
+DF-ACE-232,v_ace_lawsuit,account_key,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.account_key,No,Read from ACE through v_ace_lawsuit
+DF-ACE-233,v_ace_lawsuit,lawsuit_no,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.lawsuit_no,No,Read from ACE through v_ace_lawsuit
+DF-ACE-234,v_ace_lawsuit,black_case_no,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.black_case_no,No,Read from ACE through v_ace_lawsuit
+DF-ACE-235,v_ace_lawsuit,red_case_no,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.red_case_no,No,Read from ACE through v_ace_lawsuit
+DF-ACE-236,v_ace_lawsuit,court_name,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.court_name,No,Read from ACE through v_ace_lawsuit
+DF-ACE-237,v_ace_lawsuit,claim_amount,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.claim_amount,No,Read from ACE through v_ace_lawsuit
+DF-ACE-238,v_ace_lawsuit,filed_date,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.filed_date,No,Read from ACE through v_ace_lawsuit
+DF-ACE-239,v_ace_lawsuit,judgment_date,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.judgment_date,No,Read from ACE through v_ace_lawsuit
+DF-ACE-240,v_ace_lawsuit,judgment_amount,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.judgment_amount,No,Read from ACE through v_ace_lawsuit
+DF-ACE-241,v_ace_lawsuit,lit_status,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.lit_status,No,Read from ACE through v_ace_lawsuit
+DF-ACE-242,v_ace_lawsuit,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.source_system,No,Read from ACE through v_ace_lawsuit
+DF-ACE-243,v_ace_lawsuit,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.lawsuit.business_date,No,Read from ACE through v_ace_lawsuit
+DF-ACE-244,v_ace_hearing,hearing_key,TEXT,integer,,No,None,None,None,None,ACE,public.hearing.hearing_key,No,Read from ACE through v_ace_hearing
+DF-ACE-245,v_ace_hearing,lawsuit_key,TEXT,integer,,No,None,None,None,None,ACE,public.hearing.lawsuit_key,No,Read from ACE through v_ace_hearing
+DF-ACE-246,v_ace_hearing,hearing_date,TEXT,integer,,No,None,None,None,None,ACE,public.hearing.hearing_date,No,Read from ACE through v_ace_hearing
+DF-ACE-247,v_ace_hearing,hearing_type,TEXT,integer,,No,None,None,None,None,ACE,public.hearing.hearing_type,No,Read from ACE through v_ace_hearing
+DF-ACE-248,v_ace_hearing,next_date,TEXT,integer,,No,None,None,None,None,ACE,public.hearing.next_date,No,Read from ACE through v_ace_hearing
+DF-ACE-249,v_ace_hearing,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.hearing.source_system,No,Read from ACE through v_ace_hearing
+DF-ACE-250,v_ace_hearing,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.hearing.business_date,No,Read from ACE through v_ace_hearing
+DF-ACE-251,v_ace_pod,pod_key,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.pod_key,No,Read from ACE through v_ace_pod
+DF-ACE-252,v_ace_pod,account_key,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.account_key,No,Read from ACE through v_ace_pod
+DF-ACE-253,v_ace_pod,notice_ref,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.notice_ref,No,Read from ACE through v_ace_pod
+DF-ACE-254,v_ace_pod,sent_date,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.sent_date,No,Read from ACE through v_ace_pod
+DF-ACE-255,v_ace_pod,barcode,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.barcode,No,Read from ACE through v_ace_pod
+DF-ACE-256,v_ace_pod,callback_date,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.callback_date,No,Read from ACE through v_ace_pod
+DF-ACE-257,v_ace_pod,delivery_status,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.delivery_status,No,Read from ACE through v_ace_pod
+DF-ACE-258,v_ace_pod,sent_type,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.sent_type,No,Read from ACE through v_ace_pod
+DF-ACE-259,v_ace_pod,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.source_system,No,Read from ACE through v_ace_pod
+DF-ACE-260,v_ace_pod,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.pod_receipt.business_date,No,Read from ACE through v_ace_pod
+DF-ACE-261,v_ace_write_off,write_off_key,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.write_off_key,No,Read from ACE through v_ace_write_off
+DF-ACE-262,v_ace_write_off,account_key,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.account_key,No,Read from ACE through v_ace_write_off
+DF-ACE-263,v_ace_write_off,amount,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.amount,No,Read from ACE through v_ace_write_off
+DF-ACE-264,v_ace_write_off,posted_date,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.posted_date,No,Read from ACE through v_ace_write_off
+DF-ACE-265,v_ace_write_off,responsibility_center,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.responsibility_center,No,Read from ACE through v_ace_write_off
+DF-ACE-266,v_ace_write_off,cost_center,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.cost_center,No,Read from ACE through v_ace_write_off
+DF-ACE-267,v_ace_write_off,gl_product,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.gl_product,No,Read from ACE through v_ace_write_off
+DF-ACE-268,v_ace_write_off,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.source_system,No,Read from ACE through v_ace_write_off
+DF-ACE-269,v_ace_write_off,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.gl_write_off.business_date,No,Read from ACE through v_ace_write_off
+DF-ACE-270,v_ace_score,score_key,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.score_key,No,Read from ACE through v_ace_score
+DF-ACE-271,v_ace_score,account_key,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.account_key,No,Read from ACE through v_ace_score
+DF-ACE-272,v_ace_score,model_code,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.model_code,No,Read from ACE through v_ace_score
+DF-ACE-273,v_ace_score,model_version,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.model_version,No,Read from ACE through v_ace_score
+DF-ACE-274,v_ace_score,score_value,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.score_value,No,Read from ACE through v_ace_score
+DF-ACE-275,v_ace_score,estimate_value,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.estimate_value,No,Read from ACE through v_ace_score
+DF-ACE-276,v_ace_score,route_code,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.route_code,No,Read from ACE through v_ace_score
+DF-ACE-277,v_ace_score,scored_at,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.scored_at,No,Read from ACE through v_ace_score
+DF-ACE-278,v_ace_score,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.source_system,No,Read from ACE through v_ace_score
+DF-ACE-279,v_ace_score,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.collins_score.business_date,No,Read from ACE through v_ace_score
+DF-ACE-280,v_ace_party_product,person_key,TEXT,integer,,No,None,None,None,None,ACE,public.party_product.person_key,No,Read from ACE through v_ace_party_product
+DF-ACE-281,v_ace_party_product,account_no,TEXT,integer,,No,None,None,None,None,ACE,public.party_product.account_key,No,Read from ACE through v_ace_party_product
+DF-ACE-282,v_ace_party_product,account_key,TEXT,integer,,No,None,None,None,None,ACE,public.party_product.account_key,No,Read from ACE through v_ace_party_product
+DF-ACE-283,v_ace_party_product,product_type,TEXT,integer,,No,None,None,None,None,ACE,public.party_product.product_type,No,Read from ACE through v_ace_party_product
+DF-ACE-284,v_ace_party_product,product_status,TEXT,integer,,No,None,None,None,None,ACE,public.party_product.product_status,No,Read from ACE through v_ace_party_product
+DF-ACE-285,v_ace_party_product,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.party_product.business_date,No,Read from ACE through v_ace_party_product
+DF-ACE-286,v_ace_credit_decision,credit_decision_key,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.credit_decision_key,No,Read from ACE through v_ace_credit_decision
+DF-ACE-287,v_ace_credit_decision,account_key,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.account_key,No,Read from ACE through v_ace_credit_decision
+DF-ACE-288,v_ace_credit_decision,nleads_ref,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.nleads_ref,No,Read from ACE through v_ace_credit_decision
+DF-ACE-289,v_ace_credit_decision,credit_result,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.credit_result,No,Read from ACE through v_ace_credit_decision
+DF-ACE-290,v_ace_credit_decision,credit_result_reason,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.credit_result_reason,No,Read from ACE through v_ace_credit_decision
+DF-ACE-291,v_ace_credit_decision,decided_at,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.decided_at,No,Read from ACE through v_ace_credit_decision
+DF-ACE-292,v_ace_credit_decision,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.source_system,No,Read from ACE through v_ace_credit_decision
+DF-ACE-293,v_ace_credit_decision,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.credit_decision.business_date,No,Read from ACE through v_ace_credit_decision
+DF-ACE-294,v_ace_esign,esign_key,TEXT,integer,,No,None,None,None,None,ACE,public.esign_request.esign_key,No,Read from ACE through v_ace_esign
+DF-ACE-295,v_ace_esign,account_key,TEXT,integer,,No,None,None,None,None,ACE,public.esign_request.account_key,No,Read from ACE through v_ace_esign
+DF-ACE-296,v_ace_esign,external_ref,TEXT,integer,,No,None,None,None,None,ACE,public.esign_request.external_ref,No,Read from ACE through v_ace_esign
+DF-ACE-297,v_ace_esign,requested_at,TEXT,integer,,No,None,None,None,None,ACE,public.esign_request.requested_at,No,Read from ACE through v_ace_esign
+DF-ACE-298,v_ace_esign,status,TEXT,integer,,No,None,None,None,None,ACE,public.esign_request.status,No,Read from ACE through v_ace_esign
+DF-ACE-299,v_ace_esign,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.esign_request.source_system,No,Read from ACE through v_ace_esign
+DF-ACE-300,v_ace_esign,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.esign_request.business_date,No,Read from ACE through v_ace_esign
+DF-ACE-301,v_ace_iam_group,entra_group,TEXT,integer,,No,None,None,None,None,ACE,public.iam_group.entra_group,No,Read from ACE through v_ace_iam_group
+DF-ACE-302,v_ace_iam_group,role_code,TEXT,integer,,No,None,None,None,None,ACE,public.iam_group.role_code,No,Read from ACE through v_ace_iam_group
+DF-ACE-303,v_ace_iam_group,source_system,TEXT,integer,,No,None,None,None,None,ACE,public.iam_group.source_system,No,Read from ACE through v_ace_iam_group
+DF-ACE-304,v_ace_iam_group,data_as_of,TEXT,integer,,No,None,None,None,None,ACE,public.iam_group.business_date,No,Read from ACE through v_ace_iam_group
+DF-EXT-001,party_ext,person_key,TEXT,varchar(255),255,No,None,None,None,None,Workbench,None,No,ACE customer key the flags belong to
+DF-EXT-002,party_ext,vulnerable,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True while the customer is treated as vulnerable
+DF-EXT-003,party_ext,deceased_override,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True when a person confirms death against the ACE record
+DF-EXT-004,party_ext,bankruptcy,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True while a bankruptcy is registered
+DF-EXT-005,party_ext,fraud_flag,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True while fraud is confirmed or under investigation
+DF-EXT-006,party_ext,is_active,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,The active or inactive status of the record
+DF-EXT-007,party_ext,state,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Record lifecycle state
+DF-EXT-008,party_ext,version,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Optimistic lock version
+DF-EXT-009,party_ext,created_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record was created
+DF-EXT-010,party_ext,created_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who created the record
+DF-EXT-011,party_ext,updated_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record last changed
+DF-EXT-012,party_ext,updated_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who last changed the record
+DF-EXT-013,contact_point_ext,contact_key,TEXT,varchar(255),255,No,None,None,None,None,Workbench,None,No,"ACE phone_key, email_key or address_key"
+DF-EXT-014,contact_point_ext,contact_type,LOV,varchar(10),10,No,None,None,None,None,Workbench,None,No,"PHONE, EMAIL or ADDRESS"
+DF-EXT-015,contact_point_ext,consent_given,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True while the customer consents to contact
+DF-EXT-016,contact_point_ext,consent_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When consent was given or withdrawn
+DF-EXT-017,contact_point_ext,verified_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the contact point was last verified
+DF-EXT-018,contact_point_ext,failed_count,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Consecutive failed attempts on this contact point
+DF-EXT-019,contact_point_ext,source,TEXT,varchar(20),20,No,None,None,None,None,Workbench,None,No,Where the row came from
+DF-EXT-020,contact_point_ext,is_active,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,The active or inactive status of the record
+DF-EXT-021,contact_point_ext,state,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Record lifecycle state
+DF-EXT-022,contact_point_ext,version,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Optimistic lock version
+DF-EXT-023,contact_point_ext,created_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record was created
+DF-EXT-024,contact_point_ext,created_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who created the record
+DF-EXT-025,contact_point_ext,updated_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record last changed
+DF-EXT-026,contact_point_ext,updated_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who last changed the record
+DF-EXT-027,account_ext,account_key,TEXT,varchar(255),255,No,None,None,None,None,Workbench,None,No,ACE account key the state belongs to
+DF-EXT-028,account_ext,dispute_open,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True while a dispute is open on the account
+DF-EXT-029,account_ext,is_active,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,The active or inactive status of the record
+DF-EXT-030,account_ext,state,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Record lifecycle state
+DF-EXT-031,account_ext,version,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Optimistic lock version
+DF-EXT-032,account_ext,created_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record was created
+DF-EXT-033,account_ext,created_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who created the record
+DF-EXT-034,account_ext,updated_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record last changed
+DF-EXT-035,account_ext,updated_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who last changed the record
+DF-EXT-036,valuation_ext,valuation_key,TEXT,varchar(255),255,No,None,None,None,None,Workbench,None,No,ACE appraisal key the decision belongs to
+DF-EXT-037,valuation_ext,accepted,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True when the appraisal is accepted for the case
+DF-EXT-038,valuation_ext,accepted_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the appraisal was accepted
+DF-EXT-039,valuation_ext,accepted_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who accepted the appraisal
+DF-EXT-040,valuation_ext,valuer_partner_id,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,The panel valuer who carried out the appraisal
+DF-EXT-041,valuation_ext,stale_flag,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,True when the appraisal is older than its cycle
+DF-EXT-042,valuation_ext,age_days,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Days from the appraisal date to today
+DF-EXT-043,valuation_ext,is_active,BOOLEAN,boolean,,No,None,None,None,None,Workbench,None,No,The active or inactive status of the record
+DF-EXT-044,valuation_ext,state,TEXT,varchar(40),40,No,None,None,None,None,Workbench,None,No,Record lifecycle state
+DF-EXT-045,valuation_ext,version,NUMBER,integer,,No,None,None,None,None,Workbench,None,No,Optimistic lock version
+DF-EXT-046,valuation_ext,created_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record was created
+DF-EXT-047,valuation_ext,created_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who created the record
+DF-EXT-048,valuation_ext,updated_at,DATE,timestamptz,,No,None,None,None,None,Workbench,None,No,When the record last changed
+DF-EXT-049,valuation_ext,updated_by,CROSS_REF,uuid,,No,None,None,None,None,Workbench,None,No,Who last changed the record

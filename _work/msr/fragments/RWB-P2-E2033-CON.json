@@ -1,0 +1,238 @@
+{
+  "id": "RWB-P2-E2033-CON",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-033",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 The nine contract tables are complete and attributed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 The page shape is fixed with its row, its envelope and its columns (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The filter set, the breach and clock fields and the order are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The error envelope and the read-only idempotency are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The six fakes match this document and drift fails the build (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 No cross-schema read, no foreign key and the duplication is declared (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2033-CON-01",
+    "TC-P2-E2033-CON-02",
+    "TC-P2-E2033-CON-03",
+    "TC-P2-E2033-CON-04",
+    "TC-P2-E2033-CON-05",
+    "TC-P2-E2033-CON-06"
+  ],
+  "reqs": [
+    "REQ-WKM-002",
+    "REQ-DVH-006",
+    "REQ-ACA-006"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/integration/v1/case-list",
+    "GET /api/recovery/integration/v1/case-list/export"
+  ],
+  "ops_consumed": [
+    "GET /api/recovery/case/v1/cases",
+    "GET the ageing and service-level read of the rwb-case contract (RWB-P3-E2011-CON)",
+    "GET /api/recovery/case/v1/cases/{caseId}",
+    "GET /api/recovery/case/v1/queues",
+    "GET /api/recovery/case/v1/admin/parameters",
+    "GET the reference-data read of the rwb-case contract (RWB-P3-E1043-CON)",
+    "POST /api/recovery/access/v1/authorise",
+    "POST the access-log operation of the rwb-access contract (RWB-P4-E1037-CON)"
+  ],
+  "events_published": [],
+  "events_consumed": [],
+  "workflows": [],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-WKM-002, REQ-DVH-006, REQ-ACA-006)",
+  "gaps": [
+    "GAP-0661"
+  ],
+  "assumptions": [
+    "ASM-1133",
+    "ASM-1134",
+    "ASM-1135",
+    "ASM-1136",
+    "ASM-1137",
+    "ASM-1139",
+    "ASM-1140",
+    "ASM-1142",
+    "ASM-1143",
+    "ASM-1145"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2033 CON Case and queue list with status, owner and ageing - contract v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0661",
+      "title": "rwb-integration composed case-list contract baseline: page shape, filter names, aging read, access-log operation and path attribution not settled by any source",
+      "source": "Architecture v5 Text Extract v1 slides 13, 14, 16, 41 and 45; Ownership Map API (GET /cases, GET /cases/export, GET /queues, GET /admin/parameters, POST /cases/{caseId}/transfer) and tables (recovery_case, queue, timer, role); legacy RWB-E2-033 sections 4, 7, 12, 14 and 15; TSD P2 Integration v3 T5.2, T6.2 and Appendix T-A; Template and Rules v1 §R7.2 s12 and §R9",
+      "section": "§11 Data, §12.1 REST provided, §12.2 REST consumed, §12.7 Tables owned, §12.8 Contract fakes, §15 Screens and states",
+      "description": "One combined row for the unsettled points of the contract baseline of the composed read. (1) Paths: the two provided operations are not rows of the Ownership Map, which keeps GET /cases and GET /cases/export with P3, so their exact form is fixed under the service base of DP-13. (2) Page shape: the legacy page returns rows with a paging envelope, and no source fixes the JSON field names of the row, the envelope, the filter set or the problem body. (3) Ageing element: the contract consumes the ageing and service-level read of rwb-case for a page of case ids, batched so that one page is one hop, and no source names that operation, its path or the shape of its answer. (4) Reference data: the read of LOV-PRODUCT, LOV-CASE-STATUS and LOV-STAGE is consumed through the rwb-case reference-data contract and no source names its path. (5) Access log: the export records one entry through an operation of rwb-access and no source names that operation, its path or its row shape. (6) Attribution: Architecture v5 slide 13 shows P2 calling P5 by REST and the outside by file only, and names no P2 to P3 or P2 to P4 REST call, so every consumed operation of this contract is a call the architecture slide does not draw. (7) Duplication: the contract fixes an additional read-only composition beside the P3 read and export, which the Ownership Map does not carry. (8) Storage: the contract declares no table, no migration and no library row, while the service schema holds the four platform library objects from the baseline. (9) Edge: SCR-02 is served by the gateway-bff composite route and no source fixes that route.",
+      "evidence": "Ownership Map API has no row for GET /api/recovery/integration/v1/case-list or for its export; Architecture v5 slide 13 row 'P2 Integration' marks REST against P5 and file against 'Outside' only, while slide 45 states 'REST is one hop: gateway to service, or a cached reference read (rwb-access, rwb-source-data)'; slide 14 gives rwb-access IN 'POST /authorise, GET /me/permissions, GET /doa-limits, /masking-policies' and no access-log write; slide 14 gives rwb-case IN 'GET /cases/{id}, /cases?queue=' only; legacy RWB-E2-033 section 12 names 'CasePage of Case' and the twelve columns without JSON field names and lists 'No event is published. The access log entry is written through the RWB-E1-039 interface'; TSD P2 Integration v3 Appendix T-A carries no case-list operation for P2; Ownership Map tables outbox_event, processed_event, outbox_delivery and idempotency_key are PLT library objects created in each service schema.",
+      "type": "Conflict",
+      "area": "Integration (P2) composed case-list contract baseline",
+      "severity": "P2",
+      "needed_by_wave": 2,
+      "legacy_ref": "RWB-E2-033",
+      "owner_role": "Solution architect",
+      "asm": "ASM-1133, ASM-1134, ASM-1135, ASM-1136, ASM-1137, ASM-1139, ASM-1140, ASM-1141, ASM-1142, ASM-1146",
+      "proposed": "Baseline the two read-only operations on /api/recovery/integration/v1 with the twelve columns, the filter set, the breach filter, the order, the paging envelope and the platform problem body; declare the eight consumed operations with the element each read needs and fix their paths in the P3 and P4 contract stories; state in the contract that GET /cases and GET /cases/export stay with rwb-case and that this composition is additional and read-only; declare no table, no event, no workflow and no Schedule. Have the solution architect accept that the architecture connection matrix does not draw the P2 to P3 and P2 to P4 reads, and record the call pairs in the Service Contract Catalog.",
+      "wp": "B-P2-01"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1133",
+      "text": "rwb-case keeps GET /cases and GET /cases/export as the system-of-record read and its own export, and rwb-integration adds a read-only composed page on GET /api/recovery/integration/v1/case-list and an Excel export on GET /api/recovery/integration/v1/case-list/export for the integration slice of this legacy key; the same page is composed twice, and the duplication is stated in both stories.",
+      "why": "The Ownership Map keeps GET /cases and GET /cases/export with P3 and ADR-020 with DP-19 puts SCR-02 on the owner service, while the WP splits a P2 APP slice that owns AC1 to AC11; the conflict is resolved the way RWB-P2-E2006-APP resolved its double composition, by recording it.",
+      "read": "Ownership Map API GET /cases and GET /cases/export (owner P3); Architecture v5 slides 13, 14, 41 and 45; Template and Rules v1 §R3; RWB-P2-E2006-APP section 2.",
+      "gap": "GAP-0660",
+      "applied_in": "§1 Story, §2 Business rationale, §7 AC note, §8 BR9, §12.1 REST provided, §19 Out of scope",
+      "confidence": "Medium",
+      "confirm": "Solution architect; the rwb-case owner (RWB-P3-E1031-CON and RWB-P3-E2033-APP)",
+      "impact": "Two read surfaces over one set of owner contracts; the case-side answer stays the record and both are tested against each other.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1134",
+      "text": "The two composed operations sit on the service base /api/recovery/integration/v1 under DP-13 as /case-list and /case-list/export; they are not rows of the Ownership Map, so their exact form is fixed at the contract review of RWB-P2-E2033-CON and is not derived from another service's path.",
+      "why": "The Ownership Map keeps GET /cases and GET /cases/export with P3 and no source names a case-list path on the integration base, so the path is a gap and not a copy.",
+      "read": "Ownership Map API; Architecture v5 slides 14, 16 and 41; Template and Rules v1 §R5.5 DP-13 and §R9.",
+      "gap": "GAP-0661",
+      "applied_in": "§3 Preconditions, §12.1 REST provided, §13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "Solution architect; platform API catalogue owner",
+      "impact": "The app story and the screen call the two paths of this contract; a change of path is a contract change and not a code change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1135",
+      "text": "rwb-integration runs as its own ACE database login with grants on its own schema only (DP-02), replacing the legacy shared recovery_svc identity; the login follows the rwb_integration schema name of Architecture v5 slide 29 and holds no grant on the recovery schema or on another rwb_* schema.",
+      "why": "No source document names the per-service login, while DP-02 requires one login per service and Architecture v5 slide 29 shows one login per schema.",
+      "read": "Architecture v5 Text Extract v1 slides 8, 29 and 41; Template and Rules v1 §R5.5 DP-02; legacy RWB-E2-033 section 10.",
+      "gap": "GAP-0660",
+      "applied_in": "§3 Preconditions, §10 Authority, §13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "ACE team, DBA (schema and login provisioning, RWB-PLT-DB)",
+      "impact": "The story builds and tests against the rwb-integration login once it is allocated; no behaviour of the read changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1136",
+      "text": "The page answer carries the rows of the caller's scope with the paging envelope of the legacy page and the twelve columns caseNo, product, queue, owner, status, stage, ageDays, serviceLevelState, serviceLevelDueAt, prescriptionDate, prescriptionClockStatus and deviationOpen, and every error is returned as the platform problem body with its message identifier; the JSON field names and the problem body shape are fixed at the contract review.",
+      "why": "The sources name the legacy response type of the page and the twelve columns, not the JSON names of the composed answer, the filter set or the problem body.",
+      "read": "Legacy RWB-E2-033 sections 4, 7 and 12; Architecture v5 slide 11 (problem details); Template and Rules v1 §R7.2 s12.",
+      "gap": "GAP-0661",
+      "applied_in": "§11 Data, §12.1 REST provided, §14 Validation and messages",
+      "confidence": "Medium",
+      "confirm": "rwb-integration contract owner (RWB-P2-E2033-CON)",
+      "impact": "The names are fixed once in the baseline and consumed by the app story and the test stories; no behaviour of the read changes.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1137",
+      "text": "The ageing and service-level read of rwb-case (RWB-P3-E2011-CON) publishes ageDays, stageClockStart, serviceLevelDueAt, serviceLevelState, prescriptionDate and prescriptionClockStatus for a page of case ids, batched so that one composed page is one hop; the per-case timer projection GET /cases/{caseId}/timers of the Ownership Map is not called once per row.",
+      "why": "A per-case read of the timer projection would put one call per row inside one page and break the one-hop, 2 s budget of ADR-020, while the legacy story read the timer rows for the whole page in one query.",
+      "read": "Ownership Map API GET /cases/{caseId}/timers and tables timer (owner P3); Architecture v5 slides 14, 41 and 45; legacy RWB-E2-033 flow step 5 and section 11.",
+      "gap": "GAP-0660",
+      "applied_in": "§4 Flow, §11 Data, §12.2 REST consumed, §13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "rwb-case owner (RWB-P3-E2011-CON)",
+      "impact": "One batched read per page instead of one per case; the field names are fixed in the P3 contract story.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1139",
+      "text": "LOV-PRODUCT, LOV-CASE-STATUS and LOV-STAGE are read as reference rows of rwb-case through the reference-data contract with the version in force, and the queue codes in force are read through the rwb-case queue list; the reference-data read path is fixed in RWB-P3-E1043-CON because no source names it.",
+      "why": "DP-07 moves reference data and lists of values to rwb-case, the legacy story named the lists and the queues table only, and the Ownership Map carries no reference-data GET row.",
+      "read": "Legacy RWB-E2-033 section 8 BR6 and section 13; Template and Rules v1 §R5.5 DP-07 and §R3 default rulings; Ownership Map lov_value and reference_row (owner P3).",
+      "gap": "GAP-0661",
+      "applied_in": "§11 Data, §12.2 REST consumed, §13 Configuration and reference data",
+      "confidence": "Medium",
+      "confirm": "P3 reference-data owner (RWB-P3-E1043-CON)",
+      "impact": "Adding a value to a list is a data change in rwb-case and no code change here.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1140",
+      "text": "The export records exactly one access-log entry, through an operation of the rwb-access contract, before the file is made, and a refused entry produces no file; the path and the row shape of that operation are fixed in RWB-P4-E1037-CON because no source names them.",
+      "why": "The access log is a row of rwb-access (Architecture v5 slide 41) while the legacy story writes it through the RWB-E1-039 interface of the monolith, and Architecture v5 slide 14 lists no access-log operation for rwb-access.",
+      "read": "Architecture v5 Text Extract v1 slides 14 and 41; Ownership Map tables (role, permission; the access log is P4's); legacy RWB-E2-033 section 12 and BR7; REQ-ACA-006.",
+      "gap": "GAP-0661",
+      "applied_in": "§4 Flow, §9 State transitions, §12.2 REST consumed, §13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "rwb-access owner (RWB-P4-E1037-CON)",
+      "impact": "No access-log table exists in rwb_integration; the entry is the owner's row and a refused entry fails the export.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1142",
+      "text": "This story adds no table and no migration: the composed read copies nothing into rwb_integration and writes no library row, so DP-15 applies to the service baseline only and RWB-PLT-E1044-CON is a build dependency for the migration conventions, not for a migration of this story.",
+      "why": "DP-15 is in the pattern list of the legacy key, while the legacy story writes no business row and the Ownership Map lists no P2 table for the case list.",
+      "read": "Ownership Map tables (interface_config, outbound_item, job_catalog under P2; the four library objects under PLT); Template and Rules v1 §R5.5 DP-15; legacy RWB-E2-033 section 9 and section 13.",
+      "gap": "GAP-0660",
+      "applied_in": "§12.7 Tables owned, §13 Solution plan (database and migrations)",
+      "confidence": "High",
+      "confirm": "ACE team, DBA",
+      "impact": "No schema change and no Flyway file; the rwb_integration baseline is carried by RWB-P2-E1007-APP.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1143",
+      "text": "This slice publishes no event and adds no event name: the topic rwb.integration.events.v1 carries only FileDelivered and FileFailed from the file stories of the service, and DP-14 applies to the names of the service and not to a new event here.",
+      "why": "DP-14 is in the pattern list of the legacy key while the legacy story publishes nothing and Architecture v5 slides 16 and 43 give the service exactly two events, both on the outbound file side.",
+      "read": "Architecture v5 Text Extract v1 slides 16, 42 and 43; Template and Rules v1 §R5.5 DP-14; legacy RWB-E2-033 section 12.",
+      "gap": "GAP-0660",
+      "applied_in": "§8 BR2, §12.3 Events published, §13 Solution plan",
+      "confidence": "High",
+      "confirm": "Platform event catalogue owner (RWB-PLT-E1047-CON)",
+      "impact": "The topic and its two events stay as the file stories define them; this story adds no subscription and no producer.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1145",
+      "text": "The ageing and service-level rules of BR2 to BR5 are evaluated twice on the same owner fields: by the P3 ageing contract for the case-side screen and by AgeingAndBreachCalculator in rwb-integration for the composed page and the export; the case-side answer is the record and the composed answer is the composition, and the two are tested against each other.",
+      "why": "The legacy story computed the values in the same module that read them, while the split puts the owner's computation case-side and still needs a local computation here to apply the breach filter and the order over one page.",
+      "read": "Legacy RWB-E2-033 section 5 and BR2 to BR5; Ownership Map tables timer (owner P3) and API GET /cases/{caseId}/timers; Architecture v5 slide 41.",
+      "gap": "GAP-0660",
+      "applied_in": "§1 Story, §2 Business rationale, §7 AC note, §8 BR13, §13 Components",
+      "confidence": "Medium",
+      "confirm": "Solution architect; the rwb-case owner (RWB-P3-E2011-CON)",
+      "impact": "One set of rules implemented twice; a change of a rule is a change in both stories and one shared test proves they agree.",
+      "wp": "B-P2-01"
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "id": "RWB-P2-E2035-CON",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-035",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC1 The three provided operations are fixed"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC2 The eight consumed paths are published with one budget"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC3 The compute-and-write split is fixed and the ownership conflict is reconciled"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC4 The fill workflow and the Schedule are fixed"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC5 The error mapping covers the five messages on the named operations"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC6 The nine contract tables are complete and the fakes match them"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2035-CON-01",
+    "TC-P2-E2035-CON-02",
+    "TC-P2-E2035-CON-03",
+    "TC-P2-E2035-CON-04",
+    "TC-P2-E2035-CON-05",
+    "TC-P2-E2035-CON-06"
+  ],
+  "reqs": [
+    "REQ-WKM-012",
+    "REQ-WKM-013",
+    "REQ-WKM-016",
+    "REQ-WKM-014",
+    "REQ-WKM-015"
+  ],
+  "ops_provided": [
+    "POST /api/recovery/integration/v1/next-actions:resolve",
+    "GET /api/recovery/integration/v1/cases/{caseId}/next-action",
+    "POST /api/recovery/integration/v1/cases/{caseId}/next-action"
+  ],
+  "ops_consumed": [
+    "GET /api/recovery/case/v1/cases/{caseId}",
+    "GET /api/recovery/case/v1/cases",
+    "GET /api/recovery/decision/v1/rule-catalog/{ruleId}?packageVersion=",
+    "GET /api/recovery/case/v1/reference-data/role-classes/{roleCode}",
+    "GET /api/recovery/case/v1/reference-data/service-levels/{toState}",
+    "GET /api/recovery/case/v1/parameters/rwb.calendar.bank-holidays",
+    "GET /api/recovery/decision/v1/decision-log?caseId=&latestStateChange=true",
+    "POST /api/recovery/access/v1/authorise",
+    "POST rwb-case next-action write (path not specified in the source documents)"
+  ],
+  "events_published": [
+    "rwb.decision-record.DecisionRecorded.v1"
+  ],
+  "events_consumed": [],
+  "workflows": [
+    "NextActionCheckWorkflow",
+    "findCasesWithoutNextAction",
+    "resolveNextAction",
+    "fillNextAction"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-WKM-012, REQ-WKM-013, REQ-WKM-016, REQ-WKM-014, REQ-WKM-015)",
+  "gaps": [
+    "GAP-0668"
+  ],
+  "assumptions": [
+    "ASM-1177",
+    "ASM-1178",
+    "ASM-1179",
+    "ASM-1180",
+    "ASM-1183",
+    "ASM-1184",
+    "ASM-1185",
+    "ASM-1186"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2035 CON Next action on the case - contract v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0668",
+      "title": "rwb-integration next action contract: the read path ownership, the three operation names, the consumed shapes, the Schedule values and the timer vocabulary are not fixed by a source",
+      "source": "Architecture v5 Text Extract v1 slides 14, 41 and 44; Ownership Map API row GET /cases/{caseId}/next-action (owner P3) and tables job_catalog (P2), decision_record (PLT), rule_row (P7) and reference_row (P3); TSD P2 Integration v3 T3.1 and T3.2 (job_catalog, feature_flag) and Appendix T-B; Temporal and Drools Design Text Extract v1 slides 12, 13 and 15; legacy RWB-E2-035 §12, §13 and §14; Template and Rules v1 §R3, §R5.7 and §R9",
+      "section": "§1 Story, §10 Authority, §11 Data, §12.1 to §12.7, §14 Validation and messages",
+      "description": "One combined row for the contract baseline of this key. (1) Login: no source names the per-service login of rwb-integration under DP-02, and the contract names a workload identity it cannot resolve. (2) Ownership conflict: the Ownership Map keeps GET /cases/{caseId}/next-action with P3 while this work package places the story in rwb-integration; the contract reconciles them by serving the path from the integration base (DP-13) and leaving the case row and the write with rwb-case, and the map row stays uncorrected until the ruling is entered. (3) Contract field names: the consumed shapes of the P3 case read and write, the P3 case list, the catalog operation of RWB-P3-E2042-CON, the P3 reference data and parameter reads and the P7 decision log read are named by legacy Java types and LDM field IDs only; the JSON property names, the required flags, the query parameters and the write path of the fill are fixed by no source; and the rwb-access authorise contract the three operations call, RWB-P4-E1037-CON, is not in the contract-dependency row of this key, so it is carried here. (4) Operation names: the legacy in-process interfaces become POST /next-actions:resolve, GET /cases/{caseId}/next-action and POST /cases/{caseId}/next-action, and neither the colon path nor the POST of the fill has a source. (5) Schedule: the legacy JOB-05 every 5 minutes becomes the Temporal Schedule next-action-check on rwb-integration; the name, the catch-up window, the overlap window and the backfill limit are this work package's, while Arch v5 slide 44 lists JOB-05 as retired durable timers and the timer table ruling retires it. (6) Message texts: MSG-P2-023 is a new message of the legacy story whose text the catalogue does not hold, and MSG-GEN-004, MSG-GEN-006, MSG-P4-002 and MSG-P4-003 are platform texts reused here without a catalogue entry for this key. (7) Rule values: package version RES-2026.12 and the rows R-RES-04, R-SET-13, R-RES-03, R-DEV-05 and R-RES-07 are legacy values, are kept unchanged in the contract examples and must match the registry rows of RWB-E2-042 and RWB-P7-E2035-APP. (8) Timer vocabulary: the contract names a Schedule where the legacy names a job, and the legacy criteria keep the JOB-05 wording; the two vocabularies are declared as one mechanism.",
+      "evidence": "Legacy RWB-E2-035 §12 publishes the Java interfaces NextActionAssigner, TimerSpecResolver, RuleEvaluator, RuleCatalog and DecisionLogQuery with no HTTP path except the read; the Ownership Map row GET /cases/{caseId}/next-action reads owner P3 with no ruling; TSD P2 Integration v3 has no next action endpoint, no next action table and no job row for the sweep, so the contract fixes names the technical sources do not carry; Arch v5 slide 44 lists JOB-05 as every 5 min, owner all, retired durable timers.",
+      "type": "Conflict",
+      "area": "Contract, ownership, scheduling, messages",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-035 sections 12, 13 and 14",
+      "owner_role": "Solution architect; contract owners of rwb-case, rwb-access and rwb-decision; platform workflow kit owner",
+      "asm": "ASM-1177, ASM-1178, ASM-1179, ASM-1180, ASM-1183, ASM-1184, ASM-1185, ASM-1186",
+      "proposed": "Baseline the contract with the three operation names, the nine consumed shapes, the split note, the workflow and Schedule contract and the error mapping; have the rwb-case, rwb-access and rwb-decision contract owners confirm or correct the element names at the review; record the read path ruling in the Ownership Map; and confirm the five message texts in the catalogue.",
+      "wp": "B-P2-02"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1183",
+      "text": "The resolution is published as POST /next-actions:resolve, a colon operation name rather than a resource, and the fill is published as POST /cases/{caseId}/next-action; the legacy in-process interfaces NextActionAssigner.assign and NextActionCheckStep become these two operations, one side-effect free and one writing through the rwb-case contract.",
+      "why": "No source fixes an HTTP name for a side-effect-free resolution, and the legacy story published only the read path; the work package instructs the colon path and the fill operation.",
+      "read": "Legacy RWB-E2-035 §12 (NextActionAssigner.assign and the P3 interface block); Template and Rules v1 §R5.5 DP-11 and DP-13; Architecture v5 slide 11 (REST conventions).",
+      "gap": "GAP-0668",
+      "applied_in": "§12.1 of RWB-P2-E2035-CON",
+      "confidence": "Medium",
+      "confirm": "Solution architect and the rwb-integration contract owner",
+      "impact": "The caller in RWB-P3-E2035-APP and the integration harness call the colon path once; a later rename is one line in the contract and in the client.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1184",
+      "text": "The next-action-check Schedule runs every 5 minutes with the overlap policy SKIP and one execution per fire window, and the catch-up window, the overlap window and the backfill limit are values of the environment, set in RWB-P2-E2035-OPS and never written in code.",
+      "why": "The 5 minutes are the legacy cadence of JOB-05, while no source fixes a catch-up window, an overlap window or a backfill limit for a Schedule of this service.",
+      "read": "Legacy RWB-E2-035 §4 step 7 and the legacy misfire instruction of JOB-05; Architecture v5 slide 44 notes (cron with overlap policy SKIP and catch-up window); Template and Rules v1 §R5.5 DP-10.",
+      "gap": "GAP-0668",
+      "applied_in": "§12.6 of RWB-P2-E2035-APP and RWB-P2-E2035-CON; §12.6 and §13 of RWB-P2-E2035-OPS",
+      "confidence": "Medium",
+      "confirm": "Platform workflow kit owner and DevOps engineer",
+      "impact": "A fire missed while the service is down is caught by the next run inside the window; the sweep never runs two executions for one window.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1185",
+      "text": "The evaluation of the RESTRUCTURE package stays with the EvaluateRules activity of the case workflow, and rwb-integration uses only the embedded kit types RuleResult and NoPackageInForce and the version-in-force check; the resolve receives the fired ruleId and packageVersion and runs no rule engine of its own.",
+      "why": "D-RCV-36 fixes one evaluator per decision and the legacy component RuleEvaluator lived in the same module as the assigner, so the split must say which side evaluates now that the assigner has moved.",
+      "read": "D-RCV-36 T3, T5 and T7; Temporal and Drools Design Text Extract v1 slides 12 and 13 (EvaluateRules and RecordAndApply in the owning service); RWB-PLT-E1072-CON; legacy RWB-E2-035 §4 steps 1 and 2 and §12.",
+      "gap": "GAP-0668",
+      "applied_in": "§1 Story and §8 BR13 of RWB-P2-E2035-APP; §8 BR5 of RWB-P2-E2035-CON",
+      "confidence": "High",
+      "confirm": "Solution architect; embedded Drools kit owner",
+      "impact": "No second KieBase is built in rwb-integration and the decision record names the evaluation of the move, not a second evaluation of the same facts.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1186",
+      "text": "The legacy flag rwb.casewf.next-action stays the name of the switch as a legacy reference, and the switch itself is a feature flag of the platform flag library read at the start of every run; off pauses the Schedule, blocks the fill and hides the case record header and the case list columns.",
+      "why": "Feature flags belong to the platform library by the R-PREC default ruling and the Ownership Map gives feature_flag to PLT, while the legacy story holds the flag as a service property and TSD P2 defines feature_flag in rwb_integration.",
+      "read": "Template and Rules v1 §R3 default rulings; Ownership Map tables feature_flag and feature_flag_change (owner PLT, ruling on TSD P2 v3); TSD P2 Integration v3 T3.1 and API-P2-005 to API-P2-008; legacy RWB-E2-035 §3 and §13 (feature flag).",
+      "gap": "GAP-0668",
+      "applied_in": "§13 Solution plan (feature switch) of RWB-P2-E2035-APP; §8 BR11 of RWB-P2-E2035-CON; §7 AC4 and §13 of RWB-P2-E2035-OPS",
+      "confidence": "High",
+      "confirm": "Platform flag library owner (RWB-PLT-E1047-CON)",
+      "impact": "The flag value comes from the library and not from a service table; the legacy name is kept so the switch stays traceable to the legacy story.",
+      "wp": "B-P2-02"
+    }
+  ]
+}

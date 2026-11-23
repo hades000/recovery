@@ -1,0 +1,148 @@
+{
+  "id": "RWB-P2-E2034-OPS",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "OPS",
+  "lane": "L-P2-I",
+  "ready": "Day 1",
+  "owner": "DEVOPS",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-034",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the rwb-integration chart and its values files"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the release of this story and the four owner topics"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the published alert rules and the retry scan of the deployment"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the deployed worker and the group on rwb.source-data.events.v1"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the published dashboard of the deployment"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the published runbook and the alert rules"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2034-OPS-01",
+    "TC-P2-E2034-OPS-02",
+    "TC-P2-E2034-OPS-03",
+    "TC-P2-E2034-OPS-04",
+    "TC-P2-E2034-OPS-05",
+    "TC-P2-E2034-OPS-06"
+  ],
+  "reqs": [
+    "REQ-ILG-009",
+    "REQ-ILG-010",
+    "REQ-ILG-011",
+    "REQ-ILG-012",
+    "REQ-ILG-013",
+    "REQ-ILG-014",
+    "REQ-ILG-007",
+    "REQ-ILG-008",
+    "REQ-ILG-006"
+  ],
+  "ops_provided": [],
+  "ops_consumed": [],
+  "events_published": [],
+  "events_consumed": [
+    "rwb.treatment.TreatmentApproved.v1",
+    "rwb.comms.NoticeDispatched.v1",
+    "rwb.comms.NoticeDelivered.v1",
+    "rwb.partner.InstructionIssued.v1",
+    "rwb.partner.PartnerResultSubmitted.v1",
+    "rwb.payment.ProceedsMatched.v1",
+    "rwb.source-data.AceDataReady.v1"
+  ],
+  "workflows": [
+    "LedgerChannelIntakeWorkflow",
+    "mapChannelEvent",
+    "resolveChannelFacts",
+    "appendLedgerEntry",
+    "parkDeliveryInException",
+    "EfsLedgerReadWorkflow",
+    "readEfsOutcomes",
+    "appendEfsEntries",
+    "writeEfsReadSummary",
+    "LedgerChannelListener",
+    "delivery retry scan"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-ILG-009, REQ-ILG-010, REQ-ILG-011, REQ-ILG-012, REQ-ILG-013, REQ-ILG-014, REQ-ILG-007, REQ-ILG-008, REQ-ILG-006)",
+  "gaps": [
+    "GAP-0666"
+  ],
+  "assumptions": [
+    "ASM-1175",
+    "ASM-1176"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2034 OPS Interaction ledger on the case and from every channel - deployment v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0666",
+      "title": "The consumer group names, the offset policy, the retry scan interval, the lag and alert thresholds, the build ID format and the fixture owner of the intake deployment are not fixed in the source documents",
+      "source": "22 Microservice Realignment/Recovery Workbench Architecture v5 Text Extract v1.md (slides 20, 24, 33, 41 and 44); 22 Microservice Realignment/Recovery Workbench Temporal and Drools Design Text Extract v1.md (slides 11 and 12); _work/msr/plan/ownership.json (rulings on processed_event, outbox_delivery and idempotency_key); _work/msr/extract/Recovery Workbench Technical Specifications by Module v5/Recovery Workbench TSD P2 Integration v3.md (T4 and T-A)",
+      "section": "3 Preconditions; 8 Business rules; 10 Authority; 11 Data; 12.4; 12.5; 12.6; 13 Solution plan; 14 Validation and messages",
+      "description": "The deployment needs nine values that no source fixes. The consumer group names of the intake and of the EFS read step, and whether they are one group across four topics or one group per topic, are not stated; only the logical consumer name ledger-channels survives from the legacy story and the platform rule names topics and topics only. The offset reset policy, the maximum poll, the commit point relative to the inbox row, the partition count and the rebalance behaviour are not stated. The retry scan interval is not stated: the platform relay runs every minute by the job map, but the scan that wakes an outbox_delivery after its next attempt has no stated interval, and the retry intervals of 1 minute, 10 minutes and 1 hour of the legacy module are not confirmed for this consumer. The lag threshold of each of the five consumed topics, the alert threshold of the exception queue count, the alert threshold of the append failure rate and the stuck-run threshold of the EFS read step are not stated; the platform alert catalogue carries message identifiers, not values, and no source names an identifier or a text for a lag alert or for an EFS trigger alert in this service. The build ID format and the worker versioning policy are named as platform capabilities but not specified. The owner of the synthetic fixtures of the smoke run, and whether a synthetic delivery may be parked in a shared environment, is not stated. The replica counts, resource sizes, probe timings and the UAT promotion rule are environment values with no baseline.",
+      "evidence": "Arch v5 slide 44 puts the outbox sender on a one-minute interval for every service and gives no other interval; slide 33 gives the morning run and the 16:00 window as the busy times but no threshold; slide 24 and the Temporal and Drools design slide 11 give the namespace, the task queue and worker versioning as capabilities; slide 41 gives the queue rwb-integration and the schema rwb_integration but no group, no offset rule and no login. TSD P2 v3 T4 gives the four delivery states and the last-failure task, and T-A gives the two admin operations, with no operational value. The ownership rulings on processed_event, outbox_delivery and idempotency_key record them as library objects created in every service schema and fix no deployment value.",
+      "type": "Missing",
+      "area": "Deployment and operations",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-034",
+      "owner_role": "DevOps lead",
+      "asm": "ASM-1175",
+      "proposed": "Approve the two assumptions of RWB-P2-E2034-OPS in the release readiness review: the two consumer groups with their offset policy and commit point, the scan and retry intervals, the lag and alert thresholds, the build ID format and versioning policy, and the fixture ownership of the smoke run, all carried as environment values and never as code.",
+      "wp": "B-P2-02"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1175",
+      "text": "The deployment values are taken as follows. Two consumer groups are deployed: the ledger intake group on rwb.treatment.events.v1, rwb.comms.events.v1, rwb.partner.events.v1 and rwb.payment.events.v1, and the EFS read group on rwb.source-data.events.v1, both with an offset reset policy of earliest, a commit after the inbox row is marked and no assignment to a topic of this service. The delivery retry scan runs on its own interval and reads the deliveries where the status is PENDING or RETRYING and the next attempt is due. The lag threshold of each consumed topic, the exception queue count threshold, the append failure rate threshold and the stuck-run threshold of the EFS read step are environment values. The build ID is the one the workflow kit supplies for the release commit and worker versioning is enabled. The synthetic fixtures of the smoke run are owned by the DevOps team of the release and are created in DEV and SIT only.",
+      "why": "The platform rule names topics, the task queue and the schema and gives no group, no offset rule, no threshold and no build ID format; the job map gives only the one-minute relay. An operator cannot act on a threshold that does not exist, so the values are fixed per environment and listed here rather than in code.",
+      "read": "Arch v5 slides 20, 24, 33, 41 and 44; Temporal and Drools design slides 11 and 12; TSD P2 v3 T4; Template and Rules section R5.5 DP-09 and DP-10",
+      "gap": "GAP-0666",
+      "applied_in": "8 Business rules BR2 and BR7; 11 Data; 12.4; 12.5; 13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "DevOps lead, the platform event owner and the platform administrator at the release readiness review",
+      "impact": "No business value changes; the alert thresholds and intervals are tuning values, and a delivery is still never lost and never deleted.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1176",
+      "text": "The observability of the deployment is taken as follows. The five dashboard series are consumer lag by group and partition, deliveries in RETRYING, deliveries in EXCEPTION, append answers by class and the EFS read summary counts, each with the environment, the release and the build ID as dimensions. The three runbook entries are a lagging consumer group, a parked delivery and a missing EFS run. The build ID format is the release commit identifier supplied by the workflow kit, and the versioning policy is the platform default: a new build takes new workflows while the old build drains. No series, alert payload or runbook entry carries a case identifier beyond the delivery reference, a contact point, an amount or a decoded payload.",
+      "why": "ADR-023 requires observability per service and the message catalogue requires a message identifier per alert, but no source lists the series, the thresholds or the runbook entries of this consumer; the five series follow the failures the app story declares, and the counts are the ones the legacy criteria use.",
+      "read": "ADR-023; Temporal and Drools design slide 11 (payload codec and PDPA); Arch v5 slide 44 JOB-21; Template and Rules section R7.2 s14",
+      "gap": "GAP-0666",
+      "applied_in": "7 AC5 and AC6; 11 Data; 13 Solution plan; 14 Validation and messages",
+      "confidence": "Medium",
+      "confirm": "DevOps lead and the on-call rota at the release readiness review, before the runbook is accepted",
+      "impact": "Every alert an operator receives has one message identifier and one runbook entry, and no dashboard or alert exposes personal data.",
+      "wp": "B-P2-02"
+    }
+  ]
+}

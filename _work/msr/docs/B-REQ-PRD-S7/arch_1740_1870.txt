@@ -1,0 +1,130 @@
+1740:rwb-treatment
+1741:
+1742:rwb-valuation
+1743:
+1744:rwb-guarantee
+1745:
+1746:rwb-deviation
+1747:
+1748:rwb-asset
+1749:
+1750:rwb-debtsale
+1751:
+1752:rwb-writeoff
+1753:
+1754:rwb-payment
+1755:
+1756:rwb-document
+1757:
+1758:rwb-comms
+1759:
+1760:rwb-integration
+1761:
+1762:rwb-agent
+1763:
+1764:rwb-source-data
+1765:
+1766:rwb-reporting
+1767:
+1768:rwb-access
+1769:
+1770:1
+1771:
+1772:2
+1773:
+1774:3
+1775:
+1776:4
+1777:
+1778:Workers live in each service's worker deployment and poll only their own queue; KEDA scales them on backlog.
+1779:
+1780:Codec (AES-GCM, Key Vault) on every client and worker; codec server for the UI.
+1781:
+1782:1
+1783:
+1784:Child workflow
+1785:CaseWorkflow starts LitigationWorkflow on rwb-litigation
+1786:
+1787:2
+1788:
+1789:Activity
+1790:Litigation calls Partner.issueInstruction on rwb-partner
+1791:
+1792:3
+1793:
+1794:Nexus operation
+1795:Treatment calls ACE's restructure calculator across namespaces
+1796:
+1797:4
+1798:
+1799:Signal from an event
+1800:PaymentMissed → case router → signalWithStart CaseWorkflow
+1801:
+1802:One cluster, isolated namespaces, one queue per service: a service is reusable through its queue and contract, not its code.
+1803:
+1804:24
+1805:
+1806:Notes: Each Recovery service runs its own Temporal worker in its worker deployment, polling only task queue rwb-<service> in namespace rwb-recovery. KEDA's Temporal scaler adds workers when the queue backlog grows and can scale bursty queues (document OCR, agent runs) to zero.
+1807:
+1808:(1) Child workflow: CaseWorkflow on rwb-case starts LitigationWorkflow on rwb-litigation (parent close policy ABANDON, so the stage survives the parent's Continue-As-New). (2) Activity: LitigationWorkflow calls Partner.issueInstruction on rwb-partner; the worker of rwb-partner executes it and writes its own schema. (3) Nexus: TreatmentWorkflow calls the restructure calculator as a Nexus operation exposed by ace-collection; the namespaces stay isolated. (4) Signal: a Kafka event (PaymentMissed) reaches rwb-case's case router, which uses signalWithStart on the CaseWorkflow.
+1809:
+1810:Data converter: every client and worker uses the payload codec (AES-GCM, keys in Key Vault per namespace); the codec server lets authorised staff read payloads in the Temporal UI.
+1811:
+1812:## Slide 25
+1813:
+1814:How the journey runs: one case workflow, with a child for each stage
+1815:
+1816:The parent tracks the whole case; each stage runs in the service that owns it
+1817:
+1818:CaseWorkflow  one per case, entry to closure · queue rwb-case · signals from the case router
+1819:
+1820:child
+1821:
+1822:Route decision
+1823:rwb-valuation + approval on rwb-decision
+1824:
+1825:Deviation
+1826:rwb-deviation (any time)
+1827:
+1828:Treatment / guarantee
+1829:rwb-treatment · rwb-guarantee
+1830:
+1831:Litigation
+1832:rwb-litigation (years)
+1833:
+1834:Asset / debt sale
+1835:rwb-asset · rwb-debtsale
+1836:
+1837:Write-off
+1838:rwb-writeoff
+1839:
+1840:time
+1841:
+1842:Continue-As-New at every stage end and at least every 28 days
+1843:
+1844:Timers that last for years
+1845:Court dates and letter deadlines survive restarts and upgrades
+1846:
+1847:Events become signals
+1848:PaymentMissed, NoticeDelivered and others reach the case through the case router
+1849:
+1850:Approvals from the kit
+1851:ApprovalWorkflow on rwb-decision, routed by authority (DoA)
+1852:
+1853:Each stage runs on the queue of the service that owns it, so it scales, releases and can be reused with that service.
+1854:
+1855:25
+1856:
+1857:Notes: CaseWorkflow (rwb-case, workflow ID = case ID) is the parent from entry to closure. Each stage is a child workflow started on the owner's task queue: RouteDecisionWorkflow (rwb-valuation, with ApprovalWorkflow from the kit on rwb-decision), DeviationWorkflow (rwb-deviation, can start at any time and pauses the stage clock), TreatmentWorkflow (rwb-treatment) and GuaranteeClaimWorkflow (rwb-guarantee), LitigationWorkflow (rwb-litigation, can run for years), AssetDisposalWorkflow (rwb-asset) and DebtSaleWorkflow (rwb-debtsale), WriteOffWorkflow (rwb-writeoff).
+1858:
+1859:Events from other services reach the case as signals through the case router (signalWithStart), never by direct calls.
+1860:
+1861:History: Continue-As-New at every stage end and at least every 28 days keeps each run far below Temporal's limit of 51,200 events or 50 MB. Children use parent close policy ABANDON so they survive the parent's Continue-As-New.
+1862:
+1863:## Slide 26
+1864:
+1865:Deals that span services: undo before the point of no return, finish after it
+1866:
+1867:Debt sale example: seven steps across five services, no shared transaction
+1868:
+1869:Can still be undone

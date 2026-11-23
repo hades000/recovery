@@ -1,0 +1,171 @@
+{
+  "id": "RWB-P2-E2036-CON",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-036",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "The nine contract tables are complete and each names its owner"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "The placement operation shape is fixed on the integration base"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "The error mapping is fixed and forwarded refusals are unchanged"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "The idempotent replay is fixed"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "The approved callers list has one source"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "The P3 and P4 fakes match this document"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2036-CON-01",
+    "TC-P2-E2036-CON-02",
+    "TC-P2-E2036-CON-03",
+    "TC-P2-E2036-CON-04",
+    "TC-P2-E2036-CON-05",
+    "TC-P2-E2036-CON-06"
+  ],
+  "reqs": [
+    "REQ-CWC-017",
+    "REQ-CWC-018",
+    "REQ-CWC-019",
+    "REQ-CWC-020",
+    "REQ-ACA-010"
+  ],
+  "ops_provided": [
+    "POST /api/recovery/integration/v1/queues/{queueId}/placements"
+  ],
+  "ops_consumed": [
+    "POST /api/recovery/case/v1/queues/{queueId}/placements",
+    "GET /api/recovery/case/v1/admin/parameters",
+    "POST /api/recovery/access/v1/authorise"
+  ],
+  "events_published": [
+    "rwb.decision-record.DecisionRecorded.v1"
+  ],
+  "events_consumed": [],
+  "workflows": [],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-CWC-017, REQ-CWC-018, REQ-CWC-019, REQ-CWC-020, REQ-ACA-010)",
+  "gaps": [
+    "GAP-0671"
+  ],
+  "assumptions": [
+    "ASM-1197",
+    "ASM-1198",
+    "ASM-1199",
+    "ASM-1200",
+    "ASM-1201"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2036 CON Queue write interface for models and agents - contract v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0671",
+      "title": "rwb-integration queue-write adapter contract: the ownership of the placement path, the consumed contract shapes and the library table columns are not fixed by one source",
+      "source": "RWB P2 E2036 APP Queue write interface for models and agents v1.md (this run); _work/msr/plan/ownership.json (api POST /queues/{queueId}/placements; tables idempotency_key, decision_record); Recovery Workbench TSD P2 Integration v3 T3.1; Recovery Workbench Architecture v5 Text Extract v1 slides 11, 14, 16, 20 and 41; RWB P3 E1019 CON Roles, teams and queues as data - contract v1.md",
+      "section": "Contract sections 12.1, 12.2, 12.3 and 12.7; legacy §12; TSD P2 v3 T3.1; Architecture v5 slides 11, 14 and 20",
+      "description": "The contract baseline of the rwb-integration adapter has to fix seven elements that no source fixes together. (1) Operation ownership: the Ownership Map keeps POST /queues/{queueId}/placements with P3 rwb-case and the WP B-P2-02 gives the same legacy key a P2 contract story, so the document must say which path is whose. (2) The JSON element names of the three consumed contracts (the rwb-case placement, the rwb-case parameters contract under rwb.casewf.placement.approved-callers and the rwb-access authorise contract) are not stated by any source; the legacy gives PlacementRequest and RWB-P3-E1019-CON gives caseId and reason only. (3) The status of the P3 placement is 202 in RWB-P3-E1019-CON and 201 in the legacy AC1. (4) The row fields of the approved callers list (caller code, caller type MODEL or AGENT, service identity, approval state) are named nowhere; only the key is. (5) The column set of the decision_record library table beyond the standard record columns is not stated; Arch v5 slide 20 places the table in every service schema and DP-03 owns the library. (6) The replay window of the adapter is not stated for a placement; TSD P2 v3 T3.1 gives 24 hours for the stored response. (7) The rwb-integration login is not named by any source. The admission decision code is D6 in the legacy AC3, which is also the code of the route decision D6 in the Drools design; the placement admission keeps the legacy code. (8) Path: the caller-facing path on the integration base is not named by any source, and the legacy path carries the monolith base; the document serves the same suffix on /api/recovery/integration/v1, with no colon segment and no verb. The message texts are the legacy texts and are copied unchanged; the platform text of MSG-GEN-006 and of MSG-P4-001 is not restated.",
+      "evidence": "Ownership Map api POST /queues/{queueId}/placements owner P3; WP B-P2-02 write list and story line RWB-P2-E2036-CON; RWB-P3-E1019-CON 12.1 (202 Placement) and 12.2 (POST /api/recovery/access/v1/authorise); legacy RWB-E2-036 §12 (PlacementRequest, 201) and AC1; Architecture v5 slide 11 (Idempotency-Key on every POST, stored response), slide 14 (rwb-access IN POST /authorise), slide 16 (rwb-integration schema and topic), slide 20 (own schema: business tables + outbox + inbox + decision_record); TSD P2 v3 T3.1 idempotency_key and processed_event",
+      "type": "Missing",
+      "area": "Integration contract detail",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-036",
+      "owner_role": "Tech lead",
+      "asm": "ASM-1197, ASM-1198, ASM-1199, ASM-1200, ASM-1201",
+      "proposed": "Declare the placement on the integration base as the provided operation with the four legacy body fields, a required Idempotency-Key and the 201 shape of the legacy story, and declare the case-base placement as consumed and owned by P3; carry the consumed contracts as consumed with the placeholder for their JSON element names until their owners publish them; take the idempotency_key column set from TSD P2 v3 T3.1 and mark the remaining decision_record columns with the placeholder; state the 24-hour replay window as the platform rule; leave the login name to the rwb-integration DB story. Reconfirm the reconciliation with the Ownership Map at review: one owner per operation, two operations on two bases.",
+      "wp": "B-P2-02"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1197",
+      "text": "The placement on the integration base is a distinct operation from the placement on the case base: rwb-case keeps POST /api/recovery/case/v1/queues/{queueId}/placements and its behaviour, and rwb-integration provides the caller-facing admission and forwarding operation at the same suffix on its own base.",
+      "why": "The Ownership Map keeps POST /queues/{queueId}/placements with P3 and WP B-P2-02 gives the legacy key a P2 contract story; the two are reconciled by giving each base one operation rather than by moving an operation between owners.",
+      "read": "_work/msr/plan/ownership.json api POST /queues/{queueId}/placements (owner P3, basis API Specification v4 x-module P3 and Arch v5 slide 41); Architecture v5 slide 41 (rwb-case owns queues, tasks, allocation; rwb-integration owns interface config, file runs, outbound items, ACE integration paths); RWB-P3-E1019-CON 12.1",
+      "gap": "GAP-0671",
+      "applied_in": "RWB-P2-E2036-CON §1, §2, §12.1; RWB-P2-E2036-APP §1, §12.1",
+      "confidence": "Medium",
+      "confirm": "solution architect and the rwb-case and rwb-integration owners at the contract review; the Ownership Map keeps the P3 operation unchanged",
+      "impact": "If the reconciliation is refused, the P2 story keeps only the consumed side and the provided operation moves to the P3 story; the legacy caller journey then has no integration entry point",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1198",
+      "text": "The deployment identity that calls rwb-case and rwb-access is the rwb-integration service identity, read as the login rwb_integration.",
+      "why": "DP-02 gives one login per service; no source names the login literal, and the contract fixes no name in code.",
+      "read": "Architecture v5 slides 20 and 41 (one schema and one login per service, schema rwb_integration); plan DP-02; Template and Rules §R4",
+      "gap": "GAP-0671",
+      "applied_in": "RWB-P2-E2036-CON §10, §14",
+      "confidence": "High",
+      "confirm": "ACE DBA and the solution architect at the rwb-integration DB story",
+      "impact": "None on the contract shape; the name arrives with the DB story and the chart",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1199",
+      "text": "The three consumed contracts keep the element names of the legacy PlacementRequest where the legacy gives them, and the remaining JSON element names and the status of the rwb-case placement are taken from the owning contract once published; the adapter returns the status the owning service returns, so a 202 from the P3 operation is passed through as it is and the legacy 201 remains the shape of the 201 case.",
+      "why": "No source gives the JSON element names of the rwb-case placement, rwb-case parameters and rwb-access authorise contracts, and the legacy AC1 expects 201 while RWB-P3-E1019-CON documents 202.",
+      "read": "Legacy RWB-E2-036 §12 (PlacementRequest; 201) and AC1; RWB-P3-E1019-CON 12.1 (202 Placement; body caseId, reason); Architecture v5 slide 14 (rwb-access POST /authorise)",
+      "gap": "GAP-0671",
+      "applied_in": "RWB-P2-E2036-CON §11, §12.1, §12.2",
+      "confidence": "Medium",
+      "confirm": "the rwb-case owner and the rwb-access owner at contract review",
+      "impact": "The contract carries the placeholder until the owners publish; a status change on the P3 side is a contract change on both sides",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1200",
+      "text": "The approved callers list is one row of the rwb-case reference-data and parameter contract under rwb.casewf.placement.approved-callers, with the caller code, the caller type MODEL or AGENT, the service identity and the approval state; rwb-integration holds no copy.",
+      "why": "The legacy names the key and the type values only, and the reference-data default ruling puts the row in rwb-case (DP-07).",
+      "read": "Legacy RWB-E2-036 §3 and BR1; plan DP-07 and R-PREC default ruling; Architecture v5 slide 41 (rwb-case owns parameters and reference data by ruling)",
+      "gap": "GAP-0671",
+      "applied_in": "RWB-P2-E2036-CON §11, §12.2, §12.8",
+      "confidence": "Medium",
+      "confirm": "rwb-case owner and RW-RISK",
+      "impact": "A field name change is a contract change with the owner; the adapter fails closed when the row cannot be read",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1201",
+      "text": "The decision_record library table takes the standard record columns from TSD P2 v3 T3.0 and the decision fields of the local record from the decision-record library; its further column names are not stated by any source and are left to RWB-PLT-E1027-CON.",
+      "why": "Arch v5 slide 20 places decision_record in every service schema and DP-03 owns the library, but no source gives the table's column set beyond the standard columns.",
+      "read": "Architecture v5 slide 20 (own schema: business tables + outbox + inbox + decision_record); TSD P2 v3 T3.0 (standard record columns); plan DP-03; LDM v8 decision_log_entry DF-DEC-001 to DF-DEC-018",
+      "gap": "GAP-0671",
+      "applied_in": "RWB-P2-E2036-CON §11, §12.7, §19",
+      "confidence": "Medium",
+      "confirm": "platform library owner at RWB-PLT-E1027-CON",
+      "impact": "The contract names the table and its use, not its columns; a column set change is a library change",
+      "wp": "B-P2-02"
+    }
+  ]
+}

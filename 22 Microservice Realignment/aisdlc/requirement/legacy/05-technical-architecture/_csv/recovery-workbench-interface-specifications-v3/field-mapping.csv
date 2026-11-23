@@ -1,0 +1,85 @@
+﻿Source field to Workbench field
+"82 mappings from the source system and bank file fields to the ACE table.column that holds each value (Tier 1 exists in ACE today, Tier 2 is added by the ACE team in RWB-ACE-001) and the recovery.v_ace_* view column the Workbench reads, per the LDM v7 ACE mapping sheet. Outbound rows (INT-14, INT-25) name the Workbench (Tier 4) column the file is built from. The inbound rows are the ACE ingestion specification and are owned by the ACE team."
+Interface,Source field,Table.column,Tier,Read path,LDM field,Data type,Physical type,Mandatory,Transformation,Owner
+INT-01,ACCOUNT_KEY / iacct / AccNo,account.account_key,Tier 1,v_ace_account.account_no,DF-ACC-002,TEXT,varchar(20),Yes,Direct copy; ACE business key,ACE team
+INT-01,ContractNo,account.contract_number,Tier 1,v_ace_account.contract_no,DF-ACC-003,TEXT,varchar(20),No,Direct copy,ACE team
+INT-01,acct_prd_cd,product.product_key,Tier 1,v_ace_account.product_code,DF-ACC-004,LOV,varchar(10),Yes,Direct copy,ACE team
+INT-01,BU,account.business_unit,Tier 2,v_ace_account.business_unit,DF-ACC-006,LOV,varchar(10),No,Direct copy,ACE team
+INT-01,CONTRACT_DATE,account.contract_date,Tier 1,v_ace_account.contract_date,DF-ACC-007,DATE,date,No,Direct copy,ACE team
+INT-01,INTEREST_RATE,account.interest_rate,Tier 1,v_ace_account.interest_rate,DF-ACC-008,NUMBER,"numeric(7,4)",No,"Direct copy; the view casts numeric(38,2) to numeric(7,4)",ACE team
+INT-01,Principal,account.principal_outstanding,Tier 2,v_ace_account.principal_outstanding,DF-ACC-009,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-01,AINT1 + AINT2,account.interest_outstanding,Tier 2,v_ace_account.interest_outstanding,DF-ACC-010,NUMBER,"numeric(18,2)",Yes,AINT1 plus AINT2,ACE team
+INT-01,AFEE,account.fees_outstanding,Tier 2,v_ace_account.fees_outstanding,DF-ACC-011,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-01,TOTAL_BALANCE,account.total_balance,Tier 1,v_ace_account.total_balance,DF-ACC-012,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-01,ACCOUNTING_BALANCE,account.accounting_balance,Tier 1,v_ace_account.accounting_balance,DF-ACC-013,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-01,DELAY_DAYS,account.delay_days,Tier 1,v_ace_account.days_past_due,DF-ACC-014,NUMBER,integer,Yes,Direct copy; renamed days_past_due in the view,ACE team
+INT-01,Bucket,account.daily_bucket,Tier 2,v_ace_account.bucket,DF-ACC-015,LOV,varchar(10),No,Direct copy; daily bucket (bucket_log_snapshot is monthly),ACE team
+INT-01,LAST_PAYMENT_DATE,account.last_payment_date,Tier 1,v_ace_account.last_payment_date,DF-ACC-017,DATE,date,No,Direct copy,ACE team
+INT-01,NEXT_INSTALLMENT_DATE,account.next_installment_date,Tier 1,v_ace_account.next_installment_date,DF-ACC-018,DATE,date,No,Direct copy,ACE team
+INT-01,TDR list,account.is_restructured,Tier 1,v_ace_account.tdr_flag,DF-ACC-019,BOOLEAN,boolean,Yes,Y/N text cast to boolean by recovery.ace_to_boolean in the view,ACE team
+INT-01,Last_TDR_Date,account.last_tdr_date,Tier 1,v_ace_account.last_tdr_date,DF-ACC-020,DATE,date,No,Direct copy,ACE team
+INT-01,ms_data_dt,account.core_banking_system_date,Tier 1,v_ace_account.data_as_of,DF-ACC-021,DATE,date,Yes,Business date of the ACE batch,ACE team
+INT-02,Payment_Code,payment.pay_key,Tier 1,v_ace_payment.payment_code,DF-ACC-024,TEXT,varchar(20),Yes,Direct copy; ACE business key,ACE team
+INT-02,Payment_Date,payment.pay_date,Tier 1,v_ace_payment.payment_date,DF-ACC-025,DATE,date,Yes,varchar cast to date by recovery.ace_to_date in the view,ACE team
+INT-02,Payment_Amount,payment.total_amount,Tier 1,v_ace_payment.payment_amount,DF-ACC-026,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-02,ms_data_dt,account.core_banking_system_date,Tier 1,v_ace_payment.data_as_of,DF-ACC-028,DATE,date,Yes,Read from the account batch date; no new payment column,ACE team
+INT-02,Payment_Amount,payment.total_amount,Tier 1,v_ace_payment.payment_amount,DF-FIN-006,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-02,Payment_Date,payment.pay_date,Tier 1,v_ace_payment.payment_date,DF-FIN-007,DATE,date,Yes,varchar cast to date by recovery.ace_to_date in the view,ACE team
+INT-04,CIF,customer.person_key,Tier 1,v_ace_customer.cif_no,DF-PTY-002,TEXT,varchar(20),Yes,Direct copy; ACE business key,ACE team
+INT-04,Segment,customer.segment,Tier 2,v_ace_customer.segment,DF-PTY-009,LOV,varchar(20),No,Direct copy,ACE team
+INT-07,Actioncode ID,efs_action.action_code,Tier 1,v_ace_efs_action.action_code,DF-INT-007,LOV,varchar(10),No,Direct copy,ACE team
+INT-07,Call Result,efs_action.contact_result,Tier 2,v_ace_efs_action.contact_result,DF-INT-008,LOV,varchar(20),No,Direct copy,ACE team
+INT-09,LAWSUIT_NO / LAWSUIT_RUN,lawsuit.lawsuit_no,Tier 2,v_ace_lawsuit.lawsuit_no,DF-LEG-005,TEXT,varchar(30),No,Direct copy,ACE team
+INT-09,เลขที่คดีดำ,lawsuit.black_case_no,Tier 2,v_ace_lawsuit.black_case_no,DF-LEG-006,TEXT,varchar(30),No,Direct copy,ACE team
+INT-09,NCOURT,lawsuit.court_name,Tier 2,v_ace_lawsuit.court_name,DF-LEG-008,TEXT,varchar(120),No,Direct copy,ACE team
+INT-09,AAMT_SUIT,lawsuit.claim_amount,Tier 2,v_ace_lawsuit.claim_amount,DF-LEG-009,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-09,Judgment date,lawsuit.judgment_date,Tier 2,v_ace_lawsuit.judgment_date,DF-LEG-011,DATE,date,No,Direct copy,ACE team
+INT-10,Title Deed / Ownership Doc,collateral_detail.title_doc_no,Tier 2,v_ace_collateral_detail.title_doc_no,DF-COL-004,TEXT,varchar(40),No,Direct copy,ACE team
+INT-10,Plot No.,collateral_detail.plot_no,Tier 2,v_ace_collateral_detail.plot_no,DF-COL-005,TEXT,varchar(20),No,Direct copy,ACE team
+INT-10,Area,collateral_detail.area_text,Tier 2,v_ace_collateral_detail.area_text,DF-COL-006,TEXT,varchar(20),No,Direct copy,ACE team
+INT-10,Province,collateral_detail.province,Tier 2,v_ace_collateral_detail.province,DF-COL-007,LOV,varchar(40),No,Direct copy,ACE team
+INT-10,District,collateral_detail.district,Tier 2,v_ace_collateral_detail.district,DF-COL-008,TEXT,varchar(60),No,Direct copy,ACE team
+INT-10,Subdistrict,collateral_detail.subdistrict,Tier 2,v_ace_collateral_detail.subdistrict,DF-COL-009,TEXT,varchar(60),No,Direct copy,ACE team
+INT-10,Insvalue,collateral_detail.insured_value,Tier 2,v_ace_collateral_detail.insured_value,DF-COL-012,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-11,Appraisal No.,valuation.appraisal_no,Tier 2,v_ace_valuation.appraisal_no,DF-COL-021,TEXT,varchar(20),Yes,Direct copy,ACE team
+INT-11,Appraised Value,valuation.appraised_value,Tier 2,v_ace_valuation.appraised_value,DF-COL-023,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-11,Forced Sale Value,valuation.forced_sale_value,Tier 2,v_ace_valuation.forced_sale_value,DF-COL-024,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-11,Appraisal Date,valuation.appraisal_date,Tier 2,v_ace_valuation.appraisal_date,DF-COL-025,DATE,date,Yes,Direct copy,ACE team
+INT-12,Asset ID,asset.asset_key,Tier 1,v_ace_asset.asset_ref,DF-COL-031,TEXT,varchar(20),Yes,Direct copy; ACE business key,ACE team
+INT-12,Asset Code,npa_asset.asset_code,Tier 2,v_ace_npa_asset.asset_code,DF-COL-032,TEXT,varchar(20),No,Direct copy,ACE team
+INT-12,Asset Type,asset.asset_type,Tier 1,v_ace_asset.asset_type,DF-COL-033,LOV,varchar(20),Yes,Direct copy,ACE team
+INT-12,Transfer-in Type,npa_asset.transfer_in_type,Tier 2,v_ace_npa_asset.transfer_in_type,DF-COL-034,LOV,varchar(20),Yes,Direct copy,ACE team
+INT-12,From Segment,npa_asset.from_segment,Tier 2,v_ace_npa_asset.from_segment,DF-COL-035,LOV,varchar(20),No,Direct copy,ACE team
+INT-12,Ownership Transfer in Date,npa_asset.transfer_in_date,Tier 2,v_ace_npa_asset.transfer_in_date,DF-COL-036,DATE,date,Yes,Direct copy,ACE team
+INT-12,Book  Value,npa_asset.book_value,Tier 2,v_ace_npa_asset.book_value,DF-COL-037,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-12,Auction Purchase Price,npa_asset.auction_purchase_price,Tier 2,v_ace_npa_asset.auction_purchase_price,DF-COL-038,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-12,Contract Date,npa_sale.contract_date,Tier 2,v_ace_npa_sale.contract_date,DF-SAL-012,DATE,date,Yes,Direct copy,ACE team
+INT-12,Sale Date,npa_sale.sale_date,Tier 2,v_ace_npa_sale.sale_date,DF-SAL-013,DATE,date,Yes,Direct copy,ACE team
+INT-12,Sale Price,npa_sale.sale_price,Tier 2,v_ace_npa_sale.sale_price,DF-SAL-014,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-12,Sale Transfer Fee,npa_sale.transfer_fee,Tier 2,v_ace_npa_sale.transfer_fee,DF-SAL-015,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-12,Specific Business Tax,npa_sale.specific_business_tax,Tier 2,v_ace_npa_sale.specific_business_tax,DF-SAL-016,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-12,Corporate Income Tax,npa_sale.corporate_income_tax,Tier 2,v_ace_npa_sale.corporate_income_tax,DF-SAL-017,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-12,Incentive Amount,npa_sale.incentive_amount,Tier 2,v_ace_npa_sale.incentive_amount,DF-SAL-019,NUMBER,"numeric(18,2)",No,Direct copy,ACE team
+INT-13,ReposessedCarDate,npa_asset.repossessed_date,Tier 2,v_ace_npa_asset.repossessed_date,DF-COL-039,DATE,date,No,Thai year date YYMMDD converted to a Gregorian date,ACE team
+INT-13,STOCK_DATE,npa_asset.stock_date,Tier 2,v_ace_npa_asset.stock_date,DF-COL-040,DATE,date,No,Converted to a date,ACE team
+INT-14,DDMMYYYY,notice.sent_date,Tier 4,Workbench table,DF-LEG-019,DATE,date,No,Direct copy,Workbench
+INT-14,Barcode,notice.barcode,Tier 4,Workbench table,DF-LEG-020,TEXT,varchar(40),No,Direct copy,Workbench
+INT-14,DDMMYYYY_callBack,notice.callback_date,Tier 4,Workbench table,DF-LEG-021,DATE,date,No,Direct copy,Workbench
+INT-14,Sent Type,notice.sent_type,Tier 4,Workbench table,DF-LEG-023,LOV,varchar(10),No,Direct copy,Workbench
+INT-15,DDMMYYYY,pod_receipt.sent_date,Tier 2,v_ace_pod.sent_date,DF-LEG-019,DATE,date,No,Direct copy,ACE team
+INT-15,Barcode,pod_receipt.barcode,Tier 2,v_ace_pod.barcode,DF-LEG-020,TEXT,varchar(40),No,Direct copy,ACE team
+INT-15,DDMMYYYY_callBack,pod_receipt.callback_date,Tier 2,v_ace_pod.callback_date,DF-LEG-021,DATE,date,No,Direct copy,ACE team
+INT-15,Sent Type,pod_receipt.sent_type,Tier 2,v_ace_pod.sent_type,DF-LEG-023,LOV,varchar(10),No,Direct copy,ACE team
+INT-16,AMT,gl_write_off.amount,Tier 2,v_ace_write_off.amount,DF-FIN-013,NUMBER,"numeric(18,2)",Yes,Direct copy,ACE team
+INT-16,DATE,gl_write_off.posted_date,Tier 2,v_ace_write_off.posted_date,DF-FIN-016,DATE,date,No,Direct copy,ACE team
+INT-16,RC,gl_write_off.responsibility_center,Tier 2,v_ace_write_off.responsibility_center,DF-FIN-017,TEXT,varchar(10),No,Direct copy,ACE team
+INT-16,OC,gl_write_off.cost_center,Tier 2,v_ace_write_off.cost_center,DF-FIN-018,TEXT,varchar(10),No,Direct copy,ACE team
+INT-16,PRODUCT,gl_write_off.gl_product,Tier 2,v_ace_write_off.gl_product,DF-FIN-019,TEXT,varchar(10),No,Direct copy,ACE team
+INT-25,BorrCode,debt_sale_account.borrower_code,Tier 4,Workbench table,DF-SAL-034,TEXT,varchar(20),No,Direct copy,Workbench
+INT-25,OS By Acct,debt_sale_account.outstanding,Tier 4,Snapshot of v_ace_account.total_balance at the cut-off date,DF-SAL-035,NUMBER,"numeric(18,2)",Yes,Direct copy,Workbench
+INT-25,SellingPriceByAcct,debt_sale_account.selling_price,Tier 4,Workbench table,DF-SAL-036,NUMBER,"numeric(18,2)",No,Direct copy,Workbench
+INT-35,nleads_ref,credit_decision.nleads_ref,Tier 2,v_ace_credit_decision.nleads_ref,DF-TRT-023,TEXT,varchar(30),No,Direct copy,ACE team
+INT-35,credit_result,credit_decision.credit_result,Tier 2,v_ace_credit_decision.credit_result,DF-TRT-024,LOV,varchar(10),No,Direct copy,ACE team
+INT-35,credit_result_reason,credit_decision.credit_result_reason,Tier 2,v_ace_credit_decision.credit_result_reason,DF-TRT-025,TEXT,varchar(1000),No,Direct copy,ACE team
+INT-35,decided_at,credit_decision.decided_at,Tier 2,v_ace_credit_decision.decided_at,DF-TRT-026,DATE,timestamptz(6),No,Direct copy,ACE team
+INT-36,external_ref,esign_request.external_ref,Tier 2,v_ace_esign.external_ref,DF-DOC-103,TEXT,varchar(60),No,Direct copy,ACE team

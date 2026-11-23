@@ -1,0 +1,134 @@
+{
+  "id": "RWB-P2-E2002-OPS",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "OPS",
+  "lane": "L-P2-F",
+  "ready": "Day 1",
+  "owner": "DEVOPS",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-002",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 The service and the plan-status operation are deployed with the rwb-integration login (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 The schema is unchanged and the login holds no grant on recovery (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The ACE endpoint, the batch size and the timeout are configuration (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The trigger paths are wired and no P2 Schedule exists (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The five series and the five mapping rows carry the read (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 The runbook covers the read and the rollback keeps the answer whole (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2002-OPS-01",
+    "TC-P2-E2002-OPS-02",
+    "TC-P2-E2002-OPS-03",
+    "TC-P2-E2002-OPS-04",
+    "TC-P2-E2002-OPS-05",
+    "TC-P2-E2002-OPS-06"
+  ],
+  "reqs": [
+    "REQ-DRI-013",
+    "REQ-CHO-002"
+  ],
+  "ops_provided": [],
+  "ops_consumed": [],
+  "events_published": [],
+  "events_consumed": [],
+  "workflows": [],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (FR-P2-019)",
+  "gaps": [
+    "GAP-0656"
+  ],
+  "assumptions": [
+    "ASM-1110",
+    "ASM-1111",
+    "ASM-1112"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2002 OPS ACE plan status on the case - deployment v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0656",
+      "title": "The plan-status deployment values, the ACE endpoint and certificate references, the two setting values at run time, the trigger wiring, the alert thresholds, the mapping of the no-package condition and the fixture owner are not fixed in the source documents",
+      "source": "22 Microservice Realignment/Recovery Workbench Architecture v5 Text Extract v1.md slides 11, 16, 20, 24, 33, 41, 44 and 45; 22 Microservice Realignment/Recovery Workbench Temporal and Drools Design Text Extract v1.md slides 11, 12 and 27; _work/msr/plan/ownership.json (rulings on interface_config, job_catalog, parameter_catalog, reference_row and feature_flag); _work/msr/extract/Recovery Workbench Technical Specifications by Module v5/Recovery Workbench TSD P2 Integration v3.md T1.1, T7 and T-A.2 API-P2-010; ADR-023; RWB-P2-E2002-CON; RWB-P2-E2002-APP",
+      "section": "3, 8, 10, 11, 12.5, 12.6, 12.7, 13, 14",
+      "description": "The deployment needs nine values or rules that no source fixes. (1) The rwb-integration identity name and its secret reference are not stated; only DP-02 states that one login per service exists. (2) The ACE common module endpoint, its certificate, its network path and its per-environment availability are not in any source, and the interface is not an interface_config row, so the release has no table to read them from. (3) The two settings have no stated run-time owner: the legacy story records them as service properties under DL11, DP-06 makes parameters rwb-case data, and the deployment has to know which of the two wins in an environment. (4) The budget rule is not stated: the operation must refuse inside the caller's 2 s budget, so a timeout value longer than the budget is a release defect, and no source gives the margin. (5) The trigger wiring is not written down: the calling paths are the rwb-case activity and the composite route, no P2 Schedule exists, and the integration harness nevertheless lists a plan-status step on rwb-integration. (6) The alert thresholds of the unavailable rate, the refusal rates, the unknown-status count and the duration against the budget are not stated, and the platform alert catalogue carries message identifiers, not values. (7) The no-package-in-force condition has no home here: this service never evaluates a package, so no series, alert or runbook entry of this release can observe it, and the mapping has to name its owners instead. (8) The dashboard dimensions, the retention of the series, the replica counts, the resource sizes and the probe timings have no baseline. (9) The owner of the synthetic fixtures of the smoke run is not stated.",
+      "evidence": "Arch v5 slide 16 (P2 IN GET /interface-runs and POST /interface-runs/{id}/retry, OUT FileDelivered and FileFailed, with no ACE Common cell in the row) and slide 41 (schema rwb_integration, base /api/recovery/integration/v1, topic and task queue); slide 44 (JOB-02 owner rwb-case, no plan-status job for P2); slide 45 (only rwb-source-data reads the views); slide 24 and the Temporal and Drools design slide 11 (namespace, task queue, worker versioning as capabilities); slide 11 (OpenAPI 3.1, one hop, 2 s). TSD P2 v3 T1.1 (v_ace_plan tier 1) and T-A.2 API-P2-010 (no operational value), T7 (NFR targets with no numbers). The ownership rulings record job_catalog and interface_config as P2 tables and parameter and reference data as P3, and feature_flag as a platform library object. ADR-023 requires observability per service and gives no threshold. RWB-ITG-E2002-ITG section 12.5 lists a plan-status step on rwb-integration, which the job map and RWB-P3-E2002-APP contradict.",
+      "type": "Missing",
+      "area": "Deployment and operations",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-002",
+      "owner_role": "DevOps lead",
+      "asm": "ASM-1110",
+      "proposed": "Approve the three assumptions of RWB-P2-E2002-OPS in the release readiness review: the identity and environment values with no Schedule and no migration, the trigger wiring with the ACE-or-stub record and the corrected harness row, and the five series, four alerts, the named no-package row and the four runbook entries. Carry every threshold and endpoint as an environment value and never as code.",
+      "wp": "B-P2-01"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1110",
+      "text": "The deployment values are taken as follows: the worker runs as the rwb-integration identity carried as a secret reference; the ACE endpoint, its certificate reference, the breaker values, the replica counts, the resource sizes, the probe timings, the alert thresholds and the log level are values files of each environment; the release creates no Schedule and no workflow and applies no migration; and the schema step proves that the login holds no grant on recovery or on another rwb_ schema.",
+      "why": "DP-02 requires one login per service and gives no name, the platform rule gives the namespace and the queue and no endpoint, and the plan read is an outside call that every environment has to point somewhere; the no-Schedule and no-migration statements are the two release checks the split makes necessary.",
+      "read": "Arch v5 slides 11, 16, 20, 24, 41 and 44; Temporal and Drools design slides 11 and 27; Template and Rules section R5.5 DP-02, DP-10 and DP-15; Ownership Map interface_config and job_catalog (P2).",
+      "gap": "GAP-0656",
+      "applied_in": "8 Business rules BR1, BR3, BR4 and BR5; 10 Authority; 11 Data; 12.7; 13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "DevOps lead, the ACE DB owner and the platform administrator at the release readiness review",
+      "impact": "No business value changes; the values are tuning and environment data, and a release that adds a table or a Schedule is refused.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1111",
+      "text": "The trigger wiring is taken as follows: the plan-status step of DailyCaseRun and its readPlanStatus activity are rwb-case's and call the operation one case per call with the case reference only and a 2 s client budget; gateway-bff calls it for the case record and merges it with the stored answer of rwb-case; this service creates no Schedule and registers no workflow or activity for the key; and the release records per environment whether the ACE answer comes from the published endpoint or from the contract stub.",
+      "why": "The sibling story and the job map agree that the daily step is rwb-case's, the integration harness lists a step on rwb-integration, and no source states how an environment is flagged when ACE is not yet reachable; without the record an environment can believe it reads ACE when it reads a stub.",
+      "read": "Arch v5 slide 44 (JOB-02 owner rwb-case, mechanism AceDataReady to DailyCaseRun) and slide 13 (no P3 to P2 cell); RWB-P3-E2002-APP section 4 step 3 and section 12.5; RWB-P2-E2002-CON section 12.5; DP-10 and DP-11 in Template and Rules section R5.5.",
+      "gap": "GAP-0656",
+      "applied_in": "7 AC4; 8 Business rules BR3 and BR11; 11 Data; 12.5; 12.6",
+      "confidence": "Medium",
+      "confirm": "Case owner (RWB-P3-E2002-APP), the edge owner and the ACE team at the release readiness review",
+      "impact": "If the step is ever moved to this service, a Schedule and a workflow are added and the alert set changes; the read and its answer do not.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1112",
+      "text": "The observability is taken as follows: the five series are live answers, no-plan answers, unknown status codes, unavailable and refused answers by class, and call duration against the budget, each with the environment, the release and the build ID as dimensions; four alerts are wired, three carrying MSG-GEN-006, MSG-P4-002 and MSG-P4-003 and one the unknown status code and its count, each with one runbook entry; a fifth mapping row names the no-package-in-force refusal with its owners and no wiring. The four runbook entries are ACE unavailable, unknown status code, refused caller, and stored fallback with the no-package routing. The synthetic fixtures of the smoke run are owned by the DevOps team of the release and are created in DEV and SIT only.",
+      "why": "ADR-023 requires observability per service, the message catalogue requires a message identifier per alert, and no source lists the series, the thresholds, the runbook entries or the fixture owner; the five series follow the answer states the app story declares, and the fourth alert carries no message because the legacy story gives none for an unknown code.",
+      "read": "ADR-023; Template and Rules section R7.2 s14; Arch v5 slides 33, 42 and 44; legacy RWB-E2-002 section 5 X3 (message None) and section 14; RWB-P2-E2002-CON section 14 and RWB-P2-E2002-APP section 14.",
+      "gap": "GAP-0656",
+      "applied_in": "7 AC5 and AC6; 11 Data; 13 Solution plan; 14 Validation and messages",
+      "confidence": "Medium",
+      "confirm": "DevOps lead, the on-call rota and the platform administrator at the release readiness review",
+      "impact": "Every alert an operator receives has one message identifier and one runbook entry, no dashboard or alert exposes personal data, and no alert claims a condition this service cannot see.",
+      "wp": "B-P2-01"
+    }
+  ]
+}

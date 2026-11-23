@@ -1,0 +1,181 @@
+{
+  "id": "RWB-P2-E2007-CON",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-007",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 The match request and result shape are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 The three task codes, their roles and their messages are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The TreatmentBooked envelope and its producer are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The job administration operations and the JOB-08 registration are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The twelve consumed operations are published with one budget and the supersession is recorded (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 The nine contract tables are complete, the fakes match them and the error envelope covers the ten messages (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2007-CON-01",
+    "TC-P2-E2007-CON-02",
+    "TC-P2-E2007-CON-03",
+    "TC-P2-E2007-CON-04",
+    "TC-P2-E2007-CON-05",
+    "TC-P2-E2007-CON-06"
+  ],
+  "reqs": [
+    "REQ-CHO-008"
+  ],
+  "ops_provided": [
+    "POST /admin/jobs/{jobId}/rerun"
+  ],
+  "ops_consumed": [
+    "GET /api/recovery/treatment/v1/treatments/{treatmentId}",
+    "GET /api/recovery/source-data/v1/data-products/freshness",
+    "GET /api/recovery/case/v1/reference-data/{lovCode}",
+    "GET /api/recovery/case/v1/parameters/{key}",
+    "GET /api/recovery/decision/v1/rule-models/{n}/{v}",
+    "POST /api/recovery/access/v1/authorise",
+    "approved-not-booked treatment list read (rwb-treatment, path not specified in the source documents)",
+    "mark-booked write (rwb-treatment, path not specified in the source documents)",
+    "booking-difference write (rwb-treatment, path not specified in the source documents)",
+    "case-account read at a business date (rwb-source-data, path not specified in the source documents)",
+    "reconciliation write for REC-03 (rwb-source-data, path not specified in the source documents)",
+    "raiseTask operation (rwb-case, path not specified in the source documents)"
+  ],
+  "events_published": [
+    "rwb.decision-record.DecisionRecorded.v1"
+  ],
+  "events_consumed": [
+    "rwb.source-data.AceDataReady.v1",
+    "rwb.treatment.TreatmentApproved.v1"
+  ],
+  "workflows": [
+    "BookingMatchWorkflow"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-CHO-008)",
+  "gaps": [
+    "GAP-0658"
+  ],
+  "assumptions": [
+    "ASM-1121",
+    "ASM-1122",
+    "ASM-1123",
+    "ASM-1124",
+    "ASM-1125"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2007 CON Booking confirmation from the ALS load - contract v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0658",
+      "title": "rwb-integration booking confirmation (contract slice): the JOB-08 ownership and consumer lists, the ACE read boundary, the rerun placement and the twelve consumed shapes are not settled by one source",
+      "source": "Architecture v5 Text Extract v1 slides 41, 42, 43, 44 and 45; Ownership Map API rows POST /admin/jobs/{jobId}/rerun (owner P1), GET /data-products/freshness (owner P1), GET /treatments/{treatmentId} (owner S2) and GET /admin/scheduled-jobs (owner P2); TSD P2 Integration v3 T3.1, T5.2 and Appendix T-A (API-P2-009); FSD P2 Integration v3 VR-P2-001-1; legacy RWB-E2-007 sections 3, 4, 7, 11, 12 and 14; Template and Rules v1 R3, R5.5, R5.7 and R9",
+      "section": "1 Story, 2 Business rationale, 3 Preconditions, 5 Exception paths, 10 Authority, 11 Data, 12.1 to 12.9, 14 Validation and messages, 18 Traceability",
+      "description": "One combined row for the contract slice of this key. (1) Job ownership and consumers: Architecture v5 slide 44 names rwb-payment the owner of JOB-08, and the consumer lists of EV-26 and EV-10 do not name rwb-integration, while the accepted split of this legacy key keeps JOB-08 with rwb-integration and adds two consumer rows. (2) ACE read boundary: TSD P2 Integration v3 T5.2 states that P2 reads the recovery.v_ace_* views directly; ADR-010, DP-05 and Architecture v5 slides 41 and 45 supersede it, so the contract declares the account and batch reads as consumed from rwb-source-data and states that rwb_integration holds no grant on recovery. (3) Rerun placement: the legacy path POST /admin/jobs/{jobId}/rerun is x-module P1 in API Specification v4 and in the Ownership Map, while the job catalogue read GET /admin/scheduled-jobs is x-module P2; the contract serves the rerun on /api/recovery/integration/v1 for the jobs of this service's catalogue and declares the catalogue read as the base's surface. (4) Consumed shapes: five of the twelve consumed operations and shapes are named only by legacy Java interfaces, and no source fixes their paths, their JSON property names, their required flags or their errors; the Element names this contract fixes are the review baseline. (5) Envelope: the TreatmentBooked payload fields (treatmentId, bookingRef, businessDate) are the legacy story's, and the event type, topic and producer come from the Architecture v5 event catalogue, which no contract document of this key repeats. (6) Messages: MSG-P1-001 has two wordings and FSD P2 Integration v3 gives the current one; the other six texts are the legacy and platform texts unchanged. (7) Identity: no source names the login the contract's clients run as.",
+      "evidence": "Architecture v5 slide 44 lists JOB-08 under rwb-payment; slide 42 lists the consumers of EV-26 as rwb-case, rwb-payment, rwb-deviation and rwb-writeoff and of EV-10 as rwb-comms and rwb-payment; TSD P2 Integration v3 T5.2 keeps the direct view read; the Ownership Map keeps POST /admin/jobs/{jobId}/rerun with P1 and GET /admin/scheduled-jobs with P2; the legacy RWB-E2-007 section 12 names the treatment, account, batch, task and reconciliation calls as Java interfaces only; no source in this key publishes a contract document for the match result or the task table.",
+      "type": "Conflict",
+      "area": "Contract, ownership, ACE read boundary, messages",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-007",
+      "owner_role": "Solution architect; contract owners of rwb-treatment, rwb-source-data, rwb-case, rwb-decision and rwb-access; platform workflow kit owner",
+      "asm": "ASM-1121, ASM-1122, ASM-1123, ASM-1124, ASM-1125",
+      "proposed": "Baseline the contract with the result shape, the task table, the envelope statement, the rerun operation, the twelve consumed operations and the seven fakes; have the rwb-treatment, rwb-source-data, rwb-case, rwb-decision and rwb-access contract owners confirm or correct the element names at the review; record the JOB-08 ownership and the TSD P2 v3 T5.2 supersession in the gap register; and confirm the seven message texts in the catalogue.",
+      "wp": "B-P2-01"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1121",
+      "text": "The contract baseline records JOB-08 as a rwb-integration job started by AceDataReady with no Schedule, accepts the two added consumer rows, and records the Architecture v5 slide 44 owner row of rwb-payment as superseded for this job rather than leaving the seam ambiguous.",
+      "why": "Architecture v5 slide 44 names rwb-payment the owner of JOB-08 and the event catalogue lists no rwb-integration consumer row, while RWB-P4-E2007-APP, RWB-ITG-E2007-ITG and RWB-P2-E2007-APP all place the match in rwb-integration.",
+      "read": "Architecture v5 Text Extract v1 slides 42, 43 and 44; RWB-P4-E2007-APP section 1; RWB-ITG-E2007-ITG sections 12.5 and 19; Template and Rules v1 R3 and R5.5 DP-10.",
+      "gap": "GAP-0658",
+      "applied_in": "1 Story, 8 BR5 and BR9, 12.4, 12.6 and 13 of RWB-P2-E2007-CON",
+      "confidence": "High",
+      "confirm": "Solution architect; the rwb-payment owner and the event catalogue owner",
+      "impact": "The contract fixes the trigger, the task queue and the two subscriptions once, and every consumer of the baseline builds against them.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1122",
+      "text": "rwb-integration serves POST /api/recovery/integration/v1/admin/jobs/{jobId}/rerun for the jobs of its own catalogue, under the Platform administration U right and an Idempotency-Key per job and business date, while the generic rerun row of API Specification v4 and the Ownership Map stays with P1 for the other services' jobs; the client identity is the rwb-integration login (DP-02).",
+      "why": "The legacy story names the rerun at that path, API Specification v4 and the Ownership Map keep the path with x-module P1, and only the service that owns a job can rerun its workflow; no source names the login the callers authenticate as.",
+      "read": "Legacy RWB-E2-007 section 12; Ownership Map API row POST /admin/jobs/{jobId}/rerun (owner P1) and table job_catalog (owner P2); TSD P2 Integration v3 Appendix T-A API-P2-009; Template and Rules v1 R5.5 DP-13.",
+      "gap": "GAP-0658",
+      "applied_in": "10 Authority, 12.1 and 14 of RWB-P2-E2007-CON",
+      "confidence": "Medium",
+      "confirm": "Solution architect; the rwb-source-data and rwb-integration owners; platform administrator",
+      "impact": "The rerun is served once per service for its own jobs; the catalogue read stays the base's surface and the P1 row keeps the other services' jobs.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1123",
+      "text": "The twelve consumed operations are declared with the element names this contract fixes, the five unsettled paths and shapes carry the placeholder, and the account fact and batch answer are consumed from rwb-source-data with TSD P2 Integration v3 T5.2 recorded as superseded; rwb_integration holds no grant on recovery.",
+      "why": "The sources name the legacy Java interfaces and LDM field IDs, not the JSON property names or HTTP paths of the target contracts, and TSD P2 v3 T5.2 contradicts ADR-010 and DP-05 on the ACE read.",
+      "read": "Legacy RWB-E2-007 sections 11 and 12; TSD P2 Integration v3 T5.2 and T3.1; ADR-010; Ownership Map API rows GET /data-products/freshness and GET /treatments/{treatmentId}; Logical Data Model and Data Dictionary v8 (DF-TRT, DF-ACE, DF-ACC, DF-WRK, DF-OPS and DF-DEC ranges).",
+      "gap": "GAP-0658",
+      "applied_in": "11 Data, 12.2, 12.8 and 17 of RWB-P2-E2007-CON",
+      "confidence": "Medium",
+      "confirm": "Contract owners of rwb-treatment, rwb-source-data, rwb-case, rwb-decision and rwb-access",
+      "impact": "The names are confirmed or corrected in the owning baselines; the fakes and the app story follow the correction without a behaviour change.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1124",
+      "text": "The two consumer rows of AceDataReady and TreatmentApproved are additive rows of the event catalogue for the booking-confirmation consumer group of rwb-integration, and neither event's producer, payload or key changes.",
+      "why": "The run cannot start and cannot hold the approval date without the two events, while Architecture v5 slides 42 and 43 list other consumers only.",
+      "read": "Architecture v5 Text Extract v1 slides 42 and 43; legacy RWB-E2-007 sections 4 and 12; Template and Rules v1 R5.5 DP-09.",
+      "gap": "GAP-0658",
+      "applied_in": "12.3, 12.4 and 12.9 of RWB-P2-E2007-CON",
+      "confidence": "Medium",
+      "confirm": "Event catalogue owner (RWB-PLT-EVT); rwb-source-data and rwb-treatment owners",
+      "impact": "One consumer group is registered; the producers and the two topics are unchanged.",
+      "wp": "B-P2-01"
+    },
+    {
+      "id": "ASM-1125",
+      "text": "MSG-P1-001 uses the FSD P2 Integration v3 wording in the contract and in every alert, the other six messages keep their legacy and platform texts, the package row identifiers stay in the rwb-decision registry, and the contract cites no row identifier of its own.",
+      "why": "The legacy and the FSD give different texts for MSG-P1-001, and the package rows are rwb-decision's, so a contract that named a row identifier would fix a value another owner holds.",
+      "read": "FSD P2 Integration v3 VR-P2-001-1; legacy RWB-E2-007 section 14; D-RCV-36 T3 and T5; Architecture v5 Text Extract v1 slide 27.",
+      "gap": "GAP-0658",
+      "applied_in": "8 BR13, 12.2, 14 and 18 of RWB-P2-E2007-CON",
+      "confidence": "High",
+      "confirm": "Platform message catalogue owner; RW-COE with the registry owner",
+      "impact": "The message map and the task table are final; the registry keeps the row identifiers and the version.",
+      "wp": "B-P2-01"
+    }
+  ]
+}

@@ -1,0 +1,2943 @@
+﻿Acceptance criteria
+"Gherkin per story, as written in the Markdown file."
+Key,Title,Gherkin
+RWB-E2-001,EFS hand-over with full history,"Feature: EFS hand-over with full history
+
+  Background:
+    Given parameter ""case.entry.dpd_threshold"" is 90
+    Given the ACE batch for ALS with business date 2026-12-14 is COMPLETED at 05:20
+
+  Scenario: AC1 Case from the ACE data
+    Given synthetic account ""A-0001"" for customer ""C-0001"", product group ""MORTGAGE"", reached 90 days past due in v_ace_account at business date 2026-12-14
+    Given v_ace_efs_action holds 14 contact rows and 2 promise rows for ""A-0001"" in its collection period
+    When the morning case creation runs on 2026-12-15
+    Then a case exists with status ""NEW"", product group ""MORTGAGE"", entry date 2026-12-15 and days past due at entry 90
+    Then the case holds 16 interaction entries with source system ""EFS"" and the action code of each row
+    Then the decision log entry for the creation holds business date 2026-12-14 in its inputs snapshot
+    Then the system publishes caseCreated with business date 2026-12-14
+
+  Scenario: AC2 Repeat run
+    Given the run for business date 2026-12-14 created the case for ""A-0001""
+    When case creation runs again for business date 2026-12-14
+    Then the system creates no second case and no interaction entry is added
+    Then the run summary shows 1 repeat for ""A-0001""
+
+  Scenario: AC3 Late ACE batch
+    Given the ACE batch for ALS with business date 2026-12-15 is not COMPLETE by 09:00 on 2026-12-16
+    When case creation is due
+    Then the system creates no case from the data of 2026-12-14
+    Then the data products show message MSG-P1-001 with the date 2026-12-14
+    Then the system alerts the data steward with message MSG-P2-007
+
+  Scenario: AC4 Account linked to the open case
+    Given customer ""C-0002"" has open case ""RW-2026-000210"" for product group ""SSME""
+    Given synthetic account ""A-0002"" of ""C-0002"", product group ""SSME"", reaches 90 days past due on 2026-12-14
+    When case creation runs
+    Then the system creates no new case
+    Then the system links ""A-0002"" to ""RW-2026-000210"" with linked from 2026-12-15 and is primary false
+
+  Scenario: AC5 Customer not in the ACE customer data
+    Given synthetic account ""A-0003"" reaches 90 days past due and v_ace_customer holds no row for its person_key
+    When case creation runs
+    Then the system creates no case for ""A-0003""
+    Then the REC-05 business-key break lists ""A-0003"" for the data steward
+    Then ""A-0003"" is tried again with the next run
+
+  Scenario: AC6 Cases created on the next good batch
+    Given no case creation ran for business date 2026-12-15
+    Given the ACE batch for ALS with business date 2026-12-16 is COMPLETED at 05:15 on 2026-12-17
+    When case creation runs
+    Then accounts that reached 90 days past due on 2026-12-15 or 2026-12-16 get cases with entry date 2026-12-17
+    Then the run summary names the gap date 2026-12-15
+
+  Scenario: AC7 Decision log write fails
+    Given the decision log store is unavailable
+    When case creation runs for ""A-0004""
+    Then the system creates no case for ""A-0004""
+    Then the system raises an incident and the run summary carries message MSG-P7-003
+    Then the system takes ""A-0004"" in the next run
+
+  Scenario: AC8 Second start refused
+    Given JOB-02 is running for business date 2026-12-14
+    When a platform administrator requests a rerun of JOB-02
+    Then the response is 409 with message MSG-P2-006"
+RWB-E2-002,ACE plan status on the case,"Feature: ACE plan status on the case
+
+  Background:
+    Given case ""RW-2026-000310"" is open with synthetic account ""A-0310""
+    Given the ACE common module stub holds plan ""TDR-SYN-0310"" for ""A-0310""
+    Given package ""RESTRUCTURE"" version ""RES-2026.12"" is in force with rows R-RES-29, R-RES-30, R-RES-31 and R-LIT-02
+
+  Scenario: AC1 Plan status on the case
+    Given plan ""TDR-SYN-0310"" has status ""APPROVED"" in ACE with status date 2026-12-10
+    When the case record view loads on 2026-12-11
+    Then the case shows plan ""TDR-SYN-0310"" with status ""Approved"" and date 2026-12-10
+    Then RuleEvaluator.evaluate(""RESTRUCTURE"", facts, 2026-12-11) reads plan_status ""APPROVED"" for the case
+    Then rule R-LIT-02 does not fire for the case because plan_status is not broken
+
+  Scenario: AC2 Broken plan
+    Given the case is in route state ""PLAN_CURE_PERIOD"" with break count 0
+    Given plan ""TDR-SYN-0310"" has status ""BROKEN"" in ACE with status date 2026-12-14
+    When the daily case update runs on 2026-12-15
+    Then the case plan status is ""BROKEN"" with date 2026-12-14
+    Then the route state moves to ""PLAN_BROKEN"" by R-RES-29 and then to ""BACK_TO_ROUTE_DECISION"" by R-RES-30
+    Then the case is in the case owner's queue with a task due in 5 working days, from timer_spec ""5 working days"" of row R-RES-30 of version ""RES-2026.12""
+    Then the system writes a decision log entry for each move with the rule ID and the package version ""RES-2026.12""
+
+  Scenario: AC3 Status not available
+    Given the case holds plan ""TDR-SYN-0310"" with status ""BOOKED"" and date 2026-12-01
+    Given ACE returns no status for ""TDR-SYN-0310""
+    When the daily case update runs on 2026-12-15
+    Then the case keeps status ""BOOKED"" with date 2026-12-01
+    Then the case record view shows message MSG-P2-008 with the date 2026-12-01
+    Then a break with product ""DP04"" lists plan ""TDR-SYN-0310"" for the ACE team
+
+  Scenario: AC4 ACE unavailable
+    Given the ACE common module does not answer within 2 seconds
+    When the daily case update runs on 2026-12-16
+    Then the system changes no plan status
+    Then the run summary carries message MSG-GEN-006 with system ""ACE common module""
+    Then the next run retries every case
+
+  Scenario: AC5 Unknown status code
+    Given ACE returns status ""SUSPENDED"" for plan ""TDR-SYN-0310""
+    When the daily case update runs
+    Then the stored status does not change
+    Then a break with check ""Lists of values"" names the code ""SUSPENDED""
+
+  Scenario: AC6 Daily step run twice
+    Given the daily case update on 2026-12-15 stored status ""BROKEN"" for plan ""TDR-SYN-0310""
+    When the step is rerun on 2026-12-15
+    Then the system writes no status row
+    Then the system raises no second CURE_PERIOD_EXPIRED event for the case
+
+  Scenario: AC7 Decision log write fails on a broken plan
+    Given the decision log store is unavailable
+    When the daily case update finds plan ""TDR-SYN-0310"" broken
+    Then the route state stays ""PLAN_CURE_PERIOD""
+    Then the system raises an incident with message MSG-P7-003
+    Then the system raises the event again in the next run
+
+  Scenario: AC8 Case outside the scope
+    Given a case owner whose scope is ""Own"" and case ""RW-2026-000310"" is owned by another person
+    When the case owner calls GET /cases/{caseId}/plan-status for it
+    Then the response is 404 with message MSG-P4-003
+
+  Scenario: AC9 No RESTRUCTURE version in force
+    Given no RESTRUCTURE version is IN_FORCE on 2026-12-15
+    When the daily case update finds plan ""TDR-SYN-0310"" broken on that date
+    Then NoPackageInForce is thrown with MSG-P3-027 for package ""RESTRUCTURE""
+    Then no decision log entry is written and the route state stays ""PLAN_CURE_PERIOD""
+    Then the case goes to the exception queue for role ""RW-TEAMMGR"" with the gap"
+RWB-E2-003,Customer's other products on the case,"Feature: Customer's other products on the case
+
+  Background:
+    Given case ""RW-2026-000410"" has borrower ""C-0410"" and linked synthetic account ""A-0410""
+    Given the expected business date of the customer product holding is 2026-12-14
+
+  Scenario: AC1 Other products shown
+    Given ""C-0410"" holds a revolving credit line ""A-0411"" with status ""ACTIVE"" and a personal loan ""A-0412"" with status ""DELINQUENT"" in v_ace_party_product, both with data as of 2026-12-14
+    When the case record view loads for a case owner
+    Then the other products panel shows 2 products with their type and status
+    Then each product shows the business date 2026-12-14
+    Then the system does not list account ""A-0410"" because its account_key is on the case
+
+  Scenario: AC2 Holding older than the business date
+    Given v_ace_party_product holds no row for 2026-12-14 and its last rows are for 2026-12-13
+    When the view loads
+    Then the 2 products show with data as of 2026-12-13
+    Then the panel shows message MSG-P1-001 with product ""Customer products"" and date 2026-12-13
+    Then the system logs a stale read event with the case ID and the data product ""DP02""
+
+  Scenario: AC3 Masking
+    Given a phone collector (RW-PHONECOL) with the case in scope
+    Given product ""A-0411"" has synthetic account number ""9900015678""
+    When the view loads
+    Then the other products show with the account number ""XXXXXX5678""
+    Then a case owner sees ""9900015678""
+
+  Scenario: AC4 No other products
+    Given borrower ""C-0420"" of case ""RW-2026-000420"" holds no product other than the case account
+    When the view loads
+    Then the panel shows an empty list with message MSG-P2-017
+
+  Scenario: AC5 Case outside the scope
+    Given a case owner with scope ""Own"" and case ""RW-2026-000410"" owned by another person
+    When the case owner calls GET /cases/{caseId}/customer-products
+    Then the response is 404 with message MSG-P4-003
+
+  Scenario: AC6 PII access log unavailable
+    Given the ACE PII logging service does not accept the access event
+    When the view loads
+    Then the system returns no product
+    Then the response is 503 with message MSG-GEN-006"
+RWB-E2-004,Treatment entity and plan timers data model,"Feature: Treatment entity and plan timers data model
+
+  Background:
+    Given the business date is 2026-12-01
+    Given case ""RW-2026-000201"" with product group ""MORTGAGE"", status ""IN_PROGRESS"" and route state ""BOOKED_IN_ALS_NLEADS""
+    Given decision log entry ""DLE-9001"" records the approval of a restructure at level ""L4"" by user ""U-APR-01""
+    Given CURE_PERIOD_DAYS for ""MORTGAGE"" is 30 calendar days and plan.warn-days is 3
+    Given package ""RESTRUCTURE"" version ""RES-2026.12"" is in force with rows R-RES-25 and R-RES-27
+
+  Scenario: AC1 Treatment created
+    Given a TDR plan approved for ""RW-2026-000201"" with 36 installments, offer amount 850000.00 baht, approval level ""L4"" and decision log entry ""DLE-9001""
+    When the record is written
+    Then one treatment exists with type ""RESTRUCTURE"", installments 36, offer amount 850000.00, approval level ""L4"", decision log entry ""DLE-9001"" and the case link
+    Then booked at is empty until the booking is confirmed
+    Then one TreatmentApproved event is in the outbox with the treatment ID and the case ID
+
+  Scenario: AC2 Timer set
+    Given a plan with the first payment due on 2026-12-31
+    When the record is written and the plan timer listener processes TreatmentApproved
+    Then RuleEvaluator.evaluate(""RESTRUCTURE"", facts, 2026-12-01) returns rule R-RES-25 and package version ""RES-2026.12""
+    Then one decision log entry with rule ""R-RES-25"" and version ""RES-2026.12"" is written first
+    Then one ""INSTALLMENT_DUE"" timer exists with expires at 2026-12-31 23:59 Asia/Bangkok, warn at 2026-12-28 and status ""RUNNING"", scheduled through TimerScheduler
+    Then the case route state is ""PLAN_RUNNING"" and its status stays ""IN_PROGRESS""
+    Then when the clock passes 2026-12-31 23:59 and JOB-05, the Quartz implementation of TimerScheduler, runs, the system publishes a TimerDue event with timer type ""INSTALLMENT_DUE"" and the treatment ID
+    Then the timer status is ""EXPIRED""
+
+  Scenario: AC3 Data product
+    Given ten treatments recorded on 2026-12-01 across ""MORTGAGE"", ""HIRE_PURCHASE"" and ""SSME""
+    Given two of them have a booked at date
+    When the reporting extract runs at 01:30 on 2026-12-02
+    Then the treatment data product holds ten rows for business date 2026-12-01
+    Then eight show status ""APPROVED"" and two show status ""BOOKED""
+
+  Scenario: AC4 Required field missing
+    Given a restructure plan for ""RW-2026-000201"" with no first due date
+    When the record is written
+    Then the system refuses it with MSG-GEN-001 naming ""first due date""
+    Then no treatment and no event are written
+
+  Scenario: AC5 Approval not in the decision log
+    Given a plan that names decision log entry ""DLE-0000"" which does not exist
+    When the record is written
+    Then the system refuses it with MSG-GEN-001 naming ""decision log entry""
+
+  Scenario: AC6 First due date before the proposal
+    Given a plan proposed on 2026-12-01 with the first due date 2026-11-30
+    When the record is written
+    Then the system refuses it with MSG-GEN-003 naming ""first due date"" and ""proposed at""
+
+  Scenario: AC7 Case not in the booked state
+    Given case ""RW-2026-000202"" in route state ""WITH_FCR_OFFICER""
+    When a TreatmentApproved event with a first due date arrives for it
+    Then the system writes no timer
+    Then the system places the case in the exception queue with MSG-P3-005 naming ""PLAN_RUNNING"" and ""WITH_FCR_OFFICER""
+
+  Scenario: AC8 Event delivered twice
+    Given the TreatmentApproved event for the AC1 treatment was processed
+    When the same event with the same event ID arrives again
+    Then no second timer and no second decision log entry are written
+    Then the system counts the repeat as an idempotency hit
+
+  Scenario: AC9 Decision log write fails
+    Given the decision log store is unavailable
+    When the plan timer listener processes TreatmentApproved for ""RW-2026-000201""
+    Then the system writes no timer and the route state stays ""BOOKED_IN_ALS_NLEADS""
+    Then the system retries the event 3 times and then placed in the exception queue with an incident and MSG-P7-003
+
+  Scenario: AC10 Extract fails
+    Given the reporting extract of 2026-12-02 fails
+    When a reporting and BI analyst reads the treatment data product
+    Then it shows business date 2026-12-01 with MSG-P1-001
+
+  Scenario: AC11 Case closed
+    Given case ""RW-2026-000203"" with status ""CLOSED""
+    When a plan is recorded for it
+    Then the system refuses it with MSG-P3-005
+
+  Scenario: AC12 Payment missed starts the cure period
+    Given the AC2 timer expired on 2026-12-31
+    When a PaymentMissed event arrives for the treatment with due date 2026-12-31 on business date 2027-01-01
+    Then RuleEvaluator.evaluate(""RESTRUCTURE"", facts, 2027-01-01) returns rule R-RES-27 and package version ""RES-2026.12""
+    Then the system writes a decision log entry with rule ""R-RES-27"" and version ""RES-2026.12"" first
+    Then one ""CURE_PERIOD"" timer exists with expires at 2027-01-31, scheduled through TimerScheduler
+    Then the case route state is ""PLAN_CURE_PERIOD""
+
+  Scenario: AC13 No RESTRUCTURE version in force
+    Given no RESTRUCTURE version is IN_FORCE on 2026-12-01
+    When the plan timer listener processes TreatmentApproved for ""RW-2026-000201""
+    Then NoPackageInForce is thrown with MSG-P3-027 for package ""RESTRUCTURE""
+    Then no decision log entry, no timer and no route state change are written
+    Then the case goes to the exception queue for role ""RW-TEAMMGR"" with the gap
+
+  Scenario: AC14 Plan timers go only through TimerScheduler
+    Given the plan timer listener holds an ""INSTALLMENT_DUE"" TimerSpec for case ""RW-2026-000201""
+    When the listener schedules the timer
+    Then the timer is created by TimerScheduler and carries the case ID, the treatment ID, the timer type and the expiry
+    Then a component that inserts into the timer table without TimerScheduler fails the boundary test and the build
+    Then JOB-05, the Quartz implementation of TimerScheduler, is the only code that expires the timer"
+RWB-E2-005,Decision log query API for audit,"Feature: Decision log query API for audit
+
+  Background:
+    Given the environment is SIT with the synthetic decision log set ""DL-AUDIT-01""
+    Given test user ""U-8101"" holds RW-AUDIT with scope ""ALL""
+
+  Scenario: AC1 Query by case
+    Given case ""RW-2026-000123"" has six entries with chain_seq 101, 155, 160, 230, 231 and 402
+    When ""U-8101"" calls GET /decision-log with caseId of that case
+    Then the six entries return in chain_seq order
+    Then each entry carries chainVerified true
+
+  Scenario: AC2 Query by rule version
+    Given rule R-LIT-03 at version ""LIT-2026.12"" was used in 200 decisions
+    When ""U-8101"" calls GET /decision-log with ruleId ""R-LIT-03"" and ruleVersion ""LIT-2026.12"" and size 500
+    Then 200 entries return and total is 200
+    Then the total equals the count for ""LIT-2026.12"" in the rule change audit report
+
+  Scenario: AC3 Access
+    Given test user ""U-8102"" holds only RW-PHONECOL, whose Decision log letter is ""-""
+    When the user calls GET /decision-log
+    Then the system refuses the call with status 403 and message MSG-P4-002
+    Then one entry with decision code ""AC-DENY"", area ""DECISION_LOG"" and right ""R"" is written
+
+  Scenario: AC4 Query by approver and period
+    Given approver ""U-8103"" approved 14 decisions between 1 and 31 December 2026 and 3 in November 2026
+    When ""U-8101"" calls GET /decision-log with approver ""U-8103"", from ""2026-12-01"" and to ""2026-12-31""
+    Then 14 entries return with approverUserId ""U-8103"" and approvalLevel filled
+
+  Scenario: AC5 An entry that does not match the chain is flagged
+    Given the entry with chain_seq 230 was changed in the SIT database with the trigger disabled
+    When ""U-8101"" queries case ""RW-2026-000123""
+    Then six entries return and entry 230 carries chainVerified false
+    Then the response carries warning MSG-P7-012 naming entry 230
+    Then the system raises one incident to the Compliance queue for entry 230
+
+  Scenario: AC6 Scope limits the result
+    Given test user ""U-8104"" holds RW-CASEOWN with scope ""OWN"" and owns 3 of the cases decided under ""LIT-2026.12""
+    When ""U-8104"" queries ruleVersion ""LIT-2026.12""
+    Then only the entries of those 3 cases return and total counts only them
+
+  Scenario: AC7 Invalid filters are refused
+    When ""U-8101"" calls GET /decision-log with from ""2026-12-31"" and to ""2026-12-01""
+    Then the call returns status 422 with message MSG-GEN-003 for field ""from""
+    Then when ""U-8101"" calls it with size 1000
+    Then the call returns status 422 with message MSG-GEN-002 for field ""size"" with min 1 and max 500
+
+  Scenario: AC8 Export
+    Given the query of AC2 returns 200 entries
+    When ""U-8101"" exports the result from SCR-38
+    Then a CSV file with a header row and 200 entry rows is returned, with chainVerified on each row
+    Then one entry with decision code ""AC-EXPT"", the filter and row count 200 is written
+
+  Scenario: AC9 No match
+    When ""U-8101"" queries approver ""U-8199"", who approved nothing
+    Then the call returns status 200 with no items and total 0
+    Then SCR-38 shows the empty state
+
+  Scenario: AC10 A population of cases
+    Given cases ""RW-2026-000123"", ""RW-2026-000124"" and ""RW-2026-000125"" have 6, 2 and 4 entries
+    When ""U-8101"" calls GET /decision-log with caseIds for the three cases
+    Then 12 entries return, grouped by case and in chain_seq order within each case"
+RWB-E2-006,Credit approval pack for NLEADS,"Feature: Credit approval pack for NLEADS
+
+  Background:
+    Given case ""RW-2026-000610"" is in route state ""AWAITING_CREDIT_APPROVAL""
+    Given treatment ""TRT-SYN-0610"" of type ""RESTRUCTURE"" has offer amount 2,400,000.00 baht, haircut 0.00 baht and 84 installments
+    Given the ACE plan status of the case is ""APPROVED""
+    Given the plan needs approval at level ""L6"" or higher under item 2.1.1
+
+  Scenario: AC1 Pack prepared
+    Given an approved restructure plan on treatment ""TRT-SYN-0610""
+    When the officer opens the credit approval pack on 2026-12-15
+    Then the pack holds case number ""RW-2026-000610"", product group ""MORTGAGE"", 2 accounts with balances as of 2026-12-14 and 1 collateral with its latest appraisal
+    Then the pack holds the plan terms: offer amount 2,400,000.00 baht, haircut 0.00 baht, 84 installments, valid until 2026-12-29
+    Then the pack lists the 5 checklist documents with a link to each one on the case
+    Then the system shows the required approval level ""L6""
+    Then no field in the pack needs to be typed by the officer
+
+  Scenario: AC2 Result recorded
+    Given the officer has submitted the pack in NLEADS
+    When the officer records NLEADS reference ""NL-SYN-000610"", result ""APPROVED"", approval level ""L5"" and result date 2026-12-17
+    Then the treatment carries the reference ""NL-SYN-000610"" and its state is ""APPROVED""
+    Then a decision log entry with decision ""D5"" and final call ""approved"" holds the NLEADS reference
+    Then the route state moves to ""OFFER_WITH_CUSTOMER"" by R-RES-11
+
+  Scenario: AC3 Refused
+    Given NLEADS refuses the plan with reason ""Income does not cover 84 installments""
+    When the officer records reference ""NL-SYN-000611"", result ""REFUSED"" and the reason
+    Then the treatment state is ""REFUSED"" and the treatment shows the reason
+    Then the route state moves to ""DECLINED_BY_CREDIT"" by R-RES-12 and then to ""BACK_TO_ROUTE_DECISION"" by R-RES-14
+    Then the case is in the case owner's queue
+
+  Scenario: AC4 Missing checklist document
+    Given the case holds no document of type ""INCOME_PROOF""
+    When the officer opens the pack
+    Then the pack shows ""INCOME_PROOF"" as missing with message MSG-P2-009
+    Then the other 4 documents show as present
+
+  Scenario: AC5 Stale balance
+    Given the last account load for the case is for business date 2026-12-12 and today is 2026-12-15
+    When the officer opens the pack
+    Then each balance shows message MSG-P7-006 with 3 days
+
+  Scenario: AC6 Invalid input
+    When the officer records result ""REFUSED"" with reference ""NL-SYN-000612"" and an empty reason
+    Then the response is 422 with message MSG-GEN-001 for field ""reason""
+    Then a result with result date 2026-12-31 on 2026-12-17 returns 422 with message MSG-GEN-002
+    Then the treatment does not change
+
+  Scenario: AC7 Approval level below the required level
+    When the officer records result ""APPROVED"" with approval level ""L6"" for a plan that needs level ""L5""
+    Then the response is 409 with message MSG-P2-018
+    Then the treatment does not change
+
+  Scenario: AC8 Result recorded twice
+    Given the treatment holds result ""APPROVED"" with reference ""NL-SYN-000610"" recorded on 2026-12-17
+    When the officer records a result again
+    Then the response is 409 with message MSG-P2-010
+    Then the system writes no second decision log entry
+
+  Scenario: AC9 Case not awaiting credit approval
+    Given case ""RW-2026-000620"" is in route state ""PLAN_RUNNING""
+    When the officer records a result for its treatment
+    Then the response is 409 with message MSG-P3-005
+
+  Scenario: AC10 Two officers record at once
+    Given two officers read treatment ""TRT-SYN-0610"" at version 3
+    When both record a result with If-Match version 3
+    Then the system saves one result
+    Then the system refuses the other with 409 and message MSG-GEN-004
+
+  Scenario: AC11 Decision log write fails
+    Given the decision log store is unavailable
+    When the officer records result ""APPROVED"" with reference ""NL-SYN-000613"" and approval level ""L5""
+    Then the response is 503 with message MSG-P7-003
+    Then the treatment and the route state do not change
+    Then the system raises an incident"
+RWB-E2-007,Booking confirmation from the ALS load,"Feature: Booking confirmation from the ALS load
+
+  Background:
+    Given package ""BOOKING_MATCH"" version ""BKG-2026.12"" is in force with the RESTRUCTURE and SETTLEMENT rows and tolerance 0.00 baht
+    Given the ACE batch for ALS with business date 2026-12-16 is COMPLETED
+
+  Scenario: AC1 Booking confirmed
+    Given settlement treatment ""TRT-SYN-0701"" on case ""RW-2026-000701"" was approved on 2026-12-15 with offer amount 650,000.00 baht
+    Given the officer booked the settlement in ALS on 2026-12-16
+    Given v_ace_account shows settlement booked date 2026-12-16 and settlement booked amount 650,000.00 baht for synthetic account ""A-0701"" at business date 2026-12-16
+    When the next day's ALS batch is complete and JOB-08 runs on 2026-12-17
+    Then the SETTLEMENT row of package ""BOOKING_MATCH"" version ""BKG-2026.12"" decides that the account is booked
+    Then the booked terms match the approved treatment and the treatment state is ""BOOKED"" with booked at 2026-12-16
+    Then the system publishes treatmentBooked with business date 2026-12-16
+    Then the route state moves from ""WITH_OPS_SETTLEMENT"" to ""AWAITING_PAYMENT"" by R-SET-13 with a decision log entry
+
+  Scenario: AC2 Booking missing
+    Given restructure treatment ""TRT-SYN-0702"" was approved on 2026-12-15
+    Given v_ace_account at business date 2026-12-16 shows tdr_flag false for synthetic account ""A-0702""
+    When the match runs
+    Then the RESTRUCTURE row of package ""BOOKING_MATCH"" returns the outcome ""NO_BOOKING""
+    Then the system raises a task ""WITH_OPS_BOOKING"" for role ""RW-RESTRUCT"" with message MSG-P2-011
+    Then the treatment stays ""APPROVED""
+
+  Scenario: AC3 Terms differ
+    Given restructure treatment ""TRT-SYN-0703"" was approved with offer amount 1,800,000.00 baht and rate 4.2500 percent
+    Given v_ace_account shows tdr_flag true, last TDR date 2026-12-16, principal 1,800,000.00 baht and rate 4.5000 percent for ""A-0703""
+    When the match runs
+    Then the RESTRUCTURE row of package ""BOOKING_MATCH"" returns the outcome ""TERMS_DIFFER"" with approved rate 4.2500 and booked rate 4.5000
+    Then the treatment shows the difference: interest rate approved 4.2500, booked 4.5000
+    Then a task ""UNMATCHED_EXCEPTION"" goes to role ""RW-CREDITAD"" with message MSG-P2-012
+    Then the treatment stays ""APPROVED""
+
+  Scenario: AC4 Only some accounts booked
+    Given restructure treatment ""TRT-SYN-0704"" covers synthetic accounts ""A-0704"" and ""A-0705""
+    Given only ""A-0704"" shows the booking in v_ace_account at business date 2026-12-16
+    When the match runs
+    Then the treatment stays ""APPROVED""
+    Then the task for ""RW-RESTRUCT"" names account ""A-0705"" as not booked
+
+  Scenario: AC5 ACE batch not complete
+    Given the ACE batch for ALS with business date 2026-12-17 ended ""FAILED""
+    When JOB-08 is due on 2026-12-18
+    Then JOB-08 does not run for 2026-12-17
+    Then the system raises no missing booking task for 2026-12-17
+
+  Scenario: AC6 Match run twice
+    Given JOB-08 marked ""TRT-SYN-0701"" booked for business date 2026-12-16
+    When JOB-08 is rerun for 2026-12-16
+    Then the system publishes no second TreatmentBooked event
+    Then the system raises no task
+
+  Scenario: AC7 Booking still missing on the next batch
+    Given task ""WITH_OPS_BOOKING"" is open for ""TRT-SYN-0702"" from the batch of 2026-12-16
+    When the batch of 2026-12-17 still shows no booking
+    Then the system raises no second task
+    Then the REC-03 break list for the data steward shows ""TRT-SYN-0702"" as missing for 2 days
+
+  Scenario: AC8 Decision log write fails on confirmation
+    Given the decision log store is unavailable
+    When the match finds ""TRT-SYN-0701"" booked
+    Then the treatment stays ""APPROVED"" and no TreatmentBooked event is published
+    Then the system raises an incident with message MSG-P7-003
+    Then the match runs again with the next batch
+
+  Scenario: AC9 No BOOKING_MATCH version in force
+    Given no BOOKING_MATCH version is IN_FORCE on 2026-12-17
+    When JOB-08 starts for business date 2026-12-16
+    Then NoPackageInForce is thrown with MSG-P3-027 for package ""BOOKING_MATCH""
+    Then no treatment is marked booked, no difference is written and no task is raised
+    Then the run ends as failed and alerts role ""RW-PLATADM"""
+RWB-E2-008,Payment matching with the missed payment event,"Feature: Payment matching with the missed payment event
+
+  Background:
+    Given package ""PAYMENT_MATCH"" version ""PM-2026.12"" is in force with row ""EXACT"": amount tolerance 0 percent, window 10 days before the due date and 0 days after, grace 0 days
+    Given case ""RC-2026-000555"" has account ""A-0555"" and running restructure plan ""T-0701"" with installment amount 12,500.00 THB, installments 24 and installments paid 3
+    Given account ""A-0555"" has next installment date 2026-12-15
+
+  Scenario: AC1 Payment matched
+    Given the ACE batch for ALS with business date 2026-12-14 is COMPLETED
+    Given v_ace_payment holds payment ""PAY-90001"" of 12,500.00 THB on account ""A-0555"" dated 2026-12-14
+    When JOB-07 runs on 2026-12-15
+    Then the EXACT row of package ""PAYMENT_MATCH"" version ""PM-2026.12"" matches ""PAY-90001"" to the installment
+    Then the decision log entry names rule ""R-RES-26"" and rule version ""PM-2026.12""
+    Then a proceeds row exists for case ""RC-2026-000555"" with treatment ""T-0701"", payment code ""PAY-90001"", source ""CUSTOMER"", amount 12,500.00 and matched to ""INSTALLMENT""
+    Then the system calls treatmentApi.recordInstallmentPaid for ""T-0701"" with due date 2026-12-15
+    Then the system writes proceedsMatched to the outbox
+    Then after the ALS batch of 2026-12-15 the plan shows installments paid 4 and next due date 2027-01-15
+
+  Scenario: AC2 Missed payment
+    Given no payment on account ""A-0555"" appears in v_ace_payment between 2026-12-05 and 2026-12-15
+    When JOB-07 runs on 2026-12-16 for business date 2026-12-15
+    Then the system writes paymentMissed to the outbox with treatment ""T-0701"", due date 2026-12-15 and amount due 12,500.00
+    Then P3 moves plan ""T-0701"" from ""PLAN_RUNNING"" to ""PLAN_CURE_PERIOD"" under rule R-RES-27
+    Then the transfer rule records the case movement for reason ""payment missed""
+
+  Scenario: AC3 Exception
+    Given the ACE batch for ALS with business date 2026-12-14 is COMPLETED
+    Given v_ace_payment holds payment ""PAY-90002"" of 3,000.00 THB on account ""A-0555""
+    When JOB-07 runs on 2026-12-15
+    Then a proceeds row exists for ""PAY-90002"" with matched to ""UNMATCHED"" and no treatment
+    Then GET /proceeds?matched=false returns ""PAY-90002"" for the Credit Administration officer
+    Then the run summary shows MSG-P8-001 with 1 unmatched payment for 2026-12-14
+
+  Scenario: AC4 Payment on an account with no open case
+    Given v_ace_payment holds payment ""PAY-90003"" on account ""A-0999"" that is on no open case
+    When JOB-07 runs on 2026-12-15
+    Then the system writes no proceeds row for ""PAY-90003""
+    Then the REC-05 business-key break lists ""PAY-90003"" for the data steward
+
+  Scenario: AC5 ACE batch not complete
+    Given the ACE batch for ALS with business date 2026-12-15 ended ""FAILED""
+    When the scheduled time for JOB-07 on 2026-12-16 passes
+    Then JOB-07 does not run for business date 2026-12-15
+    Then the system writes no PaymentMissed for due date 2026-12-15
+    Then the plan view shows MSG-P1-001 naming ""DP01 Account and arrears"" and 2026-12-14
+
+  Scenario: AC6 Repeated run
+    Given JOB-07 completed for business date 2026-12-14 with 1 matched and 1 unmatched payment
+    When JOB-07 is rerun for business date 2026-12-14 from SCR-44
+    Then the proceeds table still has 2 rows for business date 2026-12-14
+    Then no second ProceedsMatched or PaymentMissed is written
+
+  Scenario: AC7 Window boundary
+    Given plan ""T-0702"" on account ""A-0666"" of case ""RC-2026-000566"" has installment amount 12,500.00 THB and next installment date 2026-12-16
+    Given v_ace_payment holds payment ""PAY-90004"" of 12,500.00 THB on account ""A-0555"" dated 2026-12-05
+    Given v_ace_payment holds payment ""PAY-90005"" of 12,500.00 THB on account ""A-0666"" dated 2026-12-05
+    When JOB-07 runs on 2026-12-06
+    Then ""PAY-90004"", 10 days before its due date, is matched to ""INSTALLMENT"" for ""T-0701"" by the EXACT row
+    Then ""PAY-90005"", 11 days before its due date, is matched to ""UNMATCHED""
+
+  Scenario: AC8 No PAYMENT_MATCH version in force
+    Given no PAYMENT_MATCH version is IN_FORCE on 2026-12-15
+    When JOB-07 starts for business date 2026-12-15
+    Then the evaluation refuses with NoPackageInForce and MSG-P3-027 for package ""PAYMENT_MATCH""
+    Then it stops before matching with MSG-P8-002
+    Then no proceeds row and no event is written
+    Then the job monitor shows JOB-07 as failed with an alert to Credit Administration
+
+  Scenario: AC9 Decision log names the rule and the package version
+    Given payment ""PAY-90001"" matches the installment of ""T-0701"" on 2026-12-15
+    When JOB-07 writes the match
+    Then the decision log entry holds decision code ""D5"", rule ""R-RES-26"" and rule version ""PM-2026.12""
+    Then the proceeds row is written only after the decision log entry succeeds
+    Then the run summary counts the match under version ""PM-2026.12"""
+RWB-E2-009,Steering dashboard v1 data set,"Feature: Steering dashboard v1 data set
+
+  Background:
+    Given definition version ""MD-2026.12"" is in force with measures ""CASES_BY_STAGE"", ""CASES_BY_QUEUE_AGE"", ""DECISIONS_LOGGED"", ""TREATMENTS"", ""LETTERS_SENT"", ""AGENT_ACCEPTANCE"" and ""AGENT_OVERRIDE""
+    Given the synthetic day 2026-12-15 holds 240 open cases, 1,412 decision log entries, 38 treatments and 95 notices sent
+
+  Scenario: AC1 Refresh
+    Given the loads of business date 2026-12-15 passed their checks
+    When JOB-15 runs at 01:30 on 2026-12-16
+    Then GET /reports/measures?from=2026-12-15&to=2026-12-15 returns a value for each of the 7 measures with period ""2026-12-15""
+    Then the INT-19 extract for 2026-12-15 has freshness stamp 2026-12-15 for the 07:30 Power BI refresh
+
+  Scenario: AC2 Reconciles
+    Given the case list shows 240 open cases at the 2026-12-15 cut-off
+    When JOB-15 runs at 01:30 on 2026-12-16
+    Then the sum of ""CASES_BY_STAGE"" for 2026-12-15 is 240
+    Then ""DECISIONS_LOGGED"" for 2026-12-15 is 1,412, the count of decision log entries decided that day
+
+  Scenario: AC3 Agent measures
+    Given agent ""case-intake"" version ""1.2.0"" made 200 recommendations on 2026-12-15, of which 170 were accepted and 30 overridden with a reason
+    When JOB-15 runs at 01:30 on 2026-12-16
+    Then ""AGENT_ACCEPTANCE"" for ""case-intake"" ""1.2.0"" on 2026-12-15 is 85.0 percent
+    Then ""AGENT_OVERRIDE"" for ""case-intake"" ""1.2.0"" on 2026-12-15 is 15.0 percent
+    Then SCR-37 shows both rates by agent
+
+  Scenario: AC4 Counts do not match
+    Given the case list shows 240 open cases at the 2026-12-15 cut-off
+    Given the case facts read for the dashboard total 239
+    When JOB-15 runs at 01:30 on 2026-12-16
+    Then no snapshot rows and no extract are published for 2026-12-15
+    Then SCR-37 shows 2026-12-14 as the latest day with MSG-P9-002 naming 239, 240 and 2026-12-15
+    Then an alert goes to the Reporting and BI analyst and the data steward
+
+  Scenario: AC5 Stale source
+    Given the notice data product is from 2026-12-14 because the 2026-12-15 load has not arrived
+    When a product head opens SCR-37 on 2026-12-16
+    Then ""LETTERS_SENT"" shows the value for 2026-12-14
+    Then SCR-37 shows MSG-P1-001 naming ""DP07 Legal"" and 2026-12-14
+
+  Scenario: AC6 Dates in the wrong order
+    Given a team manager holds RW-TEAMMGR with Reporting R
+    When a team manager sends GET /reports/measures?from=2026-12-15&to=2026-12-01
+    Then the response is status 422 with MSG-GEN-003 naming ""from"" and ""to""
+
+  Scenario: AC7 Agent with no runs
+    Given agent ""deviation-screen"" version ""0.9.0"" made no recommendations on 2026-12-15
+    When JOB-15 runs at 01:30 on 2026-12-16
+    Then the system writes no ""AGENT_ACCEPTANCE"" value for ""deviation-screen"" on 2026-12-15
+    Then SCR-37 shows ""No runs"" for ""deviation-screen"" on 2026-12-15
+
+  Scenario: AC8 Filter by product
+    Given the measures for 2026-12-15 are published and the case list shows 140 open Mortgage cases at the cut-off
+    When a product head sends GET /reports/measures?measure=CASES_BY_STAGE&product=MORTGAGE&from=2026-12-15&to=2026-12-15
+    Then the response holds only rows with product ""MORTGAGE""
+    Then their sum is 140
+
+  Scenario: AC9 Rerun of a published day
+    Given the measures for 2026-12-15 are published
+    When JOB-15 is rerun for business date 2026-12-15 from SCR-44
+    Then the rows for 2026-12-15 hold the same values
+    Then the frozen baseline rows of 2026-11-27 are unchanged"
+RWB-E2-010,"Stage 2 data products: contracts, plans and treatments","Feature: Stage 2 data products: contracts, plans and treatments
+
+  Background:
+    Given business date 2026-12-14 and the ACE batch for ALS for it is COMPLETE at 06:20
+    Given the treatment module holds 40 active treatments, 12 of them restructure plans with installments published in v_ace_plan
+    Given 9 of the 12 plans carry a credit approval recorded on the case by the restructuring officer
+
+  Scenario: AC1 Products loaded
+    Given treatments and plans in the case store, with credit approvals recorded from NLEADS by the officer
+    When the stage 2 step of JOB-02 runs
+    Then dp_treatment holds 40 rows for business date 2026-12-14, each with treatment type, approval level, installments, outcome and its case
+    Then the DP04 read for any of the 40 cases shows the contract number and contract date of its primary account from v_ace_account and the plan terms from v_ace_plan
+    Then DP04 carries a freshness stamp for business date 2026-12-14 with status ""LOADED""
+    Then the catalog entry for DP04 lists system of record ""Workbench"" for treatment and guarantee claim and names v_ace_account and v_ace_plan for the contract and plan facts
+
+  Scenario: AC2 Guarantee data
+    Given 5 TCG guarantee claim records for 5 existing cases, claimed amounts from 180,000.00 to 1,250,000.00 baht
+    When the stage 2 step runs
+    Then dp_guarantee_claim holds 5 rows, each linked to its case
+    Then a read of DP04 for case ""RW-2026-000512"" returns its TCG claim with claim deadline 2027-02-28
+
+  Scenario: AC3 Access
+    Given user ""u-phone-02"" holds RW-PHONECOL, which has no DP04 access row
+    When the user calls GET /data-products/DP04/records?caseId=RW-2026-000512
+    Then the system refuses the call with status 403 and MSG-P4-002
+    Then the system logs the refusal with user ""u-phone-02"" and product ""DP04""
+
+  Scenario: AC4 A guarantee claim for a case that does not exist
+    Given a TCG claim names case ID ""00000000-0000-0000-0000-000000000997""
+    When the stage 2 step runs
+    Then the system does not write the claim to dp_guarantee_claim
+    Then the data quality break list holds it with product ""DP04"" and check ""References""
+
+  Scenario: AC5 The treatment interface is unavailable
+    Given TreatmentQuery returns an error
+    When the stage 2 step runs for 2026-12-14
+    Then the step ends ""FAILED"" with MSG-GEN-006 for system ""Treatment""
+    Then dp_treatment keeps the rows for 2026-12-13
+    Then the system flags at 08:00 DP04 stale with MSG-P1-001 ""Treatment is from 2026-12-13. Today's load has not arrived.""
+
+  Scenario: AC6 A repeat run for the same date
+    Given the stage 2 step completed for 2026-12-14 with 40 treatment rows
+    When it runs again for 2026-12-14
+    Then dp_treatment still holds 40 rows for 2026-12-14
+
+  Scenario: AC7 Active treatment counts differ
+    Given TreatmentQuery.countActive() returns 41 and the build produced 40 active rows
+    When the count check runs
+    Then the system does not stamp DP04 for 2026-12-14
+    Then a break with check ""Active treatment count 40 against 41"" is listed for the data steward with MSG-P1-002
+
+  Scenario: AC8 A change at the end of the business date
+    Given treatment ""TRT-SYN-0601"" changed at 2026-12-14T23:59:59+07:00 and treatment ""TRT-SYN-0602"" changed at 2026-12-15T00:00:00+07:00
+    When the stage 2 step runs for 2026-12-14
+    Then ""TRT-SYN-0601"" is in the build for 2026-12-14
+    Then ""TRT-SYN-0602"" is not"
+RWB-E2-011,"Queue view screens: my queue, team queues, filters and ageing","Feature: Queue view screens: my queue, team queues, filters and ageing
+
+  Background:
+    Given the business date is 2026-12-15
+    Given team ""MTG-BKK"" has queues ""MTG-BKK-CO"" and ""MTG-BKK-LIT"" with a caseload cap of 150
+    Given user ""U-CO-01"" holds RW-CASEOWN in team ""MTG-BKK"" and user ""U-TM-01"" holds RW-TEAMMGR for team ""MTG-BKK""
+
+  Scenario: AC1 My queue
+    Given ""U-CO-01"" owns 40 open cases, 3 with an expired service level timer and 37 with running timers
+    When ""U-CO-01"" opens My queue
+    Then 40 cases list in one page
+    Then the 3 breached cases come first, then the 37 by service level due date, earliest first
+    Then each row shows the case number, product group, stage, status, age in days from the entry date and the service level due date
+
+  Scenario: AC2 Team view
+    Given ""MTG-BKK-CO"" holds 412 open cases with the oldest entered on 2026-09-02 and 9 breaches
+    Given ""MTG-BKK-LIT"" holds 38 open cases with the oldest entered on 2026-10-20 and 0 breaches
+    When ""U-TM-01"" opens Team queues
+    Then ""MTG-BKK-CO"" shows count 412, oldest case age 104 days and 9 breaches
+    Then ""MTG-BKK-LIT"" shows count 38, oldest case age 56 days and 0 breaches
+    Then each owner in ""MTG-BKK-CO"" shows their open case count against the cap of 150
+
+  Scenario: AC3 Filter
+    Given ""U-CO-01"" owns 12 open cases on stage ""LITIGATION"" and 28 on other stages
+    When the stage filter is set to ""LITIGATION"" and the list refreshes
+    Then only the 12 litigation cases show
+    Then after ""U-CO-01"" opens a case and returns to My queue the filter is still ""LITIGATION""
+    Then after sign-out and sign-in the filter is cleared
+
+  Scenario: AC4 Empty queue
+    Given ""U-CO-02"" owns no open case
+    When ""U-CO-02"" opens My queue
+    Then the screen shows the empty state with MSG-P3-017
+
+  Scenario: AC5 Age range in the wrong order
+    When ""U-CO-01"" sets age from 120 and age to 90
+    Then the system refuses the request with MSG-GEN-003 naming ""age to"" and ""age from""
+    Then the list keeps its previous rows
+
+  Scenario: AC6 Page size above the limit
+    When the front end requests My queue with page size 500
+    Then the system refuses the request with MSG-GEN-002 naming ""size"", 1 and 200
+
+  Scenario: AC7 Queue of another team
+    Given queue ""SME-NTH-CO"" belongs to team ""SME-NTH""
+    When ""U-TM-01"" requests the cases of ""SME-NTH-CO""
+    Then the system does not find the response with MSG-P4-003
+
+  Scenario: AC8 Stale data
+    Given the ACE batch of 2026-12-15 has not arrived and the case data is from 2026-12-14
+    When ""U-CO-01"" opens My queue
+    Then the 40 cases show with the stale banner MSG-P1-001 naming the date 2026-12-14
+
+  Scenario: AC9 Paused service level
+    Given 2 of the 40 cases have a deviation ""X1"" open and their service level timers paused
+    When ""U-CO-01"" opens My queue
+    Then the 2 cases show ""Paused"" with MSG-P3-004 on hover and sort after the 37 running timers
+
+  Scenario: AC10 Age boundary
+    Given case ""RW-2026-000301"" entered on 2026-09-16 and case ""RW-2026-000302"" entered on 2026-09-17
+    When ""U-CO-01"" sets age from 90 and age to 90
+    Then only ""RW-2026-000301"" shows, with age 90 days
+
+  Scenario: AC11 Counts reconcile to the case list
+    When ""U-TM-01"" reads the count of ""MTG-BKK-CO"" on Team queues and the case list filtered by queue ""MTG-BKK-CO"" and status not ""CLOSED""
+    Then both show 412
+
+  Scenario: AC12 Load time
+    Given ""U-CO-01"" owns 500 open cases
+    When ""U-CO-01"" opens My queue with page size 200
+    Then the first page shows within 2 seconds at the 95th percentile over 20 runs"
+RWB-E2-012,Manual transfer and reassignment screen with reason,"Feature: Manual transfer and reassignment screen with reason
+
+  Background:
+    Given the business date is 2026-12-15
+    Given TRANSFER package version ""TRF-2026.12"" is in force, and row ""TRF-010"" refuses a move while a deviation is open
+    Given user ""U-TM-01"" holds RW-TEAMMGR for team ""MTG-BKK""
+    Given case ""RW-2026-000401"" in queue ""MTG-BKK-CO"" owned by ""U-CO-01"", status ""IN_PROGRESS"", route state ""WITH_FCR_OFFICER"" and stage clock start 2026-12-01
+    Given queue ""LIT-BKK-01"" uses ""ROUND_ROBIN"" with a caseload cap of 150 and owners ""U-LO-01"" with 80 cases and ""U-LO-02"" with 95 cases, next in turn ""U-LO-02""
+
+  Scenario: AC1 Transfer
+    Given case ""RW-2026-000401"" in a queue of team ""MTG-BKK""
+    When ""U-TM-01"" transfers it to queue ""LIT-BKK-01"" with reason ""R02"" Customer deceased
+    Then the case is in queue ""LIT-BKK-01"" with owner ""U-LO-02""
+    Then the previous assignment of ""U-CO-01"" has ended at the time of the transfer
+    Then a new assignment has reason ""TRANSFER"", reason code ""R02"", queue ""LIT-BKK-01"" and the rule ID from TRANSFER version ""TRF-2026.12""
+    Then one decision log entry holds the rule ID, the rule version ""TRF-2026.12"", the from and to queue and owner and the reason code
+    Then the case keeps status ""IN_PROGRESS"", route state ""WITH_FCR_OFFICER"" and stage clock start 2026-12-01
+    Then one CaseTransferred event is in the outbox
+
+  Scenario: AC2 Rule blocks
+    Given case ""RW-2026-000402"" with deviation ""X1"" open and owned by the complaint officer under rule ""R-DEV-02""
+    When ""U-TM-01"" tries to transfer it to queue ""LIT-BKK-01"" with reason ""R05""
+    Then RuleEvaluator.evaluate(""TRANSFER"", facts, 2026-12-15) returns ruleId ""TRF-010"" and no allowing output
+    Then the screen refuses with MSG-P3-033 naming rule ""TRF-010""
+    Then the case, its assignment and the decision log are unchanged
+
+  Scenario: AC3 Bulk
+    Given ten selected cases in queue ""MTG-BKK-CO"" owned by ""U-CO-01""
+    When ""U-TM-01"" reassigns them to owner ""U-CO-03"" with 60 open cases and reason ""R04""
+    Then all ten have owner ""U-CO-03""
+    Then ten assignments and ten decision log entries are written, each with its rule ID and rule version
+    Then ""U-CO-03"" holds 70 open cases
+
+  Scenario: AC4 No reason
+    When ""U-TM-01"" submits a transfer of ""RW-2026-000401"" with no reason code
+    Then the system refuses the transfer with MSG-P3-001
+    Then nothing changes
+
+  Scenario: AC5 Owner at the cap
+    Given owner ""U-CO-04"" holds 150 open cases in queue ""MTG-BKK-CO"" with a cap of 150
+    When ""U-TM-01"" reassigns ""RW-2026-000401"" to ""U-CO-04"" with reason ""R01""
+    Then the screen shows the at cap warning with MSG-P3-002 naming ""U-CO-04""
+    Then nothing changes
+
+  Scenario: AC6 Absence reassignment outside the team
+    Given owner ""U-CO-09"" belongs to team ""SME-NTH""
+    When ""U-TM-01"" reassigns ""RW-2026-000401"" to ""U-CO-09"" with reason ""R04""
+    Then the system refuses the transfer with MSG-P3-033 naming rule ""R-UNI-18""
+
+  Scenario: AC7 Case under legal hold
+    Given case ""RW-2026-000403"" with legal hold true
+    When ""U-TM-01"" transfers it to queue ""LIT-BKK-01"" with reason ""R05""
+    Then the system refuses the transfer with MSG-P3-005 naming ""LIT-BKK-01"" and ""HELD_LEGAL""
+
+  Scenario: AC8 Two transfers at once
+    When ""U-TM-01"" and ""U-TM-02"" transfer ""RW-2026-000401"" to different queues in the same second
+    Then the case ends in exactly one queue with one new assignment
+    Then the system refuses the other request with MSG-GEN-004
+
+  Scenario: AC9 Repeated request
+    Given the AC1 transfer was made with Idempotency-Key ""5b0c7a1e-0000-4000-8000-000000000001""
+    When the same request is sent again with the same Idempotency-Key
+    Then the response is the same assignment
+    Then there is still one new assignment and one decision log entry
+
+  Scenario: AC10 Decision log write fails
+    Given the decision log store is unavailable
+    When ""U-TM-01"" transfers ""RW-2026-000401"" to queue ""LIT-BKK-01"" with reason ""R02""
+    Then the system refuses the transfer with MSG-P7-003
+    Then the case stays in queue ""MTG-BKK-CO"" with owner ""U-CO-01"" and no new assignment
+
+  Scenario: AC11 Bulk with refusals
+    Given ten selected cases, two of which are under a legal hold
+    When ""U-TM-01"" reassigns them to ""U-CO-03"" with reason ""R01""
+    Then eight cases move
+    Then the two held cases show MSG-P3-005
+    Then the summary shows MSG-P3-035 with 8 of 10
+
+  Scenario: AC12 Every owner of the target queue at the cap
+    Given both owners of queue ""LIT-BKK-01"" hold 150 open cases
+    When ""U-TM-01"" transfers ""RW-2026-000401"" to queue ""LIT-BKK-01"" with reason ""R05""
+    Then the screen shows the at cap warning with MSG-P3-002 naming every owner of ""LIT-BKK-01""
+    Then nothing changes
+
+  Scenario: AC13 No TRANSFER package in force
+    Given no TRANSFER package version is in force on 2026-12-20
+    When ""U-TM-01"" transfers ""RW-2026-000401"" to queue ""LIT-BKK-01"" with reason ""R02"" on 2026-12-20
+    Then RuleEvaluator.evaluate(""TRANSFER"", facts, 2026-12-20) throws NoPackageInForce
+    Then the system refuses the transfer with MSG-P3-027 for the package in force check
+    Then the case, its assignment and the decision log are unchanged"
+RWB-E2-013,Approval routing with the delegation of authority table,"Feature: Approval routing with the delegation of authority table
+
+  Background:
+    Given the environment is SIT
+    Given delegation version ""DOA-2026.11"" is in force with holder ""U-9201"" at L6, ""U-9202"" at L5 and ""U-9203"" at L4 for MORTGAGE, all holding RW-PRODHEAD
+    Given test user ""U-9210"" holds RW-RESTRUCT and test users ""U-9211"" and ""U-9212"" hold RW-LITOFF and test user ""U-9213"" holds RW-HEADLIT
+
+  Scenario: AC1 Routed
+    Given a demand notice for case ""RW-2026-000123"" was generated under rule ""R-LIT-03"" version ""LIT-2026.12"" and prepared by ""U-9211""
+    When the router runs for decision D7.1 at 09:00 on 14 December 2026
+    Then an approval appears in the queue of role RW-LITOFF with decision D7.1, area ""LITIGATION"", no amount limit and due at 09:00 on 15 December 2026
+    Then the system does not show it to ""U-9211"", who prepared it
+    Then the routing entry records rule ""R-LIT-03"", version ""LIT-2026.12"" and route parameter ""rwb.approval.route.D7.1.role""
+    Then the case status becomes ""Waiting approval""
+
+  Scenario: AC2 Escalated
+    Given the approval of AC1 is still WAITING at 09:00 on 15 December 2026
+    When JOB-05 publishes TimerBreached for its service level timer
+    Then the approval moves to role RW-HEADLIT with escalation level 1 and a new due time of 09:00 on 16 December 2026
+    Then the system writes one entry with final call ""ESCALATED"" and ""U-9213"" is told with MSG-P7-011
+    Then the case stays ""Waiting approval""
+
+  Scenario: AC3 Limit changed
+    Given approval ""A-1"" for D6.4 item 2.1.1, MORTGAGE, principal 2,400,000.00 was routed to L6 under ""DOA-2026.11""
+    Given version ""DOA-2027.01"" from 1 January 2027 moves that amount to L5
+    When a new D6.4 approval with the same amounts routes on 2 January 2027
+    Then the new approval goes to L5 holder ""U-9202"" and its entry records ""DOA-2027.01""
+    Then approval ""A-1"" stays with L6 and ""DOA-2026.11""
+
+  Scenario: AC4 Routed by limit
+    Given restructure officer ""U-9210"" prepared a settlement at a discount on case ""RW-2026-000124"", decision D6.4 item 2.1.1, MORTGAGE, principal 2,400,000.00, loss 20.00 percent, loss amount 480,000.00
+    When the router runs
+    Then the system assigns the approval to L6 holder ""U-9201"" with the delegation row ID and version ""DOA-2026.11""
+    Then GET /approvals for ""U-9201"" lists it with amount 2,400,000.00, level ""L6"" and its age
+
+  Scenario: AC5 Approve inside the limit
+    Given the approval of AC4 is WAITING
+    When ""U-9201"" approves it with Idempotency-Key ""k-501""
+    Then the approval status becomes ""APPROVED""
+    Then the system writes one entry with approver ""U-9201"", approval level ""L6"", limit version ""DOA-2026.11"", the rule ID and version and final call ""APPROVED""
+    Then the system publishes decisionRecorded and the response shows MSG-P7-004 with state ""In progress""
+
+  Scenario: AC6 The preparer cannot approve
+    Given ""U-9210"" also holds RW-PRODHEAD at L6 as substitute
+    When ""U-9210"" approves the approval of AC4
+    Then the system refuses the call with status 409 and message MSG-P7-002 and the approval stays ""WAITING""
+
+  Scenario: AC7 A change above the limit goes up
+    Given the approval of AC4 is WAITING with ""U-9201""
+    When ""U-9201"" changes the principal to 120,000,000.00 with coded reason ""CUSTOMER_REVISED_OFFER"" and approves
+    Then the call returns MSG-P7-001 with level ""L5"" and approver ""U-9202""
+    Then the approval moves to L5 with the changed terms and status ""WAITING"", and no approval at L6 is recorded
+
+  Scenario: AC8 Refuse needs a reason
+    Given the approval of AC4 is WAITING
+    When ""U-9201"" refuses it with no reason
+    Then the system refuses the call with status 422 and message MSG-GEN-001 for field ""reason""
+    Then when ""U-9201"" refuses it with reason ""Collateral appraisal older than one year""
+    Then the status becomes ""REFUSED"", the entry records the reason, and the case returns to the state the rule names
+
+  Scenario: AC9 Return with a question
+    Given the approval of AC4 is WAITING
+    When ""U-9201"" returns it with reason ""Attach the latest income statement""
+    Then the system opens the status becomes ""RETURNED"", a task for preparer ""U-9210"", and the entry records the question
+
+  Scenario: AC10 An override needs a coded reason
+    Given the recommendation on the approval of AC4 is a settlement of 1,920,000.00
+    When ""U-9201"" changes it to 1,800,000.00 and approves with no reason code
+    Then the system refuses the call with status 422 and message MSG-P7-005
+
+  Scenario: AC11 No holder means escalation, not a stall
+    Given the L6 row for SSME has no holder and no substitute
+    When an approval for D6.4 item 2.1.1, SSME, principal 1,000,000.00, loss 10.00 percent routes
+    Then the system assigns it to the L5 holder at once
+    Then the routing entry records reason ""NO_HOLDER"" for L6
+
+  Scenario: AC12 A committee level needs the resolution
+    Given an approval for D6.4 item 2.1.1, MORTGAGE, principal 800,000,000.00, loss 20.00 percent, routed to L3, Problem Asset Resolution Committee, whose recording holder is ""U-9204""
+    When ""U-9204"" approves it with no resolution reference
+    Then the system refuses the call with status 422 and message MSG-GEN-001 for field ""resolutionReference""
+    Then when ""U-9204"" approves with resolution reference ""PARC-2026-14"" and members present ""M-01, M-02, M-03, M-04""
+    Then the entry records the resolution reference, the members present, level ""L3"" and final call ""APPROVED""
+
+  Scenario: AC13 Two approvals at once
+    Given the approval of AC4 is WAITING and visible to holder ""U-9201"" and substitute ""U-9205""
+    When both approve it at the same moment
+    Then one call succeeds and one entry is written
+    Then the other call returns status 409 with message MSG-GEN-004
+
+  Scenario: AC14 No limit covers the decision
+    Given ""DOA-2026.11"" holds no row for HIRE_PURCHASE
+    When an approval for D6.4 item 2.1.1, HIRE_PURCHASE, principal 900,000.00 routes
+    Then the system stores the approval with status ""HELD_NO_LIMIT"" and the case stays ""Waiting approval""
+    Then the system raises an incident to RW-RISK with message MSG-P7-010"
+RWB-E2-014,Approval screen for D7.1 demand and recall notices,"Feature: Approval screen for D7.1 demand and recall notices
+
+  Background:
+    Given the environment is SIT
+    Given demand notice ""N-0201"" for case ""RW-2026-000123"" was generated at 08:10 on 14 December 2026 from template ""DEMAND-MTG"" ""TH"" version 2 under rule ""R-LIT-03"" version ""LIT-2026.12"", prepared by ""U-9211""
+    Given its approval ""A-0201"" is WAITING for role RW-LITOFF
+    Given test user ""U-9212"" holds RW-LITOFF and did not prepare it
+    Given the total balance comes from the ACE account data of business date 13 December 2026
+
+  Scenario: AC1 Approve
+    Given ""U-9212"" opens ""A-0201"" on SCR-11 at 10:00 on 14 December 2026
+    When ""U-9212"" approves
+    Then notice ""N-0201"" moves to state ""Approved"" and is in the 16:00 dispatch run
+    Then the decision log entry holds the inputs reference with each input's business date, rule ""R-LIT-03"" version ""LIT-2026.12"", template ""DEMAND-MTG"" version 2, approver ""U-9212"" and decided at 10:00
+    Then the screen shows MSG-P7-004 and state ""Decided""
+
+  Scenario: AC2 Change
+    Given ""U-9212"" opens ""A-0201""
+    When ""U-9212"" picks template variant ""DEMAND-MTG-B"" with coded reason ""TEMPLATE_VARIANT"" and approves
+    Then the system generates a new notice version from ""DEMAND-MTG-B"" and is the one approved
+    Then the entry records final call ""APPROVED_CHANGED"", the proposed template ""DEMAND-MTG"", the chosen ""DEMAND-MTG-B"" and the reason code
+    Then only the changed notice reaches the dispatch run
+
+  Scenario: AC3 Reject
+    Given ""U-9212"" opens ""A-0201""
+    When ""U-9212"" rejects with reason ""Addressee is a guarantor; a guarantor notice is needed""
+    Then the approval status becomes ""REFUSED"" and notice ""N-0201"" is held with reason ""REFUSED_BY_APPROVER""
+    Then a task with the reason appears in the case owner's queue
+    Then the decision log entry shows final call ""REFUSED"" and the reason
+
+  Scenario: AC4 The preparer cannot decide
+    Given ""U-9211"" also sees ""A-0201"" through RW-LEGAL
+    When ""U-9211"" opens it
+    Then approve and reject are not shown and the screen states MSG-P7-002
+    Then the system refuses a direct POST /approvals/{approvalId}/approve by ""U-9211"" with status 409 and message MSG-P7-002
+
+  Scenario: AC5 A stale input blocks approval
+    Given the total balance on the notice comes from business date 11 December 2026, 3 days before, above the 1 day limit
+    When ""U-9212"" opens ""A-0201""
+    Then the screen state is ""Stale input"" with MSG-P7-006 for ""Total balance"" and 3 days
+    Then the system refuses an approve call with status 409 and message MSG-P7-006
+
+  Scenario: AC6 A withdrawn template blocks approval
+    Given template ""DEMAND-MTG"" version 2 is withdrawn at 09:30 on 14 December 2026
+    When ""U-9212"" opens ""A-0201"" at 10:00
+    Then the screen shows MSG-P6-003 and the notice is held under R-LIT-04
+    Then the system refuses an approve call with status 409 and message MSG-P6-003
+
+  Scenario: AC7 Reject needs a reason
+    When ""U-9212"" rejects ""A-0201"" with an empty reason
+    Then the system refuses the call with status 422 and message MSG-GEN-001 for field ""reason""
+    Then the notice stays ""Generated""
+
+  Scenario: AC8 A change needs a coded reason
+    When ""U-9212"" picks template variant ""DEMAND-MTG-B"" and approves with no reason code
+    Then the system refuses the call with status 422 and message MSG-P7-005
+    Then the system generates no new notice version
+
+  Scenario: AC9 Another approver decided first
+    Given test user ""U-9214"" holding RW-LITOFF approved ""A-0201"" at 10:01
+    When ""U-9212"" approves it at 10:02 from a screen loaded at 10:00
+    Then the system refuses the call with status 409 and message MSG-GEN-004
+    Then the screen reloads in state ""Decided"" showing approver ""U-9214""
+
+  Scenario: AC10 One screen holds the notice, the facts and the rule
+    When ""U-9212"" opens ""A-0201""
+    Then the screen shows the notice PDF, case ""RW-2026-000123"", product ""MORTGAGE"", total balance with business date 13 December 2026, the addressee role ""BORROWER"", the postal address masked per the masking rules, rule ""R-LIT-03"" version ""LIT-2026.12"", template ""DEMAND-MTG"" version 2 and preparer ""U-9211""
+    Then the screen state is ""Ready"""
+RWB-E2-015,"Timers, escalation and the deviation flag on the case record view","Feature: Timers, escalation and the deviation flag on the case record view
+
+  Background:
+    Given the business date is 2026-12-15
+    Given user ""U-CO-01"" holds RW-CASEOWN and owns case ""RW-2026-000501"" with product group ""HIRE_PURCHASE"" and status ""IN_PROGRESS""
+    Given prescription.warning-days is 90
+
+  Scenario: AC1 Timers shown
+    Given case ""RW-2026-000501"" has a ""NOTICE_PERIOD"" timer started on 2026-12-01 expiring on 2027-01-30, on a task owned by role ""RW-LITOFF""
+    When ""U-CO-01"" opens the case record
+    Then the timer shows type ""Notice period"", due date 2027-01-30, status ""Running"" and owner of the next step ""Litigation officer""
+
+  Scenario: AC2 Deviation flag
+    Given case ""RW-2026-000502"" has deviation ""X3"" raised on 2026-12-10, handler ""U-SP-01"", approved in decision log entry ""DLE-9101"" by ""U-LG-01"", paused state ""WITH_FCR_OFFICER"" and contact stop true
+    When ""U-CO-01"" opens the case record
+    Then the screen is in state ""On hold"" with MSG-P3-004 naming ""Deceased customer"" and the prescription date
+    Then the deviation shows code ""X3"", handler ""U-SP-01"", approver ""U-LG-01"", raised on 2026-12-10, return point ""WITH_FCR_OFFICER"" and ""Contact stopped""
+
+  Scenario: AC3 Prescription
+    Given case ""RW-2026-000501"" has prescription date 2027-02-13, 60 days after the business date
+    When ""U-CO-01"" opens the case record
+    Then the prescription date 2027-02-13 shows with the warning MSG-P3-003
+    Then for case ""RW-2026-000503"" with prescription date 2027-03-16, 91 days after the business date, no warning shows
+
+  Scenario: AC4 Escalation state
+    Given case ""RW-2026-000501"" has a ""SERVICE_LEVEL"" timer that expired on 2026-12-12 with escalation level 1, escalated to ""RW-TEAMMGR"" at 2026-12-12 09:05
+    Given the SERVICE_LEVEL row for ""HIRE_PURCHASE"" status ""IN_PROGRESS"" names the next escalation role ""RW-PRODHEAD""
+    When ""U-CO-01"" opens the case record
+    Then the timer shows status ""Expired"", escalated to ""Team manager"" at 2026-12-12 09:05 and next escalation point ""Product head""
+    Then the case stays in queue and status as before
+
+  Scenario: AC5 Two deviations
+    Given case ""RW-2026-000504"" has deviations ""X1"" raised on 2026-12-05 and ""X3"" raised on 2026-12-08, both open
+    When ""U-CO-01"" opens the case record
+    Then both deviations show with their own handler and approver
+    Then the screen stays in state ""On hold""
+    Then when ""X1"" is cleared on 2026-12-14, the screen stays in state ""On hold"" with only ""X3"" open and ""X1"" shown as cleared on 2026-12-14
+
+  Scenario: AC6 Stage clock paused and prescription running
+    Given case ""RW-2026-000502"" with deviation ""X3"" open since 2026-12-10
+    Given its ""SERVICE_LEVEL"" timer paused on 2026-12-10 and its ""PRESCRIPTION"" timer running
+    When ""U-CO-01"" opens the case record
+    Then the service level timer shows ""Paused since 2026-12-10""
+    Then the prescription timer shows ""Running"" with its date
+
+  Scenario: AC7 Deviation cleared and timers resumed
+    Given case ""RW-2026-000505"" had deviation ""X1"" cleared on 2026-12-14 and its ""SERVICE_LEVEL"" timer resumed with a new expiry of 2026-12-22
+    When ""U-CO-01"" opens the case record
+    Then the screen is not on hold
+    Then the service level timer shows ""Running"" with due date 2026-12-22
+    Then the deviation shows as cleared on 2026-12-14 with outcome ""Returned""
+
+  Scenario: AC8 No running timer
+    Given case ""RW-2026-000506"" has no timer with status ""RUNNING"", ""PAUSED"" or ""EXPIRED""
+    When ""U-CO-01"" opens the case record
+    Then the timers section shows MSG-P3-018
+
+  Scenario: AC9 Case outside scope
+    Given case ""RW-2026-000507"" belongs to team ""SME-NTH"" and ""U-CO-01"" has scope Own in team ""MTG-BKK""
+    When ""U-CO-01"" opens it
+    Then the system does not find the response with MSG-P4-003
+
+  Scenario: AC10 Deviation module does not answer
+    Given the deviation query does not answer within 2 seconds for case ""RW-2026-000502""
+    When ""U-CO-01"" opens the case record
+    Then the timers and the prescription date show
+    Then the deviation section shows MSG-GEN-006 naming ""Deviation handling""
+    Then the on hold banner shows from the case's deviation flag"
+RWB-E2-016,Full case record view with the history timeline,"Feature: Full case record view with the history timeline
+
+  Background:
+    Given the business date is 2026-12-20
+    Given user ""U-CO-01"" holds RW-CASEOWN and owns case ""RW-2026-000601""
+
+  Scenario: AC1 Timeline
+    Given case ""RW-2026-000601"" has 30 events: 4 assignments, 3 transfers, 8 contacts, 6 decision log entries, 2 notices, 5 documents and 2 timer events
+    When ""U-CO-01"" opens the case timeline
+    Then the 30 items show newest first, each with type, actor and time
+    Then the first page loads within 2 seconds at the 95th percentile over 20 runs
+
+  Scenario: AC2 Filter
+    Given the filter set to ""DECISION""
+    When the timeline refreshes
+    Then only the 6 decision items show
+    Then each carries its decision log entry ID and opens that entry
+
+  Scenario: AC3 Queue history
+    Given case ""RW-2026-000601"" was allocated to ""MTG-BKK-CO"" on 2026-11-30 and transferred three times: to ""LIT-BKK-01"" with reason ""R05"" on 2026-12-05, to ""MTG-BKK-CO"" with reason ""R06"" on 2026-12-08 and to ""LIT-BKK-02"" with reason ""R01"" on 2026-12-12
+    When ""U-CO-01"" opens queue history
+    Then the three moves show newest first with from queue, to queue, from owner, to owner, reason code and rule ID
+    Then the allocation on 2026-11-30 shows as the first entry with reason ""ALLOCATION""
+
+  Scenario: AC4 Date filter
+    Given the filter from 2026-12-05 to 2026-12-08
+    When the timeline refreshes
+    Then only items dated 2026-12-05 to 2026-12-08 inclusive show
+
+  Scenario: AC5 Items the role may not read
+    Given user ""U-PC-01"" holds RW-PHONECOL with case ""RW-2026-000601"" in scope
+    When ""U-PC-01"" opens the case timeline
+    Then no decision item and no notice item shows
+    Then contacts, assignments, transfers, documents and timer events show
+
+  Scenario: AC6 A source does not answer
+    Given the document query does not answer within 2 seconds
+    When ""U-CO-01"" opens the case timeline
+    Then the 25 items from the other sources show
+    Then a notice shows MSG-GEN-006 naming ""Document hub""
+
+  Scenario: AC7 Dates in the wrong order
+    When ""U-CO-01"" sets the filter from 2026-12-10 to 2026-12-01
+    Then the system refuses the request with MSG-GEN-003 naming ""to"" and ""from""
+
+  Scenario: AC8 Nothing matches
+    Given the filter set to ""NOTICE"" and the dates 2026-11-01 to 2026-11-15
+    When the timeline refreshes
+    Then the screen shows MSG-P3-019
+
+  Scenario: AC9 Assignment written before the queue was recorded
+    Given case ""RW-2026-000602"" has an assignment from 2026-11-30 with no queue recorded
+    When ""U-CO-01"" opens its queue history
+    Then the move shows with ""Queue not recorded"" and its reason ""ALLOCATION""
+
+  Scenario: AC10 Case outside scope
+    Given case ""RW-2026-000603"" belongs to team ""SME-NTH"" and ""U-CO-01"" has scope Own in team ""MTG-BKK""
+    When ""U-CO-01"" opens its timeline
+    Then the system does not find the response with MSG-P4-003
+
+  Scenario: AC11 Large history
+    Given case ""RW-2026-000604"" has 4,000 timeline items
+    When ""U-CO-01"" opens the case timeline with page size 50
+    Then the first 50 items show within 2 seconds
+    Then the total shows 4,000"
+RWB-E2-017,"Contract, CA and mortgage document generation screens","Feature: Contract, CA and mortgage document generation screens
+
+  Background:
+    Given case ""RW-2026-000401"" with product group ""MORTGAGE"" in team ""FCR-BKK""
+    Given treatment ""TRT-0401"" of type ""DEED_IN_LIEU"" approved at D6.4 with no outcome
+    Given the set for ""DEED_IN_LIEU"" is ""DIL-CONTRACT"" version 2, ""DIL-CA"" version 1 and ""DIL-MORTGAGE"" version 1, all approved by Legal
+    Given a restructuring officer with role RW-RESTRUCT and scope team ""FCR-BKK""
+
+  Scenario: AC1 Generate
+    Given the officer opens SCR-14 for ""TRT-0401""
+    When the officer chooses Generate documents and confirms
+    Then the system produces three documents from the current template versions with the case facts filled
+    Then they show as drafts of types ""CONTRACT"", ""CREDIT_APPROVAL"" and ""MORTGAGE_DOCUMENT"" with template versions 2, 1 and 1
+
+  Scenario: AC2 Review
+    Given the contract draft ""DOC-0411"" at doc_version 1 has contract_date ""2026-12-10""
+    When the officer corrects contract_date to ""2026-12-12"" with reason ""Signing appointment moved by the customer""
+    Then the system writes a decision log entry with decision code ""D6.4"", the old and new value and the reason as override_reason
+    Then the system regenerates ""DOC-0411"" as doc_version 2 showing ""12 December 2569 BE""
+    Then doc_version 1 stays readable
+
+  Scenario: AC3 Send
+    Given the three drafts of ""TRT-0401"" are in state ""REVIEWED""
+    When the officer chooses Send for signature
+    Then each file is in the write-once container and each document has write_once true and state ""SENT""
+    Then the system starts one signature request for the three documents in P6
+    Then the system writes a decision log entry with final_call ""SENT_FOR_SIGNATURE""
+    Then the screen shows MSG-P5-012 with count 3
+
+  Scenario: AC4 Generate for a treatment that is not approved
+    Given treatment ""TRT-0402"" of type ""DEED_IN_LIEU"" has no decision_log_id
+    When the officer opens SCR-14 for ""TRT-0402""
+    Then the system disables generate documents with MSG-P5-011
+    Then a direct call to POST generated-documents returns 409 with MSG-P5-011
+
+  Scenario: AC5 A correction without a reason
+    Given the draft ""DOC-0411""
+    When the officer corrects contract_date with an empty reason
+    Then the response is 422 with MSG-GEN-001 naming ""Reason""
+    Then ""DOC-0411"" stays at its doc_version
+
+  Scenario: AC6 A locked value cannot be corrected
+    Given transfer_price is locked in the merge field catalog
+    When the officer tries to change transfer_price on ""DOC-0411"" from 1250000.00 to 1200000.00
+    Then the response is 422 with MSG-P5-014 naming ""Transfer price""
+    Then nothing changes
+
+  Scenario: AC7 Send with a draft not reviewed
+    Given two drafts of ""TRT-0401"" are ""REVIEWED"" and ""DIL-MORTGAGE"" is still ""DRAFT""
+    When the officer chooses Send for signature
+    Then the response is 422 with MSG-P5-013 naming the mortgage document
+    Then the system copies no document to the write-once container and no signature request starts
+
+  Scenario: AC8 A sent document cannot be changed
+    Given ""DOC-0411"" is in state ""SENT""
+    When the officer tries to correct contract_date
+    Then the response is 409 with MSG-P5-002
+    Then ""DOC-0411"" is unchanged
+
+  Scenario: AC9 The decision log write fails on a correction
+    Given the decision log store does not accept writes
+    When the officer corrects contract_date on ""DOC-0411"" with a reason
+    Then the response is 503 with MSG-P7-003
+    Then ""DOC-0411"" stays at its doc_version and no file is added
+
+  Scenario: AC10 Send chosen twice
+    Given the officer chose Send for signature for ""TRT-0401"" with Idempotency-Key ""S-0401""
+    When the same request with Idempotency-Key ""S-0401"" arrives again
+    Then the response returns the same three documents in state ""SENT""
+    Then only one signature request exists for ""TRT-0401""
+
+  Scenario: AC11 Two officers correct the same draft
+    Given two officers opened ""DOC-0411"" at version 4
+    Given the first officer saved a correction, so the record is at version 5
+    When the second officer saves a correction with version 4
+    Then the response is 409 with MSG-GEN-004
+
+  Scenario: AC12 The signature service refuses the request
+    Given SignatureRequests in P6 returns ""UNAVAILABLE""
+    When the officer chooses Send for signature for the three reviewed drafts
+    Then the response is 503 with MSG-GEN-006 naming ""e-signature""
+    Then the documents stay in state ""REVIEWED""
+    Then a second send after the service returns completes with one signature request
+
+  Scenario: AC13 The template changed after the drafts were made
+    Given the three drafts were made from ""DIL-CONTRACT"" version 2
+    Given ""DIL-CONTRACT"" version 3 became current after the drafts were made
+    When the officer chooses Send for signature
+    Then the response is 422 with MSG-P5-013 naming the contract and ""template version 3""
+    Then the system sends no document"
+RWB-E2-018,E-signature flow for customers and the bank,"Feature: E-signature flow for customers and the bank
+
+  Background:
+    Given case ""RC-2026-000888"" has settlement treatment ""T-0501"" with offer validity 2026-12-20 and state ""OFFER_WITH_CUSTOMER_SET""
+    Given agreement document ""D-0601"" on the case was generated from template ""SET-AGREE"" ""TH"" with signature basis ""E_SIGNATURE_ALLOWED""
+    Given the borrower is party ""P-0088"" with no contact stop
+
+  Scenario: AC1 Customer signs
+    Given ""RS-0301"" sent ""D-0601"" for e-signature to party ""P-0088"" on 2026-12-10
+    When EasyApp returns signing result ""SIGNED"" with the bank signature applied at 2026-12-11 10:15:00
+    Then within 60 seconds version 2 of ""D-0601"" holding the signed PDF is stored on case ""RC-2026-000888"" with write_once true
+    Then the signature request has status ""SIGNED"" and signed at 2026-12-11 10:15:00
+    Then the system calls treatmentApi.recordSignature for ""T-0501"" with signed true and method ""E_SIGNATURE""
+
+  Scenario: AC2 Branch
+    Given ""RS-0301"" created a signature request for ""D-0601"" with method ""BRANCH""
+    Given the branch scan ""D-0602"" of the signed agreement arrived through document intake on 2026-12-12
+    When ""RS-0301"" records result ""SIGNED"" with signed document ""D-0602"" and signed date 2026-12-12
+    Then the signature request has status ""SIGNED"" and method ""BRANCH""
+    Then the system links ""D-0602"" to the case as the signed agreement
+    Then the system calls treatmentApi.recordSignature for ""T-0501"" with signed true and method ""BRANCH""
+
+  Scenario: AC3 DIL paper
+    Given case ""RC-2026-000889"" has deed in lieu treatment ""T-0502"" for product ""MORTGAGE""
+    Given its contract document ""D-0701"" was generated from template ""DIL-CONTRACT-MTG"" with signature basis ""WET_INK_REQUIRED""
+    Given ""RS-0301"" created a signature request for ""D-0701"" with method ""PAPER""
+    When ""RS-0301"" records result ""SIGNED"" with scan ""D-0702"" and signed date 2026-12-14
+    Then the signature request has status ""SIGNED"" and method ""PAPER""
+    Then the system calls treatmentApi.recordSignature for ""T-0502"" with signed true and method ""PAPER""
+    Then P3 receives event CUSTOMER_ACCEPTED with signature basis ""WET_INK"" and moves the case to ""WITH_FIELD_INSPECTION"" under R-DIL-18
+
+  Scenario: AC4 E-signature refused where Legal requires wet ink
+    Given document ""D-0701"" has signature basis ""WET_INK_REQUIRED""
+    When ""RS-0301"" sends POST /treatments/T-0502/signature-requests with method ""E_SIGNATURE"" for ""D-0701""
+    Then the response is status 409 with MSG-P6-009 naming ""DIL-CONTRACT-MTG""
+    Then the system sends no request to EasyApp
+
+  Scenario: AC5 Customer declines
+    Given ""D-0601"" was sent for e-signature on 2026-12-10
+    When EasyApp returns signing result ""DECLINED"" on 2026-12-11
+    Then the signature request has status ""DECLINED""
+    Then the system calls treatmentApi.recordSignature for ""T-0501"" with signed false
+
+  Scenario: AC6 Offer validity passes with no signature
+    Given ""D-0601"" was sent for e-signature on 2026-12-10 and has status ""SENT""
+    Given P3 raised OFFER_EXPIRED for ""T-0501"" on 2026-12-21 and called SignatureApi.cancel
+    When EasyApp returns signing result ""SIGNED"" for that request on 2026-12-21
+    Then the signature request keeps status ""EXPIRED""
+    Then the system holds the result on the exception queue
+    Then the system does not call treatmentApi.recordSignature
+
+  Scenario: AC7 Contact stop
+    Given case ""RC-2026-000888"" has an open deviation ""X2"" with contact stop on
+    When ""RS-0301"" sends ""D-0601"" for e-signature
+    Then the response is status 409 with MSG-P6-001 naming ""X2 Vulnerable customer or hardship""
+    Then the system sends no request to EasyApp
+
+  Scenario: AC8 EasyApp path unavailable
+    Given the ACE path to EasyApp returns ""unavailable""
+    When ""RS-0301"" sends ""D-0601"" for e-signature
+    Then the response is status 201 with status ""QUEUED"" and MSG-GEN-006 naming ""EasyApp""
+    Then JOB-11 retries the send until it is accepted or the retry limit of 5 is reached
+
+  Scenario: AC9 Signing result repeated
+    Given the signing result ""SIGNED"" for request reference ""EA-30001"" was applied
+    When the same result for ""EA-30001"" arrives again
+    Then the system stores no second document
+    Then the system calls treatmentApi.recordSignature once
+    Then the system counts the repeat under rule R-UNI-40
+
+  Scenario: AC10 Unknown request reference
+    Given no signature request has external reference ""EA-99999""
+    When EasyApp returns a signing result for reference ""EA-99999"" that matches no request
+    Then the system holds the result on the exception queue with reason ""unknown signature request""
+    Then the system stores no document
+
+  Scenario: AC11 Branch result without a scan
+    Given a signature request for ""D-0601"" with method ""BRANCH""
+    When ""RS-0301"" records result ""SIGNED"" with no signed document
+    Then the response is status 422 with MSG-GEN-001 naming ""signed document"""
+RWB-E2-019,Partner identities through the external gateway,"Feature: Partner identities through the external gateway
+
+  Background:
+    Given the environment is UAT and feature ""rwb.access.partner-signin"" is on
+    Given partner ""LF-0012"" is a LAW_FIRM with panel status ""ACTIVE"" and contract end 30 June 2027
+    Given partner ""LF-0019"" is a LAW_FIRM with panel status ""ACTIVE""
+    Given partner ""VL-0004"" is a VALUER with panel status ""ACTIVE""
+
+  Scenario: AC1 Partner sign-in
+    Given partner identity ""P-5101"" is in group ""RWB-UAT-PT-LAWFIRM"" and bound to ""LF-0012""
+    Given 5 open instructions are placed with ""LF-0012"" and 3 with ""LF-0019""
+    When ""P-5101"" signs in through the external gateway with password and second factor
+    Then the session holds role ""PT-LAWFIRM"", scope ""PLACED"" and partner ""LF-0012""
+    Then PRT-01 Partner home lists the 5 instructions of ""LF-0012"" and none of ""LF-0019""
+    Then one entry with decision code ""AC-SIGN"" and actor ""P-5101"" is written
+
+  Scenario: AC2 Role per partner
+    Given partner identity ""P-5102"" is in group ""RWB-UAT-PT-VALUER"" and bound to ""VL-0004""
+    Given ""VL-0004"" holds 2 instructions of type ""APPRAISE"" and 1 of type ""LIST""
+    When ""P-5102"" signs in
+    Then PRT-01 Partner home lists the 2 ""APPRAISE"" instructions only
+
+  Scenario: AC3 Revoked
+    Given partner identity ""P-5101"" is bound to ""LF-0012""
+    Given ""LF-0012"" moves to panel status ""EXITED"" at 11:00 on 4 January 2027
+    When ""P-5101"" tries to sign in at 11:20
+    Then the system refuses access with message MSG-P4-008
+    Then one entry with decision code ""AC-DENY"" and reason ""PARTNER_NOT_ACTIVE"" is written
+    Then the system ends a session of ""P-5101"" opened at 10:00 at its first request after 11:05
+
+  Scenario: AC4 A partner identity with no binding is refused
+    Given partner identity ""P-5103"" is in group ""RWB-UAT-PT-LAWFIRM"" and has no active binding
+    When ""P-5103"" signs in
+    Then the system refuses the session with status 401 and message MSG-P4-001
+    Then one entry with decision code ""AC-DENY"" and reason ""NO_PARTNER_BINDING"" is written
+
+  Scenario: AC5 A partner without a second factor is refused
+    Given partner identity ""P-5101"" signs in with a token whose amr claim holds ""pwd"" only
+    When the token reaches the Workbench
+    Then the system refuses the session with status 401 and message MSG-P4-005
+
+  Scenario: AC6 An instruction of another firm is not returned
+    Given ""P-5101"" is signed in for ""LF-0012""
+    When ""P-5101"" requests instruction ""INS-2027-000431"" placed with ""LF-0019""
+    Then the call returns status 404 with message MSG-P4-003 and no instruction data
+
+  Scenario: AC7 Two partner roles or a bank role are refused
+    Given partner identity ""P-5104"" is in groups ""RWB-UAT-PT-LAWFIRM"" and ""RWB-UAT-PT-VALUER""
+    When ""P-5104"" signs in
+    Then the system refuses the session with message MSG-P4-006 and an incident is raised to the security administrator queue
+
+  Scenario: AC8 A partner cannot reach bank screens
+    Given ""P-5101"" is signed in with role ""PT-LAWFIRM"", whose Queue and allocation letter is ""-""
+    When ""P-5101"" calls GET /queues
+    Then the system refuses the call with status 403 and message MSG-P4-002
+
+  Scenario: AC9 A bank identity cannot use the external gateway
+    Given test user ""U-5105"" holds RW-LITOFF with a bank identity
+    When ""U-5105"" signs in through the external gateway
+    Then the system refuses the session with message MSG-P4-001
+    Then one entry with decision code ""AC-DENY"" and reason ""BANK_IDENTITY_ON_PARTNER_ROUTE"" is written"
+RWB-E2-021,Letter dispatch loop with proof of delivery from WIN,"Feature: Letter dispatch loop with proof of delivery from WIN
+
+  Background:
+    Given the dispatch-eligible notice states are ""APPROVED""
+    Given the proof window is 7 days
+    Given notice ""N-0101"" for case ""RC-2026-000321"" is ""Approved"" with notice type ""DEMAND"" and template ""DEMAND-SSME"" ""TH"" version 1 Approved
+    Given case ""RC-2026-000321"" has no legal hold and no open deviation
+
+  Scenario: AC1 Dispatch
+    Given JOB-10 runs at 16:00 on 2026-12-14
+    When the conduct check passes and WIN acknowledges contract ""CT-88001"" with barcode ""RR223344556TH"" and sent date 15122026
+    Then notice ""N-0101"" is ""Sent"" with barcode ""RR223344556TH"" and sent date 2026-12-15
+    Then the ledger entry for the letter has conduct check ""PASSED"" and summary naming barcode ""RR223344556TH""
+    Then GET /notices/N-0101 returns sentDate 2026-12-15 and barcode ""RR223344556TH""
+
+  Scenario: AC2 Proof back
+    Given notice ""N-0101"" is ""Sent"" on 2026-12-15
+    When the INT-15 file of 2026-12-21 returns barcode ""RR223344556TH"" with result ""DELIVERED"" and call-back date 18122026
+    Then notice ""N-0101"" is ""Delivered"" with callback date 2026-12-18
+    Then the ledger has an entry ""Delivered"" for case ""RC-2026-000321"" on 2026-12-18
+    Then case ""RC-2026-000321"" has a running ""NOTICE_PERIOD"" timer started on 2026-12-18
+
+  Scenario: AC3 Undelivered
+    Given notice ""N-0101"" is ""Sent"" on 2026-12-15
+    When the INT-15 file of 2026-12-21 returns barcode ""RR223344556TH"" with result ""UNDELIVERABLE""
+    Then notice ""N-0101"" is ""Unserved"" with delivery status ""UNDELIVERABLE""
+    Then one decision log entry exists with decision code ""D7.1"" and rule ""R-LIT-09""
+    Then the system transfers case ""RC-2026-000321"" to its owner's queue with reason ""NOTICE_UNSERVED""
+    Then the owner sees MSG-P6-008 naming ""DEMAND"" and ""UNDELIVERABLE""
+    Then the system starts no notice period timer
+
+  Scenario: AC4 Contact stop blocks the letter
+    Given case ""RC-2026-000321"" has an open deviation ""X1"" with contact stop on
+    When JOB-10 runs on 2026-12-14
+    Then the system does not writ notice ""N-0101"" to the WIN file
+    Then notice ""N-0101"" is ""Held"" with hold reason ""CONTACT_STOP_X1""
+    Then the ledger entry has conduct check ""BLOCKED""
+    Then one decision log entry exists with rule ""R-LIT-05""
+    Then the system routes the case to the complaint officer with MSG-P6-001 naming ""X1 Dispute or complaint""
+
+  Scenario: AC5 Consent withdrawn does not stop a statutory notice
+    Given the borrower's postal address contact point has consent status ""WITHDRAWN""
+    Given notice type ""DEMAND"" is a statutory notice
+    When JOB-10 runs on 2026-12-14
+    Then the system writes notice ""N-0101"" to the WIN file
+    Then the ledger entry has conduct check ""PASSED"" and summary ""Statutory notice, consent withdrawn""
+
+  Scenario: AC6 Proof window expires
+    Given notice ""N-0102"" for case ""RC-2026-000654"" is ""Sent"" with sent date 2026-12-15 and no proof returned
+    Given notice ""N-0103"" for case ""RC-2026-000655"" is ""Sent"" with sent date 2026-12-16 and no proof returned
+    When JOB-10 runs on 2026-12-22
+    Then notice ""N-0102"" is ""Unserved"" with delivery status ""PENDING""
+    Then one decision log entry exists for ""N-0102"" with rule ""R-LIT-08""
+    Then the system starts no notice period timer for case ""RC-2026-000654""
+    Then notice ""N-0103"" stays ""Sent""
+
+  Scenario: AC7 Legal hold stops dispatch
+    Given case ""RC-2026-000321"" has legal hold true
+    When JOB-10 runs on 2026-12-14
+    Then notice ""N-0101"" is ""Held"" with hold reason ""LEGAL_HOLD"" and is not in the WIN file
+    Then the case record shows MSG-P3-004
+
+  Scenario: AC8 Template withdrawn after approval
+    Given template ""DEMAND-SSME"" ""TH"" version 1 was withdrawn on 2026-12-13
+    When JOB-10 runs on 2026-12-14
+    Then notice ""N-0101"" is ""Held"" with hold reason ""TEMPLATE_WITHDRAWN"" and is not in the WIN file
+    Then the system raises a task to the litigation officer team with MSG-P6-003
+
+  Scenario: AC9 Decision log write fails on a held notice
+    Given case ""RC-2026-000321"" has an open deviation ""X2"" with contact stop on
+    Given the decision log store is unavailable
+    When JOB-10 runs on 2026-12-14
+    Then notice ""N-0101"" stays ""Approved"" and is not in the WIN file
+    Then the job record shows MSG-P7-003 for ""N-0101""
+    Then the system raises an incident under rule R-UNI-39
+
+  Scenario: AC10 Repeated request
+    Given ""LIT-0101"" sent POST /cases/RC-2026-000321/notices with notice type ""RECALL"" and Idempotency-Key ""a1b2c3d4-0001""
+    When the same request is sent again with Idempotency-Key ""a1b2c3d4-0001""
+    Then the response is the first notice with status 201
+    Then case ""RC-2026-000321"" has one RECALL notice
+
+  Scenario: AC11 Notice outside the caller's scope
+    Given notice ""N-0200"" belongs to a case outside the scope of ""LIT-0101""
+    When ""LIT-0101"" sends GET /notices/N-0200
+    Then the response is status 404 with MSG-P4-003
+
+  Scenario: AC12 Notice type missing
+    Given ""LIT-0101"" holds RW-LITOFF and case ""RC-2026-000321"" is in scope
+    When ""LIT-0101"" sends POST /cases/RC-2026-000321/notices with no notice type
+    Then the response is status 422 with MSG-GEN-001 naming ""notice type"""
+RWB-E2-022,SMS and LINE dispatch through NSS and LINE OA,"Feature: SMS and LINE dispatch through NSS and LINE OA
+
+  Background:
+    Given template ""SMS-REMIND"" ""TH"" version 1 with channel ""SMS"" is Approved and current
+    Given template ""LINE-REMIND"" ""TH"" version 1 with channel ""LINE"" is Approved and current
+    Given case ""RC-2026-000777"" is owned by ""CO-0201"" with borrower party ""P-0077""
+    Given case ""RC-2026-000777"" has no legal hold and no open deviation
+
+  Scenario: AC1 SMS sent
+    Given party ""P-0077"" has a verified ""MOBILE"" contact point with consent ""GIVEN""
+    When ""CO-0201"" sends POST /cases/RC-2026-000777/messages with channel ""SMS"", template ""SMS-REMIND"", language ""TH"" and party ""P-0077"", and NSS accepts it with reference ""NSS-7781"" returning result ""DELIVERED""
+    Then the response is status 202 with an interaction of channel ""SMS"", direction ""OUTBOUND"" and conduct check ""PASSED""
+    Then the interaction has delivery status ""DELIVERED"" and reference ""NSS-7781""
+    Then NSS received one message
+
+  Scenario: AC2 LINE
+    Given party ""P-0077"" has a verified ""LINE"" contact point with consent ""GIVEN""
+    When ""CO-0201"" sends a message with channel ""LINE"" and template ""LINE-REMIND"", and LINE OA reports it delivered and then read
+    Then the interaction has channel ""LINE"", conduct check ""PASSED"" and delivery status ""READ""
+    Then LINE OA received one message
+
+  Scenario: AC3 Contact stop on lost contact
+    Given case ""RC-2026-000777"" has an open deviation ""X6"" lost contact
+    When ""CO-0201"" sends a message with channel ""SMS""
+    Then the response is status 409 with MSG-P6-001 naming ""X6 Lost contact""
+    Then the system sends nothing to NSS
+    Then the system writes an interaction with conduct check ""BLOCKED""
+    Then one decision log entry exists with decision code ""X6"" and final call ""contact refused""
+
+  Scenario: AC4 Contact stop from a dispute
+    Given case ""RC-2026-000777"" has an open deviation ""X1"" with contact stop on
+    When ""CO-0201"" sends a message with channel ""LINE""
+    Then the response is status 409 with MSG-P6-001 naming ""X1 Dispute or complaint""
+    Then the system sends nothing to LINE OA
+    Then the system writes an interaction with conduct check ""BLOCKED""
+
+  Scenario: AC5 No consent on the channel
+    Given party ""P-0077"" has a ""MOBILE"" contact point with consent ""WITHDRAWN""
+    When ""CO-0201"" sends a message with channel ""SMS""
+    Then the response is status 409 with MSG-P6-002 naming ""SMS""
+    Then the system sends nothing to NSS
+    Then the system writes an interaction with conduct check ""BLOCKED""
+
+  Scenario: AC6 Template withdrawn
+    Given template ""SMS-REMIND"" ""TH"" version 1 is Withdrawn and no later version is Approved
+    When ""CO-0201"" sends a message with channel ""SMS"" and template ""SMS-REMIND""
+    Then the response is status 409 with MSG-P6-003 naming ""SMS-REMIND""
+
+  Scenario: AC7 NSS unavailable
+    Given the ACE notification path returns ""unavailable"" for NSS
+    When ""CO-0201"" sends a message with channel ""SMS""
+    Then the response is status 202 with MSG-GEN-006 naming ""NSS""
+    Then JOB-11 retries the send on its schedule
+    Then after the retry limit of 5 the send is in the exception queue under rule R-UNI-34 and the interaction has delivery status ""FAILED""
+
+  Scenario: AC8 NSS failure result
+    Given party ""P-0077"" has a verified ""MOBILE"" contact point with consent ""GIVEN"" and failed count 0
+    When NSS returns result ""FAILED"" for the message
+    Then the interaction has delivery status ""FAILED""
+    Then the contact point has failed count 1
+
+  Scenario: AC9 Repeated request
+    Given ""CO-0201"" sent a message with Idempotency-Key ""c0ffee00-0001""
+    When the same request is sent again with Idempotency-Key ""c0ffee00-0001""
+    Then the response is the first response
+    Then NSS received one message
+
+  Scenario: AC10 Decision log write fails on a refusal
+    Given case ""RC-2026-000777"" has an open deviation ""X6""
+    Given the decision log store is unavailable
+    When ""CO-0201"" sends a message with channel ""SMS""
+    Then the response is status 503 with MSG-P7-003
+    Then the system sends nothing to NSS
+    Then the system raises an incident under rule R-UNI-39
+
+  Scenario: AC11 Legal hold
+    Given case ""RC-2026-000777"" has legal hold true
+    When ""CO-0201"" sends a message with channel ""LINE""
+    Then the response is status 409 with MSG-P3-004
+    Then the system sends nothing to LINE OA
+
+  Scenario: AC12 Channel missing
+    Given template ""SMS-REMIND"" ""TH"" is current and party ""P-0077"" has a verified ""MOBILE"" contact point
+    When ""CO-0201"" sends POST /cases/RC-2026-000777/messages with no channel
+    Then the response is status 422 with MSG-GEN-001 naming ""channel"""
+RWB-E2-024,Field app photos and bills into the document hub,"Feature: Field app photos and bills into the document hub
+
+  Background:
+    Given case ""RW-2026-000501"" with entry date 2026-10-02 and a field inspection task for field collector ""FC-01"" with role RW-FIELDCOL
+    Given the clock skew is 5 minutes and the age limit is 30 days
+
+  Scenario: AC1 Capture
+    Given an inspection with eight photos and two bills, each with a client file ID, a capture time and a GPS position
+    When the officer syncs at 2026-12-15 14:20
+    Then ten documents are on case ""RW-2026-000501"" with source ""UPLOAD"": eight ""INSPECTION_PHOTO"" and two ""UTILITY_BILL""
+    Then each document shows its capture time and its latitude and longitude, for example 13.7563 and 100.5018
+    Then the two bills have intake items for OCR
+    Then ten DocumentStored events are in the outbox
+
+  Scenario: AC2 Offline
+    Given no signal during the visit and photos captured at 2026-12-14 10:05
+    When the officer syncs later at 2026-12-15 08:30
+    Then each document has captured_at 2026-12-14 10:05 and its stored date 2026-12-15 08:30
+
+  Scenario: AC3 Bill extracted
+    Given a utility bill photo showing amount ""1,284.50"" and due date ""28/12/2569""
+    When extraction runs
+    Then bill_amount ""1284.50"" and due_date ""2026-12-28"" are on the case in the document index
+
+  Scenario: AC4 The same sync sent twice
+    Given the ten items of AC1 were received
+    When the app sends the same ten client file IDs again
+    Then the response marks all ten as ""DUPLICATE""
+    Then the case still has ten documents from this inspection
+
+  Scenario: AC5 A sync cut off and resent
+    Given six of ten items were received before the connection dropped
+    When the app sends all ten again
+    Then six items are ""DUPLICATE"" and four are ""ACCEPTED""
+    Then the case has ten documents from this inspection
+
+  Scenario: AC6 A capture with no position
+    Given a photo with capture time 2026-12-15 13:58 and no GPS position
+    When the officer syncs
+    Then the document is on the case with no latitude and longitude
+    Then the response and SCR-30 show MSG-P5-015 with count 1
+
+  Scenario: AC7 A capture time in the future
+    Given the server receives the sync at 2026-12-15 14:20
+    Given one photo has capture time 2026-12-15 14:26 and another 2026-12-15 14:25
+    When the officer syncs
+    Then the system refuses the photo at 14:26 with MSG-GEN-002
+    Then the system accepts the photo at 14:25
+
+  Scenario: AC8 A capture time before the case entry date
+    Given a photo with capture time 2026-10-01 09:00, before the entry date 2026-10-02
+    When the officer syncs
+    Then the system refuses the item with MSG-GEN-003 naming ""Capture time"" and ""Case entry date""
+
+  Scenario: AC9 A capture older than the age limit
+    Given the sync is at 2026-12-15 14:20
+    Given one photo was captured at 2026-11-14 14:19, 31 days earlier, and another at 2026-11-15 14:20
+    When the officer syncs
+    Then the system refuses the first photo with MSG-GEN-003 naming ""Capture time"" and the age limit date 2026-11-15
+    Then the system accepts the second photo
+
+  Scenario: AC10 A file type not allowed
+    Given a photo in HEIC format
+    When the officer syncs
+    Then the system refuses the item with MSG-P5-001
+    Then the system accepts the other items in the same sync
+
+  Scenario: AC11 Malware in a capture
+    Given a file carrying the EICAR test signature
+    When the officer syncs
+    Then the system quarantines the item with MSG-P5-016 and an incident is raised
+    Then the system writes no document for it
+
+  Scenario: AC12 A case outside the collector's scope
+    Given case ""RW-2026-000502"" where ""FC-01"" has no task
+    When the app sends captures for ""RW-2026-000502""
+    Then the response is 404 with MSG-P4-003
+    Then no file or document is stored
+
+  Scenario: AC13 A bill field below the threshold
+    Given the bill amount is read with confidence 0.5500 and the threshold is 0.80
+    When extraction runs
+    Then bill_amount has state ""REVIEW"" and the document is in the review queue
+    Then SCR-30 shows MSG-P5-003 on the bill
+
+  Scenario: AC14 A manifest that does not match the files
+    Given a manifest of three items and two files
+    When the officer syncs
+    Then the response is 422 with MSG-GEN-001 naming the client file ID with no file
+    Then the system stores nothing
+
+  Scenario: AC15 Too many files in one sync
+    Given 51 files in one sync and a limit of 50
+    When the officer syncs
+    Then the response is 413 with MSG-GEN-002 naming ""Files"", 1 and 50
+    Then the system stores nothing"
+RWB-E2-025,Extraction for the stage 2 and 3 document types,"Feature: Extraction for the stage 2 and 3 document types
+
+  Background:
+    Given the document type table version ""DOCTYPE-2026.12"" is in force from 2026-12-31
+    Given the field threshold is 0.80 and the accuracy pass mark is 0.90
+    Given the labeled sample holds 60 documents: 10 each of CONTRACT, CREDIT_APPROVAL, MORTGAGE_DOCUMENT, COURT_FILING, JUDGMENT and COURT_NOTICE
+
+  Scenario: AC1 Court notice
+    Given the 10 scanned court notices of the sample with 30 labeled values of court_name, black_case_no and hearing_date
+    When extraction runs
+    Then court, case number and hearing date are on the index
+    Then at least 27 of the 30 values match the labels, which is 90% field accuracy on the sample
+
+  Scenario: AC2 Contract
+    Given a signed contract ""DOC-0601"" on case ""RW-2026-000601"" classified ""CONTRACT"" with confidence 0.9300
+    Given its text names two parties, amount ""2,400,000.00 baht"" and date ""1 December 2569 BE""
+    When extraction runs
+    Then party_names holds the two party names, masked in responses for roles without the right
+    Then contract_amount is ""2400000.00"" and contract_date is ""2026-11-01""
+
+  Scenario: AC3 Low confidence
+    Given a judgment ""DOC-0602"" whose judgment_amount is read with confidence 0.7100
+    When extraction runs
+    Then judgment_amount has state ""REVIEW""
+    Then the document is in the review queue on SCR-31 with judgment_amount marked
+    Then SCR-30 shows MSG-P5-003 on ""DOC-0602""
+
+  Scenario: AC4 A field below the pass mark is proposed as review-only
+    Given judgment_amount matches the labels on 8 of the 10 sample judgments
+    When the extraction evaluation run processes the sample
+    Then the report lists judgment_amount at 0.80, below the pass mark 0.90
+    Then the proposed table version marks judgment_amount review_only = true
+    Then the version in force does not change until it is loaded
+
+  Scenario: AC5 Classification into the new types
+    Given the 50 sample documents of the five new types
+    When classification runs with the new classifier version
+    Then the system gives each document one of the eleven types with a confidence
+    Then the report shows the confusion matrix and at least 45 of 50 correct
+
+  Scenario: AC6 A document before the new version is in force
+    Given a judgment ""DOC-0603"" received on 2026-12-26, before the valid-from date of ""DOCTYPE-2026.12""
+    When it is classified and extracted
+    Then the system classifies it against the six types of ""DOCTYPE-2026.11""
+    Then the classifier returns ""JUDGMENT"", which is not in that version, so the item goes to the review queue with review_reason ""UNKNOWN_TYPE""
+
+  Scenario: AC7 A Thai judgment date in Buddhist Era
+    Given a judgment whose text reads ""Judgment at 5 March 2570 BE""
+    When extraction runs
+    Then judgment_date is ""2027-03-05""
+
+  Scenario: AC8 A value that does not match its pattern
+    Given the pattern for red_case_no is two to four letters, a space, digits, ""/"" and four digits
+    Given the extractor reads red_case_no ""Por345-2570"" with confidence 0.9200
+    When extraction runs
+    Then red_case_no has state ""REVIEW""
+    Then a value ""Por 345/2570"" with confidence 0.9200 has state ""OK""
+
+  Scenario: AC9 Readers get only checked or confident values
+    Given judgment ""DOC-0602"" has red_case_no in state ""OK"" and judgment_amount in state ""REVIEW""
+    When the litigation module calls DocumentFieldReader for case ""RW-2026-000601"" and type ""JUDGMENT""
+    Then the system returns red_case_no
+    Then the system does not return judgment_amount until it is confirmed or corrected
+
+  Scenario: AC10 A write-once document is not altered
+    Given judgment ""DOC-0604"" is held write-once with write_once true
+    When extraction runs
+    Then the system writes four document_field rows
+    Then the stored file hash, storage_ref and write_once are unchanged
+
+  Scenario: AC11 A document outside the caller's scope
+    Given a litigation officer with scope team ""LIT-BKK""
+    Given document ""DOC-0605"" belongs to a case of team ""LIT-NE""
+    When the officer calls GET /api/recovery/v1/documents/DOC-0605
+    Then the response is 404 with MSG-P4-003"
+RWB-E2-026,"Document generation engine for contract, CA and mortgage templates","Feature: Document generation engine for contract, CA and mortgage templates
+
+  Background:
+    Given case ""RW-2026-000301"" with product group ""MORTGAGE""
+    Given treatment ""TRT-0301"" of type ""DEED_IN_LIEU"" on that case with decision_log_id set and no outcome
+    Given template ""DIL-CONTRACT"" version 2 in Thai for ""MORTGAGE"" with approved_by_legal true
+    Given the merge fields of ""DIL-CONTRACT"" version 2 are case_no, borrower_name, title_doc_no, transfer_price and contract_date
+    Given a restructuring officer with role RW-RESTRUCT in scope of the case
+
+  Scenario: AC1 Generate
+    Given the case facts give transfer_price 1250000.00, title_doc_no ""12345"" and contract_date 2026-12-10
+    When the engine runs for treatment ""TRT-0301"" and template ""DIL-CONTRACT""
+    Then the system stores one document with document_type ""CONTRACT"", source ""GENERATED"", state ""DRAFT"" and write_once false
+    Then the document carries template_code ""DIL-CONTRACT"", template_version 2 and treatment_id ""TRT-0301""
+    Then the PDF shows ""1,250,000.00 baht (one million two hundred fifty thousand baht)"" and ""10 December 2569 BE""
+    Then the system writes one decision log entry with decision code ""D6.4"" and an inputs reference to the merge snapshot
+    Then one DocumentStored event is in the outbox
+
+  Scenario: AC2 Missing field
+    Given the case has no title_doc_no
+    When the engine runs for template ""DIL-CONTRACT""
+    Then the response is 422 with MSG-P5-009 naming ""DIL-CONTRACT"" and ""title_doc_no""
+    Then no document, no file and no decision log entry is stored
+
+  Scenario: AC3 Version
+    Given template ""DIL-CONTRACT"" version 3 is approved by Legal and valid from 2026-12-15
+    Given document ""DOC-0310"" was generated on 2026-12-10 from version 2
+    When the engine runs on 2026-12-15
+    Then the new document carries template_version 3
+    Then ""DOC-0310"" still carries template_version 2 and its file opens
+    Then template version 2 stays readable in the template catalog
+
+  Scenario: AC4 A version not approved by Legal is refused
+    Given template ""DIL-CA"" has only version 1 with approved_by_legal false
+    When the engine runs for template ""DIL-CA""
+    Then the response is 422 with MSG-P5-010 naming ""DIL-CA"" version 1
+    Then the system stores nothing
+
+  Scenario: AC5 A withdrawn template holds generation
+    Given template ""DIL-MORTGAGE"" version 1 is withdrawn and no later version is approved
+    When the engine runs for template ""DIL-MORTGAGE""
+    Then the response is 422 with MSG-P6-003 naming ""DIL-MORTGAGE""
+    Then the system raises a task to the restructuring officer who requested it
+
+  Scenario: AC6 A treatment that is not approved is refused
+    Given treatment ""TRT-0302"" of type ""DEED_IN_LIEU"" with no decision_log_id
+    When the engine runs for treatment ""TRT-0302""
+    Then the response is 409 with MSG-P5-011
+    Then the system stores nothing
+
+  Scenario: AC7 The decision log write fails
+    Given the decision log store does not accept writes
+    When the engine runs for treatment ""TRT-0301"" and template ""DIL-CONTRACT""
+    Then the response is 503 with MSG-P7-003
+    Then no document row exists for ""TRT-0301"" and the draft file is removed from the container
+    Then the system raises an incident as in R-UNI-39
+
+  Scenario: AC8 A repeated request
+    Given a request with Idempotency-Key ""K-0301"" generated document ""DOC-0311""
+    When the same request with Idempotency-Key ""K-0301"" arrives again
+    Then the response is 201 with document ""DOC-0311""
+    Then no second document or decision log entry is written
+
+  Scenario: AC9 Two requests at the same time
+    Given two requests for treatment ""TRT-0301"" and template ""DIL-CONTRACT"" with different keys arrive together
+    When both run
+    Then one returns 201 with one DRAFT document
+    Then the other returns 409 with MSG-GEN-004
+
+  Scenario: AC10 A template body that cannot be rendered
+    Given the body of ""DIL-CONTRACT"" version 2 is a damaged file
+    When the engine runs
+    Then the response is 503 with MSG-GEN-006 naming ""document generation""
+    Then the system stores nothing and an incident is raised
+
+  Scenario: AC11 No template for the product group
+    Given template ""DIL-CONTRACT"" exists only for product group ""MORTGAGE""
+    Given case ""RW-2026-000305"" has product group ""HIRE_PURCHASE""
+    When the engine runs for that case and ""DIL-CONTRACT""
+    Then the response is 422 with MSG-P5-010 naming ""DIL-CONTRACT"" for ""HIRE_PURCHASE""
+
+  Scenario: AC12 A case outside the caller's scope
+    Given case ""RW-2026-000306"" is in team ""HP-NE"" and the officer's scope is team ""FCR-BKK""
+    When the officer requests generation for that case
+    Then the response is 404 with MSG-P4-003
+
+  Scenario: AC13 A set of three documents in one request
+    Given templates ""DIL-CONTRACT"", ""DIL-CA"" and ""DIL-MORTGAGE"" are current and approved
+    When the engine runs for treatment ""TRT-0301"" with the three template codes
+    Then the system stores three documents with types ""CONTRACT"", ""CREDIT_APPROVAL"" and ""MORTGAGE_DOCUMENT""
+    Then one decision log entry names the three template codes and versions
+
+  Scenario: AC14 A set is stored whole or not at all
+    Given templates ""DIL-CONTRACT"" and ""DIL-MORTGAGE"" are current and approved
+    Given template ""DIL-CA"" has no version approved by Legal
+    When the engine runs for treatment ""TRT-0301"" with the three template codes
+    Then the response is 422 with MSG-P5-010 naming ""DIL-CA""
+    Then the system stores none of the three documents and no decision log entry is written"
+RWB-E2-027,Payment matching rules with the data team,"Feature: Payment matching rules with the data team
+
+  Background:
+    Given PAYMENT_MATCH package version ""PM-2026.12"" is in force from 2026-12-01 with rows:
+      | rule_id | row_order | match_type | amount_tolerance_pct | window_days_before | window_days_after | partial_floor_pct |
+      | EXACT   | 1         | EXACT      | 0                    | 10                 | 0                 |                   |
+      | WINDOW  | 2         | WINDOW     | 0                    | 10                 | 3                 |                   |
+      | PARTIAL | 3         | PARTIAL    | 0                    | 10                 | 3                 | 90                |
+    Given case ""RC-2026-000555"" has account ""A-0555"" and running plan ""T-0701"" with installment amount 12,500.00 THB and next installment date 2026-12-15
+
+  Scenario: AC1 Exact match
+    Given the ALS load for 2026-12-14 holds payment ""PAY-91001"" of 12,500.00 THB on the plan account ""A-0555""
+    When JOB-07 runs on 2026-12-15
+    Then the system matches ""PAY-91001"" to ""INSTALLMENT"" for ""T-0701"" in that run
+    Then the decision log entry for the match has decision code ""D5"", rule ""EXACT"" and rule version ""PM-2026.12""
+
+  Scenario: AC2 Partial
+    Given the ALS load for 2026-12-14 holds payment ""PAY-91002"" of 11,875.00 THB on account ""A-0555"", 5 percent short
+    When JOB-07 runs on 2026-12-15
+    Then the system matches ""PAY-91002"" to ""INSTALLMENT"" for ""T-0701"" with rule ""PARTIAL""
+    Then the system calls treatmentApi.recordInstallmentPaid with amount 11,875.00 and shortfall 625.00
+    Then plan ""T-0701"" shows a shortfall of 625.00 THB for due date 2026-12-15
+
+  Scenario: AC3 Rule change
+    Given PAYMENT_MATCH version ""PM-2027.01"" is loaded and approved with valid from 2027-01-01, changing WINDOW to 5 days after
+    Given the ALS load for 2027-01-04 holds payment ""PAY-91003"" of 12,500.00 THB on account ""A-0555"" for due date 2026-12-31, 4 days late
+    When JOB-07 runs on 2027-01-05
+    Then the system matches ""PAY-91003"" to ""INSTALLMENT"" with rule ""WINDOW""
+    Then the decision log entry has rule version ""PM-2027.01""
+    Then the match of ""PAY-91001"" keeps rule version ""PM-2026.12""
+
+  Scenario: AC4 Late payment inside and outside the window
+    Given the ALS load for 2026-12-18 holds payment ""PAY-91004"" of 12,500.00 THB on account ""A-0555"", 3 days after due date 2026-12-15
+    Given the same load holds payment ""PAY-91005"" of 12,500.00 THB on account ""A-0666"" of plan ""T-0702"", 4 days after its due date 2026-12-14
+    When JOB-07 runs on 2026-12-19
+    Then the system matches ""PAY-91004"" with rule ""WINDOW"" and P3 receives PAYMENT_RECEIVED_LATE under R-RES-28
+    Then the system matches ""PAY-91005"" to ""UNMATCHED"" with a decision log entry under rule ""R-UNI-03""
+
+  Scenario: AC5 Partial below the floor
+    Given the ALS load for 2026-12-14 holds payment ""PAY-91006"" of 10,000.00 THB on account ""A-0555"", 80 percent of the installment
+    When JOB-07 runs on 2026-12-15
+    Then the system matches ""PAY-91006"" to ""UNMATCHED""
+    Then the run summary shows MSG-P8-001 with 1 unmatched payment for 2026-12-14
+
+  Scenario: AC6 Invalid package version refused
+    Given a PAYMENT_MATCH workbook for version ""PM-2027.02"" where rows ""WINDOW"" and ""PARTIAL"" both have row order 2 and ""PARTIAL"" has tolerance 120
+    When it is loaded through POST /api/recovery/v1/admin/rule-packages/PAYMENT_MATCH/versions
+    Then the response is status 422 with MSG-P3-027 for the schema check naming ""PARTIAL"" and the tolerance column
+    Then the system refuses the load in full and ""PM-2026.12"" stays in force
+
+  Scenario: AC7 Decision log write fails
+    Given the decision log store is unavailable during JOB-07 on 2026-12-15
+    When ""PAY-91001"" is matched
+    Then the system writes no proceeds row for ""PAY-91001""
+    Then the run summary shows MSG-P7-003 for ""PAY-91001""
+    Then the system raises an incident under rule R-UNI-39
+    Then the next run of JOB-07 for 2026-12-14 matches ""PAY-91001""
+
+  Scenario: AC8 Overpayment beyond the tolerance
+    Given the ALS load for 2026-12-14 holds payment ""PAY-91007"" of 13,000.00 THB on account ""A-0555""
+    When JOB-07 runs on 2026-12-15
+    Then the system matches ""PAY-91007"" to ""UNMATCHED"" and appears in GET /proceeds?matched=false
+
+  Scenario: AC9 Lowest row order decides
+    Given the ALS load for 2026-12-14 holds payment ""PAY-91008"" of 12,500.00 THB on account ""A-0555"", which both ""EXACT"" and ""WINDOW"" match
+    When JOB-07 runs on 2026-12-15
+    Then the system matches ""PAY-91008"" with rule ""EXACT""
+    Then the system writes one decision log entry for ""PAY-91008""
+
+  Scenario: AC10 No PAYMENT_MATCH version in force
+    Given no PAYMENT_MATCH package version is in force on 2027-02-01
+    When JOB-07 runs for business date 2027-02-01
+    Then RuleEvaluator.evaluate(""PAYMENT_MATCH"", facts, 2027-02-01) throws NoPackageInForce
+    Then the run stops with MSG-P3-027 for the package in force check
+    Then no payment is matched and no proceeds row is written for 2027-02-01"
+RWB-E2-031,Agent monitoring dashboard v2 [E3d],"Feature: Agent monitoring dashboard v2 [E3d]
+
+  Background:
+    Given agents ""INTAKE"" (policy ""P2"", mode ""L1"") and ""SCREENING"" (policy ""P2"", mode ""L1"" for segment MORTGAGE and BKK) are live
+    Given the drift rule is a fall of 10 points or more with at least 20 feedback entries in each week
+
+  Scenario: AC1 Per agent
+    Given two agents at L1
+    When the dashboard loads for 2026-12-01 to 2026-12-14
+    Then acceptance, override, fallback, latency and cost show per agent, version and segment
+    Then ""INTAKE"" for segment MORTGAGE and BKK shows 140 feedback entries with 119 accepted, acceptance rate 0.8500
+    Then ""SCREENING"" shows state ""live"" for MORTGAGE and BKK and ""Shadow"" for every other segment
+
+  Scenario: AC2 Drift
+    Given ""INTAKE"" acceptance for MORTGAGE and BKK is 0.8600 for 2026-12-01 to 2026-12-07 and 0.7500 for 2026-12-08 to 2026-12-14
+    When the check runs after JOB-15 for 2026-12-14
+    Then one alert of type ""DRIFT"" for ""INTAKE"", segment ""MORTGAGE/BKK"" and date 2026-12-14 holds measured 0.7500 and threshold 0.7600
+    Then MSG-P10-006 goes to the holders of RW-COE and RW-RISK
+
+  Scenario: AC3 Cost
+    Given a month of calls in November 2026 for ""INTAKE"": 3,100 runs with 2,945,000 input tokens and 465,000 output tokens
+    When the dashboard loads for November 2026
+    Then tokens and cost per agent match the sum of the agent runs, which hold the token counts the endpoint returned on each call
+    Then ""INTAKE"" shows 3,410,000 tokens and cost 170.5000 baht at 0.0500 baht per 1,000 tokens
+    Then a month where the daily rows and the runs differ shows ""not reconciled"" with the token difference
+
+  Scenario: AC4 Not enough feedback
+    Given ""SCREENING"" for MORTGAGE and BKK has 12 feedback entries in the week to 2026-12-14
+    When the check runs
+    Then the system raises no drift alert for that segment and the screen shows ""not enough feedback""
+
+  Scenario: AC5 Dates in the wrong order
+    When RW-COE filters from 2026-12-14 to 2026-12-01
+    Then the system refuses the request with 422 and MSG-GEN-003
+
+  Scenario: AC6 A range that is too long
+    When RW-COE filters from 2026-08-01 to 2026-12-14
+    Then the system refuses the request with 422 and MSG-GEN-002 naming 1 and 92 days
+
+  Scenario: AC7 The check runs twice
+    Given the DRIFT alert for ""INTAKE"", ""MORTGAGE/BKK"" and 2026-12-14 exists
+    When JOB-15 is rerun for 2026-12-14
+    Then no second alert row or notification exists"
+RWB-E2-032,TDR offer-suggestion model through the model gateway [E3e],"Feature: TDR offer-suggestion model through the model gateway [E3e]
+
+  Background:
+    Given restructure treatment ""T-1001"" is open on case ""RW-2026-001001""
+    Given the account has principal outstanding 1,250,000.00 baht and 120 days past due
+
+  Scenario: AC1 Exposed
+    Given the model deployed by the TDR team with policy ""TDR_OFFER"" version ""P2"", mode ""L1"" and model version ""TDR-OFFER-1.0""
+    When the gateway calls it
+    Then the suggestion returns with 84 installments of 18,900.00 baht and model version ""TDR-OFFER-1.0""
+    Then one agent run row and one decision log entry with decision ""D5"", model version ""TDR-OFFER-1.0"" and final call ""SUGGESTION_RECORDED"" are written
+
+  Scenario: AC2 Not available
+    Given the model not yet built and policy ""TDR_OFFER"" version ""P1"" with mode ""OFF"" and review date 2027-02-28
+    When the treatment service asks for a suggestion
+    Then the gateway stub returns no suggestion and makes no model call
+    Then SCR-14 shows MSG-P10-007 and no decision log entry is written
+    Then GET /admin/agent-configs shows version ""P1"" with review date 2027-02-28
+
+  Scenario: AC3 Logged
+    Given a suggestion on treatment ""T-1001""
+    When the record is read
+    Then the decision log entry linked to the suggestion holds model version ""TDR-OFFER-1.0"", the inputs reference and the suggested terms
+    Then SCR-14 shows ""Suggested by TDR_OFFER, version TDR-OFFER-1.0""
+
+  Scenario: AC4 The model does not answer
+    Given the TDR model stub does not answer for 61 seconds
+    When the treatment service asks for a suggestion
+    Then the agent run holds status ""TIMED_OUT"" and fallback true
+    Then no suggestion and no decision log entry exist and SCR-14 shows MSG-P10-007
+
+  Scenario: AC5 An answer that fails the schema
+    Given the model returns installments -12
+    When the guardrail runs
+    Then the agent run holds status ""GUARDRAIL_FAILED"" with check ""SCHEMA"" and no suggestion is returned
+
+  Scenario: AC6 The decision cannot be recorded
+    Given the decision log writer fails
+    When the model answers
+    Then the system returns no suggestion and the treatment service receives DecisionNotRecordedException with MSG-P7-003
+    Then the agent run has no decision log entry ID
+
+  Scenario: AC7 The same treatment asks twice
+    Given a suggestion was recorded for treatment ""T-1001""
+    When the treatment service asks again for ""T-1001""
+    Then the first suggestion and its decision log entry ID return and no second model call is made
+
+  Scenario: AC8 Not a restructure
+    Given treatment ""T-1002"" has type ""SETTLEMENT""
+    When the treatment service asks for a suggestion
+    Then the system makes no model call and no suggestion returns"
+RWB-E2-033,"Case and queue list with status, owner and ageing","Feature: Case and queue list with status, owner and ageing
+
+  Background:
+    Given today is 10 December 2026 at 09:00 Asia/Bangkok
+    Given the team manager holds role RW-TEAMMGR with Team scope for team ""MTG-BKK""
+    Given queue ""MTG-BKK-CO"" belongs to team ""MTG-BKK"" and role RW-CASEOWN
+    Given queue ""MTG-BKK-LIT"" belongs to team ""MTG-BKK"" and role RW-LITOFF
+
+  Scenario: AC1 Every case is visible
+    Given case ""RW-2026-000101"", product MORTGAGE, queue ""MTG-BKK-CO"", owner ""U-1001"", status ASSIGNED, stage clock start 1 December 2026, service level due 8 December 2026 17:00
+    Given case ""RW-2026-000102"", product MORTGAGE, queue ""MTG-BKK-LIT"", owner ""U-1002"", status IN_PROGRESS, stage clock start 8 December 2026, service level due 15 December 2026 17:00
+    Given case ""RW-2026-000103"", product MORTGAGE, queue ""MTG-BKK-CO"", no owner, status NEW, entry date 10 December 2026
+    When the manager opens the list
+    Then 3 rows show
+    Then row ""RW-2026-000101"" shows product MORTGAGE, queue ""MTG-BKK-CO"", owner ""U-1001"", status ASSIGNED, age in state 9 days and service level state BREACHED
+    Then row ""RW-2026-000102"" shows queue ""MTG-BKK-LIT"", owner ""U-1002"", status IN_PROGRESS, age in state 2 days and service level state RUNNING
+    Then row ""RW-2026-000103"" shows owner ""Unassigned"", status NEW, age in state 0 days and service level state NONE
+    Then the rows are in the order ""RW-2026-000101"", ""RW-2026-000102"", ""RW-2026-000103""
+
+  Scenario: AC2 Ageing is correct when a clock is paused
+    Given case ""RW-2026-000104"" with deviation X1 raised on 9 December 2026
+    Given its SERVICE_LEVEL timer has paused true and status PAUSED
+    Given its PRESCRIPTION timer has status RUNNING and expires 30 June 2028
+    When the list is read
+    Then row ""RW-2026-000104"" shows service level state PAUSED, prescription clock RUNNING with date 30 June 2028 and deviation open Yes
+    Then the system does not count the case as breached
+
+  Scenario: AC3 It can be filtered and extracted
+    Given the 4 cases above
+    When the manager filters by queue ""MTG-BKK-CO"", product MORTGAGE and breached Yes and then chooses Extract with the same filters
+    Then 1 row shows, ""RW-2026-000101""
+    Then an Excel file downloads with a header row and 1 data row for ""RW-2026-000101"" with columns age in state, service level state, service level due, prescription date, prescription clock and deviation open
+    Then the access log holds one export entry with the user, the time, the 3 filters and row count 1
+
+  Scenario: AC4 Breach at the boundary of the service level
+    Given case ""RW-2026-000105"" with a RUNNING SERVICE_LEVEL timer due 10 December 2026 09:00
+    When the list is read at 10 December 2026 09:00
+    Then row ""RW-2026-000105"" shows service level state RUNNING
+    Then when the list is read again at 10 December 2026 09:01, row ""RW-2026-000105"" shows service level state BREACHED
+
+  Scenario: AC5 A case with no service level timer
+    Given case ""RW-2026-000103"" with status NEW and no SERVICE_LEVEL timer
+    When the list is read with breached No
+    Then row ""RW-2026-000103"" shows service level state NONE and is in the result
+
+  Scenario: AC6 A filter value outside its list is refused
+    When the manager requests the list with product ""CAR""
+    Then the response is 422 with message MSG-GEN-007 for field product
+    Then the system reads no case
+
+  Scenario: AC7 Page size outside its limits is refused
+    When the manager requests the list with page size 500
+    Then the response is 422 with message MSG-GEN-002 naming page size, minimum 1 and maximum 200
+
+  Scenario: AC8 No case matches
+    When the manager filters by product SSME and then chooses Extract with the same filter
+    Then the list shows the empty state with message MSG-P3-020
+    Then an Excel file downloads with the header row and no data row
+
+  Scenario: AC9 Scope limits the list
+    Given case ""RW-2026-000201"" in queue ""HP-NE-CO"" of team ""HP-NE""
+    When the manager of team ""MTG-BKK"" filters by queue ""HP-NE-CO""
+    Then the list shows the empty state with message MSG-P3-020
+    Then case ""RW-2026-000201"" does not appear in any page of the unfiltered list
+
+  Scenario: AC10 The extract limit
+    Given 10,001 cases in the manager's scope match breached No
+    When the manager chooses Extract with breached No
+    Then the response is 422 with message MSG-P3-021 naming 10,000 rows
+    Then the system produces no file
+
+  Scenario: AC11 Order is stable across pages
+    Given 120 cases in scope with no breach and the same age in state
+    When the manager reads page 1 and page 2 with page size 50
+    Then page 1 holds the 50 lowest case numbers and page 2 the next 50
+    Then no case appears on both pages"
+RWB-E2-034,Interaction ledger on the case and from every channel,"Feature: Interaction ledger on the case and from every channel
+
+  Background:
+    Given open case ""RW-2026-000301"" with account ""ACC-SYN-0301"" and owner ""U-2001""
+    Given the EFS ledger outcome list holds action code ""PTP"" with channel CALL
+    Given the retention class for every event code is ""ILG-STD""
+
+  Scenario: AC1 An interaction is recorded
+    Given the ACE batch for EFS with business date 14 December 2026 holds an action row for account ""ACC-SYN-0301"" with action code ""PTP"", call result RIGHT_PARTY, contact time 14 December 2026 10:15, promise amount 12,500.00 and promise date 20 December 2026
+    Given case owner ""U-2001"" records a call on 15 December 2026 09:30 to contact key ""PHONE:CP-SYN-0301-M"" with result NO_ANSWER
+    When the EFS batch is complete and the call is saved
+    Then the ledger holds a CONTACT entry with source EFS, channel CALL, occurred 14 December 2026 10:15, result RIGHT_PARTY, promise 12,500.00 for 20 December 2026 and retention class ""ILG-STD""
+    Then the ledger holds a CONTACT entry with source WORKBENCH, channel CALL, occurred 15 December 2026 09:30, contact key ""PHONE:CP-SYN-0301-M"" and result NO_ANSWER
+
+  Scenario: AC2 A hand-over is recorded
+    Given case ""RW-2026-000301"" is transferred from ""U-2001"" to ""U-2002"" on 16 December 2026 11:00
+    Given instruction ""INS-SYN-0301"" is issued to partner ""LF-SYN-01"" on 17 December 2026 14:00
+    When both moves complete
+    Then the CASE_TRANSFERRED entry of 16 December 2026 11:00 holds from ""USER:U-2001"" and to ""USER:U-2002""
+    Then the ledger holds a HANDOVER entry with channel PORTAL, direction OUTBOUND, from ""USER:U-2002"", to ""PARTNER:LF-SYN-01"", occurred 17 December 2026 14:00
+
+  Scenario: AC3 The ledger is one place
+    Given the EFS entry of 14 December 2026, the Workbench call of 15 December 2026 and a partner result from ""LF-SYN-01"" entered in the partner portal on 18 December 2026 16:00
+    When the case is read
+    Then GET /cases/{caseId}/interactions returns the 3 entries in the order 14, 15 and 18 December 2026
+    Then each entry names its source: EFS, WORKBENCH, and WORKBENCH with channel PORTAL and event code PARTNER_RESULT
+
+  Scenario: AC4 Letter, delivery, offer and payment are recorded
+    Given notice ""NT-SYN-0301"" is dispatched on 19 December 2026 with barcode ""EV000000001TH""
+    Given WIN returns delivered for it on 22 December 2026
+    Given treatment ""TRT-SYN-0301"" is approved on 23 December 2026
+    Given proceeds ""PRC-SYN-0301"" of 5,000.00 are matched to the case on 24 December 2026
+    When the four events are processed
+    Then the ledger holds a LETTER entry with delivery status SENT and external reference ""EV000000001TH""
+    Then a LETTER entry with delivery status DELIVERED on 22 December 2026
+    Then an OFFER entry linked to ""TRT-SYN-0301"" and a PAYMENT entry linked to ""PRC-SYN-0301""
+
+  Scenario: AC5 Nothing is written twice
+    Given event NoticeDispatched with event ID ""EVT-SYN-0001"" has been processed by ""ledger-channels""
+    When the same event is delivered again
+    Then the ledger holds one entry for ""EVT-SYN-0001""
+    Then the hit count for that key becomes 2
+
+  Scenario: AC6 EFS rows outside the list or outside a case are not written
+    Given the EFS rows for 14 December 2026 hold 3 rows: action code ""PTP"" for ""ACC-SYN-0301"", action code ""SYS"" not in the outcome list for ""ACC-SYN-0301"", and action code ""PTP"" for account ""ACC-SYN-0999"" on no open case
+    When the EFS batch is complete
+    Then the ledger holds 1 new EFS entry
+    Then the read summary shows 3 read, 1 written, 1 excluded by the outcome list and 1 not on a case
+
+  Scenario: AC7 A ledger write failure loses nothing
+    Given the ledger store is unavailable
+    When event NoticeDispatched for ""NT-SYN-0301"" is delivered
+    Then the system writes no entry and the delivery stays in the outbox with status RETRYING
+    Then an incident is raised
+    Then when the store is available the retry delivers the event and the ledger holds one LETTER entry for ""NT-SYN-0301""
+
+  Scenario: AC8 An event for an unknown case goes to the exception queue
+    Given event InstructionIssued names an instruction whose case does not exist
+    When the outbox has retried the delivery 3 times
+    Then the system writes no entry
+    Then the delivery is in the exception queue with a task for role RW-PLATADM
+
+  Scenario: AC9 A late EFS row reads in time order
+    Given the ledger holds the Workbench call of 15 December 2026 09:30
+    When the EFS row with contact time 14 December 2026 10:15 is processed on 15 December 2026 at 10:00
+    Then the timeline shows the EFS entry before the call
+
+  Scenario: AC10 A case with no entry
+    Given open case ""RW-2026-000302"" with no ledger entry
+    When the case owner opens the timeline
+    Then the timeline shows the empty state with message MSG-P3-024
+
+  Scenario: AC11 A case outside the reader's scope is refused
+    Given case ""RW-2026-000301"" is owned by ""U-2002"" in team ""MTG-BKK""
+    When case owner ""U-3001"" of team ""HP-NE"" with Own scope reads its ledger
+    Then the response is 404 with message MSG-P4-003"
+RWB-E2-035,Next action on the case,"Feature: Next action on the case
+
+  Background:
+    Given the RESTRUCTURE package version ""RES-2026.12"" is in force and holds rule R-RES-04, which moves IN_FCR_QUEUE on CASE_PICKED_UP to WITH_FCR_OFFICER with action ""Assign the case to a restructuring officer and start the offer clock"", owner role RW-RESTRUCT and timer ""2 working days""
+    Given the same version holds rule R-SET-13, which moves WITH_OPS_SETTLEMENT on SETTLEMENT_BOOKED to AWAITING_PAYMENT with action ""Set the payment due date and wait for the money"", owner role CU-BORROW and timer ""payment due 30 days""
+    Given the bank holiday list holds 31 December 2026 and 1 January 2027
+
+  Scenario: AC1 Every active case carries a next action
+    Given case ""RW-2026-000401"" with status IN_PROGRESS moved by R-RES-04 on 11 December 2026
+    When the case is opened
+    Then it shows action ""Assign the case to a restructuring officer and start the offer clock"", owner ""Restructuring officer (FCR)"" and due date 15 December 2026
+    Then the next action names rule R-RES-04 of version ""RES-2026.12""
+
+  Scenario: AC2 The routing rules set it
+    Given case ""RW-2026-000402"" in state IN_FCR_QUEUE
+    When event CASE_PICKED_UP fires R-RES-04 on Friday 11 December 2026
+    Then RuleEvaluator.evaluate(""RESTRUCTURE"", facts, 2026-12-11) returns ruleId ""R-RES-04"" and packageVersion ""RES-2026.12""
+    Then the case holds next action text from R-RES-04, owner role RW-RESTRUCT, rule ID R-RES-04, rule version ""RES-2026.12"" and due date Tuesday 15 December 2026
+    Then the system writes the values in the same transaction as the move to WITH_FCR_OFFICER
+
+  Scenario: AC3 Waiting is a valid next action
+    Given case ""RW-2026-000403"" moved by R-SET-13 on 14 December 2026
+    When the case is opened
+    Then the next action reads ""Waiting for Customer (borrower): Set the payment due date and wait for the money""
+    Then the wait ends on 13 January 2027
+    Then next action waiting is true
+
+  Scenario: AC4 It is visible on the list
+    Given case ""RW-2026-000401"" with due date 15 December 2026
+    Given case ""RW-2026-000403"" with due date 13 January 2027
+    When a manager reads the list on 16 December 2026
+    Then next action, next action owner and due date are columns
+    Then the system marks row ""RW-2026-000401"" Overdue
+    Then the system does not mark row ""RW-2026-000403"" Overdue
+
+  Scenario: AC5 A rule with no timer takes the state's service level
+    Given RESTRUCTURE rule R-RES-03 moves the case to BACK_TO_ROUTE_DECISION with owner role RW-CASEOWN and timer ""None""
+    Given the service levels and timers table holds 5 working days for BACK_TO_ROUTE_DECISION
+    When R-RES-03 fires on Monday 14 December 2026
+    Then its catalog row returns timerSpec ""None"" through RuleCatalog.row(""R-RES-03"", ""RES-2026.12"")
+    Then the due date is Monday 21 December 2026
+    Then the owner shown is the case owner named on the case
+
+  Scenario: AC6 No due date can be found
+    Given RESTRUCTURE rule R-DEV-05 moves the case to DEV_WITH_OWNER with owner role RW-LEGAL and timer ""deadline driven""
+    Given the service levels and timers table holds no row for DEV_WITH_OWNER
+    When the rule fires on case ""RW-2026-000404"" of team ""MTG-BKK""
+    Then the case holds the action and owner of R-DEV-05 with no due date
+    Then the system raises one task NEXT_ACTION_MISSING on the exception queue for role RW-TEAMMGR of team ""MTG-BKK""
+    Then the case record shows warning MSG-P2-023
+
+  Scenario: AC7 Working days skip weekends and bank holidays
+    When R-RES-04 fires on Wednesday 30 December 2026
+    Then the due date is Tuesday 5 January 2027
+
+  Scenario: AC8 A closed case has no next action
+    Given case ""RW-2026-000404"" with task NEXT_ACTION_MISSING open
+    When the case closes with closure reason SETTLED
+    Then the next action fields are empty
+    Then the system cancels the task
+    Then the case is not in the list of active cases with no next action
+
+  Scenario: AC9 A repeated transition changes nothing
+    Given case ""RW-2026-000402"" was moved by R-RES-04 on 11 December 2026 with decision log entry ""DLE-SYN-0402""
+    When the same transition with ""DLE-SYN-0402"" is processed again
+    Then the next action and due date are unchanged
+    Then the system raises no task
+
+  Scenario: AC10 Two transitions at the same time
+    Given case ""RW-2026-000405"" at version 7
+    When two transitions commit against version 7 at the same time
+    Then one commits and the other is refused with MSG-GEN-004 and retried against version 8
+    Then the next action is that of the rule committed last
+
+  Scenario: AC11 Cases open before the switch-on are filled
+    Given 3 active cases with no next action, each with a state change in the decision log by R-RES-04 on 11 December 2026
+    When JOB-05 runs on 14 December 2026
+    Then each of the 3 cases holds the next action of R-RES-04 with due date 15 December 2026
+    Then each reads the text from RuleCatalog.row(""R-RES-04"", ""RES-2026.12"")
+
+  Scenario: AC12 A same day timer
+    Given RESTRUCTURE rule R-RES-07 with timer ""same day"" moves case ""RW-2026-000406"" on 14 December 2026
+    When the next action is set from that rule
+    Then the due date is 14 December 2026
+
+  Scenario: AC13 A role without Case record R
+    Given user ""U-REF-01"" holds RW-REFADM and no role with Case record R
+    When they call GET /api/recovery/v1/cases/{caseId}/next-action
+    Then the response is 403 with MSG-P4-002
+    Then no next action data is returned
+
+  Scenario: AC14 No RESTRUCTURE version in force
+    Given no RESTRUCTURE package version is in force on 2027-01-04
+    When event CASE_PICKED_UP fires for case ""RW-2026-000407"" on 2027-01-04
+    Then RuleEvaluator.evaluate(""RESTRUCTURE"", facts, 2027-01-04) throws NoPackageInForce
+    Then the move is refused with MSG-P3-027 for the package in force check
+    Then the case keeps its state and holds no next action from this move"
+RWB-E2-036,Queue write interface for models and agents,"Feature: Queue write interface for models and agents
+
+  Background:
+    Given feature flag ""rwb.casewf.queue-placement"" is on
+    Given the permission matrix version ""PM-SIT-02"" gives service identity SY-AGENT Queue and allocation C
+    Given the approved callers list holds caller ""MDL-SYN-PRIORITY"" of type MODEL for service identity SY-AGENT
+    Given queue ""MTG-BKK-PRI"" of team ""MTG-BKK"" uses method ROUND_ROBIN with caseload cap 150 and overflow queue ""MTG-BKK-OVF""
+    Given case ""RW-2026-000501"" has status NEW, no owner, no open deviation
+
+  Scenario: AC1 A non-engine writer can place a case
+    When SY-AGENT places case ""RW-2026-000501"" on queue ""MTG-BKK-PRI"" with reason ""High cure score"", modelOrAgent ""MDL-SYN-PRIORITY"" and version ""1.4.0""
+    Then the response is 201
+    Then the case is in queue ""MTG-BKK-PRI""
+    Then the assignment and the case record show SY-AGENT as the identity that made the change
+
+  Scenario: AC2 The same rules still apply
+    Given queue ""MTG-BKK-PRI"" holds owners ""U-5001"" with 150 open cases and ""U-5002"" with 149 open cases
+    When the model places case ""RW-2026-000501"" on it
+    Then the system gives the case to ""U-5002"" by round robin, skipping ""U-5001"" at the cap
+    Then the case status becomes ASSIGNED
+    Then when both owners hold 150 open cases and the model places case ""RW-2026-000502"", that case is in queue ""MTG-BKK-OVF"" with no owner and status NEW
+
+  Scenario: AC3 Every placement is logged
+    When the model places case ""RW-2026-000501"" on queue ""MTG-BKK-PRI""
+    Then one decision log entry exists with decision code D6, model version ""MDL-SYN-PRIORITY 1.4.0"", the reason ""High cure score"", the caller identity SY-AGENT and final call ""PLACED MTG-BKK-PRI""
+    Then the entry, the case change, the assignment and the events commit in one transaction
+
+  Scenario: AC4 It is off until a consumer exists
+    Given feature flag ""rwb.casewf.queue-placement"" is off
+    When SY-AGENT places case ""RW-2026-000501"" on queue ""MTG-BKK-PRI""
+    Then the response is 404 with message MSG-P2-025
+    Then the case and the decision log are unchanged
+
+  Scenario: AC5 A caller that is not approved is refused
+    When SY-AGENT places a case with modelOrAgent ""MDL-SYN-UNLISTED""
+    Then the response is 422 with message MSG-P2-020
+    Then nothing changes
+
+  Scenario: AC6 A required field is empty
+    When SY-AGENT places case ""RW-2026-000501"" with no reason
+    Then the response is 422 with message MSG-GEN-001 for field reason
+    Then nothing changes
+
+  Scenario: AC7 A case already in the queue
+    Given case ""RW-2026-000501"" was placed on queue ""MTG-BKK-PRI"" at 08:10
+    When the same request is sent again at 08:11
+    Then the response is 409 with message MSG-P2-024
+    Then there is still one assignment and one decision log entry for the placement
+
+  Scenario: AC8 A closed case is refused
+    Given case ""RW-2026-000503"" has status CLOSED
+    When the model places it on queue ""MTG-BKK-PRI""
+    Then the response is 409 with message MSG-P3-005
+    Then nothing changes
+
+  Scenario: AC9 A case with an open deviation stays with its handler
+    Given case ""RW-2026-000504"" has deviation X2 open and is in the deviation handler's queue
+    When the model places it on queue ""MTG-BKK-PRI""
+    Then the response is 409 with message MSG-P2-021
+    Then the case stays in the deviation handler's queue
+
+  Scenario: AC10 An unknown queue or case
+    When the model places case ""RW-2026-000501"" on a queue ID that does not exist
+    Then the response is 404 with message MSG-P4-003
+
+  Scenario: AC11 Two placements at the same time
+    When two placements of case ""RW-2026-000501"" to queues ""MTG-BKK-PRI"" and ""MTG-BKK-CO"" commit at the same time
+    Then one succeeds with 201
+    Then the system refuses the other with 409 and message MSG-GEN-004
+    Then the case is in exactly one queue with one open assignment
+
+  Scenario: AC12 A case that already has an owner
+    Given case ""RW-2026-000505"" has status IN_PROGRESS, owner ""U-5100"" and queue ""MTG-BKK-CO""
+    When the model places it on queue ""MTG-BKK-PRI""
+    Then the assignment of ""U-5100"" ends and a new owner is chosen by the queue's method
+    Then the case status stays IN_PROGRESS
+    Then events CaseAllocated and CaseTransferred are written to the outbox"
+RWB-E2-037,Temporal observability and run books,"Feature: Temporal observability and run books
+
+  Background:
+    Given the Temporal cluster of RWB-E1-070 runs in SIT with namespace rwb-recovery
+    Given the worker of RWB-E1-071 polls rwb-platform with build ID ""9f3c2a1-418""
+    Given the parameter temporal.stuck.hours is 24
+    Given Alertmanager routes the Workbench platform alerts to the platform on-call rota
+
+  Scenario: AC1 A failed workflow raises an alert within five minutes
+    Given workflow ""platform-smoke-20261116"" started at 07:00 on 16 November 2026 on task queue rwb-platform
+    When the workflow closes FAILED at 10:12
+    Then the rule TemporalWorkflowFailed is FIRING at the 10:13 evaluation with severity ""page""
+    Then the alert annotation carries MSG-P3-037 with workflowId ""platform-smoke-20261116"" and hours 3
+    Then Alertmanager delivers the alert to the platform on-call rota within 5 minutes of the close
+    Then the dashboard count of failed PlatformSmokeWorkflow executions for the day is 1
+
+  Scenario: AC2 A workflow with no progress raises an alert, and a timed wait does not
+    Given workflow ""case-RW-2026-000123"" of type CaseHoldWorkflow on task queue rwb-platform is RUNNING
+    Given its last history event is at 09:00 on 15 November 2026 and it has no open timer and no activity in retry
+    Given workflow ""case-RW-2026-000124"" of the same type is RUNNING and started timer ""wait-30-days"" at 10:00 on 14 November 2026
+    When StuckWorkflowScanner runs at 09:05 on 16 November 2026
+    Then ""case-RW-2026-000123"" is marked stuck with 24 hours since its last progress
+    Then TemporalWorkflowStuck is FIRING with MSG-P3-037, workflowId ""case-RW-2026-000123"" and hours 24
+    Then ""case-RW-2026-000124"" is not marked stuck and no alert exists for it
+
+  Scenario: AC3 Schedule-to-start latency raises an alert
+    Given the worker stops polling rwb-platform at 11:00 on 16 November 2026
+    Given the rule threshold is a p95 schedule-to-start latency of 60 seconds for 10 minutes
+    When 12 tasks wait on rwb-platform and the p95 reaches 120 seconds at 11:12
+    Then TemporalScheduleToStartLatency is FIRING with taskQueue ""rwb-platform"" and p95 ""120s""
+    Then Alertmanager delivers the alert to the platform on-call rota
+    Then the dashboard panel ""Schedule-to-start latency"" shows the spike for rwb-platform
+    When the worker resumes at 11:20 and the p95 returns below 60 seconds
+    Then the alert resolves at the next evaluation
+
+  Scenario: AC4 The dashboard shows volume by type and status with no personal data
+    Given the dashboard ""Temporal workflows"" is provisioned from ops/monitoring/temporal/workflow-dashboard.json
+    When U-70 opens it for the rwb-recovery namespace
+    Then it shows running, failed, completed and timed-out counts by workflow type
+    Then it shows schedule-to-start latency by task queue, task queue backlog, stuck workflows and worker build IDs
+    Then every panel query uses the search attributes CaseId, Stage, ProductGroup and QueueCode only
+    Then DashboardPersonalDataCheck finds no person field and no payload field in the 40 panel queries
+    Then no panel shows a workflow input, a workflow output or a history event payload
+
+  Scenario: AC5 Every alert has a run book
+    Given the rule file holds TemporalWorkflowFailed, TemporalWorkflowStuck and TemporalScheduleToStartLatency
+    When RunbookCompletenessTest runs in the pipeline
+    Then each alert names a run book in docs/operations/runbooks with the eight sections
+    Then each run book names the alert, the check, the restart or drain step and the escalation
+    Then the build passes with the three run books
+
+  Scenario: AC6 The scanner cannot reach the frontend
+    Given the Temporal frontend is unreachable from the scanner at 09:05 on 16 November 2026
+    When StuckWorkflowScanner runs
+    Then it publishes no workflow_stuck value and raises no TemporalWorkflowStuck alert
+    Then temporal_scanner_failures_total increases by one
+    Then the dashboard panel ""Stuck workflows"" shows ""data stale since 09:05""
+    Then an incident reaches RW-PLATADM naming the scanner error
+    Then no workflow is marked stuck
+
+  Scenario: AC7 An alert with no run book fails the build
+    Given a branch adds the alert TemporalWorkerDown to the rule file with no entry in the alert-to-run-book map
+    When RunbookCompletenessTest runs
+    Then the build fails naming ""TemporalWorkerDown"" and the missing run book
+    Then the rule file is not deployed to SIT or PROD
+
+  Scenario: AC8 An alert clears before it is delivered
+    Given TemporalWorkflowStuck is PENDING for ""case-RW-2026-000125"" at 09:05 with 25 hours since its last event
+    When the worker picks up the workflow and it records a new history event at 09:06
+    Then the alert resolves at the 09:10 evaluation
+    Then Alertmanager sends no page and opens no incident
+    Then the alert history keeps the PENDING and RESOLVED states with their times"
+RWB-E2-038,"Temporal security, codec server and admin audit","Feature: Temporal security, codec server and admin audit
+
+  Background:
+    Given the Temporal Web UI of RWB-E1-070 uses the codec server of the recovery module as its codec endpoint
+    Given the codec key has versions 1 and 2 enabled, and version 2 is current
+    Given workflow ""case-RW-2026-000301"" holds a salary slip payload encrypted with key version 2
+
+  Scenario: AC1 Decode needs RW-SECADM and an open grant
+    Given U-88 holds RW-SECADM and the ACTIVE break-glass grant ""BG-2026-0042"" for area PLATFORM_ADMINISTRATION, right R, ending at 12:00 on 16 November 2026
+    When U-88 asks the Web UI to decode the payload at 11:40
+    Then the Web UI calls the codec server POST /decode and receives 200 with the clear payload
+    Then one decision_log_entry exists with decision code AC-READ, actor U-88, operation DECODE, grant ""BG-2026-0042"" and incident ""INC0004521""
+    Then the entry is committed before the response carries the payload
+    When U-88 asks again at 12:05, after the grant ended
+    Then the response is 403 with MSG-P4-002 and no payload is returned
+    When U-53 holds RW-PLATADM with an active grant and asks at 11:50
+    Then the request is refused with 403 and MSG-P4-002 because decode needs RW-SECADM
+
+  Scenario: AC2 Every decode and every administrative call writes an entry
+    Given U-70 holds RW-PLATADM and no break-glass grant
+    Given U-88 holds RW-SECADM with grant ""BG-2026-0042""
+    When U-88 decodes a payload of ""case-RW-2026-000301""
+    When U-70 terminates ""case-RW-2026-000302"" with reason ""stuck on a bad activity""
+    When U-70 resets ""case-RW-2026-000303"" to event 12
+    When U-70 sends signal CaseEvent to ""case-RW-2026-000304""
+    Then four decision_log_entry rows exist: AC-READ for the decode and PLATFORM_ADMIN for TERMINATE, RESET and SIGNAL
+    Then each row carries namespace rwb-recovery, the workflow ID, the run ID, the actor and the reason, and the grant where one applies
+    Then the TERMINATE row is committed before the frontend reports ""case-RW-2026-000302"" TERMINATED
+    Then no row holds a payload or a clear personal data field
+
+  Scenario: AC3 Other roles are refused
+    Given U-53 holds RW-AUDIT with an active grant for area PLATFORM_ADMINISTRATION, right R
+    Given U-62 holds RW-CASEOWN and no grant
+    When U-53 calls the decode endpoint for ""case-RW-2026-000301""
+    Then the response is 403 with MSG-P4-002 because RW-AUDIT reads the log and does not decode
+    When U-62 calls the decode endpoint
+    Then the response is 403 with MSG-P4-002 and no payload is returned
+    Then one AC-DENY entry records each refusal with the actor and the area, and no payload
+
+  Scenario: AC4 A key rotation keeps old histories decodable
+    Given ""case-RW-2026-000301"" was written when key version 1 was current
+    Given ""case-RW-2026-000304"" was written when key version 2 is current
+    When the key is rotated to version 3 and versions 1 and 2 stay enabled
+    Then a decode of ""case-RW-2026-000301"" with a grant returns the clear payload using version 1
+    Then a decode of ""case-RW-2026-000304"" uses version 2
+    Then a workflow started after the rotation writes payloads with version 3
+    Then the run book keeps every version that a history inside the retention or the archive of RWB-E2-039 names
+
+  Scenario: AC5 A payload without codec metadata is refused
+    Given a SIT test wrote the history of ""case-RW-2026-000305"" with the codec off, so its payload carries no codec metadata
+    When U-88 decodes that payload with an active grant
+    Then the response is 422 and no payload is returned
+    Then one AC-DENY entry records the payload index and the reason
+    Then an incident reaches RW-SECADM and RW-PLATADM
+    Then the codec does not guess a key and does not fall back to a clear read
+
+  Scenario: AC6 A failed audit write blocks the administrative call
+    Given the decision log store is unavailable at 13:00 on 16 November 2026
+    When U-70 terminates ""case-RW-2026-000306"" from the Web UI
+    Then the authorizer receives 503 from the audit writer and denies the call with PERMISSION_DENIED
+    Then ""case-RW-2026-000306"" stays RUNNING and no TERMINATE entry exists
+    Then the Web UI shows that the action was not taken because the decision could not be recorded
+    Then an incident reaches RW-PLATADM
+
+  Scenario: AC7 The reconciliation finds an action with no entry
+    Given the frontend audit log holds a signal on ""case-RW-2026-000307"" at 13:02 with no decision_log_entry
+    When TemporalAdminAuditListener runs at 02:00 on 17 November 2026
+    Then it reports one gap with the workflow ID, the operation and the time
+    Then an incident reaches RW-SECADM and RW-PLATADM
+    Then the incident stays open until the security administrator records the finding in the bank IAM
+    Then the job writes no entry of its own"
+RWB-E2-039,"Temporal resilience: backup, failover, upgrade and archive","Feature: Temporal resilience: backup, failover, upgrade and archive
+
+  Background:
+    Given the Temporal cluster of RWB-E1-070 runs in SIT with databases temporal and temporal_visibility on the zone-redundant PostgreSQL flexible server
+    Given the worker of RWB-E1-071 polls rwb-platform and runs the smoke workflow
+    Given retention is 30 days and the archive lead time is 7 days
+
+  Scenario: AC1 A point-in-time restore brings the workflows back
+    Given workflow ""case-RW-2026-000201"" started at 09:40 on 16 November 2026 and completed activity ""ReadAceSnapshot"" at 09:42
+    Given it waits on a timer that fires at 10:00 and was RUNNING at the restore point 09:55
+    Given workflow ""case-RW-2026-000202"" started at 10:00, after the restore point
+    When the platform administrator restores temporal and temporal_visibility to 09:55 on a new server in SIT
+    Then the namespace rwb-recovery is REGISTERED and the frontend points at the new server
+    Then the workers reconnect and ""case-RW-2026-000201"" continues when its timer fires
+    Then its history holds one WorkflowExecutionStarted, one TimerStarted, one ActivityTaskCompleted and one TimerFired
+    Then activity ""ReadAceSnapshot"" wrote one row under its idempotency key and did not run twice
+    Then ""case-RW-2026-000202"" is absent and the run book says the caller starts it again, inside the recovery point objective
+    Then the drill records the elapsed time against the ACE recovery time objective (NFR-023)
+
+  Scenario: AC2 A zone failover completes the smoke workflow
+    Given 12 workflows are RUNNING in rwb-recovery at 14:00 on 16 November 2026
+    When the primary availability zone of the PostgreSQL flexible server fails at 14:00 and the server fails over
+    Then the frontend reconnects without a manual change and the namespace is REGISTERED
+    Then the smoke workflow ""platform-smoke-20261116"" starts at 14:06 and ends COMPLETED
+    Then the count of RUNNING workflows at 14:10 is 12
+    Then no history holds a gap or a duplicate event
+    Then the drill records the failover time against the ACE recovery time objective (NFR-023)
+
+  Scenario: AC3 A one-minor upgrade loses no workflow
+    Given SIT runs the approved server version and the next minor version is available
+    Given 5 workflows are RUNNING on task queue rwb-platform
+    When the run book is followed: the workers are drained, the server is upgraded with Helm, the schema tool runs, and the workers start with the matching SDK
+    Then the 5 workflows are RUNNING or COMPLETED after the upgrade with the same workflow ID and run ID
+    Then no history holds a gap or a duplicate event
+    Then the smoke workflow completes after the upgrade
+    Then Environment and Deployment Design v4 records the next minor version as the pinned version
+
+  Scenario: AC4 A closed history is archived and readable by RW-AUDIT
+    Given workflow ""case-RW-2026-000101"" closed COMPLETED on 16 October 2026
+    When the archive job runs at 02:00 on 23 October 2026
+    Then the history is written to Blob at dt=2026-10-23/case-RW-2026-000101/<runId>.json.gz
+    Then the manifest row names the workflow ID, run ID, workflow type, close time, archive time, path and checksum, and its status is VERIFIED
+    Then the visibility record is left to the 30-day retention and is gone on 15 November 2026
+    When RW-AUDIT lists the archive on 16 November 2026
+    Then the file is listed and readable and its checksum matches the manifest
+
+  Scenario: AC5 The archive holds no clear personal data
+    Given the archived history of ""case-RW-2026-000101"" holds a salary slip payload with the synthetic national ID ""1101700203456""
+    When RW-AUDIT opens the file
+    Then the payload is binary ciphertext with codec metadata naming key version 2
+    Then the string ""1101700203456"" appears nowhere in the file, the manifest or the archive log
+    Then the manifest holds the workflow ID, type and timestamps and no personal data field
+    Then a clear read needs the codec server of RWB-E2-038 with an open break-glass grant
+
+  Scenario: AC6 The two databases are restored to one timestamp
+    Given a drill restores temporal to 09:55 and temporal_visibility to 10:05
+    When the frontend starts against the restored pair
+    Then the consistency check reports workflows in visibility with no history in the history store
+    Then no worker is started against the pair
+    Then the run book says to restore both databases to one timestamp and repeat the drill
+    Then the drill is recorded as failed with both timestamps
+
+  Scenario: AC7 The archive verifies every file
+    Given the archive job writes the history of ""case-RW-2026-000102"" and the read-back checksum differs
+    When verification runs
+    Then the manifest row is FAILED with the reason and the file is not marked VERIFIED
+    Then the job retries the export up to three times in the same run
+    Then an incident reaches RW-PLATADM and RW-AUDIT
+    Then the next run re-exports the history and the row becomes VERIFIED
+
+  Scenario: AC8 An upgrade skips no minor version
+    Given SIT runs the approved server version and the proposed target is two minor versions later
+    When the version step check runs in the pipeline and the run book is read
+    Then the upgrade is refused before any pod is replaced
+    Then the error names the missing intermediate version
+    Then the approved path is one minor version, verify, then the next
+
+  Scenario: AC9 A history with a clear payload is not archived
+    Given a SIT test workflow wrote its payload with the codec off, so its history holds the national ID ""1101700203456"" in clear text
+    When the archive job exports that history
+    Then the payload check finds the pattern and the file is not written
+    Then the manifest row is FAILED and an incident reaches RW-SECADM and RW-PLATADM
+    Then the test workflow is deleted and the test profile is corrected before the next run"
+RWB-E2-040,Workflow versioning and replay test gate,"Feature: Workflow versioning and replay test gate
+
+  Background:
+    Given the replay store holds 200 histories exported from SIT on 16 November 2026, including 40 of workflow type PlatformSmokeWorkflow
+    Given the export timestamp is 01:00 on 16 November 2026 and the gate runs at 09:00 on 16 November 2026
+    Given rwb.p3.temporal is on in SIT
+
+  Scenario: AC1 A non-deterministic change fails the gate
+    Given build ID ""9f3c2a1-418"" produced the 40 PlatformSmokeWorkflow histories
+    Given a branch removes the activity call from PlatformSmokeWorkflow and completes at once
+    When pipeline gate 10 replays the 40 histories against the branch build
+    Then the replay fails with a non-determinism error at the first mismatched event ""ActivityTaskScheduled"", event ID 4
+    Then the gate fails and the merge is blocked with MSG-P3-038 naming the workflow type, history ID and event ID
+    Then no build ID is registered for the branch and no worker takes a workflow with that code
+
+  Scenario: AC2 A change guarded by Workflow.getVersion passes
+    Given the same 40 PlatformSmokeWorkflow histories
+    Given the branch adds a second activity and guards it with Workflow.getVersion(""smoke-step-2"", Workflow.DEFAULT_VERSION, 2)
+    When gate 10 replays the 40 histories
+    Then every history takes the pre-version path and replays to the end without error
+    Then a new execution takes version 2 and runs the second activity
+    Then a history recorded under version 2 replays on the branch build with version 2
+    Then the gate passes and the pull request may merge
+
+  Scenario: AC3 Time skipping runs a 30-day timer in under a minute
+    Given a test workflow waits on a 30-day timer and then calls one activity
+    When the time-skipping test runs in TestWorkflowEnvironment
+    Then the timer fires and the workflow completes in under 60 seconds of wall-clock time
+    Then the test reports the simulated elapsed time of 30 days
+    Then the gate's total run stays inside its 10-minute budget
+    Then a run over the budget is reported as failed and never as passed
+
+  Scenario: AC4 A new build ID takes new workflows and old ones drain
+    Given build ID ""9f3c2a1-418"" is the default for rwb-platform and 12 workflows are RUNNING on it
+    When the pipeline deploys build ID ""7b1d4e0-419"" and registers it as the new default
+    Then a workflow started after the deploy runs on ""7b1d4e0-419""
+    Then the 12 running workflows finish on ""9f3c2a1-418""
+    Then the rollout report shows 12 draining on the old build and 1 running on the new build
+    Then the old build is retired only when its running count is zero
+
+  Scenario: AC5 The gate is pipeline gate 10
+    Given Recovery Workbench Engineering Practices lists the nine pipeline checks
+    When this story is merged
+    Then gate 10, ""Workflow replay and time-skipping tests"", is listed with its owner, its pass rule, its budget and its failure message MSG-P3-038
+    Then the merge checklist and the pull request template name gate 10
+    Then a pull request that changes a class under recovery.casewf.workflow without a gate 10 result cannot merge
+
+  Scenario: AC6 A stale or missing history export fails the gate closed
+    Given the nightly history export failed and the newest history in the replay store is 36 hours old
+    When gate 10 runs for a branch that changes PlatformSmokeWorkflow
+    Then the gate fails closed with ""history export stale"" and runs no replay
+    Then the merge is blocked and the failure names the export job and its last successful run
+    Then no result is reported as a pass
+    Then the gate passes only after a fresh export exists
+
+  Scenario: AC7 A build with a running workflow is not retired
+    Given build ID ""9f3c2a1-418"" still has 2 RUNNING workflows
+    When the rollout script is asked to retire it
+    Then the script refuses and names the 2 workflow IDs
+    Then the build stays REGISTERED, its workers stay up and new workflows do not start on it
+    Then the retire command succeeds only after both workflows close
+
+  Scenario: AC8 A replay history with a clear payload is refused
+    Given a replay history file holds a salary slip payload with the national ID ""1101700203456"" in clear text, because a SIT test wrote it with the codec off
+    When the export job validates the file
+    Then the file is not written to the replay store and the index row is FAILED
+    Then an incident reaches RW-SECADM and RW-PLATADM
+    Then gate 10 fails closed for that workflow type until a clean export exists
+    Then the test profile is corrected and the history is deleted at the source"
+RWB-E2-041,Rule change governance and audit report,"Feature: Rule change governance and audit report
+
+  Background:
+    Given the business date is 2026-12-01
+    Given package ALLOCATION version ""ALLOC-2026.11"" is in force with 24 rows
+    Given user ""U-41"" holds RW-COE, ""U-51"" holds RW-RISK and ""U-AUD-01"" holds RW-AUDIT
+
+  Scenario: AC1 Change by checklist
+    Given a request ""CR-2026-0042"" to change ALLOCATION row ""ALLOC-031"" from queue ""MTG-BKK-CO"" to ""MTG-CEN-CO"" from 2026-12-10
+    Given ""U-41"" loads ALLOCATION version ""ALLOC-2026.12"" with impact summary ""412 open Mortgage cases in the BKK queue"" and rollback plan ""Roll back to ALLOC-2026.11""
+    Given the load checks and the 50 scenarios pass
+    Given ""U-51"" approves version ""ALLOC-2026.12"" on 2026-12-02
+    When ""U-AUD-01"" reads the change report for 2026-12-01 to 2026-12-31
+    Then one entry shows package ""ALLOCATION"", version ""ALLOC-2026.12"", request ""CR-2026-0042"", test result ""PASSED"", author ""U-41"", approver ""U-51"", approved on 2026-12-02 and valid from 2026-12-10
+    Then the entry shows 1 row changed, 0 added and 0 removed against ""ALLOC-2026.11""
+    Then the approval time is before the valid from date
+
+  Scenario: AC2 Checklist skipped
+    Given ALLOCATION version ""ALLOC-2026.13"" loaded by ""U-41"" with a complete checklist, valid from 2026-12-15 and never approved
+    When the business date reaches 2026-12-15
+    Then the rule package service still serves version ""ALLOC-2026.12""
+    Then the change report shows version ""ALLOC-2026.13"" with status ""LOADED"" and approver empty
+
+  Scenario: AC3 Checklist item missing at approval
+    Given RESTRUCTURE version ""RES-2026.12"" loaded with no rollback plan
+    When ""U-51"" approves it
+    Then the system refuses the approval with MSG-P3-022 naming ""rollback plan""
+    Then version ""RES-2026.12"" stays ""LOADED""
+
+  Scenario: AC4 Failed test result
+    Given PAYMENT_MATCH version ""PMT-2026.12"" whose scenario result is ""FAILED"" with 2 of 58 scenarios failing
+    When ""U-51"" approves it
+    Then the system refuses the approval with MSG-P3-022 naming ""test result""
+
+  Scenario: AC5 Verify item recorded before approval
+    Given ALLOCATION version ""ALLOC-2026.12"" loaded on 2026-12-08 with verify note ""SIT run 2026-12-08: 50 of 50 scenarios pass and the dry run covers 412 open cases"" and verify date 2026-12-08
+    When ""U-51"" approves it on 2026-12-09
+    Then the change report shows verify date 2026-12-08, the verify note, the load time 2026-12-08 and checksum ""9f2c...e1b4""
+    Then the checklist holds all seven items: request, impact, test result, approver, load, verify and rollback plan
+
+  Scenario: AC6 Period with no changes
+    When ""U-AUD-01"" reads the change report for 2026-11-01 to 2026-11-15
+    Then the response is an empty list with total 0
+
+  Scenario: AC7 Verify date before the load
+    Given ALLOCATION version ""ALLOC-2026.14"" with verify date 2026-12-07 and load time 2026-12-08
+    When ""U-41"" loads it
+    Then the system refuses the load with MSG-GEN-003 naming ""verifiedAt"" and ""loadedAt""
+
+  Scenario: AC8 Period in the wrong order
+    When ""U-AUD-01"" reads the change report from 2026-12-31 to 2026-12-01
+    Then the system refuses the call with MSG-GEN-003 naming ""to"" and ""from""
+
+  Scenario: AC9 Report as CSV
+    When ""U-AUD-01"" reads the change report for 2026-12-01 to 2026-12-31 with format ""csv""
+    Then the response is a CSV file with one header row and one row per package version
+    Then it carries no party identifier and no case data
+
+  Scenario: AC10 Decisions per package version
+    Given ALLOCATION version ""ALLOC-2026.11"" was in force until 2026-12-09 and ""ALLOC-2026.12"" from 2026-12-10
+    Given the decision log holds 96 entries with package version ""ALLOC-2026.11"" and 1,204 with ""ALLOC-2026.12"" in December 2026
+    When ""U-AUD-01"" reads the change report for 2026-12-01 to 2026-12-31
+    Then version ""ALLOC-2026.11"" shows 96 decisions and version ""ALLOC-2026.12"" shows 1,204
+    Then the entry shows the decisions per rule ID across both versions: ""ALLOC-031"" 700 and ""ALLOC-032"" 600
+    Then the total matches GET /api/recovery/v1/decision-log for the same period and package version
+    Then RWB-E2-005 reconciles the count per package version from this report"
+RWB-E2-042,Epic 2 rule packages in Drools,"Feature: Epic 2 rule packages in Drools
+
+  Background:
+    Given the loader U-41 holds RW-COE and the approver U-51 holds RW-RISK
+    Given package codes RESTRUCTURE, PAYMENT_MATCH and BOOKING_MATCH are seeded with owner role RW-COE
+    Given rules.testcases.min is 50 and the business date is 2026-12-10
+
+  Scenario: AC1 RESTRUCTURE package
+    Given a RESTRUCTURE workbook version ""RES-2026.12"" with 38 rows and 62 scenarios
+    When U-41 loads it with valid from 2026-12-15
+    Then the compile, schema, overlap, unreachable row and default row checks pass
+    Then the test result is ""62 of 62 scenarios passed""
+    When U-51 approves it
+    Then version ""RES-2026.12"" is APPROVED and in force from 2026-12-15
+    Then rule_row holds 38 rows under version ""RES-2026.12"", including R-RES-25, R-RES-27, R-RES-29, R-RES-30, R-RES-31 and R-LIT-02
+
+  Scenario: AC2 PAYMENT_MATCH package
+    Given a PAYMENT_MATCH workbook version ""PMT-2026.12"" with 3 rows and 58 scenarios
+    When U-41 loads it with valid from 2026-12-15
+    Then the test result is ""58 of 58 scenarios passed""
+    When U-51 approves it
+    Then version ""PMT-2026.12"" is APPROVED and in force from 2026-12-15
+    Then rule_row holds the rows EXACT, WINDOW and PARTIAL under version ""PMT-2026.12""
+
+  Scenario: AC3 BOOKING_MATCH package
+    Given a BOOKING_MATCH workbook version ""BKG-2026.12"" with 21 rows and 54 scenarios
+    When U-41 loads it with valid from 2026-12-15
+    Then the test result is ""54 of 54 scenarios passed""
+    When U-51 approves it
+    Then version ""BKG-2026.12"" is APPROVED and in force from 2026-12-15
+    Then rule_row holds 21 rows under version ""BKG-2026.12"" and the comparison evaluator of RWB-E2-007 is no longer used
+
+  Scenario: AC4 PAYMENT_MATCH keeps the priority order of RWB-E2-027
+    Given PAYMENT_MATCH version ""PMT-2026.12"" is in force on 2026-12-15
+    When JOB-07 matches payments for that date
+    Then the rows are tried in the order EXACT priority 1, WINDOW priority 2, PARTIAL priority 3
+    Then payment ""PAY-91008"" of 12,500.00 THB that both EXACT and WINDOW match is decided by EXACT
+    Then payment ""PAY-91002"" of 11,875.00 THB is decided by PARTIAL with a shortfall of 625.00 THB
+    Then the decision log entry names rule ""R-RES-26"" and rule version ""PMT-2026.12""
+    Then the order matches RWB-E2-027 BR1 and its ""PM-2026.12"" row order
+
+  Scenario: AC5 RESTRUCTURE rows feed RWB-E2-035
+    Given RESTRUCTURE version ""RES-2026.12"" is in force on 2026-12-15
+    When SY-RULES evaluates R-RES-04 for case ""RW-2026-000777""
+    Then RuleCatalog.row(""R-RES-04"", ""RES-2026.12"") returns action_text ""Assign the case to a restructuring officer and start the offer clock"", owner_role ""RW-RESTRUCT"" and timer_spec ""2 working days""
+    Then every route-set row that RWB-E2-035 reads carries the three fields
+    Then RWB-E2-035 sets the next action, the owner and the due date from these values
+
+  Scenario: AC6 payment_match_rule is not created
+    Given a database migrated from empty with the release migrations on 2026-12-10
+    When the schema check runs
+    Then no table named payment_match_rule exists
+    Then no column of DF-REF-261 to DF-REF-273 exists
+    Then the table count is 93
+    Then the build fails if any migration in the release creates payment_match_rule"
+RWB-E2-043,Temporal and Drools integration pattern and reference case workflow,"Feature: Temporal and Drools integration pattern and reference case workflow
+
+  Background:
+    Given the environment is SIT with synthetic data and no live case
+    Given rwb.p3.temporal is on and the worker polls ""rwb-platform""
+    Given RESTRUCTURE version ""RES-2026.12"" is in force from 2026-12-01
+    Given rule R-RES-04 moves IN_FCR_QUEUE on CASE_PICKED_UP to WITH_FCR_OFFICER
+    Given the synthetic case ""RW-2026-000777"" has status IN_PROGRESS and route state IN_FCR_QUEUE
+
+  Scenario: AC1 The four steps run in order
+    Given the reference workflow ""ref-case-RW-2026-000777"" is running and waits for a CaseEvent
+    Given outbox event ""EV-CASE-0777-01"" of type CASE_PICKED_UP
+    When CaseEventSignalRelay calls WorkflowGateway.signal with ""CaseEvent"" and the event payload
+    Then the workflow history shows EvaluateRulesActivity, then WriteDecisionLogActivity, then ApplyStateActivity
+    Then EvaluateRulesActivity returns rule ""R-RES-04"" and package version ""RES-2026.12""
+    Then WriteDecisionLogActivity writes one entry with rule ""R-RES-04"" and rule version ""RES-2026.12""
+    Then ApplyStateActivity moves the route state to ""WITH_FCR_OFFICER""
+    Then no case row is written before the decision log entry
+
+  Scenario: AC2 A failed decision log write stops the state change
+    Given the decision log store is unavailable
+    When the CaseEvent ""EV-CASE-0777-02"" is processed
+    Then WriteDecisionLogActivity throws DecisionLogUnavailableException
+    Then the workflow does not call ApplyStateActivity
+    Then the route state of ""RW-2026-000777"" stays ""IN_FCR_QUEUE""
+    Then the workflow fails with MSG-P7-003 after its retries and an incident is raised
+
+  Scenario: AC3 Activity retries are idempotent
+    Given ApplyStateActivity commits the state row and then times out before it returns
+    When Temporal retries the activity with idempotency key ""CASE_EVENT:EV-CASE-0777-03""
+    Then the second attempt returns the first result and changes nothing
+    Then one case state row exists for ""EV-CASE-0777-03""
+    Then WriteDecisionLogActivity ran once and one decision_log_entry row exists with that key
+    Then the workflow completes once
+
+  Scenario: AC4 The rule version is pinned in the result and replay is stable
+    Given EvaluateRulesActivity returned package version ""RES-2026.12"" and rule ""R-RES-04"" for ""EV-CASE-0777-04""
+    Given package version ""RES-2027.01"" is in force from 2027-01-01 while the workflow waits for the next event
+    When the workflow is replayed from its recorded history on 2027-01-05
+    Then the recorded result still carries ""RES-2026.12"" and ""R-RES-04""
+    Then the replay reads the recorded activity result and never calls RuleEvaluator again
+    Then the replay reaches the same activity path and the same state move
+
+  Scenario: AC5 Temporal unavailable keeps the case event in the outbox
+    Given the Temporal frontend is unreachable
+    When the outbox sender delivers ""EV-CASE-0777-05""
+    Then WorkflowGateway.signal fails with MSG-P3-036
+    Then outbox event ""EV-CASE-0777-05"" stays in the outbox and its delivery is RETRYING with the next attempt time
+    Then the sender retries on its schedule
+    When Temporal is available at the next attempt
+    Then the signal is delivered and the delivery is DELIVERED
+
+  Scenario: AC6 The skeleton runs behind the flag with no live case
+    Given rwb.p3.temporal is off in DEV
+    When the application starts
+    Then no worker is registered on ""rwb-platform"" and ReferenceCaseWorkflow is not deployed
+    When the flag is on and the reference harness starts ""ref-case-RW-2026-000777"" with synthetic ""true""
+    Then the skeleton runs the four steps with no live case
+    Then no recovery_case row outside the synthetic fixture is read or written
+    Then the workflow ID starts ""ref-case-"" and never ""case-"""
+RWB-E2-028,Case intake agent live at L1 [E3a],"Feature: Case intake agent live at L1 [E3a]
+
+  Background:
+    Given policy ""INTAKE"" version ""P2"" with mode ""L1"" and prompt ""PR3"" is in force from 2027-01-25
+    Given case owner ""owner.user07"" holds RW-CASEOWN and owns case ""RW-2027-000501""
+
+  Scenario: AC1 Summary shown
+    Given a new case ""RW-2027-000501"" with an ANSWERED intake run and gap flags MISSING_DOCUMENT and NO_VALID_APPRAISAL
+    When the case record view loads
+    Then the panel ""Agent summary"" shows the summary, the two gap flags with reasons, agent ""INTAKE"", version ""INTAKE@P2/PR3"" and the marker ""Agent output""
+    Then the controls Accept, Correct and Reject are shown
+    Then the case record loads in under 2 seconds whether or not the panel has data
+
+  Scenario: AC2 Acceptance measured
+    Given a month of summaries in January 2027 for segment MORTGAGE and BKK: 300 with feedback, 240 accepted, 45 corrected and 15 rejected
+    When the dashboard refreshes after JOB-15
+    Then SCR-46 shows for ""INTAKE"" and MORTGAGE/BKK acceptance rate 0.8000 and correction rate 0.1500
+    Then each feedback has one decision log entry with decision ""D6"" and agent version ""INTAKE@P2/PR3""
+
+  Scenario: AC3 Fallback
+    Given the agent timed out for case ""RW-2027-000502""
+    When the view loads
+    Then the case shows without a summary and the panel shows MSG-P10-005
+    Then the agent run holds status ""TIMED_OUT"" and fallback true
+
+  Scenario: AC4 Correction without a reason
+    When ""owner.user07"" chooses Correct on case ""RW-2027-000501"" with an empty reason
+    Then the system refuses the request with 422 and MSG-P7-005
+    Then no decision log entry and no feedback are stored
+
+  Scenario: AC5 The decision cannot be recorded
+    Given the decision log writer fails
+    When ""owner.user07"" chooses Accept
+    Then the system refuses the request with 503 and MSG-P7-003
+    Then no agent_feedback row exists for the run and the controls stay on the panel
+
+  Scenario: AC6 Feedback given twice
+    Given ""owner.user07"" accepted the summary of case ""RW-2027-000501""
+    When a second feedback request for the same run arrives
+    Then the system refuses it with 409 and MSG-GEN-004
+    Then one decision log entry exists for the run
+
+  Scenario: AC7 A case outside the user's scope
+    Given case ""RW-2027-000601"" belongs to team ""HP-NE"" outside the scope of ""owner.user07""
+    When ""owner.user07"" requests GET /cases/{caseId}/agent-outputs for it
+    Then the system refuses the request with 404 and MSG-P4-003
+
+  Scenario: AC8 A segment still in shadow
+    Given the INTAKE policy for segment UNSECURED is mode ""SHADOW""
+    When the owner opens unsecured case ""RW-2027-000701""
+    Then GET /cases/{caseId}/agent-outputs returns an empty list and no panel is shown
+
+  Scenario: AC9 Stale input
+    Given the run for case ""RW-2027-000503"" used data as of 2027-01-26 and the business date is 2027-01-28
+    When the view loads
+    Then the panel shows MSG-P1-001 with the date 2027-01-26 above the summary"
+RWB-E2-029,Deviation screening agent evaluation and L1 on one segment [E3b],"Feature: Deviation screening agent evaluation and L1 on one segment [E3b]
+
+  Background:
+    Given policy ""SCREENING"" version ""P2"" with prompt ""PR2"" has mode ""L1"" for segment MORTGAGE and BKK and mode ""SHADOW"" for every other segment
+    Given case owner ""owner.user07"" holds RW-CASEOWN
+
+  Scenario: AC1 Evaluation
+    Given the shadow run on 500 cases in sample ""SCREEN-S2"" version 1
+    When the evaluation runs
+    Then precision and recall per flag X1 to X7 are stored with sample size 500
+    Then for X1 with 41 true positives, 4 false positives and 5 false negatives precision is 0.9111 and recall is 0.8913
+    Then the system records the L1 proposal as policy ""SCREENING"" version ""P2"" with status ""LOADED"", segment MORTGAGE and BKK and the evaluation run ID
+
+  Scenario: AC2 L1 on one segment
+    Given Mortgage case ""RW-2027-000801"" in region BKK and a complaint note on 2027-01-26
+    When the agent runs
+    Then the panel ""Proposed deviations"" shows X1 with its reasons, the preceding contact and the marker ""Agent output""
+    Then when the owner confirms X1 the S8 service raises deviation X1 with raised_by ""SCREENING_AGENT"" under rule R-DEV-01
+    Then the case status becomes ""On hold"" and agent_feedback holds verdict ""ACCEPTED"" for item ""X1"" with the S8 decision log entry ID
+
+  Scenario: AC3 Other segments
+    Given hire purchase case ""RW-2027-000802"" in region BKK
+    When the agent runs
+    Then the result stays in shadow and GET /cases/{caseId}/agent-outputs returns no screening output
+
+  Scenario: AC4 The owner rejects a proposal
+    Given the agent proposes X6 on case ""RW-2027-000801""
+    When the owner rejects X6 with reason ""Customer answered on 2027-01-25""
+    Then one decision log entry holds decision ""X6"", agent version ""SCREENING@P2/PR2"", final call ""REJECTED"" and the reason
+    Then the system raises no deviation and agent_feedback holds ""REJECTED"" for item ""X6""
+
+  Scenario: AC5 Reject without a reason
+    When the owner rejects X6 with an empty reason
+    Then the system refuses the request with 422 and MSG-P7-005
+
+  Scenario: AC6 A low-confidence proposal
+    Given the agent proposes X2 with confidence 0.72 on case ""RW-2027-000803""
+    When the panel loads
+    Then X2 shows with the marker ""Low confidence""
+
+  Scenario: AC7 A code already open
+    Given deviation X1 is open on case ""RW-2027-000801""
+    When the agent proposes X1 again
+    Then the panel does not show X1
+
+  Scenario: AC8 Two confirmations at once
+    Given two sessions of ""owner.user07"" confirm X1 on case ""RW-2027-000804"" at the same time
+    When both requests arrive
+    Then one deviation X1 exists and the second request is refused with 409 and MSG-GEN-004
+
+  Scenario: AC9 The rejection cannot be recorded
+    Given the decision log writer fails
+    When the owner rejects X6 with a reason
+    Then the system refuses the request with 503 and MSG-P7-003 and no agent_feedback row exists
+
+  Scenario: AC10 A proposal with scores below its condition
+    Given X4 has recall 0.6000 in the evaluation of ""SCREEN-S2""
+    When RW-COE loads an L1 proposal with condition ""recall at least 0.75 for every code""
+    Then the system refuses the load with 422 and MSG-P10-001 naming ""X4 recall 0.6000 below 0.75"""
+RWB-E2-030,Legal document agent in shadow on Epic 1 data [E3c],"Feature: Legal document agent in shadow on Epic 1 data [E3c]
+
+  Background:
+    Given policy ""LEGAL_DOC"" version ""P1"" with mode ""SHADOW"" and prompt ""PR1""
+    Given the checklist for case type ""MORTGAGE_CIVIL"" has 9 items including ""LOAN_CONTRACT"", ""MORTGAGE_DEED"" and ""DEMAND_NOTICE_PROOF""
+
+  Scenario: AC1 Shadow pack
+    Given litigation case ""RW-2026-000901"" with 14 documents and an open legal action
+    When the agent runs
+    Then a pack listing document IDs for each of the 9 items and a completeness list with PRESENT, MISSING or DEFECT per item are stored on the agent run
+    Then no document, legal action, task or case field changes
+    Then no user-facing endpoint returns the pack
+
+  Scenario: AC2 Scored
+    Given 50 shadow packs for sample ""LEGAL-S1"" version 1
+    When the evaluation runs
+    Then the system stores agreement with the officers' packs per item with sample size 50
+    Then for ""DEMAND_NOTICE_PROOF"" with 46 agreeing cases the agreement rate is 0.9200
+
+  Scenario: AC3 Promotion proposal
+    Given the score
+    When RW-COE loads policy ""LEGAL_DOC"" version ""P2"" with mode ""SHADOW"", review date 2027-03-15 and the evaluation run ID, and RW-RISK approves it
+    Then the system records the decision to keep shadow on version ""P2"" with the approver and the approval date
+    Then the system accepts a proposal with mode ""L1"" only when every stated condition is met by the evaluation
+
+  Scenario: AC4 A document from another case
+    Given the model stub names document ""D-7001"" of case ""RW-2026-000902"" in the pack of case ""RW-2026-000901""
+    When the guardrail runs
+    Then the run holds status ""GUARDRAIL_FAILED"" and check ""SCHEMA_RULE""
+
+  Scenario: AC5 An item without a status
+    Given the answer has no status for item ""MORTGAGE_DEED""
+    When the guardrail runs
+    Then the run holds status ""GUARDRAIL_FAILED"" and check ""SCHEMA""
+
+  Scenario: AC6 The document interface is down
+    Given the P5 document interface is unavailable for case ""RW-2026-000903""
+    When the agent runs
+    Then the run holds status ""TOOL_UNAVAILABLE"" and fallback true
+    Then the evaluation lists the case as not run and scores 49 cases
+
+  Scenario: AC7 Too few cases to promote
+    Given the evaluation scored 49 cases
+    When RW-COE loads a proposal with mode ""L1""
+    Then the system refuses the load with 422 and MSG-P10-001 naming check ""sample size at least 50""
+
+  Scenario: AC8 Keep shadow without a review date
+    When RW-COE loads version ""P2"" with mode ""SHADOW"" and no review date
+    Then the system refuses the load with 422 and MSG-P10-001 naming check ""review date present""
+
+  Scenario: AC9 The loader cannot approve
+    Given user ""coe.user01"" loaded version ""P2""
+    When user ""coe.user01"" approves it
+    Then the system refuses the approval with 409 and MSG-P7-002"

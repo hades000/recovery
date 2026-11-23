@@ -1,0 +1,195 @@
+<!-- source: 11 Delivery and operations/Recovery Workbench Build Sequence Epic 1 and Epic 2 v6.xlsx -->
+<!-- converted: 2026-11-16 from XLSX -->
+
+> **Source:** `11 Delivery and operations/Recovery Workbench Build Sequence Epic 1 and Epic 2 v6.xlsx`  
+> **Converted from:** XLSX
+
+## Sequence
+
+| The order the Epic 1 and Epic 2 work is pulled |  |  |  |  |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 115 items. Delivery runs as Kanban (DT04): items are pulled in this order as capacity frees up. The two-week windows are the sponsor review points, not sprint boundaries. RWB-ACE-001, the ACE team's schema delivery, gates window 1 and is not pulled by either squad. v6, 16 November 2026. |  |  |  |  |  |  |  |  |  |  |
+| Order | Key | Title | Module | Type | Priority | Depends on | Review window | Dates | Release | Critical path |
+| 1 | RWB-E1-044 | Database migrations versioned with parameterized schema names | P3 | Enabler | Must |  | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 2 | RWB-TE-001 | Recovery module folder and boundary test | P2 | Enabler | Must |  | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 3 | RWB-E1-042 | Central configuration service and parameter catalog | P3 | Enabler | Must | RWB-E1-044 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 4 | RWB-TE-002 | Code owners for the recovery module | P2 | Enabler | Must | RWB-TE-001 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 5 | RWB-TE-003 | Types and contract tests from the API specification | P2 | Enabler | Must | RWB-TE-001 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 6 | RWB-TE-011 | PDPA lint for code, tests and logs | P2 | Enabler | Must | RWB-TE-001 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 7 | RWB-TE-012 | Document storage containers | P5 | Enabler | Must | RWB-TE-001 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 8 | RWB-E1-043 | Reference data service with versioned tables | P3 | Enabler | Must | RWB-E1-042, RWB-E1-044 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 9 | RWB-E1-001 | Recovery tables for the 14 data products | P1 | User story | Must | RWB-E1-044, RWB-E1-043 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 10 | RWB-E1-069 | Read-only ACE source views, grants and boundary rule | P1 | User story | Must | RWB-E1-001, RWB-ACE-001 | Window 1 | 2 Nov to 13 Nov | E1 | Yes |
+| 11 | RWB-E1-007 | Integration adapters for outbound files | P2 | User story | Must | RWB-E1-001, RWB-E1-069 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 12 | RWB-E1-008 | Decision log store v1, append only and hash chained | P7 | User story | Must | RWB-E1-001 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 13 | RWB-E1-064 | Data dictionary for the 14 data products | P1 | Enabler | Must | RWB-E1-001, RWB-E1-043, RWB-E1-069 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 14 | RWB-E1-065 | Sandbox database with synthetic recovery data | P1 | Enabler | Must | RWB-E1-001, RWB-E1-069 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 15 | RWB-TE-004 | Masked data in SIT and UAT | P1 | Enabler | Must | RWB-E1-065 | Window 1 | 2 Nov to 13 Nov | E1 |  |
+| 16 | RWB-E1-047 | Feature flags for module release with a removal date | P2 | User story | Should | RWB-E1-001 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 17 | RWB-E1-017 | Retention and archive rule for the data store | P1 | User story | Should | RWB-E1-001, RWB-E1-043, RWB-TE-012, RWB-E1-064 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 18 | RWB-E1-056 | Run books and monitoring for every Epic 1 job | P2 | Enabler | Must | RWB-E1-007 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 19 | RWB-E1-014 | Decision log copy to the data lake | P1 | User story | Should | RWB-E1-056, RWB-E1-017 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 20 | RWB-E1-027 | Decision log writer v1 | P7 | User story | Must | RWB-E1-008, RWB-E1-056 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 21 | RWB-TE-007 | Scheduled jobs on Quartz | P3 | Enabler | Must | RWB-E1-044, RWB-E1-056 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 22 | RWB-E1-038 | Delegation of authority table as reference data | P4 | User story | Must | RWB-E1-043, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 23 | RWB-TE-006 | Outbox and retry for outbound work | P2 | Enabler | Must | RWB-E1-044, RWB-E1-027, RWB-E1-007 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 24 | RWB-TE-008 | Decision log hash chain check | P7 | Enabler | Must | RWB-E1-008, RWB-TE-007 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 25 | RWB-E1-019 | Roles, teams and queues as data | P3 | User story | Must | RWB-E1-038, RWB-E1-043 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 26 | RWB-E1-022 | Sign-on with SSO, MFA and the first roles | P4 | User story | Must | RWB-E1-001, RWB-E1-019 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 27 | RWB-E1-037 | Role to permission matrix as data and PDPA field masking by role | P4 | User story | Must | RWB-E1-022, RWB-E1-043, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 28 | RWB-E1-039 | Access log into the decision log and break-glass admin | P4,P7 | User story | Must | RWB-E1-008, RWB-E1-022, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 29 | RWB-E1-016 | Access control per data product and catalog entries | P1 | User story | Must | RWB-E1-037, RWB-E1-001, RWB-E1-064, RWB-E1-069 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 30 | RWB-E1-025 | Document types and fields agreed | P5 | User story | Must | RWB-E1-069 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 31 | RWB-E1-045 | Multi-product parameters for Mortgage, HP and SSME | P3 | Enabler | Must | RWB-E1-042, RWB-E1-043 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 32 | RWB-E1-046 | Template and merge field catalog as data | P6 | User story | Must | RWB-E1-001, RWB-E1-069 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 33 | RWB-E1-058 | Agent platform set-up [E1a] | P10 | User story | Must | RWB-E1-001, RWB-E1-037 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 34 | RWB-E1-070 | Temporal platform on the ACE AKS clusters | P3 | Enabler | Must | RWB-E1-044, RWB-E1-056, RWB-E1-022 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 35 | RWB-E1-071 | Temporal worker and SDK in the recovery module | P3 | Enabler | Must | RWB-E1-070, RWB-E1-042, RWB-E1-047, RWB-TE-001 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 36 | RWB-E1-072 | Drools runtime and rule package store | P3 | Enabler | Must | RWB-E1-044, RWB-E1-043, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 37 | RWB-E1-073 | Rule authoring, validation, test scenarios, approval and rollback in Drools | P3 | User story | Must | RWB-E1-072, RWB-E1-042 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 38 | RWB-E1-018 | Case ID issuance and case record v1 | P3 | User story | Must | RWB-E1-016, RWB-E1-027, RWB-E1-042, RWB-E1-069, RWB-E1-072, RWB-E1-073 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 39 | RWB-TE-013 | Agent runtime client with fallback | P10 | Enabler | Must | RWB-TE-007, RWB-E1-058, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 40 | RWB-E1-013 | Baseline measures | P9 | User story | Must | RWB-E1-043, RWB-E1-018 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 41 | RWB-E1-020 | Allocation and assignment engine v1 | P3 | User story | Must | RWB-E1-018, RWB-E1-019, RWB-E1-027, RWB-E1-056, RWB-E1-072, RWB-E1-073 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 42 | RWB-E1-024 | Document store and index | P5 | User story | Must | RWB-E1-027, RWB-E1-018, RWB-E1-025, RWB-TE-012, RWB-E1-001 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 43 | RWB-E1-062 | Deviation screening agent in shadow [E2b] | P10 | User story | Must | RWB-E1-058, RWB-TE-013 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 44 | RWB-E1-066 | Interaction ledger store and writer | P1 | User story | Must | RWB-E1-018, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 45 | RWB-E1-002 | Case list v1 with case ID, owner and queue | P1 | User story | Must | RWB-E1-018, RWB-E1-069, RWB-E1-007, RWB-E1-020 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 46 | RWB-E1-023 | Case record view v1, read only | P3 | User story | Must | RWB-E1-018, RWB-E1-024, RWB-E1-037, RWB-E1-039 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 47 | RWB-E1-028 | Service levels, timers, escalation and prescription dates | P3 | User story | Must | RWB-E1-045, RWB-E1-020, RWB-E1-027, RWB-E1-043 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 48 | RWB-E1-031 | Queue and owner on the case list with filters | P3 | User story | Must | RWB-E1-020, RWB-E1-039 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 49 | RWB-E1-049 | OCR pipeline on the Workbench document hub | P5 | User story | Must | RWB-TE-012, RWB-E1-024, RWB-E1-045 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 50 | RWB-E1-067 | Every Workbench action into the interaction ledger | P1 | User story | Must | RWB-E1-066 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 51 | RWB-E1-068 | Interaction ledger read interface | P1 | User story | Must | RWB-E1-066 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 52 | RWB-E1-021 | Transfer rules and engine v1 | P3 | User story | Must | RWB-E1-028, RWB-E1-020, RWB-E1-027, RWB-E1-072, RWB-E1-073 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 53 | RWB-E1-030 | Daily rebalancing and queue measures | P3 | User story | Must | RWB-E1-020, RWB-E1-027, RWB-E1-028 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 54 | RWB-E1-041 | Retention classes and virus scan on intake | P5 | User story | Must | RWB-E1-024, RWB-E1-049 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 55 | RWB-E1-050 | Document classification | P5 | User story | Must | RWB-E1-049, RWB-E1-025 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 56 | RWB-E1-015 | Freshness stamp per data product | P1 | User story | Must | RWB-E1-001, RWB-E1-069, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 57 | RWB-E1-011 | Reconciliation and data quality report | P1 | User story | Must | RWB-E1-002, RWB-E1-015, RWB-E1-069 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 58 | RWB-E1-026 | Attach and search screen | P5 | User story | Must | RWB-E1-025, RWB-E1-024, RWB-E1-041, RWB-E1-045, RWB-E1-030 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 59 | RWB-E1-035 | Case record view v1.1 with documents and history timeline | P3 | User story | Should | RWB-E1-021, RWB-E1-023, RWB-E1-027 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 60 | RWB-E1-053 | Field extraction for the six types into the index | P5 | User story | Must | RWB-E1-049, RWB-E1-050, RWB-E1-025 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 61 | RWB-E1-057 | Intake from branches, mailroom, partner SFTP and email | P5 | User story | Must | RWB-E1-049, RWB-TE-012, RWB-E1-041 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 62 | RWB-E1-059 | Case intake agent in shadow [E1b] | P10 | User story | Must | RWB-E1-030, RWB-E1-058, RWB-TE-013 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 63 | RWB-E1-032 | Automatic attach from the OCR intake | P5 | User story | Must | RWB-E1-024, RWB-E1-050, RWB-E1-053 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 64 | RWB-E1-033 | Search across cases | P5 | User story | Should | RWB-E1-024, RWB-E1-053, RWB-E1-049 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 65 | RWB-E1-034 | Letter template management | P6 | User story | Should | RWB-E1-046, RWB-E1-015 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 66 | RWB-E1-040 | Document checklist per case type as reference data | P5 | User story | Should | RWB-E1-024, RWB-E1-043, RWB-E1-025, RWB-E1-026 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 67 | RWB-E1-052 | Notice generation v1 | P6 | User story | Must | RWB-E1-015, RWB-E1-027, RWB-E1-046, RWB-E1-069 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 68 | RWB-E1-060 | Extraction evaluation [E1c] | P10 | Spike | Must | RWB-E1-053, RWB-E1-058 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 69 | RWB-E1-061 | Intake agent evaluation and L1 proposal [E2a] | P10 | User story | Must | RWB-E1-059 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 70 | RWB-E1-054 | Review queue for low-confidence documents | P5 | User story | Must | RWB-E1-049, RWB-E1-035, RWB-E1-050, RWB-E1-053, RWB-E1-032 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 71 | RWB-E1-063 | Agent monitoring dashboard v1 [E2c] | P10 | User story | Should | RWB-E1-061, RWB-E1-007, RWB-E1-014, RWB-E1-058 | Window 2 | 16 Nov to 27 Nov | E1 | Yes |
+| 72 | RWB-E1-055 | Proof of delivery capture design with WIN | P6 | User story | Should | RWB-E1-052, RWB-E1-054, RWB-E1-028, RWB-E1-066 | Window 2 | 16 Nov to 27 Nov | E1 |  |
+| 73 | RWB-E2-037 | Temporal observability and run books | P2 | Enabler | Must | RWB-E1-070, RWB-E1-071, RWB-E1-056 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 74 | RWB-E2-038 | Temporal security, codec server and admin audit | P4 | Enabler | Must | RWB-E1-070, RWB-E1-071, RWB-E1-039 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 75 | RWB-E2-039 | Temporal resilience, backup, failover, upgrade and archive | P2 | Enabler | Must | RWB-E1-070, RWB-E2-037 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 76 | RWB-E2-040 | Workflow versioning and replay test gate | P2 | Enabler | Must | RWB-E1-071 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 77 | RWB-E2-041 | Rule change governance and audit report | P3 | User story | Must | RWB-E1-073, RWB-E1-037 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 78 | RWB-E2-042 | Epic 2 rule packages in Drools | P3 | User story | Must | RWB-E1-073 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 79 | RWB-TE-010 | Browser and accessibility tests | P2 | Enabler | Must | RWB-TE-003 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 80 | RWB-E2-003 | Customer's other products on the case | P2 | User story | Should | RWB-E1-069, RWB-E1-007 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 81 | RWB-TE-009 | Performance test harness | P2 | Enabler | Must | RWB-TE-004 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 82 | RWB-E2-005 | Decision log query API for audit | P7 | User story | Must | RWB-E1-008, RWB-E1-039, RWB-E2-041 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 83 | RWB-E2-004 | Treatment entity and plan timers data model | P3,P1 | User story | Must | RWB-E1-018, RWB-E1-028, RWB-E1-045, RWB-E1-072, RWB-E2-042 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 84 | RWB-E2-011 | Queue view screens: my queue, team queues, filters and ageing | P3 | User story | Must | RWB-E1-020, RWB-E1-031 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 85 | RWB-E2-013 | Approval routing with the delegation of authority table | P7 | User story | Must | RWB-E1-038, RWB-E1-028, RWB-E1-027, RWB-E1-037 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 86 | RWB-E2-012 | Manual transfer and reassignment screen with reason | P3 | User story | Must | RWB-E1-021, RWB-E2-011, RWB-E1-072 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 87 | RWB-E2-033 | Case and queue list with status, owner and ageing | P2 | User story | Must | RWB-E1-018, RWB-E1-031, RWB-E2-011 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 88 | RWB-E2-015 | Timers, escalation and the deviation flag on the case record view | P3 | User story | Must | RWB-E1-028, RWB-E1-035 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 89 | RWB-E2-001 | EFS hand-over with full history | P2 | User story | Must | RWB-E1-069, RWB-E1-015, RWB-E1-007 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 90 | RWB-E2-014 | Approval screen for D7.1 demand and recall notices | P7,P6 | User story | Must | RWB-E2-013, RWB-E1-052 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 91 | RWB-E2-022 | SMS and LINE dispatch through NSS and LINE OA | P6 | User story | Must | RWB-E1-052, RWB-E1-066 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 92 | RWB-E2-002 | ACE plan status on the case | P2 | User story | Must | RWB-E2-001, RWB-E1-072, RWB-E2-042 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 93 | RWB-E2-021 | Letter dispatch loop with proof of delivery from WIN | P6 | User story | Must | RWB-E1-052, RWB-E1-055, RWB-E2-014 | Window 3 | 30 Nov to 11 Dec | E2 |  |
+| 94 | RWB-E2-019 | Partner identities through the external gateway | P4 | User story | Should | RWB-E1-022, RWB-E1-037, RWB-E1-039 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 95 | RWB-E2-036 | Queue write interface for models and agents | P2 | Enabler | Must | RWB-E1-019, RWB-E1-020, RWB-E1-027 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 96 | RWB-E2-006 | Credit approval pack for NLEADS | P2 | User story | Must | RWB-E2-004, RWB-E1-007 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 97 | RWB-E2-007 | Booking confirmation from the ALS load | P2,P8 | User story | Must | RWB-E2-004, RWB-E1-007, RWB-E1-072, RWB-E2-042 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 98 | RWB-E2-008 | Payment matching with the missed payment event | P8 | User story | Must | RWB-E2-004, RWB-E1-069, RWB-E1-072, RWB-E2-042 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 99 | RWB-E2-032 | TDR offer-suggestion model through the model gateway [E3e] | P10 | Spike | Could | RWB-E1-058, RWB-E2-004, RWB-E1-027 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 100 | RWB-E2-010 | Stage 2 data products: contracts, plans and treatments | P1 | User story | Should | RWB-E2-004, RWB-E1-016, RWB-E1-015 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 101 | RWB-E2-027 | Payment matching rules with the data team | P8 | User story | Must | RWB-E2-008, RWB-E2-042 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 102 | RWB-E2-035 | Next action on the case | P2 | User story | Must | RWB-E1-018, RWB-E1-031, RWB-E2-033, RWB-E1-072, RWB-E2-042 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 103 | RWB-E2-016 | Full case record view with the history timeline | P3,P7 | User story | Must | RWB-E1-035, RWB-E2-015, RWB-E2-012 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 104 | RWB-E2-024 | Field app photos and bills into the document hub | P5 | User story | Must | RWB-E1-057, RWB-E1-032, RWB-E1-053, RWB-E1-024, RWB-E1-041 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 105 | RWB-E2-026 | Document generation engine for contract, CA and mortgage templates | P5 | User story | Must | RWB-E1-046, RWB-E1-034, RWB-E1-024, RWB-E1-027 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 106 | RWB-E2-009 | Steering dashboard v1 data set | P9 | User story | Should | RWB-E1-013, RWB-E1-063 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 107 | RWB-E2-017 | Contract, CA and mortgage document generation screens | P5 | User story | Must | RWB-E2-026, RWB-E1-034, RWB-E1-054, RWB-TE-012 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 108 | RWB-E2-025 | Extraction for the stage 2 and 3 document types | P5 | User story | Must | RWB-E1-053, RWB-E1-050, RWB-E1-054 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 109 | RWB-E2-031 | Agent monitoring dashboard v2 [E3d] | P10 | User story | Must | RWB-E1-063, RWB-E2-005 | Window 4 | 14 Dec to 25 Dec | E2 | Yes |
+| 110 | RWB-E2-034 | Interaction ledger on the case and from every channel | P2 | User story | Must | RWB-E1-027, RWB-E2-016, RWB-E1-069, RWB-E1-007, RWB-E1-066, RWB-E1-067, RWB-TE-006 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 111 | RWB-E2-018 | E-signature flow for customers and the bank | P6 | User story | Must | RWB-E2-017, RWB-E2-022 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 112 | RWB-E2-043 | Temporal and Drools integration pattern and reference case workflow | P3 | Enabler | Must | RWB-E1-071, RWB-E1-072, RWB-TE-006 | Window 4 | 14 Dec to 25 Dec | E2 |  |
+| 113 | RWB-E2-028 | Case intake agent live at L1 [E3a] | P10 | User story | Must | RWB-E1-061, RWB-E1-035, RWB-E1-027, RWB-E2-031 | Epic 3 | 28 Dec to 22 Jan | E3 | Yes |
+| 114 | RWB-E2-030 | Legal document agent in shadow on Epic 1 data [E3c] | P10 | User story | Should | RWB-E1-058, RWB-E2-025, RWB-E1-061 | Epic 3 | 28 Dec to 22 Jan | E3 |  |
+| 115 | RWB-E2-029 | Deviation screening agent evaluation and L1 on one segment [E3b] | P10 | User story | Must | RWB-E1-062, RWB-E2-015, RWB-E1-061, RWB-E2-028 | Epic 3 | 28 Dec to 22 Jan | E3 | Yes |
+
+## By window
+
+| Load by review window |  |  |  |
+|---|---|---|---|
+| Items expected to finish in each two-week window. Window 1 includes RWB-E1-069, which stays open until RWB-ACE-001 lands (21 November, DL43). v6, 16 November 2026. |  |  |  |
+| Window | Dates | Release | Items |
+| Window 1 | 2 Nov to 13 Nov | E1 | 15 |
+| Window 2 | 16 Nov to 27 Nov | E1 | 57 |
+| Window 3 | 30 Nov to 11 Dec | E2 | 21 |
+| Window 4 | 14 Dec to 25 Dec | E2 | 19 |
+| Epic 3 | 28 Dec to 22 Jan | E3 | 3 |
+| Total |  |  | 115 |
+
+## Critical path
+
+| The chain that sets the release date |  |  |  |  |  |
+|---|---|---|---|---|---|
+| 17 items. RWB-ACE-001 gates RWB-E1-069, and RWB-E1-069 gates RWB-E1-018 and RWB-E1-002: a day lost on the ACE delivery, on the views or on the Temporal and Drools configuration moves the 30 November release. RWB-E1-072 and RWB-E1-073 gate RWB-E1-018, so the four configuration stories RWB-E1-070 to RWB-E1-073 sit before RWB-E1-018 in window 2. E1-069 also needs RWB-E1-001, the V0001 migration, built in window 1. v6, 16 November 2026. |  |  |  |  |  |
+| Step | Key | Title | Module | Window | Gated by |
+| 1 | RWB-ACE-001 | ACE DB additions for the Recovery Workbench | ACE | Window 1 | None. ACE team; DL43, needed 21 November |
+| 2 | RWB-E1-069 | Read-only ACE source views, grants and boundary rule | P1 | Window 1 | RWB-ACE-001 (Section B); RWB-E1-001 (Section A) |
+| 3 | RWB-E1-070 | Temporal platform on the ACE AKS clusters | P3 | Window 2 | RWB-E1-022, RWB-E1-056 |
+| 4 | RWB-E1-071 | Temporal worker and SDK in the recovery module | P3 | Window 2 | RWB-E1-070 |
+| 5 | RWB-E1-072 | Drools runtime and rule package store | P3 | Window 2 | RWB-E1-043, RWB-E1-027 |
+| 6 | RWB-E1-073 | Rule authoring, validation, test scenarios, approval and rollback in Drools | P3 | Window 2 | RWB-E1-072 |
+| 7 | RWB-E1-018 | Case ID issuance and case record v1 | P3 | Window 2 | RWB-E1-069, RWB-E1-016, RWB-E1-072, RWB-E1-073 |
+| 8 | RWB-E1-020 | Allocation and assignment engine v1 | P3 | Window 2 | RWB-E1-018 |
+| 9 | RWB-E1-002 | Case list v1 with case ID, owner and queue | P1 | Window 2 | RWB-E1-018, RWB-E1-069, RWB-E1-020 |
+| 10 | RWB-E1-028 | Service levels, timers, escalation and prescription dates | P3 | Window 2 | RWB-E1-020 |
+| 11 | RWB-E1-030 | Daily rebalancing and queue measures | P3 | Window 2 | RWB-E1-028 |
+| 12 | RWB-E1-059 | Case intake agent in shadow [E1b] | P10 | Window 2 | RWB-E1-030 |
+| 13 | RWB-E1-061 | Intake agent evaluation and L1 proposal [E2a] | P10 | Window 2 | RWB-E1-059 |
+| 14 | RWB-E1-063 | Agent monitoring dashboard v1 [E2c] | P10 | Window 2 | RWB-E1-061 |
+| 15 | RWB-E2-031 | Agent monitoring dashboard v2 [E3d] | P10 | Window 4 | RWB-E1-063 |
+| 16 | RWB-E2-028 | Case intake agent live at L1 [E3a] | P10 | Epic 3 | RWB-E2-031 |
+| 17 | RWB-E2-029 | Deviation screening agent evaluation and L1 on one segment [E3b] | P10 | Epic 3 | RWB-E2-028, RWB-E1-062 |
+
+## By module
+
+| Items by module and window |  |  |  |  |  |  |
+|---|---|---|---|---|---|---|
+| How the work spreads across the windows, to balance the two squads. One item is one story or enabler. An item that spans two modules is counted under each, so the module rows add to more than the 115 items. v6, 16 November 2026. |  |  |  |  |  |  |
+| Module | Window 1 | Window 2 | Window 3 | Window 4 | Epic 3 | Total |
+| P1 | 5 | 9 | 1 | 1 |  | 16 |
+| P2 | 5 | 3 | 9 | 5 |  | 22 |
+| P3 | 3 | 15 | 6 | 2 |  | 26 |
+| P4 |  | 4 | 1 | 1 |  | 6 |
+| P5 | 1 | 12 |  | 4 |  | 17 |
+| P6 |  | 4 | 3 | 1 |  | 8 |
+| P7 | 1 | 3 | 3 | 1 |  | 8 |
+| P8 |  |  |  | 3 |  | 3 |
+| P9 |  | 1 |  | 1 |  | 2 |
+| P10 |  | 7 |  | 2 | 3 | 12 |
+| Items | 15 | 57 | 21 | 19 | 3 | 115 |
+
+## Pull rules
+
+| How the sequence is used |  |
+|---|---|
+| Applies to both recovery squads. |  |
+| Rule | Detail |
+| 1 | Pull the next item in order whose dependencies are done |
+| 2 | Work in progress per squad stays within the board limit |
+| 3 | An item on the critical path is pulled before any other item in the same window |
+| 4 | An item that will miss its release stays behind its flag and moves to the next release |
+| 5 | The two squads agree the split of work at the daily board review; the product owner settles a disagreement the same day |
+| 6 | RWB-ACE-001 is the ACE team's delivery: RWB-E1-069 builds the 16 Section A views now and the 14 Section B views only after the ACE tables, columns and grant land (DL43, 21 November) |

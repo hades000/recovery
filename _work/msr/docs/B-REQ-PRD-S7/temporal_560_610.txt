@@ -1,0 +1,60 @@
+555:
+556:Temporal cluster
+557:one per environment on ACE AKS · own DB · UI · codec server · 1.30+
+558:
+559:platform team
+560:
+561:Recovery-specific above · shared platform, owned once, below
+562:
+563:WHERE S1–S9 USE THE KIT
+564:
+565:Approval (DoA)
+566:
+567:S1 route · S2, S3, S5–S7 approvals
+568:
+569:Human task with SLA
+570:
+571:every officer task and escalation
+572:
+573:Saga runner
+574:
+575:S2 settlement · S5 auction · S6 · S7
+576:
+577:Scheduled job
+578:
+579:JOB-16 write-off scan · overnight jobs
+580:
+581:Partner instruction
+582:
+583:law firms, vendors, agencies (S4, S5, S9)
+584:
+585:WHERE DROOLS SITS
+586:
+587:Inside L4 activities of the owning service, never in workflow code.
+588:Rule models are governed once in rwb-decision and copied to each owner.
+589:
+590:Another workbench gets a namespace and the kit, and writes only its own domain workflows.
+591:
+592:12
+593:
+594:Notes: From Recovery Microservice Architecture v5, slide 23.
+595:L1 cluster: one Temporal cluster per environment on ACE AKS, own persistence database, UI, metrics and codec server; upgrade to 1.30 or later for Nexus and Worker Versioning.
+596:L2 namespaces: one per workbench (ace-collection, rwb-recovery, the next one), each with its own retention, rate limits, certificates and encryption keys.
+597:L3 workflow kit: a versioned library of generic templates with no business terms in their interfaces: Approval (maker-checker, DoA lookup as a parameter), Notify, Document intake, Agent run with rule fallback, Human task with SLA timers, Saga runner, Scheduled job, Partner instruction.
+598:L4 activity contracts: each service publishes typed activity interfaces on its queue rwb-<service>, plus Nexus endpoints for callers in other namespaces. EvaluateRules and RecordAndApply live here, in the service that owns the decision.
+599:L5 domain workflows: CaseWorkflow and the stage workflows.
+600:
+601:How S1 to S9 use the kit: Approval for route approval (S1), DoA approvals (S2, S3, S5, S6, S7) and rule sign-off; Human task with SLA for every officer task; Saga runner for settlement and deed in lieu (S2), auction (S5), debt sale (S6) and write-off posting (S7); Scheduled job for JOB-16 write-off scan (S7) and the overnight jobs; Partner instruction for law firms, auction vendors and agencies (S4, S5, S9); Agent run with rule fallback for the route agent and pricing agent (R-UNI-32).
+602:
+603:## Slide 13
+604:
+605:Workflow model: a parent per case, a child per stage, the same four steps for every event
+606:
+607:CaseWorkflow on rwb-case tracks the case; each stage runs as a child workflow in the service that owns it
+608:
+609:Any stage workflow
+610:on its owner's queue
+611:
+612:1  Event arrives
+613:Kafka → case router → signal
+614:

@@ -1,0 +1,118 @@
+{
+  "id": "RWB-P10-E2029-CON",
+  "epic": "RWB-SVC-P10",
+  "service": "rwb-agent",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP03",
+  "wave": 2,
+  "release": "31 January 2027",
+  "legacy": "RWB-E2-029",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 The evaluation start and report are narrowed, not redefined (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 One score row per code carries the counts, precision and recall (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The segment-eligibility and L1 decision request and outcome are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The decision-record mapping and the feedback idempotency are fixed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The two event contracts are declared with their retry and .dlt topics (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 The route, the fakes and the error taxonomy are complete (new, D-RCV-60)"
+    },
+    {
+      "id": "AC7",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC7 The contract declares no lake artefact and no daily agent table (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P10-E2029-CON-01",
+    "TC-P10-E2029-CON-02",
+    "TC-P10-E2029-CON-03",
+    "TC-P10-E2029-CON-04",
+    "TC-P10-E2029-CON-05",
+    "TC-P10-E2029-CON-06",
+    "TC-P10-E2029-CON-07"
+  ],
+  "reqs": [
+    "REQ-DVH-001",
+    "REQ-DVH-006"
+  ],
+  "ops_provided": [
+    "POST /api/recovery/agent/v1/admin/agent-evaluations (restated from RWB-P10-E1061-CON, narrowed to agent SCREENING on sample SCREEN-S2 version 1)",
+    "GET /api/recovery/agent/v1/admin/agent-evaluations/{evaluationId}/report (restated from RWB-P10-E1061-CON, one score row per code)",
+    "POST /api/recovery/agent/v1/admin/agent-configs (narrowed from RWB-P10-E1058-CON with autonomyMode L1 and the two segment members)",
+    "POST /api/recovery/agent/v1/admin/agent-configs/{versionId}/approve (restated from RWB-P10-E1058-CON)",
+    "GET /api/recovery/agent/v1/admin/agent-configs (restated from RWB-P10-E1058-CON, the eligibility read)",
+    "GET /api/recovery/agent/v1/cases/{caseId}/agent-outputs (restated from RWB-P10-E2028-CON with the screening narrowing)",
+    "POST /api/recovery/agent/v1/agent-runs/{runId}/feedback (restated from RWB-P10-E2028-CON with the decision-record mapping)"
+  ],
+  "ops_consumed": [
+    "rwb-case: GET /api/recovery/case/v1/cases/{caseId} for the product group, the region and the status (RWB-P3-E2015-CON)",
+    "rwb-case: GET /api/recovery/case/v1/admin/parameters (RWB-P3-E1042-CON)",
+    "rwb-case: GET /api/recovery/case/v1/admin/lists/{listCode} (RWB-P3-E1043-CON)",
+    "rwb-deviation: GET /api/recovery/deviation/v1/deviations?caseId= for the open deviations (ASM-3572)",
+    "rwb-deviation: the raise of a deviation with raisedBy SCREENING_AGENT, answering deviationId and decisionLogEntryId (not named by a source; GAP-2194, ASM-3572)",
+    "rwb-source-data: the interaction-ledger read of a case in a window, with the ACE fact DF-ACE-193 (not named by a source; GAP-2194, ASM-3576)",
+    "rwb-decision: the sealed entry read of the record written by the local library (not named by a source; GAP-2194, ASM-3573)"
+  ],
+  "events_published": [
+    "rwb.agent.AgentRunCompleted.v1 (EV-28) on rwb.agent.events.v1 with the retry and .dlt topics, carrying the two segment members and the run facts (ASM-3575)",
+    "DecisionRecorded on rwb.decision-record.v1 with the retry and .dlt topics, written by the local decision-record library (ASM-3581)"
+  ],
+  "events_consumed": [
+    "rwb.case.CaseCreated.v1 (EV-01) on rwb.case.events.v1, declared as the run trigger of the app slice",
+    "rwb.document.DocumentStored.v1 (EV-16) on rwb.document.events.v1, declared as the run trigger of the app slice"
+  ],
+  "workflows": [
+    "AgentRunWorkflow (workflow, task queue rwb-agent, declared for the key)",
+    "ResolveScreeningMode (activity, task queue rwb-agent, declared for the key)"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P10 rwb-agent v1.md (FR-P10-007, FR-P10-012, FR-P10-013, FR-P10-014)",
+  "gaps": [
+    "GAP-0626"
+  ],
+  "assumptions": [
+    "ASM-0930",
+    "ASM-0931",
+    "ASM-0932",
+    "ASM-0933",
+    "ASM-0934",
+    "ASM-0935",
+    "ASM-0936",
+    "ASM-0937",
+    "ASM-0938",
+    "ASM-0939",
+    "ASM-0940",
+    "ASM-0941",
+    "ASM-0942"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2029 CON Deviation screening agent evaluation and L1 on one segment [E3b] - contract v1.md"
+}

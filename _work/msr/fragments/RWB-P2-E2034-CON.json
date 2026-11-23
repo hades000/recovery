@@ -1,0 +1,162 @@
+{
+  "id": "RWB-P2-E2034-CON",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "CON",
+  "lane": "CG-W2",
+  "ready": "Day 1",
+  "owner": "TechX",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-034",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the contract section of this story"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the consumed-event contract of this story"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the delivery contract of this story"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the append contract of this story"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the eight fakes of 12.8"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Given the code and the migrations of the app and operations stories of this key"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2034-CON-01",
+    "TC-P2-E2034-CON-02",
+    "TC-P2-E2034-CON-03",
+    "TC-P2-E2034-CON-04",
+    "TC-P2-E2034-CON-05",
+    "TC-P2-E2034-CON-06"
+  ],
+  "reqs": [
+    "REQ-ILG-009",
+    "REQ-ILG-010",
+    "REQ-ILG-011",
+    "REQ-ILG-012",
+    "REQ-ILG-013",
+    "REQ-ILG-014",
+    "REQ-ILG-007",
+    "REQ-ILG-008",
+    "REQ-ILG-006"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/integration/v1/admin/outbox/deliveries",
+    "POST /api/recovery/integration/v1/admin/outbox/deliveries/{deliveryId}/resend"
+  ],
+  "ops_consumed": [
+    "POST /api/recovery/source-data/v1/cases/{caseId}/interactions",
+    "GET the EFS contact-outcome read of the rwb-source-data contract",
+    "GET the contact-fact read of the rwb-source-data contract",
+    "GET /api/recovery/case/v1/cases/{caseId}",
+    "GET /api/recovery/case/v1/cases",
+    "GET /api/recovery/comms/v1/notices/{noticeId}",
+    "GET the instruction-fact read of the rwb-partner contract",
+    "GET /api/recovery/treatment/v1/treatments/{treatmentId}",
+    "GET the proceeds-fact read of the rwb-payment contract",
+    "POST /api/recovery/access/v1/authorise"
+  ],
+  "events_published": [
+    "rwb.decision-record.DecisionRecorded.v1"
+  ],
+  "events_consumed": [
+    "rwb.treatment.TreatmentApproved.v1",
+    "rwb.comms.NoticeDispatched.v1",
+    "rwb.comms.NoticeDelivered.v1",
+    "rwb.partner.InstructionIssued.v1",
+    "rwb.partner.PartnerResultSubmitted.v1",
+    "rwb.payment.ProceedsMatched.v1",
+    "rwb.source-data.AceDataReady.v1"
+  ],
+  "workflows": [
+    "LedgerChannelIntakeWorkflow",
+    "mapChannelEvent",
+    "resolveChannelFacts",
+    "appendLedgerEntry",
+    "parkDeliveryInException",
+    "EfsLedgerReadWorkflow",
+    "readEfsOutcomes",
+    "appendEfsEntries",
+    "writeEfsReadSummary"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-ILG-009, REQ-ILG-010, REQ-ILG-011, REQ-ILG-012, REQ-ILG-013, REQ-ILG-014, REQ-ILG-007, REQ-ILG-008, REQ-ILG-006)",
+  "gaps": [
+    "GAP-0665"
+  ],
+  "assumptions": [
+    "ASM-1173",
+    "ASM-1174"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2034 CON Interaction ledger on the case and from every channel - contract v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0665",
+      "title": "The append, EFS and contact wire shapes, the admin operation bodies, the dedupe key of each type and the ordering of the append and the inbox are not stated for the intake contract",
+      "source": "_work/msr/plan/ownership.json (rulings on interaction, efs_ledger_outcome, processed_event, outbox_delivery and the two interaction operations); 22 Microservice Realignment/Recovery Workbench Architecture v5 Text Extract v1.md (slides 11, 20, 41, 42, 43 and 44); 22 Microservice Realignment/Recovery Workbench Temporal and Drools Design Text Extract v1.md (slide 11); _work/msr/extract/Recovery Workbench Functional Specifications by Module v6/Recovery Workbench FSD P2 Integration v3.md (A2.7); _work/msr/extract/Recovery Workbench Technical Specifications by Module v5/Recovery Workbench TSD P2 Integration v3.md (T3.1, T3.2, T4 and T-A)",
+      "section": "7 Acceptance criteria AC4 and AC5; 11 Data; 12.1; 12.2; 12.3; 12.7; 12.8",
+      "description": "A contract cannot be faked where the source is silent, and six elements of this contract are silent. First, the P1 append: the legacy story calls InteractionLedgerWriter.append inside the delivery transaction, and the R-PREC default ruling moves the writer to rwb-source-data, so the append is now one REST hop; no source states the wire command, the answer, the repeated-key answer or the error classes, and no source states the order in which the append and the inbox row are written, which is the only way the legacy once-only guarantee survives a service boundary. Second, the EFS and contact reads: the Ownership Map names no path for either, so the operation names, query parameters and field names are unknown. Third, the fact contracts: the Ownership Map names paths for the case read, the notice read and the treatment read but not for the single-instruction read, the proceeds read or the case-list account filter, and no source gives the element names of any of the five answers. Fourth, the admin operations: TSD P2 v3 T-A.1 fixes the method, the path suffix, the right and the Idempotency-Key header of API-P2-003 and API-P2-004 but not the query parameters, the page envelope, the response body or the error body, and no source gives the shape of the RESOLVE_OUTBOX_DELIVERY task. Fifth, the dedupe key: the FSD gives two example shapes only, EV-10:TRT-0001:v1 and EV-26:ALS:2026-11-10, and no source states the business key of the partner result, of the notice pair or of the treatment, so the key of each of the seven types is derived and not stated. Sixth, the state rule: the TSD lists the four delivery states and the last-failure task but not the legal moves between them, the resend rule for a delivery that is not in EXCEPTION, or the upgrade path of a field name that removes nothing.",
+      "evidence": "Legacy RWB-E2-034 section 12 states that the writer must run in the caller transaction and section 13 stores the entry inside the same module; the ownership ruling on interaction records that the ledger stays with P1 despite TSD P3 v3 defining the table. FSD P2 v3 AC-EXC-P2-007-03 and AC-EXC-P2-007-07 give the two key examples and the hit count rule. TSD P2 v3 T3.2 gives LOV-OUTBOX-DELIVERY, T4 gives the one-delivery-per-consumer rule and the RESOLVE_OUTBOX_DELIVERY task name, and T-A.2 gives API-P2-003 and API-P2-004 without a body. Arch v5 slide 11 gives the inbox dedupe and the transactional outbox, slide 20 gives the per-service schema with outbox and inbox, and slide 41 gives the schema and the base. No AsyncAPI document for the four owner topics and no OpenAPI document for the P1 append is in the source set.",
+      "type": "Missing",
+      "area": "API contract",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-034",
+      "owner_role": "Solution architect",
+      "asm": "ASM-1173",
+      "proposed": "Approve the two assumptions of RWB-P2-E2034-CON at the contract review before the baseline is tagged: the wire shapes of the append, the two P1 reads, the five fact answers and the two admin operations with the RESOLVE_OUTBOX_DELIVERY task, and the dedupe key, the state moves and the append-before-inbox order with the repeated-key answer treated as success.",
+      "wp": "B-P2-02"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1173",
+      "text": "The published contract is taken as follows. Each of the seven consumed types is a CloudEvents 1.0 message keyed by its case id where a case exists, with the dedupe key <EV-nn>:<business key>:v1 for the six business events (treatment id, notice id, instruction id, proceeds id) and EFS:<efs_record_key> for an EFS row; a message without the envelope, without a business key or of an eighth type is routed to .dlt with an alert. The append is one operation, create-only and idempotent on the key, called before the inbox row is marked so that a replay returns the same entry reference; a 409 is treated as success. The delivery states are PENDING, RETRYING, DELIVERED and EXCEPTION, the attempt limit is three, and only a delivery in EXCEPTION may be resent, to PENDING with attempt count 0. The two admin operations are the re-based forms of API-P2-003 and API-P2-004 on the base /api/recovery/integration/v1, with Platform administration R and U, an Idempotency-Key on the resend and a 409 for a delivery not in EXCEPTION or an event whose workflow is already running.",
+      "why": "The FSD gives two example dedupe keys, the TSD gives the four states and the rights, and the legacy story gives the three attempts; the business key of each type, the ordering of the append and the inbox, the legal state moves and the bodies of the two operations are not stated anywhere. A contract cannot be faked without them.",
+      "read": "_work/msr/plan/ownership.json for the owner of every consumed path and of the two provided operations; FSD P2 v3 A2.7 AC-EXC-P2-007-03 and AC-EXC-P2-007-07; TSD P2 v3 T3.2, T4 and T-A.1; Arch v5 slides 11, 20 and 41",
+      "gap": "GAP-0665",
+      "applied_in": "7 AC1 to AC6; 8 Business rules BR2 to BR7; 11 Data; 12.1 to 12.4",
+      "confidence": "Medium",
+      "confirm": "Solution architect, the rwb-source-data owner and the platform event owner in the contract review before the baseline is tagged",
+      "impact": "The legacy guarantees survive the split: one entry per key, no entry lost, the task for RW-PLATADM after three attempts and no delivery deleted. The state names are the TSD names.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1174",
+      "text": "The fakes are taken as follows: the rwb-source-data fake answers the append with 201, the same reference on a repeat, 409, 503 and one slow answer, the EFS read with three rows (listed, unlisted and not on a case) for business date 2026-12-14, and the contact read with one hit and one 404; the rwb-case, rwb-comms, rwb-partner, rwb-treatment and rwb-payment fakes answer one hit and one 404 each; the rwb-access fake grants and refuses Platform administration; the Kafka stubs hold one message per type, one duplicate per type, one malformed envelope and one eighth type. Every fake is compared with the document by a drift test that fails the merge, and a fake answer outside the declared shape is a defect. No statement of this service reads another service's table, a ledger table or an ACE view, and no foreign key leaves rwb_integration.",
+      "why": "The app, operations and test stories must build before the other services exist, and a fake that drifts from the document is worse than no fake; the source gives no fixture shapes, so the fixtures follow the data of the legacy criteria (2026-12-14, ACC-SYN-0301, NT-SYN-0301, LF-SYN-01, TRT-SYN-0301 and PRC-SYN-0301).",
+      "read": "Legacy RWB-E2-034 AC1 to AC11 and section 16; Template and Rules section R5.5 DP-09 and DP-11",
+      "gap": "GAP-0665",
+      "applied_in": "7 AC5 and AC6; 12.8; 13 Solution plan",
+      "confidence": "Medium",
+      "confirm": "Tech lead of rwb-integration and the owners of the faked contracts at the baseline tag",
+      "impact": "No production data is used and no business value is invented: every fixture is synthetic and follows a value the legacy story already uses.",
+      "wp": "B-P2-02"
+    }
+  ]
+}

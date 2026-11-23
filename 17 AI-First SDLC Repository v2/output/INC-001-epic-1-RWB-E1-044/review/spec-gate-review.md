@@ -59,3 +59,38 @@ REVIEW_STATUS: FAIL
 REVIEW_BLOCKING: YES (Medium: REVIEW-RWB-E1-044-001, -002; Low: -003..-010)
 NEXT_STEP: Human records remediation or explicit acceptance of REVIEW-RWB-E1-044-001 and -002 (and disposition of the Low findings); re-run /specify INC-001-epic-1-RWB-E1-044 for the spec edits, then re-run the spec gate. Product Owner specification approval waits on this.
 ```
+
+## Gate closure (round 1)
+
+The review above is kept as written on 2026-11-09. This section records how the gate was closed. It does not change the reviewer's verdict.
+
+| Field | Value |
+|---|---|
+| Closed | 2026-11-19 |
+| Basis | Remediation recorded in `specify/compliance-validation.md` §4 (decided by the recovery tech lead, 2026-11-09). Independent re-verification in `review/spec-gate-review-r2.md` (every finding below marked CLOSED with evidence). |
+| Outcome | **CLOSED: 10 of 10 findings resolved, 0 accepted, 0 open.** Both Medium findings are cleared. |
+| Superseded by | Round 2 (Low only, closed in round 3), round 3 (High -016 and Medium -017, closed in round 4), round 4 (Low -022..-025, dispositioned by the plan PRE-5 approval, 2026-11-10). No blocking finding is open on the spec gate. |
+
+| Finding | Severity | Disposition | Evidence |
+|---|---|---|---|
+| REVIEW-RWB-E1-044-001 | Medium | CLOSED | D-RCV-44: `recoveryIntegrationTest` stays outside `check` and runs before every MR touching recovery migrations or `RecoveryFlywayConfig`, with the result in implementation evidence. SPEC-012, SPEC-015 (c), BR7 coverage row and Unit Test Applicability corrected. CI wiring waits on Docker (OPEN-026). The PO re-confirmed the BR7 run rule on 2026-11-10 (OPEN-027, Settled). |
+| REVIEW-RWB-E1-044-002 | Medium | CLOSED | D-RCV-45: the recovery bean is disabled under `db-migrate` without `db-migrate-recovery`. SPEC-004 (d), T-044-15, `backend-apis.json` `activation.dbMigrateWithoutRecovery`. Re-checked in r2 and again under D-RCV-48 in r4. |
+| REVIEW-RWB-E1-044-003 | Low | CLOSED | Coverage table uses only `DIRECT` / `INHERITED_EXISTING_BEHAVIOR` and `COVERED`; X-paths split; §10 Authority row added. |
+| REVIEW-RWB-E1-044-004 | Low | CLOSED | FR/NFR IDs in every SPEC "Traces to"; header lists D-RCV-40, -43..-46. |
+| REVIEW-RWB-E1-044-005 | Low | CLOSED | Test-scope tooling `recovery/casewf/internal/migration/**` (non-test classes) added to coverage scope, SPEC-015 (d), consistent with D-RCV-43. |
+| REVIEW-RWB-E1-044-006 | Low | CLOSED | T-044-03 runs with a second valid schema value plus an invalid-value negative case. Re-shaped by D-RCV-48 (schema from the connection, `createSchemas(false)`). |
+| REVIEW-RWB-E1-044-007 | Low | CLOSED | SPEC-007 scans dollar-quoted bodies; accepted gap limited to single-quoted literals; fixtures in T-044-05; CON-002. |
+| REVIEW-RWB-E1-044-008 | Low | CLOSED | INC-001 card status, compliance, rollback route, flag and main-flow superseded note updated. |
+| REVIEW-RWB-E1-044-009 | Low | CLOSED | D-RCV-46 records Chitchaya Muanchonchana as Product Owner for Recovery stories in `TB0001`; INC-001 and EPIC-001 cards and the OPEN-018 settled row updated. |
+| REVIEW-RWB-E1-044-010 | Low | CLOSED | Traceability matrix CRLF restored (diff is the 2 real rows); `open-items.md` separator fixed; run-log reference fixed. |
+
+Scope of this closure: the 10 findings were raised and fixed against the 2026-11-10 spec baseline (schema `ace`, `rwb_` prefix, D-RCV-47/-48). Since then D-RCV-35 reverted the schema basis to `recovery`, D-RCV-47 is superseded and OPEN-029 is Settled as "Superseded by the v2 context build". The closure of -001..-010 is not reopened by that change (their evidence is in the 10 Nov spec, r2 and `compliance-validation.md` §4), but the spec and plan must be re-baselined before build (OPEN-036, card status "needs re-baseline for D-RCV-35"). That re-baseline is a new `/specify` run with its own spec gate, not part of this closure.
+
+Carried forward, not part of this gate: OPEN-026 (Docker on build agents), OPEN-036 (re-baseline of the E1-044 spec and plan to schema `recovery`), and the round-4 Low items -022..-025 under the plan PRE-5 disposition (2026-11-10).
+
+```text
+GATE_CLOSURE: SPEC GATE ROUND 1 CLOSED (10/10 findings closed; REVIEW-RWB-E1-044-001 and -002 cleared)
+GATE_CLOSURE_DATE: 2026-11-19
+SPEC_GATE_STATE: no blocking finding open on the 2026-11-10 spec baseline; latest round (r4) is non-blocking and dispositioned (plan PRE-5, 2026-11-10)
+SPEC_REBASELINE: required before build (OPEN-036, D-RCV-35); new /specify run and new spec gate
+```

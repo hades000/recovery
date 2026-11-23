@@ -1,0 +1,105 @@
+1455:
+1456:22
+1457:
+1458:Notes: Source: FSD S6 Debt sale v3; Routing Logic v4 (R-DS, 41 rules). Today sales run on spreadsheets. Buyer remediation 10 working days (R-DS-40). In v5 DebtSaleWorkflow in rwb-debtsale runs this as a saga with the kit's Saga runner, across five services: reserve accounts (rwb-debtsale), approve sale (rwb-decision), buyer pays (rwb-payment) can be undone; then transfer accounts, post proceeds, close cases (rwb-case), tell customers (rwb-comms) are retried until done. The transfer waits for the central ledger to confirm the decision record (strict mode).
+1459:
+1460:## Slide 23
+1461:
+1462:S7 · Write-off and recovery
+1463:
+1464:Monthly write-off scan, committee, posting, and recovery after charge-off
+1465:
+1466:Starts when  JOB-16 runs on the 3rd working day after EV-26 AceDataReady (R-WO-01)
+1467:
+1468:1
+1469:
+1470:Scan proposes population
+1471:
+1472:R-WO-01/03
+1473:
+1474:2
+1475:
+1476:Pack built in 3 wd
+1477:
+1478:R-WO-05
+1479:
+1480:3
+1481:
+1482:Committee decides
+1483:
+1484:R-WO-11 to 17
+1485:
+1486:4
+1487:
+1488:Post to ALS / GL
+1489:
+1490:R-WO-21 · EV-24
+1491:
+1492:5
+1493:
+1494:Release provision, feed
+1495:
+1496:R-WO-25/26
+1497:
+1498:6
+1499:
+1500:Agency or sale after
+1501:
+1502:R-WO-29/30/32
+1503:
+1504:7
+1505:
+1506:Retention, then close
+1507:
+1508:R-WO-47 · JOB-17
+1509:
+1510:Runs in
+1511:rwb-writeoff
+1512:WriteOffWorkflow
+1513:
+1514:System step
+1515:
+1516:Timer
+1517:
+1518:Signal / event
+1519:
+1520:Drools decision
+1521:
+1522:Person
+1523:
+1524:External system
+1525:
+1526:AI agent
+1527:
+1528:Drools decides
+1529:
+1530:Write-off route set, 51 rules (package Phase 2)
+1531:Open deviation → case removed (R-WO-06)
+1532:Approved must equal posted (R-WO-42/43)
+1533:
+1534:Who approves
+1535:
+1536:Meets MR/BOT criteria: L4–L6
+1537:Else PARC ≤ THB 100m, ExCo ≤ 1,000m
+1538:Related parties: the Board
+1539:
+1540:Clocks
+1541:
+1542:Monthly cut-off, month-end close
+1543:Defer sets a review timer (R-WO-17)
+1544:
+1545:Point of no return / undo
+1546:
+1547:Posting is the point of no return
+1548:On failure: re-post, rescan or committee
+1549:
+1550:S7 is batch-shaped: a schedule starts it, Drools selects the population, Temporal retries the posting.
+1551:
+1552:23
+1553:
+1554:Notes: Source: FSD S7 Write-off and recovery v3; Routing Logic v4 (R-WO, 51 rules). Scan holds if tax criteria are missing (R-WO-03). Recovery of written-off debt (2.1.11): L6 up to 50m and at least 15%. Posting failure: re-post, return to scan, or refer to committee (R-WO-44/45/46). In v5 JOB-16 is a Temporal Schedule in rwb-writeoff (monthly, 3rd working day); there are no shared Quartz tables. Today's Phase 1 note (T2) keeps it on Quartz, so this is listed as an open point. Write-off posting waits for the central ledger to confirm the decision record (strict mode).
+1555:
+1556:## Slide 24
+1557:
+1558:S8 · Deviation handling (X1–X7)
+1559:

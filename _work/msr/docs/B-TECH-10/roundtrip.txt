@@ -1,0 +1,61 @@
+SCB Collections and Recovery. Henka Group, 22 November 2026.
+(C) Siam Commercial Bank and Henka Pte Ltd
+Recovery Workbench
+Error handling and resilience standard
+# Change log
+# 1. Rules
+Every failure is caught at the boundary where it happens and is given a category and a message code.
+No failure is silent: it reaches a person, a queue or an alert with a named owner.
+A decision that cannot be recorded is not taken: a failed decision log write stops the chain and the state is not applied (REQ-DRI-005, consistent with E2-043).
+Outbound work is never lost: it waits in the outbox and retries. The outbox stays for outbound work in Epics 1 and 2, and the reference workflow uses it when Temporal is unavailable.
+Temporal activities retry on their own policy, and Drools failures are refused with a message; neither falls back silently.
+A user sees what happened and what to do, in Thai and English, from the error and message standard.
+An agent or model failure never stops a case: the rule result is used.
+A REST call is one hop and has a 2 s timeout. gateway-bff calls each owner directly and in parallel; a service never calls another service to answer a screen, and anything longer is a workflow (Architecture v5 slides 10 and 11; ADR-020).
+A GET retries once with jitter inside the 2 s budget, with a circuit breaker and a bulkhead per downstream. A POST is not retried automatically and carries its Idempotency-Key (Architecture v5 slide 11).
+An event that a consumer cannot handle is retried at 1 minute, 10 minutes and 1 hour on the retry topics of the owner's topic rwb.<short>.events.v1 and then goes to its .dlt topic with an alert. The inbox records ce_id, so a retry or a redelivery acts once (Architecture v5 slides 11 and 22; ADR-015; DP-09).
+Version 4 reads the outbox rule above for every service: the transactional outbox and the inbox are library objects in all 19 schemas, one copy in each owner's schema (Architecture v5 slides 20 and 22; DP-09). The Epic 1 and Epic 2 wording is kept as the as-built position, not as the target scope (CG-B-TECH-10-2; ASM-B-TECH-10-2).
+# 2. Failure categories
+The retry topics and the .dlt topic belong to the service that owns the topic, one set per service; the owner of every topic is the service recorded in the Microservice Ownership Map v1, Services sheet. The exact names of the three retry topics and of the dead-letter topic are Not specified in the source documents (CG-B-TECH-10-1; ASM-B-TECH-10-3).
+# 3. Retry
+# 4. What the user sees meanwhile
+A stale data product shows its business date and a warning on every screen that uses it.
+An outbound action waiting in the outbox shows as pending on the case timeline.
+A case in the exception queue shows the reason and the owner of the fix.
+During an outage the front end shows the service unavailable page and keeps unsent form input in the browser.
+When no rule package version is in force, the action is held and the case shows MSG-P3-027; the rest of the case stays usable.
+When the workflow service is unavailable, the case shows MSG-P3-036 and the outbound action shows as pending.
+When a REST hop times out, only the panel that needed it shows the RFC 9457 problem detail; the other panels of the case screen still load, because the gateway calls each owner in parallel and does not chain the calls (Architecture v5 slide 10; ASM-B-TECH-10-4).
+An event on a retry topic changes nothing on the screen until the consumer applies it. An event on a .dlt topic appears in the alert path and in the replay log, not as a case state (ASM-B-TECH-10-4).
+# 5. Recovery
+# 6. Temporal and Drools
+Temporal activities retry by default with an initial interval of 1 second, a backoff coefficient of 2 and a maximum of 10 attempts. NoPackageInForce is non-retryable, so a missing rule package fails the activity at once and the action is held.
+Every activity carries an idempotency key built from the workflow ID, the activity type and the step. A retry after a timeout writes one row, one decision log entry and one outbox item.
+A workflow task failure retries the task on the same workflow execution. A workflow that cannot progress is failed, the case keeps its last applied state, and MSG-P3-037 goes to the platform administrator.
+When the workflow service is unavailable, WorkflowGateway.start and signal return MSG-P3-036. The event stays in the outbox for retry, and no case state is changed.
+A failed decision log write stops the chain and the state is not applied (REQ-DRI-005). E2-043 uses the same order: EvaluateRulesActivity, WriteDecisionLogActivity, then ApplyStateActivity.
+The outbox stays for outbound work in Epics 1 and 2. The reference workflow in E2-043 writes through the outbox before the external call, so outbound work is kept when Temporal is unavailable.
+Drools compile failure at load is refused with MSG-P3-027 and check compile; no version is written. When no version is in force, RuleEvaluator raises NoPackageInForce, the action is held, and MSG-P3-027 names the package and check package in force.
+A checksum mismatch between the stored DRL and the recorded checksum refuses the version at load into the KieBase cache and raises an incident to RW-PLATADM. The previous version keeps serving.
+A workflow change that fails the replay test fails the build with MSG-P3-038; nothing is deployed. A role without the right gets MSG-P4-002.
+An activity that calls another service uses the 2 s REST timeout of section 3; the activity's own retry policy is what repeats the call, with the idempotency key above (Architecture v5 slide 11).
+A Kafka failure never fails a workflow: the event waits in the producer's outbox and the consumer retries on its retry topics. A workflow is not used to retry an event (Architecture v5 slide 22).
+# 7. Message map
+These are the only messages used for the Temporal and Drools failures in this standard. No message ID is added by this standard.
+# 8. Calls between services in version 4
+The realignment replaces the single deployable with 19 services (ADR-013). Every call between them follows one of four call types, and each call type has one failure rule: a REST hop has a 2 s timeout and is never chained, an event is retried and then dead-lettered, a Temporal activity retries on its own policy, and a file is retried by the workflow that started it (Architecture v5 slide 11; ADR-015, ADR-016, ADR-020).
+# 8.1 One REST hop
+The browser calls gateway-bff only. gateway-bff checks the session and the coarse permission, then calls each owner it needs, in parallel, and merges the answers into the screen model (Architecture v5 slide 10).
+Two services are asked at the same time on the case screen, one hop each: rwb-case for the case, stage, tasks and timers, and rwb-source-data for the customer and the accounts (Architecture v5 slide 10).
+Other tabs load when the user clicks them, each from its own owner, one hop (Architecture v5 slide 10).
+Any call that would need a third service becomes a Temporal activity or a child workflow, not a REST chain (Architecture v5 slide 11; ADR-016, ADR-020).
+Trace analysis flags any trace with a call depth above one, and the contract test of each service fails a client that chains (Architecture v5 slide 11).
+# 8.2 The 2 s timeout and the screen budget
+The 2 s is the ceiling of one REST call: the call ends at 2 s, the breaker opens for that downstream, and the caller answers with RFC 9457 problem details (Architecture v5 slides 10 and 11).
+The screen target is a separate figure: 2 s at p95 for the whole screen, planned at about 1.2 s — gateway and session 0.15 s, the slowest of the two parallel calls 0.6 s, composition and transfer 0.3 s (Architecture v5 slide 10).
+A hop that runs to its 2 s ceiling therefore consumes the whole screen budget. The read used in version 4 is that 2 s is the per-call ceiling and 1.2 s is the planning figure (CG-B-TECH-10-5; ASM-B-TECH-10-6).
+# 8.3 Retry and .dlt by service
+Each service owns its own topic and the retry and dead-letter topics of that topic. The topic, the retry ladder and the service that owns them are below; the owner of every row is the service recorded in the Microservice Ownership Map v1, Services and Events sheets (ASM-B-TECH-10-3).
+The shared topic rwb.decision-record.v1 is owned by rwb-decision (P7); its retry topics and its .dlt topic follow the same rule, and each service writes only its own local decision record and publishes it (Architecture v5 slide 20; DP-03, DP-09). The exact names of the retry topics and of the .dlt topics are Not specified in the source documents (CG-B-TECH-10-1; ASM-B-TECH-10-3). Who is alerted and who replays is the platform administrator role (CG-B-TECH-10-4; ASM-B-TECH-10-5).
+# 9. Realignment changes in version 4 (D-RCV-60)
+Everything else in version 3 is kept character for character: the seven opening rules, the thirteen failure categories, the eight retry rows, the six user-facing statements, the nine recovery paths, the nine Temporal and Drools bullets, the eight message rows, and the closing sentence of section 7. No message code, requirement ID, decision reference or date of version 3 is changed, and no release date is added.

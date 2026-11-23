@@ -1,0 +1,512 @@
+[
+ [
+  "Topics and queues (D-RCV-60)"
+ ],
+ [
+  "Every service has one business-event topic and one Temporal task queue; the decision record has one shared topic. Names follow DP-14 and the service table in Template and Rules R4. Settings are Architecture v5 slide 34 (12 partitions, replication factor 3, 7 days, key caseId, retry 1 min, 10 min, 1 h, then .dlt) and the event catalogue on slides 42 and 43."
+ ],
+ [],
+ [
+  "Business-event topics"
+ ],
+ [
+  "Topic",
+  "Producer",
+  "Events published",
+  "Partitions",
+  "Replication factor",
+  "Retention",
+  "Record key",
+  "Consumer groups",
+  "Retry",
+  "Dead letter"
+ ],
+ [
+  "rwb.source-data.events.v1",
+  "P1 rwb-source-data",
+  "AceDataReady, AceDataLate (05:30)",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case, rwb-payment, rwb-deviation, rwb-writeoff",
+  "1 min, 10 min, 1 h",
+  "rwb.source-data.events.v1.dlt"
+ ],
+ [
+  "rwb.integration.events.v1",
+  "P2 rwb-integration",
+  "FileDelivered, FileFailed",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "the service that requested the file",
+  "1 min, 10 min, 1 h",
+  "rwb.integration.events.v1.dlt"
+ ],
+ [
+  "rwb.case.events.v1",
+  "P3 rwb-case",
+  "CaseCreated, CaseAllocated, CaseAllocationFailed, CaseTransferred, CaseStateChanged, TimerBreached",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-agent, rwb-deviation, rwb-reporting; gateway-bff (inbox)",
+  "1 min, 10 min, 1 h",
+  "rwb.case.events.v1.dlt"
+ ],
+ [
+  "rwb.access.events.v1",
+  "P4 rwb-access",
+  "AccessPolicyChanged, DoaLimitChanged",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "all 19 services (cache refresh)",
+  "1 min, 10 min, 1 h",
+  "rwb.access.events.v1.dlt"
+ ],
+ [
+  "rwb.document.events.v1",
+  "P5 rwb-document",
+  "DocumentStored, DocumentFieldsExtracted",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-agent, rwb-case",
+  "1 min, 10 min, 1 h",
+  "rwb.document.events.v1.dlt"
+ ],
+ [
+  "rwb.comms.events.v1",
+  "P6 rwb-comms",
+  "NoticeGenerated, NoticeDispatched, NoticeDelivered",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-decision, rwb-reporting, rwb-litigation, rwb-guarantee, rwb-case",
+  "1 min, 10 min, 1 h",
+  "rwb.comms.events.v1.dlt"
+ ],
+ [
+  "rwb.decision.events.v1",
+  "P7 rwb-decision",
+  "ApprovalRequested, ApprovalDecided, RulePackageInForce",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "gateway-bff (inbox); rwb-case, rwb-valuation, rwb-treatment, rwb-payment",
+  "1 min, 10 min, 1 h",
+  "rwb.decision.events.v1.dlt"
+ ],
+ [
+  "rwb.payment.events.v1",
+  "P8 rwb-payment",
+  "TreatmentBooked, PaymentMissed, ProceedsMatched",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case, rwb-treatment, rwb-comms, rwb-asset, rwb-debtsale, rwb-writeoff, rwb-guarantee",
+  "1 min, 10 min, 1 h",
+  "rwb.payment.events.v1.dlt"
+ ],
+ [
+  "rwb.reporting.events.v1",
+  "P9 rwb-reporting",
+  "ReportPublished",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "Not specified in the source documents (CG-B-DATA-26-4; ASM-B-DATA-26-4)",
+  "1 min, 10 min, 1 h",
+  "rwb.reporting.events.v1.dlt"
+ ],
+ [
+  "rwb.agent.events.v1",
+  "P10 rwb-agent",
+  "AgentRunCompleted",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-decision, rwb-document, rwb-deviation",
+  "1 min, 10 min, 1 h",
+  "rwb.agent.events.v1.dlt"
+ ],
+ [
+  "rwb.valuation.events.v1",
+  "S1 rwb-valuation",
+  "RouteDecided",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case",
+  "1 min, 10 min, 1 h",
+  "rwb.valuation.events.v1.dlt"
+ ],
+ [
+  "rwb.treatment.events.v1",
+  "S2 rwb-treatment",
+  "TreatmentApproved, TreatmentClosed",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-comms, rwb-payment",
+  "1 min, 10 min, 1 h",
+  "rwb.treatment.events.v1.dlt"
+ ],
+ [
+  "rwb.guarantee.events.v1",
+  "S3 rwb-guarantee",
+  "GuaranteeClaimFiled, GuaranteeClaimSettled",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case, rwb-reporting",
+  "1 min, 10 min, 1 h",
+  "rwb.guarantee.events.v1.dlt"
+ ],
+ [
+  "rwb.litigation.events.v1",
+  "S4 rwb-litigation",
+  "LawsuitFiled, JudgmentRecorded, AuctionResult",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-asset, rwb-case",
+  "1 min, 10 min, 1 h",
+  "rwb.litigation.events.v1.dlt"
+ ],
+ [
+  "rwb.asset.events.v1",
+  "S5 rwb-asset",
+  "AssetTakenOn, AssetSold",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case, rwb-payment",
+  "1 min, 10 min, 1 h",
+  "rwb.asset.events.v1.dlt"
+ ],
+ [
+  "rwb.debtsale.events.v1",
+  "S6 rwb-debtsale",
+  "LotAwarded, AccountsTransferred",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case, rwb-payment, rwb-reporting",
+  "1 min, 10 min, 1 h",
+  "rwb.debtsale.events.v1.dlt"
+ ],
+ [
+  "rwb.writeoff.events.v1",
+  "S7 rwb-writeoff",
+  "WriteOffApproved",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case, rwb-payment, rwb-reporting",
+  "1 min, 10 min, 1 h",
+  "rwb.writeoff.events.v1.dlt"
+ ],
+ [
+  "rwb.deviation.events.v1",
+  "S8 rwb-deviation",
+  "DeviationRaised, DeviationCleared",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-case, rwb-comms, rwb-treatment",
+  "1 min, 10 min, 1 h",
+  "rwb.deviation.events.v1.dlt"
+ ],
+ [
+  "rwb.partner.events.v1",
+  "S9 rwb-partner",
+  "InstructionIssued, PartnerResultSubmitted",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "partner portal; rwb-litigation, rwb-asset, rwb-case",
+  "1 min, 10 min, 1 h",
+  "rwb.partner.events.v1.dlt"
+ ],
+ [
+  "rwb.decision-record.v1 (shared)",
+  "all 19 services",
+  "DecisionRecorded",
+  12,
+  3,
+  "7 days",
+  "caseId",
+  "rwb-decision, rwb-reporting",
+  "1 min, 10 min, 1 h",
+  "rwb.decision-record.v1.dlt"
+ ],
+ [],
+ [
+  "Task queues"
+ ],
+ [
+  "Task queue",
+  "Service",
+  "Wave",
+  "Workflows on the queue",
+  "Activities",
+  "Schedules and event-started work",
+  "Scale note"
+ ],
+ [
+  "rwb-source-data",
+  "P1 rwb-source-data",
+  1,
+  "AceIngestCheck, reconciliation",
+  "listEligibleAccounts, snapshot(page)",
+  "JOB-04 started by AceDataReady",
+  "Snapshot pages for the 01:30 measures and for the composite screens"
+ ],
+ [
+  "rwb-integration",
+  "P2 rwb-integration",
+  1,
+  "none (activities only)",
+  "deliverFile(manifest), receiveFile",
+  "JOB-10 file window at 16:00 from Airflow; buyer files per lot",
+  "One file a day plus one for each lot"
+ ],
+ [
+  "rwb-case",
+  "P3 rwb-case",
+  1,
+  "CaseWorkflow (parent, one per case), DailyCaseRun",
+  "allocate, transfer, rebalance",
+  "JOB-02 and JOB-03 from AceDataReady, JOB-06 rebalancing 06:30",
+  "05:00-07:00 chain (hot)"
+ ],
+ [
+  "rwb-access",
+  "P4 rwb-access",
+  1,
+  "none",
+  "authorise, permission cache refresh",
+  "JOB-18 access review, six-monthly",
+  "Light: cached permission reads"
+ ],
+ [
+  "rwb-document",
+  "P5 rwb-document",
+  1,
+  "DocumentIntakeWorkflow",
+  "OCR, classify, extract, generate, seal",
+  "JOB-12 intake every 15 min, JOB-17 retention monthly",
+  "OCR target 500 pages an hour; KEDA on backlog"
+ ],
+ [
+  "rwb-comms",
+  "P6 rwb-comms",
+  1,
+  "NoticeDispatchWorkflow",
+  "generate letter (P5), approval child (P7), deliverFile (P2)",
+  "JOB-10 notices at 16:00",
+  "Burst at 16:00"
+ ],
+ [
+  "rwb-decision",
+  "P7 rwb-decision",
+  1,
+  "ApprovalWorkflow",
+  "rule governance, ledger seal (WORM)",
+  "JOB-20 rule promote 00:01, JOB-14 chain check 02:00, JOB-13 continuous ingest",
+  "Steady; DecisionRecorded collected within 5 minutes"
+ ],
+ [
+  "rwb-payment",
+  "P8 rwb-payment",
+  2,
+  "none (activities only)",
+  "matchPayments, confirmBookings, postProceeds",
+  "JOB-07 and JOB-08 from AceDataReady",
+  "05:00-07:00 chain (hot)"
+ ],
+ [
+  "rwb-reporting",
+  "P9 rwb-reporting",
+  1,
+  "none (Schedule)",
+  "buildRegulatoryExtract",
+  "JOB-15 measures at 01:30, Airflow trigger",
+  "One publish a day"
+ ],
+ [
+  "rwb-agent",
+  "P10 rwb-agent",
+  1,
+  "AgentRunWorkflow",
+  "screening, classification and extraction runs, 60 s then rule result",
+  "Started by CaseCreated and DocumentStored",
+  "Bursty; 60 s cap per run"
+ ],
+ [
+  "rwb-valuation",
+  "S1 rwb-valuation",
+  3,
+  "RouteDecisionWorkflow",
+  "valuation, route agent child, approval child",
+  "Child of the case",
+  "One per new case"
+ ],
+ [
+  "rwb-treatment",
+  "S2 rwb-treatment",
+  2,
+  "TreatmentWorkflow",
+  "settlement and DIL sagas, postProceeds step",
+  "Child of the case; plan timers as durable timers",
+  "Long-running"
+ ],
+ [
+  "rwb-guarantee",
+  "S3 rwb-guarantee",
+  3,
+  "GuaranteeClaimWorkflow",
+  "guarantor notice child, approval child",
+  "Child of the case",
+  "Low volume"
+ ],
+ [
+  "rwb-litigation",
+  "S4 rwb-litigation",
+  3,
+  "LitigationWorkflow",
+  "issueInstruction (law firm), demand notice",
+  "Child of the case, years; continues-as-new",
+  "Longest-running workflows"
+ ],
+ [
+  "rwb-asset",
+  "S5 rwb-asset",
+  2,
+  "AssetDisposalWorkflow",
+  "issueInstruction (auction vendor), postProceeds",
+  "JOB-19 re-appraisal monthly",
+  "Monthly peaks"
+ ],
+ [
+  "rwb-debtsale",
+  "S6 rwb-debtsale",
+  3,
+  "DebtSaleWorkflow (saga, pivot = transfer)",
+  "deliverFile (buyer file), postProceeds",
+  "Per lot",
+  "Per lot, not daily"
+ ],
+ [
+  "rwb-writeoff",
+  "S7 rwb-writeoff",
+  4,
+  "WriteOffWorkflow",
+  "committee approval child, postProceeds",
+  "JOB-16 scan, monthly on the 3rd working day",
+  "Monthly peak"
+ ],
+ [
+  "rwb-deviation",
+  "S8 rwb-deviation",
+  2,
+  "DeviationWorkflow",
+  "screening agent child",
+  "Started by CaseCreated and AceDataReady",
+  "Can start at any time; pauses the stage clock"
+ ],
+ [
+  "rwb-partner",
+  "S9 rwb-partner",
+  4,
+  "InstructionWorkflow",
+  "issueInstruction, recordResult",
+  "Per instruction",
+  "SLA timers on the partner gateway"
+ ],
+ [],
+ [
+  "Platform settings"
+ ],
+ [
+  "Item",
+  "Value",
+  "Note"
+ ],
+ [
+  "Temporal namespace",
+  "rwb-recovery",
+  "One task queue per service; the ACE namespace ace-collection is reached through Nexus (restructure calculator)"
+ ],
+ [
+  "Temporal cluster",
+  "Shared with ACE, one per environment",
+  "Own persistence database; workers scaled by KEDA on backlog (ADR-016)"
+ ],
+ [
+  "Partitions",
+  12,
+  "Every business-event topic (slide 34)"
+ ],
+ [
+  "Replication factor",
+  3,
+  "Every business-event topic (slide 34)"
+ ],
+ [
+  "Retention",
+  "7 days",
+  "Replay for a new or repurposed service (slide 21)"
+ ],
+ [
+  "Record key",
+  "caseId",
+  "One case's events stay in order (slide 21)"
+ ],
+ [
+  "Envelope",
+  "CloudEvents 1.0, Kafka binary mode",
+  "ce_id, ce_type, ce_source, ce_subject and traceparent headers; JSON body against the registry, BACKWARD (ADR-015)"
+ ],
+ [
+  "Delivery",
+  "Outbox in the producer, inbox in each consumer",
+  "Exactly-once effect from at-least-once delivery (DP-09, RWB-PLT-TE006)"
+ ],
+ [
+  "Dead letter",
+  "<topic>.dlt",
+  "After the three retries; alerts the owning service"
+ ],
+ [
+  "Capacity",
+  "Tens of thousands of events a day",
+  "Small; the platform team confirms the quota (CG-B-DATA-26-4; ASM-B-DATA-26-4)"
+ ],
+ [
+  "Shared topic",
+  "rwb.decision-record.v1",
+  "DecisionRecorded from all 19 services into the central ledger in rwb-decision (DP-03, ADR-022)"
+ ]
+]

@@ -1,0 +1,358 @@
+=== SLIDE 1
+[Rounded Rectangle 2]
+SCB
+[TextBox 4]
+COLLECTIONS AND RECOVERY TRANSFORMATION
+Recovery Workbench: target architecture, all eight epics
+[TextBox 5]
+Henka Group, 16 November 2026
+(C) Siam Commercial Bank and Henka Pte Ltd
+=== SLIDE 2
+[TextBox 1]
+The architecture on one page
+[TextBox 3]
+2
+[Rectangle 4]
+Bank staff
+Entra ID single sign-on
+[Rectangle 5]
+Partners
+Partner portal (DL03)
+[Rectangle 6]
+Customers
+Existing bank channels only
+[Rectangle 7]
+ACE: one service, one repository, one front end, on the shared ACE AKS clusters
+[Rectangle 8]
+Front end
+React on Vite with Radix. Recovery screens in the recovery module folder
+[Rectangle 9]
+Common module
+ACE team. Sign-in, access checks, audit and PII logging, the shared case view, shared entities, notification path
+[Rectangle 10]
+Collection module
+Collection squad. Phone, field, FCR and restructure work
+[Rectangle 11]
+Recovery module
+TechX squads. Stages and tasks, Drools rules engine and Temporal workflow platform, decision center and log, document hub, partner portal, read-only ACE views and extension tables
+[Rectangle 12]
+ACE database, PostgreSQL
+Source data written by ACE ingestion; case state, records, reference data, decision log, interaction ledger
+[Rectangle 13]
+Blob storage
+Documents, with a write-once container for legal types
+[Rectangle 14]
+In: ACE ingestion
+ALS, EFS, COLLINS (today); SVAF, CCMS, AMIS, RPS, LIT, WIN, GL, COLLINS scores, SCBPDM, NLEADS, EasyApp, Entra ID
+[Rectangle 15]
+Read only: 30 views
+recovery.v_ace_* over the ACE tables. No Workbench load
+[Rectangle 16]
+Out
+Core bank bookings by the officer; WIN files; NSS and LINE OA; data lake for Power BI and COLLINS; partners; debt buyers
+[Rectangle 17]
+Platform services
+Entra ID, bank IAM, PII Kafka, audit and SOC logs, model endpoint (DL33)
+[TextBox 22]
+No component calls a system of record directly. ACE ingests the source data and the Workbench reads it through 30 read-only views; work for other systems leaves through paths ACE already has.
+=== SLIDE 3
+[TextBox 1]
+Goals and constraints
+[TextBox 3]
+3
+[TABLE]
+Goal | What it means
+One case record from day 90 to close | Every recovery case is held once, with one owner, one clock and one history, in the same application as collection
+Change without a release | Every rule, limit, threshold, template, queue, role, timer and route is a versioned data row
+Every decision traceable | Each decision is logged once with its inputs, the rule and model versions, the approver and the outcome
+Safe use of AI | Agents prepare and recommend through one runtime, start in shadow and fall back to the rules when they do not answer
+Monthly releases | One production release at each month end, shared with the collection squad, from November 2026 to June 2027
+[TABLE]
+Constraint | What it means | Status
+Built on ACE | The Workbench is a module of ACE: one service, one repository, one front end | Taken
+Modular monolith | Common, collection and recovery modules by folder, with boundaries checked at build time | Taken
+Hybrid workflow | Case, stage and task state stay in the ACE database. From Epic 3, Temporal runs the case lifecycle as one workflow per case; Quartz and Spring Batch stay for Epic 1 and Epic 2 scheduled jobs | Taken; D-RCV-36, ADR-011
+CMMN 1.1 | Case, stage, milestone, task, sentry, event listener and case file item mean the same in both modules | Taken
+Data through ACE | Source data lands in the ACE database through ACE ingestion. The recovery module reads it through 30 read-only views and holds no copy | Taken; D-RCV-35, ADR-010
+ACE technology | Spring Boot, React on Vite, PostgreSQL, Entra ID, the bank IAM, PII Kafka, audit and SOC logs | Taken
+Document hub built here | The Workbench holds recovery documents as their system of record | Taken; storage pattern DL27
+No legacy enhancement | The Workbench reads source data through ACE and writes through ACE only | Taken; D-RCV-35 (supersedes DL12 option A)
+=== SLIDE 4
+[TextBox 1]
+Architecture principles
+[TextBox 3]
+4
+[TABLE]
+ | Principle
+1 | Everything that a business person may want to change is a versioned data row, changed through a validated load without a code release
+2 | One service, one repository, one front end. A module calls another only through its published interface or an application event
+3 | Each module owns its tables. No module reads another module's tables directly; the recovery module reads ACE source data only through its own read-only views
+4 | No component calls a system of record directly. ACE ingests the source data and the recovery module reads it through read-only views; outbound work leaves through existing ACE paths
+5 | A decision that cannot be written to the decision log does not proceed
+6 | An agent reaches a system only through the tool gateway and holds no credential. When it does not answer, the rule result is used
+7 | Personal data is masked in the views and at the API unless the role is allowed to see it. No personal data in code, tests, logs or prompts
+8 | Every value read from ACE carries its business date, so every decision can show the age of its inputs
+=== SLIDE 5
+[TextBox 1]
+Context: who and what the Workbench works with
+[TextBox 3]
+5
+[TABLE]
+Actor or system | What passes | How
+Bank staff | Case owners, officers, approvers, committees, control functions | Workbench screens in the ACE front end, signed in through Entra ID
+Partners | Law firms, agencies, valuers, auction vendors, debt buyers, RAMC | Partner portal, once partner access from outside the bank is in place (DL03)
+Customers | Borrowers, guarantors, heirs, bidders | Existing bank channels only: SCB Easy, LINE OA, SMS, branches, HOME.SCB
+COLLINS | Account, customer, collections history, litigation status, scores | ACE ingestion, daily batch into the ACE database
+CCMS, SVAF, AMIS, RPS, LIT, WIN, GL, SCBPDM, NLEADS, EasyApp, Entra ID | Collateral detail, appraisals, assets, litigation, registered mail, write-off postings, product holding, credit decisions, signature requests, group mapping | ACE ingestion into the ACE database. No Workbench load
+Core bank (ALS) | Bookings for restructures, settlements and write-offs | Made by the officer; confirmed in ACE on the next business date
+NSS and LINE OA | SMS and LINE messages | The ACE notification path
+Power BI and the data lake | Reporting and model learning | Daily batch out
+Enterprise AI platform | The model endpoint the agents call | Private endpoint in the SCB tenant (DL33)
+=== SLIDE 6
+[TextBox 1]
+The modular monolith
+[TextBox 3]
+6
+[TABLE]
+Module | Built by | Holds
+Common | ACE team | Sign-in and access checks, audit and PII logging, the shared case view, shared entities (customer, account, product, collateral, asset), shared tasks such as the restructure calculator, the notification path
+Collection | Collection squad | Phone, field, FCR and restructure work, as split under DL14
+Recovery | TechX recovery squads | Recovery stages, tasks and screens, the Drools rules engine, the decision center and log, the document hub, the partner portal, the read-only ACE views and the extension tables
+[TABLE]
+Boundary rules
+A module calls another only through its published interface or an application event
+Each module owns its tables; another module reads them only through the owning module's interface
+A boundary test runs in every build and fails it on any violation
+A recovery component the collection module also needs moves to the common module by agreement with the ACE team
+The recovery module reads ACE source data only through recovery.v_ace_* views: no direct public read, no write and no foreign key into ACE
+=== SLIDE 7
+[TextBox 1]
+The ten platform modules
+[TextBox 3]
+7
+[TABLE]
+ | Module | Where it lives | What it owns | First in
+P1 | Recovery data engine | Recovery | Read-only ACE source views, the extension tables, reconciliation to the ACE account list, freshness from the ACE batch record | E1
+P2 | Integration | Common and recovery | Outbound files and adapters, the ACE integration paths | E1
+P3 | Case and workflow | Recovery, with the common case view | Case record, CMMN state, queues, allocation, timers, the Drools rules engine and the Temporal workflow platform | E1 core, E2 screens
+P4 | Access and administration | Common, with recovery roles as data | Roles, permissions, scope, masking, delegation of authority table, access log | E1; E2 partners; E8 full administration
+P5 | Document hub | Recovery | Store, index, OCR, classification, extraction, review queue, retention, custody | E1 store and OCR; E2 generation
+P6 | Communications | Common path, recovery templates | Letters, notices, SMS, LINE, proof of delivery | E1 notices; E2 dispatch; E4 self-service
+P7 | Decision center and log | Recovery | Recommendation with reasons, approval within delegation, decision log store and writer | E1 log; E2 routing; E3 center
+P8 | Payments and posting | Recovery | Payment and proceeds matching, fees, posting files | E2 matching; E4
+P9 | Reporting | Recovery, with Power BI | Baseline measures, steering dashboard, operational and regulatory reports | E1 baseline; E2 dashboard
+P10 | Agent runtime | Recovery, calling the Enterprise AI platform | Orchestrator, tool gateway, guardrails, prompt store, evaluation, autonomy levels | E1 shadow; E2 L1
+=== SLIDE 8
+[TextBox 1]
+The nine stage modules
+[TextBox 3]
+8
+[TextBox 5]
+Every stage module runs on the platform modules and adds its own stages, tasks, rules, screens and documents to the recovery module.
+[TABLE]
+ | Module | What it owns | First in
+S1 | Valuation and route | D6 route decision with COLLINS return by route and the route agent | E4
+S2 | TDR, settlement and deed in lieu | Treatment record, contracts, booking, plan timers | E2 foundations; E3
+S3 | Guarantees and guarantors | TCG and insurance claims, guarantor notices and pursuit | E4
+S4 | Litigation and enforcement | Notices, law firm instruction, hearings, judgment, enforcement | E2 notices; E5
+S5 | Assets and auction | Asset record, holding, floor price, listing, auction rounds, RAMC | E3; E4
+S6 | Debt sale | Lot building, data room, buyer terms, award, transfer | E5 data; E6 screens
+S7 | Write-off and recovery | Eligibility, committee, posting, recovery after charge-off | E6
+S8 | Deviation handling | X1 to X7: screening, pause, handling, return | E2 screening; E7
+S9 | Partner management | Panel, allocation, fees, scorecards, conduct | E6 panel; E7 scoring
+=== SLIDE 9
+[TextBox 1]
+How the case workflow runs
+[TextBox 3]
+9
+[Pentagon 4]
+Event arrives
+An ACE refresh, a screen action, a partner result, a timer or another module
+[Pentagon 5]
+Rules evaluated
+The Drools rules engine finds the rule for the state and the event
+[Pentagon 6]
+Decision logged
+Rule version, inputs and approver written. A failed write stops here
+[Pentagon 7]
+Action taken
+Next state, tasks, owner, queue, documents or notices
+[Pentagon 8]
+Timer set
+The next due date is stored for the scheduler
+[Rectangle 9]
+Work queued
+Work for other systems goes to an outbox with retry
+[Rectangle 11]
+Temporal from Epic 3, case data in ACE
+Case, stage and task state stay the system of record in the ACE database. From Epic 3, Temporal runs the case lifecycle in the rwb-recovery namespace on ACE AKS, with durable timers and retries. Quartz and Spring Batch stay for every Epic 1 and Epic 2 scheduled job; JOB-05 sits behind the TimerScheduler port (ADR-011, D-RCV-36).
+[TABLE]
+Case model, CMMN 1.1 | Count
+Stages | 10
+Milestones | 30
+Tasks | 150
+Event listeners | 53
+Sentries (rules) | 448
+Case file items | 12
+=== SLIDE 10
+[TextBox 1]
+The rules engine
+[TextBox 3]
+10
+[TABLE]
+What | How it works
+Rules as packages | Each package is an XLS decision table: from state, event and condition in; action, next state, owner and timer out. Each row has an ID, a version, valid dates, an approver and a test case
+Embedded Drools | KIE runtime libraries only. No KIE Server, no Business Central and no KJAR in Maven. The workbook compiles to a KieBase on upload (T3, ADR-012)
+Versioned store | rule_package and rule_package_version hold the workbook, the generated DRL and a checksum. rule_row is the parsed catalog that code reads (T4, T6)
+First match | Rows share one activation-group and salience follows row order, so exactly one rule fires. The Drools rule name is the rule ID; the package version label is the rule version (T5)
+Change without a release | RW-COE uploads, RW-RISK approves and the author cannot approve. In force from valid-from; rollback is one call (T4)
+Open cases | A case keeps the rule version it was decided under; new decisions use the version in force on the day
+Epic 1 | Entry, exclusion, allocation, assignment and transfer packages; the route decision follows in Epic 4 (DL24)
+=== SLIDE 11
+[TextBox 1]
+Data architecture: four tiers, one read path
+[TextBox 3]
+11
+[Rounded Rectangle 4]
+ACE ingestion
+ALS, EFS, COLLINS (today); SVAF, CCMS, AMIS, RPS, LIT, WIN, GL, COLLINS scores, SCBPDM, NLEADS, EasyApp, Entra ID
+[Rounded Rectangle 6]
+ACE database
+Tier 1: 22 tables. Tier 2: 14 tables and 12 columns
+[Rounded Rectangle 8]
+30 read-only views
+recovery.v_ace_* - SELECT only, no write, no foreign key
+[Rounded Rectangle 10]
+Recovery module
+Tier 3: 4 extension tables. Tier 4: 88 Workbench tables
+[Rounded Rectangle 11]
+Tier 1 - ACE tables that exist today
+ACE team, read only. 22 tables, 16 views. Read through a view, never altered
+[Rounded Rectangle 12]
+Tier 3 - recovery extension tables
+Workbench. 4 tables, 1:1, keyed by ACE business keys
+[Rounded Rectangle 13]
+Tier 2 - new ACE tables and columns
+ACE team. 14 tables, 12 columns, 14 views. Raised once in RWB-ACE-001 (DL43)
+[Rounded Rectangle 14]
+Tier 4 - Workbench tables that stay
+Workbench. 88 tables: case, workflow, treatment, legal, partner, debt sale, documents, decision log, reference, outbox, flags, agents
+[Rounded Rectangle 15]
+Removed from the schema
+20 tables, 243 fields: source copies, load machinery and the 6 columns the ACE story absorbs
+[TextBox 16]
+92 Workbench tables, 30 views, 122 dictionary objects and 1,366 dictionary fields. Tier 1 views ship with RWB-E1-069; the Tier 2 views ship when RWB-ACE-001 lands (DL43). No foreign key into ACE: a link to a source record is a business key.
+=== SLIDE 12
+[TextBox 1]
+Security and access
+[TextBox 3]
+12
+[TABLE]
+Control | How it works
+Sign-in | Entra ID single sign-on with multi-factor authentication
+Roles | 54 roles held as data, granted by Entra ID group membership through the bank IAM
+Permissions | A matrix of roles against 14 capability areas, held as versioned data, checked on every endpoint
+Scope | Own cases, team, region or all, set per role
+Masking | Personal data masked in the views and at the API unless the role is allowed to see it
+Approval limits | The delegation of authority table as reference data, checked before an approval is accepted
+Logs | Access to personal data through PII Kafka; security events to the SOC log; every decision to the decision log
+Break-glass | Emergency access with a reason and a review window
+Partners | Their own identities, scoped to the cases placed with them (DL03)
+=== SLIDE 13
+[TextBox 1]
+The agent runtime
+[TextBox 3]
+13
+[TextBox 6]
+Agents run in shadow first. A decision moves up one level on evidence and drops one level on a guardrail breach.
+[TABLE]
+Part | What it does
+Orchestrator | Runs the decision steps and applies the autonomy level
+Tool gateway | The only way an agent reaches a system. No agent holds a credential
+Guardrail checker | Checks every output against its schema, the allowed actions and a confidence floor
+Prompt and policy store | Versioned, so a run can be reproduced
+Evaluation harness | Labeled sets scored before a result is used
+Model endpoint | On the approved endpoint in the SCB tenant (DL33)
+[TABLE]
+Level | The agent | A person
+L0 | Nothing. The rule decides | Everything
+L1 | Recommends, with its reasons | Decides. Every decision starts here after a shadow run
+L2 | Acts inside a narrow band | Reviews a sample and the exceptions
+L3 | Acts across the decision | Reviews by exception
+L4 | Acts and closes | Monitors the measures
+=== SLIDE 14
+[TextBox 1]
+Environments and the release path
+[TextBox 3]
+14
+[TextBox 5]
+Nine pipeline gates before every merge: build and unit tests, lint, secret scan, PDPA lint, container scan, module boundary, integration and contract tests, AI first-pass review, and human approval. A change that fails SIT or UAT has its feature flag switched off and the release goes ahead without it.
+[TABLE]
+Environment | Data | Deployed | Notes
+DEV | Synthetic data | On every merge into main | Four slots planned, one available (DL35)
+SIT | Masked data | On a release tag | Two slots planned, one available (DL35)
+UAT | Masked data | In the week before each release | Shared with the collection squad
+PROD | Live data | In the monthly change window (DL34) | ACE namespace on the shared ACE AKS clusters
+=== SLIDE 15
+[TextBox 1]
+What each epic adds to the architecture
+[TextBox 3]
+15
+[TABLE]
+Epic | Release | Added
+E1 | 30 Nov 2026 | P1 read-only ACE views for Tier 1 (RWB-E1-069) and the extension tables, reconciliation and freshness; P3 case record, state model and embedded Drools rules engine with allocation rules; the Temporal platform, worker and rule package store (RWB-E1-070 to RWB-E1-073); P4 sign-in and roles; P5 document store and OCR; P6 notice generation; P7 decision log store; P9 baseline; P10 agent runtime in shadow; Tier 2 views ship when RWB-ACE-001 lands (DL43)
+E2 | 31 Dec 2026 | P3 queue and transfer screens; P4 partner identities; P5 document generation; P6 dispatch and proof of delivery; P7 approval routing; P8 matching skeleton; P9 steering dashboard; S2 treatment record; S4 notice approval; S8 deviation screening; Temporal observability, security, resilience and replay gate; Epic 2 rule packages (RWB-E2-037 to RWB-E2-043)
+E3 | 31 Jan 2027 | S2 settlement and deed in lieu to booking; S5 asset record, floor price and listing; P7 decision center
+E4 | 28 Feb 2027 | S1 route decision with COLLINS and the route agent; S3 guarantee and TCG claims; S5 auction rounds and RAMC; P6 customer self-service; P8 posting
+E5 | 31 Mar 2027 | S4 litigation end to end with law firms through the partner portal; S6 lot data and data room
+E6 | 30 Apr 2027 | S6 debt sale screens and award; S7 write-off and committee; S9 partner panel, allocation and fees
+E7 | 31 May 2027 | S8 deviations end to end; S9 partner scoring, conduct and the field app
+E8 | 30 Jun 2027 | P4 full administration; conduct checks; autonomy step-ups; regulatory returns; hardening
+=== SLIDE 16
+[TextBox 1]
+Quality targets
+[TextBox 3]
+16
+[TABLE]
+Quality | Target or position | Status
+Availability | 99.9% in business hours | Proposed, DL11
+Screen response | Under 2 seconds | Proposed, DL11
+Agent response | Within 60 seconds; after that the rule result is used | Proposed, DL11
+Recovery point and time | Set by SCB IT | Open, DL11
+Volume | About 23,600 open cases at go-live and 26,500 at the end of 2027; about 410 concurrent users | Sized; bank confirms under DL15
+Retention and masking | Per data product and document type | Open, DL26
+Data freshness | End of day for ACE data; the view reports the ACE batch date. Tier 2 sources arrive at the frequency ACE ingests them | Taken; DL06, DL43
+Auditability | Every decision reproducible from the log with its rule version and approver | Designed
+Resilience | An agent or model outage falls back to rules. A source that has not refreshed shows its age on the view and through the data product freshness stamp | Designed
+=== SLIDE 17
+[TextBox 1]
+Risks and how the architecture answers them
+[TextBox 3]
+17
+[TABLE]
+Risk | Effect | Answer
+Data arrives a day late | End of day data for decisions that need today's position | Officers confirm payoff figures in the core; same-day triggers named under DL06
+A source is not ingested by ACE | That source reopens U1 for it and needs a Workbench staging table and a load | Each source confirmed with the ACE team under DL43; the gap list names them one by one
+RWB-ACE-001 lands late | The Tier 2 views, and the features that read them, cannot ship on their planned release | Tier 2 features stay behind their feature flags until RWB-ACE-001 lands; Tier 1 views ship with RWB-E1-069; scope and dates confirmed under DL43
+Two squads, one repository | One squad's change holds the other's release | Feature flags, code owners and the module boundary test (DL04, DL37)
+Rules engine is new to ACE | ACE rule logic is scattered and not held as versioned packages | Embedded Drools in the recovery module, with every rule package tested scenario by scenario through RuleEvaluator (ADR-012)
+Volume grows faster than forecast | Reads, storage and queues sized too small | Sized at 15 percent inflow growth a year from the 30 June 2026 inventory; reviewed each quarter (DL15)
+Partner access from outside | One to three months of lead time | Change raised in November; law firms first needed at Epic 5 (DL03)
+=== SLIDE 18
+[TextBox 1]
+Open architecture decisions
+[TextBox 3]
+18
+[TABLE]
+Decision | What is needed
+DL03 | How partners reach the partner portal from outside the bank
+DL05 | Who creates the recovery module in ACE
+DL06 | Which interfaces need real-time data
+DL07 | How the front end is split into modules
+DL11 | Non-functional target values
+DL12 | Which legacy systems are kept
+DL21 | Which systems carry the case identifier
+DL27 | Storage, backup, legal hold and e-discovery for the document hub
+DL33 | The model endpoint the agents call
+DL35 | Further ACE deployment slots
+DL43 | Whether the ACE team accepts the RWB-ACE-001 scope and dates

@@ -1,0 +1,838 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-agent (Agent)"
+  version: 5.0.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-agent (Agent, module P10, service wave 1) under
+    Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16 November 2026)
+    by the D-RCV-60 microservice realignment.
+    This document holds 11 operations under REST base /api/recovery/agent/v1; schema rwb_agent; topic
+    rwb.agent.events.v1; Temporal task queue rwb-agent in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-agent.asyncapi.yaml.
+servers:
+- url: "/api/recovery/agent/v1"
+  description: "Relative to the rwb-agent service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Cases"
+- name: "Administration"
+x-service:
+  code: "P10"
+  service: "rwb-agent"
+  name: "Agent"
+  wave: 1
+  schema: "rwb_agent"
+  rest-base: "/api/recovery/agent/v1"
+  topic: "rwb.agent.events.v1"
+  task-queue: "rwb-agent"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-agent.asyncapi.yaml"
+  operations: 11
+paths:
+  /admin/agent-runs:
+    get:
+      tags:
+      - Administration
+      summary: List agent runs with fallbacks and evaluation results
+      operationId: getAdminAgentRuns
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: agent
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentRun'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/agent-configs:
+    get:
+      tags:
+      - Administration
+      summary: List prompt and policy versions per agent with status and dates
+      operationId: getAdminAgentConfigs
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: agent
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentConfigVersion'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+    post:
+      tags:
+      - Administration
+      summary: Load a new prompt or policy version for an agent from a checked file
+      operationId: postAdminAgentConfigs
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                kind:
+                  type: string
+                agent:
+                  type: string
+                validFrom:
+                  type: string
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentConfigVersion'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/agent-configs/{versionId}/approve:
+    post:
+      tags:
+      - Administration
+      summary: Approve a loaded prompt or policy version
+      operationId: postAdminAgentConfigsVersionidApprove
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: A
+      x-first-release: E1
+      parameters:
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentConfigVersion'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/agent-samples:
+    post:
+      tags:
+      - Administration
+      summary: Load a labeled evaluation sample for an agent
+      operationId: postAdminAgentSamples
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                agent:
+                  type: string
+                sampleCode:
+                  type: string
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentSample'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/agent-evaluations:
+    get:
+      tags:
+      - Administration
+      summary: List evaluation runs with their scores and proposals, as JSON or CSV
+      operationId: getAdminAgentEvaluations
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: agent
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentEvaluationRun'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+    post:
+      tags:
+      - Administration
+      summary: Start the evaluation harness for an agent on a labeled sample
+      operationId: postAdminAgentEvaluations
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentEvaluationRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentEvaluationRun'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/agent-evaluations/{evaluationId}/report:
+    get:
+      tags:
+      - Administration
+      summary: 'Read the report of one evaluation run: sample size, agreement, failures, cost and latency'
+      operationId: getAdminAgentEvaluationsEvaluationidReport
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: evaluationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentEvaluationReport'
+            text/csv:
+              schema:
+                type: string
+                description: CSV export of the same report (RWB-E1-061).
+            application/pdf:
+              schema:
+                type: string
+                description: PDF export of the same report (RWB-E1-061).
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/agent-metrics:
+    get:
+      tags:
+      - Administration
+      summary: Read agent measures per agent, version, segment and day for the agent monitor
+      operationId: getAdminAgentMetrics
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: agent
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: segment
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: version
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentMetric'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/agent-outputs:
+    get:
+      tags:
+      - Cases
+      summary: 'Read the L1 agent outputs for a case: intake summary and proposed deviations'
+      operationId: getCasesCaseidAgentOutputs
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E3
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentOutput'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /agent-runs/{runId}/feedback:
+    post:
+      tags:
+      - Cases
+      summary: Record a person's verdict on an item of an L1 agent output
+      operationId: postAgentRunsRunidFeedback
+      x-module: P10
+      x-owner: "P10"
+      x-capability:
+        area: Case record
+        right: U
+      x-first-release: E3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentFeedbackRequest'
+      parameters:
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentOutput'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    AgentRun:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        agent:
+          type: string
+        agentVersion:
+          type: string
+        caseId:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+        fallback:
+          type: boolean
+        latencyMs:
+          type: integer
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        messageCode:
+          type: string
+        messageTh:
+          type: string
+        field:
+          type: string
+        traceId:
+          type: string
+    AgentConfigVersion:
+      type: object
+      properties:
+        versionId:
+          type: string
+          format: uuid
+        agent:
+          type: string
+        kind:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+        validFrom:
+          type: string
+          format: date
+        validTo:
+          type: string
+          format: date
+        loadedBy:
+          type: string
+          format: uuid
+        approvedBy:
+          type: string
+          format: uuid
+        bodyHash:
+          type: string
+        autonomyMode:
+          type: string
+        reviewDate:
+          type: string
+          format: date
+        rowVersion:
+          type: integer
+    AgentSample:
+      type: object
+      properties:
+        sampleCode:
+          type: string
+        sampleVersion:
+          type: integer
+        agent:
+          type: string
+        rows:
+          type: integer
+    AgentEvaluationRequest:
+      type: object
+      properties:
+        agent:
+          type: string
+        sampleCode:
+          type: string
+        sampleVersion:
+          type: integer
+        approaches:
+          type: array
+          items:
+            type: string
+    AgentEvaluationRun:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        agent:
+          type: string
+        sampleCode:
+          type: string
+        sampleVersion:
+          type: integer
+        status:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+        evaluations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentEvaluation'
+        proposal:
+          type: string
+    AgentEvaluation:
+      type: object
+      properties:
+        approach:
+          type: string
+        labelKey:
+          type: string
+        sampleSize:
+          type: integer
+        agreementRate:
+          type: number
+        failureCount:
+          type: integer
+    AgentEvaluationReport:
+      type: object
+      properties:
+        evaluationId:
+          type: string
+          format: uuid
+        agent:
+          type: string
+        sampleSize:
+          type: integer
+        versions:
+          type: array
+          items:
+            type: string
+        agreementByLabel:
+          type: array
+          items:
+            $ref: '#/components/schemas/LabelAgreement'
+        failureCounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailureCount'
+        totalCostThb:
+          type: number
+        costPerCaseThb:
+          type: number
+        latencyP50Ms:
+          type: integer
+        latencyP95Ms:
+          type: integer
+    LabelAgreement:
+      type: object
+      properties:
+        labelKey:
+          type: string
+        rows:
+          type: integer
+        agreementRate:
+          type: number
+    FailureCount:
+      type: object
+      properties:
+        failureType:
+          type: string
+        count:
+          type: integer
+    AgentMetric:
+      type: object
+      properties:
+        agent:
+          type: string
+        policyVersion:
+          type: string
+        promptVersion:
+          type: string
+        modelVersion:
+          type: string
+        segment:
+          type: string
+        mode:
+          type: string
+        date:
+          type: string
+          format: date
+        runs:
+          type: integer
+        fallbackRate:
+          type: number
+        acceptanceRate:
+          type: number
+        correctionRate:
+          type: number
+        overrideRate:
+          type: number
+        feedbackCount:
+          type: integer
+        latencyP50Ms:
+          type: integer
+        latencyP95Ms:
+          type: integer
+        tokens:
+          type: integer
+        costThb:
+          type: number
+        reconciled:
+          type: boolean
+    AgentOutput:
+      type: object
+      properties:
+        runId:
+          type: string
+          format: uuid
+        agent:
+          type: string
+        agentVersion:
+          type: string
+        mode:
+          type: string
+        status:
+          type: string
+        summary:
+          type: string
+        gaps:
+          type: array
+          items:
+            type: string
+        proposals:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentProposal'
+        confidence:
+          type: number
+        dataAsOf:
+          type: string
+          format: date-time
+        feedback:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentFeedback'
+        rowVersion:
+          type: integer
+    AgentProposal:
+      type: object
+      properties:
+        itemKey:
+          type: string
+        text:
+          type: string
+        confidence:
+          type: number
+    AgentFeedback:
+      type: object
+      properties:
+        itemKey:
+          type: string
+        verdict:
+          type: string
+        reason:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        recordedAt:
+          type: string
+          format: date-time
+    AgentFeedbackRequest:
+      type: object
+      properties:
+        itemKey:
+          type: string
+        verdict:
+          type: string
+        reason:
+          type: string

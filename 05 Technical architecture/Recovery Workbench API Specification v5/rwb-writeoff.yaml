@@ -1,0 +1,377 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-writeoff (Write-off)"
+  version: 5.0.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-writeoff (Write-off, module S7, service wave 4)
+    under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16 November
+    2026) by the D-RCV-60 microservice realignment.
+    This document holds 2 operations under REST base /api/recovery/writeoff/v1; schema rwb_writeoff; topic
+    rwb.writeoff.events.v1; Temporal task queue rwb-writeoff in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-writeoff.asyncapi.yaml.
+servers:
+- url: "/api/recovery/writeoff/v1"
+  description: "Relative to the rwb-writeoff service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Write-off"
+x-service:
+  code: "S7"
+  service: "rwb-writeoff"
+  name: "Write-off"
+  wave: 4
+  schema: "rwb_writeoff"
+  rest-base: "/api/recovery/writeoff/v1"
+  topic: "rwb.writeoff.events.v1"
+  task-queue: "rwb-writeoff"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-writeoff.asyncapi.yaml"
+  operations: 2
+paths:
+  /write-off-scans:
+    post:
+      tags:
+      - Write-off
+      summary: Run the monthly write-off scan for a cut-off date
+      operationId: postWriteOffScans
+      x-module: S7
+      x-owner: "S7"
+      x-capability:
+        area: Write-off and posting
+        right: C
+      x-first-release: E6
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteOffScan'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /write-offs/{writeOffId}/committee-decision:
+    post:
+      tags:
+      - Write-off
+      summary: Record the committee decision for a write-off
+      operationId: postWriteOffsWriteoffidCommitteeDecision
+      x-module: S7
+      x-owner: "S7"
+      x-capability:
+        area: Write-off and posting
+        right: A
+      x-first-release: E6
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommitteeDecision'
+      parameters:
+      - name: writeOffId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionLogEntry'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    DecisionLogEntry:
+      type: object
+      description: One record per decision. Append only and hash chained.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the decision log entry
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to; empty only for access events (decision code AC-...) with no case
+        decisionCode:
+          type: string
+          maxLength: 8
+          description: D5.1 to D9.3, X1 to X7, or an access event
+        ruleId:
+          type: string
+          maxLength: 20
+          description: Rule that fired
+        ruleVersion:
+          type: string
+          maxLength: 20
+          description: Rule version
+        modelVersion:
+          type: string
+          maxLength: 40
+          description: Model version used
+        agentVersion:
+          type: string
+          maxLength: 40
+          description: Agent and prompt version used
+        inputsRef:
+          type: string
+          maxLength: 400
+          description: Reference to the inputs snapshot, with the freshness of each input
+        recommendation:
+          type: object
+          description: Option, reasons, confidence and alternatives
+        approverUserId:
+          type: string
+          format: uuid
+          description: Who approved
+        approvalLevel:
+          type: string
+          maxLength: 4
+          enum:
+          - L1
+          - L2
+          - L3
+          - L4
+          - L5
+          - L6
+          description: Approval level applied
+        finalCall:
+          type: string
+          maxLength: 40
+          description: The option decided
+        overrideReason:
+          type: string
+          maxLength: 1000
+          description: Reason when the person did not follow the recommendation
+        actions:
+          type: object
+          description: Target system, result and timestamps of each action
+        outcome:
+          type: object
+          description: Cash, cure, loss and time, written when known
+        decidedAt:
+          type: string
+          format: date-time
+          description: When decided
+        prevHash:
+          type: string
+          maxLength: 64
+          description: Hash of the previous entry
+        entryHash:
+          type: string
+          maxLength: 64
+          description: Hash of this entry
+        chainSeq:
+          type: string
+          description: Position of the entry in the hash chain; prev_hash is the entry_hash of chain_seq minus 1; unique on its own
+        correctsEntryId:
+          type: string
+          format: uuid
+          description: The entry this entry corrects
+        actorUserId:
+          type: string
+          format: uuid
+          description: The person or service identity whose action, preparation or access the entry records
+        idempotencyKey:
+          type: string
+          maxLength: 80
+          description: Event ID of the calling module; a repeat returns the first entry; unique on its own
+      required:
+      - id
+      - decisionCode
+      - inputsRef
+      - finalCall
+      - decidedAt
+      - prevHash
+      - entryHash
+      - chainSeq
+    WriteOff:
+      type: object
+      description: A write-off of the balance on a case.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the write-off
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        decisionLogId:
+          type: string
+          format: uuid
+          description: The decision_log_entry this record belongs to
+        amount:
+          type: number
+          description: Amount written off, baht
+        taxCriteriaMet:
+          type: boolean
+          description: True when the tax criteria are met
+        committeeDate:
+          type: string
+          format: date
+          description: Committee approval date
+        postedDate:
+          type: string
+          format: date
+          description: Posting date
+        responsibilityCenter:
+          type: string
+          maxLength: 10
+          description: Responsibility center
+        costCenter:
+          type: string
+          maxLength: 10
+          description: Operating cost center
+        glProduct:
+          type: string
+          maxLength: 10
+          description: GL product code
+        recoveredAfter:
+          type: number
+          description: Recovered after charge-off to date, baht
+      required:
+      - id
+      - caseId
+      - amount
+      - taxCriteriaMet
+      - recoveredAfter
+    ScanRequest:
+      type: object
+      properties:
+        cutOffDate:
+          type: string
+          format: date
+        taxCriteriaVersion:
+          type: string
+    CommitteeDecision:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+          - approve
+          - reject
+          - defer
+        resolutionReference:
+          type: string
+        membersPresent:
+          type: array
+          items:
+            type: string
+    WriteOffScan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        cutOffDate:
+          type: string
+          format: date
+        eligible:
+          type: integer
+        heldOut:
+          type: integer
+        status:
+          type: string
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        messageCode:
+          type: string
+        messageTh:
+          type: string
+        field:
+          type: string
+        traceId:
+          type: string

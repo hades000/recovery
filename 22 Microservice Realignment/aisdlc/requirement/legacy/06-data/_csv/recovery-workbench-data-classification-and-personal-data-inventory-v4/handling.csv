@@ -1,0 +1,21 @@
+﻿Handling rule by classification
+"What each classification means for storage, screens, logs, prompts, test data and export."
+Classification,Where,Rule
+Restricted,Stored,ACE source fields stored in ACE only; Workbench Restricted fields encrypted at rest. Identification numbers never leave ACE in clear
+Restricted,On screen,Masked unless the role is allowed to see the field for cases in its scope
+Restricted,In logs,Never written to application logs. Every read of a v_ace_* personal field is logged through PII Kafka
+Restricted,In agent prompts,Removed or masked before a prompt is built
+Restricted,In test data,Synthetic in DEV. Masked copies in SIT and UAT
+Restricted,Export,"Blocked except through an approved extract, logged with the requester"
+Restricted,Debt sale tape,"Only the fields the sale terms allow, after the award"
+Confidential,Stored,Encrypted at rest and in transit
+Confidential,On screen,Shown within the role's scope. Indirect identifiers masked in UAT
+Confidential,In agent prompts,Only the fields the agent's step needs
+Confidential,Export,"Within the role's scope, logged"
+Internal,Stored,Encrypted at rest and in transit
+Internal,On screen,By permission
+All,Retention,Set per data product and document type by Compliance (DL26). A legal hold overrides retention
+All,Data subject request,"Access, correction or erasure routed to Compliance inside the statutory period; automated processing on the case is held (R-UNI-11)"
+Restricted,In ACE,customer.identification_number is never exposed in clear. v_ace_customer returns id_no_masked (last four) and id_no_last4 only
+Restricted,Contact values,"phone.phone_number, email.email and address.address are full in v_ace_contact because notices and calls need them. Display masking is E1-037 at the API, and every read is audited"
+Restricted,Every ACE read,The recovery identity holds SELECT only on recovery.v_ace_* and on nothing else. A read of a personal field is audited; a direct public read fails in the catalog

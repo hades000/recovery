@@ -1,0 +1,145 @@
+{
+  "id": "RWB-P2-E2035-OPS",
+  "epic": "RWB-SVC-P2",
+  "service": "rwb-integration",
+  "wt": "OPS",
+  "lane": "L-P2-J",
+  "ready": "Day 1",
+  "owner": "DEVOPS",
+  "business_epic": "EP02",
+  "wave": 2,
+  "release": "31 December 2026",
+  "legacy": "RWB-E2-035",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC1 The service and the three operations are deployed with the rwb-integration login"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC2 The worker registers the sweep workflow and its three activities"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC3 The next-action-check Schedule is created and reported"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC4 The flag governs the sweep and the operations"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC5 The backfill fills only the missing cases and is idempotent"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "AC6 The five dashboard series, the three alerts and the runbook cover the sweep"
+    }
+  ],
+  "tcs": [
+    "TC-P2-E2035-OPS-01",
+    "TC-P2-E2035-OPS-02",
+    "TC-P2-E2035-OPS-03",
+    "TC-P2-E2035-OPS-04",
+    "TC-P2-E2035-OPS-05",
+    "TC-P2-E2035-OPS-06"
+  ],
+  "reqs": [
+    "REQ-WKM-012",
+    "REQ-WKM-013",
+    "REQ-WKM-016",
+    "REQ-WKM-014",
+    "REQ-WKM-015"
+  ],
+  "ops_provided": [],
+  "ops_consumed": [],
+  "events_published": [],
+  "events_consumed": [],
+  "workflows": [
+    "NextActionCheckWorkflow",
+    "findCasesWithoutNextAction",
+    "resolveNextAction",
+    "fillNextAction"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P2 rwb-integration v1.md (no FR mapped to REQ-WKM-012, REQ-WKM-013, REQ-WKM-016, REQ-WKM-014, REQ-WKM-015)",
+  "gaps": [
+    "GAP-0669"
+  ],
+  "assumptions": [
+    "ASM-1177",
+    "ASM-1180",
+    "ASM-1184",
+    "ASM-1187",
+    "ASM-1188",
+    "ASM-1189"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2035 OPS Next action on the case - deployment v1.md",
+  "gap_rows": [
+    {
+      "id": "GAP-0669",
+      "title": "rwb-integration next action deployment: the login and secret reference, the next-action-check run values, the alert thresholds and the runbook ownership are not fixed by a source",
+      "source": "Architecture v5 Text Extract v1 slides 16, 41, 42 and 44; Ownership Map tables job_catalog (P2) and feature_flag (PLT) and API row GET /cases/{caseId}/next-action (owner P3); Temporal and Drools Design Text Extract v1 slides 12, 13, 27 and 28; TSD P2 Integration v3 T3.1 (job_catalog, feature_flag), API-P2-009 and Appendix T-B; legacy RWB-E2-035 §4 step 7, §12 job step and §13 configuration; Template and Rules v1 §R3, §R5.7, §R7.2 s12 and §R9",
+      "section": "§3 Preconditions, §10 Authority, §11 Data, §12.5 to §12.7, §13 Solution plan",
+      "description": "One combined row for the deployment side of this key. (1) Login and identity: no source names the login, the secret reference or the worker identity of rwb-integration under DP-02, and the release must carry one login and one task queue. (2) Ownership conflict: the Ownership Map keeps GET /cases/{caseId}/next-action with P3 while this work package assigns it to rwb-integration, so the release deploys a path the map attributes to another service until the ruling is entered. (3) Contract field names: the release configures the consumed shapes of the P3 case read and write, the catalog operation of RWB-P3-E2042-CON, the P3 reference data and parameter reads and the P7 decision log read, whose JSON property names and query parameters are fixed by no source; the readiness probe must therefore name a check that does not depend on an invented field. (4) Operation names: the release exposes POST /next-actions:resolve, GET /cases/{caseId}/next-action and POST /cases/{caseId}/next-action, and the colon path and the fill method are this work package's. (5) Schedule: the release creates next-action-check every 5 minutes with the overlap policy SKIP, and the catch-up window, the overlap window and the backfill limit are not specified, while Arch v5 slide 44 lists JOB-05 as retired durable timers and the timer table ruling retires it, so the job_catalog row is the only legacy trace of the sweep. (6) Message texts: the three alerts carry MSG-P2-023, MSG-P3-027 and MSG-GEN-004, whose texts come from the legacy story and the platform catalogue and not from a deployment source. (7) Rule values: the series and the alerts name package version RES-2026.12 and the rows R-RES-04 and R-SET-13, which are legacy values kept unchanged and must match the registry rows of RWB-E2-042. (8) Timer vocabulary: the runbook and the alert texts name the sweep by its new name, and the legacy JOB-05 wording survives in the criteria and in the job catalogue, so the two are mapped in the runbook.",
+      "evidence": "Legacy RWB-E2-035 §13 fixes no deployment value and names no identity; TSD P2 Integration v3 API-P2-009 reads the job catalogue with owner, schedule, run book and alert threshold but names no next action job; Arch v5 slide 44 lists JOB-05 as every 5 min, owner all, retired durable timers; the Ownership Map gives job_catalog to P2 and feature_flag to PLT; no source fixes the readiness check, the catch-up window, the backfill limit or the alert thresholds of this sweep.",
+      "type": "Missing",
+      "area": "Deployment, scheduling, observability, ownership",
+      "severity": "P2",
+      "needed_by_wave": "2",
+      "legacy_ref": "RWB-E2-035 sections 4, 12 and 13",
+      "owner_role": "DevOps engineer; platform administrator; platform workflow kit owner",
+      "asm": "ASM-1177, ASM-1180, ASM-1184, ASM-1187, ASM-1188, ASM-1189",
+      "proposed": "Fix the identity, the secret reference and the probe checks in RWB-P2-E2035-OPS; take the catch-up window, the overlap window, the backfill limit and the thresholds as values of the environment; create the next-action-check row in the job catalogue with its run book path; record the read path ruling in the Ownership Map; and review the three runbook entries with the on-call rota.",
+      "wp": "B-P2-02"
+    }
+  ],
+  "asm_rows": [
+    {
+      "id": "ASM-1187",
+      "text": "The release carries the rwb-integration login as a secret reference from the platform secret store and runs the worker as that identity on the task queue rwb-integration; the readiness probe waits for one successful poll and one successful authorise call, and neither probe writes to the database.",
+      "why": "No source names the worker identity, the secret reference or the probe checks of this service, and DP-02 and DP-10 require one login and one task queue per service.",
+      "read": "Template and Rules v1 §R5.5 DP-02 and DP-10; Architecture v5 slides 16 and 41; Temporal and Drools Design Text Extract v1 slide 27 (worker versioning and build ID); ASM-1177.",
+      "gap": "GAP-0669",
+      "applied_in": "§10 Authority, §11 Data and §12.5 of RWB-P2-E2035-OPS",
+      "confidence": "Medium",
+      "confirm": "ACE team, DBA and platform administrator",
+      "impact": "The chart and the probes are fixed in the values of the environment; a wrong identity fails the registration check and never reaches production.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1188",
+      "text": "The three alerts use thresholds and routes that are values of the environment: the missing-action backlog alert routes to the team manager of the team and the platform on-call, the NoPackageInForce alert routes to RW-COE, and the sweep-stalled alert fires when no run completes inside twice the cadence or when a consumed-call failure rate passes its threshold; each alert carries one message ID and one runbook entry.",
+      "why": "The legacy story sets no alert and no threshold, and Architecture v5 slide 44 and ADR-023 fix the mechanism but not the values.",
+      "read": "Architecture v5 Text Extract v1 slides 42 and 44; ADR-023 (observability per service); Template and Rules v1 §R7.2 s12 and s14; legacy RWB-E2-035 §14 (MSG-P2-023, MSG-P3-027, MSG-GEN-004).",
+      "gap": "GAP-0669",
+      "applied_in": "§7 AC6, §11 Data, §13 Alert mapping and §14 of RWB-P2-E2035-OPS",
+      "confidence": "Medium",
+      "confirm": "DevOps engineer, platform on-call rota and RW-COE",
+      "impact": "A threshold change is a values change and not a code change; the three messages stay the ones the case record and the catalogue already carry.",
+      "wp": "B-P2-02"
+    },
+    {
+      "id": "ASM-1189",
+      "text": "The smoke run and the backfill tests use the synthetic cases RW-2026-000401, RW-2026-000402 and RW-2026-000403 of the legacy criteria in DEV and SIT only, seeded by the pipeline of the owning stories, and no production case is read or filled by the deployment.",
+      "why": "The legacy story gives the case identifiers of its criteria and no source names a fixture owner, a seeding path or an evidence format for a deployment test.",
+      "read": "Legacy RWB-E2-035 §7 (case identifiers of AC1 to AC14); RWB-ITG-E2035-ITG §3 and §4 (the seeded cases); Template and Rules v1 §R9.",
+      "gap": "GAP-0669",
+      "applied_in": "§11 Data, §7 AC5 and §13 of RWB-P2-E2035-OPS",
+      "confidence": "Medium",
+      "confirm": "QA lead and DevOps engineer",
+      "impact": "The smoke run and the backfill test are repeatable and synthetic; a fixture change is a pipeline change and not a story change.",
+      "wp": "B-P2-02"
+    }
+  ]
+}

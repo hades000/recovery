@@ -1,0 +1,180 @@
+60:### 3.1 Context
+61:
+62:The Workbench is the recovery module of ACE. It takes every case from 90 days past due, for Mortgage, Hire Purchase and SSME, and carries decisions D6 to D9 with their sub-decisions, D5 once the restructure program is live, and deviations X1 to X7 after day 90. Epics 1 and 2 put the case list, the case layer, the owner, the timer and the approval path in place; Epics 3 to 8 are where the recovery money is actually made and lost.
+63:
+64:Source data arrives through ACE ingestion and is read only through the read-only `recovery.v_ace_*` views (D-RCV-35, ADR-010). The Workbench loads no source data and holds only the case, its decisions, reference data and four extension tables. From Epic 3 the case lifecycle runs on Temporal, one workflow per case, and every rule is a versioned data row evaluated by embedded Drools inside a workflow step (D-RCV-36, ADR-011, ADR-012). Under D-RCV-60 the module is delivered as 19 services inside the ACE platform, each with its own schema, contract, topic and task queue (Architecture v5, ADR-013 to ADR-023).
+65:
+66:### 3.2 Problem statement
+67:
+68:| # | Problem the business has today | Evidence in the sources |
+69:|---|---|---|
+70:| 1 | Recovery takes too long. Litigation runs at 21 days, deed in lieu at 26 days, restructure at 23 days, and an NPA takes 1,486 days to sell. | Program BRD v4 section 2 |
+71:| 2 | Money and decisions are re-keyed across ALS, COLLINS, EFS, AMIS, RPS, LIT and WIN, so the case and the system of record disagree. | Program BRD v4 sections 5.2, 5.3, 5.8 to 5.16; Epics 3 to 8 Specification v3 integrations sheet |
+72:| 3 | Some end-to-end steps have no owner at all: the NPA stock balance, an eviction, enforcement after judgment, and the write-off exception loop. | Epics 3 to 8 Specification v3, features FEAT-AST-06, FEAT-AST-08, FEAT-LIT-20, FEAT-WOF-12 |
+73:| 4 | Deviations from the policy are common and are not measured. 44 percent of TDR cases deviate today. | Business Rules and Routing Logic v4, rule R-RES-10 |
+74:| 5 | Decisions are not reproducible after the fact: the rule, model and prompt versions and the inputs used are not held in one place per decision. | Program BRD v4 sections 5.7 and 6.6 |
+75:| 6 | Assets, debt sales and write-offs are run on spreadsheets and local lists, so the population, the price and the provision cannot be reconciled to the book. | Program BRD v4 sections 5.12 to 5.14, 7 |
+76:| 7 | Personal data leaves the bank in a debt sale data tape and in partner exchanges, with masking done by hand. | Program BRD v4 NFR-041, NFR-042; Specification v3 FEAT-DBS-03 |
+77:| 8 | Partner performance, conduct and fees are managed by memory and by email, and a partner exit does not recall its open cases. | Program BRD v4 sections 5.16, REQ-S9-001 to REQ-S9-008 |
+78:
+79:## 4. Business objectives and expected outcomes
+80:
+81:### 4.1 Objectives
+82:
+83:| ID | Objective |
+84:|---|---|
+85:| OBJ-1 | A case reaches a route decision with a recommendation, a reason and an approval inside the delegation, every time, without a person assembling the inputs. |
+86:| OBJ-2 | Settlements, TDR plans and deeds in lieu reach a booking in ALS and NLEADS without re-keying, and the bought-back or transferred asset reaches the asset record in the same step. |
+87:| OBJ-3 | Litigation is instructed, tracked and enforced with one named owner from judgment to the end of enforcement, and enforcement proceeds are matched to the case. |
+88:| OBJ-4 | Debt sale and write-off run as rule-driven populations against a policy cap, with the committee decision, the posting and the provision reconciled. |
+89:| OBJ-5 | Deviations X1 to X7 run end to end with a named owner, contact stops that hold, and a return point that keeps the clocks right. |
+90:| OBJ-6 | Partners are selected, instructed, scored, paid and exited on measured evidence through the portal, not by email. |
+91:| OBJ-7 | Administration, rule change, autonomy and regulatory reporting are done through versioned data and screens, with no code release. |
+92:
+93:### 4.2 What each epic gives the business
+94:
+95:| Epic | Theme | Release (tentative) | What the business gets | Outcome measure |
+96:|---|---|---|---|---|
+97:| E3 | Settle, deed in lieu, assets | 31 January 2027 | Settlements and deeds in lieu end to end to booking. Asset record, floor price and listing on HOME.SCB | Deed in lieu turnaround 26 to 12 days; restructure 23 to 5 days |
+98:| E4 | Route decision | 28 February 2027 | The route recommended with reasons and approved inside the delegation for every new case. Guarantee and TCG claims. Auction rounds and RAMC transfer | Recovery rate on NPL 66.3 to 73 percent; NPA sales cycle 1,486 to 1,095 days |
+99:| E5 | Litigation | 31 March 2027 | Litigation instructed and tracked end to end, law firms through the partner portal. Debt sale lot data and the buyer data room | Litigation turnaround 21 to 6 days; debt sale turnaround 45 days |
+100:| E6 | Debt sale and write-off | 30 April 2027 | Debt sale screens and award, write-off committee, partner panel, allocation and fees | Manual processes removed towards 80 percent of the selected list; audit findings and fraud cases 50 to 13 |
+101:| E7 | Deviations and partners | 31 May 2027 | Deviations X1 to X7 end to end. Partner scoring, conduct and the field app | Audit findings and fraud cases 50 to 13; override rate reported monthly |
+102:| E8 | Administration and hardening | 30 June 2027 | Full administration, conduct checks, autonomy step-ups, regulatory returns, hardening | No code release for a rule, limit, template or panel change |
+103:
+104:### 4.3 Expected outcomes by audience
+105:
+106:| Audience | What changes |
+107:|---|---|
+108:| Customer (borrower) | Sees and accepts an offer, pays and raises a dispute on the bank's channels; receives statutory notices on a consented channel |
+109:| Case owner | Works one list with a next action, a recommendation and the reasons, and is not asked to assemble data from four systems |
+110:| Restructuring officer | Builds a settlement or TDR offer inside a range, sends it, and sees the booking confirmed from ACE |
+111:| Sale and NPA officer | Sees the asset, its holding age, its costs and its price ladder on one screen, and sets a floor with the approval the policy names |
+112:| Litigation officer and law firm | Prepare, verify and instruct a pack through the portal, and track hearings, fees and judgment on the case |
+113:| Debt sale officer and buyer | Select, lot, tape, award and transfer on one path, with a masked tape and a data room |
+114:| Write-off team and committee | Scan, pack, decide and post a write-off, and reconcile what was approved to what was posted |
+115:| Partner and agency manager | Allocates on measured return, scores monthly, pays against results, and recalls every open case on exit |
+116:| Risk, Compliance and audit | Reads one decision log with the rule, model and prompt versions; sees masked personal data; gets a data subject request answered inside the statutory period |
+117:| Center of excellence | Changes a rule, limit, template or panel as a versioned load with a test and a rollback |
+118:
+119:### 4.4 Delivery model under D-RCV-60
+120:
+121:| Item | Statement |
+122:|---|---|
+123:| Services | 19 services inside ACE, one per business module P1 to P10 and S1 to S9, each with its own schema, login, REST base, Kafka topic and Temporal task queue (Architecture v5 slide 41, ADR-013, ADR-014) |
+124:| Waves | Platform and Epic 1 wave 1, Epic 2 and Epic 3 wave 2, Epics 4 and 5 wave 3, Epics 6, 7 and 8 wave 4 (Template and Rules v1 R5.6) |
+125:| Contracts | Contract-first REST, one hop from the gateway, 2 second timeout; a consuming service builds against the published contract and its fake (ADR-020) |
+126:| Events | Kafka with an outbox per producer, an inbox per consumer, CloudEvents on `rwb.<service>.events.v1`, key `caseId` (ADR-015) |
+127:| Workflow | A parent CaseWorkflow with a child workflow per stage, Temporal Schedules replacing the shared scheduler table, durable timers replacing the timer check job (ADR-016, D-RCV-036) |
+128:| Rules | Rule packages governed in the decision service and evaluated by embedded Drools inside a workflow activity, with the package version written to the decision log (ADR-017, D-RCV-036 T7) |
+129:| Reporting | No data lake; the reporting service builds its read model from events and holds the measures and regulatory extracts (ADR-018) |
+130:| Edge | gateway-bff for staff screens, the partner gateway in the DMZ for partner users (ADR-019) |
+131:| Releases | One production release at each month end, shared with the collection squad (Program BRD v4 section 7). Release dates in this document are unchanged and (tentative) |
+132:
+133:## 5. Stakeholders and user groups
+134:
+135:| Role | Interest | Decision rights |
+136:|---|---|---|
+137:| Product Owner | That the six epics deliver the business outcomes and stay inside scope | Approves scope and this document; decides priority between Must items |
+138:| Business owner, settle and deed in lieu | Settlements, TDR plans and deeds in lieu reach booking and release | Approves the treatment policy for their product within the delegation |
+139:| Business owner, route decision | That every case gets a route with reasons inside the delegation | Owns the route measure; decides the recommendation is fit to approve |
+140:| Head of Litigation | That litigation is instructed and tracked and enforcement has an owner | Approves settlement before judgment, appeals and fee payment inside the delegation |
+141:| Head of NPA | That assets are priced, listed and sold with an owner and a floor | Approves the floor price; approves RAMC and joint venture transfers |
+142:| Head of Asset Liquidity | That debt sale runs against the policy cap and the reserve | Approves lots, reserve and tiered terms; approves the award |
+143:| Write-off committee member | That the write-off population is eligible, packed and decided | Approves, rejects or defers a write-off inside the delegation |
+144:| Credit approval committee | That a route above the case owner's limit is decided by committee | Decides a route above the delegated limit |
+145:| Case owner | One list, one next action, a recommendation with reasons | Decides inside the case owner limit; refers up when above it |
+146:| Restructuring officer (FCR) | Offers inside the range reach the customer and book | Builds and sends an offer; escalates an out-of-range offer |
+147:| Sale officer | Assets and auctions, from floor price to transfer | Sets the start price; requests the floor; runs auction rounds |
+148:| NPA and asset manager | The asset record, holding cost and provision step | Owns the asset stock position per case |
+149:| Litigation officer | The pack, the firm, the hearing and the filing | Verifies the pack and approves filing |
+150:| Law firm user | Instruction, filing and results through the portal | Records the filing and its results for its own firm |
+151:| Enforcement owner | Enforcement from judgment to the end, with a review date | Defers enforcement with a coded reason and a review date |
+152:| Debt sale officer | The sale population, the award and the transfer | Runs the sale and the award within the approval taken |
+153:| Debt buyer and AMC | The data room, the bid and the transfer | Bids inside the bid window |
+154:| Write-off team member | The scan, the pack and the population | Removes a case from the proposed population with a reason |
+155:| Partner and agency manager | Panel, allocation, fees, scorecard, conduct and exit | Onboards a partner, approves fees, issues notice, ends a contract |
+156:| Auction vendor | Auction rounds and bids | Runs a round and reports bids |
+157:| Field collector | Field visits, photographs and bills | Records field evidence against the case |
+158:| Guarantee officer | TCG and insurance claims inside the deadline | Prepares and files a claim |
+159:| Complaint officer | Dispute and complaint resolution inside the service level | Resolves a complaint and returns the case |
+160:| Hardship and vulnerability specialist | Contact limits and the hardship decision; deceased customer cases | Decides the hardship outcome; stops contact |
+161:| Fraud investigator | The fraud referral and its outcome | Routes the case on the investigation outcome |
+162:| Legal counsel | Notices, litigation, bankruptcy and estate positions | Approves a notice template; decides a legal position |
+163:| Conduct and QA officer | That conduct is measured and a breach is raised | Samples decisions and contacts; raises a breach |
+164:| Risk and model risk officer | Autonomy, drift, overrides and agent risk | Changes an autonomy level; approves a step-up |
+165:| Center of excellence analyst | Rules, criteria and criteria changes as versioned data | Loads a validated rule version; runs a champion and challenger test |
+166:| Platform administrator | Configuration, incidents and rollback | Rolls a configuration version back; manages an incident |
+167:| Security administrator | Access by role and by agent | Approves access and reports the matrix |
+168:| Compliance and PDPA officer | Masking, consent, retention and data subject rights | Approves masking and retention; answers a data subject request |
+169:| Finance and CFO delegate | Provision inputs and benefit realisation | Accepts the provision inputs and the benefit report |
+170:| Internal audit | The decision history of a population of cases | Requests the audit population and its decisions |
+171:| Tribe lead | Volume, ageing, route mix, turnaround and recovery against the baseline | Owns the steering measures |
+172:| ACE team lead | The ACE tables, columns and ingestion the views depend on | Accepts the ACE additions and their dates (DL43) |
+173:
+174:Personal data classification for every row above: business roles only, `PII` where the role reads a customer identifier or contact point, `SENSITIVE_FINANCIAL` where the role reads balances, arrears, write-off or sale values. No customer data is copied into this document.
+175:
+176:## 6. Current state and challenges
+177:
+178:| # | Current state | Challenge it creates | Source |
+179:|---|---|---|---|
+180:| 1 | Recovery steps are spread across ALS, COLLINS, EFS, AMIS, RPS, LIT and WIN, with the case re-keyed at each hand-over | The case and the system of record disagree, and nobody can prove which version a decision used | Program BRD v4 sections 5.2, 5.3, 5.8 to 5.16 |
+181:| 2 | Litigation takes 21 days of internal handling; a deed in lieu takes 26 days; a restructure takes 23 days; an NPA sale takes 1,486 days | Recovery value leaks in the waiting, and the customer experience is a series of unanswered steps | Program BRD v4 section 2 |
+182:| 3 | The NPA stock balance, an eviction, enforcement after judgment and the write-off exception loop have no named owner | Nobody owes the next action; the case sits until someone notices | Specification v3 FEAT-AST-06, FEAT-AST-08, FEAT-LIT-20, FEAT-WOF-12 |
+183:| 4 | 44 percent of TDR cases deviate from the approved range today | Deviation is normal, unmeasured and unaudited, and the approval path is bypassed | Business Rules v4 R-RES-10 |
+184:| 5 | Asset prices, lot reserves and write-off populations sit in local spreadsheets | The population and the price cannot be reconciled to the book or defended to audit | Program BRD v4 sections 5.12 to 5.14, section 7 |
+185:| 6 | Debt sale tapes are masked by hand, and partner work is exchanged by email | Personal data can leave the bank unmasked; instructions and results are not on the case | Program BRD v4 NFR-041, REQ-S9-008, Specification v3 FEAT-DBS-03 |
+186:| 7 | Partner performance and fees are managed by memory, and a partner exit does not recall its cases | Cases stay with a firm that has left the panel; fees are paid without a measured result | Program BRD v4 REQ-S9-001 to REQ-S9-008 |
+187:| 8 | Decisions are recorded in several places and not always with the rule, model and prompt version | An audit or regulatory question cannot be answered from one source | Program BRD v4 sections 5.7, 6.6 |
+188:| 9 | Retention, masking and data subject rights are applied by discipline, not by class and role | A data subject request, a legal hold or a disposal cannot be proved | Program BRD v4 NFR-028, NFR-043, NFR-074 |
+189:
+190:## 7. Scope
+191:
+192:### 7.1 In scope
+193:
+194:| Epic | Capabilities in scope | Story keys |
+195:|---|---|---|
+196:| E3 | Treatment record, settlement and TDR offer, validity and return, booking and schedule, broken plan, deed in lieu, buy-back rental, collateral release, asset take-on, holding age and provision step, stock balance, held property, floor price, listing, autonomy and drift | RWB-E3-001 to RWB-E3-031 (31) |
+197:| E4 | Valuation and route decision, guarantee and TCG claims, insurance claim, auction rounds and vendor allocation, title transfer, proceeds and shortfall, RAMC, buy-back, rental, broker, self-service, contact repository, custody, payments and reconciliation | RWB-E4-001 to RWB-E4-050 (50) |
+198:| E5 | Demand and recall notices, litigation pack, firm selection and instruction, filing, hearings and fees, settlement and appeal, judgment, enforcement, asset tracing, LED ladder, bankruptcy, debt sale lot building and data room | RWB-E5-001 to RWB-E5-026 (26) |
+199:| E6 | Lot approval, buyer qualification, bidding, award, transfer and posting, put-back, write-off scan, pack, committee, posting and provision, exception loop, closure, criteria change, post charge-off recovery, partner panel, allocation, fees, benefit realisation | RWB-E6-001 to RWB-E6-037 (37) |
+200:| E7 | X1 to X7 deviations end to end, override review, complaint matching, contact breach, partner scorecard, fees, review, notice, exit, conduct, extra asset costs, field app | RWB-E7-001 to RWB-E7-018 (18) |
+201:| E8 | Regulatory returns, classification and re-ageing, champion and challenger, autonomy with approval, agent risk, administration screens, rule and limit change, treatment policy, template, rollback, panel change, QA sample, defective pack, hash chain, data subject request, incident, Aric referral, access control | RWB-E8-001 to RWB-E8-019 (19) |
+202:
+203:### 7.2 Out of scope
+204:
+205:| Out of scope | Where it is handled |
+206:|---|---|
+207:| Collections before day 90 and decisions D1 to D4 | EFS and the ACE collection module |
+208:| Booking logic in the core bank (ALS) and credit approval in NLEADS | ALS and NLEADS; the Workbench records the result and reads the booked position back |
+209:| COLLINS model development and the affordability calculation | Data and AI; the ACE restructure calculator |
+210:| ACE ingestion, the ACE tables and columns, and the read-only views | The ACE team under RWB-ACE-001 and DL43 |
+211:| Tracker retirement and local file archives | The Cutover plan (D-RCV-35 U5) |
+212:| Partner systems and their internal processes | Each partner |
+213:| Bank policy itself: the levels, limits and periods that the rules read | The policy owners, through DL18, DL22, DL23 and DL26 |
+214:| Technical design beyond the confirmed v5 constraints | The PRDs per service and the architecture set |
+215:
+216:### 7.3 Epics, services and waves under D-RCV-60
+217:
+218:| Epic | Service epics that deliver it | Service wave | Business epic wave | Capability owner from the Ownership Map |
+219:|---|---|---|---|---|
+220:| E3 | RWB-SVC-S2 treatment, RWB-SVC-S5 asset, RWB-SVC-P8 payment, RWB-SVC-P10 agent | S2 2, S5 2, P8 2, P10 1 | 2 | S2 rwb-treatment, S5 rwb-asset, P8 rwb-payment, P10 rwb-agent |
+221:| E4 | RWB-SVC-S1 valuation, RWB-SVC-S3 guarantee, RWB-SVC-S5 asset, RWB-SVC-P6 comms, RWB-SVC-P8 payment, RWB-SVC-S9 partner | S1 3, S3 3, S5 2, P6 1, P8 2, S9 4 | 3 | S1 rwb-valuation, S3 rwb-guarantee, S5 rwb-asset, P6 rwb-comms, P8 rwb-payment, S9 rwb-partner |
+222:| E5 | RWB-SVC-S4 litigation, RWB-SVC-S6 debtsale, RWB-SVC-S9 partner | S4 3, S6 3, S9 4 | 3 | S4 rwb-litigation, S6 rwb-debtsale, S9 rwb-partner |
+223:| E6 | RWB-SVC-S6 debtsale, RWB-SVC-S7 writeoff, RWB-SVC-S9 partner, RWB-SVC-P8 payment, RWB-SVC-P9 reporting | S6 3, S7 4, S9 4, P8 2, P9 1 | 4 | S6 rwb-debtsale, S7 rwb-writeoff, S9 rwb-partner, P8 rwb-payment, P9 rwb-reporting |
+224:| E7 | RWB-SVC-S8 deviation, RWB-SVC-S9 partner | S8 2, S9 4 | 4 | S8 rwb-deviation, S9 rwb-partner |
+225:| E8 | RWB-SVC-P4 access, RWB-SVC-P9 reporting, RWB-SVC-P10 agent | P4 1, P9 1, P10 1 | 4 | P4 rwb-access, P9 rwb-reporting, P10 rwb-agent |
+226:| All | RWB-PLT-* platform epics and RWB-ITG-W1 to W4 | 0 and 1 to 4 | — | Platform and integration |
+227:
+228:## 8. Business requirements
+229:
+230:Epics 3 to 8 carry 181 features, written as 181 stories, of which 166 are Must and 15 are Should. The requirement set below states the same intent at business level: one testable need per row, a rationale, a priority that follows the stories it covers, and the source it comes from. Every row names the stories it is tested through, so a reader can go from the business need to the story, its acceptance criteria and its test cases. Requirement IDs are new in this document (ASM-B-REQ-BRD-E38-23); the program requirement IDs of the source are carried in the source column.
+231:
+232:### 8.1 E3 Settle, deed in lieu and assets (31 stories)
+233:
+234:| ID | Requirement | Priority | Rationale | Source |
+235:|---|---|---|---|---|
+236:| BR-001 | Every offer made to a customer exists as one treatment record holding its type, terms, approval and outcome. | Must | Without one record, the offer, the approval and the booking cannot be reconciled, and a dispute cannot be answered from the case | REQ-S2-001, REQ-CHO-006; FEAT-TRT-01; RWB-E3-001 |
+237:| BR-002 | A settlement is offered only inside the rule range, and an offer below the floor price goes to the approver or committee named by the limit before it is sent. | Must | Protects the recovery floor and puts the deviation in front of the authority that owns it | REQ-S2-004; FEAT-TRT-02, FEAT-TRT-03; R-SET-04, R-SET-05; RWB-E3-002, RWB-E3-003 |
+238:| BR-003 | A TDR plan offer carries the affordability result from ACE and the model installment with the range the officer may move within. | Must | The plan must be affordable on the bank's own calculation, not on an officer's estimate | REQ-S2-002; FEAT-TRT-04, FEAT-TRT-05, FEAT-TRT-06; RWB-E3-004, RWB-E3-005, RWB-E3-006 |
+239:| BR-004 | An offer carries a validity period, and a decline or an expiry returns the case to the status it held before the offer. | Must | A case must not sit in an offer state after the customer has gone | REQ-S2-002, REQ-S2-003; FEAT-TRT-07, FEAT-TRT-09; R-RES-09, R-RES-17, R-RES-18; RWB-E3-007, RWB-E3-009 |

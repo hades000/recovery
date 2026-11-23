@@ -1,0 +1,143 @@
+{
+  "id": "RWB-P10-E1062-APP",
+  "epic": "RWB-SVC-P10",
+  "service": "rwb-agent",
+  "wt": "APP",
+  "lane": "L-P10-A",
+  "ready": "After RWB-P10-E1058-APP, RWB-P10-TE013-APP",
+  "owner": "TechX",
+  "business_epic": "EP01",
+  "wave": 1,
+  "release": "30 November 2026",
+  "legacy": "RWB-E1-062",
+  "disposition": "Split (rework)",
+  "H": [
+    "RWB-P10-E1062-CON",
+    "RWB-PLT-E1072-CON",
+    "RWB-PLT-E1042-CON",
+    "RWB-PLT-E1043-CON",
+    "RWB-PLT-TE006-CON",
+    "RWB-PLT-E1044-CON",
+    "RWB-PLT-N001-CON",
+    "RWB-P10-TE013-CON",
+    "RWB-P10-E1058-APP",
+    "RWB-P10-TE013-APP"
+  ],
+  "C": [
+    "RWB-P3-E1042-CON",
+    "RWB-P3-E1043-CON"
+  ],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "legacy RWB-E1-062 AC1",
+      "text_first_line": "Scenario: AC1 Shadow flags (legacy RWB-E1-062 AC1)"
+    },
+    {
+      "id": "AC2",
+      "origin": "legacy RWB-E1-062 AC2",
+      "text_first_line": "Scenario: AC2 Compared (legacy RWB-E1-062 AC2)"
+    },
+    {
+      "id": "AC3",
+      "origin": "legacy RWB-E1-062 AC3",
+      "text_first_line": "Scenario: AC3 A new document starts a run (legacy RWB-E1-062 AC3)"
+    },
+    {
+      "id": "AC4",
+      "origin": "legacy RWB-E1-062 AC4",
+      "text_first_line": "Scenario: AC4 The owner role comes from the rule rows (legacy RWB-E1-062 AC4)"
+    },
+    {
+      "id": "AC5",
+      "origin": "legacy RWB-E1-062 AC5",
+      "text_first_line": "Scenario: AC5 A complaint names the contact before it (legacy RWB-E1-062 AC5)"
+    },
+    {
+      "id": "AC6",
+      "origin": "legacy RWB-E1-062 AC6",
+      "text_first_line": "Scenario: AC6 A low-confidence proposal is marked for review (legacy RWB-E1-062 AC6)"
+    },
+    {
+      "id": "AC7",
+      "origin": "legacy RWB-E1-062 AC7",
+      "text_first_line": "Scenario: AC7 A repeated event (legacy RWB-E1-062 AC7)"
+    },
+    {
+      "id": "AC8",
+      "origin": "legacy RWB-E1-062 AC8",
+      "text_first_line": "Scenario: AC8 A code outside the list (legacy RWB-E1-062 AC8)"
+    },
+    {
+      "id": "AC9",
+      "origin": "legacy RWB-E1-062 AC9",
+      "text_first_line": "Scenario: AC9 Timeout (legacy RWB-E1-062 AC9)"
+    }
+  ],
+  "tcs": [
+    "TC-E1-062-10",
+    "TC-E1-062-01",
+    "TC-E1-062-02",
+    "TC-E1-062-03",
+    "TC-E1-062-04",
+    "TC-E1-062-05",
+    "TC-E1-062-06",
+    "TC-E1-062-07",
+    "TC-E1-062-08",
+    "TC-E1-062-09"
+  ],
+  "reqs": [
+    "REQ-DVH-001",
+    "REQ-DVH-003",
+    "REQ-DVH-007"
+  ],
+  "ops_provided": [
+    "POST /api/recovery/agent/v1/agent-runs: start one screening run for one case and one triggering event through the rwb-agent contract (the path below the base is not named by a source; GAP-0615, ASM-0879)",
+    "GET /api/recovery/agent/v1/agent-runs/{runId}: read one run with its status, guardrail result and proposals (Arch v5 slide 16)"
+  ],
+  "ops_consumed": [
+    "rwb-case: the case read, the parameters contract (confidence floor, 30-day look-back, 180-day ledger window) and the reference-data lists LOV-DEVIATION, LOV-AGENT and LOV-AGENT-RUN (the parameter operation is not named by a source; ASM-0883)",
+    "rwb-deviation: the open deviations of the case, so a code already open is not proposed again",
+    "rwb-source-data: the interaction ledger entries of a case inside the window and the preceding contact of an X1 proposal (the operation is not named by a source; ASM-0880)",
+    "rwb-document: the documents of the case and their stored document_field values",
+    "rwb-decision: the rule package with R-DEV-02 to R-DEV-06 through the rule-model read of the embedded kit (ASM-0881)",
+    "INT-23: the Enterprise AI private endpoint, reached inside the agent platform of RWB-P10-E1058-APP"
+  ],
+  "events_published": [
+    "rwb.agent.AgentRunStarted.v1 on rwb.agent.events.v1",
+    "rwb.agent.AgentRunCompleted.v1 (EV-28) on rwb.agent.events.v1",
+    "rwb.agent.ScreeningProposalRaised.v1 on rwb.agent.events.v1"
+  ],
+  "events_consumed": [
+    "rwb.case.CaseCreated.v1 (EV-01) on rwb.case.events.v1",
+    "rwb.document.DocumentStored.v1 (EV-16) on rwb.document.events.v1"
+  ],
+  "workflows": [
+    "AgentRunWorkflow (workflow, task queue rwb-agent)",
+    "AssembleScreeningInputs (activity)",
+    "ResolveOwnerRole (activity)",
+    "CallModelGateway (activity)",
+    "CheckScreeningGuardrail (activity)",
+    "RecordScreeningRun (activity, workflow kit)",
+    "PublishScreeningEvents (activity, outbox relay)"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P10 rwb-agent v1.md (FR-P10-007, FR-P10-012, FR-P10-013, FR-P10-014)",
+  "gaps": [
+    "GAP-0614"
+  ],
+  "assumptions": [
+    "ASM-0878",
+    "ASM-0879",
+    "ASM-0880",
+    "ASM-0881",
+    "ASM-0882",
+    "ASM-0883",
+    "ASM-0884",
+    "ASM-0885",
+    "ASM-0886",
+    "ASM-0887"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1062 APP Deviation screening agent in shadow [E2b] v1.md"
+}

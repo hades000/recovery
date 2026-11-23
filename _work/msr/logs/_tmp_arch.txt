@@ -1,0 +1,287 @@
+## Slide 11
+
+Five call types, each with a fixed contract
+
+What every call between services must follow: transport, contract, identity, failure handling
+
+REST
+
+BFF
+
+svc
+
+Event (Kafka)
+
+svc
+
+topic
+
+group
+
+Temporal
+
+wf
+
+queue
+
+worker
+
+File
+
+svc
+
+Blob
+
+party
+
+SQL view
+
+P1
+
+v_ace_*
+
+|  | REST | Event (Kafka) | Temporal | File | SQL view |
+|---|---|---|---|---|---|
+| Use when | A person waits for the answer | A fact others may react to | A step in another service, or a long process | Bulk data, or a party outside the bank | Reading ACE data (rwb-source-data only) |
+| Transport | HTTPS/JSON, mesh mTLS | Kafka over TLS; CloudEvents 1.0, binary mode | Temporal gRPC over mTLS; queue rwb-<svc> | Blob + MFT/SFTP; PGP for outside parties | PostgreSQL TLS; read-only login |
+| Contract | OpenAPI 3.1; /v1 in the path | AsyncAPI 3.0; JSON Schema registry, backward compatible | Typed activity / workflow interface in a contract jar | Manifest: fileId, batchId, sha256, record count | 30 recovery.v_ace_* views (ADR-010) |
+| Identity | User JWT from BFF + workload identity | OAUTHBEARER (Entra) or mTLS; topic ACLs | Namespace mTLS; worker identity per service | SAS link, one file, 15 minutes | One login: rwb_source_data |
+| Timeout, retry | 2 s; retry GET only (once, jitter); breaker + bulkhead | Retry topics 1 min / 10 min / 1 h, then .dlt + alert | Start-to-close per activity; backoff; heartbeats | Retried by the workflow; checksum on receipt | 5 s statement timeout |
+| Duplicates, order | Idempotency-Key on every POST | Key = caseId (order per case); inbox dedupe | Workflow ID = business key; activities idempotent | fileId unique; re-delivery safe | Read only |
+| Errors | RFC 9457 problem details | Dead-letter topic; replay tool | Typed failures; non-retryable list; saga undo | FileFailed event; operator retry | Mapped to domain errors by P1 |
+| Never | Call chains (depth > 1) | Personal data in events | I/O or PII in workflow code or payloads | Data inside the message | Any other service reading the views |
+
+
+Every service publishes its contracts (OpenAPI, AsyncAPI, activity jar) before code; contract tests run in every build.
+
+11
+
+Notes: These are engineering standards for every team; the architecture review checks them per service.
+
+REST: depth one only (browser → BFF → owner, or a cached reference read). Commands carry Idempotency-Key; errors as RFC 9457 problem details; Resilience4j circuit breaker and bulkhead per downstream.
+
+Event: Kafka, CloudEvents 1.0 Kafka binding in binary mode (ce_* headers), JSON Schema registry with BACKWARD compatibility, AsyncAPI 3.0 per topic. Transactional outbox in the producer's schema; idempotent producer with acks=all; inbox table (processed_event) in each consumer; retry topics and dead-letter topic with alert.
+
+Temporal: activity and workflow interfaces are published as a contract jar per service; callers import only the interface and call the owner's task queue. Payloads pass through the codec (AES-GCM, keys in Key Vault). Nexus for calls into another namespace (ACE).
+
+File: claim-check. The message carries a SAS link and a manifest, never the data. Outside parties via MFT/SFTP with PGP.
+
+SQL view: only rwb-source-data, read-only login, 30 views, statement timeout.
+
+-----
+## Slide 15
+
+Service contracts 2/7 · Deviation, source data, reporting
+
+IN = what the service accepts; OUT = what it writes and sends; the tag is the call type
+
+IN
+
+OUT
+
+REST  GET/POST /deviations · POST /deviations/{id}/clear
+EVT  CaseCreated (screening) · AceDataReady (deceased, bankrupt flags) · AgentRunCompleted
+TMP  DeviationWorkflow (child of case)
+
+DB  writes schema rwb_deviation: X1-X7 screening, pause, handling, return
+EVT  rwb.deviation.events.v1: DeviationRaised, DeviationCleared
+TMP  Agent: child: screening agent run
+REST  Source data: party flags
+
+S8 · rwb-deviation
+Deviation handling
+queue rwb-deviation
+rwb.deviation.events.v1
+
+IN
+
+OUT
+
+REST  GET /customers/{id}, /accounts/{id} · GET /collateral/{id}, /payments?accountId= · GET /freshness (business date) · POST /business-days/{date}/ready (Airflow)
+EVT  (none: Airflow call; fallback polls ACE batch record)
+TMP  Act: listEligibleAccounts, snapshot(page) · Workflow: AceIngestCheck, reconciliation
+
+DB  writes schema rwb_source_data: ACE view contract, extension tables, freshness, reconciliation
+EVT  rwb.source-data.events.v1: AceDataReady, AceDataLate (05:30)
+SQL  ACE DB views: SELECT recovery.v_ace_* (30 views)
+
+P1 · rwb-source-data
+Source data
+queue rwb-source-data
+rwb.source-data.events.v1
+
+IN
+
+OUT
+
+REST  GET /dashboards/{id} · GET /reports/{id} · POST /reports/{id}/run (Airflow)
+EVT  All business events (projections) · DecisionRecorded
+TMP  Schedule: measures 01:30 · Act: buildRegulatoryExtract
+
+DB  writes schema rwb_reporting: measures, snapshots, steering dashboard, regulatory reports
+EVT  rwb.reporting.events.v1: ReportPublished
+TMP  Source data: snapshot(page) for measures · Integration: deliverFile (regulatory extract)
+
+P9 · rwb-reporting
+Reporting
+queue rwb-reporting
+rwb.reporting.events.v1
+
+15
+
+Notes: Contracts in full (also in the service catalogue in the appendix):
+
+rwb-deviation (S8, Deviation handling)
+IN: REST GET/POST /deviations; POST /deviations/{id}/clear | events CaseCreated (screening); AceDataReady (deceased, bankrupt flags); AgentRunCompleted | Temporal DeviationWorkflow (child of case)
+OUT: schema rwb_deviation (X1-X7 screening, pause, handling, return) | topic rwb.deviation.events.v1: DeviationRaised, DeviationCleared | TMP Agent: child: screening agent run | REST Source data: party flags
+
+rwb-source-data (P1, Source data)
+IN: REST GET /customers/{id}, /accounts/{id}; GET /collateral/{id}, /payments?accountId=; GET /freshness (business date); POST /business-days/{date}/ready (Airflow) | events (none: Airflow call; fallback polls ACE batch record) | Temporal Act: listEligibleAccounts, snapshot(page); Workflow: AceIngestCheck, reconciliation
+OUT: schema rwb_source_data (ACE view contract, extension tables, freshness, reconciliation) | topic rwb.source-data.events.v1: AceDataReady, AceDataLate (05:30) | SQL ACE DB views: SELECT recovery.v_ace_* (30 views)
+
+rwb-reporting (P9, Reporting)
+IN: REST GET /dashboards/{id}; GET /reports/{id} · POST /reports/{id}/run (Airflow) | events All business events (projections); DecisionRecorded | Temporal Schedule: measures 01:30; Act: buildRegulatoryExtract
+OUT: schema rwb_reporting (measures, snapshots, steering dashboard, regulatory reports) | topic rwb.reporting.events.v1: ReportPublished | TMP Source data: snapshot(page) for measures · Integration: deliverFile (regulatory extract)
+
+Tags: REST = synchronous HTTPS (OpenAPI 3.1); EVT = Kafka topic (CloudEvents, AsyncAPI); TMP = Temporal activity or child workflow on the owner's task queue; NEXUS = Temporal Nexus operation into another namespace; SQL = read-only view; FILE = claim-check file; DB = the service's own schema in the ACE database.
+
+-----
+## Slide 29
+
+Data: one ACE database, one schema and one login per service
+
+Ownership is enforced by grants, not by separate servers
+
+rwb-case
+
+login rwb_case
+
+schema rwb_case: read and write
+
+rwb-source-data
+
+login rwb_source_data
+
+recovery.v_ace_* views: SELECT only
+
+rwb-litigation
+
+login rwb_litigation
+
+schema rwb_payment: no grant, refused
+
+ACE POSTGRESQL SERVER · PgBouncer pool and connection cap per login
+
+ACE-OWNED
+
+ACE schemas: customer, account, payment, collateral, …
+
+schema recovery: 30 v_ace_* views, SELECT only, for rwb_source_data
+
+19 RECOVERY SCHEMAS · ONE LOGIN EACH
+
+rwb_case
+
+rwb_decision
+
+rwb_access
+
+rwb_deviation
+
+rwb_valuation
+
+rwb_treatment
+
+rwb_guarantee
+
+rwb_litigation
+
+rwb_asset
+
+rwb_debtsale
+
+rwb_writeoff
+
+rwb_document
+
+rwb_comms
+
+rwb_payment
+
+rwb_partner
+
+rwb_integration
+
+rwb_source_data
+
+rwb_reporting
+
+rwb_agent
+
+Temporal persistence: own database
+
+Blob storage with WORM: documents (rwb-document only)
+
+Own schema only
+one login per service; grants on its own schema
+
+No cross-schema joins or keys
+hold IDs; ask the owner through its contract
+
+Capped connections
+PgBouncer pool per login protects ACE
+
+Checked in every build
+boundary test fails on a cross-schema reference
+
+Own migrations
+Flyway per service, in its own pipeline
+
+Movable later
+a schema can move to its own server: change the connection string
+
+Same ACE database, clear ownership: a service writes only its own schema, and only rwb-source-data reads ACE's views.
+
+29
+
+Notes: Physical: the ACE PostgreSQL server (Azure Database for PostgreSQL). ACE's own schemas, plus schema recovery holding the 30 read-only v_ace_* views (ADR-010), plus 19 Recovery schemas rwb_<service>. Temporal keeps its persistence in its own database; documents are in Blob with WORM.
+
+Rules: each service has one database login that owns its schema and has no grant on any other schema; only rwb_source_data has SELECT on the views. No cross-schema joins, views or foreign keys: services hold each other's IDs and use contracts for everything else. Each service runs its own Flyway migrations. A boundary test in every build fails on any cross-schema reference.
+
+Protecting ACE: each login goes through its own PgBouncer pool with a connection cap and statement timeout; heavy reporting runs from rwb-reporting's own projections, not from ACE tables. Per-schema monitoring.
+
+This is the schema-per-service variant of database per service (microservices.io): ownership and isolation are kept, and any schema can later move to its own server by changing its connection string, with no code change.
+
+-----
+## Slide 41
+
+A1 · Service catalogue: the 19 services
+
+One row per service: module, what it owns, its schema, API, topic, task queue and wave
+
+| Module | Service | Owns | Schema | First API path | Kafka topic | Task queue | Wave |
+|---|---|---|---|---|---|---|---|
+| P3 | rwb-case | case, CMMN state, queues, tasks, allocation, timers | rwb_case | /cases/{id} | rwb.case.events.v1 | rwb-case | 1 |
+| P7 | rwb-decision | approvals, central decision ledger, DMN model registry | rwb_decision | /decisions | rwb.decision.events.v1 | rwb-decision | 1 |
+| P4 | rwb-access | Recovery roles as data, scope, masking policy, DoA table, access log | rwb_access | /authorise | rwb.access.events.v1 | rwb-access | 1 |
+| S8 | rwb-deviation | X1-X7 screening, pause, handling, return | rwb_deviation | /deviations | rwb.deviation.events.v1 | rwb-deviation | 2 |
+| P1 | rwb-source-data | ACE view contract, extension tables, freshness, reconciliation | rwb_source_data | /customers/{id} | rwb.source-data.events.v1 | rwb-source-data | 1 |
+| P9 | rwb-reporting | measures, snapshots, steering dashboard, regulatory reports | rwb_reporting | /dashboards/{id} | rwb.reporting.events.v1 | rwb-reporting | 1 |
+| P10 | rwb-agent | agent policies, prompts, runs, guardrails, evaluations | rwb_agent | /agent-runs/{id} | rwb.agent.events.v1 | rwb-agent | 1 |
+| P2 | rwb-integration | interface config, file runs, outbound items, ACE integration paths | rwb_integration | /interface-runs | rwb.integration.events.v1 | rwb-integration | 1 |
+| P5 | rwb-document | metadata, custody, OCR text and fields, signatures, retention | rwb_document | /documents | rwb.document.events.v1 | rwb-document | 1 |
+| P6 | rwb-comms | notices, templates, merge fields, proof of delivery | rwb_comms | /notices | rwb.comms.events.v1 | rwb-comms | 1 |
+| P8 | rwb-payment | payment and proceeds matching, fees, bookings, posting files | rwb_payment | /cases/{id}/payments | rwb.payment.events.v1 | rwb-payment | 2 |
+| S9 | rwb-partner | panel, partner users, instructions, results, fees, scorecards | rwb_partner | /partners | rwb.partner.events.v1 | rwb-partner | 4 |
+| S1 | rwb-valuation | valuations, D6 route decision, route agent output | rwb_valuation | /cases/{id}/valuation | rwb.valuation.events.v1 | rwb-valuation | 3 |
+| S2 | rwb-treatment | treatments, contracts, settlement and deed-in-lieu agreements, plan timers | rwb_treatment | /treatments | rwb.treatment.events.v1 | rwb-treatment | 2 |
+| S3 | rwb-guarantee | TCG and insurance claims, guarantor notices and pursuit | rwb_guarantee | /guarantee-claims | rwb.guarantee.events.v1 | rwb-guarantee | 3 |
+| S4 | rwb-litigation | legal actions, hearings, judgments, enforcement, LED auction ladder | rwb_litigation | /legal-actions | rwb.litigation.events.v1 | rwb-litigation | 3 |
+| S5 | rwb-asset | assets taken on, holding, floor price, listings, auction rounds | rwb_asset | /assets | rwb.asset.events.v1 | rwb-asset | 2 |
+| S6 | rwb-debtsale | lots, data room, buyer terms, bids, award, transfer | rwb_debtsale | /lots | rwb.debtsale.events.v1 | rwb-debtsale | 3 |
+| S7 | rwb-writeoff | eligibility, committee, posting, recovery after charge-off | rwb_writeoff | /write-offs | rwb.writeoff.events.v1 | rwb-writeoff | 4 |
+
+
+41
+
+Notes: Every service follows the same naming: schema rwb_<name> in the ACE database with its own login; REST under /api/recovery/<name>/v1 behind gateway-bff; Kafka topic rwb.<name>.events.v1; Temporal task queue rwb-<name> in namespace rwb-recovery. Wave = the delivery wave in which the service is created (Wave 1 = Epic 1).

@@ -1,0 +1,130 @@
+880:return its ID; screen shows progress
+881:
+882:yes
+883:
+884:no
+885:
+886:Publish an event (Kafka)
+887:past tense fact; IDs only; outbox
+888:
+889:Temporal activity, child workflow or Nexus
+890:short step / long stage / another workbench
+891:
+892:File through rwb-integration
+893:claim-check: link + manifest, never the data
+894:
+895:yes
+896:
+897:yes
+898:
+899:yes
+900:
+901:Need ACE data?  Ask rwb-source-data (REST for screens, activity in workflows). Only rwb-source-data reads the SQL views, so a change in ACE is absorbed in one place.
+902:
+903:Events announce, Temporal commands, REST answers people: never mix the three.
+904:
+905:12
+906:
+907:Notes: This decision guide is part of the engineering standard. Typical examples: officer opens a case (REST); a payment is missed (event PaymentMissed); the case workflow needs a route decision (child workflow on rwb-valuation); rwb-litigation needs a law firm instructed (activity issueInstruction on rwb-partner); daily WIN letters (file through rwb-integration); restructure calculation in ACE (Nexus operation).
+908:
+909:Anti-patterns rejected in review: REST from one service to another inside a business step (use Temporal); events used as commands (use Temporal); a service reading another service's schema (use its API); a workflow calling REST directly from workflow code (wrap it in an activity).
+910:
+911:## Slide 13
+912:
+913:Who calls whom: the full connection matrix
+914:
+915:Row = the service that starts the interaction; column = the service it calls or listens to
+916:
+917:| starts ↓ / target → | P3 | P7 | P4 | S8 | S1 | S2 | S3 | S4 | S5 | S6 | S7 | P5 | P6 | P8 | S9 | P2 | P1 | P9 | P10 | ACE Cmn | ACE DB | Outside |
+918:|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+919:| P3 Case |  | E | R | T E | T E | T E | T E | T E | T E | T E | T E | E | E | E | E |  | T E |  |  |  |  |  |
+920:| P7 Decision |  |  | R |  |  |  |  |  |  |  |  |  | E |  |  |  |  |  | E |  |  | F |
+921:| P4 Access |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | R |  |  |
+922:| S8 Deviation | E |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | R E |  | T E |  |  |  |
+923:| S1 Valuation |  | T E |  |  |  |  |  |  |  |  |  |  |  |  |  |  | R |  | T |  |  |  |
+924:| S2 Treatment |  | T E |  | E |  |  |  |  |  |  |  | T |  | T E |  |  |  |  |  | N |  |  |
+925:| S3 Guarantee |  | T |  |  |  |  |  |  |  |  |  |  | T E | E |  |  |  |  |  |  |  |  |
+926:| S4 Litigation |  | T |  |  |  |  |  |  |  |  |  |  | T E |  | T E |  |  |  |  |  |  |  |
+927:| S5 Asset |  | T |  |  |  |  |  | E |  |  |  |  |  | T E | T E |  |  |  |  |  |  |  |
+928:| S6 Debt sale |  | T |  |  |  |  |  |  |  |  |  | T |  | T E |  | T |  |  |  |  |  |  |
+929:| S7 Write-off |  | T |  |  |  |  |  |  |  |  |  |  |  | T E |  |  | R E |  |  |  |  |  |
+930:| P5 Document |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | T E |  |  | F |
+931:| P6 Comms | E | T |  | E |  | E |  |  |  |  |  | T |  | E |  | T |  |  |  | R |  |  |
+932:| P8 Payment |  | E |  |  |  | E |  |  | E | E | E |  |  |  |  | T | T E |  |  |  |  |  |
+933:| S9 Partner |  |  |  |  |  |  |  |  |  |  |  | R |  |  |  |  |  |  |  |  |  | R |
+934:| P2 Integration |  |  |  |  |  |  |  |  |  |  |  | R |  |  |  |  |  |  |  |  |  | F |
+935:| P1 Source data |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | S |  |
+936:| P9 Reporting | E |  |  |  |  | E | E |  |  | E | E |  | E |  |  | T | T |  |  |  |  |  |
+937:| P10 Agent | E |  |  |  |  |  |  |  |  |  |  | R E |  |  |  |  | R |  |  |  |  | R |
+938:
+939:
+940:Cells
+941:
+942:T Temporal / N Nexus
+943:
+944:R REST
+945:
+946:E listens to events
+947:
+948:S SQL views
+949:
+950:F file
+951:
+952:Route services reach shared capabilities through Temporal, never REST; only rwb-source-data touches ACE's tables.
+953:
+954:13
+955:
+956:Notes: Letters: R = REST call; T = Temporal (activity on the owner's queue or child workflow there); N = Nexus operation into ACE; E = subscribes to the column's Kafka events; S = SQL views; F = file. Built from the per-service contracts on the next slides.
+957:
+958:Not shown because every service does it: audit and PII logs to ACE Common (Kafka), DecisionRecorded to rwb-decision, permission data cached from rwb-access, traces to OpenTelemetry.
+959:
+960:Reading tips: rwb-case's row shows it orchestrates the route services through Temporal children; rwb-decision and rwb-reporting listen widely (ledger and projections) but call almost nobody; route services call shared capabilities (decision, document, payment, partner, comms) through Temporal, never through REST.
+961:
+962:## Slide 14
+963:
+964:Service contracts 1/7 · Case and control: case, decision, access
+965:
+966:IN = what the service accepts; OUT = what it writes and sends; the tag is the call type
+967:
+968:IN
+969:
+970:OUT
+971:
+972:REST  GET /cases/{id}, /cases?queue= · POST /cases/{id}/actions · GET /tasks · POST /tasks/{id}/complete · GET /case-summary/{id} (for ACE shared case view)
+973:EVT  RouteDecided · DeviationRaised / Cleared · PaymentMissed, TreatmentBooked, ProceedsMatched · LotAwarded, AssetTakenOn, WriteOffApproved · AceDataReady, RulePackageInForce
+974:TMP  CaseWorkflow (parent, one per case) · DailyCaseRun (Schedule + AceDataReady) · Act: allocate, transfer, rebalance
+975:
+976:DB  writes schema rwb_case: case, CMMN state, queues, tasks, allocation, timers
+977:EVT  rwb.case.events.v1: CaseCreated, CaseAllocated, CaseAllocationFailed, CaseTransferred, CaseStateChanged, TimerBreached
+978:TMP  Source data: listEligibleAccounts(businessDate) · Valuation: child: RouteDecisionWorkflow · Treatment: child: stage workflows · Litigation, Asset, Debt sale, Write-off, Guarantee: child · Deviation: child: DeviationWorkflow
+979:REST  Access: authorise (cached)
+980:
+981:P3 · rwb-case
+982:Case & workflow
+983:queue rwb-case
+984:rwb.case.events.v1
+985:
+986:IN
+987:
+988:OUT
+989:
+990:REST  GET /decisions?caseId= · POST /approvals/{id}/decide · POST /rule-models · GET /rule-models/{n}/{v}
+991:EVT  DecisionRecorded (from all 19) · NoticeGenerated (approval) · AgentRunCompleted
+992:TMP  ApprovalWorkflow (kit template) · Schedules: rule promote 00:01, chain check 02:00
+993:
+994:DB  writes schema rwb_decision: approvals, central decision ledger, DMN model registry
+995:EVT  rwb.decision.events.v1: ApprovalRequested, ApprovalDecided, RulePackageInForce
+996:REST  Access: DoA limits
+997:FILE  Immutable storage: daily ledger seal (WORM)
+998:
+999:P7 · rwb-decision
+1000:Decision center & log
+1001:queue rwb-decision
+1002:rwb.decision.events.v1
+1003:
+1004:IN
+1005:
+1006:OUT
+1007:
+1008:REST  POST /authorise (role, scope, DoA) · GET /me/permissions · GET /doa-limits · /masking-policies
+1009:EVT  (none: reference data owner)

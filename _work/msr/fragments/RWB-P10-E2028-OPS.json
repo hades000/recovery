@@ -1,0 +1,121 @@
+{
+  "id": "RWB-P10-E2028-OPS",
+  "epic": "RWB-SVC-P10",
+  "service": "rwb-agent",
+  "wt": "OPS",
+  "lane": "L-P10-E",
+  "ready": "Day 1",
+  "owner": "DEVOPS",
+  "business_epic": "EP03",
+  "wave": 2,
+  "release": "31 January 2027",
+  "legacy": "RWB-E2-028",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": [],
+  "I": [],
+  "X": [],
+  "acs": [
+    {
+      "id": "AC1",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC1 The chart deploys the api and the worker from one artefact (new, D-RCV-60)"
+    },
+    {
+      "id": "AC2",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC2 The rwb_agent login and the Flyway run are in place (new, D-RCV-60)"
+    },
+    {
+      "id": "AC3",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC3 The worker polls rwb-agent in namespace rwb-recovery and scales on backlog (new, D-RCV-60)"
+    },
+    {
+      "id": "AC4",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC4 The L1 run is registered as an event-started workflow and no Schedule exists (new, D-RCV-60)"
+    },
+    {
+      "id": "AC5",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC5 The topic, the record feed and the consumer groups are provisioned (new, D-RCV-60)"
+    },
+    {
+      "id": "AC6",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC6 The reads are wired by contract, secrets are references and egress is closed (new, D-RCV-60)"
+    },
+    {
+      "id": "AC7",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC7 Probes, scaling and the smoke read answer (new, D-RCV-60)"
+    },
+    {
+      "id": "AC8",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC8 The dashboards, the alerts and the runbook cover the L1 gate (new, D-RCV-60)"
+    },
+    {
+      "id": "AC9",
+      "origin": "new, D-RCV-60",
+      "text_first_line": "Scenario: AC9 The route is published and the runbook, the rollback and the capacity plan are accepted (new, D-RCV-60)"
+    }
+  ],
+  "tcs": [
+    "TC-P10-E2028-OPS-01",
+    "TC-P10-E2028-OPS-02",
+    "TC-P10-E2028-OPS-03",
+    "TC-P10-E2028-OPS-04",
+    "TC-P10-E2028-OPS-05",
+    "TC-P10-E2028-OPS-06",
+    "TC-P10-E2028-OPS-07",
+    "TC-P10-E2028-OPS-08",
+    "TC-P10-E2028-OPS-09"
+  ],
+  "reqs": [
+    "REQ-DRI-001",
+    "REQ-ACA-005"
+  ],
+  "ops_provided": [
+    "GET /api/recovery/agent/v1/cases/{caseId}/agent-outputs, published behind the gateway-bff pass-through route",
+    "POST /api/recovery/agent/v1/agent-runs/{runId}/feedback, published behind the gateway-bff pass-through route"
+  ],
+  "ops_consumed": [
+    "rwb-case GET /api/recovery/case/v1/cases/{caseId} (RWB-P3-E1035-CON)",
+    "rwb-case the case-decision proposal operation (path not specified; RWB-P3-E1035-CON)",
+    "rwb-case GET /api/recovery/case/v1/admin/lists/{listCode} (RWB-P3-E1043-CON)",
+    "rwb-decision GET /api/recovery/decision/v1/decision-log/{entryId} (RWB-P7-E1027-CON)",
+    "rwb-source-data GET /api/recovery/source-data/v1/freshness",
+    "the ACE PostgreSQL database, schema rwb_agent and its login",
+    "the Kafka cluster with rwb.agent.events.v1, rwb.decision-record.v1 and rwb.case.events.v1",
+    "the Temporal cluster, namespace rwb-recovery and the task queue rwb-agent",
+    "the platform secret store, the platform feature-flag library and the gateway-bff route",
+    "the model endpoint INT-23 through the agent platform of the earlier P10 stories"
+  ],
+  "events_published": [
+    "rwb.agent.events.v1 provisioned with the retry topic and the .dlt topic; EV-28 and AgentFeedbackRecorded relayed by the outbox of rwb-agent (ASM-0926)",
+    "rwb.decision-record.v1 verified with its retry and .dlt topics and the publish right of the library"
+  ],
+  "events_consumed": [
+    "rwb.case.events.v1: the consume right and the consumer group of rwb-agent on EV-01 CaseCreated"
+  ],
+  "workflows": [
+    "task queue rwb-agent registered in namespace rwb-recovery, event-started, with KEDA scaling on the backlog (ASM-0928)",
+    "AgentRunWorkflow registration with ResolveIntakeMode and RecordIntakeFeedback",
+    "no Schedule is registered: the L1 run is event-started and no cadence belongs to it"
+  ],
+  "prd_ref": "03 Requirements and specifications/PRD/Recovery Workbench PRD P10 rwb-agent v1.md (FR-P10-001, FR-P10-002, FR-P10-004, FR-P10-008, FR-P10-009, FR-P10-010, FR-P10-011, FR-P10-015, FR-P10-024, FR-P10-025, FR-P10-026)",
+  "gaps": [
+    "GAP-0624"
+  ],
+  "assumptions": [
+    "ASM-0916",
+    "ASM-0921",
+    "ASM-0923",
+    "ASM-0926",
+    "ASM-0927",
+    "ASM-0928"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2028 OPS Case intake agent live at L1 [E3a] - deployment v1.md"
+}

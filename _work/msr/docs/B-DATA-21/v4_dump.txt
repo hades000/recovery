@@ -1,0 +1,170 @@
+[p] SCB Collections and Recovery. Henka Group, 22 November 2026.
+[p] (C) Siam Commercial Bank and Henka Pte Ltd
+[p] Recovery Workbench
+[p] Data migration approach
+[t] Item | Detail
+Document | Recovery Workbench data migration approach
+Version | 4
+Date | 22 November 2026
+Prepared by | Henka Group
+Structure | Henka word rules
+Decision | D-RCV-35: ACE holds the source data; the Workbench migrates only its own case state, documents, decisions and reference data
+Realignment | D-RCV-60: one schema per service in the ACE database (ADR-014) and per-service Flyway with migration ownership following the schema owner (ADR-021, DP-15), under DL44 (adopt Arch v5)
+[p] 1. What moves
+[t] What | Data product | Scope | History | How | When
+Case and ownership state | DP03 | Open cases: status, stage, route, owner, queue, tasks, timers and deviations | Current position | Spreadsheet extract, re-keyed to person_key and account_key | E1
+Recovery team spreadsheets | DP03, DP04 | The Excel and SharePoint lists of open recovery work | Open items only | File extract, then retired through the Cutover plan (U5) | E1
+Treatment records | DP04 | Restructures, settlements and deeds agreed but not yet booked, with their approvals | Open only | Spreadsheet extract; the plan itself is read from v_ace_plan | E2
+Documents | DP10 | Documents for open cases in shared drives and the mailroom | Open cases only; originals tracked | Bulk intake through OCR | E1 and E2
+Decision log | DP12 | Decisions taken outside the Workbench on the open cases, with their rule and model version | Open cases only | Spreadsheet extract | E1
+Partners and open instructions | DP08 | Panel firms and their open work | Open instructions | Partner master load | E4 to E6
+Reference data | DP14 | Rules, approval limits, lists of values, roles and letter templates | Current versions | Validated load, versioned | E1
+[p] Under D-RCV-60 each row of this section lands in the schema of the owner of the table it writes, not in one recovery schema; section 9.2 gives the schema and the owner of every table, and section 9.4 splits the reference-data row across its five owners. The data products, scopes, history rules and release markers above are unchanged.
+[p] 2. What does not move
+[p] These data products are already in ACE. Nothing of them moves into the recovery schema: the Workbench reads them through the view named beside each one and holds only its own decisions about them, in party_ext, contact_point_ext, account_ext and valuation_ext.
+[t] Already in ACE | Read through
+Account, arrears, balances, bucket and classification | v_ace_account
+Payments and proceeds | v_ace_payment
+Customer, identity and relations | v_ace_customer, v_ace_ca_relation
+Phone, email and address | v_ace_contact
+Collateral, assets and appraisals | v_ace_collateral, v_ace_asset, v_ace_valuation, v_ace_npa_asset, v_ace_npa_sale
+Collections history from EFS | v_ace_efs_action
+Lawsuits, hearings and proof of delivery | v_ace_lawsuit, v_ace_hearing, v_ace_pod
+Write-offs and GL postings | v_ace_write_off
+Scores and route economics | v_ace_score
+[p] Under D-RCV-60 the views keep their read-only recovery schema and their single reader; only rwb-source-data (P1) reads them, and every other service reads the same data through the rwb-source-data contract (DP-05). The list of views and the statement that nothing of them is copied are unchanged.
+[p] 3. Principles
+[p] ACE holds the source data. The Workbench runs no load of accounts, payments, customer, contact, collateral or collections history, and migrates none of it.
+[p] • ACE holds the source data. The Workbench runs no load of accounts, payments, customer, contact, collateral or collections history, and migrates none of it.
+[p] Only open work and the history a decision needs move; closed history stays in its source.
+[p] • Only open work and the history a decision needs move; closed history stays in its source.
+[p] Every migrated record carries its source and migration date.
+[p] • Every migrated record carries its source and migration date.
+[p] Each migration reconciles to its source before cutover, and the case list reconciles to v_ace_account.
+[p] • Each migration reconciles to its source before cutover, and the case list reconciles to v_ace_account.
+[p] Spreadsheets are retired with a read-only archive once their content is on the case.
+[p] • Spreadsheets are retired with a read-only archive once their content is on the case.
+[p] A link to a source record is a business key, never a copy of the record.
+[p] • A link to a source record is a business key, never a copy of the record.
+[p] 4. Cases in flight
+[t] State today | On the Workbench
+Account at 90 days past due with no recovery action | New case, allocated by rule; the account is read from v_ace_account
+In restructure or settlement | Case with the treatment record and its status; the plan is read from v_ace_plan
+In litigation | Case in the litigation stage, linked to v_ace_lawsuit and v_ace_hearing; the Workbench keeps the instruction
+Asset held | Case linked by asset_key to v_ace_asset and v_ace_npa_asset where the case is open
+In a partner's hands | Case with an open partner instruction
+[p] In the target the five states stay as written: the case rows are rwb_case (P3), the treatment row is rwb_treatment (S2), the litigation rows are rwb_litigation (S4), the asset rows are rwb_asset (S5) and the partner rows are rwb_partner (S9). Each state reads ACE through rwb-source-data, never from a copy.
+[p] 5. Migration stories
+[p] Six of the fourteen migration stories change. The other eight, DM-003, DM-004, DM-007, DM-008, DM-009, DM-010, DM-012 and DM-014, keep their scope, with their sources re-worded to ACE where a read replaces a load.
+[t] Story | New scope
+RWB-DM-001 Migrate account and arrears | Out of scope. The data is in ACE and is read through v_ace_account.
+RWB-DM-002 Migrate customer and party | Out of scope. The data is in ACE and is read through v_ace_customer, v_ace_ca_relation and v_ace_contact.
+RWB-DM-005 Migrate contact and promises | Reduced to the Workbench part. EFS history is read through v_ace_efs_action; only the open promises and contact notes held outside EFS move.
+RWB-DM-006 Migrate collateral and assets | Reduced to the Workbench part. Collateral, appraisals, NPA assets and sales are read through v_ace_collateral, v_ace_valuation, v_ace_asset, v_ace_npa_asset and v_ace_npa_sale; only listings, case asset links and sale instructions move.
+RWB-DM-011 Migrate scores and route economics | Reduced to the Workbench part. COLLINS scores are read through v_ace_score; only the expected-return and sale-estimate records the Workbench calculates move.
+RWB-DM-013 Migrate money and closure | Reduced to the Workbench part. Payments and GL postings are read through v_ace_payment and v_ace_write_off; only proceeds matching and closure records move.
+[p] The six changed stories and the eight unchanged ones all land in the schema of the owner of each table they write. Section 9.3 re-cuts all fourteen against the Ownership Map, and no story keeps a scope wider than the one written here.
+[p] 6. Parallel run
+[p] Each team runs its spreadsheet and the Workbench side by side for two weeks after its first release. The data steward reconciles daily. The spreadsheet retires when the business lead signs ten clean days.
+[p] In the target the parallel run is run per schema, because each schema is released with its own service: a team's spreadsheet retires against the schema that replaces it, two weeks after that schema's release (section 10.2). The ten clean days, the daily reconciliation and the business-lead sign-off are unchanged.
+[p] 7. Reconciliation and the cut-over check
+[p] Counts and balances per data product reconcile to the source within the tolerance under DL25. Breaks are listed for the data steward and cleared before cutover.
+[p] The cut-over check is the case list. Every case_list_row.account_key must resolve to a row in v_ace_account for the cut-over business date, and the count of open cases by product and bucket must agree with the view. A key that does not resolve is either a closed account or a key error; both are cleared before go-live, and the result is recorded against reconciliation rule REC-05. No case starts on the Workbench until this check passes.
+[p] Under D-RCV-60 the case-list check stays the single global gate and keeps its owner: case_list_row is P1's daily published projection and the case list screen and API stay with P3. Section 10.1 adds the per-schema count and balance check that runs before each schema's own cutover.
+[p] 8. Open decisions
+[t] Decision | What is needed
+DL12 | Which legacy systems are kept, and what the Workbench reads from each. Option A is superseded by D-RCV-35: the read path is the SELECT-only recovery.v_ace_* views, not a direct read of ACE or COLLINS
+DL29 | Closed: EFS contact history is read through v_ace_efs_action, so no migration decision is needed
+DL43 | Open with the ACE team lead, needed by 2026-11-21: the ACE team accepts the RWB-ACE-001 scope and dates (14 new ACE tables, 12 new columns). The Tier 2 reads this approach names depend on it
+D-RCV-60 | Decided 22 November 2026: adopt Arch v5. The read path of DL12 becomes one reader, rwb-source-data, and one contract for every other service (DP-05); the Workbench side of DL12 is closed and the source-system list is not reopened. DL43 stays open and unchanged: the ACE team's acceptance of RWB-ACE-001 is still the gate on the ACE tables and columns that the views expose
+[p] 9. Migration by schema
+[p] 9.1 Rules that apply to every schema
+[p] One schema per service in the ACE database, `rwb_<short>` with its own login and pool (ADR-014). The 19 schemas and logins are created once, in wave 0, by RWB-PLT-NF06-DB; pools, the migrator role and the grant check are RWB-PLT-N011-DB.
+[p] • One schema per service in the ACE database, `rwb_<short>` with its own login and pool (ADR-014). The 19 schemas and logins are created once, in wave 0, by RWB-PLT-NF06-DB; pools, the migrator role and the grant check are RWB-PLT-N011-DB.
+[p] Migration ownership follows the schema owner (ADR-021, DP-15). Each service keeps one Flyway sequence in its own schema, never a shared sequence, and its baseline depends on the platform contract story RWB-PLT-E1044-CON.
+[p] • Migration ownership follows the schema owner (ADR-021, DP-15). Each service keeps one Flyway sequence in its own schema, never a shared sequence, and its baseline depends on the platform contract story RWB-PLT-E1044-CON.
+[p] No service reads or writes another service's tables (DP-01). A row that belongs to another service's schema is not copied into the loading service's schema; the reference is a business key resolved through the owner's contract.
+[p] • No service reads or writes another service's tables (DP-01). A row that belongs to another service's schema is not copied into the loading service's schema; the reference is a business key resolved through the owner's contract.
+[p] Only rwb-source-data (P1) reads the 30 recovery.v_ace_* views (DP-05, ADR-010). Every other service reads ACE data through the rwb-source-data contract, which is already the rule for the migration extract.
+[p] • Only rwb-source-data (P1) reads the 30 recovery.v_ace_* views (DP-05, ADR-010). Every other service reads ACE data through the rwb-source-data contract, which is already the rule for the migration extract.
+[p] rwb-source-data stays the data engine: it owns the extract, the key mapping to account_key and person_key, and the reconciliation rows. The load of each migrated table is the owner's Flyway step in the owner's schema, run in the same cutover step. The owner-side step has no story ID of its own in the source documents (CG-B-DATA-21-2; ASM-B-DATA-21-2).
+[p] • rwb-source-data stays the data engine: it owns the extract, the key mapping to account_key and person_key, and the reconciliation rows. The load of each migrated table is the owner's Flyway step in the owner's schema, run in the same cutover step. The owner-side step has no story ID of its own in the source documents (CG-B-DATA-21-2; ASM-B-DATA-21-2).
+[p] Every migrated row keeps its source and migration date columns in the owner's schema, as section 3 requires; no schema receives a row without them.
+[p] • Every migrated row keeps its source and migration date columns in the owner's schema, as section 3 requires; no schema receives a row without them.
+[p] The platform library tables (outbox_event, outbox_delivery, processed_event, idempotency_key, feature_flag, feature_flag_change) are created in every schema by the service's own DB work and migrate no rows (DP-09, RWB-PLT-TE006).
+[p] • The platform library tables (outbox_event, outbox_delivery, processed_event, idempotency_key, feature_flag, feature_flag_change) are created in every schema by the service's own DB work and migrate no rows (DP-09, RWB-PLT-TE006).
+[p] 9.2 The nineteen schemas
+[t] Code | Service | Schema | Wave | Tables that receive migrated rows
+P1 | rwb-source-data | rwb_source_data | 1 | interaction, contact_point_ext, valuation_ext, case_list_row, efs_ledger_outcome
+P2 | rwb-integration | rwb_integration | 1 | None
+P3 | rwb-case | rwb_case | 1 | recovery_case, case_account, case_party, assignment, task, timer, queue, lov_value, reference_version, reference_row, parameter_catalog, parameter_value
+P4 | rwb-access | rwb_access | 1 | role, permission, role_conflict, delegation_limit, masking_rule
+P5 | rwb-document | rwb_document | 1 | document, document_field, document_custody, document_type, retention_rule
+P6 | rwb-comms | rwb_comms | 1 | notice, template, merge_field
+P7 | rwb-decision | rwb_decision | 1 | decision_log_entry, approval, rule_package, rule_package_version, rule_row, rule_test_case
+P8 | rwb-payment | rwb_payment | 2 | proceeds
+P9 | rwb-reporting | rwb_reporting | 1 | measure_snapshot
+P10 | rwb-agent | rwb_agent | 1 | None
+S1 | rwb-valuation | rwb_valuation | 3 | Route-decision output for expected return and sale estimate (CG-B-DATA-21-5; ASM-B-DATA-21-5)
+S2 | rwb-treatment | rwb_treatment | 2 | treatment
+S3 | rwb-guarantee | rwb_guarantee | 3 | None
+S4 | rwb-litigation | rwb_litigation | 3 | legal_action, hearing
+S5 | rwb-asset | rwb_asset | 2 | listing, asset_sale
+S6 | rwb-debtsale | rwb_debtsale | 3 | debt_sale_lot, debt_sale_account
+S7 | rwb-writeoff | rwb_writeoff | 4 | write_off
+S8 | rwb-deviation | rwb_deviation | 2 | deviation
+S9 | rwb-partner | rwb_partner | 4 | partner, partner_user, partner_instruction
+[p] Fifty tables across fifteen schemas receive migrated rows. Four schemas carry none in this version: rwb_integration (P2), rwb_agent (P10) and rwb_guarantee (S3) have no row in section 1, and rwb_valuation (S1) receives only the route-decision records covered by ASM-B-DATA-21-5. Their rows are created by their own services from the first day, and their migration step is the empty baseline of the service's Flyway sequence. The owner of every table is the Ownership Map row for that table; no owner in this document is set by this document.
+[p] 9.3 The fourteen migration stories re-cut
+[t] Legacy story | Title | Target schema and owner | Story IDs | Release (tentative) | What lands
+RWB-DM-001 | Migrate account and arrears | None; ACE through rwb_source_data (P1) | RWB-P1-DM001-APP | 30 November 2026 (tentative) | Nothing: out of scope, read through v_ace_account
+RWB-DM-002 | Migrate customer and party | None; ACE through rwb_source_data (P1) | RWB-P1-DM002-APP | 30 November 2026 (tentative) | Nothing: out of scope, read through v_ace_customer, v_ace_ca_relation and v_ace_contact
+RWB-DM-003 | Migrate case and ownership | rwb_case (P3) | RWB-P1-DM003-APP; RWB-ITG-DM003-ITG | 30 November 2026 (tentative) | recovery_case, case_account, case_party, assignment, task, timer, queue
+RWB-DM-004 | Migrate treatment and offers | rwb_treatment (S2), with the case key in rwb_case (P3) | RWB-P1-DM004-APP; RWB-ITG-DM004-ITG | 31 December 2026 (tentative) | treatment; v_ace_plan is read, not loaded
+RWB-DM-005 | Migrate contact and promises | rwb_source_data (P1), with the case key in rwb_case (P3) | RWB-P1-DM005-APP; RWB-ITG-DM005-ITG | 30 November 2026 (tentative) | interaction, contact_point_ext
+RWB-DM-006 | Migrate collateral and assets | rwb_asset (S5), valuation_ext in rwb_source_data (P1), case key in rwb_case (P3) | RWB-P1-DM006-APP; RWB-ITG-DM006-ITG | 31 December 2026 (tentative) | listing, asset_sale, valuation_ext
+RWB-DM-007 | Migrate legal events and cases | rwb_litigation (S4), notice in rwb_comms (P6), partner_instruction in rwb_partner (S9), case key in rwb_case (P3) | RWB-P1-DM007-APP; RWB-ITG-DM007-ITG | 31 December 2026 (tentative) | legal_action, notice, partner_instruction
+RWB-DM-008 | Migrate partner performance | rwb_partner (S9), with the case key in rwb_case (P3) | RWB-P1-DM008-APP; RWB-ITG-DM008-ITG | 31 December 2026 (tentative) | partner, partner_user, partner_instruction
+RWB-DM-009 | Migrate debt sale | rwb_debtsale (S6), with the case key in rwb_case (P3) | RWB-P1-DM009-APP; RWB-ITG-DM009-ITG | 31 December 2026 (tentative) | debt_sale_lot, debt_sale_account
+RWB-DM-010 | Migrate documents and extracted fields | rwb_document (P5), with the case key in rwb_case (P3) | RWB-P1-DM010-APP; RWB-ITG-DM010-ITG | 30 November 2026 (tentative) | document, document_field, document_custody, and the originals in Blob WORM
+RWB-DM-011 | Migrate scores and route economics | rwb_source_data (P1), rwb_reporting (P9), route decision in rwb_valuation (S1) | RWB-P1-DM011-APP; RWB-ITG-DM011-ITG | 31 December 2026 (tentative) | case_list_row, measure_snapshot, and the expected-return and sale-estimate records (CG-B-DATA-21-5; ASM-B-DATA-21-5)
+RWB-DM-012 | Migrate decision log | rwb_decision (P7), with the case key in rwb_case (P3) | RWB-P1-DM012-APP; RWB-ITG-DM012-ITG | 30 November 2026 (tentative) | decision_log_entry
+RWB-DM-013 | Migrate money and closure | rwb_payment (P8), rwb_writeoff (S7), case key in rwb_case (P3) | RWB-P1-DM013-APP; RWB-P8-DM013-APP; RWB-ITG-DM013-ITG | 31 December 2026 (tentative) | proceeds, write_off
+RWB-DM-014 | Migrate reference data | rwb_case (P3), rwb_decision (P7), rwb_access (P4), rwb_comms (P6), rwb_document (P5), rwb_source_data (P1) | RWB-P1-DM014-APP | 30 November 2026 (tentative) | Section 9.4, one owner per reference table
+[p] The story IDs are the split of the legacy keys in the plan; no story ID is added or renumbered here. The owner-side load step of each row is the Flyway step of the schema named in the third column, under section 9.1 (CG-B-DATA-21-2; ASM-B-DATA-21-2). The P1 and ITG stories keep the scope written in section 5; what changes is the schema each table lands in, and that the landing is the owner's step and not a write by rwb-source-data.
+[p] 9.4 Reference data (DP14) across its five owners
+[t] Item in section 1 | Table | Schema | Owner
+Rules | rule_package, rule_package_version, rule_row, rule_test_case | rwb_decision | P7 rwb-decision
+Approval limits | delegation_limit | rwb_access | P4 rwb-access
+Lists of values | lov_value, reference_version, reference_row | rwb_case | P3 rwb-case
+Roles | role, permission, role_conflict, masking_rule | rwb_access | P4 rwb-access
+Letter templates | template, merge_field | rwb_comms | P6 rwb-comms
+Parameters (R-PREC default ruling, E1-042) | parameter_catalog, parameter_value | rwb_case | P3 rwb-case
+Document types and retention (the document part of DP14) | document_type, retention_rule | rwb_document | P5 rwb-document
+EFS action codes for the interaction ledger | efs_ledger_outcome | rwb_source_data | P1 rwb-source-data
+[p] RWB-P1-DM014-APP extracts and validates the set and maps each table to its owner; each owner's schema loads its own rows in its own Flyway step and versions them there. The rule-package registry, the DoA table, the LOV and parameter tables, the templates and the document types therefore go live with their own service, and a change to any of them is a change in one schema only.
+[p] 9.5 Order of cutover by schema
+[t] Step | Schema and owner | Ready when
+0 | All 19 schemas and logins (RWB-PLT-NF06-DB, wave 0) | The schema, login, pool and migrator role exist and the grant check passes (RWB-PLT-N011-DB); the Flyway baseline is RWB-PLT-E1044-CON
+1 | rwb_source_data (P1) | The read-only view contract is live (RWB-P1-E1069-DB), freshness is visible, and the interaction ledger reconciles
+2 | rwb_access (P4) and rwb_decision (P7) | Roles, DoA limits, masking rules and rule packages are loaded and versioned before any case is allocated
+3 | rwb_case (P3) | Cases, ownership, tasks and timers are loaded, their keys resolve, and the case-list check of section 7 passes
+4 | rwb_treatment (S2), rwb_deviation (S8), rwb_payment (P8), rwb_asset (S5), rwb_document (P5), rwb_comms (P6) | The case rows of step 3 resolve; treatment, deviation, proceeds, asset, document and notice rows attach to them
+5 | rwb_partner (S9) | The panel, its users and the open instructions resolve to the case rows of step 3
+6 | rwb_valuation (S1), rwb_guarantee (S3), rwb_litigation (S4), rwb_debtsale (S6) | Legal actions, hearings, lots and instructions resolve to the case of step 3 and to the panel of step 5
+7 | rwb_writeoff (S7) | Closures load after the route schemas that produce them
+8 | rwb_reporting (P9) | The measures read the loaded schemas and agree with the case list
+[p] The sequence follows the dependency classes of Template and Rules section R5.4: the platform schema work is wave 0, rwb_case is the case of record, and every stage schema is later than the case and earlier than the closure and the reporting projection. The releases of the migration stories are the dates in section 9.3 and stay as they are; a schema in an earlier service wave may cut over earlier, and section 10.2 records that (CG-B-DATA-21-6; ASM-B-DATA-21-6).
+[p] 10. Cut-over, reconciliation and parallel run per schema
+[p] 10.1 Reconciliation per schema
+[p] Each schema reconciles its own counts and balances to its source within the tolerance under DL25 before its cutover, and the data steward clears its breaks. Every schema records its result as a row in reconciliation_result (P1 rwb-source-data), one row per schema and business date, so the per-schema results and the global case-list result of section 7 sit together.
+[p] A schema whose owner has no migrated table starts empty on its own baseline and records a zero-row result; it has no break to clear and no spreadsheet to retire.
+[p] 10.2 Parallel run per schema
+[p] Each team runs its spreadsheet beside the schema that replaces it for two weeks after that schema's release. The data steward reconciles daily per schema, and the spreadsheet retires when the business lead signs ten clean days for that schema. A team whose work spans several schemas retires each list against the schema that now holds it, not against the last service to go live.
+[p] 10.3 Gate on every schema cutover
+[p] No schema accepts writes before RWB-PLT-NF06-DB has created it and RWB-PLT-N011-DB has granted its login; no schema goes live before its own Flyway sequence has run and its reconciliation row is signed; and no case starts on the Workbench before the case-list check of section 7 passes, as section 7 already requires. The legacy tables stay read-only in place after their schema cuts over, for the retention period of each table (CG-B-DATA-21-7; ASM-B-DATA-21-7).
+[p] 11. Change log
+[p] Change-log row: 4, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash.
+[t] Version | Date | Change | Tool
+3 | 15 November 2026 | D-RCV-35: ACE holds the source data; the Workbench migrates only its own case state, documents, decisions and reference data. Sections 1 to 8 of this version are that text. | Not recorded in the source
+4 | 22 November 2026 | D-RCV-60 microservice realignment: section 9 migrates per schema with the owner of every table from the Ownership Map, section 10 cuts over and reconciles per schema; sections 1 to 8 keep every section, ID, number and date, with the realignment notes marked in place | T3 Code / OpenCode / DeepSeek v4.1 Flash

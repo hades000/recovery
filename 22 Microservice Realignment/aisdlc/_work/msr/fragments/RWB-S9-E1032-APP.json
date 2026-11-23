@@ -1,0 +1,84 @@
+{
+  "id": "RWB-S9-E1032-APP",
+  "epic": "RWB-SVC-S9",
+  "service": "rwb-partner",
+  "wt": "APP",
+  "lane": "L-S9-B",
+  "ready": "Day 1",
+  "owner": "TechX (suggested; any team may pick up this story)",
+  "business_epic": "EP01",
+  "wave": 1,
+  "release": "30 November 2026",
+  "legacy": "RWB-E1-032",
+  "disposition": "Split (rework)",
+  "H": [],
+  "C": ["RWB-P5-E1032-CON"],
+  "I": [],
+  "X": [],
+  "acs": [
+    {"id": "AC1", "origin": "new, D-RCV-60", "text_first_line": "A partner file on an open instruction is recorded and announced"},
+    {"id": "AC2", "origin": "new, D-RCV-60", "text_first_line": "The attach outcome closes the submission"},
+    {"id": "AC3", "origin": "new, D-RCV-60", "text_first_line": "A held file is copied to the partner side and attached by no one here"},
+    {"id": "AC4", "origin": "new, D-RCV-60", "text_first_line": "The same file under the same instruction writes one submission"},
+    {"id": "AC5", "origin": "new, D-RCV-60", "text_first_line": "A submission that cannot be accepted writes nothing"},
+    {"id": "AC6", "origin": "new, D-RCV-60", "text_first_line": "A refused record leaves no trace"},
+    {"id": "AC7", "origin": "new, D-RCV-60", "text_first_line": "The submission and its attach state read on SCR-35"}
+  ],
+  "tcs": [
+    "TC-S9-E1032-APP-01",
+    "TC-S9-E1032-APP-02",
+    "TC-S9-E1032-APP-03",
+    "TC-S9-E1032-APP-04",
+    "TC-S9-E1032-APP-05",
+    "TC-S9-E1032-APP-06",
+    "TC-S9-E1032-APP-07",
+    "TC-S9-E1032-APP-08"
+  ],
+  "reqs": ["REQ-DCM-007", "REQ-DRI-004", "REQ-DCM-005"],
+  "ops_provided": [
+    "POST /api/recovery/partner/v1/partner/instructions/{instructionId}/documents: multipart file and documentType in, PartnerSubmission out (201), Partner portal C on the own firm, Idempotency-Key required, errors 401, 403, 404, 409, 415, 422, 503",
+    "GET /api/recovery/partner/v1/partner/instructions/{instructionId}/documents: query state, page, size; SubmissionPage out, Partner portal R on the own firm, errors 401, 403, 404, 503"
+  ],
+  "ops_consumed": [
+    "rwb-document intake creation (RWB-P5-E1032-CON carries the IntakeItem shape; the operation itself is not published, CG-B2-S9-017-5) for the file reference, the partner source and the case ID of the instruction",
+    "rwb-document item read GET /api/recovery/document/v1/intake-items/{intakeItemId} (RWB-P5-E1032-CON) for the match state and the candidate cases of an open submission",
+    "rwb-case parameters read (RWB-P3-E1042-CON behind the client library, DP-06) for the intake bound",
+    "rwb-case reference-data read (RWB-P3-E1043-CON behind the client library, DP-07) for LOV-DOC-TYPE and LOV-INSTR-STATUS"
+  ],
+  "events_published": [
+    "rwb.partner.PartnerDocumentSubmitted.v1 on rwb.partner.events.v1, key caseId: submission ID, instruction ID, case ID, document type, file SHA-256, intake item ID, submitted time; outbox in the acceptance transaction (DP-09)"
+  ],
+  "events_consumed": [
+    "rwb.document.DocumentAttached.v1 on rwb.document.events.v1 (owner P5 rwb-document, RWB-P5-E1032-APP 12.3): closes the submission with the document ID and signals documentAttached"
+  ],
+  "workflows": [
+    "PartnerInstructionWorkflow on rwb-partner: signal documentAttached (submission ID, document ID)",
+    "PartnerIntakeReconcileWorkflow on rwb-partner with the activities recordPartnerDocument and reconcilePartnerIntake",
+    "Schedule partner-intake-reconcile, every 15 minutes in business hours (the legacy JOB-12 cadence)"
+  ],
+  "prd_ref": "Pending (C1)",
+  "gaps": [
+    "CG-B2-S9-017-1",
+    "CG-B2-S9-017-2",
+    "CG-B2-S9-017-3",
+    "CG-B2-S9-017-4",
+    "CG-B2-S9-017-5",
+    "CG-B2-S9-017-6",
+    "CG-B2-S9-017-7",
+    "CG-B2-S9-017-8",
+    "CG-B2-S9-017-9"
+  ],
+  "assumptions": [
+    "ASM-B2-S9-017-1",
+    "ASM-B2-S9-017-2",
+    "ASM-B2-S9-017-3",
+    "ASM-B2-S9-017-4",
+    "ASM-B2-S9-017-5",
+    "ASM-B2-S9-017-6",
+    "ASM-B2-S9-017-7",
+    "ASM-B2-S9-017-8",
+    "ASM-B2-S9-017-9",
+    "ASM-B2-S9-017-10"
+  ],
+  "file": "04 User stories/Recovery Workbench Service Story Files v1/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E1032 APP Automatic attach from the OCR intake v1.md"
+}

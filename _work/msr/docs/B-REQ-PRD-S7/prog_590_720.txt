@@ -1,0 +1,135 @@
+585:## 6.11 Accessibility and devices
+586:
+587:| ID | Requirement | Target | Status | Owner |
+588:|---|---|---|---|---|
+589:| NFR-060 | Screens meet the bank's accessibility standard. | WCAG 2.1 level AA for every screen | Proposed, DL11 | Tech leads with the ACE team |
+590:| NFR-061 | Screens work on the browsers and versions the bank supports. | The current and previous major versions of Microsoft Edge and Google Chrome | Proposed, DL11 | IT lead |
+591:| NFR-062 | The field application captures evidence with no network connection and uploads when it reconnects. | Offline capture | Proposed | Solution architect |
+592:| NFR-063 | Partner-facing screens work on the devices partners actually use. | Desktop browsers as in NFR-061 and tablets for field and auction partners | Proposed, DL11 | Partner and agency manager |
+593:
+594:
+595:## 6.12 Observability
+596:
+597:| ID | Requirement | Target | Status | Owner |
+598:|---|---|---|---|---|
+599:| NFR-064 | Logs, traces and metrics are produced across the workflow, the decision service and the agents. | Across all three | Proposed | Solution architect |
+600:| NFR-065 | Business measures per decision are produced from the decision log and not from a separate count. | From the log | Proposed | Solution architect |
+601:| NFR-066 | Agent acceptance, override rate, latency and cost are measured and reported. | Measured per agent | Proposed | Solution architect |
+602:| NFR-067 | Every scheduled job has a run book, monitoring and an alert to the operations channel. | Every job | Proposed | Solution architect |
+603:| NFR-068 | A failing interface, job or agent raises an alert to a named owner within its target. | Alert within 15 minutes to the named owner | Proposed, DL11 | Platform administrator |
+604:
+605:
+606:# 7. Constraints
+607:
+608:| Constraint | What it means |
+609:|---|---|
+610:| Built on ACE | The Workbench is a module of ACE: 19 services in one ACE platform, one ACE database and one front end, with shape given by D-RCV-60 and ADR-013 (CG-B-REQ-BRD-PROG-5; ASM-B-REQ-BRD-PROG-3) |
+611:| Modular monolith | Superseded by D-RCV-60 and ADR-014: the recovery module is split into 19 services, each with its own schema, login, topic and task queue in the ACE database, and the boundaries are checked at build time (CG-B-REQ-BRD-PROG-5; ASM-B-REQ-BRD-PROG-4) |
+612:| Programmatic workflow | Superseded by D-RCV-60 and ADR-016: case, stage and task state is still held in the owner's database and is still described in CMMN 1.1 terms, but a case is moved by a durable workflow, with one parent case workflow and one child workflow per stage, and a schedule per job (CG-B-REQ-BRD-PROG-5; ASM-B-REQ-BRD-PROG-5) |
+613:| Principle 1 | Every rule, limit, threshold, template, name, queue, role, timer and route is a versioned data row, changed through a validated load without a code release |
+614:| Data through ACE ingestion | Source data lands in the ACE database through ACE ingestion, including sources ACE does not hold today. The recovery module reads it only through the read-only recovery.v_ace_* views, links to it by ACE business keys and holds no copy, load or staging table (D-RCV-35, ADR-010). No real-time feed today; same-day needs are named under DL06 |
+615:| ACE team dependency | The ACE team owns every ACE table and column the views read, and adds 14 tables, 12 columns and 80 source fields under RWB-ACE-001 by 21 November 2026 for the 30 November release (tentative) (DL43). Features that read the Tier 2 additions stay behind their feature flags until the additions land |
+616:| Document hub | The Workbench is the system of record for recovery documents |
+617:| Monthly releases | One production release at each month end, shared with the collection squad |
+618:
+619:
+620:# 8. Release plan
+621:
+622:| Epic | Release | Theme | What the business gets |
+623:|---|---|---|---|
+624:| E1 | 30 Nov 2026 (tentative) | Foundation 1 | One case list for every account at 90 days past due or more, reconciled to the core bank. Documents found by case. Decision log store. Read-only case record view |
+625:| E2 | 31 Dec 2026 (tentative) | Foundation 2 | One owner and a timer on every case, full history on one screen, approval routing, litigation notices generated and approved, steering dashboard |
+626:| E3 | 31 Jan 2027 (tentative) | Settle, deed in lieu, assets | Settlements and deeds in lieu end to end to booking. Asset record, floor price and listing on HOME.SCB |
+627:| E4 | 28 Feb 2027 (tentative) | Route decision | The route recommended with reasons and approved within the delegation of authority for every new case. Guarantee and TCG claims. Auction rounds and RAMC transfer |
+628:| E5 | 31 Mar 2027 (tentative) | Litigation | Litigation instructed and tracked end to end, law firms through the partner portal. Debt sale lot data and the buyer data room |
+629:| E6 | 30 Apr 2027 (tentative) | Debt sale and write-off | Debt sale screens and award, write-off committee, partner panel, allocation and fees |
+630:| E7 | 31 May 2027 (tentative) | Deviations and partners | Deviations X1 to X7 end to end. Partner scoring, conduct and the field app |
+631:| E8 | 30 Jun 2027 (tentative) | Administration and hardening | Full administration, conduct checks, autonomy step-ups, regulatory returns, hardening |
+632:
+633:
+634:# 9. Open decisions that change these requirements
+635:
+636:DL43 is the new open decision. The others keep their v3 answers, with the wording changed where D-RCV-35 supersedes the COLLINS route or the read and write position.
+637:
+638:| Decision | Question | Answer the build uses until decided | Owner | Needed by |
+639:|---|---|---|---|---|
+640:| DL06 | Which interfaces need real time data, and which take the daily batch? | Option A, daily batch through COLLINS, is superseded by D-RCV-35: ACE ingests all source data, so the Workbench runs no source batch load and reads ACE once its batch is complete. Option B for the named same-day triggers. ACE has no real time feed today. Name the same-day triggers now: case transferred from EFS, payment received, legal event. | Not specified in the source documents (CG-B-REQ-BRD-PROG-1; ASM-B-REQ-BRD-PROG-6) | 30 Oct |
+641:| DL10 | What is the Thai name for each field, label and message? | The business lead drafts per module one epic ahead; Legal and Compliance approve. | Business lead with Legal and Compliance | 5 Nov |
+642:| DL11 | What is the value for each non-functional target, or the owner and date for it? | Use the ACE values where ACE has them; the solution architect proposes the rest; Risk agrees. | Solution architect with Risk | 5 Nov |
+643:| DL12 | Which legacy systems are kept, and does any need enhancing? | No legacy enhancement, with a list of the systems kept and what the Workbench reads from each. The read and write part of option A is superseded by D-RCV-35: source data is read only, through the SELECT-only recovery.v_ace_* views, not a direct read of ACE or COLLINS. | Not specified in the source documents (CG-B-REQ-BRD-PROG-1; ASM-B-REQ-BRD-PROG-6) | 7 Nov |
+644:| DL13 | The SCB X consortium template for AI code generation arrives on 29 October. Are the Epic 1 and Epic 2 requirements rewritten to it before the build? | Remap the Epic 1 requirements by 4 November and use the template from Epic 2. TechX, SCB and Henka agree one template and keep it for every later epic. | Not specified in the source documents (CG-B-REQ-BRD-PROG-1; ASM-B-REQ-BRD-PROG-6) | 30 Oct |
+645:| DL15 | Are the inventory counts and the growth assumption the right base for sizing? | A: Mortgage 12,256, hire purchase 12,960 and SSME 2,903 accounts; 3,110 new accounts a month; 15 percent growth a year. | Data lead | 6 Nov |
+646:| DL16 | Does a case enter the Workbench at 90 or 91 days past due? | 90 days past due. The target operating model has the case owner holding the case from day 90. | Business lead | 6 Nov |
+647:| DL17 | Is a case one per customer per product, one per account, or one per customer? | One per customer per product, with the accounts linked. | Product owner with the solution architect | 6 Nov |
+648:| DL18 | Which person holds each approval level, with the limit by decision, amount and product, and the substitute for each? | Load the regulation's levels and limits now; add names and substitutes when signed. | Risk with the product heads | 30 Nov |
+649:| DL20 | Where do customer facts come from? | The customer facts ACE holds, which ACE ingests from SCBPDM and the core bank; the Workbench reads them through v_ace_customer. Amended by D-RCV-35, which removes the COLLINS route. | Solution architect with Not specified in the source documents (CG-B-REQ-BRD-PROG-1; ASM-B-REQ-BRD-PROG-6) | 30 Oct |
+650:| DL22 | How long may a case stay in each state before it escalates? | Load the values as parameters; escalation runs from the day they are loaded. | Business lead | 13 Nov |
+651:| DL23 | What is the most cases a person holds, and how is a queue ordered? | Load as parameters. | Product owner | 13 Nov |
+652:| DL26 | How long is each data product and document type kept, and which fields are masked for which role? | Provide per data product and document type. | Compliance | 13 Nov |
+653:| DL27 | How are storage, backup, legal hold and e-discovery provided for the document hub? | The ACE storage pattern with a write-once container and the bank backup service. | Solution architect with Compliance | 13 Nov |
+654:| DL43 | Does the ACE team accept the RWB-ACE-001 scope and its dates? The scope is 14 new ACE tables, 12 new columns and 80 source fields. | Open. The build assumes the scope is accepted: 14 new ACE tables, 12 new columns and 80 source fields. Dates to confirm, and the Tier 2 features stay behind their flags until the additions land. | ACE team lead | 21 Nov |
+655:
+656:# 10. Delivery model
+657:
+658:Under D-RCV-60 the program is delivered as 19 service epics, seven platform epics and five integration epics, and every story also carries its business epic EP01 to EP08 as a tag (U1, DL45). The eight business epics keep the releases in section 8. The requirement IDs in section 5, their text, their priorities, their business owners and their epic column do not change; what this section adds is which epic delivers each requirement, in which wave, and in what order the work can start.
+659:
+660:## 10.1 Epic structure
+661:
+662:| Epic group | Epics | Count | What the epic delivers |
+663:|---|---|---|---|
+664:| Platform | RWB-PLT-TPL, RWB-PLT-LIB, RWB-PLT-WF, RWB-PLT-DB, RWB-PLT-EVT, RWB-PLT-EDGE, RWB-PLT-OBS | 7 | Service template and repositories, shared libraries, the workflow platform, the ACE database schemas and logins, the event platform, the edge and gateway, and observability |
+665:| Service | RWB-SVC-P1 to RWB-SVC-S9 | 19 | One epic per service, covering the contract, application, database, infrastructure, operations and integration work of that service |
+666:| Integration | RWB-ITG-W1, RWB-ITG-W2, RWB-ITG-W3, RWB-ITG-W4, RWB-ITG-NFR | 5 | One integration harness per wave, and the non-functional work of section 6 |
+667:| Business epic tag | EP01 to EP08 | 8 | The business release a requirement lands in; carried as a tag on every story, alongside the service epic |
+668:
+669:The platform epics deliver first, as wave 0, because every service epic builds on the template, the libraries, the workflow platform, the schemas and logins, the event platform, the edge and the observability baseline. RWB-PLT-EVT carries the event platform; the shared topic that every service writes its decision record to is rwb.decision-record.v1, and the Temporal namespace is rwb-recovery.
+670:
+671:## 10.2 The 19 service epics and their waves
+672:
+673:Each service epic is one service in the ACE platform, with its own schema and login in the ACE database, and each is reusable or replaceable on its own. The service, schema and wave are the Ownership Map entries (Ownership Map, Services sheet), which follow the Architecture v5 service catalogue (R-PREC rank 1).
+674:
+675:| Service epic | Module | Service | Schema | Wave | Business epics served |
+676:|---|---|---|---|---|---|
+677:| RWB-SVC-P1 | P1 | rwb-source-data | rwb_source_data | 1 | EP01 to EP02 |
+678:| RWB-SVC-P2 | P2 | rwb-integration | rwb_integration | 1 | EP01 to EP02 |
+679:| RWB-SVC-P3 | P3 | rwb-case | rwb_case | 1 | EP01, EP02, EP07 |
+680:| RWB-SVC-P4 | P4 | rwb-access | rwb_access | 1 | EP01, EP02, EP08 |
+681:| RWB-SVC-P5 | P5 | rwb-document | rwb_document | 1 | EP01 to EP02 |
+682:| RWB-SVC-P6 | P6 | rwb-comms | rwb_comms | 1 | EP01, EP02, EP04 |
+683:| RWB-SVC-P7 | P7 | rwb-decision | rwb_decision | 1 | EP01 to EP02 |
+684:| RWB-SVC-P8 | P8 | rwb-payment | rwb_payment | 2 | EP02 to EP08 |
+685:| RWB-SVC-P9 | P9 | rwb-reporting | rwb_reporting | 1 | EP01 to EP08 |
+686:| RWB-SVC-P10 | P10 | rwb-agent | rwb_agent | 1 | EP01 to EP08 |
+687:| RWB-SVC-S1 | S1 | rwb-valuation | rwb_valuation | 3 | EP04 |
+688:| RWB-SVC-S2 | S2 | rwb-treatment | rwb_treatment | 2 | EP03 |
+689:| RWB-SVC-S3 | S3 | rwb-guarantee | rwb_guarantee | 3 | EP04 |
+690:| RWB-SVC-S4 | S4 | rwb-litigation | rwb_litigation | 3 | EP05 |
+691:| RWB-SVC-S5 | S5 | rwb-asset | rwb_asset | 2 | EP03 to EP04 |
+692:| RWB-SVC-S6 | S6 | rwb-debtsale | rwb_debtsale | 3 | EP05 to EP06 |
+693:| RWB-SVC-S7 | S7 | rwb-writeoff | rwb_writeoff | 4 | EP06 |
+694:| RWB-SVC-S8 | S8 | rwb-deviation | rwb_deviation | 2 | EP02, EP03, EP07 |
+695:| RWB-SVC-S9 | S9 | rwb-partner | rwb_partner | 4 | EP06 to EP07 |
+696:
+697:Owner in delivery terms is a suggestion only: every service epic is picked up by TechX (suggested; any team may pick up this story), and the database, infrastructure and operations work inside it by the ACE team, SCB IT infrastructure and the DevOps team as their suggested owners. No owner is a named person (U3, DL46).
+698:
+699:## 10.3 Waves and releases
+700:
+701:A wave groups the monthly releases that can be built together. The wave of a business epic is fixed: EP01 in wave 1, EP02 and EP03 in wave 2, EP04 and EP05 in wave 3, and EP06 to EP08 in wave 4, with platform and non-functional work in wave 0. A service is created in the wave shown in 10.2, so a service that a later wave needs first is created earlier rather than the requirement moving.
+702:
+703:| Wave | Business epics in the wave | Service epics created in the wave | Release (tentative) |
+704:|---|---|---|---|
+705:| 0 | Platform and non-functional | The seven platform epics and RWB-ITG-NFR | Before EP01, November 2026 |
+706:| 1 | EP01 | RWB-SVC-P1, P2, P3, P4, P5, P6, P7, P9, P10 | 30 Nov 2026 |
+707:| 2 | EP02, EP03 | RWB-SVC-P8, S2, S5, S8 | 31 Dec 2026 and 31 Jan 2027 |
+708:| 3 | EP04, EP05 | RWB-SVC-S1, S3, S4, S6 | 28 Feb 2027 and 31 Mar 2027 |
+709:| 4 | EP06, EP07, EP08 | RWB-SVC-S7, S9 | 30 Apr 2027, 31 May 2027 and 30 Jun 2027 |
+710:| per wave | All | RWB-ITG-W1 to RWB-ITG-W4, one harness per wave | The same wave dates, tentative |
+711:
+712:The dates are the section 8 dates, unchanged and tentative (U7, DL48). The program finishes inside eight months of the first release.
+713:
+714:## 10.4 Contract-first delivery
+715:
+716:Every service publishes its contract before its build starts, and no service waits for another service to be built (ADR-020).
+717:
+718:- The contract of a service is four things: its REST resources under /api/recovery/<short>/v1 behind gateway-bff, its topic rwb.<short>.events.v1 with its event names, its Temporal task queue rwb-<short> in the namespace rwb-recovery, and the call types it offers and accepts (REST, Kafka, Temporal, file).
+719:- A contract story is Day 1 in every service epic and has no build dependency. Application stories build against the published contract and its fake, so a dependency on another service's contract never blocks a build.
