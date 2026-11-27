@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "The refusals are the store's and are quoted, not built, here: MSG-P4-002 for an identity without the Documents right (403), MSG-P4-003 for a case outside the caller's scope (403). MSG-P1-022 belongs to the listener's incident and appears in this story only as the text the consumer side shows. No role in this story may grant itself an event and no caller may name another actor in the header: the actor is the session's identity or the workload identity, never a field of the request.",
+   "new": "The refusals are the store's and are quoted, not built, here: MSG-P4-002 for an identity without the Documents right (403), MSG-P4-003 for a case outside the caller's scope (403). MSG-P1-022 belongs to the listener's incident and appears in this story only as the text the consumer side shows. No role in this story may grant itself an event and no caller may name another actor in the header: the actor is the session's identity or the workload identity, never a field of the request.\n\nThe event of this story carries the actor in the CloudEvents extension attribute ce_actor and the idempotency key in the extension attribute ce_idempotencykey, on rwb.document.events.v1 (section 12.3). The key is derived from the document row, and the attribute name is read from configuration. Every REST operation of this story (API-P5-001 and API-P5-005) runs the rwb-access authorise check (DP-08) before the store command."
+  },
+  {
+   "old": "| REQ-ILG-005 | Every Workbench action on a case writes to the ledger as it happens | Business Requirements Epic 1, sections 3.1 and 4 | FEAT-ILG-01 | All recovery processes | R-UNI-36; legacy BR1, BR5, BR8 | TC-E1-067-01, TC-E1-067-05, TC-E1-067-06 |",
+   "new": "| REQ-ILG-005 | Every Workbench action on a case writes to the ledger as it happens | Business Requirements Epic 1, sections 3.1 and 4 | FEAT-ILG-01 | All recovery processes | R-UNI-36; legacy BR1, BR5, BR8 | TC-E1-067-01, TC-E1-067-02, TC-E1-067-03 |"
+  },
+  {
+   "old": "| REQ-ILG-002 | Every entry carries case, event, time, actor and source | Business Requirements Epic 1, sections 3.1 and 4 | FEAT-ILG-01 | All recovery processes | R-UNI-40; legacy BR2 | TC-E1-067-02 |",
+   "new": "| REQ-ILG-002 | Every entry carries case, event, time, actor and source | Business Requirements Epic 1, sections 3.1 and 4 | FEAT-ILG-01 | All recovery processes | R-UNI-40; legacy BR2 | TC-E1-066-01, TC-E1-066-03, TC-E1-066-05, TC-E1-067-01, TC-E1-067-02, TC-E1-067-03 |"
+  },
+  {
+   "old": "The user-visible consequence of this story is indirect and worth one sentence in the test pack: a document uploaded on the Documents tab appears in the case history with the time it was stored and the identity that stored it, and the label of the entry is the ledger's, not this service's.",
+   "new": "The user-visible consequence of this story is indirect and worth one sentence in the test pack: a document uploaded on the Documents tab appears in the case history with the time it was stored and the identity that stored it, and the label of the entry is the ledger's, not this service's.\n\nScreen states on SCR-03 Case record for the DOCUMENT_ATTACHED entry follow Screen Specifications v1 section SCR-03: loading as specified there; empty, error and no access: Not specified in the source documents (CG-ALL-6134). Screen states on SCR-04 follow Screen Specifications v1 section SCR-04: loading as specified there; empty, error and no access: Not specified in the source documents (CG-ALL-6135)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17397",
+   "item": "DOR-RWB-P5-E1067-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Added a sentence to section 10 that every REST operation (API-P5-001, API-P5-005) runs the rwb-access authorise check (DP-08) before the store command.",
+   "note": "Authorise check named in section 10; the eight-role table is unchanged."
+  },
+  {
+   "ruling": "R-22258",
+   "item": "GAP-1612",
+   "status": "Cross-document",
+   "section": "",
+   "target": "FSD P7 functional specification",
+   "change": "Re-issue without FEAT-ILG-01 to FEAT-ILG-10 and A2.26 to A2.35; keep REQ-ILG-001 to REQ-ILG-014 traced to CAP-P1-012; rwb-source-data owns the one ledger.",
+   "note": "This story already gives the ledger to rwb-source-data under DP-18; the P7 change sits in the FSD."
+  },
+  {
+   "ruling": "R-22266",
+   "item": "GAP-0376",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P1-E1067-APP",
+   "change": "One consumer group across the three topics; accept current and previous schema version; dedupe on CloudEvents id in rwb_source_data.processed_event; assign case_seq under the case lock; ordered read by occurredAt then case_seq; report cross-topic inversions; keep the legacy event-to-code map.",
+   "note": "Consumer-side ordering and dedupe rule belong to the listener; this producer story has no edit for it."
+  },
+  {
+   "ruling": "R-22267",
+   "item": "GAP-0507",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P1-E1067-CON",
+   "change": "Fix rows 16 and 19 of Architecture v5 slide 15 in the intake map: EV-16 DocumentStored to rwb.document.DocumentStored.v1 and EV-19 TimerBreached to rwb.case.TimerBreached.v1, consumed by rwb-source-data; each producer signs its row.",
+   "note": "The intake map is owned by the contract; no story-side change needed."
+  },
+  {
+   "ruling": "R-22268",
+   "item": "GAP-1055",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Section 10 now states the key is derived from the document row and carried in ce_idempotencykey, with the attribute name read from configuration.",
+   "note": "Story side resolved. TSD P5 T5.3 header schema is not edited here."
+  },
+  {
+   "ruling": "R-22269",
+   "item": "GAP-1056",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Section 10 names ce_actor as the CloudEvents extension attribute carrying the actor on rwb.document.events.v1 (section 12.3).",
+   "note": "Actor attribute named in the story. Envelope assertion against the section 12.3 AsyncAPI fragment is not added as a new test row here."
+  },
+  {
+   "ruling": "R-22270",
+   "item": "GAP-2257",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "rwb-case API and event specification; platform event library registry",
+   "change": "Record ce_idempotencykey and ce_actor; key shape of event code, case number and action date for CaseCreated, CaseAllocated, CaseTransferred and TimerBreached; relay publish limit as a platform parameter; registry subject derived from rwb.case.events.v1.",
+   "note": "Story section 10 adopts ce_idempotencykey and ce_actor; rwb-case spec and registry values are in other documents."
+  },
+  {
+   "ruling": "R-25877",
+   "item": "CG-ALL-6132",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "REQ-ILG-005 and REQ-ILG-002 aligned to RTM v7. REQ-ILG-007 RTM list is truncated in the evidence, so that row is left unchanged."
+  },
+  {
+   "ruling": "R-25878",
+   "item": "CG-ALL-6134",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 states SCR-03 loading as in Screen Specifications v1; empty, error and no access marked Not specified in the source documents.",
+   "note": "SCR-03 states now cite Screen Specifications v1; the spec lacks empty, error and no access."
+  },
+  {
+   "ruling": "R-25879",
+   "item": "CG-ALL-6135",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 states SCR-04 loading as in Screen Specifications v1; empty, error and no access marked Not specified in the source documents.",
+   "note": "SCR-04 states now cite Screen Specifications v1; the spec lacks empty, error and no access."
+  }
+ ]
+}

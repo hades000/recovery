@@ -1,0 +1,76 @@
+{
+ "edits": [
+  {
+   "old": "Given approved versions are in force for \"QUEUE\" version 7 and \"SERVICE_LEVEL\" version 2, and v_ace_holiday holds the Bank of Thailand calendar",
+   "new": "Given approved versions are in force for \"QUEUE\" version 7 and \"SERVICE_LEVEL\" version 2, and the rwb-source-data contract mock holds the Bank of Thailand calendar"
+  },
+  {
+   "old": "Then each reads every reference table it uses from the reference data service and the holiday calendar from v_ace_holiday",
+   "new": "Then each reads every reference table it uses from the reference data service and the holiday calendar from the rwb-source-data contract"
+  },
+  {
+   "old": "    Then the system refuses the load with MSG-GEN-001 naming \"rows\"\n    Then the system writes no version",
+   "new": "    Then the system refuses the load with MSG-GEN-001 naming \"rows\"\n    Then the system writes no version\n\n  Scenario: AC11 Only the twelve listed reference tables are served (new, D-RCV-60)\n    Given LOV-REF-TABLE holds 25 values, of which the twelve tables of section 8 are a subset\n    When a table code that is not one of the twelve tables of section 8 is requested\n    Then the service serves only the twelve tables of section 8\n\n  Scenario: AC12 A provided operation answers 401, 403 or 404 for a refused or unknown call (new, D-RCV-60)\n    Given a caller with no valid credential calls a provided operation\n    Given \"U-REF-01\" with no approve right calls the approve operation\n    Given a caller asks for a table code that does not exist\n    When each call is made\n    Then the service answers 401 to the first call, 403 to the second and 404 to the third\n\n  Scenario: AC13 A consumed call fails or does not answer (new, D-RCV-60)\n    Given the rwb-source-data contract mock does not answer for business date 2026-11-30\n    When the allocation engine starts for business date 2026-11-30\n    Then the engine does not start its run\n    Then the engine does not run on stale or missing values\n\n  Scenario: AC14 A status change the model does not allow is refused (new, D-RCV-60)\n    Given version 3 of \"EXPOSURE_BAND\" has status \"APPROVED\"\n    When \"U-RSK-01\" approves version 3 of \"EXPOSURE_BAND\" again\n    Then the system refuses the approval\n    Then the version stays \"APPROVED\" with its approver unchanged"
+  },
+  {
+   "old": "| TC-E1-043-13 | Section 12.7 (ASM-3438) | Component | Boundary test of each table of section 12.7 at its unique and partial unique index limits |",
+   "new": "| TC-E1-043-13 | Section 12.7 (ASM-3438) | Component | Boundary test of each table of section 12.7 at its unique and partial unique index limits |\n| TC-E1-043-14 | AC11, BR1 | Component | LOV-REF-TABLE with 25 values; a request for a table code that is not one of the twelve tables of section 8 |\n| TC-E1-043-15 | AC12 | Component | Calls to the provided operations without a credential, without the approve right, and for a table code that does not exist |\n| TC-E1-043-16 | AC13 | Component | rwb-source-data contract fake does not answer for business date 2026-11-30 |\n| TC-E1-043-17 | AC14 | Component | EXPOSURE_BAND version 3 with status APPROVED, approved again |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29037",
+   "item": "GAP-0223",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "refdata source, Reference tables sheet",
+   "change": "Record the owner of each of the five 'Reference table' rows from its map item (LOV-DOC-TYPE, LOV-RETENTION, service levels, masking_rule, reference_row); name reference_row in rwb_case as the message catalogue carrier; leave Table cells unchanged.",
+   "note": "Table cells and owners sit in the refdata Reference tables sheet, not this story. Story BR1 unchanged."
+  },
+  {
+   "ruling": "R-29366",
+   "item": "ACR-RWB-P3-E1043-APP-AC3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC3 Given and Then now read the holiday calendar through the rwb-source-data contract mock, not the ACE view."
+  },
+  {
+   "ruling": "R-30598",
+   "item": "NEWAC-RWB-P3-E1043-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for BR1 served-table list and TC-E1-043-14."
+  },
+  {
+   "ruling": "R-30599",
+   "item": "NEWAC-RWB-P3-E1043-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for 401, 403 and 404 answers and TC-E1-043-15."
+  },
+  {
+   "ruling": "R-30600",
+   "item": "NEWAC-RWB-P3-E1043-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 for a failed consumed call (BR9) and TC-E1-043-16."
+  },
+  {
+   "ruling": "R-30601",
+   "item": "NEWAC-RWB-P3-E1043-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for a refused disallowed status change and TC-E1-043-17."
+  }
+ ]
+}

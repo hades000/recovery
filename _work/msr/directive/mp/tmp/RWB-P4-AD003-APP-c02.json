@@ -1,0 +1,172 @@
+{
+ "edits": [
+  {
+   "old": "| X3 | The posted value is outside `LOV-SCOPE`, or a required field is empty | 422 with the field named; no row is written, no entry, no event | MSG-GEN-001 | TC-AD-003-03 |",
+   "new": "| X3 | The posted value is outside `LOV-SCOPE`, or a required field is empty | 422 with the field named; no row is written, no entry, no event | MSG-GEN-001 | AC3, TC-AD-003-06 |"
+  },
+  {
+   "old": "| X4 | The `If-Match` version is stale, or the role code does not exist or is inactive | 409 for the stale version, 404 for the unknown or inactive role; nothing is written | None specified for 409 | X4 |",
+   "new": "| X4 | The `If-Match` version is stale, or the role code does not exist or is inactive | 409 for the stale version, 404 for the unknown or inactive role; nothing is written | None specified for 409 | AC4, TC-AD-003-07 |"
+  },
+  {
+   "old": "| X5 | The decision-record library answers 503 while a change is being recorded | The change is not stored; the role keeps its value in force | MSG-P7-003 | TC-AD-003-04 |",
+   "new": "| X5 | The decision-record library answers 503 while a change is being recorded | The change is not stored; the role keeps its value in force | MSG-P7-003 | AC5, TC-AD-003-08 |"
+  },
+  {
+   "old": "| X7 | The refusal entry cannot be written | 503; the record is not returned, so a refusal is never silent | MSG-P7-003 | TC-AD-003-04 |",
+   "new": "| X7 | The refusal entry cannot be written | 503; the record is not returned, so a refusal is never silent | MSG-P7-003 | AC6, TC-AD-003-09 |"
+  },
+  {
+   "old": "| X8 | The access owner does not answer inside the 2 s budget while a consumer builds its predicate | The consumer answers 503 for that read and never answers a record it could not bound; the breaker opens per downstream | MSG-GEN-006 | X8 |",
+   "new": "| X8 | The access owner does not answer inside the 2 s budget while a consumer builds its predicate | The consumer answers 503 for that read and never answers a record it could not bound; the breaker opens per downstream | MSG-GEN-006 | AC7, TC-AD-003-10 |"
+  },
+  {
+   "old": "    Then the system does not find the response and the refusal is logged",
+   "new": "    Then the system does not find the response and the refusal is logged\n\n  Scenario: AC3 A value outside LOV-SCOPE or an empty required field is refused 422 and nothing is written (new, D-RCV-60)\n    Given a role \"RW-CASEOWN\" with scope \"OWN\"\n    When the security administrator posts a scope value outside LOV-SCOPE\n    Then the system answers 422 with MSG-GEN-001 naming the field and writes no row, entry or event\n\n  Scenario: AC4 A stale If-Match version is answered 409 and an unknown or inactive role 404, with nothing written (new, D-RCV-60)\n    Given a role \"RW-CASEOWN\" at its current version\n    When the security administrator posts a change with a stale If-Match version or a role code that does not exist or is inactive\n    Then the system answers 409 for the stale version or 404 for the unknown or inactive role and writes nothing\n\n  Scenario: AC5 A change is not stored when the decision-record library answers 503 (new, D-RCV-60)\n    Given the decision-record library answers 503\n    When the security administrator posts a valid scope change\n    Then the change is not stored, the role keeps its value in force and the answer is 503 with MSG-P7-003\n\n  Scenario: AC6 A refusal whose entry cannot be written is answered 503 and the record is not returned (new, D-RCV-60)\n    Given a case owned by another team and the decision-record library answers 503\n    When a case owner with scope Team opens it\n    Then the system answers 503 with MSG-P7-003 and does not return the record\n\n  Scenario: AC7 A consumer answers 503 when the access owner misses the 2 s budget (new, D-RCV-60)\n    Given the access owner does not answer inside the 2 s budget while the consumer builds its predicate\n    When a case owner lists cases\n    Then the consumer answers 503 with MSG-GEN-006 and never answers a record it could not bound"
+  },
+  {
+   "old": "| TC-AD-003-04 | Principle 5 | Component | The decision-record library forced to 503 on change and on refusal: the change is not stored (MSG-P7-003) and the refused record is not returned (MSG-P7-003) |",
+   "new": "| TC-AD-003-04 | Principle 5 | Component | The decision-record library forced to 503 on change and on refusal: the change is not stored (MSG-P7-003) and the refused record is not returned (MSG-P7-003) |\n| TC-AD-003-05 | Section 12.7 tables (ASM-3438) | Component | Role RW-CASEOWN with scope `OWN`; one read and one change through rwb-access; the query log of `rwb_access` holds `role` and `permission` only, with no read or write of `recovery_case`, `assignment` or `decision_log_entry` |\n| TC-AD-003-06 | AC3 | Contract | Role RW-CASEOWN; a posted scope value outside `LOV-SCOPE` and a change with an empty required field; 422 with MSG-GEN-001 naming the field; no row, entry or event |\n| TC-AD-003-07 | AC4 | Contract | Role RW-CASEOWN at its current version; a change with a stale `If-Match` is 409; a change naming a role code that does not exist or is inactive is 404; nothing is written |\n| TC-AD-003-08 | AC5 | Component | The decision-record library forced to 503 on change; the change is not stored; the role keeps its value in force; the answer is 503 with MSG-P7-003 |\n| TC-AD-003-09 | AC6 | Component | Case `RW-2026-000456` in team `MTG-NE` under another owner; session scope `TEAM`; the decision-record library forced to 503; the answer is 503 with MSG-P7-003 and the record is not returned |\n| TC-AD-003-10 | AC7 | Component | Access owner stub not answering inside the 2 s budget while the consumer builds its predicate; a case list read; the consumer answers 503 with MSG-GEN-006 and returns no record |\n| TC-AD-003-11 | BR1, BR2 | Component | Role RW-CASEOWN with `default_scope` `OWN` read from its `role` row; a scope value outside `LOV-SCOPE` is refused 422 before any row is written |\n| TC-AD-003-12 | BR3, BR4 | Component | Role with scope `TEAM`; case in team `MTG-NE` under another owner; the predicate carries exactly `scope`, `teamCode`, `regionCode` and `caseOwnerRef`; scope is applied before the permission letter is checked |\n| TC-AD-003-13 | BR5 | Contract | Role RW-PHONECOL: no Workbench role in the session gives 401 with MSG-P4-001; a missing Platform administration letter gives 403 with MSG-P4-002; both are recorded |\n| TC-AD-003-14 | BR6 | Contract | A change for an inactive role, a value outside `LOV-SCOPE`, a stale `If-Match` and a missing required field are each refused before the row is written |\n| TC-AD-003-15 | BR7 | Component | One valid scope change writes one `AC-CHG` entry and publishes one `rwb.access.AccessPolicyChanged.v1` with change kind `SCOPE` |\n| TC-AD-003-16 | BR9 | Component | Refusal entry forced to 503 on a record outside the predicate; the answer is 503 with MSG-P7-003 and the record is not returned |\n| TC-AD-003-17 | BR10 | Component | Consumer guard applies the predicate in its own query; rwb-access runs no case query and holds no case row |\n| TC-AD-003-18 | BR11 | Component | Security administrator posts a change under the C letter with no second approval; the entry names the actor and the time; no version of the scope is kept |\n| TC-AD-003-19 | BR12 | Component | Consumer refreshes on `rwb.access.AccessPolicyChanged.v1`; until then its cached answer stays in force; no answer mixes two scopes |"
+  },
+  {
+   "old": "Recording failed (MSG-P7-003); Access log tab |",
+   "new": "Recording failed (MSG-P7-003); Empty (no role in force); Loading; Error (RFC 9457 problem details, no business text); Access log tab |"
+  },
+  {
+   "old": "- A refusal is indistinguishable from an absence and is always recorded; a record is never returned unbound and never answered as a success.",
+   "new": "- A refusal is indistinguishable from an absence and is always recorded; a record is never returned unbound and never answered as a success.\n- Personal data: this story holds no personal data of a case or a person; the caller's team and region codes are read from the session and not stored."
+  },
+  {
+   "old": "| Size | Set by the squad at refinement |",
+   "new": "| Size | Set by the squad at refinement; Small, fits two weeks |"
+  },
+  {
+   "old": "| Item | Source |\n|---|---|",
+   "new": "| Item | Source | Feature | L3 process |\n|---|---|---|---|"
+  },
+  {
+   "old": "| Legacy key and criteria | RWB-AD-003 (Administration Stories v4), AC1 and AC2, copied with the origin tag in section 7 |",
+   "new": "| Legacy key and criteria | RWB-AD-003 (Administration Stories v4), AC1 and AC2, copied with the origin tag in section 7 | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  },
+  {
+   "old": "| Legacy test cases | TC-AD-003-01 to TC-AD-003-04, kept unchanged in section 16 |",
+   "new": "| Legacy test cases | TC-AD-003-01 to TC-AD-003-04, kept unchanged in section 16 | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  },
+  {
+   "old": "| Legacy data | `role` DF-REF-034 to DF-REF-038; `recovery_case`, `assignment` and `decision_log_entry` named only (section 11) |",
+   "new": "| Legacy data | `role` DF-REF-034 to DF-REF-038; `recovery_case`, `assignment` and `decision_log_entry` named only (section 11) | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  },
+  {
+   "old": "| Feature and requirement | FEAT-ACA-14 \"Scope a user's cases by team and region\"; REQ-ACA-009, with REQ-ACA-003 and REQ-ACA-007 for the matrix and the refusal (FSD P4 v3 A2.14, Requirements served); TSD P4 v3 T8 maps REQ-ACA-009 to the sign-in story as well (ASM-3735) |",
+   "new": "| Feature and requirement | FEAT-ACA-14 \"Scope a user's cases by team and region\"; REQ-ACA-009, with REQ-ACA-003 and REQ-ACA-007 for the matrix and the refusal (FSD P4 v3 A2.14, Requirements served); TSD P4 v3 T8 maps REQ-ACA-009 to the sign-in story as well (ASM-3735) | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  },
+  {
+   "old": "| Specification | FSD P4 v3 A2.14 (VR-P4-014-1, BR-P4-014, AC-P4-014-01, AC-EXC-P4-014-01); TSD P4 v3 T3.1, T3.2, T6.1, T6.2 and T-A.1 (API-P4-007) |",
+   "new": "| Specification | FSD P4 v3 A2.14 (VR-P4-014-1, BR-P4-014, AC-P4-014-01, AC-EXC-P4-014-01); TSD P4 v3 T3.1, T3.2, T6.1, T6.2 and T-A.1 (API-P4-007) | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  },
+  {
+   "old": "| Epic and release | Service epic RWB-SVC-P4 at arch wave 1; business epic EP08 at wave 4 by the W-MAP; release 30 June 2027 (tentative) |",
+   "new": "| Epic and release | Service epic RWB-SVC-P4 at arch wave 1; business epic EP08 at wave 4 by the W-MAP; release 30 June 2027 (tentative) | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  },
+  {
+   "old": "| Gaps and assumptions | GAP-2265; ASM-3734 to ASM-3735 |",
+   "new": "| Gaps and assumptions | GAP-2265; ASM-3734 to ASM-3735 | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  },
+  {
+   "old": "| Contract baseline | RWB-P4-AD003-CON (this key), RWB-P4-E1037-CON (authorise answer), RWB-PLT-E1037-CON (guard), RWB-PLT-E1027-CON (decision record), RWB-PLT-N001-CON (route) |",
+   "new": "| Contract baseline | RWB-P4-AD003-CON (this key), RWB-P4-E1037-CON (authorise answer), RWB-PLT-E1037-CON (guard), RWB-PLT-E1027-CON (decision record), RWB-PLT-N001-CON (route) | FEAT-ACA-14 | Not specified in the source documents (DOR-RWB-P4-AD003-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-05437",
+   "item": "DOR-RWB-P4-AD003-APP-8",
+   "status": "Cross-document",
+   "section": "4, 12.1",
+   "target": "rwb-access.yaml",
+   "change": "Add paths GET /admin/role-scopes and PATCH /admin/role-scopes/{roleCode}; type defaultScope as a reference to LOV-SCOPE, not a closed enum",
+   "note": "Story already has Idempotency-Key (sections 4 and 12.1). 404/409 message IDs remain open under CG-ALL-4560."
+  },
+  {
+   "ruling": "R-10534",
+   "item": "CG-ALL-4560",
+   "status": "Not applied",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "Sources give no message ID for 404 unknown role or 409 stale version; business analyst to assign from Error and Message Standard v4."
+  },
+  {
+   "ruling": "R-16360",
+   "item": "DOR-RWB-P4-AD003-APP-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role 'application owner' (code or name) so the section 1 role resolves to a role in force",
+   "note": "Story role wording in section 1 is correct; the role is missing from Users Roles and Permissions v5."
+  },
+  {
+   "ruling": "R-16361",
+   "item": "DOR-RWB-P4-AD003-APP-10",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added empty, loading and error states to the SCR-43 row; no access state is MSG-P4-002 already listed."
+  },
+  {
+   "ruling": "R-16362",
+   "item": "DOR-RWB-P4-AD003-APP-11",
+   "status": "Resolved",
+   "section": "17",
+   "target": "",
+   "change": "",
+   "note": "Added personal data guardrail to section 17."
+  },
+  {
+   "ruling": "R-16363",
+   "item": "DOR-RWB-P4-AD003-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-AD-003-05 boundary test for the section 12.7 tables (ASM-3438)."
+  },
+  {
+   "ruling": "R-16364",
+   "item": "DOR-RWB-P4-AD003-APP-15",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Size row now states Small fits two weeks."
+  },
+  {
+   "ruling": "R-16365",
+   "item": "DOR-RWB-P4-AD003-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Added Feature and L3 process columns; L3 values not in sources and marked. Eight rows kept."
+  },
+  {
+   "ruling": "R-16366",
+   "item": "DOR-RWB-P4-AD003-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC3 to AC7 with TC-AD-003-06 to -10; Covered by column of X3, X4, X5, X7, X8 now names criteria."
+  },
+  {
+   "ruling": "R-16367",
+   "item": "DOR-RWB-P4-AD003-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-AD-003-11 to -19 covering BR1 to BR7 and BR9 to BR12; BR8 covered by AC2 and TC-AD-003-02."
+  }
+ ]
+}

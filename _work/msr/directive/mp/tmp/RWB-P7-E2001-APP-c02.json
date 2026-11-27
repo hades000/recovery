@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| X5 | The record breaks the record shape | Refused by the library before it reaches the topic, naming the field | MSG-P7-009 | Section 12.8 |",
+   "new": "| X5 | The record breaks the record shape | Refused by the library before it reaches the topic, naming the field | MSG-P7-009 | AC9 |"
+  },
+  {
+   "old": "| X7 | The entry is asked for and is absent | 404; nothing is read and nothing is recorded as a successful read | MSG-P4-003 | Section 12.1 |",
+   "new": "| X7 | The entry is asked for and is absent | 404; nothing is read and nothing is recorded as a successful read | MSG-P4-003 | AC10 |"
+  },
+  {
+   "old": "The eight criteria are new, tagged `(new, D-RCV-60)`",
+   "new": "The ten criteria are new, tagged `(new, D-RCV-60)`"
+  },
+  {
+   "old": "    Then no entry is returned and the ledger is unchanged",
+   "new": "    Then no entry is returned and the ledger is unchanged\n\n  Scenario: AC9 A record that breaks the record shape is refused before the topic (new, D-RCV-60)\n    Given the record for \"A-0001\" carries a field that breaks the record shape\n    When the record is submitted to the library\n    Then the record is refused before it reaches rwb.decision-record.v1\n    Then the refusal names the field and carries MSG-P7-009\n\n  Scenario: AC10 An entry that is absent is refused and not recorded as read (new, D-RCV-60)\n    Given no decision log entry exists for the entryId requested\n    When GET /api/recovery/decision/v1/decision-log/{entryId} is called for that entryId\n    Then the response is 404 with message MSG-P4-003\n    Then no entry is returned and no successful read is recorded\n\n  Scenario: AC11 The ledger is written only in its own table (new, D-RCV-60)\n    Given the hand-over record for \"A-0001\" and business date 2026-12-14 is processed\n    When the entry is sealed\n    Then the only table written is decision_log_entry in rwb_decision\n    Then no table of another service is read or written\n\n  Scenario: AC12 The threshold is read as the parameter in force (new, D-RCV-60)\n    Given the hand-over record for \"A-0001\" and business date 2026-12-14 is processed\n    When the threshold is applied\n    Then the threshold of 90 is read from parameter \"case.entry.dpd_threshold\" with the version in force for business date 2026-12-14\n\n  Scenario: AC13 The hand-over facts arrive on the shared topic only (new, D-RCV-60)\n    Given the record for \"A-0001\" is published on rwb.decision-record.v1\n    When the hand-over is processed\n    Then the facts are taken from the message on rwb.decision-record.v1\n    Then no ACE view is read and no call is made into another schema\n\n  Scenario: AC14 No personal value is written into an event, a log or a workflow input (new, D-RCV-60)\n    Given the entry for \"A-0001\" and business date 2026-12-14 is sealed\n    When its event, its log lines and its workflow inputs are produced\n    Then each carries IDs, codes, versions, dates, counts and hashes only\n    Then no personal value appears in any of them"
+  },
+  {
+   "old": "| Event | Topic | Key | Payload (IDs and facts only) | Handling |\n|---|---|---|---|---|",
+   "new": "| Event | Topic | Key | Payload (IDs and facts only) | Handling | Owner (producing service) |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "five-minute target (GAP-2465; ASM-4094) |",
+   "new": "five-minute target (GAP-2465; ASM-4094) | Not specified in the source documents (DOR-RWB-P7-E2001-APP-24) |"
+  },
+  {
+   "old": "| MSG-P4-003 | The entry is absent | This case is not in your scope. |",
+   "new": "| MSG-P4-003 | The entry is absent | This case is not in your scope. |\n| MSG-P7-009 | The record breaks the record shape (X5) | Text fixed in RWB-PLT-E1027-CON |\n| MSG-GEN-006 | Not specified in the source documents (DOR-RWB-P7-E2001-APP-9) | Not specified in the source documents (DOR-RWB-P7-E2001-APP-9) |"
+  },
+  {
+   "old": "| TC-E2-001-10 | AC4, BR7 | NFR | The write forced to fail over 50 synthetic records; no entry without a case |",
+   "new": "| TC-E2-001-10 | AC4, BR7 | NFR | The write forced to fail over 50 synthetic records; no entry without a case |\n| TC-E2-001-11 | §12.7, BR9 | Contract | Write and read attempts on decision_log_entry and on each table not owned in §12.7 |\n| TC-E2-001-12 | AC9, X5 | Contract | A record that breaks the record shape, submitted to the library |\n| TC-E2-001-13 | AC10, X7 | Component | Entry id requested that is absent from the ledger |\n| TC-E2-001-14 | AC11, BR9 | Component | Hand-over of A-0001 for 2026-12-14 with the ledger writes observed |\n| TC-E2-001-15 | AC12, BR10 | Contract | Threshold parameter with the version in force for 2026-12-14 |\n| TC-E2-001-16 | AC13, BR11 | Contract | Record published on rwb.decision-record.v1 with no ACE view reachable |\n| TC-E2-001-17 | AC14, BR12 | Contract | Sealed entry with its event, log lines and workflow inputs captured |"
+  },
+  {
+   "old": "with the Level column of §R7.2 and no ID added or dropped.",
+   "new": "with the Level column of §R7.2; TC-E2-001-11 to TC-E2-001-17 are added (new, D-RCV-60) for the boundary of §12.7 and the criteria and rules that had no test case."
+  },
+  {
+   "old": "The full Given, When and Then of each is in Recovery Workbench Test Cases, tab Story test cases, under the same ID.",
+   "new": "The full Given, When and Then of TC-E2-001-01 to TC-E2-001-10 is in Recovery Workbench Test Cases, tab Story test cases, under the same ID; TC-E2-001-11 to TC-E2-001-17 are to be added to that tab."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17995",
+   "item": "DOR-RWB-P7-E2001-APP-11",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "RWB-P2-E2001-CON",
+   "change": "Reconcile the personal-data classification of its fields with BR12, which says no personal value is carried.",
+   "note": "Personal-data fields are not named in the source documents; BR12 is unchanged in this story."
+  },
+  {
+   "ruling": "R-17996",
+   "item": "DOR-RWB-P7-E2001-APP-12",
+   "status": "Resolved",
+   "section": "12.7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-001-11 for the §12.7 boundary. Test Cases v8 and RTM v7 alignment sit in those documents."
+  },
+  {
+   "ruling": "R-17997",
+   "item": "DOR-RWB-P7-E2001-APP-18",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "No assumption ID for DL17 or DL29 appears in the source documents; none is invented."
+  },
+  {
+   "ruling": "R-17998",
+   "item": "DOR-RWB-P7-E2001-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Owner column added to §12.4; producing service is not specified in the source documents."
+  },
+  {
+   "ruling": "R-17999",
+   "item": "DOR-RWB-P7-E2001-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "X5 and X7 now covered by AC9 and AC10 with TC-12 and TC-13; §7 holds ten criteria."
+  },
+  {
+   "ruling": "R-18000",
+   "item": "DOR-RWB-P7-E2001-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR9 to BR12 now covered by AC11 to AC14 and TC-14 to TC-17."
+  },
+  {
+   "ruling": "R-18001",
+   "item": "DOR-RWB-P7-E2001-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Added MSG-P7-009 (text per RWB-PLT-E1027-CON) and MSG-GEN-006 (text not specified in source documents)."
+  },
+  {
+   "ruling": "R-22303",
+   "item": "GAP-3175",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Event and Messaging next version; Kafka Topic and Event Catalog v1",
+   "change": "List LoadCompleted (EV-26) as the legacy alias of AceDataReady (EV-26), with rwb-source-data as producer.",
+   "note": "Build-note step text naming LoadCompleted is outside this chunk; the target name is already AceDataReady."
+  },
+  {
+   "ruling": "R-22304",
+   "item": "GAP-3176",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Batch and Scheduling next version",
+   "change": "Confirm no Epic 2 step depends on JOB-01; carry AceIngestCheck (JOB-04) and AceDataReady (EV-26) as the only entry points.",
+   "note": "Build-note steps naming JOB-01 are outside this chunk."
+  },
+  {
+   "ruling": "R-22305",
+   "item": "GAP-0590",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P2-E2001-CON",
+   "change": "Fix the key as EFS:<efs_record_key>; the ledger writer owns the repeat hit count; the run summary reports both counts.",
+   "note": "Key format and count ownership are set in the contract; no edit to this chunk's story text is needed."
+  }
+ ]
+}

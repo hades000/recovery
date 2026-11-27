@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "AC1 to AC12 pass at component and contract level",
+   "new": "AC1 to AC17 pass at component and contract level"
+  },
+  {
+   "old": "the boundary test shows no `v_ace_*` read and no `rwb_case` statement",
+   "new": "the boundary test shows no `v_ace_*` read and no statement on any schema but `rwb_deviation`"
+  },
+  {
+   "old": "(5) Prove AC1 to AC12,",
+   "new": "(5) Prove AC1 to AC17,"
+  },
+  {
+   "old": "so the twelve criteria are new under D-RCV-60",
+   "new": "so the seventeen criteria are new under D-RCV-60"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E1-023-11 |",
+   "new": "| MSG-P4-002 | AC13, TC-E1-023-11 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR1, BR5 |",
+   "new": "| None (pipeline log) | AC14, TC-E1-023-14, Section 17, BR1, BR5 |"
+  },
+  {
+   "old": "Then REC-05 lists account_key A-7010 for the data steward and the ACE team",
+   "new": "Then REC-05 lists account_key A-7010 for the data steward and the ACE team\n\n  Scenario: AC13 Role without the Case record right (new, D-RCV-60)\n    Given a caller with role RW-REFADM, which lacks the Case record right\n    Given the rwb-access contract mock refuses the Case record right for that caller\n    When the caller opens case RW-2026-000701\n    Then the response is 403 with MSG-P4-002 before any section is read\n\n  Scenario: AC14 Statement outside the own schema (new, D-RCV-60)\n    Given a component or statement under test reads a `v_ace_*` view, a `rwb_case` row or another service's schema\n    When the boundary test runs in the build\n    Then the grant refuses the statement and the boundary test fails the build\n\n  Scenario: AC15 Read only page (new, D-RCV-60)\n    Given the rwb-case contract mock returns case RW-2026-000701\n    When U-81 opens the case record view\n    Then the page shows no edit control\n    Then no case status changes\n\n  Scenario: AC16 Deviation block from its own table (new, D-RCV-60)\n    Given `rwb_deviation` holds an open deviation X1 on case RW-2026-000701\n    When U-81 opens the view\n    Then the deviation block reads `deviation` in `rwb_deviation` only\n    Then no flag is copied from another service's case column\n\n  Scenario: AC17 No personal data at rest (new, D-RCV-60)\n    Given U-81 opens the view with personal fields on the case\n    When the view has answered\n    Then no person name, contact value, address or identity number is in `rwb_deviation`, the AC-READ record, a log or a prompt"
+  },
+  {
+   "old": "| DP-02 | `recovery_svc` login | One login per service | None |",
+   "new": "| DP-02 | `recovery_svc` login | One login per service; login name Not specified in the source documents (GAP-0692) | None |"
+  },
+  {
+   "old": "in one time order, each entry naming its source system, both on the P1 answer",
+   "new": "in one time order, occurred_at descending, each entry naming its source system, both on the P1 answer; page size taken from a parameter, value Not specified in the source documents (GAP-0695)"
+  },
+  {
+   "old": "| TC-E1-023-11 | Access (AC5, X8) | Contract | RW-REFADM calls `GET /cases/{caseId}` and is refused with MSG-P4-002 |",
+   "new": "| TC-E1-023-11 | Access (AC5, AC13, X8) | Contract | RW-REFADM calls `GET /cases/{caseId}` and is refused with MSG-P4-002 |\n| TC-E1-023-14 | Boundary (AC14, X10) | Build | A statement reads a `v_ace_*` view or another service's schema; the grant refuses it and the boundary test fails the build |\n| TC-E1-023-15 | Read only (AC15, BR6) | Component | The page shows no edit control and moves no case status |\n| TC-E1-023-16 | Deviation block (AC16, BR11) | Contract | The deviation block reads `deviation` in `rwb_deviation` only and copies no flag from another service |\n| TC-E1-023-17 | No personal data at rest (AC17, BR12) | Contract | No person name, contact value, address or identity number is written to `rwb_deviation`, the AC-READ record, a log or a prompt |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21094",
+   "item": "DOR-RWB-S8-E1023-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Done-when no longer names rwb_case; boundary test limited to statements on rwb_deviation only."
+  },
+  {
+   "ruling": "R-21095",
+   "item": "DOR-RWB-S8-E1023-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 (X8) and AC14 (X10) with test rows; X8 and X10 now cite them in section 5. Sections 7 and 13 counts updated."
+  },
+  {
+   "ruling": "R-21096",
+   "item": "DOR-RWB-S8-E1023-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 (BR6), AC16 (BR11) and AC17 (BR12) with TC-E1-023-15 to 17; each rule now has a criterion and a test case."
+  },
+  {
+   "ruling": "R-21097",
+   "item": "DOR-RWB-S8-E1023-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Add decision_record as an entity or field of the platform decision-record library in rwb_deviation, so the section 11 row resolves to a model entry.",
+   "note": "Story row left as written; the name is absent from both models."
+  },
+  {
+   "ruling": "R-21098",
+   "item": "DOR-RWB-S8-E1023-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 wording in Error and Message Standard v4 is not in the source documents given; cannot copy it without inventing text."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Business Requirements Document section 8.2",
+   "change": "State that Epic 1 stories keep the business-epic wave while the service starts in its own epic wave; delivery lead confirms the wave per story at build sequencing.",
+   "note": "Rule belongs in the BRD section 8.2, not this story; story wave 1 kept."
+  },
+  {
+   "ruling": "R-22023",
+   "item": "GAP-0348",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Ownership Map v1 (ownership.json) and Architecture v5 Text Extract v1",
+   "change": "Add GET /api/recovery/deviation/v1/deviations?caseId={caseId} for rwb-deviation; treat rwb-deviation as available in SIT for the wave 1 run; fixture stays the W1J01 synthetic set.",
+   "note": "Ownership map lacks the case-scoped read; story has no AC18 to change."
+  },
+  {
+   "ruling": "R-22024",
+   "item": "GAP-0692",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "DP-02 row names login per service with value Not specified; rwb_case grant omitted as it belongs to the rwb-case story."
+  },
+  {
+   "ruling": "R-22025",
+   "item": "GAP-0695",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Architecture v5 Text Extract v1 (rwb-source-data contract, P1)",
+   "change": "Add the interaction read with its path and page and size parameters; fix timeline default order as occurred_at descending.",
+   "note": "BR10 now fixes the order and names the page size parameter; value still not specified."
+  },
+  {
+   "ruling": "R-22026",
+   "item": "GAP-0694",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "RWB-P4-E1039-CON",
+   "change": "Publish the masking policy request and response keyed by view field ID, with a masked flag and the source column per field; rwb-case sends the field list it read.",
+   "note": "Masking contract shape belongs to the access contract; story hook unchanged."
+  }
+ ]
+}

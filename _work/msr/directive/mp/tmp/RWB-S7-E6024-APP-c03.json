@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "never written in code (ASM-5093, ASM-5095).",
+   "new": "never written in code (ASM-5093, ASM-5095).\n- Parameters read: the retry limit (rule row of the package), the loop's owner and the correction task's service level (reference rows), and the three correction outcomes (reference values). Reference-data contract: Not specified in the source documents (DOR-RWB-S7-E6024-APP-20)."
+  },
+  {
+   "old": "no write to `rwb_case`, `rwb_decision` or the workspace tables (X8, BR3, BR4, BR5).",
+   "new": "no write to the data of rwb-case or rwb-decision or to the workspace tables (X8, BR3, BR4, BR5)."
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E6-024-04 |",
+   "new": "| MSG-P4-002 | AC4, TC-E6-024-04, TC-E6-024-06 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR3, BR4 |",
+   "new": "| None (pipeline log) | AC5, TC-E6-024-07, Section 17, BR3, BR4 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 A role without the correction right is refused (new, D-RCV-60)\n    Given the user holds the write-off and posting right C and does not hold right A\n    When the user submits a correction for the write-off\n    Then the request is refused with 403 and MSG-P4-002 before any read or write\n    Then nothing changes and no record is written\n\n  Scenario: AC5 A statement outside the service boundary fails the build (new, D-RCV-60)\n    Given a component of rwb-writeoff issues a statement against a recovery_case, task or assignment row or another service schema\n    When the boundary test runs\n    Then the grant refuses the statement and the build fails\n    Then nothing is released\n\n  Scenario: AC6 No person data enters the decision record (new, D-RCV-60)\n    Given a correction is recorded for the write-off\n    When the decision record is written\n    Then the record and the answer carry identifiers, a role code and an identity only\n    Then no name, address, contact value or identity number is written\n\n  Scenario: AC7 A correction exit writes its state and its move (new, D-RCV-60)\n    Given the write-off is in state WRITEOFF_EXCEPTION and the owner decides R-WO-44, R-WO-45 or R-WO-46\n    When the correction is recorded\n    Then the write-off row takes the state of the chosen exit and the case move is answered\n    Then the decision record carries the chosen rule ID and its version"
+  },
+  {
+   "old": "| R-WO-24 | Write-off | D9 |",
+   "new": "| R-WO-24 (BR11) | Write-off | D9 |"
+  },
+  {
+   "old": "| R-WO-44 | Write-off | D9 |",
+   "new": "| R-WO-44 (BR12) | Write-off | D9 |"
+  },
+  {
+   "old": "| R-WO-45 | Write-off | D9 |",
+   "new": "| R-WO-45 (BR13) | Write-off | D9 |"
+  },
+  {
+   "old": "| R-WO-46 | Write-off | D9 |",
+   "new": "| R-WO-46 (BR14) | Write-off | D9 |"
+  },
+  {
+   "old": "| BR10 | The write-off row carries the route state the rule names, because no list of values publishes a write-off state vocabulary | TSD S7 T3.2 (empty); ASM-5094 |",
+   "new": "| BR10 | The write-off row carries the route state the rule names, because no list of values publishes a write-off state vocabulary | TSD S7 T3.2 (empty); ASM-5094 |\n\n| Rule | Covered by |\n|---|---|\n| BR1 | AC5, TC-E6-024-07 |\n| BR2 | AC1, AC3, TC-E6-024-03 |\n| BR3 | AC5, TC-E6-024-07 |\n| BR4 | AC2, AC5, TC-E6-024-07 |\n| BR5 | AC5, TC-E6-024-07 |\n| BR6 | AC1, AC2 |\n| BR7 | AC2 |\n| BR8 | AC1 |\n| BR9 | AC6, TC-E6-024-08 |\n| BR10 | AC2 |\n| BR11 (R-WO-24) | AC2 |\n| BR12 (R-WO-44) | AC7, TC-E6-024-09 |\n| BR13 (R-WO-45) | AC7, TC-E6-024-09 |\n| BR14 (R-WO-46) | AC7, TC-E6-024-09 |"
+  },
+  {
+   "old": "| TC-E6-024-04 | Access | Component | A role without the Write-off and posting right A; 403 with MSG-P4-002 and no read; RW-WRITEOFF holding C and refused the decision |",
+   "new": "| TC-E6-024-04 | Access | Component | A role without the Write-off and posting right A; 403 with MSG-P4-002 and no read; RW-WRITEOFF holding C and refused the decision |\n| TC-E6-024-06 | Access | Component | A role without right A of the correction is refused with 403 and MSG-P4-002 before any read or write (AC4) |\n| TC-E6-024-07 | Access | Component | A statement against recovery_case, task, assignment or another service schema is refused and fails the build (AC5) |\n| TC-E6-024-08 | Data | Component | The decision record and the answer carry identifiers, a role code and an identity only (AC6) |\n| TC-E6-024-09 | Flow | Component | Each of R-WO-44, R-WO-45 and R-WO-46 writes its state and its move on the fakes (AC7) |"
+  },
+  {
+   "old": "so the check is stated here and not built here.",
+   "new": "so the check is stated here and not built here. Each operation's authorise check is the rwb-access check of the capability area and the right in this section, read through the guard."
+  },
+  {
+   "old": "**Components**",
+   "new": "**Correction operation.** The correction operation is the one operation added on the base `/api/recovery/writeoff/v1` (DP-13). Its path, request element, answer element and error set are Not specified in the source documents (GAP-3039). Its vocabulary is the three rule events of the exit (R-WO-44, R-WO-45, R-WO-46), because no list of values exists (TSD S7 T3.2, BR10).\n\n**Components**"
+  },
+  {
+   "old": "| Contract dependencies | None |",
+   "new": "| Contract dependencies | rwb-case and rwb-decision contracts (case read, case moves, task raise, package read), built on their fakes |"
+  },
+  {
+   "old": "the plan's C row is None",
+   "new": "the plan's C row names them"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "The refusal, not-recorded and refused-correction states read the messages of section 14.",
+   "new": "The refusal, not-recorded and refused-correction states read the messages of section 14. The empty, loading, error and no-access states of SCR-27 are not in Screen Specifications v1: Not specified in the source documents (CG-ALL-11145)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20988",
+   "item": "DOR-RWB-S7-E6024-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Parameters and reference-data contract named in the configuration list of section 13",
+   "note": "Parameters named; contract name is not in the sources, so it is a placeholder."
+  },
+  {
+   "ruling": "R-20989",
+   "item": "DOR-RWB-S7-E6024-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Section 13 names rwb-case and rwb-decision as services, not schemas",
+   "note": "Schema names replaced by service names in the boundary build step."
+  },
+  {
+   "ruling": "R-20990",
+   "item": "DOR-RWB-S7-E6024-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "AC4 for X2 and AC5 for X8 added with TC-E6-024-06 and TC-E6-024-07; section 5 Covered by updated",
+   "note": "AC6 and AC7 also added. New TC numbers 06 to 09 assumed free; table not fully visible."
+  },
+  {
+   "ruling": "R-20991",
+   "item": "DOR-RWB-S7-E6024-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "BR11 to BR14 on the four rule rows; coverage table for BR1 to BR14; TC-E6-024-06 to 09 added",
+   "note": "Coverage uses existing TC-E6-024-03 and AC IDs; TC numbers 06 to 09 assumed free."
+  },
+  {
+   "ruling": "R-20992",
+   "item": "DOR-RWB-S7-E6024-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD",
+   "note": "Story side done: rwb-access authorise check named per operation in section 10."
+  },
+  {
+   "ruling": "R-20993",
+   "item": "DOR-RWB-S7-E6024-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Name retry_count as a field of the posting step record and decision_record as a PLT library object of rwb_writeoff",
+   "note": "Criteria and tests wording handled under CG-ALL-11144."
+  },
+  {
+   "ruling": "R-23269",
+   "item": "GAP-3039",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Correction operation paragraph with placeholder path, elements and error set added; vocabulary from three exit events",
+   "note": "Owner, time limit, retry count and SCR-27 states already resolved in sections 8, 11 and 15."
+  },
+  {
+   "ruling": "R-23638",
+   "item": "GAP-3040",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-S7-E6024-CON",
+   "change": "Publish correction operation and its two elements with placeholders, the loop owner and service level as reference values, and section 14 message IDs for errors",
+   "note": "APP contract dependencies row now names the consumed contracts."
+  },
+  {
+   "ruling": "R-27692",
+   "item": "CG-ALL-11144",
+   "status": "Not applied",
+   "section": "12.5",
+   "target": "",
+   "change": "AC1 and AC3 now say decision record",
+   "note": "TC-E6-024-05 and any JOB-nn or job record lines are not in this chunk text, so they were not edited."
+  },
+  {
+   "ruling": "R-27693",
+   "item": "CG-ALL-11145",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Empty, loading, error and no-access states added as Not specified in the source documents",
+   "note": "Screen Specifications v1 lacks these states, so they are marked as not specified."
+  }
+ ]
+}

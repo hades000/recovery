@@ -1,0 +1,194 @@
+{
+ "stage": "audit",
+ "story": "RWB-P2-E2001-APP",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 14
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22314",
+     "item": "GAP-2258",
+     "status": "Resolved",
+     "section": "5, 7, 12.8",
+     "target": "",
+     "change": "",
+     "note": "Rerun request is an admin operation on the rwb-case base, named so in X7, AC8, AC9 and the rwb-case fake; it answers 409 MSG-P2-006 while the business-date workflow runs."
+    },
+    {
+     "ruling": "R-28700",
+     "item": "GAP-2467",
+     "status": "Resolved",
+     "section": "4, 8, 16",
+     "target": "",
+     "change": "",
+     "note": "Step 13, BR12 and TC-E2-001-14 read the decision code as data from LOV-DECISION with legacy name D6 entry; exact value to be confirmed with RW-COE at row load."
+    },
+    {
+     "ruling": "R-15592",
+     "item": "DOR-RWB-P2-E2001-APP-9",
+     "status": "Cross-document",
+     "section": "14",
+     "target": "Error and Message Standard v4",
+     "change": "",
+     "note": "Section 14 now uses the v4 text for MSG-P1-001 and MSG-P2-006. The other use of MSG-GEN-006 (CG-ALL-3022) still needs a new ID from the standard."
+    },
+    {
+     "ruling": "R-15591",
+     "item": "DOR-RWB-P2-E2001-APP-7",
+     "status": "Resolved",
+     "section": "11",
+     "target": "",
+     "change": "",
+     "note": "Run summary states it carries no BR Field ID (BR12); TC-01 data now uses the rwb-source-data contract. Legacy job wording in criteria is replaced under CG-ALL-3028."
+    },
+    {
+     "ruling": "R-15585",
+     "item": "DOR-RWB-P2-E2001-APP-12",
+     "status": "Resolved",
+     "section": "16",
+     "target": "",
+     "change": "",
+     "note": "Added TC-11 contract and TC-13 boundary for the 12.7 tables (ASM-3438); section 16 now runs TC-E2-001-01 to -21. Section 18 vs RTM v7 lists remain for RTM sync."
+    },
+    {
+     "ruling": "R-30440",
+     "item": "NEWAC-RWB-P2-E2001-APP-AC12",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "X8 is covered by AC10 and AC15 in section 7, with TC-E2-001-11 and TC-E2-001-16 in section 16."
+    },
+    {
+     "ruling": "R-30444",
+     "item": "NEWAC-RWB-P2-E2001-APP-AC16",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Added as AC15, the next free number, for timeout and retry of the hand-over activity (X8); TC-E2-001-16 added to section 16."
+    }
+   ],
+   "edits": [
+    {
+     "old": "  Scenario: AC16 Activity timed out and retried (exception X8)\n    Given the rwb-source-data contract mock does not answer inside the 2 s budget for the hand-over activity\n    When the hand-over activity runs for business date 2026-12-14\n    Then the activity is retried with jitter on a 5xx answer and is not retried on a 4xx answer\n    Then the run ends as PARTIAL with the unanswered call named and message MSG-GEN-006\n    Then the accounts it covered are tried in the next run\n\n  Scenario: AC14 Account with no customer row is left for the next run (exception X3) (new, D-RCV-60)\n    Given the rwb-source-data contract mock returns \"A-0003\" as a candidate whose person key has no customer row\n    When case creation runs for business date 2026-12-14\n    Then the system does not take \"A-0003\" and asks for no case or account link for it\n    Then the REC-05 business-key break of rwb-source-data lists the account key of \"A-0003\"\n    Then the system tries \"A-0003\" again in the next run\n",
+     "new": "  Scenario: AC14 Account with no customer row is left for the next run (exception X3) (new, D-RCV-60)\n    Given the rwb-source-data contract mock returns \"A-0003\" as a candidate whose person key has no customer row\n    When case creation runs for business date 2026-12-14\n    Then the system does not take \"A-0003\" and asks for no case or account link for it\n    Then the REC-05 business-key break of rwb-source-data lists the account key of \"A-0003\"\n    Then the system tries \"A-0003\" again in the next run\n\n  Scenario: AC15 Activity timed out and retried (exception X8)\n    Given the rwb-source-data contract mock does not answer inside the 2 s budget for the hand-over activity\n    When the hand-over activity runs for business date 2026-12-14\n    Then the activity is retried with jitter on a 5xx answer and is not retried on a 4xx answer\n    Then the run ends as PARTIAL with the unanswered call named and message MSG-GEN-006\n    Then the accounts it covered are tried in the next run\n"
+    },
+    {
+     "old": "| AC16, X8 |",
+     "new": "| AC15, X8 |"
+    },
+    {
+     "old": "Then the call is made once, with no retry on a 4xx answer and a retry with jitter on a 5xx answer",
+     "new": "Then the call is one hop, with no retry on a 4xx answer and a retry with jitter on a 5xx answer"
+    },
+    {
+     "old": "Then the step does not run and the data products show the stale date",
+     "new": "Then the step does not run a good morning and the data products show the stale date"
+    },
+    {
+     "old": "AC2, AC4, AC7 and AC8 are the legacy criteria this slice owns, copied word for word with the origin tag on the scenario line and the legacy Background unchanged.",
+     "new": "AC2, AC4, AC7 and AC8 are the legacy criteria this slice owns, with the origin tag on the scenario line and the legacy Background unchanged; they are copied from the legacy text, except that legacy job and decision-log wording now reads EfsHandoverWorkflow and decision record store."
+    },
+    {
+     "old": "AC9 to AC12 cover the exception paths X7 to X10 of section 5 and carry no origin tag, since they are not legacy criteria.",
+     "new": "AC9 to AC12 cover the exception paths X7 to X10 of section 5, AC13 to AC15 cover X2, X3 and X8, and AC17 to AC21 cover BR9 to BR13; none of these carries an origin tag, since they are not legacy criteria."
+    },
+    {
+     "old": "Refused by the rwb-source-data rerun operation before any step starts; nothing changes",
+     "new": "Refused by the rerun operation on the rwb-case base before any step starts; nothing changes"
+    },
+    {
+     "old": "Given the rwb-source-data contract mock returns that the administrative rerun of EfsHandoverWorkflow reaches",
+     "new": "Given the rwb-case contract mock returns that the administrative rerun of EfsHandoverWorkflow reaches"
+    },
+    {
+     "old": "Given the rwb-source-data contract mock refuses the administrative rerun",
+     "new": "Given the rwb-case contract mock refuses the administrative rerun"
+    },
+    {
+     "old": "the reconciliation write; the rerun request on the rwb-case base answering 409 with MSG-P2-006 while the workflow for the business date runs |",
+     "new": "the reconciliation write |"
+    },
+    {
+     "old": "the reference-data read returning the product map |",
+     "new": "the reference-data read returning the product map; the rerun request on the rwb-case base answering 409 with MSG-P2-006 while the workflow for the business date runs |"
+    },
+    {
+     "old": "writes one local decision record with decision code \"D6 entry\",",
+     "new": "writes one local decision record with the decision code read as data from LOV-DECISION (legacy name \"D6 entry\"),"
+    },
+    {
+     "old": "one decision record with decision code \"D6 entry\" and the REC-01 row through the rwb-source-data contract |",
+     "new": "one decision record with the decision code read as data from LOV-DECISION (legacy name \"D6 entry\") and the REC-01 row through the rwb-source-data contract |"
+    },
+    {
+     "old": "MSG-P1-001 uses the wording of the Error and Message Standard v4 (the legacy story carries an older wording of the same message). Every other text is the legacy text unchanged.",
+     "new": "MSG-P1-001 and MSG-P2-006 use the wording of the Error and Message Standard v4 (the legacy story carries older wording of these messages). Every other text is the legacy text unchanged."
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-30444",
+     "kind": "wrong",
+     "issue": "AC numbering skips AC15 and AC16 sits before AC14. Renumbered AC16 to AC15 and placed it after AC14. AC1, 3, 5, 6 belong to other stories."
+    },
+    {
+     "ruling": "R-22314",
+     "kind": "wrong",
+     "issue": "The rerun on the rwb-case base was put in the rwb-source-data fake row, while X7, AC8 and AC9 still name rwb-source-data."
+    },
+    {
+     "ruling": "R-28700",
+     "kind": "incomplete",
+     "issue": "Step 13 and TC-E2-001-14 still fix the code as \"D6 entry\", contradicting BR12 and AC20."
+    },
+    {
+     "ruling": "R-30445",
+     "kind": "wrong",
+     "issue": "AC13 says the step does not run, then that the run holds. X2 says it does not run a good morning."
+    },
+    {
+     "ruling": "R-30442",
+     "kind": "wrong",
+     "issue": "AC10 says the call is made once and also retried on a 5xx. The source wording is one hop."
+    },
+    {
+     "ruling": "R-24685",
+     "kind": "wrong",
+     "issue": "Section 7 note says AC7 and AC8 are copied word for word, though reworded, and does not cover AC13 onwards."
+    },
+    {
+     "ruling": "R-24681",
+     "kind": "wrong",
+     "issue": "Section 14 note says all texts except MSG-P1-001 are legacy text, but MSG-P2-006 now uses the v4 wording."
+    },
+    {
+     "ruling": "R-15592",
+     "kind": "wrong",
+     "issue": "Disposition note says section 14 keeps the FSD wording for MSG-P1-001, but it now uses the v4 text."
+    },
+    {
+     "ruling": "R-15591",
+     "kind": "wrong",
+     "issue": "Disposition note says legacy JOB-02 wording is kept in AC2-AC8, but R-24685 replaced it."
+    },
+    {
+     "ruling": "R-15585",
+     "kind": "wrong",
+     "issue": "Disposition note says section 16 has 15 rows; it now has TC-E2-001-01 to -21."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 10
+}

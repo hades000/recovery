@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "    Given the storage of rwb_document in the environment",
+   "new": "    Given the storage of rwb_document in the environment\n    When the storage of a synthetic month is measured against the storage budget"
+  },
+  {
+   "old": "    Given the storage account and the three document containers",
+   "new": "    Given the storage account and the three document containers\n    When a held file reaches its clearing event"
+  },
+  {
+   "old": "    Then it is refused before authentication and logged",
+   "new": "    Then it is refused before authentication and logged\n\n  Scenario: AC7 The story registers no Schedule, builds no matcher and writes no business rule (new, D-RCV-60)\n    Given the Temporal Schedule and the matcher code of rwb-document\n    When the release of this story is inspected\n    Then this story registers no Schedule, builds no matcher and writes no business rule"
+  },
+  {
+   "old": "| Resource | Setting | Source |\n|---|---|---|\n| Worker pool | Queue `rwb-document` in namespace `rwb-recovery`, KEDA on the queue backlog, one floor poller, a ceiling, a request and limit set per activity, all as environment values | Arch v5 slides 20 and 44; GAP-0993 |",
+   "new": "| Resource | Setting | Source | BR Field ID |\n|---|---|---|---|\n| Worker pool | Queue `rwb-document` in namespace `rwb-recovery`, KEDA on the queue backlog, one floor poller, a ceiling, a request and limit set per activity, all as environment values | Arch v5 slides 20 and 44; GAP-0993 | BR1, BR2 |"
+  },
+  {
+   "old": "| Database storage | `document_text` one row per page with its quality; `document_intake` one row per file; sized against NFR-004 and NFR-069 | TSD P5 T3.1; NFR-004; NFR-069 |",
+   "new": "| Database storage | `document_text` one row per page with its quality; `document_intake` one row per file; sized against NFR-004 and NFR-069 | TSD P5 T3.1; NFR-004; NFR-069 | BR3, BR9 |"
+  },
+  {
+   "old": "| Index budget | `document_text (intake_id, page_no)`; `document_intake (match_status, received_at)` for the held set and for the pending set; `document_intake (file_sha256)` | TSD P5 T3.1; RWB-P5-E1032-APP section 13 |",
+   "new": "| Index budget | `document_text (intake_id, page_no)`; `document_intake (match_status, received_at)` for the held set and for the pending set; `document_intake (file_sha256)` | TSD P5 T3.1; RWB-P5-E1032-APP section 13 | BR3, BR9 |"
+  },
+  {
+   "old": "| Containers | `rwb-docs` standard, `rwb-docs-legal` write-once under the storage product's immutability policy, `rwb-quarantine` hold for intake files | RWB-P5-E1024-APP; Arch v5 slide 11 |",
+   "new": "| Containers | `rwb-docs` standard, `rwb-docs-legal` write-once under the storage product's immutability policy, `rwb-quarantine` hold for intake files | RWB-P5-E1024-APP; Arch v5 slide 11 | BR4 |"
+  },
+  {
+   "old": "| Hold rule | One claim-check read at a time through the storage product; cleared on attach, discard or the age rule; never deleted while the item is open | Arch v5 slide 11; GAP-0993 |",
+   "new": "| Hold rule | One claim-check read at a time through the storage product; cleared on attach, discard or the age rule; never deleted while the item is open | Arch v5 slide 11; GAP-0993 | BR4 |"
+  },
+  {
+   "old": "| Topic binding | `rwb.document.events.v1` with 12 partitions, replication factor 3, 7-day retention, key caseId, three retry topics and one `.dlt` topic; `rwb.decision-record.v1` as the shared topic | Arch v5 slides 11 and 42; DP-09 |",
+   "new": "| Topic binding | `rwb.document.events.v1` with 12 partitions, replication factor 3, 7-day retention, key caseId, three retry topics and one `.dlt` topic; `rwb.decision-record.v1` as the shared topic | Arch v5 slides 11 and 42; DP-09 | BR5 |"
+  },
+  {
+   "old": "| ACLs | Producer: rwb-document on its own topic and the shared topic. Consumers: rwb-case and rwb-agent on `rwb.document.events.v1`. No ACL on a PII logging topic | Arch v5 slides 21, 35 and 42 |",
+   "new": "| ACLs | Producer: rwb-document on its own topic and the shared topic. Consumers: rwb-case and rwb-agent on `rwb.document.events.v1`. No ACL on a PII logging topic | Arch v5 slides 21, 35 and 42 | BR5 |"
+  },
+  {
+   "old": "| Secrets | The rwb-document login, the Kafka credential, the Temporal mTLS material and the storage identity binding, in the key store behind the workload identity | NFR-052; Arch v5 slide 35 |",
+   "new": "| Secrets | The rwb-document login, the Kafka credential, the Temporal mTLS material and the storage identity binding, in the key store behind the workload identity | NFR-052; Arch v5 slide 35 | BR6 |"
+  },
+  {
+   "old": "| Network | Private DNS and private endpoints for `rwb-case`, `rwb-decision`, the brokers, the Temporal frontend and Blob; no public inbound rule; egress to the named endpoints only | Arch v5 slide 35 |",
+   "new": "| Network | Private DNS and private endpoints for `rwb-case`, `rwb-decision`, the brokers, the Temporal frontend and Blob; no public inbound rule; egress to the named endpoints only | Arch v5 slide 35 | BR7 |"
+  },
+  {
+   "old": "| Scan capacity | The scanning product call of RWB-P5-E1041-APP, its throughput as a value, and the queue-age alert wired to it | FSD P5 A2.18; GAP-0993 |",
+   "new": "| Scan capacity | The scanning product call of RWB-P5-E1041-APP, its throughput as a value, and the queue-age alert wired to it | FSD P5 A2.18; GAP-0993 | BR8 |"
+  },
+  {
+   "old": "| Observability hooks | Queue backlog and age, batch duration against the 15-minute cadence, storage and index size, held-file age, retry and `.dlt` counts, dependency health; no page text and no personal data | ADR-023; CTL-11 |",
+   "new": "| Observability hooks | Queue backlog and age, batch duration against the 15-minute cadence, storage and index size, held-file age, retry and `.dlt` counts, dependency health; no page text and no personal data | ADR-023; CTL-11 | BR9 |"
+  },
+  {
+   "old": "| Absent by design | No shared Quartz scheduler, no shared schema, no second copy of OCR text, no public inbound rule, no data-lake route, no ACE view grant | D-RCV-35 U1; ADR-010; DP-01; DP-05; DP-17 |",
+   "new": "| Absent by design | No shared Quartz scheduler, no shared schema, no second copy of OCR text, no public inbound rule, no data-lake route, no ACE view grant | D-RCV-35 U1; ADR-010; DP-01; DP-05; DP-17 | BR2, BR3, BR7 |"
+  },
+  {
+   "old": "they are Not specified in the source documents (GAP-0993; ASM-1763) and this story fixes only their shape and the rule that no value is written in code.",
+   "new": "they are Not specified in the source documents (GAP-0993; ASM-1763) and this story fixes only their shape and the rule that no value is written in code. Each value is set per environment from the SIT measurement of one business-hour window and the scan product throughput, and recorded in the environment files of section 13."
+  },
+  {
+   "old": "| None | — | The `rwb_document` schema and the rwb-document login are RWB-PLT-DB's and the migration is RWB-PLT-E1044-CON's, applied by RWB-P5-E1032-OPS. This story creates no table, no column, no index and no grant; it sizes the storage and the index budget of `document_intake` and `document_text` |",
+   "new": "| rwb_case.case_document_link | P5 | The `rwb_document` schema and the rwb-document login are RWB-PLT-DB's and the migration is RWB-PLT-E1044-CON's, applied by RWB-P5-E1032-OPS. This story's migration V1032_1 creates rwb_case.case_document_link with case_id, document_id, checklist_state, extracted_field_count, linked_at and source_event_id, a unique key on (case_id, document_id) and no foreign key across services; field IDs Not specified in the source documents (GAP-0742). It creates no other table, column, index or grant and sizes the storage and the index budget of `document_intake` and `document_text` |"
+  },
+  {
+   "old": "| TC-P5-E1032-INF-06 | AC6, BR7, BR8 | Integration | Private endpoints and private DNS for the five dependencies; an outside connection refused; every file scanned before the matcher; the scan rate and the queue-age alert wired |",
+   "new": "| TC-P5-E1032-INF-06 | AC6, BR7, BR8 | Integration | Private endpoints and private DNS for the five dependencies; an outside connection refused; every file scanned before the matcher; the scan rate and the queue-age alert wired |\n| TC-P5-E1032-INF-07 | 12.7, BR9 | Contract | Boundary: the migration V1032_1 creates only rwb_case.case_document_link and no other table, column, index or grant; the link key is (case_id, document_id) and no foreign key crosses a service |\n| TC-P5-E1032-INF-08 | AC7, BR10 | Contract | This story's release inspected; no Schedule registered, no matcher built and no business rule written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17168",
+   "item": "DOR-RWB-P5-E1032-INF-12",
+   "status": "Resolved",
+   "section": "12.7, 16",
+   "target": "",
+   "change": "",
+   "note": "Boundary test TC-P5-E1032-INF-07 added for the 12.7 tables. Test Cases v8 registration of TC-01 to TC-08 is outside this story."
+  },
+  {
+   "ruling": "R-17169",
+   "item": "DOR-RWB-P5-E1032-INF-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "When steps added to AC2 and AC3. Section 5 exception paths unchanged; each is covered by a criterion."
+  },
+  {
+   "ruling": "R-17170",
+   "item": "DOR-RWB-P5-E1032-INF-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC7 added for BR10 with test case TC-P5-E1032-INF-08."
+  },
+  {
+   "ruling": "R-17171",
+   "item": "DOR-RWB-P5-E1032-INF-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "BR Field ID column added to section 11 with a BR ID on each of the 12 data rows."
+  },
+  {
+   "ruling": "R-22055",
+   "item": "GAP-0992",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "Intake-match contract baseline (RWB-P5-E1032-CON plan slice)",
+   "change": "Add the two rwb-case case reads the baseline consumes to the C list; fix the four shapes as the smallest superset of the legacy section 12 list, with fakes; keep unnamed elements behind the placeholder.",
+   "note": "Baseline and plan C list are outside this infrastructure story; no story text change needed."
+  },
+  {
+   "ruling": "R-22056",
+   "item": "GAP-0065",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Story Wave 1 and EP01 match W-MAP, which is kept. No edit; the Arch v5 wave 4 for rwb-partner is outside this story."
+  },
+  {
+   "ruling": "R-22057",
+   "item": "GAP-0356",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "TSD P5 v2 (DocumentIntakeWorkflow trigger, /resolve and parameter home)",
+   "change": "Start the intake from DocumentStored with KEDA workers; keep /review-items and /resolve with the item version; keep the three parameters as document_hub_parameter rows read as data; prove the P6 letter copy and S9 partner result on the same match path. BR2 and AC1 cadence wording follows the owner ruling.",
+   "note": "Trigger and attach change sits in TSD P5 and the legacy-to-target ruling; story BR2 wording awaits that ruling."
+  },
+  {
+   "ruling": "R-22058",
+   "item": "GAP-0742",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "",
+   "note": "12.7 now names rwb_case.case_document_link from migration V1032_1 with its columns and key. Field IDs stay Not specified pending the data steward."
+  },
+  {
+   "ruling": "R-22059",
+   "item": "GAP-0991",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "Arch v5 event catalogue (slide 42) and TSD P5 v2 API-P5-013",
+   "change": "Declare rwb.document.DocumentAttached.v1 on rwb.document.events.v1 or confirm DocumentStored before the wave 1 release; publish /resolve as the attach operation with the Documents right C and the 201 Document answer.",
+   "note": "Event catalogue and API declarations are outside this story; the story names no attach event."
+  },
+  {
+   "ruling": "R-22060",
+   "item": "GAP-0993",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now states each capacity value is set per environment from SIT measurement and scan throughput and recorded in the environment files."
+  }
+ ]
+}

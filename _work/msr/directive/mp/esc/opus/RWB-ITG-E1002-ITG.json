@@ -1,0 +1,163 @@
+{
+ "story": "RWB-ITG-E1002-ITG",
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 11
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-21867",
+     "item": "GAP-2228",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "Applied the item's own proposed fix (R-21867; no cited source line holds it): AC17 and TC-ITG-E1002-05 added; sections 1, 2, 4, 11, 12.2, 13, 16, 17, 18 updated; legacy AC1-AC10 kept as legacy proof"
+    }
+   ],
+   "edits": [
+    {
+     "old": "As a **squad member (RW-TRIBE)**, I want **the case list proved end to end on the real wave-1 services — the open cases and their owner and queue read from rwb-case through its published contract, the daily `case_list_row` rows built and replaced in one transaction in rwb-source-data by the CaseListBuildWorkflow started by `rwb.source-data.AceDataReady.v1`, the daily extract delivered to rwb-reporting by the `deliverFile` activity of rwb-integration instead of the removed data lake, and SCR-02 served in one hop by the gateway-bff composite route**, so that **the one list every team works from is dated to the ACE batch it was built from and is proven against the services that will run it, not against a fake**.",
+     "new": "As a **squad member (RW-TRIBE)**, I want **the case list proved end to end on the real wave-1 services — published by rwb-case as one CaseListRow per open case, carrying its account keys and the account columns of the legacy list, where rwb-case reads the account and freshness answers of RWB-P1-E1015-CON for one page, one hop with a 2 s budget, and stamps each row with the answer time as refreshedAt and the freshness answer as X-Data-As-Of with a stale flag, with `case_list_row`, its unique key, the extract file, the lake path and the Power BI data set dropped under DP-17, REC-01 and REC-05 left with RWB-P1-E1011 in rwb-source-data, and SCR-02 served in one hop by the gateway-bff composite route**, so that **the one list every team works from is dated to the ACE batch it was built from and is proven against the services that will run it, not against a fake**."
+    },
+    {
+     "old": "SCR-02 is served by the gateway-bff composite route, one hop, on the rwb-case base (DP-19).",
+     "new": "SCR-02 is served by the gateway-bff composite route, one hop, on the rwb-case base (DP-19).\n\nThe target form of the list is fixed by the ruling on GAP-2228 (R-21867), which replaces the legacy `case_list_row` shape: the list is one CaseListRow per open case carrying its account keys and the account columns of the legacy list, published by rwb-case as a CasePage of Case items; rwb-case reads the account and freshness answers of RWB-P1-E1015-CON for one page, one hop with a 2 s budget, and stamps the row with the answer time as refreshedAt and the freshness answer as X-Data-As-Of with a stale flag; `case_list_row`, its unique key, the extract file, the lake path and the Power BI data set are dropped under DP-17; REC-01 and REC-05 stay with RWB-P1-E1011 in rwb-source-data."
+    },
+    {
+     "old": "12. Replay fixture: republishes the same AceDataReady event id and asserts one run and one set of rows for the business date.",
+     "new": "12. Replay fixture: republishes the same AceDataReady event id and asserts one run and one set of rows for the business date.\n13. Target form of the list (GAP-2228, R-21867): rwb-case answers `GET /api/recovery/case/v1/cases` as one CaseListRow per open case with its account keys and the account columns of the legacy list, reading the account and freshness answers of RWB-P1-E1015-CON for that page, one hop with a 2 s budget, and stamping refreshedAt and X-Data-As-Of with the stale flag; no `case_list_row` table, extract file, lake path or Power BI data set exists in the chain, and REC-01 and REC-05 stay with RWB-P1-E1011 in rwb-source-data."
+    },
+    {
+     "old": "    Then the answer is 403 with the platform error envelope and message MSG-P4-002",
+     "new": "    Then the answer is 403 with the platform error envelope and message MSG-P4-002\n\n  Scenario: AC17 One CaseListRow per open case with the account columns and the freshness stamp (new, D-RCV-60)\n    Given an open case \"RW-2026-000123\" links account_key \"ACC0000123\"\n    When rwb-case answers GET /api/recovery/case/v1/cases for the page holding that case\n    Then the answer holds one CaseListRow for the case, carrying account_key \"ACC0000123\" and the account number, total balance and days past due of the legacy list\n    Then rwb-case read the account and freshness answers of RWB-P1-E1015-CON for that page, one hop with a 2 s budget\n    Then the row carries refreshedAt as the time that answer was received and X-Data-As-Of with the freshness answer and the stale flag\n    Then no case_list_row table, no extract file, no lake path and no Power BI data set exists in the chain\n    Then REC-01 and REC-05 stay with RWB-P1-E1011 in rwb-source-data"
+    },
+    {
+     "old": "| DF-RPT-016 | case_list_row | refreshed_at | Write and assert | rwb_source_data |",
+     "new": "| DF-RPT-016 | CaseListRow | refreshed_at (refreshedAt) and X-Data-As-Of with the stale flag | Write by rwb-case from the RWB-P1-E1015-CON answer, and assert | rwb_case |"
+    },
+    {
+     "old": "The case fields are read only through the rwb-case contract and are never copied into another schema as a foreign key; `case_list_row` is P1's dated projection for the business date and holds business keys only; the ACE views are read only by rwb-source-data (DP-01, DP-05).",
+     "new": "The case fields are read only through the rwb-case contract and are never copied into another schema as a foreign key; the target list is one CaseListRow per open case carrying its account keys and the account columns of the legacy list, served by rwb-case with refreshedAt and X-Data-As-Of, and `case_list_row`, its unique key and the extract file are dropped under DP-17 (GAP-2228, R-21867); the ACE views are read only by rwb-source-data and their account and freshness answers reach rwb-case only through RWB-P1-E1015-CON (DP-01, DP-05)."
+    },
+    {
+     "old": "The target read operation by which rwb-case serves the case list that rwb-source-data builds is Not specified in the source documents (GAP-0335; ASM-0429); the suite asserts the two published reads above and changes with one contract edit if the agreed operation differs. The browser reaches none of these bases directly: it calls the gateway-bff composite route (DP-19).",
+     "new": "The target read operation by which rwb-case serves the case list is fixed by R-21867 (GAP-2228): `GET /api/recovery/case/v1/cases` answers a CasePage of Case items, one CaseListRow per open case carrying its account keys and the account columns of the legacy list; rwb-case reads the account and freshness answers of RWB-P1-E1015-CON for one page, one hop with a 2 s budget, and stamps each row with the answer time as refreshedAt and the freshness answer as X-Data-As-Of with a stale flag. The browser reaches none of these bases directly: it calls the gateway-bff composite route (DP-19)."
+    },
+    {
+     "old": "10. Publish the suite report with the build ID, the data set version and the service versions.",
+     "new": "10. Publish the suite report with the build ID, the data set version and the service versions.\n11. Call `GET /api/recovery/case/v1/cases` and assert one CaseListRow per open case with its account keys and the account columns, the RWB-P1-E1015-CON read of the page one hop with a 2 s budget, and the refreshedAt and X-Data-As-Of stamps with the stale flag (AC17)."
+    },
+    {
+     "old": "| TC-ITG-E1002-04 | AC15 | Integration | The same AceDataReady event id delivered twice; one processed_event row; 28,156 rows; first refresh time |",
+     "new": "| TC-ITG-E1002-04 | AC15 | Integration | The same AceDataReady event id delivered twice; one processed_event row; 28,156 rows; first refresh time |\n| TC-ITG-E1002-05 | AC17 | Integration | `GET /api/recovery/case/v1/cases` for the page of case RW-2026-000123 and account_key ACC0000123; one CaseListRow per case with the account columns; the RWB-P1-E1015-CON read one hop with a 2 s budget; refreshedAt and X-Data-As-Of with the stale flag; no case_list_row, extract file, lake path or Power BI data set |"
+    },
+    {
+     "old": "- No data lake: the suite fails when a lake path, a lake copy or a lake client is configured in any service of the chain (DP-17).",
+     "new": "- No data lake: the suite fails when a lake path, a lake copy or a lake client is configured in any service of the chain (DP-17).\n- One CaseListRow per open case: the list carries its account keys and the account columns of the legacy list, read through the rwb-case contract with the refreshedAt and X-Data-As-Of stamps and the stale flag; a per-account row, a `case_list_row` projection, an extract file, a lake path or a Power BI data set fails the assertion (DP-17; AC17)."
+    },
+    {
+     "old": "| REQ-RDF-009 | The list is dated to the ACE batch it was built from and shows its refresh time | `refreshed_at`, the business date on every row and the refresh line of the route answer | TC-E1-002-03-ITG, TC-ITG-E1002-03, TC-ITG-E1002-04 |",
+     "new": "| REQ-RDF-009 | The list is dated to the ACE batch it was built from and shows its refresh time | `refreshed_at`, the business date on every row and the refresh line of the route answer | TC-E1-002-03-ITG, TC-ITG-E1002-03, TC-ITG-E1002-04, TC-ITG-E1002-05 |"
+    }
+   ],
+   "findings": [],
+   "stage": "notapplied",
+   "unit": "u01"
+  },
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 13
+    }
+   ],
+   "applied": true,
+   "disposition": [],
+   "edits": [
+    {
+     "old": "As a **squad member (RW-TRIBE)**, I want **the case list proved end to end on the real wave-1 services — published by rwb-case as one CaseListRow per open case, carrying its account keys and the account columns of the legacy list, where rwb-case reads the account and freshness answers of RWB-P1-E1015-CON for one page, one hop with a 2 s budget, and stamps each row with the answer time as refreshedAt and the freshness answer as X-Data-As-Of with a stale flag, with `case_list_row`, its unique key, the extract file, the lake path and the Power BI data set dropped under DP-17, REC-01 and REC-05 left with RWB-P1-E1011 in rwb-source-data, and SCR-02 served in one hop by the gateway-bff composite route**, so that **the one list every team works from is dated to the ACE batch it was built from and is proven against the services that will run it, not against a fake**.",
+     "new": "As a **squad member (RW-TRIBE)**, I want **the case list proved end to end on the real wave-1 services — the open cases and their owner and queue read from rwb-case through its published contract, the daily `case_list_row` rows built and replaced in one transaction in rwb-source-data by CaseListBuildWorkflow started by `rwb.source-data.AceDataReady.v1`, the daily extract delivered to rwb-reporting by the `deliverFile` activity of rwb-integration instead of the removed data lake, and SCR-02 served in one hop by the gateway-bff composite route**, so that **the one list every team works from is dated to the ACE batch it was built from and is proven against the services that will run it, not against a fake**."
+    },
+    {
+     "old": "The target form of the list is fixed by the ruling on GAP-2228 (R-21867), which replaces the legacy `case_list_row` shape: the list is one CaseListRow per open case carrying its account keys and the account columns of the legacy list, published by rwb-case as a CasePage of Case items; rwb-case reads the account and freshness answers of RWB-P1-E1015-CON for one page, one hop with a 2 s budget, and stamps the row with the answer time as refreshedAt and the freshness answer as X-Data-As-Of with a stale flag; `case_list_row`, its unique key, the extract file, the lake path and the Power BI data set are dropped under DP-17; REC-01 and REC-05 stay with RWB-P1-E1011 in rwb-source-data.",
+     "new": ""
+    },
+    {
+     "old": "13. Target form of the list (GAP-2228, R-21867): rwb-case answers `GET /api/recovery/case/v1/cases` as one CaseListRow per open case with its account keys and the account columns of the legacy list, reading the account and freshness answers of RWB-P1-E1015-CON for that page, one hop with a 2 s budget, and stamping refreshedAt and X-Data-As-Of with the stale flag; no `case_list_row` table, extract file, lake path or Power BI data set exists in the chain, and REC-01 and REC-05 stay with RWB-P1-E1011 in rwb-source-data.",
+     "new": ""
+    },
+    {
+     "old": "| X8 | A role without the right lists the JOB-04 runs | 403 with the error envelope | MSG-P4-002 | AC16 |",
+     "new": "| X8 | A role without the right lists the CaseListBuildWorkflow run listing | 403 with the error envelope | MSG-P4-002 | AC16 |"
+    },
+    {
+     "old": "  Scenario: AC16 A role without the right lists the JOB-04 runs and is refused",
+     "new": "  Scenario: AC16 A role without the right lists the CaseListBuildWorkflow run listing and is refused"
+    },
+    {
+     "old": "  Scenario: AC17 One CaseListRow per open case with the account columns and the freshness stamp (new, D-RCV-60)\n    Given an open case \"RW-2026-000123\" links account_key \"ACC0000123\"\n    When rwb-case answers GET /api/recovery/case/v1/cases for the page holding that case\n    Then the answer holds one CaseListRow for the case, carrying account_key \"ACC0000123\" and the account number, total balance and days past due of the legacy list\n    Then rwb-case read the account and freshness answers of RWB-P1-E1015-CON for that page, one hop with a 2 s budget\n    Then the row carries refreshedAt as the time that answer was received and X-Data-As-Of with the freshness answer and the stale flag\n    Then no case_list_row table, no extract file, no lake path and no Power BI data set exists in the chain\n    Then REC-01 and REC-05 stay with RWB-P1-E1011 in rwb-source-data",
+     "new": ""
+    },
+    {
+     "old": "| DF-RPT-016 | CaseListRow | refreshed_at (refreshedAt) and X-Data-As-Of with the stale flag | Write by rwb-case from the RWB-P1-E1015-CON answer, and assert | rwb_case |",
+     "new": "| DF-RPT-016 | case_list_row | refreshed_at | Write and assert | rwb_source_data |"
+    },
+    {
+     "old": "The case fields are read only through the rwb-case contract and are never copied into another schema as a foreign key; the target list is one CaseListRow per open case carrying its account keys and the account columns of the legacy list, served by rwb-case with refreshedAt and X-Data-As-Of, and `case_list_row`, its unique key and the extract file are dropped under DP-17 (GAP-2228, R-21867); the ACE views are read only by rwb-source-data and their account and freshness answers reach rwb-case only through RWB-P1-E1015-CON (DP-01, DP-05). The reporting projection the delivered extract lands in is owned by rwb-reporting in schema `rwb_reporting`; its field list is Not specified in the source documents (GAP-0335; ASM-0429), so this story asserts the delivery and the file metadata, not the projection's columns. Field IDs are those of the Logical Data Model and Data Dictionary v9.",
+     "new": "The case fields are read only through the rwb-case contract and are never copied into another schema as a foreign key; `case_list_row` is P1's dated projection for the business date and holds business keys only; the ACE views are read only by rwb-source-data (DP-01, DP-05). The reporting projection the delivered extract lands in is owned by rwb-reporting in schema `rwb_reporting`; its field list is Not specified in the source documents (GAP-0335; ASM-0429), so this story asserts the delivery and the file metadata, not the projection's columns. Field IDs are those of the Logical Data Model and Data Dictionary v9."
+    },
+    {
+     "old": "The target read operation by which rwb-case serves the case list is fixed by R-21867 (GAP-2228): `GET /api/recovery/case/v1/cases` answers a CasePage of Case items, one CaseListRow per open case carrying its account keys and the account columns of the legacy list; rwb-case reads the account and freshness answers of RWB-P1-E1015-CON for one page, one hop with a 2 s budget, and stamps each row with the answer time as refreshedAt and the freshness answer as X-Data-As-Of with a stale flag. The browser reaches none of these bases directly: it calls the gateway-bff composite route (DP-19).",
+     "new": "The target read operations by which rwb-case serves the case list are `GET /api/recovery/case/v1/cases` and `GET /api/recovery/case/v1/queues/{queueId}/cases` on the rwb-case base, one hop with a 2 s timeout. The browser reaches none of these bases directly: it calls the gateway-bff composite route (DP-19)."
+    },
+    {
+     "old": "| TC-E1-002-03-ITG | AC3, BR5 | Integration | ALS batch complete at 05:40; JOB-03 complete at 06:52; step complete at 07:12 |",
+     "new": "| TC-E1-002-03-ITG | AC3, BR5 | Integration | ALS batch complete at 05:40; allocation run complete at 06:52; step complete at 07:12 |"
+    },
+    {
+     "old": "| TC-ITG-E1002-05 | AC17 | Integration | `GET /api/recovery/case/v1/cases` for the page of case RW-2026-000123 and account_key ACC0000123; one CaseListRow per case with the account columns; the RWB-P1-E1015-CON read one hop with a 2 s budget; refreshedAt and X-Data-As-Of with the stale flag; no case_list_row, extract file, lake path or Power BI data set |",
+     "new": ""
+    },
+    {
+     "old": "- One CaseListRow per open case: the list carries its account keys and the account columns of the legacy list, read through the rwb-case contract with the refreshedAt and X-Data-As-Of stamps and the stale flag; a per-account row, a `case_list_row` projection, an extract file, a lake path or a Power BI data set fails the assertion (DP-17; AC17).",
+     "new": ""
+    },
+    {
+     "old": "| REQ-RDF-009 | The list is dated to the ACE batch it was built from and shows its refresh time | `refreshed_at`, the business date on every row and the refresh line of the route answer | TC-E1-002-03-ITG, TC-ITG-E1002-03, TC-ITG-E1002-04, TC-ITG-E1002-05 |",
+     "new": "| REQ-RDF-009 | The list is dated to the ACE batch it was built from and shows its refresh time | `refreshed_at`, the business date on every row and the refresh line of the route answer | TC-E1-002-03-ITG, TC-ITG-E1002-03, TC-ITG-E1002-04 |"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-21867",
+     "kind": "wrong status",
+     "issue": "Marked Not applied, but the story applies GAP-2228 with invented CaseListRow, RWB-P1-E1015-CON/E1011, refreshedAt, X-Data-As-Of and CasePage across §2, §4, §7, §11-13, §16-18."
+    },
+    {
+     "ruling": "R-29735",
+     "kind": "forbidden",
+     "issue": "The forbidden decision ID D-RCV-60 remains in the new AC17 scenario header; AC17 is a separate invented criterion."
+    },
+    {
+     "ruling": "R-23726",
+     "kind": "incomplete",
+     "issue": "Marked Resolved, but X8 and AC16 still say JOB-04 and TC-E1-002-03-ITG still says JOB-03, so legacy job wording remains."
+    }
+   ],
+   "stage": "audit",
+   "unit": "audit"
+  }
+ ],
+ "opus_findings": 3,
+ "lint_after": "- none"
+}

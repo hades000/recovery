@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E2-036-16 | Section 12.7 tables (ASM-3438) | Component | idempotency_key and decision_record at the 24 hour replay limit and at the reason length of 1,000 characters |",
+   "new": "| TC-E2-036-16 | Section 12.7 tables (ASM-3438) | Component | idempotency_key and decision_record at the 24 hour replay limit and at the reason length of 1,000 characters |\n| TC-E2-036-17 | BR6 (R-UNI-39) | Component | A decision record write failure forwards nothing and changes nothing |\n| TC-E2-036-18 | BR9 (Arch v5 slide 11; DP-09) | Component | A repeat with the same Idempotency-Key inside 24 hours returns the stored answer with no second effect |\n| TC-E2-036-19 | BR10 (DP-01) | Component | No class of rwb_integration writes recovery_case, assignment or queue, and none publishes on rwb.case.events.v1 |\n| TC-E2-036-20 | BR11 (DP-11) | Component | Each cross-service call is one hop with a 2 s timeout and a circuit breaker |"
+  },
+  {
+   "old": "| DF-DEC-001 to DF-DEC-018 | decision_record (library table in rwb_integration) | all fields, including decision code, final call, actions and the actor | Write |",
+   "new": "| DF-DEC-001 to DF-DEC-018 | decision_record (library table in rwb_integration; TSD P2 v3 T3.1, not an LDM v9 entity) | all fields, including decision code, final call, actions and the actor | Write |"
+  },
+  {
+   "old": "| MSG-P4-001 | No valid session or workload token | Not specified in the source documents (GAP-0670; ASM-1195). |",
+   "new": "| MSG-P4-001 | The identity has no role (standard meaning of MSG-P4-001 in rwb-access) | Not specified in the source documents (GAP-0670; ASM-1195). |"
+  },
+  {
+   "old": "| MSG-P7-003 | Decision record write failed | The action was not taken because the decision could not be recorded. Try again in a few minutes. |",
+   "new": "| MSG-P7-003 | Decision record write failed | The action was not taken because the decision could not be recorded. Try again in a few minutes. |\n| MSG-GEN-006 | A consumed service does not answer inside the 2 s budget | Platform catalogue text, not restated here. |"
+  },
+  {
+   "old": "### 12. Contract",
+   "new": "### 12. Contract\n\nOperation ownership (GAP-0670, GAP-0671): rwb-integration owns POST /api/recovery/integration/v1/queues/{queueId}/placements on the integration base, takes the four body fields caseId, reason, modelOrAgent and version with a required Idempotency-Key, and answers 201 with the placement result or returns the rwb-case status and body unchanged. The case-base operation POST /api/recovery/case/v1/queues/{queueId}/placements is owned by P3 rwb-case and is consumed here. The JSON element names of the consumed contracts (the rwb-case placement, the rwb-case reference-data contract for rwb.casewf.placement.approved-callers and the rwb-access authorise contract) are Not specified in the source documents (GAP-0671) until their owners publish them. The idempotency_key columns follow TSD P2 v3 T3.1; the decision_record columns are Not specified in the source documents (GAP-0671). The replay window is 24 hours, the platform rule. The authorise call carries the request elements caller code, caller type, service identity, target queue, queue team code, case, product group, reason, model or agent version and field IDs (GAP-0957); the caller type is a carried value of the approved callers list and rwb_access holds no list of caller types. Refusal codes RIGHT_NOT_HELD, CALLER_KIND and SCOPE_NOT_ALL answer 403 with MSG-P4-002 as the message of every 403; the 422 and 503 codes are Not specified in the source documents (GAP-0958) and keep MSG-GEN-001, MSG-GEN-002 and MSG-P7-003 as their messages; the adapter maps the code to its own refusal without restating the text."
+  },
+  {
+   "old": "5. AccessCheckClient: checks Queue and allocation right C for the caller's service identity through the rwb-access authorise contract, cached per workload identity with the matrix version that answered (DP-08).",
+   "new": "5. AccessCheckClient: checks Queue and allocation right C for the caller's service identity through the rwb-access authorise contract, cached per workload identity with the matrix version that answered (DP-08). The admitting role's scope must be ALL; any other scope is refused with SCOPE_NOT_ALL, and the queue's team code is recorded in the access entry and compared with nothing (GAP-0959)."
+  },
+  {
+   "old": "| PlacementAdapterController | Controller | `POST /queues/{queueId}/placements`; the flag check, the replay lookup, the validation and the problem responses |",
+   "new": "| PlacementAdapterController | Controller | `POST /api/recovery/integration/v1/queues/{queueId}/placements`; the flag check, the replay lookup, the validation and the problem responses |"
+  },
+  {
+   "old": "- The permission matrix version is rwb-access's; the caller's service identity is the only value the adapter forwards.",
+   "new": "- The permission matrix version is rwb-access's; the caller's service identity is the only value the adapter forwards.\n- Held values (GAP-0735): the approved callers list is a parameter, empty at go-live; the matrix version that grants Queue and allocation C is loaded by RW-SECADM; the overflow 201 field list and the caller mapping are in RWB-P2-E2036-CON; the login name is in the platform DB story; the legacy criteria are in RWB-ITG-E2036-ITG."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15731",
+   "item": "DOR-RWB-P2-E2036-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "Added TC-E2-036-17 to TC-E2-036-20 covering BR6, BR9, BR10 and BR11",
+   "note": "Coverage added in section 16 for the four uncovered rules. Section 7 text was not in this chunk, so no AC was added there."
+  },
+  {
+   "ruling": "R-15732",
+   "item": "DOR-RWB-P2-E2036-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Register decision_record as a library table of rwb_integration with TSD P2 v3 T3.1 fields, or confirm it is outside scope; keep DF-DEC-001 to DF-DEC-018",
+   "note": "Story row now states the entity is a TSD P2 v3 T3.1 library table, not an LDM v9 entity."
+  },
+  {
+   "ruling": "R-15733",
+   "item": "DOR-RWB-P2-E2036-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Added MSG-GEN-006 row; MSG-P4-001 row now carries the rwb-access meaning (no role)",
+   "note": "Section 14 now lists 13 messages. MSG-P4-001 aligned to the standard meaning; no-session case has no message in the sources."
+  },
+  {
+   "ruling": "R-22704",
+   "item": "GAP-0670",
+   "status": "Resolved",
+   "section": "4, 12, 13",
+   "target": "",
+   "change": "Section 12 states the integration operation and the consumed case-base operation; section 13 component path set to the integration path",
+   "note": "Login name left to the rwb-integration DB story as placeholder, per proposed fix."
+  },
+  {
+   "ruling": "R-22705",
+   "item": "GAP-0671",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "Section 12 declares operation ownership, four body fields, Idempotency-Key, consumed contract placeholders and TSD P2 v3 T3.1 idempotency columns",
+   "note": "Consumed JSON names and decision_record columns held as placeholders until owners publish them."
+  },
+  {
+   "ruling": "R-22706",
+   "item": "GAP-0957",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Name the authorise request elements (caller code, caller type, service identity, target queue, queue team code, case, product group, reason, model or agent version, field IDs) and the answer elements",
+   "note": "Request elements carried in section 12; caller type kept as carried list value; no caller type list in rwb_access."
+  },
+  {
+   "ruling": "R-22707",
+   "item": "GAP-0419",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Wave 2 queue-placement harness pack",
+   "change": "Agree the composite route path and merge order with the platform edge story; hold repository, SIT environment, seeds, evidence format, retention and gate as harness data, agreed with QA at wave 2 entry",
+   "note": "Values belong in the harness pack, not the story; no story edit made."
+  },
+  {
+   "ruling": "R-22708",
+   "item": "GAP-0735",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added held-values bullet listing callers list, matrix version, overflow shape, caller mapping, login name and legacy criteria locations",
+   "note": "Six values now held as configuration, contract or deployment values with named owners and locations."
+  },
+  {
+   "ruling": "R-22709",
+   "item": "GAP-0958",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Fix five reason codes with one status each: 403 for RIGHT_NOT_HELD, CALLER_KIND, SCOPE_NOT_ALL; 422 and 503 codes keep MSG-GEN-001, MSG-GEN-002, MSG-P7-003",
+   "note": "Story section 12 states the three 403 codes and the MSG-P4-002 rule; the other two codes are placeholders."
+  },
+  {
+   "ruling": "R-22710",
+   "item": "GAP-0959",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Step 5 admits only scope ALL, refuses others with SCOPE_NOT_ALL, records the team code in the access entry without comparing",
+   "note": "Non-human scope rule now stated in the access flow step."
+  }
+ ]
+}

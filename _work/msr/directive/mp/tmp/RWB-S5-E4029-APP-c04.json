@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "and SCR-22 Asset record (take-on, held, listed, sold) are served through the gateway-bff route (DP-19)",
+   "new": "and SCR-22 Asset record (take-on, held, listed, sold; empty, loading, error and no access: Not specified in the source documents (CG-ALL-10165)) are served through the gateway-bff route (DP-19)"
+  },
+  {
+   "old": "(no FR mapped to no REQ IDs)",
+   "new": "(no FR mapped; REQ-S5 id for this slice Pending until the PRD of S5 allocates it; GAP-2936; GAP-2942)"
+  },
+  {
+   "old": "| REQ-S5-008 | Title transfer is prepared and recorded for vehicles and for property (Business Requirements Program v5); shared with FEAT-AST-19, and the plan carries no id for this slice (GAP-2942; ASM-4838) | The title branch, the release, the statuses and the answer | TC-E4-029-01, -02 | FEAT-AST-20; shared with FEAT-AST-19 | Not specified in the source documents (DOR-RWB-S5-E4029-APP-2) |",
+   "new": "| REQ-S5-008 | Title transfer is prepared and recorded for vehicles and for property (Business Requirements Program v5); shared with FEAT-AST-19; TSD S5 T8 gives it to FEAT-AST-08 and BR-029 to FEAT-AST-19 and FEAT-AST-20, a collision (GAP-2936); the plan's requirement list is empty for this slice (GAP-2942; ASM-4838) | The title branch, the release, the statuses and the answer | TC-E4-029-01, -02 | FEAT-AST-20 (FSD S5 A2.20); shared with FEAT-AST-19 | Not specified in the source documents (DOR-RWB-S5-E4029-APP-2) |"
+  },
+  {
+   "old": "| None (pipeline log) | AC5, §17, BR6 |",
+   "new": "| None (pipeline log) | AC5, TC-E4-029-09, §17, BR6 |"
+  },
+  {
+   "old": "| X9 | The Land Office rejects the transfer | Held for R-DIS-53, which no story of this split owns; the branch writes nothing | None | AC6 |",
+   "new": "| X9 | The Land Office rejects the transfer | Held for R-DIS-53, which no story of this split owns; the branch writes nothing | None | AC6, TC-E4-029-10 |"
+  },
+  {
+   "old": "    Then the buyer is written as a code and the property address is not written",
+   "new": "    Then the buyer is written as a code and the property address is not written\n\n  Scenario: AC10 A consumed call fails and nothing is committed (new, D-RCV-60)\n    Given the rwb-document contract mock refuses the custody release\n    When the title transfer branch runs\n    Then nothing is committed and the step retries on the workflow schedule\n\n  Scenario: AC11 A status change the model does not allow is refused (new, D-RCV-60)\n    Given a case in a state other than TITLE_TRANSFER_PENDING\n    When the title transfer branch runs\n    Then the rule does not fire, nothing is written and the state is reported to the parent\n\n  Scenario: AC12 An error answer is 401, 403 or 404 (new, D-RCV-60)\n    Given a request without a valid login, a role without the right, or an asset that does not exist\n    When the provided operation is called\n    Then the answer is 401 without a login, 403 with MSG-P4-002 without the right, or 404 for an unknown asset\n\n  Scenario: AC13 A timed-out or broken-circuit call commits nothing (new, D-RCV-60)\n    Given the rwb-document contract mock does not answer inside 2 s or its breaker is open\n    When the title transfer branch runs\n    Then nothing is committed, the step retries on the workflow schedule and the caller sees 503"
+  },
+  {
+   "old": "Coverage: BR1 AC2; BR2 AC1 and AC4; BR3 AC1; BR4 AC2; BR5 AC2; BR6 AC5; BR7 AC7; BR8 AC8; BR9 AC1; BR10 AC9; BR11 AC2; BR12 AC3. Test cases for these criteria are in section 16.",
+   "new": "Coverage: BR1 AC2 (TC-E4-029-02); BR2 AC1 and AC4 (TC-E4-029-01, -04, -06); BR3 AC1 (TC-E4-029-01); BR4 AC2 (TC-E4-029-02); BR5 AC2 (TC-E4-029-02); BR6 AC5 (TC-E4-029-09); BR7 AC7 (TC-E4-029-11); BR8 AC8 (TC-E4-029-12); BR9 AC1 (TC-E4-029-01); BR10 AC9 (TC-E4-029-13); BR11 AC2 (TC-E4-029-02); BR12 AC3 (TC-E4-029-03). Test cases for these criteria are in section 16."
+  },
+  {
+   "old": "| TC-E4-029-13 | AC9, BR10 | Component | The buyer is written as a code and the property address is not written to the record, the log or the workflow input |",
+   "new": "| TC-E4-029-13 | AC9, BR10 | Component | The buyer is written as a code and the property address is not written to the record, the log or the workflow input |\n| TC-E4-029-14 | AC10 | Component | The rwb-document release fake refuses; nothing committed and the step retries on the workflow schedule; fixture data Not specified in the source documents (NEWAC-RWB-S5-E4029-APP-AC10) |\n| TC-E4-029-15 | AC11 | Component | A case in a state other than TITLE_TRANSFER_PENDING; the rule does not fire, nothing written and the state reported to the parent; fixture data Not specified in the source documents (NEWAC-RWB-S5-E4029-APP-AC11) |\n| TC-E4-029-16 | AC12 | Component | A request without a valid login, a role without the right, and an unknown asset; 401, 403 with MSG-P4-002 and 404; fixture data Not specified in the source documents (NEWAC-RWB-S5-E4029-APP-AC8) |\n| TC-E4-029-17 | AC13 | Component | The rwb-document release fake does not answer inside 2 s or its breaker is open; nothing committed and 503 returned; fixture data Not specified in the source documents (NEWAC-RWB-S5-E4029-APP-AC9) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-27455",
+   "item": "CG-ALL-10165",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-22 empty, loading, error and no-access states added as Not specified in the source documents (CG-ALL-10165); the screen spec lacks them."
+  },
+  {
+   "ruling": "R-29179",
+   "item": "GAP-2936",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "REQ-S5-008 row states the collision: TSD S5 T8 gives it to FEAT-AST-08, BR-029 to FEAT-AST-19 and FEAT-AST-20. PRD reference Pending in header."
+  },
+  {
+   "ruling": "R-29181",
+   "item": "GAP-2942",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Slice traced to REQ-S5-008 and FEAT-AST-20 (FSD S5 A2.20); plan reqs list kept empty; slice ids allocated by S5 PRD, reference Pending."
+  },
+  {
+   "ruling": "R-32730",
+   "item": "NEWAC-RWB-S5-E4029-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for a refused consumed call (X4): nothing committed, retry on workflow schedule. TC-E4-029-14 added; fixture data Not specified."
+  },
+  {
+   "ruling": "R-32731",
+   "item": "NEWAC-RWB-S5-E4029-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for a case outside TITLE_TRANSFER_PENDING (X3): rule does not fire, nothing written. TC-E4-029-15 added; fixture data Not specified."
+  },
+  {
+   "ruling": "R-32732",
+   "item": "NEWAC-RWB-S5-E4029-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X8 already names AC5 and §17 BR6; Covered by now also cites TC-E4-029-09 (AC5 criterion exists in section 7)."
+  },
+  {
+   "ruling": "R-32733",
+   "item": "NEWAC-RWB-S5-E4029-APP-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 already names AC6; Covered by now also cites TC-E4-029-10, the Land Office rejection test."
+  },
+  {
+   "ruling": "R-32734",
+   "item": "NEWAC-RWB-S5-E4029-APP-AC7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 coverage line now maps each BR1 to BR12 to a criterion and a test case; architecture rules remain in §17 guardrails."
+  },
+  {
+   "ruling": "R-32735",
+   "item": "NEWAC-RWB-S5-E4029-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for 401, 403 and 404 answers; TC-E4-029-16 added. The 400 code and message IDs stay Not specified (CG-ALL-10157)."
+  },
+  {
+   "ruling": "R-32736",
+   "item": "NEWAC-RWB-S5-E4029-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 added for no answer inside 2 s or open breaker: nothing committed, 503, retry on schedule. TC-E4-029-17 added."
+  }
+ ]
+}

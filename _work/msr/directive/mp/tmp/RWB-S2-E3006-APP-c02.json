@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "3. `calculatePlanInstallment` activity, step one: reads `recovery.v_ace_batch_status` and compares the data product date with today's business date; a product older than today's ACE batch stops the step with MSG-P1-001 naming the product and its date (VR-S2-006-1).",
+   "new": "3. `calculatePlanInstallment` activity, step one: obtains the data product date through the rwb-source-data contract and compares it with today's business date; a product older than today's ACE batch stops the step with MSG-P1-001 naming the product and its date (VR-S2-006-1)."
+  },
+  {
+   "old": "4. Step two: reads `total_balance`, `contract_no`, `product_category_efs` and the account identifiers of each account of the case from `recovery.v_ace_account` at the batch date, read only, one hop, inside the 2 s budget, and keeps no copy (DP-05).",
+   "new": "4. Step two: obtains `total_balance`, `contract_no`, `product_category_efs` and the account identifiers of each account of the case through the rwb-source-data contract at the batch date, read only, one hop, inside the 2 s budget, and keeps no copy (DP-05)."
+  },
+  {
+   "old": "9. The officer reads the model installment and the range on SCR-14 and SCR-15 through the gateway-bff composite route and through the treatment read of RWB-S2-E3001-APP, and builds the offer inside the range.",
+   "new": "9. The officer reads the model installment and the range on SCR-14 and SCR-15 through the gateway-bff composite route and through the treatment read of RWB-S2-E3001-APP, and builds the offer inside the range. Screen states of SCR-14 and SCR-15: empty (no plan installment is recorded on the treatment yet, so no figure is shown); loading (the read of the element is pending, no figure is shown); error (the read fails and the screen shows the platform error, no figure); no access (a role without the right gets 403 with MSG-P4-002, as X6)."
+  },
+  {
+   "old": "| X4 | The record is refused for a missing or invalid field | Nothing is written, the field is named, the stage stays where it was | MSG-P7-009 | Section 12.8 |",
+   "new": "| X4 | The record is refused for a missing or invalid field | Nothing is written, the field is named, the stage stays where it was | MSG-P7-009 | AC4; Section 12.8 |"
+  },
+  {
+   "old": "| X5 | A required value is missing on the treatment, for example the installment count | The step holds, names the field and raises a task for the owner; no element is written | MSG-GEN-001 | Section 14 |",
+   "new": "| X5 | A required value is missing on the treatment, for example the installment count | The step holds, names the field and raises a task for the owner; no element is written | MSG-GEN-001 | AC5; Section 14 |"
+  },
+  {
+   "old": "| X6 | A role without the right tries to re-run the step or read its result | 403 from the access guard and nothing changes; the step itself runs unattended under the service identity | MSG-P4-002 | Section 10 |",
+   "new": "| X6 | A role without the right tries to re-run the step or read its result | 403 from the access guard and nothing changes; the step itself runs unattended under the service identity | MSG-P4-002 | AC6; Section 10 |"
+  },
+  {
+   "old": "| X7 | The payoff on the case is older than the freshness limit | The step warns, requests a fresh figure and does not compute on the stale one | MSG-S2-002 | Section 4 |",
+   "new": "| X7 | The payoff on the case is older than the freshness limit | The step warns, requests a fresh figure and does not compute on the stale one | MSG-S2-002 | AC7; Section 4 |"
+  },
+  {
+   "old": "| X8 | A second case signal arrives while the branch is running | The inbox dedupes by the cloud event id of the case signal and the activity is idempotent on the treatment and the rule version, so no second element is written | None | Section 12.5 |",
+   "new": "| X8 | A second case signal arrives while the branch is running | The inbox dedupes by the cloud event id of the case signal and the activity is idempotent on the treatment and the rule version, so no second element is written | None | AC8; Section 12.5 |"
+  },
+  {
+   "old": "Given the ACE account view returns the ALS balance of the case at today's batch date",
+   "new": "Given the rwb-source-data contract fake returns the ALS balance of the case at today's batch date"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 Field refused (X4)\n    Given a record of the plan installment has a missing or invalid field\n    When the record is written\n    Then nothing is written, the field is named with MSG-P7-009 and the stage stays where it was\n\n  Scenario: AC5 Required value missing (X5)\n    Given a required value on the treatment, for example the installment count, is missing\n    When the calculation runs\n    Then the step holds, names the field, raises a task for the owner, writes no element and shows MSG-GEN-001\n\n  Scenario: AC6 Access refused (X6)\n    Given a role without the right\n    When it tries to re-run the step or read its result\n    Then the access guard returns 403 with MSG-P4-002 and nothing changes\n\n  Scenario: AC7 Stale payoff (X7)\n    Given the payoff on the case is older than the freshness limit\n    When the step runs\n    Then the step warns with MSG-S2-002, requests a fresh figure and does not compute on the stale one\n\n  Scenario: AC8 Duplicate case signal (X8)\n    Given a second case signal arrives while the branch is running\n    When the inbox receives it\n    Then the inbox dedupes it by the cloud event id of the case signal and no second element is written\n\n  Scenario: AC9 Case status not owned (BR8)\n    Given the stage has reported its outcome to the parent\n    When the parent applies the rule for the status\n    Then this service writes no case row and publishes no case event for it"
+  },
+  {
+   "old": "| ACE view fixture | `v_ace_account` and `v_ace_batch_status` | A balance at today's batch date; a product dated yesterday; a case with two accounts; an unreachable view |",
+   "new": "| rwb-source-data contract fake (ACE) | The ALS balance and the data product date, as returned by rwb-source-data | A balance at today's batch date; a product dated yesterday; a case with two accounts; an unreachable contract |"
+  },
+  {
+   "old": "The field names of the element itself are Not specified in the source documents (GAP-2651; ASM-4359).",
+   "new": "The field names of the element itself are Not specified in the source documents (GAP-2651; ASM-4359). Personal data: the DF-ACE fields that Data Classification v5 classes as personal data are carried read only and are not copied into any column of this service; which fields those are is Not specified in the source documents (DOR-RWB-S2-E3006-APP-11)."
+  },
+  {
+   "old": "BR8 is the boundary to rwb-case.",
+   "new": "BR8 is the boundary to rwb-case.\n\n**Covered by.** BR1: AC1, TC-E3-006-01; BR2: AC1, TC-E3-006-01; BR3: AC1, TC-E3-006-01; BR4: AC1, TC-E3-006-01; BR5: AC7, TC-E3-006-09; BR6: AC3, TC-E3-006-03, TC-E3-006-05; BR7: AC1, TC-E3-006-01; BR8: AC9, TC-E3-006-11."
+  },
+  {
+   "old": "| TC-E3-006-05 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E3-006-05 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E3-006-06 | AC4 | Component | A record refused for a missing or invalid field writes nothing and shows MSG-P7-009 |\n| TC-E3-006-07 | AC5 | Component | A missing required value holds the step, raises a task and shows MSG-GEN-001 |\n| TC-E3-006-08 | AC6 | Component | A role without the right is refused with 403 and MSG-P4-002 on re-run or read |\n| TC-E3-006-09 | AC7 | End to end | A payoff older than the freshness limit warns with MSG-S2-002 and is not computed |\n| TC-E3-006-10 | AC8 | Component | A second case signal is deduped and writes no second element |\n| TC-E3-006-11 | AC9 | Component | The stage reports and the parent applies the status; this service writes no case row |\n| TC-E3-006-12 | Section 12.5 | Component | Each activity and workflow of section 12.5 receives and returns the shapes of RWB-S2-E3006-CON through the fakes of section 12.8 |\n| TC-E3-006-13 | Section 12.7 | Component | Boundary values of the treatment tables of section 12.7 are accepted and out-of-range values are refused |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12240",
+   "item": "CG-ALL-8551",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity calculatePlanInstallment to the Activities sheet on task queue rwb-treatment, or confirm a catalogued activity to use.",
+   "note": "Story section 12.5 names the activity; the catalog row is missing. No story edit requested."
+  },
+  {
+   "ruling": "R-12241",
+   "item": "CG-ALL-8553",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows for TC-E3-006-01, -03, -04, -05 and new TC-E3-006-06 to -13 with Given, When and Then from the criteria in section 7 and the section 16 data.",
+   "note": "Story rows added in section 16; the matching Test Cases v8 rows are not in the story and must be added in the next version."
+  },
+  {
+   "ruling": "R-12243",
+   "item": "CG-ALL-8555",
+   "status": "Resolved",
+   "section": "4, 7, 12.8",
+   "target": "",
+   "change": "",
+   "note": "Section 4 steps 3 and 4, the AC1 Given and the section 12.8 ACE fake now run through the rwb-source-data contract fake. Section 12.7 and BR3 still name the views."
+  },
+  {
+   "ruling": "R-19308",
+   "item": "DOR-RWB-S2-E3006-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access states for SCR-14 and SCR-15 added to section 4 step 9."
+  },
+  {
+   "ruling": "R-19309",
+   "item": "DOR-RWB-S2-E3006-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now states that personal data is carried read only; the per-field classing is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-19310",
+   "item": "DOR-RWB-S2-E3006-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E3-006-12 as a contract test for section 12.5 and TC-E3-006-13 as a boundary test for the section 12.7 tables (ASM-3438)."
+  },
+  {
+   "ruling": "R-19311",
+   "item": "DOR-RWB-S2-E3006-APP-18",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Open decisions sit in section 18, which is not in this chunk, so DL10 and its assumptions cannot be edited here."
+  },
+  {
+   "ruling": "R-19312",
+   "item": "DOR-RWB-S2-E3006-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC4 to AC9 in section 7 for X4 to X8 and BR8; section 5 Covered by cells cite them; TC-E3-006-06 to -11 added."
+  },
+  {
+   "ruling": "R-19313",
+   "item": "DOR-RWB-S2-E3006-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Covered by line under section 8 maps BR1 to BR8 to AC1, AC3, AC7, AC9 and the TC rows that prove them."
+  },
+  {
+   "ruling": "R-19314",
+   "item": "DOR-RWB-S2-E3006-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add settlement_range_low, settlement_range_high, payoff_as_at, decision_record and the one further name in the detcheck as fields or entities, or confirm they are rule names.",
+   "note": "Names in section 11 and section 7 are not in LDM v9 or Data Classification v5. No story edit requested."
+  }
+ ]
+}

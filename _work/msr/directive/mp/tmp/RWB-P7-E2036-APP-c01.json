@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "`ix_declog_case_decided ON decision_log_entry (case_id, decided_at DESC)`",
+   "new": "`ix_declog_case_decided ON decision_log_entry (case_id, decided_at)`"
+  },
+  {
+   "old": "| `rwb.decision-record.DecisionRecorded.v1` (EV-08) | `rwb.decision-record.v1` | P7 owns the event type; the placement instance is published by its local record's owner (`rwb-case` for the placement, `rwb-integration` for the admission) | entryId | The facts of one admitted placement: case, decision code D6, model or agent version, inputs reference, reason, caller identity, queue and queue code, decided time and the placement key |",
+   "new": "| `rwb.decision.DecisionRecorded.v1` (EV-08) | `rwb.decision-record.v1` | P7 owns the event type; the placement instance is published by its local record's owner (`rwb-case` for the placement, `rwb-integration` for the admission) | entryId | The facts of one admitted placement: case, decision code D6, model or agent version, inputs reference, reason, caller identity, queue and queue code, decided time and the placement key |"
+  },
+  {
+   "old": "publishes `rwb.decision-record.DecisionRecorded.v1` on",
+   "new": "publishes `rwb.decision.DecisionRecorded.v1` on"
+  },
+  {
+   "old": "| Kafka | Published 0, consumed 1 event type | `rwb.decision-record.DecisionRecorded.v1` consumed from `rwb.decision-record.v1` through the inbox; nothing published |",
+   "new": "| Kafka | Published 0, consumed 1 event type | `rwb.decision.DecisionRecorded.v1` consumed from `rwb.decision-record.v1` through the inbox; nothing published |"
+  },
+  {
+   "old": "| Ready to start | Day 1 |",
+   "new": "| Ready to start | Day 1 |\n| Size | Set by the squad at refinement |"
+  },
+  {
+   "old": "| Contract dependencies | RWB-P2-E2036-CON |",
+   "new": "| Contract dependencies | RWB-P2-E2036-CON |\n| Contract version | Not specified in the source documents (DOR-RWB-P7-E2036-APP-23) |"
+  },
+  {
+   "old": "| DF-WRK-001, DF-WRK-002, DF-WRK-006, DF-WRK-007, DF-WRK-008 | `queue`, `decision_record` in `rwb_case` | id, queue_code, assignment_method, capacity_cap, overflow_queue_id | Not read here: they are `rwb-case`'s and reach this story only as the queue code and the queue ID on the fact |",
+   "new": "| DF-WRK-001, DF-WRK-002, DF-WRK-006, DF-WRK-007, DF-WRK-008 | `queue` in `rwb_case` | id, queue_code, assignment_method, capacity_cap, overflow_queue_id | Not read here: they are `rwb-case`'s and reach this story only as the queue code and the queue ID on the fact |"
+  },
+  {
+   "old": "| TC-E2-036-14 | AC6, BR9 | NFR | The ledger append forced to fail; 503 MSG-P7-003 to the owner, the delivery held, the incident raised, the entry absent and the placement unchanged |",
+   "new": "| TC-E2-036-14 | AC6, BR9 | NFR | The ledger append forced to fail; 503 MSG-P7-003 to the owner, the delivery held, the incident raised, the entry absent and the placement unchanged |\n| TC-E2-036-15 | AC3, BR2, BR3 | Component | Admitted placement of caller `MDL-SYN-PRIORITY` version \"1.4.0\" for case `RW-2026-000501` on `MTG-BKK-PRI`; one D6 entry with the model version, the reason `High cure score`, the caller and the final call `PLACED MTG-BKK-PRI` |\n| TC-E2-036-16 | AC5, BR3 | Component | A D6 entry with no model version and no agent version; refused, no entry written |\n| TC-E2-036-17 | §12.7, DP-01 | Component | The migration and the writes of this story touch only `decision_log_entry` and the inbox table in `rwb_decision`; no other schema or table is read or written |"
+  },
+  {
+   "old": "| REQ-CWC-017 | A queue accepts a write from a model or an agent with the case and the reason | Business Requirements Epic 2, section 3.2 | FEAT-CWC-29 | All recovery processes | R-DEV-01 | TC-E2-036-01, TC-E2-036-02, TC-E2-036-03, TC-E2-036-12 |",
+   "new": "| REQ-CWC-017 | A queue accepts a write from a model or an agent with the case and the reason | Business Requirements Epic 2, section 3.2 | FEAT-CWC-29 | All recovery processes | R-DEV-01 | TC-E2-036-01, TC-E2-036-02, TC-E2-036-03, TC-E2-036-12, TC-E2-036-15 |"
+  },
+  {
+   "old": "| REQ-CWC-018 | The write passes the same permission checks and is logged with the model or agent version | Business Requirements Epic 2, section 3.2 | FEAT-CWC-29 | All recovery processes | R-UNI-39 | TC-E2-036-03, TC-E2-036-13, TC-E2-036-14 |",
+   "new": "| REQ-CWC-018 | The write passes the same permission checks and is logged with the model or agent version | Business Requirements Epic 2, section 3.2 | FEAT-CWC-29 | All recovery processes | R-UNI-39 | TC-E2-036-03, TC-E2-036-13, TC-E2-036-14, TC-E2-036-16 |"
+  },
+  {
+   "old": "| Test cases TC-E2-036-01 to TC-E2-036-14 | Section 16 |",
+   "new": "| Test cases TC-E2-036-01 to TC-E2-036-17 | Section 16 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-01886",
+   "item": "CG-ALL-7392",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Index on decision_log_entry (case_id, decided_at); DESC removed from field list, ordering left to the query.",
+   "note": "Index now uses decided_at, the LDM v9 field. DESC is not a field name; ordering is a query concern."
+  },
+  {
+   "ruling": "R-01887",
+   "item": "CG-ALL-7394",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "API Specification v5/rwb-access.yaml",
+   "change": "Publish POST /api/recovery/access/v1/authorise in rwb-access.yaml through the rwb-access contract story.",
+   "note": "Recommended option is provider publication; story text unchanged until the provider publishes the operation."
+  },
+  {
+   "ruling": "R-01888",
+   "item": "CG-ALL-7396",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "ce_type set to rwb.decision.DecisionRecorded.v1 in section 12.4, section 4 outbox line and section 12.9 Kafka row; topic unchanged.",
+   "note": "Event type corrected to Kafka Catalog v1 EV-08 ce_type in all three places; topic rwb.decision-record.v1 kept."
+  },
+  {
+   "ruling": "R-06916",
+   "item": "DOR-RWB-P7-E2036-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "RTM v7",
+   "change": "Align the test case lists per requirement with section 18 of this story, which now includes TC-E2-036-15, -16 and -17.",
+   "note": "Added TC rows for AC3 (TC-15), AC5 (TC-16) and the table boundary (TC-17); RTM v7 list still to align."
+  },
+  {
+   "ruling": "R-06917",
+   "item": "DOR-RWB-P7-E2036-APP-14",
+   "status": "Cross-document",
+   "section": "Metadata",
+   "target": "Epic design record",
+   "change": "Record the signed epic design sign-off for RWB-SVC-P7 in the epic design record.",
+   "note": "No signed epic design is in the sources; sign-off must be confirmed in the epic design record."
+  },
+  {
+   "ruling": "R-06918",
+   "item": "DOR-RWB-P7-E2036-APP-16",
+   "status": "Resolved",
+   "section": "Metadata",
+   "target": "",
+   "change": "Size row added to the metadata table: set by the squad at refinement.",
+   "note": "Size row added as set at refinement. No size number invented."
+  },
+  {
+   "ruling": "R-06919",
+   "item": "DOR-RWB-P7-E2036-APP-21",
+   "status": "Resolved",
+   "section": "Metadata",
+   "target": "",
+   "change": "",
+   "note": "Contract dependency RWB-P2-E2036-CON already named in metadata and section 18; no P7 contract story exists. No edit."
+  },
+  {
+   "ruling": "R-06920",
+   "item": "DOR-RWB-P7-E2036-APP-22",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "Contract fake library of RWB-P2-E2036-CON",
+   "change": "Record the published fake library version for the contract the story faked against.",
+   "note": "No published fake library version is in the sources; must be recorded by the contract owner."
+  },
+  {
+   "ruling": "R-06921",
+   "item": "DOR-RWB-P7-E2036-APP-23",
+   "status": "Not applied",
+   "section": "Metadata",
+   "target": "",
+   "change": "Contract version row added as Not specified in the source documents.",
+   "note": "Contract version is not in any source; cannot be set without an invented value. Placeholder row added."
+  },
+  {
+   "ruling": "R-06922",
+   "item": "DOR-RWB-P7-E2036-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "decision_record removed from the queue data row; the index on decided_at now uses the LDM v9 field.",
+   "note": "decision_record is not an LDM v9 entity and is not read here; row now names only queue. Index fixed under CG-ALL-7392."
+  }
+ ]
+}

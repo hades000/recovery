@@ -1,0 +1,99 @@
+{
+ "edits": [
+  {
+   "old": "    Then no decision record and no DecisionRecorded is written for that business date",
+   "new": "    Then no decision record and no DecisionRecorded is written for that business date\n\n  Scenario: AC10 The facts read calls neither the completeness gate nor the payments of rwb-source-data (new, D-RCV-60)\n    Given the completeness gate and the payments since entry of rwb-source-data are stubbed\n    When the facts of 2026-11-27 are read\n    Then the answer holds 120 facts and no call is made to the completeness gate or to the payments of rwb-source-data\n    Then the gate and the payments stay with rwb-source-data and rwb-reporting joins them to these facts\n\n  Scenario: AC11 The error answers of the provided operation are 401, 403 and 404 (new, D-RCV-60)\n    Given the provided operation GET /api/recovery/case/v1/cases/facts\n    When a caller calls it without a valid identity\n    Then the answer is 401 with the problem envelope of the service template and no fact is returned\n    When RW-CASEOWN calls it for business date 2026-11-27 without Reporting R\n    Then the answer is 403 as in AC6\n    When a caller calls a path of the service that is not defined\n    Then the answer is 404 with the problem envelope of the service template\n\n  Scenario: AC12 A consumed call that fails or does not answer releases nothing (new, D-RCV-60)\n    Given the store of the reference version or the case store does not answer the read of business date 2026-11-27\n    When the facts of 2026-11-27 are read\n    Then the answer is 503 with the problem envelope of the service template\n    Then no fact, no band code and no count of zero is returned and no decision record is written"
+  },
+  {
+   "old": "| None | AC2, AC7 |",
+   "new": "| None | AC2, AC7, AC12 |"
+  },
+  {
+   "old": "| TC-E1-013-12 | BR4: the facts read calls neither the completeness gate nor the payments of rwb-source-data | Component | The 2026-11-27 read with the gate and the payments stubbed; no call to either |",
+   "new": "| TC-E1-013-12 | BR4: the facts read calls neither the completeness gate nor the payments of rwb-source-data | Component | The 2026-11-27 read with the gate and the payments stubbed; no call to either |\n| TC-E1-013-13 | AC10, BR4: the facts read calls neither the completeness gate nor the payments of rwb-source-data | Component | The 2026-11-27 read with the gate and the payments stubbed; no call to either (as TC-E1-013-12) |\n| TC-E1-013-14 | AC11: the provided operation answers 401, 403 and 404 with the problem envelope of the service template | Contract | Not specified in the source documents (NEWAC-RWB-P3-E1013-APP-AC11) |\n| TC-E1-013-15 | AC12: a consumed call that fails or does not answer answers 503 and releases nothing | Component | The 2026-11-27 read with the reference version store stubbed unavailable; no fact, no band code and no decision record |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28486",
+   "item": "GAP-0565",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Recovery Workbench message standard and RWB-E1-013 legacy story section 14",
+   "change": "Set MSG-P1-001 to '{product} is from {date}. Today's ACE batch has not arrived.' as in FSD P1 VR-P1-001-1 and TSD P1 T3.7",
+   "note": "Section 14 of this story is outside this chunk, so no story edit made. The change sits in the message standard and the legacy copy."
+  },
+  {
+   "ruling": "R-28487",
+   "item": "GAP-2242",
+   "status": "Cross-document",
+   "section": "5",
+   "target": "rwb-case message catalogue and SCR-44 screen specification",
+   "change": "Add one message for a held facts release to the catalogue; name the release state and the facts and case list count columns of SCR-44",
+   "note": "X3 keeps its placeholder until the catalogue ID exists; no ID invented."
+  },
+  {
+   "ruling": "R-28488",
+   "item": "GAP-2571",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P9-E1013-CON (TSD P9 T3.1)",
+   "change": "Declare measure_definition.approved_by as uuid and approved_at as timestamptz; carry TRB-0001 as element comment and test fixture",
+   "note": "This story holds no approver column; AC5 already keeps approver out of rwb_case. Data steward confirms the stored reference."
+  },
+  {
+   "ruling": "R-28489",
+   "item": "GAP-2574",
+   "status": "Cross-document",
+   "section": "",
+   "target": "DevOps catalogue, values files and run book of JOB-15 (OPS story)",
+   "change": "Hold thresholds, channels and run-book paths as catalogue and values-file entries; use the 15-minute failed-run target from NFR-068; name the caller of MSG-GEN-006 in the run book",
+   "note": "AC4 already states MSG-GEN-006 has no caller here. No threshold or channel invented."
+  },
+  {
+   "ruling": "R-28490",
+   "item": "GAP-2575",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P9-E1013-APP (rwb-reporting app story) and its deployment story",
+   "change": "Carry measure_definition, measure_snapshot, measure_publish and the frozen-row trigger in V1013__measures.sql in the per-service sequence; deployment story replays it",
+   "note": "rwb_case keeps no measure table (AC5), so no DDL is added to this story."
+  },
+  {
+   "ruling": "R-30518",
+   "item": "NEWAC-RWB-P3-E1013-APP-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC10 and TC-E1-013-13 for the BR4 boundary",
+   "note": "TC-E1-013-12 already tests BR4 data; the proposed test is not specified in the sources, so it reuses that data."
+  },
+  {
+   "ruling": "R-30519",
+   "item": "NEWAC-RWB-P3-E1013-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC11 (401, 403, 404) and TC-E1-013-14",
+   "note": "The sources give no test data for AC11, so TC-14 data is a Not specified placeholder for the proposed test."
+  },
+  {
+   "ruling": "R-30520",
+   "item": "NEWAC-RWB-P3-E1013-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC12 and TC-E1-013-15; X5 Covered by now includes AC12",
+   "note": "Consumed store call failure maps to the existing X5 503 behaviour."
+  },
+  {
+   "ruling": "R-30521",
+   "item": "NEWAC-RWB-P3-E1013-APP-AC9",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "No new criterion added",
+   "note": "X4 is already covered by AC8 and TC-E1-013-11, so the TC-02-only gap no longer applies."
+  }
+ ]
+}

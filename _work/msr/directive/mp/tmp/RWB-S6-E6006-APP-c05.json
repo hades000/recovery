@@ -1,0 +1,72 @@
+{
+ "edits": [
+  {
+   "old": "    Then the grant refuses the statement and the build fails",
+   "new": "    Then the grant refuses the statement and the build fails\n\n  Scenario: AC5 Business rules BR1 to BR10 hold\n    Given the rule list of section 8 is the rule list of this story\n    When the step runs\n    Then each rule BR1 to BR10 of section 8 holds as written\n\n  Scenario: AC6 A consumed call does not answer inside 2 s\n    Given the rwb-document contract mock does not answer inside 2 s\n    Given the rwb-case contract mock returns the case state \"AWARD_PENDING\" for \"RC-2027-000611\"\n    When award confirmed\n    Then nothing is written, no case move is answered, the caller sees 503 with the platform error envelope and the step retries on the workflow's own schedule\n\n  Scenario: AC7 A consumed call fails\n    Given the rwb-document contract mock returns no reference for the sale agreement of lot \"LOT-2027-000041\"\n    Given the rwb-case contract mock returns the case state \"AWARD_PENDING\" for \"RC-2027-000611\"\n    When award confirmed\n    Then nothing changes, no case move is answered, the agreement request is retried on the workflow's schedule and the award stays in AWARD_PENDING\n\n  Scenario: AC8 A status change the model does not allow is refused\n    Given the rwb-case contract mock returns the case state \"BIDS_RECEIVED\" for \"RC-2027-000611\"\n    When award confirmed\n    Then 409 is answered, nothing is written and the step is not re-evaluated"
+  },
+  {
+   "old": "Coverage of the rules: BR1 by TC-E6-006-02; BR2 by AC1, AC3, TC-E6-006-03 and TC-E6-006-05; BR3 by TC-E6-006-01 and TC-E6-006-02; BR4 by TC-E6-006-01; BR5 by TC-E6-006-02; BR6 by AC4 and TC-E6-006-07; BR7 to BR10 by TC-E6-006-08.",
+   "new": "Coverage of the rules: BR1 by TC-E6-006-02; BR2 by AC1, AC3, TC-E6-006-03 and TC-E6-006-05; BR3 by TC-E6-006-01 and TC-E6-006-02; BR4 by TC-E6-006-01; BR5 by TC-E6-006-02; BR6 by AC4 and TC-E6-006-07; BR7 to BR10 by TC-E6-006-08. AC5 and TC-E6-006-09 cover BR1 to BR10 as a set."
+  },
+  {
+   "old": "| TC-E6-006-08 | BR7, BR8, BR9, BR10, X8 | Component | The same confirmation sent twice with the same `Idempotency-Key`; the reserve and the cap read from the package and the award record; reference values read with their version; no person name, contact value or identity number held; on the fakes |",
+   "new": "| TC-E6-006-08 | BR7, BR8, BR9, BR10, X8 | Component | The same confirmation sent twice with the same `Idempotency-Key`; the reserve and the cap read from the package and the award record; reference values read with their version; no person name, contact value or identity number held; on the fakes |\n| TC-E6-006-09 | AC5, BR1 to BR10 | Component | The rule list of section 8 checked on the service's own fakes; each of BR1 to BR10 holds as written |\n| TC-E6-006-10 | AC6, X7 | Component | A consumed call that does not answer inside 2 s; nothing written, no case move answered, 503 with the platform error envelope and the step retried on the workflow's schedule, on the fakes |\n| TC-E6-006-11 | AC7, X4 | Component | The rwb-document fake returns no reference; nothing changed, no case move answered and the award stays in AWARD_PENDING, on the fakes |\n| TC-E6-006-12 | AC8, X3 | Component | The rwb-case fake returns BIDS_RECEIVED for the case; 409, nothing written and the step not re-evaluated, on the fakes |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29231",
+   "item": "GAP-3002",
+   "status": "Cross-document",
+   "section": "",
+   "target": "_work/msr/extract (S6 extract set)",
+   "change": "Add a flat S6 extract of FSD S6 v3 and TSD S6 v2 to the extract set before the baseline is tagged. Story reads the module files directly; no story edit.",
+   "note": "Story already cites FSD S6 and TSD S6 sections; flat extract is an extract-set change, not a story change."
+  },
+  {
+   "ruling": "R-32848",
+   "item": "NEWAC-RWB-S6-E6006-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 is covered by AC4 in section 7 and TC-E6-006-07 in section 16, both already present. No edit needed."
+  },
+  {
+   "ruling": "R-32849",
+   "item": "NEWAC-RWB-S6-E6006-APP-AC5",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC5 scenario (BR1 to BR10), TC-E6-006-09 row and coverage sentence in section 8.",
+   "note": "AC5 added in section 7; test row TC-E6-006-09 in section 16; coverage line updated. Proposed test source not specified."
+  },
+  {
+   "ruling": "R-32850",
+   "item": "NEWAC-RWB-S6-E6006-APP-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC6 scenario (2 s no answer, 503, retry) and TC-E6-006-10 row.",
+   "note": "AC6 from X7 wording; TC-E6-006-10 added in section 16. Proposed test source not specified."
+  },
+  {
+   "ruling": "R-32851",
+   "item": "NEWAC-RWB-S6-E6006-APP-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC7 scenario (failed rwb-document call) and TC-E6-006-11 row.",
+   "note": "AC7 from X4 wording; TC-E6-006-11 added in section 16. Proposed test source not specified."
+  },
+  {
+   "ruling": "R-32852",
+   "item": "NEWAC-RWB-S6-E6006-APP-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC8 scenario (disallowed transition refused, 409) and TC-E6-006-12 row.",
+   "note": "AC8 from X3 and R-DS-23 from-state; TC-E6-006-12 added in section 16. Proposed test source not specified."
+  }
+ ]
+}

@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "| ID | Trigger | What happens | Message |\n|---|---|---|---|",
+   "new": "| ID | Trigger | What happens | Message | Covered by |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| X1 | A document declares an `rwb_*` schema, a topic or a `/api/recovery/<short>/v1` base, or a field carries a payload or a personal data field | The lint step fails the build and the version is not published | Lint finding, no message id |",
+   "new": "| X1 | A document declares an `rwb_*` schema, a topic or a `/api/recovery/<short>/v1` base, or a field carries a payload or a personal data field | The lint step fails the build and the version is not published | Lint finding, no message id | AC1 |"
+  },
+  {
+   "old": "| X2 | An index row has no build ID, no export time or no payload-check status, or its export time is not the newest of its type | The contract test fails naming the field and the row; freshness is never inferred from a file | Lint finding, no message id |",
+   "new": "| X2 | An index row has no build ID, no export time or no payload-check status, or its export time is not the newest of its type | The contract test fails naming the field and the row; freshness is never inferred from a file | Lint finding, no message id | AC2 |"
+  },
+  {
+   "old": "| X3 | A document lets an empty, missing, stale or refused replay set be reported as PASSED | The fail-closed rule is a single declaration in `replay-gate.yaml`; the contract test fails if any example or fake reports PASSED for such a set | Lint finding, no message id |",
+   "new": "| X3 | A document lets an empty, missing, stale or refused replay set be reported as PASSED | The fail-closed rule is a single declaration in `replay-gate.yaml`; the contract test fails if any example or fake reports PASSED for such a set | Lint finding, no message id | AC6 |"
+  },
+  {
+   "old": "| X4 | A retire request on a build with a running count above zero is reported as accepted anywhere in the documents or a fake | The contract test fails; the registry answers the refusal and names the workflow IDs, and the build stays DRAINING | PLT-REPLAY-409 placeholder of section 14 |",
+   "new": "| X4 | A retire request on a build with a running count above zero is reported as accepted anywhere in the documents or a fake | The contract test fails; the registry answers the refusal and names the workflow IDs, and the build stays DRAINING | PLT-REPLAY-409 placeholder of section 14 | AC4 |"
+  },
+  {
+   "old": "| X5 | A change breaks a consumer: a renamed field, a removed state, a changed outcome value or a changed {detail} field set | v1 is not edited; the change raises v2, v1 is deprecated, and no consumer sees an edited v1 | Lint finding, no message id |",
+   "new": "| X5 | A change breaks a consumer: a renamed field, a removed state, a changed outcome value or a changed {detail} field set | v1 is not edited; the change raises v2, v1 is deprecated, and no consumer sees an edited v1 | Lint finding, no message id | AC8 |"
+  },
+  {
+   "old": "| X6 | A value the consumers need is named by no read source: the pipeline identity, the replay container retention, the pinned SDK version and the owner of the build registry | The value is published as the working read of the assumption, with the placeholder where it is still open, and the gap stays open | Not specified in the source documents (GAP-1450; ASM-2545) |",
+   "new": "| X6 | A value the consumers need is named by no read source: the pipeline identity, the replay container retention, the pinned SDK version and the owner of the build registry | The value is published as the working read of the assumption, with the placeholder where it is still open, and the gap stays open | Not specified in the source documents (GAP-1450; ASM-2545) | None; GAP-1450 and ASM-2545 stay open |"
+  },
+  {
+   "old": "    Then the contract test fails against v1 for the breaking change and passes against v2",
+   "new": "    Then the contract test fails against v1 for the breaking change and passes against v2\n\n  Scenario: AC9 Each business rule of section 8 is covered by a criterion and a test case (new, D-RCV-60)\n    Given the business rules BR1 to BR8 of section 8\n    When the criteria of this story are checked against section 8\n    Then BR1 and BR2 are met by the gate report of AC3, which fails the merge on a non-deterministic change\n    Then BR3 and BR8 are met by the build-ID registry of AC4\n    Then BR4 is met by the time-skipping test contract of AC5\n    Then BR5 is met by the gate 10 entry that carries the MSG-P3-038 text declared in AC1\n    Then BR6 and BR7 are met by the replay history index of AC2 and the fail-closed rule of AC6\n\n  Scenario: AC10 A retried or timed-out activity whose event does not match the history is never reported as PASSED (new, D-RCV-60)\n    Given a replayed workflow whose activity is retried or times out in the recorded history\n    When the gate replays the history of that workflow\n    Then an activity event that does not match the recorded history is reported as the first mismatch of AC3 with outcome FAILED\n    Then the gate budget of AC5 still applies, and an overrun is reported as FAILED"
+  },
+  {
+   "old": "    Then no such run is ever reported as PASSED, and a re-run after a fresh export may pass",
+   "new": "    Then no such run is ever reported as PASSED, and a re-run after a fresh export (at most 24 hours old, payload-check status PASSED) is reported as PASSED"
+  },
+  {
+   "old": "The eight criteria are new",
+   "new": "The ten criteria are new"
+  },
+  {
+   "old": "### 11. Data\n\n| Item | Value |\n|---|---|",
+   "new": "### 11. Data\n\n| Item | Value | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Business data published | None. The documents publish field names, state names, outcome values, thresholds and message placeholders; no customer, account, case or document value appears |",
+   "new": "| Business data published | None. The documents publish field names, state names, outcome values, thresholds and message placeholders; no customer, account, case or document value appears | Not specified in the source documents (DOR-RWB-PLT-E2040-CON-7) |"
+  },
+  {
+   "old": "| Identifiers in the examples | Synthetic only: the workflow type PlatformSmokeWorkflow and the test-only workflow type of the replay corpus, the synthetic build IDs and the synthetic export timestamps of the examples |",
+   "new": "| Identifiers in the examples | Synthetic only: the workflow type PlatformSmokeWorkflow and the test-only workflow type of the replay corpus, the synthetic build IDs and the synthetic export timestamps of the examples | Not specified in the source documents (DOR-RWB-PLT-E2040-CON-7) |"
+  },
+  {
+   "old": "| Personal data | None, and none is admitted: a replay history is codec-encrypted and never republished by this contract, and no index row, report, example or fake holds a person field, a national identifier or an account number |",
+   "new": "| Personal data | None, and none is admitted: a replay history is codec-encrypted and never republished by this contract, and no index row, report, example or fake holds a person field, a national identifier or an account number | Not specified in the source documents (DOR-RWB-PLT-E2040-CON-7) |"
+  },
+  {
+   "old": "| Payload content | None published. A report names the history ID and the event ID of a mismatch and never the event payload |",
+   "new": "| Payload content | None published. A report names the history ID and the event ID of a mismatch and never the event payload | Not specified in the source documents (DOR-RWB-PLT-E2040-CON-7) |"
+  },
+  {
+   "old": "| Tables published | None. This document declares no table, no column and no migration; the index lives in Blob storage and the registry is the Temporal build-ID API |",
+   "new": "| Tables published | None. This document declares no table, no column and no migration; the index lives in Blob storage and the registry is the Temporal build-ID API | Not specified in the source documents (DOR-RWB-PLT-E2040-CON-7) |"
+  },
+  {
+   "old": "| Retention | None at the contract: a document keeps no data and the fakes hold only the examples they publish. The replay store's own retention is 90 days and its owner is named by no read source (GAP-1450; ASM-2545) |",
+   "new": "| Retention | None at the contract: a document keeps no data and the fakes hold only the examples they publish. The replay store's own retention is 90 days and its owner is named by no read source (GAP-1450; ASM-2545) | Not specified in the source documents (DOR-RWB-PLT-E2040-CON-7) |"
+  },
+  {
+   "old": "| TC-PLT-E2040-CON-08 | AC8 | Contract | v1 pinned; a field, a state, an outcome and the placeholder set changed; v2 published and v1 deprecated; an additive field raising the minor number |",
+   "new": "| TC-PLT-E2040-CON-08 | AC8 | Contract | v1 pinned; a field, a state, an outcome and the placeholder set changed; v2 published and v1 deprecated; an additive field raising the minor number |\n| TC-PLT-E2040-CON-09 | AC9 | Contract | Each rule BR1 to BR8 traced to its criterion and test case; no rule without a criterion |\n| TC-PLT-E2040-CON-10 | AC10 | Component | A retried activity and a timed-out activity replayed; a matching event passes; a non-matching event reported as the first mismatch with FAILED |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18730",
+   "item": "DOR-RWB-PLT-E2040-CON-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to the section 5 exception table: X1 to X5 tied to AC1, AC2, AC6, AC4, AC8; X6 stays open (GAP-1450)."
+  },
+  {
+   "ruling": "R-18731",
+   "item": "DOR-RWB-PLT-E2040-CON-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "New AC9 covers BR1 to BR8 by reference to existing criteria, with test row TC-PLT-E2040-CON-09."
+  },
+  {
+   "ruling": "R-18732",
+   "item": "DOR-RWB-PLT-E2040-CON-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "BR Field ID column added to section 11; the six rows carry the placeholder because no source gives the BR Field ID."
+  },
+  {
+   "ruling": "R-26686",
+   "item": "CG-ALL-1819",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8 (next version)",
+   "change": "Add rows TC-PLT-E2040-CON-01 to TC-PLT-E2040-CON-08 to Story test cases, with Given, When and Then copied from AC1 to AC8.",
+   "note": "Story test IDs exist in section 16; the Test Cases workbook has no rows for them."
+  },
+  {
+   "ruling": "R-26687",
+   "item": "CG-ALL-1820",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the REQ-DRI-005 test list with RWB-PLT-E2040-CON section 18 (TC-PLT-E2040-CON-03, TC-PLT-E2040-CON-06) in the next RTM version; RTM lists other test IDs for this requirement.",
+   "note": "Story-side section 18 is unchanged; the RTM test list for REQ-DRI-005 differs."
+  },
+  {
+   "ruling": "R-29056",
+   "item": "GAP-0021",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "testing-standards.md",
+   "change": "Add the v5 test obligations: contract tests per API, event and activity; Temporal replay tests and replay gate E2-040; Testcontainers for Kafka and PostgreSQL; JOB-22 daily journey smoke; 50 scenarios per rule package; boundary test per build.",
+   "note": "Owner QA lead; applied in the next context run."
+  },
+  {
+   "ruling": "R-29057",
+   "item": "GAP-2020",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Workflow Engine Design v3, section 6",
+   "change": "Add Continue-As-New: the closing run's signal handler writes the event to the new run before it returns; Continue-As-New only at a stage end. A durable timer due at the cut is not covered by the proposed rule.",
+   "note": "Owner Platform team (RWB-PLT-WF); the timer case needs a follow-up ruling."
+  },
+  {
+   "ruling": "R-29664",
+   "item": "ACR-RWB-PLT-E2040-CON-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Third Then of AC6 rewritten without 'may'; it now names the 24-hour freshness and the PASSED payload-check status."
+  },
+  {
+   "ruling": "R-31795",
+   "item": "NEWAC-RWB-PLT-E2040-CON-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "New AC10 on retried and timed-out activities, with TC-PLT-E2040-CON-10; the test follows the AC3 mismatch and AC5 budget rules."
+  },
+  {
+   "ruling": "R-31796",
+   "item": "NEWAC-RWB-PLT-E2040-CON-AC9",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "New AC9 covering BR1 to BR8 with test row TC-PLT-E2040-CON-09; no guardrail test added."
+  }
+ ]
+}

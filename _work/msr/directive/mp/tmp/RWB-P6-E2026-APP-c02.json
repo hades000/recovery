@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "No Flyway migration touches another schema.",
+   "new": "Owned schema: `rwb_comms` only. rwb_case, rwb_decision and rwb_document belong to their owning services and are reached only through contracts; no Flyway migration touches them."
+  },
+  {
+   "old": "| Contract dependencies | RWB-P5-E2026-CON, RWB-P6-E2026-CON |",
+   "new": "| Contract dependencies | RWB-P5-E2026-CON, RWB-P6-E2026-CON, RWB-P6-E1046-CON |"
+  },
+  {
+   "old": "Given rwb_comms.template holds \"DIL-CONTRACT\" version 2 in Thai for \"MORTGAGE\" with approved_by_legal true",
+   "new": "Given the RWB-P6-E1046-CON contract returns template \"DIL-CONTRACT\" version 2 in Thai for \"MORTGAGE\" with approved_by_legal true"
+  },
+  {
+   "old": "Given rwb_comms.merge_field holds case_no, borrower_name, title_doc_no, transfer_price and contract_date for \"DIL-CONTRACT\" version 2",
+   "new": "Given the RWB-P6-E1046-CON contract returns the merge fields case_no, borrower_name, title_doc_no, transfer_price and contract_date for \"DIL-CONTRACT\" version 2"
+  },
+  {
+   "old": "version 3 is approved by Legal and valid from 2026-12-15 in rwb_comms.template",
+   "new": "version 3 is approved by Legal and valid from 2026-12-15 through RWB-P6-E1046-CON"
+  },
+  {
+   "old": "Then version 2 stays readable in rwb_comms.template",
+   "new": "Then version 2 stays readable through RWB-P6-E1046-CON"
+  },
+  {
+   "old": "Then rwb-document received no create call and no decision record is published",
+   "new": "Then rwb-document received no create call and no decision record is published\n\n  Scenario: AC15 The caller lacks Documents C (new, D-RCV-60)\n    Given the rwb-access contract mock reports that the caller holds Documents R only\n    When the caller requests generation for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the response is 403 with MSG-P4-002\n    Then nothing is created in rwb-document and no decision record is published\n\n  Scenario: AC16 The national ID appears only inside the PDF (new, D-RCV-60)\n    Given the token service returns a national ID for the borrower of case \"RW-2026-000301\"\n    When the engine runs for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the rendered PDF shows the national ID filled from the token service at render time\n    Then no log, decision record, event or workflow input holds the clear national ID"
+  },
+  {
+   "old": "| TC-E2-026-15 | Access | Integration | RW-TEAMMGR user (Documents R) calls POST generated-documents; refused with MSG-P4-002 |",
+   "new": "| TC-E2-026-15 | Access | Integration | RW-TEAMMGR user (Documents R) calls POST generated-documents; refused with MSG-P4-002 (AC15) |\n| TC-E2-026-16 | Generation | Integration | National ID is filled from the token service only inside the generated PDF and appears in no log, event or workflow input (AC16) |"
+  },
+  {
+   "old": "| X12 | The caller lacks Documents C | 403 | MSG-P4-002 | TC-E2-026-15 |",
+   "new": "| X12 | The caller lacks Documents C | 403 | MSG-P4-002 | AC15 |"
+  },
+  {
+   "old": "| TemplateSelector | Service | Selects the version from `rwb_comms.template` by language, product group and date (BR1, BR2); never reads another schema (DP-01) |",
+   "new": "| TemplateSelector | Service | Selects the version through RWB-P6-E1046-CON by language, product group and date (BR1, BR2); holds no template row (DP-01) |"
+  },
+  {
+   "old": "Reads the merge codes of the selected version from `rwb_comms.merge_field` (BR3)",
+   "new": "Reads the merge codes of the selected version through RWB-P6-E1046-CON (BR3)"
+  },
+  {
+   "old": "Template and merge field reads; request key and request lock",
+   "new": "Request key and request lock only"
+  },
+  {
+   "old": "(DP-15): template and merge_field with the standard record columns, the unique key on (template_code, template_version), and an index on (template_code, language, product_group, valid_from). The request key",
+   "new": "(DP-15). Template and merge field catalogues are read through RWB-P6-E1046-CON and are not held as tables here. The request key"
+  },
+  {
+   "old": "Templates and merge fields stay data rows of this service, owner legal counsel (DL28).",
+   "new": "Templates and merge fields are read through RWB-P6-E1046-CON, owned by P6; Legal approval as named in the contract (DL28)."
+  },
+  {
+   "old": "1. Flyway baseline of `rwb_comms` with template and merge_field; repository and unique-key tests.",
+   "new": "1. Flyway baseline of `rwb_comms` for the request key and request lock; repository tests."
+  },
+  {
+   "old": "TemplateSelector against the own-schema tables:",
+   "new": "TemplateSelector against contract fakes of RWB-P6-E1046-CON:"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17700",
+   "item": "DOR-RWB-P6-E2026-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "§13 Database now states rwb_comms as the only owned schema; rwb_case, rwb_decision and rwb_document are reached through contracts."
+  },
+  {
+   "ruling": "R-17701",
+   "item": "DOR-RWB-P6-E2026-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X12 now covered by new AC15 (Documents C refusal) in §7; §5 Covered by updated; TC-E2-026-15 cites AC15."
+  },
+  {
+   "ruling": "R-17702",
+   "item": "DOR-RWB-P6-E2026-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR11 covered by new AC16 in §7 and new test row TC-E2-026-16 in §16."
+  },
+  {
+   "ruling": "R-22121",
+   "item": "GAP-1023",
+   "status": "Resolved",
+   "section": "7, 13",
+   "target": "",
+   "change": "",
+   "note": "Template and merge field reads moved to RWB-P6-E1046-CON in header, §7 and §13. rwb-document columns and index are outside this story."
+  },
+  {
+   "ruling": "R-22122",
+   "item": "GAP-1879",
+   "status": "Resolved",
+   "section": "7, 13",
+   "target": "",
+   "change": "",
+   "note": "Template and merge_field no longer read as tables; catalogue read through RWB-P6-E1046-CON in header, §7, §13 and build steps."
+  },
+  {
+   "ruling": "R-22347",
+   "item": "GAP-1713",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P6-E2026-CON",
+   "change": "Record once in the service contract the owner of each FEAT prerequisite: approval P7, case P3, documents P5, communications P6, valuation S1.",
+   "note": "No feature code appears in this story; the mapping belongs in the service contract."
+  },
+  {
+   "ruling": "R-22511",
+   "item": "GAP-1580",
+   "status": "Cross-document",
+   "section": "",
+   "target": "FSD P5 v3",
+   "change": "Add a generation section in the next version carrying FR-P5-026 and AC-P5-019 from REQ-DCM-012, so the behaviour has one functional statement.",
+   "note": "The generation behaviour needs a functional statement in FSD P5; no change in this story."
+  },
+  {
+   "ruling": "R-22615",
+   "item": "GAP-0938",
+   "status": "Cross-document",
+   "section": "",
+   "target": "TSD P4 v3 appendix T-A and RWB-P4-E1037-CON",
+   "change": "Add the request and answer schema of POST /api/recovery/access/v1/authorise to the API specification, TSD P4 appendix T-A and RWB-P4-E1037-CON; stub generation facts in RWB-P5-E2026-CON.",
+   "note": "The authorise schema is missing from the P4 sources; this story already uses the rwb-access contract mock."
+  },
+  {
+   "ruling": "R-22616",
+   "item": "GAP-0408",
+   "status": "Not applied",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Fixtures, PDF/A check, font pack, harness and evidence format are not in the sources; agreement with P5, P6 and QA is needed. No values invented."
+  },
+  {
+   "ruling": "R-22617",
+   "item": "GAP-0937",
+   "status": "Cross-document",
+   "section": "",
+   "target": "PM-2026.12 policy pack load",
+   "change": "Load Documents letters: C for RW-RESTRUCT, RW-CASEOWN and SY-CASEWF; R for RW-TEAMMGR; no row for RW-PHONECOL; confirm at policy pack review.",
+   "note": "The Documents letters belong in the policy pack and the P4 RBAC matrix, not in this story."
+  }
+ ]
+}

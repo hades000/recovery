@@ -1,0 +1,90 @@
+{
+ "edits": [
+  {
+   "old": "    Then the change is recorded in the Change Register",
+   "new": "    Then the change is recorded in the Change Register\n\n  Scenario: AC8 Each business rule of section 8 has a criterion and a test row (new, D-RCV-60)\n    Given the business rules BR1 to BR10 of section 8\n    When the rule table of section 8 is read against sections 7 and 16\n    Then each rule ID names AC8 and at least one test row of section 16\n    Then a rule that is an architecture constraint is checked by a boundary test row\n\n  Scenario: AC9 The provided operations answer 401, 403 and 404 on their errors (new, D-RCV-60)\n    Given the baseline document version \"v1\"\n    When a consumer calls \"GET /proceeds\" or \"POST /proceeds/{proceedsId}/match\" without a valid credential\n    Then the answer is 401 with the problem envelope of AC5\n    When a consumer calls one of the two operations without the declared right\n    Then the answer is 403 with the message of section 14 and changes nothing\n    When a consumer calls \"POST /proceeds/{proceedsId}/match\" with an unknown proceedsId\n    Then the answer is 404 with the problem envelope of AC5\n\n  Scenario: AC11 A consumed call that fails or does not answer is handled (new, D-RCV-60)\n    Given a consumed operation whose fake answers a failure\n    When the service calls the consumed operation\n    Then the call returns the problem envelope of AC5 with its trace identifier and changes nothing\n    Given a consumed operation whose fake gives no answer\n    When the service calls the consumed operation\n    Then the call is not treated as answered and no record of \"proceeds\" changes\n\n  Scenario: AC12 A status change the model does not allow is refused (new, D-RCV-60)\n    Given a status change that the status model of the service allows\n    When a consumer requests it\n    Then the change is accepted\n    Given a status change that the status model of the service does not allow\n    When a consumer requests it\n    Then the request is refused with the problem envelope of AC5 and the message of section 14 and changes nothing"
+  },
+  {
+   "old": "| BR1 | The baseline is one tagged version; a consumer builds against the tag and never against a draft element | R8.2; R5.7 rule 1 | AC6, TC-P8-E2008-CON-07 |",
+   "new": "| BR1 | The baseline is one tagged version; a consumer builds against the tag and never against a draft element | R8.2; R5.7 rule 1 | AC6, AC8, TC-P8-E2008-CON-07, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR2 | The operation set is the ownership rows of the service and nothing else; an operation the Ownership Map does not carry is not published | Ownership Map; GAP-2504 | AC1, TC-P8-E2008-CON-01 |",
+   "new": "| BR2 | The operation set is the ownership rows of the service and nothing else; an operation the Ownership Map does not carry is not published | Ownership Map; GAP-2504 | AC1, AC8, TC-P8-E2008-CON-01, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR3 | One base per service, `/api/recovery/payment/v1`, and no operation outside it | DP-13, R4 | AC1, TC-P8-E2008-CON-01 |",
+   "new": "| BR3 | One base per service, `/api/recovery/payment/v1`, and no operation outside it | DP-13, R4 | AC1, AC8, TC-P8-E2008-CON-01, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR4 | Event names follow `rwb.<short>.<Event>.v1` on `rwb.<short>.events.v1`, with a retry and a dead-letter topic | DP-09, DP-14 | AC2, TC-P8-E2008-CON-03 |",
+   "new": "| BR4 | Event names follow `rwb.<short>.<Event>.v1` on `rwb.<short>.events.v1`, with a retry and a dead-letter topic | DP-09, DP-14 | AC2, AC8, TC-P8-E2008-CON-03, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR5 | One schema and one login per service; no foreign key and no statement may leave `rwb_payment` | DP-01, DP-02 | AC4, TC-P8-E2008-CON-05, TC-P8-E2008-CON-09 |",
+   "new": "| BR5 | One schema and one login per service; no foreign key and no statement may leave `rwb_payment` | DP-01, DP-02 | AC4, AC8, TC-P8-E2008-CON-05, TC-P8-E2008-CON-09, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR6 | Every consumed operation is declared with a fake; a declaration without a fake is not publishable | DP-11 | AC3, TC-P8-E2008-CON-04 |",
+   "new": "| BR6 | Every consumed operation is declared with a fake; a declaration without a fake is not publishable | DP-11 | AC3, AC8, TC-P8-E2008-CON-04, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR7 | No business value is frozen: window, tolerance, grace days, partial floor, match types and the LOV values are read from their owners | Principle 1; D-RCV-36 T10 | AC3, TC-P8-E2008-CON-04 |",
+   "new": "| BR7 | No business value is frozen: window, tolerance, grace days, partial floor, match types and the LOV values are read from their owners | Principle 1; D-RCV-36 T10 | AC3, AC8, TC-P8-E2008-CON-04, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR8 | No personal data in a schema, an event, a fake or a test fixture | Section 17 | AC2, TC-P8-E2008-CON-03 |",
+   "new": "| BR8 | No personal data in a schema, an event, a fake or a test fixture | Section 17 | AC2, AC8, TC-P8-E2008-CON-03, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR9 | The error envelope is the platform problem shape and every legacy message ID maps to one status and one code | R7.2 s14; section 14 | AC5, TC-P8-E2008-CON-06 |",
+   "new": "| BR9 | The error envelope is the platform problem shape and every legacy message ID maps to one status and one code | R7.2 s14; section 14 | AC5, AC8, TC-P8-E2008-CON-06, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| BR10 | A breaking change is a new version and a Change Register row; a correction of an element name by its owner is a patch to the same version | R8.2; AC7 | AC7, TC-P8-E2008-CON-07 |",
+   "new": "| BR10 | A breaking change is a new version and a Change Register row; a correction of an element name by its owner is a patch to the same version | R8.2; AC7 | AC7, AC8, TC-P8-E2008-CON-07, TC-P8-E2008-CON-10 |"
+  },
+  {
+   "old": "| TC-P8-E2008-CON-09 | AC4 | Contract | the boundary of each table of section 12.7 at its key, index and column limits |",
+   "new": "| TC-P8-E2008-CON-09 | AC4 | Contract | the boundary of each table of section 12.7 at its key, index and column limits |\n| TC-P8-E2008-CON-10 | AC8 | Contract | the rules BR1 to BR10 of section 8 read against the criteria and rows of sections 7 and 16 |\n| TC-P8-E2008-CON-11 | AC9 | Contract | one request without a credential, one without the declared right and one with an unknown proceedsId |\n| TC-P8-E2008-CON-12 | AC11 | Contract | one consumed operation whose fake answers a failure and one whose fake gives no answer |\n| TC-P8-E2008-CON-13 | AC12 | Contract | one allowed and one disallowed status change |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31573",
+   "item": "NEWAC-RWB-P8-E2008-CON-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 (failed and unanswered consumed call return the AC5 envelope and change nothing) and TC-P8-E2008-CON-12."
+  },
+  {
+   "ruling": "R-31574",
+   "item": "NEWAC-RWB-P8-E2008-CON-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 (allowed status change accepted, disallowed one refused with AC5 envelope) and TC-P8-E2008-CON-13."
+  },
+  {
+   "ruling": "R-31575",
+   "item": "NEWAC-RWB-P8-E2008-CON-AC8",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 covering BR1 to BR10, added AC8 and TC-P8-E2008-CON-10 to each section 8 Covered by cell."
+  },
+  {
+   "ruling": "R-31576",
+   "item": "NEWAC-RWB-P8-E2008-CON-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 (401 no credential, 403 no right, 404 unknown proceedsId) and TC-P8-E2008-CON-11. Section 7 footer count left unchanged."
+  }
+ ]
+}

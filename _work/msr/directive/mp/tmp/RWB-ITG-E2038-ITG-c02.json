@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "| Size | Not set; the squad sizes it at refinement |",
+   "new": "| Size | Not set; the squad sizes it at refinement and confirms it fits two weeks |"
+  },
+  {
+   "old": "| Depends on (build) | None |",
+   "new": "| Depends on (build) | RWB-P4-E1039-APP, RWB-PLT-E2038-APP (not yet done) |"
+  },
+  {
+   "old": "| ID | Trigger | What the harness asserts | Message | ITG test case |\n|---|---|---|---|---|",
+   "new": "| ID | Trigger | What the harness asserts | Message | ITG test case | Covered by |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| X1 | The grant is missing, ended, or for another area or right | 403 from the codec server; no payload; nothing reaches the workflow | MSG-P4-002 | TC-E2-038-01-ITG |",
+   "new": "| X1 | The grant is missing, ended, or for another area or right | 403 from the codec server; no payload; nothing reaches the workflow | MSG-P4-002 | TC-E2-038-01-ITG | AC1 |"
+  },
+  {
+   "old": "| X2 | The caller holds RW-PLATADM, RW-AUDIT or RW-CASEOWN | 403 from the codec server; no payload; one AC-DENY entry per refusal | MSG-P4-002 | TC-E2-038-03-ITG, TC-E2-038-09-ITG |",
+   "new": "| X2 | The caller holds RW-PLATADM, RW-AUDIT or RW-CASEOWN | 403 from the codec server; no payload; one AC-DENY entry per refusal | MSG-P4-002 | TC-E2-038-03-ITG, TC-E2-038-09-ITG | AC2 |"
+  },
+  {
+   "old": "| X3 | A payload carries no codec metadata | 422 for the whole request; no payload index answers; one AC-DENY entry with the payload index and the reason; no key is guessed | None (422 refusal text) | TC-E2-038-05-ITG |",
+   "new": "| X3 | A payload carries no codec metadata | 422 for the whole request; no payload index answers; one AC-DENY entry with the payload index and the reason; no key is guessed | None (422 refusal text) | TC-E2-038-05-ITG | AC3 |"
+  },
+  {
+   "old": "| X4 | More than 100 payloads, or more than 1 MB in one request | 413; no payload returned; no AC-READ entry | None (413 refusal text) | TC-E2-038-01-ITG |",
+   "new": "| X4 | More than 100 payloads, or more than 1 MB in one request | 413; no payload returned; no AC-READ entry | None (413 refusal text) | TC-E2-038-01-ITG | AC5 (new, D-RCV-60) |"
+  },
+  {
+   "old": "| X5 | A payload names a key version that is not enabled | 422; no payload returned; one AC-DENY entry; no fallback to a clear read | None (422 refusal text) | TC-E2-038-04-ITG |",
+   "new": "| X5 | A payload names a key version that is not enabled | 422; no payload returned; one AC-DENY entry; no fallback to a clear read | None (422 refusal text) | TC-E2-038-04-ITG | AC6 (new, D-RCV-60) |"
+  },
+  {
+   "old": "| X6 | The decision log store is unavailable when an administrative call arrives | 503 to the authorizer, read as PERMISSION_DENIED; the workflow is unchanged and no entry exists | None (503 refusal text) | TC-E2-038-06-ITG |",
+   "new": "| X6 | The decision log store is unavailable when an administrative call arrives | 503 to the authorizer, read as PERMISSION_DENIED; the workflow is unchanged and no entry exists | None (503 refusal text) | TC-E2-038-06-ITG | AC4 |"
+  },
+  {
+   "old": "| X7 | The frontend audit log holds a terminate, reset or signal with no entry | The reconciliation reports the gap with workflow ID, operation and time; no entry is written by the job | None (incident only) | TC-E2-038-07-ITG |",
+   "new": "| X7 | The frontend audit log holds a terminate, reset or signal with no entry | The reconciliation reports the gap with workflow ID, operation and time; no entry is written by the job | None (incident only) | TC-E2-038-07-ITG | AC4 |"
+  },
+  {
+   "old": "| X8 | A caller presents a certificate that is not the workflow service's, or the frontend's on the audit endpoint | 403 with MSG-P4-002 on the codec path; a refused mTLS handshake on the audit endpoint; no entry | MSG-P4-002 | TC-E2-038-09-ITG |",
+   "new": "| X8 | A caller presents a certificate that is not the workflow service's, or the frontend's on the audit endpoint | 403 with MSG-P4-002 on the codec path; a refused mTLS handshake on the audit endpoint; no entry | MSG-P4-002 | TC-E2-038-09-ITG | AC7 (new, D-RCV-60) |"
+  },
+  {
+   "old": "    And the job writes no entry of its own, and no entry is invented for \"case-RW-2026-000307\"",
+   "new": "    And the job writes no entry of its own, and no entry is invented for \"case-RW-2026-000307\"\n\n  Scenario: AC5 A decode request over the codec limit is refused whole, with no payload and no read entry (new, D-RCV-60)\n    Given user \"U-88\" holds RW-SECADM and the ACTIVE break-glass grant \"BG-2026-0042\" for area PLATFORM_ADMINISTRATION, right R, ending at 12:00 on 16 November 2026\n    When the harness sends one decode request with more than 100 payloads at 11:40\n    Then the codec server answers 413 and no payload is returned\n    When the harness sends one decode request with more than 1 MB at 11:40\n    Then the codec server answers 413 and no payload is returned\n    And no AC-READ entry exists for either request\n\n  Scenario: AC6 A payload naming a key version that is not enabled is refused with no fallback to a clear read (new, D-RCV-60)\n    Given user \"U-88\" holds RW-SECADM and the ACTIVE break-glass grant \"BG-2026-0042\" for area PLATFORM_ADMINISTRATION, right R, ending at 12:00 on 16 November 2026\n    Given \"case-RW-2026-000304\" names a key version that is not enabled\n    When \"U-88\" decodes the payload of \"case-RW-2026-000304\" at 11:40\n    Then the answer is 422 and no payload is returned\n    And one AC-DENY entry records the refusal\n    And the codec does not fall back to a clear read\n\n  Scenario: AC7 Only the codec path with the workflow service's certificate reaches a clear payload (new, D-RCV-60)\n    Given the codec server is the only path to a clear payload for the Web UI\n    When SY-RULES calls POST /decode with its own certificate\n    Then the answer is 403 with MSG-P4-002 and no payload is returned\n    And no entry is written\n    When the frontend presents its certificate to the audit endpoint\n    Then the mTLS handshake is refused and no entry is written"
+  },
+  {
+   "old": "| SCR-38 Decision log query | Read only | The PLATFORM_ADMIN and AC-READ rows show the operation in the actions field |",
+   "new": "| SCR-38 Decision log query | Read only | The PLATFORM_ADMIN and AC-READ rows show the operation in the actions field |\n| SCR-38 Decision log query | Empty | Not specified in the source documents (CG-ALL-788) |\n| SCR-38 Decision log query | Loading | As set in Screen Specifications v1, section SCR-38 (CG-ALL-788) |\n| SCR-38 Decision log query | Error | Not specified in the source documents (CG-ALL-788) |\n| SCR-38 Decision log query | No access | Not specified in the source documents (CG-ALL-788) |"
+  },
+  {
+   "old": "| SCR-43 Roles and access | Read only | The grant rule is shown; the harness asserts no panel is added to it |",
+   "new": "| SCR-43 Roles and access | Read only | The grant rule is shown; the harness asserts no panel is added to it |\n| SCR-43 Roles and access | Empty | Not specified in the source documents (CG-ALL-789) |\n| SCR-43 Roles and access | Loading | Not specified in the source documents (CG-ALL-789) |\n| SCR-43 Roles and access | Error | Not specified in the source documents (CG-ALL-789) |\n| SCR-43 Roles and access | No access | Not specified in the source documents (CG-ALL-789) |"
+  },
+  {
+   "old": "and the harness environment and evidence detail: Not specified in the source documents (GAP-0417; ASM-0592).",
+   "new": "and the harness environment and evidence detail: Not specified in the source documents (GAP-0417; ASM-0592), to be agreed by the integration lead with the platform workflow owner and QA at the wave 2 entry check."
+  },
+  {
+   "old": "| TC-E2-038-09-ITG | Access; ITG AC2 | Component | SY-RULES calls the codec server POST /decode with its own certificate; refused with MSG-P4-002 and no entry |",
+   "new": "| TC-E2-038-09-ITG | Access; ITG AC2 | Component | SY-RULES calls the codec server POST /decode with its own certificate; refused with MSG-P4-002 and no entry |\n| TC-E2-038-10-ITG | AC5 (new, D-RCV-60) | Integration | \"U-88\" RW-SECADM, grant \"BG-2026-0042\" ending 12:00; decode with more than 100 payloads and with more than 1 MB at 11:40 |\n| TC-E2-038-11-ITG | AC6 (new, D-RCV-60) | Integration | Payload on \"case-RW-2026-000304\" naming a key version not enabled; decode by \"U-88\" with grant \"BG-2026-0042\" |\n| TC-E2-038-12-ITG | AC7 (new, D-RCV-60); BR2 | Component | SY-RULES calls POST /decode with its own certificate; frontend certificate presented to the audit endpoint |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14407",
+   "item": "DOR-RWB-ITG-E2038-ITG-12",
+   "status": "Cross-document",
+   "section": "16, 18",
+   "target": "RTM v7",
+   "change": "Align the REQ-DRI-001 and REQ-DRI-005 test lists in RTM v7 with RWB-ITG-E2038-ITG section 18 in its next version.",
+   "note": "Story §16 now has 12 test cases (TC-10 to TC-12 added for AC5 to AC7). §18 test lists need RTM v7 alignment."
+  },
+  {
+   "ruling": "R-14408",
+   "item": "DOR-RWB-ITG-E2038-ITG-15",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Size row now states the squad confirms the story fits two weeks at refinement."
+  },
+  {
+   "ruling": "R-14409",
+   "item": "DOR-RWB-ITG-E2038-ITG-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Depends on (build) now names RWB-P4-E1039-APP and RWB-PLT-E2038-APP as not yet done."
+  },
+  {
+   "ruling": "R-14410",
+   "item": "DOR-RWB-ITG-E2038-ITG-18",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Open-decisions text for DL10 and ASM-2250, ASM-2357, ASM-2377, ASM-2863 is not in chunk c02; apply in the chunk holding it."
+  },
+  {
+   "ruling": "R-14411",
+   "item": "DOR-RWB-ITG-E2038-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added Covered by column to §5; new AC5 to AC7 in §7 with TC-10 to TC-12 in §16 for the uncovered exception paths."
+  },
+  {
+   "ruling": "R-14412",
+   "item": "DOR-RWB-ITG-E2038-ITG-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR2 now covered by AC7 and TC-E2-038-12-ITG; all 10 rules have a criterion and test case."
+  },
+  {
+   "ruling": "R-22714",
+   "item": "GAP-0417",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "§15 now assigns agreement of harness repository, environment, seeding, evidence and certificates to the integration lead at the wave 2 entry check."
+  },
+  {
+   "ruling": "R-24015",
+   "item": "CG-ALL-787",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the REQ-DRI-001 and REQ-DRI-005 test lists in RTM v7 with RWB-ITG-E2038-ITG section 18 in its next version.",
+   "note": "RTM v7 lists further TC-E1 and TC-E2 IDs for these requirements; the story side cannot be aligned without them."
+  },
+  {
+   "ruling": "R-24016",
+   "item": "CG-ALL-788",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-38 now lists Empty, Loading, Error and No access; spec-missing states marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-24017",
+   "item": "CG-ALL-789",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-43 now lists Empty, Loading, Error and No access, each marked Not specified in the source documents."
+  }
+ ]
+}

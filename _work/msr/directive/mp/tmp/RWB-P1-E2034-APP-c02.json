@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| X9 | The entry cannot be inserted | 503 with the rollback; the incident hook fires; nothing is discarded silently | MSG-P1-022 | Section 12.1 |",
+   "new": "| X9 | The entry cannot be inserted | 503 with the rollback; the incident hook fires; nothing is discarded silently | MSG-P1-022 | AC7 |"
+  },
+  {
+   "old": "| MSG-P3-024 | The case has no ledger entry (the timeline's empty state, owned by RWB-P3-E2034-APP) | No interactions are recorded on this case yet. |",
+   "new": "| MSG-P3-024 | The case has no ledger entry (the timeline's empty state, owned by RWB-P3-E2034-APP) | Nothing is recorded in {section} yet. |"
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, which is open (assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863)."
+  },
+  {
+   "old": "No message carries a number, an address, a name or a case summary.",
+   "new": "No message carries a number, an address, a name or a case summary. Decision DL26 is open (assumptions ASM-0247, ASM-0264, ASM-0275 and ASM-0355)."
+  },
+  {
+   "old": "`DF-CAS-001` is rwb-case's key, answered by the contract and never joined locally (DP-01).",
+   "new": "`DF-CAS-001` is rwb-case's key, answered by the contract and never joined locally (DP-01). `tr_interaction_append_only` is a database trigger of RWB-P1-E1066-APP, not a dictionary field or entity, and is named here only as the trigger BR7 relies on."
+  },
+  {
+   "old": "| Legacy field | Entity | Home in the target |",
+   "new": "| BR Field ID | Entity | Home in the target |"
+  },
+  {
+   "old": "    Then the case read returns one entry for the notice and the case sequence series has no gap and no repeat",
+   "new": "    Then the case read returns one entry for the notice and the case sequence series has no gap and no repeat\n\n  Scenario: AC7 A failed insert rolls back, answers 503 and raises the incident (new, D-RCV-60)\n    Given the ledger store cannot insert a row for case \"RW-2026-000301\"\n    When a LETTER entry for notice \"NT-SYN-0301\" is appended through POST /cases/{caseId}/interactions\n    Then the append answers 503 with MSG-P1-022 and nothing is returned\n    Then no row is written and the case stays at its last case sequence\n    Then the incident hook fires with the case ID and the error class and no personal data\n\n  Scenario: AC8 An entry is never updated or deleted and a correction is a new entry (new, D-RCV-60)\n    Given a LETTER entry for notice \"NT-SYN-0301\" is stored on case \"RW-2026-000301\"\n    When an update or a delete of that entry is attempted on the ledger\n    Then the change is refused and the stored entry is unchanged\n    Then a correction is stored as a new entry with its own case sequence and the original entry stays in the ledger\n\n  Scenario: AC9 One ledger holds every entry of a case in rwb_source_data (new, D-RCV-60)\n    Given the entries of case \"RW-2026-000301\" are stored by this service\n    When the case is read through GET /cases/{caseId}/interactions\n    Then every entry of the case is returned from the one interaction table of rwb_source_data\n    Then no other service holds a copy of the ledger and each reads it only through the case read"
+  },
+  {
+   "old": "| TC-E2-034-15 | Boundary test - the tables of section 12.7 | Component | Not specified in the source documents (DOR-RWB-P1-E2034-APP-12) |",
+   "new": "| TC-E2-034-15 | Boundary test - the tables of section 12.7 | Component | Not specified in the source documents (DOR-RWB-P1-E2034-APP-12) |\n| TC-E2-034-16 | AC7, BR8, X9 - this story's store evidence: the failed insert rolls back, answers 503 and raises the incident hook | End to end | Ledger store refuses one insert for case \"RW-2026-000301\" |\n| TC-E2-034-17 | AC8, BR7 - this story's store evidence: the repository refuses an update and a delete; a correction is a new entry | Component | Entry \"LETTER\" for notice \"NT-SYN-0301\" on case \"RW-2026-000301\", then an update, a delete and a correction |\n| TC-E2-034-18 | AC9, BR1 - this story's store evidence: one interaction table in rwb_source_data, read only through the case read | Component | Entries of case \"RW-2026-000301\" in the ledger store |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09804",
+   "item": "CG-ALL-2471",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a message ID for 'No session on either operation' with text 'Your session has ended. Sign in again.'; the story then cites that ID in section 14.",
+   "note": "Story keeps MSG-P4-001 until the standard assigns the new ID; no ID invented here."
+  },
+  {
+   "ruling": "R-09805",
+   "item": "CG-ALL-2472",
+   "status": "Cross-document",
+   "section": "5, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a message ID for the 2 s reference-data or authorise library timeout with text 'The request could not be completed because {system} is not available. Try again in a few minutes.'; the story then cites it in section 5 (X8) and section 14.",
+   "note": "Story keeps MSG-GEN-006 until the standard assigns the new ID; no ID invented here."
+  },
+  {
+   "ruling": "R-09806",
+   "item": "CG-ALL-2473",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P3-024 English text in section 14 set to the standard v4 wording 'Nothing is recorded in {section} yet.'",
+   "note": "Story use matches the standard's interaction-ledger case, so the standard text is copied; no new ID needed."
+  },
+  {
+   "ruling": "R-09807",
+   "item": "CG-ALL-2475",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "TC-E2-034-13 already covers AC4 in section 16 as its test case; no edit needed."
+  },
+  {
+   "ruling": "R-15250",
+   "item": "DOR-RWB-P1-E2034-APP-10",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P3-E2034-APP",
+   "change": "Add empty, loading, error and no-access states to screens SCR-03 and SCR-04, which the P3 slice owns.",
+   "note": "The screens belong to the P3 slice, not this app story; no story-side edit."
+  },
+  {
+   "ruling": "R-15251",
+   "item": "DOR-RWB-P1-E2034-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Open decisions DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863) and DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355) named in section 14 as open, with their assumptions.",
+   "note": "Both decisions stay open; their assumptions are now listed in the story."
+  },
+  {
+   "ruling": "R-15252",
+   "item": "DOR-RWB-P1-E2034-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC7 (failed insert rolls back, 503, MSG-P1-022, incident hook) and TC-E2-034-16; X9 in section 5 now covered by AC7.",
+   "note": "X9 was covered only by Section 12.1; it is now covered by a Gherkin criterion."
+  },
+  {
+   "ruling": "R-15253",
+   "item": "DOR-RWB-P1-E2034-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 (no update or delete; correction is a new entry) for BR7 with TC-E2-034-17, and AC9 (one ledger in rwb_source_data) for BR1 with TC-E2-034-18.",
+   "note": "BR1 and BR7 now each have a criterion and a test case."
+  },
+  {
+   "ruling": "R-15254",
+   "item": "DOR-RWB-P1-E2034-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD (data load), which section 10 of RWB-P1-E2034-APP grants the append of EFS entries.",
+   "note": "The role is missing from the roles workbook; the story already names it."
+  },
+  {
+   "ruling": "R-15255",
+   "item": "DOR-RWB-P1-E2034-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 names tr_interaction_append_only as a database trigger of RWB-P1-E1066-APP, not a dictionary field or entity; the legacy table's column header is now BR Field ID.",
+   "note": "Legacy rows carry DF field IDs under the BR Field ID header; trigger naming is clarified."
+  }
+ ]
+}

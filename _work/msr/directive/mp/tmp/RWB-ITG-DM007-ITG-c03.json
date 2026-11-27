@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| DF-CAS-001 to DF-CAS-055 | recovery_case | case_no, status, stage_code and the other fields of the entity | Read, through the rwb-case contract |",
+   "new": "| DF-CAS-001 to DF-CAS-055 | recovery_case | case_no, status, stage_code; the other fields are not all confirmed against LDM v9 (DOR-RWB-ITG-DM007-ITG-7) | Read, through the rwb-case contract |"
+  },
+  {
+   "old": "| DF-LEG-015 to DF-LEG-023 | notice | id, case_id, person_key, notice_type, sent_date, barcode and the other fields | Read, through the rwb-comms contract |",
+   "new": "| DF-LEG-015 to DF-LEG-023 | notice | id, case_id, person_key, notice_type, sent_date, barcode; the other fields are not all confirmed against LDM v9 (DOR-RWB-ITG-DM007-ITG-7) | Read, through the rwb-comms contract |"
+  },
+  {
+   "old": "| DF-LEG-030 to DF-LEG-034 | notice | id, case_id, person_key, notice_type, sent_date, barcode and the other fields | Read, through the rwb-comms contract |",
+   "new": "| DF-LEG-030 to DF-LEG-034 | notice | id, case_id, person_key, notice_type, sent_date, barcode; the other fields are not all confirmed against LDM v9 (DOR-RWB-ITG-DM007-ITG-7) | Read, through the rwb-comms contract |"
+  },
+  {
+   "old": "which holds v_ace_lawsuit and v_ace_hearing with the legal_action, notice and hearing tables, and through DP02 Customer and party for the person_key.",
+   "new": "which holds the legal_action, notice and hearing tables, and through DP02 Customer and party for the person_key; the harness reads DP07 only through the data product contract and never the v_ace_lawsuit or v_ace_hearing views."
+  },
+  {
+   "old": "| DF-PRT-008 to DF-PRT-016 | partner_instruction | id, case_id, partner_id, instruction_type, instructed_at, due_at and the other fields | Read, through the rwb-partner contract |",
+   "new": "| DF-PRT-008 to DF-PRT-016 | partner_instruction | id, case_id, partner_id, instruction_type, instructed_at, due_at; the legal slice is handed over by RWB-P1-DM007-APP and the panel slice by RWB-P1-DM008-APP, both loaded idempotent on the instruction id | Read, through the rwb-partner contract |"
+  },
+  {
+   "old": "no run started and no break row written (AC4, AC5); it writes one evidence report per business date.",
+   "new": "no run started and no break row written (AC4, AC5); it writes one evidence report per business date.\nGate: AC1 to AC5 all pass on the stubs and again on the real owners. The environment, base hosts, cutover fixture layout, SCR-45 composite route and break-list fields are fixed at the wave 4 entry check from the gateway-bff contract once RWB-AD-019 publishes; the extract format and retention are agreed with the data steward (GAP-0447)."
+  },
+  {
+   "old": "| MSG-P1-001 | Warning | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | Warning | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "| MSG-P1-012 | Warning | The case list for {date} does not reconcile to ACE for {product}: a difference of {variance} accounts, {pct} percent. |",
+   "new": "| MSG-P1-012 | Warning | The case list for {date} does not reconcile to ALS for {product}: a difference of {variance} accounts, {pct} percent. |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13746",
+   "item": "DOR-RWB-ITG-DM007-ITG-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Field lists for DF-CAS and the two notice rows no longer claim all fields; the ACE view wording is replaced by the DP07 data product contract.",
+   "note": "Case and notice field lists marked unconfirmed against LDM v9; harness reads DP07 via contract, not ACE views."
+  },
+  {
+   "ruling": "R-13747",
+   "item": "DOR-RWB-ITG-DM007-ITG-9",
+   "status": "Resolved",
+   "section": "14",
+   "change": "MSG-P1-001 and MSG-P1-012 text copied from the Error and Message Standard v4.",
+   "target": "",
+   "note": "Both message texts now match the standard; the Raised-when column is unchanged."
+  },
+  {
+   "ruling": "R-21789",
+   "item": "GAP-0447",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Gate added after flow step 9: AC1 to AC5 pass on stubs and again on real owners; remaining values fixed at the wave 4 entry check.",
+   "note": "Gate defined in section 4. Environment, hosts, route and extract values deferred to wave 4 entry check per proposed fix."
+  },
+  {
+   "ruling": "R-21814",
+   "item": "GAP-2170",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P1-DM007-APP story and P1 API yaml (API-P1-002, API-P1-003, API-P1-010)",
+   "change": "Add the one-dump read, one package per owner per cut-over business date to S4, P6 and S9, the ten-day count on reconciliation_result rows with reset on break, the cut-over record with sign-off, the flag defaulting off, and API-P1-003 for the out-of-scope tracker and exception rows.",
+   "note": "Cut-over dump, package, evidence and API surface belong to the P1 story and yaml, not this harness story."
+  },
+  {
+   "ruling": "R-21815",
+   "item": "GAP-0533",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "partner_instruction field cell now names the legal slice from RWB-P1-DM007-APP and the panel slice from RWB-P1-DM008-APP, both idempotent on the instruction id.",
+   "note": "Split of partner_instruction facts recorded in section 11; load is idempotent per proposed fix."
+  },
+  {
+   "ruling": "R-21817",
+   "item": "GAP-2171",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Release pipeline runbook entry and Flyway version description",
+   "change": "Record the cutover record, dump interface, clean-day rule and DM007 instruction slice agreed at the cutover rehearsal, with values kept in the values file.",
+   "note": "Cutover mechanics belong in the pipeline runbook and Flyway description, not in this story."
+  },
+  {
+   "ruling": "R-21818",
+   "item": "GAP-0532",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P1-DM007-APP",
+   "change": "Agree package layout and cutover record at rehearsal; hand one package per owner per cutover business date; P1 writes no other service's schema; extract carries legacy keys only.",
+   "note": "Handover package format and per-owner split belong to the P1 story."
+  },
+  {
+   "ruling": "R-21819",
+   "item": "GAP-0534",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P1-DM007-APP",
+   "change": "Count ten clean days on reconciliation_result rows from JOB-04; a BREAK row or new REC-05 orphan resets to zero; keep ten-day rows and sign-off in the cutover record beside the read-only window; flag defaults off.",
+   "note": "Flag name differs from GAP-2170 (-cutover-extract vs -cutover); resolve before build."
+  },
+  {
+   "ruling": "R-23698",
+   "item": "CG-ALL-1017",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text copied from the Error and Message Standard v4.",
+   "note": "Text now copied from standard; trigger wording in When column left as is."
+  },
+  {
+   "ruling": "R-23699",
+   "item": "CG-ALL-1018",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-012 text copied from the Error and Message Standard v4.",
+   "note": "Text now copied from standard; ALS wording per standard. When column left as is."
+  }
+ ]
+}

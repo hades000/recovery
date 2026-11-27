@@ -1,0 +1,75 @@
+{
+ "stage": "audit",
+ "story": "RWB-P3-E1035-APP",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 4
+    }
+   ],
+   "applied": true,
+   "disposition": [],
+   "edits": [
+    {
+     "old": "| Size | Not specified in the source documents (DOR-RWB-P3-E1035-APP-16; the squad sizes it at refinement) |",
+     "new": "| Size | Not specified in the source documents (DOR-RWB-P3-E1035-APP-16) |"
+    },
+    {
+     "old": "\n\n  Scenario: AC11 A personal field in a contact summary is masked by role (new, D-RCV-60)\n    Given a contact item on the timeline of case RW-2026-000801 whose summary holds a personal field\n    Given the rwb-access contract mock returns the masking policy for the role of U-81\n    When the timeline opens\n    Then the summary shows the value the masking policy allows for that role\n    Then the rest of the item shows with its time and its by\n\n  Scenario: AC12 The type order and the section timeout come from the parameters contract (new, D-RCV-60)\n    Given the parameters contract returns `timeline.type.order` and `caserecord.section.timeout.ms` on every request\n    When the timeline opens\n    Then the items follow the type order the parameters contract returned\n    Then a source that exceeds the returned section timeout sets its section to the failed state with MSG-P3-023\n    Then no order and no timeout is read from a constant in code\n\n  Scenario: AC13 The timeline of a case with 500 events reads in under 2 seconds (new, D-RCV-60)\n    Given case RW-2026-000801 has 500 events across the four sources\n    Given the rwb-decision, rwb-source-data and rwb-document contract mocks answer within their 2 s budget\n    When the timeline opens\n    Then the first page is returned in under 2 seconds (NFR-070)\n\n  Scenario: AC14 A transfer item takes its queues from the assignment rows and its rule version from the decision record (new, D-RCV-60)\n    Given a transfer at 2026-12-04 14:00 with an assignment row carrying the to queue and a closed previous assignment row carrying the from queue and the from owner\n    Given the rwb-decision contract mock returns the transfer decision record with rule \"TRF-007\" and version \"TRF-2026.11\"\n    When the transfer item is opened\n    Then the to queue comes from `assignment.queue_id`, and the from queue and the from owner from the closed previous assignment row\n    Then the rule version \"TRF-2026.11\" comes from the decision record, never from a column\n\n  Scenario: AC15 A case state change and the creation item come from the decision records (new, D-RCV-60)\n    Given case RW-2026-000802 has no status-history row of its own\n    Given the rwb-decision contract mock returns the creation record and a state change record of the case\n    When the timeline opens\n    Then the creation item and the state change show from the decision records, with the rule version\n\n  Scenario: AC16 The scope filter applies before the merge (new, D-RCV-60)\n    Given case RW-2026-000804 belongs to team \"LIT-BKK\" and U-81 has scope Own\n    Given the rwb-access contract mock returns scope Own for U-81\n    Given the rwb-decision, rwb-source-data and rwb-document contract mocks record every call\n    When U-81 opens the timeline for RW-2026-000804\n    Then the response is 404 with MSG-P4-003 and no item\n    Then none of the three contracts is called for the case",
+     "new": ""
+    },
+    {
+     "old": "\n| TC-E1-035-14 | AC11, BR5 | Component | Contact item whose summary holds a personal field; rwb-access masking policy mock |\n| TC-E1-035-15 | AC12, BR7 | Component | Parameters contract returning `timeline.type.order` and `caserecord.section.timeout.ms` |\n| TC-E1-035-16 | AC13, BR6 | Component | 500 events across the four sources |\n| TC-E1-035-17 | AC14, BR8 | Component | Transfer with a closed previous assignment row; decision record TRF-007 version TRF-2026.11 |\n| TC-E1-035-18 | AC15, BR9 | Component | Case with no status-history row; creation and state change records from the rwb-decision mock |\n| TC-E1-035-19 | AC16, BR11 | Component | Out-of-scope case; the three contracts record no call |",
+     "new": ""
+    },
+    {
+     "old": "| Open decisions | DL11 (ASM-0553, ASM-0703, ASM-1051, ASM-1104); DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355) |",
+     "new": "| Open decisions | DL11, DL26; ASM-0553, ASM-0703, ASM-1051, ASM-1104, ASM-0247, ASM-0264, ASM-0275, ASM-0355 |"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-05064",
+     "kind": "invented",
+     "issue": "Size row adds 'the squad sizes it at refinement', a process claim not in the sources. Removed."
+    },
+    {
+     "ruling": "R-30592",
+     "kind": "wrong",
+     "issue": "AC11-AC16 scenarios and TC-E1-035-14 to -19 go beyond the rulings, which cover BR5-BR11 only via AC9/TC-13. Removed."
+    },
+    {
+     "ruling": "R-28779",
+     "kind": "wrong",
+     "issue": "AC12 adds parameter names (timeline.type.order, caserecord.section.timeout.ms) with no source and contradicts 'no story edit'. Removed with AC12."
+    },
+    {
+     "ruling": "R-15957",
+     "kind": "invented",
+     "issue": "Open decisions row maps ASM IDs to DL11 and DL26 in groups the item does not state. Listed as a set instead."
+    },
+    {
+     "ruling": "R-15956",
+     "kind": "incomplete",
+     "issue": "Note says the dependency list has 12 entries; the Depends on row lists 11. Count not corrected, no source to confirm."
+    },
+    {
+     "ruling": "R-30591",
+     "kind": "wrong",
+     "issue": "Note says AC8 already exists in section 7, but the diff adds AC8 as new. Story has one AC8; note conflicts with R-15958."
+    },
+    {
+     "ruling": "R-15959",
+     "kind": "wrong",
+     "issue": "Note says TC-E1-035-12 already covered BR10, but the diff adds TC-12 as a new row. Note conflicts with the table change."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 7
+}

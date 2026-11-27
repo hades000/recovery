@@ -1,0 +1,184 @@
+{
+ "edits": [
+  {
+   "old": "| X9 | The case read, or the reference-data read, does not answer inside 2 s | The panel shows the case side without the deviation fragment and the move is never taken on an unread deviation | None | Section 17 |",
+   "new": "| X9 | The case read, or the reference-data read, does not answer inside 2 s | The panel shows the case side without the deviation fragment and the move is never taken on an unread deviation | None | AC10 |"
+  },
+  {
+   "old": "| X10 | A statement, a test or a component reaches a `rwb_case` row or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | Section 17 |",
+   "new": "| X10 | A statement, a test or a component reaches a `rwb_case` row or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | AC11 |"
+  },
+  {
+   "old": "the per-service Flyway sequence of `rwb_deviation`.",
+   "new": "the per-service Flyway sequence of `rwb_deviation`.\n\n**SCR-05 screen states.** Open: the answered rows and the refusal named (X1, X4; AC1, AC4). Refused: MSG-P3-033 names rule \"TRF-010\" (X1). Cleared history: the cleared deviation and its outcome shown as history (X5; AC6). Empty: no open deviation, form offered (X3; AC2, AC6). Error: a read not answered inside 2 s shows the case side without the deviation fragment (X9; AC10). No access: 403 with MSG-P4-002 (X6; AC9). Loading: Not specified in the source documents (DOR-RWB-S8-E2012-APP-10). SCR-03, SCR-07 and SCR-09 are not screens of this story; their states are Not specified in the source documents (DOR-RWB-S8-E2012-APP-10)."
+  },
+  {
+   "old": "AC1 to AC9 pass at component and contract level",
+   "new": "AC1 to AC12 pass at component and contract level"
+  },
+  {
+   "old": "and the boundary test shows no `rwb_case` statement and no `v_ace_*` read.",
+   "new": "and the boundary test shows no statement against another owner's schema (the case schema is owned by rwb-case) and no `v_ace_*` read.\n\n**Open decision.** DL23 stays open as a business decision, carried on the assumptions ASM-1232, ASM-1237, ASM-1259 and ASM-1560."
+  },
+  {
+   "old": "Prove AC1 to AC9 on the fakes",
+   "new": "Prove AC1 to AC12 on the fakes"
+  },
+  {
+   "old": "The nine criteria are new:",
+   "new": "The twelve criteria are new:"
+  },
+  {
+   "old": "    Then the call is refused with 403 and MSG-P4-002 before any row is read\n    Then the deviation row is unchanged",
+   "new": "    Then the call is refused with 403 and MSG-P4-002 before any row is read\n    Then the deviation row is unchanged\n\n  Scenario: AC10 The case or reference-data read is not answered in time (new, D-RCV-60)\n    Given case \"RW-2026-000402\" has deviation \"X1\" open\n    When \"U-TM-01\" opens SCR-05 for the case and the case read or the reference-data read does not answer inside 2 s\n    Then the panel shows the case side without the deviation fragment\n    Then the move is never taken on an unread deviation\n\n  Scenario: AC11 A statement reaches another owner's table (new, D-RCV-60)\n    Given the boundary test runs on the build\n    When a statement, a test or a component reaches a rwb_case row or a v_ace_* view\n    Then the grant refuses the statement and the boundary test fails the build\n\n  Scenario: AC12 The stage clock resumes when the deviation is resolved (new, D-RCV-60)\n    Given case \"RW-2026-000402\" has deviation \"X1\" in state DEV_RESOLVED\n    When the event CLOCK_RESUMED arrives for the deviation\n    Then the stage clock resumes and the case returns to the previous owner\n    Then the deviation state moves to RESUMED"
+  },
+  {
+   "old": "| R-DEV-01 | Deviations |",
+   "new": "| R-DEV-01 (BR12) | Deviations |"
+  },
+  {
+   "old": "| R-DEV-02 | Deviations |",
+   "new": "| R-DEV-02 (BR13) | Deviations |"
+  },
+  {
+   "old": "| R-DEV-03 | Deviations |",
+   "new": "| R-DEV-03 (BR14) | Deviations |"
+  },
+  {
+   "old": "| R-DEV-18 | Deviations |",
+   "new": "| R-DEV-18 (BR15) | Deviations |"
+  },
+  {
+   "old": "| BR11 | No person name, contact value, address or identity number enters the deviation row, the answer, a decision record, a log or an event | Template and Rules v1 §R7.2 s17 |",
+   "new": "| BR11 | No person name, contact value, address or identity number enters the deviation row, the answer, a decision record, a log or an event | Template and Rules v1 §R7.2 s17 |\n| BR12 | R-DEV-01: a flagged deviation X1 to X7 pauses the stage clock, keeps the prescription clock running and routes to the named owner | FSD S8 A2.2.3.1, A2.4.3.1; TSD S8 T4 |\n| BR13 | R-DEV-02: deviation X1 is assigned to the complaint officer | FSD S8 A2.2.3.1, A2.4.3.1; TSD S8 T4 |\n| BR14 | R-DEV-03: deviations X2 and X3 are assigned to the specialist; Legal joins X3 for the estate claim | FSD S8 A2.2.3.1, A2.4.3.1; TSD S8 T4 |\n| BR15 | R-DEV-18: on CLOCK_RESUMED from DEV_RESOLVED the stage clock resumes and the case returns to the previous owner | FSD S8 A2.2.3.1, A2.4.3.1; TSD S8 T4 |\n\n**Coverage of the rules.** BR1 is proved by AC5 and AC6 (TC-E2-012-01, -06); BR2 by AC1 and AC4 (TC-E2-012-02, -12); BR3 by AC5 (TC-E2-012-05, -06); BR4 and BR11 by AC3; BR5 by AC2 and AC6; BR6 by AC5; BR7 by TC-E2-012-07; BR8 by AC8 (TC-E2-012-10, -14); BR9 by AC7 (TC-E2-012-08, -09); BR10 by AC11 (TC-E2-012-16); BR12 by AC1; BR13 by AC1 and AC5; BR14 by AC4; BR15 by AC12 (TC-E2-012-18)."
+  },
+  {
+   "old": "except MSG-P3-027, copied from Error and Message Standard v4 §4; no message is added.",
+   "new": "except MSG-P3-027, whose wording differs from Error and Message Standard v4 §4 (Not specified in the source documents (DOR-RWB-S8-E2012-APP-9)); no message is added."
+  },
+  {
+   "old": "| TC-E2-012-15 | AC1, AC6 | Component | No TRANSFER version in force on 2026-12-20; the panel answers MSG-P3-027 |",
+   "new": "| TC-E2-012-15 | AC1, AC6 | Component | No TRANSFER version in force on 2026-12-20; the panel answers MSG-P3-027 |\n| TC-E2-012-16 | AC11 | NFR | Each table named in §12.7 and each v_ace_* view; owned tables written here only, other owners' tables named and never read or written |\n| TC-E2-012-17 | AC10 | Component | RW-2026-000402 with X1 open; the case read not answered inside 2 s; the panel shows the case side only |\n| TC-E2-012-18 | AC12 | Component | Deviation X1 in DEV_RESOLVED; CLOCK_RESUMED; the case returns to the previous owner |"
+  },
+  {
+   "old": "| Legacy | Owner after the split | This story |\n|---|---|---|",
+   "new": "| Legacy | Feature | L3 process | Owner after the split | This story |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| RWB-E2-012 AC1 to AC13 | The primary slice RWB-P3-E2012-APP in rwb-case (`acs` is empty here) | AC1 to AC9 prove the deviation answer, the panel and the handler rule on the fakes |",
+   "new": "| RWB-E2-012 AC1 to AC13 | Manual transfer and reassignment screen with reason | Not specified in the source documents (DOR-RWB-S8-E2012-APP-2) | The primary slice RWB-P3-E2012-APP in rwb-case (`acs` is empty here) | AC1 to AC12 prove the deviation answer, the panel and the handler rule on the fakes |"
+  },
+  {
+   "old": "| RWB-E2-012 BR10 and AC2 (a move refused while a deviation is open) | Both: P3 refuses and names the rule; S8 supplies the fact | AC1, AC4 |",
+   "new": "| RWB-E2-012 BR10 and AC2 (a move refused while a deviation is open) | Manual transfer and reassignment screen with reason | Not specified in the source documents (DOR-RWB-S8-E2012-APP-2) | Both: P3 refuses and names the rule; S8 supplies the fact | AC1, AC4 |"
+  },
+  {
+   "old": "| RWB-E2-012 §15 SCR-05 and its four states | The primary slice owns the screen; this story owns the deviation fragment | AC1, AC4, AC5, AC6 |",
+   "new": "| RWB-E2-012 §15 SCR-05 and its four states | Manual transfer and reassignment screen with reason | Not specified in the source documents (DOR-RWB-S8-E2012-APP-2) | The primary slice owns the screen; this story owns the deviation fragment | AC1, AC4, AC5, AC6 |"
+  },
+  {
+   "old": "| RWB-E2-012 §14 messages | The primary slice owns the texts; this story renders MSG-P3-033, MSG-P3-027 and MSG-P4-002 | Section 14 |",
+   "new": "| RWB-E2-012 §14 messages | Manual transfer and reassignment screen with reason | Not specified in the source documents (DOR-RWB-S8-E2012-APP-2) | The primary slice owns the texts; this story renders MSG-P3-033, MSG-P3-027 and MSG-P4-002 | Section 14 |"
+  },
+  {
+   "old": "| RWB-E2-012 TC-E2-012-01 to -15 | Both slices carry the ids (GAP-3098) | The fifteen at Component and NFR level |",
+   "new": "| RWB-E2-012 TC-E2-012-01 to -15 | Manual transfer and reassignment screen with reason | Not specified in the source documents (DOR-RWB-S8-E2012-APP-2) | Both slices carry the ids (GAP-3098) | The fifteen at Component and NFR level |"
+  },
+  {
+   "old": "| RWB-E2-012 §12 transfer endpoint and §13 solution plan | The primary slice | Not restated; named in sections 1 and 19 |",
+   "new": "| RWB-E2-012 §12 transfer endpoint and §13 solution plan | Manual transfer and reassignment screen with reason | Not specified in the source documents (DOR-RWB-S8-E2012-APP-2) | The primary slice | Not restated; named in sections 1 and 19 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13375",
+   "item": "CG-ALL-11349",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add a row for TC-E2-012-15 with Given, When and Then copied from AC1 and AC6 of RWB-S8-E2012-APP section 7.",
+   "note": "Story §16 already lists TC-E2-012-15; the missing Given, When and Then sit in Test Cases v8 and need the row added there."
+  },
+  {
+   "ruling": "R-21122",
+   "item": "DOR-RWB-S8-E2012-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "SCR-05 states set out in §13 (empty, error, no access added). Loading and SCR-03/07/09 states are not in the source documents."
+  },
+  {
+   "ruling": "R-21123",
+   "item": "DOR-RWB-S8-E2012-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-012-16 (NFR boundary test over the §12.7 tables, covers AC11). TC-15 missing-row issue sits in CG-ALL-11349."
+  },
+  {
+   "ruling": "R-21124",
+   "item": "DOR-RWB-S8-E2012-APP-18",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Added open-decision line for DL23 with assumptions ASM-1232, ASM-1237, ASM-1259 and ASM-1560; DL23 stays open as a business decision."
+  },
+  {
+   "ruling": "R-21125",
+   "item": "DOR-RWB-S8-E2012-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to the traceability table; L3 process value is not in the source documents."
+  },
+  {
+   "ruling": "R-21126",
+   "item": "DOR-RWB-S8-E2012-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Done-when line no longer names rwb_case; it refers to the case schema owned by rwb-case."
+  },
+  {
+   "ruling": "R-21127",
+   "item": "DOR-RWB-S8-E2012-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "X9 and X10 now cite new AC10 and AC11; AC12 added for R-DEV-18; TC-16 to TC-18 added; counts and AC ranges updated."
+  },
+  {
+   "ruling": "R-21128",
+   "item": "DOR-RWB-S8-E2012-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR12 to BR15 assigned to R-DEV-01/02/03/18; coverage paragraph maps BR1 to BR15 to AC and TC IDs."
+  },
+  {
+   "ruling": "R-21129",
+   "item": "DOR-RWB-S8-E2012-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "LDM v9 and Data Classification v5",
+   "change": "Add decision_record and inbox_event as platform library tables of rwb_deviation (DP-03, DP-09), or record them as outside entity scope.",
+   "note": "Both names are library tables that are not entities in LDM v9 or Data Classification v5; the story text is unchanged."
+  },
+  {
+   "ruling": "R-21130",
+   "item": "DOR-RWB-S8-E2012-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P3-027 wording in Error and Message Standard v4 §4 is not in the sources; the story now states the difference instead of claiming a copy."
+  }
+ ]
+}

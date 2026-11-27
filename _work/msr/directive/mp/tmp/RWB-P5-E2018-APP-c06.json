@@ -1,0 +1,67 @@
+{
+ "edits": [
+  {
+   "old": "| BR10 | One base `/api/recovery/document/v1`, one hop, a 2 s timeout and an Idempotency-Key on every write | DP-11, DP-13; ADR-020 |",
+   "new": "| BR10 | One base `/api/recovery/document/v1`, one hop, a 2 s timeout and an Idempotency-Key on every write | DP-11, DP-13; ADR-020 |\n| BR11 | The service publishes DocumentStored from the version add and no signature event: no SignatureRecorded is invented, no comms event is published for a signature, and callers read the request state through the five operations | GAP-1185; GAP-2355; TSD P5 T5.3 |"
+  },
+  {
+   "old": "    Then the answer is 404 with MSG-P4-003 and no row is returned",
+   "new": "    Then the answer is 404 with MSG-P4-003 and no row is returned\n\n  Scenario: AC9 The service reads its method and status from the reference data, reads no template or case row, and writes rwb_document only (new, D-RCV-60)\n    Given the rwb-case reference-data contract mock returns LOV-SIGN-METHOD with \"E_SIGNATURE\", \"BRANCH\" and \"PAPER\"\n    When \"RS-0301\" sends POST /api/recovery/document/v1/cases/RC-2026-000888/signature-requests with document \"D-0601\", party \"P-0088\", method \"BRANCH\" and expiry 2026-12-20\n    Then the answer is 201 with method \"BRANCH\" taken from LOV-SIGN-METHOD\n    And no template, deviation or case row is read by this service\n    And the only table written is \"signature_request\" in \"rwb_document\"\n    And the row carries no person name, no identity number and no document content\n\n  Scenario: AC10 A call without a valid credential is refused 401 on each provided operation (new, D-RCV-60)\n    When a caller sends POST /api/recovery/document/v1/cases/RC-2026-000888/signature-requests for \"D-0601\" with no credential\n    Then the answer is 401 and no signature request row is written\n    When a caller reads the request by external reference \"EA-30001\" with no credential\n    Then the answer is 401 and no request row is returned\n    And the request keeps its status and no version is written"
+  },
+  {
+   "old": "The eight criteria above are new",
+   "new": "The ten criteria above are new"
+  },
+  {
+   "old": "| TC-E2-018-13 | No criterion here; boundary of the 12.7 tables (ASM-3438) | Component | SIGNED result for RS-0301 with the version add; only the tables of 12.7 are written, no other table |",
+   "new": "| TC-E2-018-13 | No criterion here; boundary of the 12.7 tables (ASM-3438) | Component | SIGNED result for RS-0301 with the version add; only the tables of 12.7 are written, no other table |\n| TC-E2-018-14 | AC9, BR2, BR7, BR8, BR9 | Component | LOV-SIGN-METHOD mock with E_SIGNATURE, BRANCH and PAPER; D-0601; P-0088; no table outside rwb_document written |\n| TC-E2-018-15 | AC10 | Component | No credential on the create for D-0601 and on the read of EA-30001; 401 each time, no row written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28788",
+   "item": "GAP-1185",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR11 states no comms event and no SignatureRecorded; story publishes none",
+   "note": "Routing reads the treatment; no signature event invented here. Any later signature fact is rwb-treatment's to publish, not this story's."
+  },
+  {
+   "ruling": "R-28789",
+   "item": "GAP-2355",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR11 fixes DocumentStored as the only event, published from the version add",
+   "note": "Story publishes DocumentStored only; no signature event; request state read through the five operations."
+  },
+  {
+   "ruling": "R-28790",
+   "item": "GAP-2357",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Users Roles and Permissions",
+   "change": "Confirm Documents C, R and U as operation-level rights of the five signature-request operations; add a rwb-document closed-request message at the next message standard version",
+   "note": "MSG-P3-005 kept for this version (AC4). Message standard name not specified in source documents (GAP-2357)."
+  },
+  {
+   "ruling": "R-31206",
+   "item": "NEWAC-RWB-P5-E2018-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC9 added in section 7; TC-E2-018-14 added in section 16",
+   "note": "AC9 covers BR2, BR7, BR8 and BR9 as a component test of the stored state; a boundary test may also apply."
+  },
+  {
+   "ruling": "R-31207",
+   "item": "NEWAC-RWB-P5-E2018-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC10 added in section 7 for 401 on create and read; TC-E2-018-15 added in section 16",
+   "note": "AC10 covers 401 on the create and the read by external reference; no error message code is given in the source documents."
+  }
+ ]
+}

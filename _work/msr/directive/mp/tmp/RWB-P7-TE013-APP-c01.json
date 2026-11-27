@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "`ix_declog_agent_step ON decision_log_entry (agent_version, decided_at DESC) WHERE agent_version IS NOT NULL`",
+   "new": "`ix_declog_agent_step ON decision_log_entry (agent_version, decided_at DESC) WHERE agent_version IS NOT NULL` (column `decided_at` is the LDM v9 field; DESC is the sort direction)"
+  },
+  {
+   "old": "the expression index `ix_declog_fallback ON decision_log_entry ((actions->>'fallback')) WHERE actions ? 'fallback'`",
+   "new": "the expression index `ix_declog_fallback ON decision_log_entry ((actions->>'fallback')) WHERE actions ? 'fallback'` over the LDM v9 field `actions`, key `fallback`"
+  },
+  {
+   "old": "| `rwb.decision-record.DecisionRecorded.v1` | `rwb.decision-record.v1` | Produced by each of the 19 services through its local library; topic and schema owned by P7 rwb-decision | Validates the record of the agent step, appends one `decision_log_entry` per step key and one inbox row in one transaction, and publishes nothing |",
+   "new": "| `rwb.decision.DecisionRecorded.v1` | `rwb.decision-record.v1` | Produced by each of the 19 services through its local library; topic and schema owned by P7 rwb-decision | Validates the record of the agent step, appends one `decision_log_entry` per step key and one inbox row in one transaction, and publishes nothing |"
+  },
+  {
+   "old": "Consumes `rwb.decision-record.DecisionRecorded.v1`, writes the inbox row",
+   "new": "Consumes `rwb.decision.DecisionRecorded.v1`, writes the inbox row"
+  },
+  {
+   "old": "publishes `rwb.decision-record.DecisionRecorded.v1` on `rwb.decision-record.v1` from its outbox",
+   "new": "publishes `rwb.decision.DecisionRecorded.v1` on `rwb.decision-record.v1` from its outbox"
+  },
+  {
+   "old": "publishes `rwb.decision-record.DecisionRecorded.v1` on `rwb.decision-record.v1`, CloudEvents 1.0",
+   "new": "publishes `rwb.decision.DecisionRecorded.v1` on `rwb.decision-record.v1`, CloudEvents 1.0"
+  },
+  {
+   "old": "the schema of its event `rwb.decision-record.DecisionRecorded.v1` is defined",
+   "new": "the schema of its event `rwb.decision.DecisionRecorded.v1` is defined"
+  },
+  {
+   "old": "`rwb.decision-record.DecisionRecorded.v1` on `rwb.decision-record.v1`, CloudEvents 1.0, key caseId",
+   "new": "`rwb.decision.DecisionRecorded.v1` on `rwb.decision-record.v1`, CloudEvents 1.0, key caseId"
+  },
+  {
+   "old": "| TC-TE-013-10 | AC6, BR9, BR15 | NFR | The append forced to fail during a SHADOW step; the step does not act, MSG-P7-003, the ledger at its last entry, an incident |",
+   "new": "| TC-TE-013-10 | AC6, BR9, BR15 | NFR | The append forced to fail during a SHADOW step; the step does not act, MSG-P7-003, the ledger at its last entry, an incident |\n| TC-TE-013-11 | AC8 | Component | 120 entries with 9 fallbacks in the month; the fallback count by agent version and month is 0.0750 |\n| TC-TE-013-12 | §12.7 table boundary (DP-01) | Component | Writes and reads only in schema rwb_decision; no row of another service is read or copied and no foreign key crosses a schema |"
+  },
+  {
+   "old": "the full test is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same test case ID.",
+   "new": "the full test is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same test case ID. TC-TE-013-11 and TC-TE-013-12 are added by this story for AC8 and the table boundary of section 12.7; they carry no legacy ID."
+  },
+  {
+   "old": "The ten test cases of section 16 pass",
+   "new": "The twelve test cases of section 16 pass"
+  },
+  {
+   "old": "| R-UNI-32 | TC-TE-013-01, TC-TE-013-03, TC-TE-013-07 |",
+   "new": "| R-UNI-32 | TC-TE-013-01, TC-TE-013-03, TC-TE-013-07, TC-TE-013-11, TC-TE-013-12 |"
+  },
+  {
+   "old": "| Build status | Not started |",
+   "new": "| Build status | Not started |\n| Size | Not specified in the source documents (DOR-RWB-P7-TE013-APP-16) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-01904",
+   "item": "CG-ALL-7470",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Index column is decided_at, the LDM v9 field; DESC is only the index sort direction. Stated in the migration line."
+  },
+  {
+   "ruling": "R-01905",
+   "item": "CG-ALL-7471",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Expression index is over LDM v9 field actions with key fallback; stated in the migration line."
+  },
+  {
+   "ruling": "R-01906",
+   "item": "CG-ALL-7473",
+   "status": "Not applied",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "No existing story key is given in the sources; naming one would invent a key. Needs the Solution architect to name or create it."
+  },
+  {
+   "ruling": "R-01907",
+   "item": "CG-ALL-7474",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Event type changed to rwb.decision.DecisionRecorded.v1 in all story mentions; topic rwb.decision-record.v1 kept."
+  },
+  {
+   "ruling": "R-06954",
+   "item": "DOR-RWB-P7-TE013-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the section 18 test list with the new TC-TE-013-11 and TC-TE-013-12 rows",
+   "note": "Added TC-TE-013-11 for AC8 and TC-TE-013-12 for the 12.7 boundary; RTM v7 alignment is outside this story."
+  },
+  {
+   "ruling": "R-06955",
+   "item": "DOR-RWB-P7-TE013-APP-14",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Epic design record of RWB-SVC-P7",
+   "change": "Record the signed epic design sign-off for the epic",
+   "note": "No signed epic design exists in the sources; the sign-off belongs in the epic design record."
+  },
+  {
+   "ruling": "R-06956",
+   "item": "DOR-RWB-P7-TE013-APP-16",
+   "status": "Not applied",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Size is set by the squad at refinement and no value exists in the sources. Placeholder Size row added to metadata."
+  },
+  {
+   "ruling": "R-06957",
+   "item": "DOR-RWB-P7-TE013-APP-17",
+   "status": "Not applied",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Dependency RWB-P7-E1073-CON has no story key to name instead in the sources. Needs the Solution architect to resolve."
+  },
+  {
+   "ruling": "R-06958",
+   "item": "DOR-RWB-P7-TE013-APP-21",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P10-TE013-CON",
+   "change": "Publish the contract story RWB-P10-TE013-CON with the DP-20 contract row",
+   "note": "This story names RWB-P10-TE013-CON as its contract dependency; the contract is written in its own story."
+  },
+  {
+   "ruling": "R-06959",
+   "item": "DOR-RWB-P7-TE013-APP-22",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P10-TE013-CON contract fake library",
+   "change": "Record the published fake library version",
+   "note": "No fake library version is recorded as published in the sources; the version belongs to the contract fake."
+  }
+ ]
+}

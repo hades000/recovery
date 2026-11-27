@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| Item | Content |\n|---|---|",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Policy version resource | the step (a LOV-DECISION value), the autonomy mode (a LOV-AUTONOMY value), the policy version label, the approval reference, the model code and version, the output schema reference, `valid_from`, `valid_to` and the status over LOV-CONFIG-STATUS (DF-AGT-001 to DF-AGT-025) |",
+   "new": "| Policy version resource | the step (a LOV-DECISION value), the autonomy mode (a LOV-AUTONOMY value), the policy version label, the approval reference, the model code and version, the output schema reference, `valid_from`, `valid_to` and the status over LOV-CONFIG-STATUS (DF-AGT-001 to DF-AGT-025) | Not specified in the source documents (DOR-RWB-P10-AD020-CON-7) |"
+  },
+  {
+   "old": "| Step scope of the version | the named member of the version that names the decision step it governs, with the key and the fallback of a dedicated column left open (DF-AGT-018; ASM-1010) |",
+   "new": "| Step scope of the version | the named member of the version that names the decision step it governs, with the key and the fallback of a dedicated column left open (DF-AGT-018; ASM-1010) | Not specified in the source documents (DOR-RWB-P10-AD020-CON-7) |"
+  },
+  {
+   "old": "| Agent run resource | the step it ran, the autonomy mode it ran under, the policy version, the model version, the run reference and `decision_log_id` (DF-AGT-036 to DF-AGT-060, especially DF-AGT-043 and DF-AGT-058) |",
+   "new": "| Agent run resource | the step it ran, the autonomy mode it ran under, the policy version, the model version, the run reference and `decision_log_id` (DF-AGT-036 to DF-AGT-060, especially DF-AGT-043 and DF-AGT-058) | Not specified in the source documents (DOR-RWB-P10-AD020-CON-7) |"
+  },
+  {
+   "old": "| Agent output resource | the mode, the step, the policy version, the run reference, the record reference, the recommendation marker and the answer payload as the run stored it (DF-AGT-049) |",
+   "new": "| Agent output resource | the mode, the step, the policy version, the run reference, the record reference, the recommendation marker and the answer payload as the run stored it (DF-AGT-049) | Not specified in the source documents (DOR-RWB-P10-AD020-CON-7) |"
+  },
+  {
+   "old": "| Decision record members | `decision_code` for the step, `recommendation.autonomyMode` and `recommendation.policyVersion` for the level and the version, `agent_version` and `model_version` for the versions, the hash chain from the library (DF-DEC-003, DF-DEC-007, DF-DEC-009, DF-DEC-011, DF-DEC-017, DF-DEC-018) |",
+   "new": "| Decision record members | `decision_code` for the step, `recommendation.autonomyMode` and `recommendation.policyVersion` for the level and the version, `agent_version` and `model_version` for the versions, the hash chain from the library (DF-DEC-003, DF-DEC-007, DF-DEC-009, DF-DEC-011, DF-DEC-017, DF-DEC-018) | Not specified in the source documents (DOR-RWB-P10-AD020-CON-7) |"
+  },
+  {
+   "old": "| Approval reference | the identifier the approval read answers for the version, taken from the `approval` table of rwb-decision and held on the version (ASM-1011) |",
+   "new": "| Approval reference | the identifier the approval read answers for the version, taken from the `approval` table of rwb-decision and held on the version (ASM-1011) | Not specified in the source documents (DOR-RWB-P10-AD020-CON-7) |"
+  },
+  {
+   "old": "No personal data element is declared: the shapes carry identifiers, codes, versions and references.",
+   "new": "No personal data element is declared: the shapes carry identifiers, codes, versions and references.\n\nAssumptions settled for the open values (GAP-0636, GAP-0637, GAP-0638, GAP-0639, GAP-0640, GAP-0641): the step is a named member of the promotion_conditions of the version until a decision_code column is agreed, and the approval reference is a named member of the same jsonb, carried as approval_ref and added as a backward-compatible column whose migration number is taken from the rwb-agent Flyway sequence at build time. A version is in force when its status is APPROVED and the run date is inside its window, with one version per step and date. A run is identified by its step and not by an agent code. The unit of change is a policy version, and the per-decision key is carried in RWB-P10-AD020-APP. The autonomy mode accepts only OFF, SHADOW and L1 until LOV-AUTONOMY is extended by its owner; L2 is then governed by the step-up key RWB-P10-E8004. The approved autonomy level is read from the approval subject and never from approval_level, and the approval instant is taken from updated_at and the approver role from rwb-access. The evidence of a change is agent_policy.evaluation_run_id and the breach is an agent_alert row of type DRIFT. The three read resources gain step, autonomyMode, policyVersion and approvalRef; the decision record carries decision_code with recommendation.autonomyMode and recommendation.policyVersion, and the configuration version is named in the rule-version element of the record. At L1 the agent output carries the recommendation marker and no applied-outcome element. The fakes stub the rwb-valuation route as POST /api/recovery/valuation/v1/cases/{caseId}/route. The three operations of the configuration change are GET and POST /admin/agent-configs and POST /admin/agent-configs/{versionId}/approve; the Arch v5 summary label GET and POST /agent-policies is a summary. The authorise call is made through the gateway-bff route. A 404 means the version id is unknown; a 409 means the version is not LOADED or the caller loaded it; a repeat under the same Idempotency-Key returns the first answer. The kind of a configuration resource is POLICY or PROMPT. The approval answer's element names and the file column set are settled at the wave 4 contract freeze."
+  },
+  {
+   "old": "and the panel that shows the level per step is the monitor story's.",
+   "new": "and the panel that shows the level per step is the monitor story's. The legacy states of SCR-46 are Shadow, live and paused; empty, loading, error and no access are Not specified in the source documents (CG-ALL-2489)."
+  },
+  {
+   "old": "Then the contract adds no message beyond the three legacy messages, and no business value is written in it",
+   "new": "Then the contract adds no message beyond the three legacy messages, and no business value is written in it\n\n  Scenario: AC8 A consumed call that fails or does not answer leaves no level and no record (new, D-RCV-60)\n    Given a consumed call to rwb-decision, rwb-access or the rwb-valuation route output fails or does not answer within the 2 s budget of the gateway-bff route\n    When a run asks for the level of a step while that call is in that state\n    Then the run resolves no level and writes no record, and the failure is returned in the platform error envelope"
+  },
+  {
+   "old": "| TC-P10-AD020-CON-08 | AC7 | Contract | The tables of section 12.7 at their boundary: a row written to agent_policy or agent_run with no added column; a read of decision_log_entry or approval by this service |",
+   "new": "| TC-P10-AD020-CON-08 | AC7 | Contract | The tables of section 12.7 at their boundary: a row written to agent_policy or agent_run with no added column; a read of decision_log_entry or approval by this service |\n| TC-P10-AD020-CON-09 | AC8 | Component | A consumed call that fails: the forced failure of the rwb-decision library stub; a timeout of the rwb-access authorise call; no answer from the rwb-valuation route output |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15268",
+   "item": "DOR-RWB-P10-AD020-CON-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "BR Field ID column added to section 11; each of the six rows reads Not specified in the source documents (DOR-RWB-P10-AD020-CON-7).",
+   "note": "Gap marked as not specified in the source documents for all six rows; the column now exists."
+  },
+  {
+   "ruling": "R-22962",
+   "item": "GAP-0638",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Assumptions paragraph added to section 11: step as promotion_conditions member, approval_ref, APPROVED-in-window rule, one version per step and date, read resources gain four elements.",
+   "note": "Values stated as assumptions; L2 governed by step-up key until LOV-AUTONOMY is extended by its owner."
+  },
+  {
+   "ruling": "R-22963",
+   "item": "GAP-0639",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 assumptions name the four elements, the record members decision_code and recommendation.autonomyMode/policyVersion, the L1 recommendation marker and the rwb-valuation route stub.",
+   "note": "Element names fixed as assumptions; types and lengths left to review with the consumed operations' owners."
+  },
+  {
+   "ruling": "R-22964",
+   "item": "GAP-0636",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 assumptions: autonomy_mode accepts only OFF, SHADOW and L1; per-decision key in RWB-P10-AD020-APP; version is the unit of change; approval instant and approver role fixed.",
+   "note": "File column set is left to the wave 4 contract freeze as stated in section 11."
+  },
+  {
+   "ruling": "R-22965",
+   "item": "GAP-0640",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 assumptions: approval_ref as backward-compatible column with Flyway number at build time; approved level from approval subject; evidence and DRIFT breach sources named.",
+   "note": "Approval element names and the file column set are left to the wave 4 freeze; no level above L1 stored yet."
+  },
+  {
+   "ruling": "R-22966",
+   "item": "GAP-0641",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 assumptions: approval reference element approval_ref; 404 and 409 meanings; repeat under the same Idempotency-Key returns the first answer; authorise call through the gateway-bff route.",
+   "note": "Approval answer element names are left to the wave 4 contract freeze as stated in section 11."
+  },
+  {
+   "ruling": "R-23169",
+   "item": "GAP-0637",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 assumptions: the three /admin/agent-configs operations fixed; Arch v5 summary label recorded as a summary; kind value set POLICY and PROMPT; approval instant and approver role fixed.",
+   "note": "Library JSON member names stay with RWB-PLT-E1027-CON; file column set and message texts left to the wave 4 freeze."
+  },
+  {
+   "ruling": "R-24506",
+   "item": "CG-ALL-2488",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8 (next version)",
+   "change": "Add rows TC-P10-AD020-CON-01 to TC-P10-AD020-CON-07 with Given, When and Then copied from AC1 to AC7 of section 7.",
+   "note": "Story rows exist in section 16; the missing Test Cases rows belong to the next Test Cases version."
+  },
+  {
+   "ruling": "R-24507",
+   "item": "CG-ALL-2489",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 now lists the legacy states Shadow, live and paused and marks empty, loading, error and no access as Not specified in the source documents.",
+   "note": "The specification lacks four states; they are marked as not specified rather than invented."
+  },
+  {
+   "ruling": "R-30316",
+   "item": "NEWAC-RWB-P10-AD020-CON-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC8 added in section 7 (next free number) for a consumed call that fails or does not answer; test row TC-P10-AD020-CON-09 added in section 16.",
+   "note": "Item named AC10; the next free story number is AC8. Proposed test was not specified, so it is written from the consumed calls."
+  }
+ ]
+}

@@ -1,0 +1,85 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E1013-APP",
+ "unit": "u03",
+ "rulings": [
+  "R-21950",
+  "R-21952",
+  "R-21953",
+  "R-24825"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 5
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-21950",
+     "item": "GAP-2573",
+     "status": "Resolved",
+     "section": "12.6",
+     "target": "",
+     "change": "",
+     "note": "12.6 records one Schedule for JOB-15 at 01:30 Asia/Bangkok in rwb-reporting and no Airflow call wired; Arch v5 L2990 job map row JOB-15 (GAP-2573)."
+    },
+    {
+     "ruling": "R-21952",
+     "item": "GAP-0561",
+     "status": "Resolved",
+     "section": "12.6",
+     "target": "",
+     "change": "",
+     "note": "12.6 and the DP-10 bullet of section 13 record the 05:30 rwb-source-data Schedule and its worker, queue, namespace and topics as an operations dependency, not a build dependency (GAP-0561)."
+    },
+    {
+     "ruling": "R-21953",
+     "item": "GAP-2569",
+     "status": "Resolved",
+     "section": "12.3",
+     "target": "",
+     "change": "",
+     "note": "12.3 declares no reporting event and records the conflict: Ownership Map gives rwb-reporting no event row, RWB-ITG-E1013-ITG names rwb.reporting.ReportPublished.v1; DP-09 RWB-PLT-TE006-CON (GAP-2569)."
+    },
+    {
+     "ruling": "R-24825",
+     "item": "CG-ALL-3421",
+     "status": "Resolved",
+     "section": "13",
+     "target": "",
+     "change": "",
+     "note": "Migration stated in the service's DP-15 V0001..Vnnnn sequence; next free number not in any source, written as Not specified in the source documents (CG-ALL-3421). Service Template Spec v1 §3.1."
+    }
+   ],
+   "edits": [
+    {
+     "old": "None. The Quartz trigger of JOB-15 is rwb-reporting's to replace with its own Temporal Schedule; this service holds no job, no Schedule and no Quartz table (DP-10).",
+     "new": "None. The Quartz trigger of JOB-15 is rwb-reporting's to replace with its own Temporal Schedule; this service holds no job, no Schedule and no Quartz table (DP-10).\n\nOne Schedule is registered for JOB-15, in rwb-reporting, at 01:30 Asia/Bangkok; no Airflow call is wired to that run, the bank's Airflow triggering no report extract of this story, and whether any extract trigger returns and what it calls is settled in the batch and scheduling work (GAP-2573; D-RCV-60). The 05:30 late check is a Temporal Schedule of rwb-source-data, and its two workflows and two activities need the rwb-source-data worker, the task queue, the namespace and the topic with its retry and `.dlt` topics registered: that registration stands in the platform workflow and operations stories of the epic, so it is an external or operations dependency of the plan and no build dependency of this slice (GAP-0561; D-RCV-60)."
+    },
+    {
+     "old": "CloudEvents 1.0 envelope, published after the record commits. This story adds no event to `rwb.case.events.v1`: the facts are served on request, not streamed, and no payload carries a case value, an amount or personal data.",
+     "new": "CloudEvents 1.0 envelope, published after the record commits. This story adds no event to `rwb.case.events.v1`: the facts are served on request, not streamed, and no payload carries a case value, an amount or personal data.\n\nNo reporting event is declared. The Ownership Map gives rwb-reporting the topic `rwb.reporting.events.v1` and no event row, while RWB-ITG-E1013-ITG names `rwb.reporting.ReportPublished.v1` on that topic as the freshness signal of its journey and cites this story as the publisher. The topic stays provisioned by the platform, this story publishes nothing on it, and the owner of the reporting read model decides whether a freshness event is published; if it is, that is raised as its own story with the outbox library row RWB-PLT-TE006-CON of DP-09, which is in no pattern set of this key (GAP-2569; D-RCV-60)."
+    },
+    {
+     "old": "- Migration in this story, in the per-service Flyway sequence of DP-15: `V1013_1__case_facts_read.sql` adds the covering index on `recovery_case (entry_date, product_group, route_code, stage_code, queue_id, closed_date)` for the facts read and the index on `reference_version (table_code, valid_from, valid_to)` for the version lookup. It creates no table and adds no column.",
+     "new": "- Migration in this story, in the per-service Flyway sequence of DP-15 (`V0001` to `Vnnnn`, owned by the service): the facts-read migration, whose next free number and file name are Not specified in the source documents (CG-ALL-3421), adds the covering index on `recovery_case (entry_date, product_group, route_code, stage_code, queue_id, closed_date)` for the facts read and the index on `reference_version (table_code, valid_from, valid_to)` for the version lookup. It creates no table and adds no column."
+    },
+    {
+     "old": "- DP-01, DP-13 and DP-15 are the target shape itself: the facts of `rwb_case`, the base `/api/recovery/case/v1` and the migration `V1013_1__case_facts_read.sql`, with no new dependency.",
+     "new": "- DP-01, DP-13 and DP-15 are the target shape itself: the facts of `rwb_case`, the base `/api/recovery/case/v1` and the facts-read migration of the service's own `Vnnnn` sequence, with no new dependency."
+    },
+    {
+     "old": "- DP-10 is a prohibition: no Quartz table, no job and no Schedule here; the 01:30 run is rwb-reporting's Schedule over this read.",
+     "new": "- DP-10 is a prohibition: no Quartz table, no job and no Schedule here; the 01:30 run is rwb-reporting's Schedule over this read (GAP-2573), and the worker, the task queue and the namespace of rwb-source-data are registered by the platform workflow and operations stories as an operations dependency of the plan, not a build dependency of this slice (GAP-0561)."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

@@ -1,0 +1,105 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-S3-E4013-APP",
+ "unit": "u01",
+ "rulings": [
+  "R-07827",
+  "R-19552",
+  "R-19554",
+  "R-19555",
+  "R-19557",
+  "R-23386"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 5
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-07827",
+     "item": "DOR-RWB-S3-E4013-APP-23",
+     "status": "Resolved",
+     "section": "Header",
+     "target": "",
+     "change": "Header now states contract version v1, the /v1 segment of the base path",
+     "note": "v1 is the /v1 segment of the base path in the header (DP-13). No other contract version appears in the sources. Story header."
+    },
+    {
+     "ruling": "R-19552",
+     "item": "DOR-RWB-S3-E4013-APP-11",
+     "status": "Not applied",
+     "section": "17",
+     "target": "",
+     "change": "",
+     "note": "P2 fields are not named in the story or this chunk; classifying them needs the Data Classification v5 field list, which I did not check. Not specified in the source documents (DOR-RWB-S3-E4013-APP-11)."
+    },
+    {
+     "ruling": "R-19554",
+     "item": "DOR-RWB-S3-E4013-APP-18",
+     "status": "Resolved",
+     "section": "19",
+     "target": "",
+     "change": "Section 19 adds open decision DL10 with ASM-2250, ASM-2357, ASM-2377, ASM-2863",
+     "note": "DL10 is the Thai wording of every message (Assumptions Register v1, GAP-1276 row). Open decisions are placed in section 19; section 18 is traceability."
+    },
+    {
+     "ruling": "R-19555",
+     "item": "DOR-RWB-S3-E4013-APP-20",
+     "status": "Resolved",
+     "section": "8",
+     "target": "",
+     "change": "Section 8 names rwb-case as holder of the parameters and reference data (DP-06, DP-07)",
+     "note": "FSD P2 Integration v5, ruling line: parameters and reference data with rwb-case (DP-06, DP-07)."
+    },
+    {
+     "ruling": "R-19557",
+     "item": "DOR-RWB-S3-E4013-APP-4",
+     "status": "Resolved",
+     "section": "7 and 16",
+     "target": "",
+     "change": "Added AC17 to AC26 (one per rule BR1 to BR10) and TC-E4-013-21 to TC-E4-013-30",
+     "note": "AC12 and TC-E4-013-16 covered BR1 to BR10 only in one combined row. Each rule now has its own criterion and test case."
+    },
+    {
+     "ruling": "R-23386",
+     "item": "GAP-2708",
+     "status": "Not applied",
+     "section": "8",
+     "target": "",
+     "change": "",
+     "note": "Window, deadline home, checklist interface, agent binding, state map, event set and message ID are in no source; publishes stay open. Not specified in the source documents (GAP-2708)."
+    }
+   ],
+   "edits": [
+    {
+     "old": "the officer's two operations sit on base `/api/recovery/guarantee/v1` (DP-13) and are reached through the gateway-bff composite route (DP-19);",
+     "new": "the officer's two operations sit on base `/api/recovery/guarantee/v1` (DP-13) and are reached through the gateway-bff composite route (DP-19); the contract version built against is v1, the version segment of that base path;"
+    },
+    {
+     "old": "**Where each rule lives in the target.** BR1 is why the rules, the window and the service level are inputs of the step;",
+     "new": "**Where each rule lives in the target.** BR1 is why the rules, the window and the service level are inputs of the step; the parameters and reference data they read are held by rwb-case (DP-06, DP-07);"
+    },
+    {
+     "old": "Then the change is refused and nothing changes",
+     "new": "Then the change is refused and nothing changes\n\n  Scenario: AC17 Business rule BR1 (section 8) (new, D-RCV-60)\n    Given the prepare branch runs\n    When it reads a rule, the preparation window, the service level, a list or a message text\n    Then each is read from a rule row or a governed row with a version and no such value is held in code\n\n  Scenario: AC18 Business rule BR2 (section 8) (new, D-RCV-60)\n    Given a guarantee found on the TCG scheme with a scheme code\n    When the default conditions are met\n    Then the claim deadline timer starts from that date and the claim moves to DEADLINE_TIMER_RUNNING\n\n  Scenario: AC19 Business rule BR3 (section 8) (new, D-RCV-60)\n    Given the scheme default conditions are not satisfied\n    When the branch evaluates the guarantee\n    Then no claim arises, the guarantee is held and the claim moves to NOT_ELIGIBLE\n\n  Scenario: AC20 Business rule BR4 (section 8) (new, D-RCV-60)\n    Given days to claim_deadline are at or inside the preparation window\n    When the branch prepares the claim\n    Then the claim is assembled against the scheme checklist and moves to CLAIM_PREPARATION inside the 5 working day service level\n\n  Scenario: AC21 Business rule BR5 (section 8) (new, D-RCV-60)\n    Given the claim is prepared\n    When the claim row is written\n    Then it is one write on guarantee_claim with claim_type, claim_deadline, claimed_amount and status PREPARING, filed_at and paid_amount are null, and the claim status is derived from the workflow state through versioned reference data\n\n  Scenario: AC22 Business rule BR6 (section 8) (new, D-RCV-60)\n    Given the claim write and its decision record\n    When the decision record cannot be written\n    Then nothing changes and MSG-P7-003 is shown\n\n  Scenario: AC23 Business rule BR7 (section 8) (new, D-RCV-60)\n    Given the prepare branch runs\n    When the outcome is reported to the parent\n    Then no case status, case task or case timer is written here, and the stage reports the outcome, rule version and service level\n\n  Scenario: AC24 Business rule BR8 (section 8) (new, D-RCV-60)\n    Given the scheme checklist is assembled\n    When it resolves documents\n    Then it uses case facts and the document references the scheme requires, and no document row, blob reference or document content is owned or read directly\n\n  Scenario: AC25 Business rule BR9 (section 8) (new, D-RCV-60)\n    Given the preparation runs\n    When a value is missing or the checklist is incomplete\n    Then the preparation runs unattended under the service identity and rwb-case raises the officer task\n\n  Scenario: AC26 Business rule BR10 (section 8) (new, D-RCV-60)\n    Given an operation of the contract\n    When a caller invokes it\n    Then the capability area \"Treatment and offer\" is checked, with right C on create and right U on update"
+    },
+    {
+     "old": "| TC-E4-013-20 | AC16 | Component | A case status change the model does not allow |",
+     "new": "| TC-E4-013-20 | AC16 | Component | A case status change the model does not allow |\n| TC-E4-013-21 | AC17 | Component | Business rule BR1 of section 8 |\n| TC-E4-013-22 | AC18 | Component | Business rule BR2 of section 8 |\n| TC-E4-013-23 | AC19 | Component | Business rule BR3 of section 8 |\n| TC-E4-013-24 | AC20 | Component | Business rule BR4 of section 8 |\n| TC-E4-013-25 | AC21 | Component | Business rule BR5 of section 8 |\n| TC-E4-013-26 | AC22 | Component | Business rule BR6 of section 8 |\n| TC-E4-013-27 | AC23 | Component | Business rule BR7 of section 8 |\n| TC-E4-013-28 | AC24 | Component | Business rule BR8 of section 8 |\n| TC-E4-013-29 | AC25 | Component | Business rule BR9 of section 8 |\n| TC-E4-013-30 | AC26 | Component | Business rule BR10 of section 8 |"
+    },
+    {
+     "old": "- The real cross-service proof against the live owners and the `-ITG` copies of the legacy cases: RWB-ITG-W3.",
+     "new": "- The real cross-service proof against the live owners and the `-ITG` copies of the legacy cases: RWB-ITG-W3.\n- Open decision DL10 (the Thai wording of every message): still open; the Thai text of the messages of this story follows DL10; assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

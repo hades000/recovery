@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| Ready to start | After RWB-P10-E1058-APP |",
+   "new": "| Ready to start | After RWB-P10-E1058-APP |\n| Dependency status | Not done: RWB-P10-E1058-APP and RWB-P10-TE013-OPS (2 of 12 named dependencies) |"
+  },
+  {
+   "old": "| External dependencies | RWB-P10-TE013-OPS |",
+   "new": "| External dependencies | RWB-P10-TE013-OPS |\n| Open decisions | DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863); DL11 (ASM-0553, ASM-0703, ASM-1051, ASM-1104); each decision is still open and carries its assumption |"
+  },
+  {
+   "old": "| X7 | A role without the right reads agent runs | Refused with 403 | MSG-P4-002 | TC-TE-013-09 |",
+   "new": "| X7 | A role without the right reads agent runs | Refused with 403 | MSG-P4-002 | AC9, TC-TE-013-09 |"
+  },
+  {
+   "old": "| X8 | The step operation is called with no step key or no rule result | Refused with 422 and no run is started; proved by RWB-P10-TE013-CON | MSG-GEN-001 | TC-P10-TE013-CON-01 |",
+   "new": "| X8 | The step operation is called with no step key or no rule result | Refused with 422 and no run is started; proved by RWB-P10-TE013-CON | MSG-GEN-001 | AC10, TC-TE-013-12 |"
+  },
+  {
+   "old": "X7 is not reached by a criterion of this story: it is proved by TC-TE-013-09 at Contract level.",
+   "new": "X7 is reached by AC9 and proved by TC-TE-013-09 at Contract level. This story has no screen, so the empty, loading, error and no-access states of SCR-46 (P3) are not owned here; the no-access refusal is X7."
+  },
+  {
+   "old": "    Then the decision log entry holds agent version null and fallback false",
+   "new": "    Then the decision log entry holds agent version null and fallback false\n\n  Scenario: AC9 A role without the right reads agent runs (exception X7)\n    Given role \"RW-CASEOWN\" has no right to read agent runs\n    When it calls GET /api/recovery/agent/v1/admin/agent-runs through the route\n    Then the system refuses the call with 403 and MSG-P4-002\n\n  Scenario: AC10 The step operation has no step key or no rule result (exception X8)\n    Given the calling step sends no step key or no rule result\n    When it calls the step operation\n    Then the system refuses the call with 422 and MSG-GEN-001\n    Then no agent run is started"
+  },
+  {
+   "old": "The approval of a policy version, its mode and its timeout is the Rules and parameters A right of RWB-P10-E1058-APP; no delegation of authority level applies here.",
+   "new": "The approval of a policy version, its mode and its timeout is the Rules and parameters A right of RWB-P10-E1058-APP; no delegation of authority level applies here. Each operation of this story is authorised through the rwb-access authorise check (DP-08) before it runs."
+  },
+  {
+   "old": "| TC-TE-013-09 | Access | Contract |",
+   "new": "| TC-TE-013-09 | Access, AC9 | Contract |"
+  },
+  {
+   "old": "| TC-TE-013-10 | Principle 5 | NFR | Decision record write forced to fail during a step in SHADOW mode; the step does not act; MSG-P7-003 |",
+   "new": "| TC-TE-013-10 | Principle 5 | NFR | Decision record write forced to fail during a step in SHADOW mode; the step does not act; MSG-P7-003 |\n| TC-TE-013-11 | Tables 12.7 (boundary, ASM-3438) | Component | Reads and writes of agent_policy, agent_run, agent_prompt and the idempotency envelope in `rwb_agent` only; no foreign key across schema |\n| TC-TE-013-12 | AC10, X8 | Contract | Step operation called with no step key or no rule result; refused with 422 and MSG-GEN-001; no run started |\n| TC-TE-013-13 | BR6, BR7 | Component | Client runs under the calling identity; no calling step reads agent_run, agent_policy or a record table in another schema |\n| TC-TE-013-14 | BR8 | Contract | Step operation is one hop under /api/recovery/agent/v1 with the 60 second policy timeout as budget; other hops keep 2 seconds |\n| TC-TE-013-15 | BR9, BR10 | Component | Calling step writes its record through the local library in its own transaction; mode, timeout and fallback rule read from the approved policy row |\n| TC-TE-013-16 | BR11 | Component | Link written once per run; a different record for the same run refused with 409 |\n| TC-TE-013-17 | BR12 | Component | Mode, run status and product group values read from the rwb-case reference-data contract |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09987",
+   "item": "CG-ALL-2911",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add an Activities row ApplyAutonomyMode on task queue rwb-agent, or name a catalogued activity",
+   "note": "Activity is missing from the catalog Activities sheet; the story keeps the name. No story edit."
+  },
+  {
+   "ruling": "R-09988",
+   "item": "CG-ALL-2912",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add an Activities row LinkDecisionRecord on task queue rwb-agent, or name a catalogued activity",
+   "note": "Activity is missing from the catalog Activities sheet; the story keeps the name. No story edit."
+  },
+  {
+   "ruling": "R-15524",
+   "item": "DOR-RWB-P10-TE013-APP-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Section 5 now states the story has no screen; SCR-46 states are owned by P3 and the no-access state is X7."
+  },
+  {
+   "ruling": "R-15525",
+   "item": "DOR-RWB-P10-TE013-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "RTM v7 and P3 story section 18",
+   "change": "Align the P3 section 18 test lists with RTM v7",
+   "note": "Boundary test TC-TE-013-11 and rows 13 to 17 added here. The P3 test-list mismatch belongs to P3."
+  },
+  {
+   "ruling": "R-15526",
+   "item": "DOR-RWB-P10-TE013-APP-15",
+   "status": "Not applied",
+   "section": "2",
+   "target": "",
+   "change": "",
+   "note": "The INVEST Small statement is not in the supplied story parts, so there is no exact old text to edit."
+  },
+  {
+   "ruling": "R-15527",
+   "item": "DOR-RWB-P10-TE013-APP-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Dependency status row added: 2 of 12 named dependencies are not done."
+  },
+  {
+   "ruling": "R-15528",
+   "item": "DOR-RWB-P10-TE013-APP-18",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Open decisions row added for DL10 and DL11 with their assumptions; each decision is still open."
+  },
+  {
+   "ruling": "R-15529",
+   "item": "DOR-RWB-P10-TE013-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 (X7) and AC10 (X8) added with Covered by updated; TC-TE-013-09 and TC-TE-013-12 cover them."
+  },
+  {
+   "ruling": "R-15530",
+   "item": "DOR-RWB-P10-TE013-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Rows TC-TE-013-13 to 17 cover BR6 to BR12, so the seven uncovered rules now have test cases."
+  },
+  {
+   "ruling": "R-15531",
+   "item": "DOR-RWB-P10-TE013-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 now states that each operation is authorised through the rwb-access authorise check (DP-08)."
+  }
+ ]
+}

@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "| Legacy | Owner after the split | This story |\n|---|---|---|",
+   "new": "| Legacy | Feature | L3 process | Owner after the split | This story |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| RWB-E1-021 AC1 to AC14 |",
+   "new": "| RWB-E1-021 AC1 to AC14 | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) |"
+  },
+  {
+   "old": "| RWB-E1-021 TC-E1-021-01 to -14, -16 |",
+   "new": "| RWB-E1-021 TC-E1-021-01 to -14, -16 | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) |"
+  },
+  {
+   "old": "| RWB-E1-021 TC-E1-021-15 (access) |",
+   "new": "| RWB-E1-021 TC-E1-021-15 (access) | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) |"
+  },
+  {
+   "old": "| RWB-E1-021 manual transfer API, legal hold (BR11, legacy X2, X9) |",
+   "new": "| RWB-E1-021 manual transfer API, legal hold (BR11, legacy X2, X9) | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1021-APP-2) |"
+  },
+  {
+   "old": "| Flow step 12, TC-E1-021-11 |",
+   "new": "| AC10, TC-E1-021-11 |"
+  },
+  {
+   "old": "| Section 17 |",
+   "new": "| AC11, Section 17 |"
+  },
+  {
+   "old": "    Then the case keeps its queue and owner\n```",
+   "new": "    Then the case keeps its queue and owner\n\n  Scenario: AC10 Same event ID arrives twice (new, D-RCV-60)\n    Given the rwb-case contract mock returns case \"RW-2026-000301\" in \"IN_PROGRESS\" in queue \"TDR-BKK-CO\" with owner \"U-21\"\n    When the same event ID of \"DeviationRaised\" arrives twice for the case\n    Then the second arrival is ignored and counted\n    Then one transfer request leaves the service\n\n  Scenario: AC11 Boundary test refuses a direct read (new, D-RCV-60)\n    Given the boundary test runs against the service build\n    When a statement reaches a rwb_case row, a v_ace_* view or another service's schema\n    Then the grant refuses the statement and the boundary test fails the build\n\n  Scenario: AC12 Package read from rwb-decision and evaluated here (new, D-RCV-60; BR3)\n    Given the rwb-decision contract mock returns the TRANSFER package at version \"TRF-2026.11\"\n    When \"DeviationRaised\" arrives for case \"RW-2026-000301\"\n    Then the package is read from rwb-decision and evaluated by the embedded kit of this service\n    Then the rule ID and the target queue come from the package in force\n\n  Scenario: AC13 Move requested from rwb-case, no owned row written (new, D-RCV-60; BR8)\n    Given the rwb-case contract mock returns the transfer accepted with owner \"U-31\", the member with the lowest load\n    When rule \"TRF-004\" moves a case to queue \"DEV-HANDLER\" on \"DeviationRaised\" for case \"RW-2026-000301\"\n    Then one transfer request is sent to rwb-case\n    Then this service writes no recovery_case, queue or assignment row\n\n  Scenario: AC14 Transfer keeps the status and both clocks (new, D-RCV-60; BR9)\n    Given the rwb-case contract mock returns case \"RW-2026-000301\" in \"IN_PROGRESS\" in queue \"TDR-BKK-CO\" with owner \"U-21\"\n    When rule \"TRF-004\" moves the case to queue \"DEV-HANDLER\" for case \"RW-2026-000301\"\n    Then the case keeps status \"IN_PROGRESS\" and both clocks\n    Then only the queue, the team and the owner change\n\n  Scenario: AC15 No person data in the record, a log or an event (new, D-RCV-60; BR10)\n    Given the rwb-case contract mock returns case \"RW-2026-000301\" in \"IN_PROGRESS\" in queue \"TDR-BKK-CO\" with owner \"U-21\"\n    When rule \"TRF-004\" moves the case to queue \"DEV-HANDLER\" for case \"RW-2026-000301\"\n    Then the decision record, the logs and the published events carry no person name, contact value, address or identity number\n```"
+  },
+  {
+   "old": "The nine criteria are new",
+   "new": "The fifteen criteria are new"
+  },
+  {
+   "old": "The four rows are copied character for character from FSD S8 A2.2.3.1, A2.4.3.1 and the DEVIATION machine of TSD S8 T4.",
+   "new": "The four rows are copied character for character from FSD S8 A2.2.3.1, A2.4.3.1 and the DEVIATION machine of TSD S8 T4. They carry BR IDs BR11 (R-DEV-01), BR12 (R-DEV-02), BR13 (R-DEV-03) and BR14 (R-DEV-18), in row order."
+  },
+  {
+   "old": "Legacy BR2; R-DEV-01 |",
+   "new": "Legacy BR2; R-DEV-01; GAP-0346: the route-decided fact is read as rwb.case.CaseStateChanged.v1 and asserted in wave 1; the S1 RouteDecided announcement is asserted when rwb-valuation lands in wave 3 |"
+  },
+  {
+   "old": "DP-04; ADR-017; legacy §17 |",
+   "new": "DP-04; ADR-017; legacy §17; GAP-3077: split confirmed, deviation triggers evaluated here and the manual and case-trigger paths stay in P3 |"
+  },
+  {
+   "old": "(8) Prove AC1 to AC9 on the fakes and run the boundary test.",
+   "new": "(8) Prove AC1 to AC15 on the fakes and run the boundary test."
+  },
+  {
+   "old": "**Feature flag.** `rwb.s8.transfer`.",
+   "new": "**Consumed operations.** The six consumed rows have no published operation name (GAP-3076). The clients and their fakes are built from the documented use until each owner publishes its name, and a published name replaces the placeholder in a minor contract version with no behaviour change.\n\n**Feature flag.** `rwb.s8.transfer`."
+  },
+  {
+   "old": "AC1 to AC9 pass at component and contract level",
+   "new": "AC1 to AC15 pass at component and contract level"
+  },
+  {
+   "old": "no `rwb_case` statement and no `v_ace_*` read",
+   "new": "no statement against another service's schema and no `v_ace_*` read"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21083",
+   "item": "DOR-RWB-S8-E1021-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Added Feature and L3 process columns to the §18 traceability table; values not specified in the source documents."
+  },
+  {
+   "ruling": "R-21084",
+   "item": "DOR-RWB-S8-E1021-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Done-when no longer names rwb_case; it refers to another service's schema instead."
+  },
+  {
+   "ruling": "R-21085",
+   "item": "DOR-RWB-S8-E1021-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "X4 now covered by AC10 with TC-E1-021-11; X10 by AC11 and Section 17. §16 rows for AC10 and AC11 are not in this chunk."
+  },
+  {
+   "ruling": "R-21086",
+   "item": "DOR-RWB-S8-E1021-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "R-DEV rows carry BR11 to BR14; AC12 to AC15 cover BR3, BR8, BR9, BR10. §16 test rows for AC10 to AC15 not in this chunk."
+  },
+  {
+   "ruling": "R-21087",
+   "item": "DOR-RWB-S8-E1021-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9",
+   "change": "Add entity decision_record or record it as platform-library scope; story §11 already marks it as a library table.",
+   "note": "decision_record is a platform library table in the story, not an LDM entity."
+  },
+  {
+   "ruling": "R-21088",
+   "item": "DOR-RWB-S8-E1021-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 wording for MSG-P3-027 and MSG-P1-001 is not in this chunk; it cannot be copied, so §14 is unchanged."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Business Requirements Document",
+   "change": "State in section 8.2 that the business-epic wave is kept over the service wave; delivery lead confirms the wave per story at build sequencing.",
+   "note": "Rule belongs in the BRD; story wave kept as the business-epic wave."
+  },
+  {
+   "ruling": "R-22009",
+   "item": "GAP-0346",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR2 records the assumption: rwb.case.CaseStateChanged.v1 asserted in wave 1; S1 RouteDecided asserted in wave 3."
+  },
+  {
+   "ruling": "R-22010",
+   "item": "GAP-3076",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Assumption recorded in §13: placeholders until owners publish names; a published name replaces them in a minor contract version."
+  },
+  {
+   "ruling": "R-22011",
+   "item": "GAP-3077",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Architect split confirmed; BR3 records GAP-3077 and the split of evaluation between S8 and P3."
+  }
+ ]
+}

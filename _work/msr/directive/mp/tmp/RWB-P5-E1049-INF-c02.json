@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| Item | Content |\n|---|---|",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Engine capacity | 500 pages an hour with headroom for the morning burst (Arch v5 slide 46); `OCR_TIMEOUT_SECONDS` = 120; concurrency accepted per endpoint Not specified in the source documents (GAP-1000; ASM-1782) |",
+   "new": "| Engine capacity | 500 pages an hour with headroom for the morning burst (Arch v5 slide 46); `OCR_TIMEOUT_SECONDS` = 120; concurrency accepted per endpoint Not specified in the source documents (GAP-1000; ASM-1782) | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| Engine queue | A bounded admission depth, reported as a metric and consumed by the worker scaler; the depth value is an environment value |",
+   "new": "| Engine queue | A bounded admission depth, reported as a metric and consumed by the worker scaler; the depth value Not specified in the source documents (GAP-1000), set as an environment value at the capacity review | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |\n| Engine identity | Engine product, endpoint, engine version and per-request page limit Not specified in the source documents (GAP-0997); service identity SY-OCR; business-hours window Not specified in the source documents (GAP-0997) | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| Worker pool | Replica range, KEDA Temporal scaler on the `rwb-document` backlog, floor 0, `OCR_WORKERS` = 4 concurrent `ocr` activities per pod |",
+   "new": "| Worker pool | Replica range, KEDA Temporal scaler on the `rwb-document` backlog, floor 0, `OCR_WORKERS` = 4 as the concurrency cap per pod (concurrent `ocr` activities), read as data from document_hub_parameter; the platform scales replicas on queue depth | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| Containers | The intake container for the file to read and the text container for `ocr/{intakeId}.json`; access by the workload identity only; no public access |",
+   "new": "| Containers | The intake container for the file to read and the text container for `ocr/{intakeId}.json`; access by the workload identity only; no public access; container quota Not specified in the source documents (GAP-1000) | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| Storage sizing | About 860,000 documents in 2027 (NFR-004); about 5.8 million documents and 2.8 TB by the end of 2031 (NFR-069); the OCR estate at 2.8 TB on Blob (Arch v5 slide 6); bytes per page and per item Not specified in the source documents (GAP-1000; ASM-1782) |",
+   "new": "| Storage sizing | About 860,000 documents in 2027 (NFR-004); about 5.8 million documents and 2.8 TB by the end of 2031 (NFR-069); the OCR estate at 2.8 TB on Blob (Arch v5 slide 6); bytes per page and per item Not specified in the source documents (GAP-1000; ASM-1782) | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| Topic | `rwb.document.events.v1`, 12 partitions, replication factor 3, 7-day retention, key caseId, three retry topics and one `.dlt` topic, provisioned by RWB-PLT-N002-INF |",
+   "new": "| Topic | `rwb.document.events.v1`, 12 partitions, replication factor 3, 7-day retention, key caseId, three retry topics and one `.dlt` topic, provisioned by RWB-PLT-N002-INF | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| Secrets | The engine credential, the client certificate, the storage access through the workload identity, the Kafka client credential and the Temporal mTLS material, all from the platform key store |",
+   "new": "| Secrets | The engine credential, the client certificate, the storage access through the workload identity, the Kafka client credential and the Temporal mTLS material, all from the platform key store | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| Metrics | Engine latency, engine error rate, engine queue depth, worker backlog, scale events, container write failures, topic publish failures |",
+   "new": "| Metrics | Engine latency, engine error rate, engine queue depth, worker backlog, scale events, container write failures, topic publish failures | Not specified in the source documents (DOR-RWB-P5-E1049-INF-7) |"
+  },
+  {
+   "old": "| BR8 | No business value lives in the infrastructure: the threshold, the workers, the timeout and the attempts are parameters read by the app story, and this story only sizes the capacity they imply | Template and Rules §R7.2 s17 |",
+   "new": "| BR8 | No business value lives in the infrastructure: the threshold, the workers, the timeout and the attempts are parameters held in document_hub_parameter and read by the app story, and this story only sizes the capacity they imply | Template and Rules §R7.2 s17 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17254",
+   "item": "DOR-RWB-P5-E1049-INF-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Covering AC and TC IDs sit in sections 7 and 16, outside this chunk; a Covered by column cannot be mapped without them."
+  },
+  {
+   "ruling": "R-17255",
+   "item": "DOR-RWB-P5-E1049-INF-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "BR Field ID column added to section 11 with the not-specified marker on all 8 rows; no BR Field ID appears in the sources."
+  },
+  {
+   "ruling": "R-22139",
+   "item": "GAP-1590",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "03 Requirements and specifications/PRD/Recovery Workbench PRD P5 rwb-document v1.md",
+   "change": "State intake as an event-started DocumentIntakeWorkflow with KEDA workers on queue rwb-document; keep the 15-minute cadence as a schedule that raises the intake; state JOB-17 as a Temporal Schedule on the 1st Sunday of the month.",
+   "note": "Architecture v5 wins. Story section 11 worker row already states the KEDA Temporal scaler."
+  },
+  {
+   "ruling": "R-22140",
+   "item": "GAP-0998",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P5-E2026-CON",
+   "change": "Add rwb.document.OcrCompleted.v1 (eight-field payload, no personal data) to the service event catalogue and the two-event count of rwb-document.",
+   "note": "Recommended option is to add the event, since the contract baseline already declares it. No story text names an event."
+  },
+  {
+   "ruling": "R-22141",
+   "item": "GAP-0362",
+   "status": "Resolved",
+   "section": "8, 11",
+   "target": "",
+   "change": "",
+   "note": "Worker row reads OCR_WORKERS as concurrency cap from document_hub_parameter; BR8 names the parameter home. The 60-minute target sits outside this chunk."
+  },
+  {
+   "ruling": "R-22142",
+   "item": "GAP-0997",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Engine identity row added. Engine product, endpoint, version, page limit and business-hours window are marked Not specified (GAP-0997) until the entry check."
+  },
+  {
+   "ruling": "R-22143",
+   "item": "GAP-0999",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P5 T-A.1 and T3.1 (technical specification P5) and the message catalogue",
+   "change": "Add the IntakeItem field list and the GET .../ocr-status path with derived JSON property names, and the workflow input and output, after sign-off by the four consumers; add the not-found message ID to the message catalogue.",
+   "note": "No IntakeItem field list or message ID appears in this chunk; the change belongs to the TSD and the catalogue."
+  },
+  {
+   "ruling": "R-22144",
+   "item": "GAP-1000",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Engine queue depth and container quota marked Not specified (GAP-1000) and set at the capacity review; bytes per page already marked."
+  },
+  {
+   "ruling": "R-22145",
+   "item": "GAP-1204",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P6 v2 (T-A.2 API-P6-002 and T3.2 LOV-NOTICE) and the ACE notification path baseline",
+   "change": "Publish the rescan notice template row (code, version, language, body, channel); extend LOV-NOTICE with the value the business owner chooses; baseline the Notice answer and the notification-path request and result; set retry values and the state list as data rows.",
+   "note": "The rescan notice sits in section 13, outside this chunk. Placeholders stay until each value is published."
+  },
+  {
+   "ruling": "R-22146",
+   "item": "GAP-1207",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P6 v2 (T3.2 LOV-NOTICE)",
+   "change": "Add one value for an operational notice to the case owner, named by the business owner, as a reference row; set DF-LEG-018 notice_type from it.",
+   "note": "Story criteria assert message, case, document and dispatch facts, not notice type. No story edit needed."
+  }
+ ]
+}

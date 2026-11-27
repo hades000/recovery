@@ -1,0 +1,93 @@
+{
+ "edits": [
+  {
+   "old": "    Then one sale outcome and one answer are written and the timed-out attempt writes no second row",
+   "new": "    Then one sale outcome and one answer are written and the timed-out attempt writes no second row\n\n  Scenario: AC11 A consumed call fails or does not answer (X8)\n    Given a consumed contract call for case \"RC-2026-000593\" fails or does not answer within the budget\n    When the call is made\n    Then the activity retries on the workflow schedule and the answer is 503 in the platform envelope\n\n  Scenario: AC12 A status change the model does not allow is refused (X3)\n    Given the case \"RC-2026-000593\" is in state ASSET_SOLD with a shortfall_amount above 0\n    When R-DIS-55 is evaluated\n    Then the rule does not fire, nothing is written, and the state is reported"
+  },
+  {
+   "old": "    Then the rule does not fire, nothing is written, and the state is reported",
+   "new": "    Then the rule does not fire, nothing is written, and the state is reported\n\n  Scenario: AC13 Boundary refuses a statement outside the owned schema and logs it (X9)\n    Given a statement reaches a `v_ace_*` view, `recovery_case` or a foreign schema\n    When the boundary test runs\n    Then the grant refuses it, the build fails and the pipeline log records the refusal\n\n  Scenario: AC14 Unset residual route writes no route (X10)\n    Given the case \"RC-2026-000593\" is in state SHORTFALL_RAISED and residual_route is unset\n    When the residual is evaluated\n    Then no route is written by this story and MSG-GEN-001 is shown on the task\n\n  Scenario: AC15 Each business rule of section 8 holds (BR1 to BR10)\n    Given the rwb-payment contract mock returns ProceedsMatched for case \"RC-2026-000593\" with its proceeds fact\n    When the sale outcome is processed\n    Then the outcomes of BR1 to BR10 hold as their rows in section 8 state\n\n  Scenario: AC16 Error answers of the provided operations (401, 403, 404)\n    Given a request is made to each provided operation of section 12.1\n    When the request has no valid login, a role without the Asset and disposal right, or an unknown path\n    Then the answer is 401, 403 or 404 respectively, in the platform envelope, and a 403 carries MSG-P4-002\n\n  Scenario: AC17 A redelivered consumed event is counted and writes once (X5; BR9)\n    Given ProceedsMatched for case \"RC-2026-000593\" is redelivered with the same idempotency key\n    When the redelivery is processed\n    Then one sale outcome and one answer are written, the redelivery is counted, and no event is published"
+  },
+  {
+   "old": "| TC-E4-030-16 | AC10 (no legacy tag) | Component | Case `RC-2026-000593` with the applyProceeds activity timed out and retried; one sale outcome and one answer on the fakes |",
+   "new": "| TC-E4-030-16 | AC10 (no legacy tag) | Component | Case `RC-2026-000593` with the applyProceeds activity timed out and retried; one sale outcome and one answer on the fakes |\n| TC-E4-030-17 | AC11 (X8) | Component | Case `RC-2026-000593` with a consumed contract call that fails or does not answer; retry on the workflow schedule and 503 on the fakes |\n| TC-E4-030-18 | AC12 (X3) | Component | Case `RC-2026-000593` at `ASSET_SOLD` with a shortfall_amount above 0; R-DIS-55 does not fire, nothing written, state reported |\n| TC-E4-030-19 | AC13 (X9; BR7, BR10) | Component | A statement on a v_ace_* view, recovery_case or a foreign schema; grant refuses it, build fails, pipeline log records it |\n| TC-E4-030-20 | AC14 (X10; BR5) | Component | Case `RC-2026-000593` at `SHORTFALL_RAISED` with residual_route unset; no route written and MSG-GEN-001 on the task |\n| TC-E4-030-21 | AC15 (BR1 to BR10) | Component | Case `RC-2026-000593` with a posted sale; each rule row of section 8 holds on the fakes |\n| TC-E4-030-22 | AC16 (401, 403, 404) | Component | Each provided operation of section 12.1 called with no login, with a role lacking the right, and with an unknown path; 401, 403 with MSG-P4-002, 404 |\n| TC-E4-030-23 | AC17 (X5; BR9) | Component | ProceedsMatched for case `RC-2026-000593` redelivered with the same idempotency key; one outcome, one answer, repeat counted |"
+  },
+  {
+   "old": "| X9 | A statement reaches a `v_ace_*` view, `recovery_case` or a foreign schema | The grant refuses it and the boundary test fails the build | None (pipeline log) | AC5, TC-E4-030-09 |",
+   "new": "| X9 | A statement reaches a `v_ace_*` view, `recovery_case` or a foreign schema | The grant refuses it and the boundary test fails the build | None (pipeline log) | AC5, AC13, TC-E4-030-09, TC-E4-030-19 |"
+  },
+  {
+   "old": "| X10 | The residual routes nowhere because `residual_route` is unset | The case is held in `UNMATCHED_EXCEPTION` by R-DIS-71, which is the adjacent step and not owned here | MSG-GEN-001 on the task | AC6, TC-E4-030-10 |",
+   "new": "| X10 | The residual routes nowhere because `residual_route` is unset | The case is held in `UNMATCHED_EXCEPTION` by R-DIS-71, which is the adjacent step and not owned here | MSG-GEN-001 on the task | AC6, AC14, TC-E4-030-10, TC-E4-030-20 |"
+  },
+  {
+   "old": "- ACE data only through the owner's contract: no `v_ace_*` grant and no ACE read (DP-05, BR7).",
+   "new": "- ACE data only through the owner's contract: no `v_ace_*` grant and no ACE read (DP-05, BR7; AC5, AC13)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32740",
+   "item": "NEWAC-RWB-S5-E4030-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 (X8 failed call, retry and 503) in section 7 and TC-E4-030-17 in section 16",
+   "note": "Failed-call criterion added from X8. Test data taken from the story fixture; proposed test was unspecified in source."
+  },
+  {
+   "ruling": "R-32741",
+   "item": "NEWAC-RWB-S5-E4030-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 (X3 disallowed transition refused) in section 7 and TC-E4-030-18 in section 16",
+   "note": "Disallowed-transition criterion added from X3: R-DIS-55 does not fire from ASSET_SOLD. Proposed test was unspecified in source."
+  },
+  {
+   "ruling": "R-32742",
+   "item": "NEWAC-RWB-S5-E4030-APP-AC5",
+   "status": "Resolved",
+   "section": "5, 17",
+   "target": "",
+   "change": "Added AC13 and TC-E4-030-19; X9 row in section 5 and guardrail in section 17 now cite AC13",
+   "note": "Boundary refusal criterion added for X9 with pipeline-log outcome. Proposed test was unspecified in source."
+  },
+  {
+   "ruling": "R-32743",
+   "item": "NEWAC-RWB-S5-E4030-APP-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC14 and TC-E4-030-20; X10 row in section 5 now cites AC14 and TC-E4-030-20",
+   "note": "Unset residual_route criterion added for X10: no route written, MSG-GEN-001 on the task. Proposed test was unspecified in source."
+  },
+  {
+   "ruling": "R-32744",
+   "item": "NEWAC-RWB-S5-E4030-APP-AC7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added AC15 covering BR1 to BR10 in section 7 and TC-E4-030-21 in section 16",
+   "note": "One criterion added covering section 8 rules BR1 to BR10 via their rows. Proposed test was unspecified in source."
+  },
+  {
+   "ruling": "R-32745",
+   "item": "NEWAC-RWB-S5-E4030-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC16 (401, 403, 404 of provided operations) in section 7 and TC-E4-030-22 in section 16",
+   "note": "Error-status criterion added naming 401, 403 with MSG-P4-002, and 404. Proposed test was unspecified in source."
+  },
+  {
+   "ruling": "R-32746",
+   "item": "NEWAC-RWB-S5-E4030-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC17 (redelivered event counted, writes once) in section 7 and TC-E4-030-23 in section 16",
+   "note": "Redelivery criterion added from X5 and BR9 with the same idempotency key. Proposed test was unspecified in source."
+  }
+ ]
+}

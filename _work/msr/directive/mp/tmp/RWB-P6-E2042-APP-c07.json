@@ -1,0 +1,89 @@
+{
+ "edits": [
+  {
+   "old": "| BR2 | Every notice decision names the package code, the version label, the checksum and the rule ID that decided it, written on the local decision record in the same transaction as the notice row | R-UNI-38; DP-03; Temporal and Drools design slide 16 |",
+   "new": "| BR2 | Every notice decision names the package code, the version label, the checksum and the rule ID that decided it, written on the local decision record in the same transaction as the notice row; the field IDs that carry the package code and the checksum are confirmed by the decision-record owner when the record is published, and no column is added to `notice`, `template` or `merge_field` (GAP-2397) | R-UNI-38; DP-03; Temporal and Drools design slide 16 |"
+  },
+  {
+   "old": "| BR12 | Every notice operation declares its capability area and right and a caller without it is refused; no role row is held in `rwb_comms` | TSD P6 v2 T6.1; RWB-P4-E2042-APP |",
+   "new": "| BR12 | Every notice operation declares its capability area and right and a caller without it is refused; no role row is held in `rwb_comms` | TSD P6 v2 T6.1; RWB-P4-E2042-APP |\n| BR13 | The UNIVERSAL package (R-UNI-01 to 50) is evaluated in this service from its own local copy of the same approved version as the other packages; its authoring, scenarios and approval are rwb-decision's (`RWB-P7-E2042-APP`) | GAP-2034; Rules Engine Design v3 section 2; Temporal and Drools design slide 13 |"
+  },
+  {
+   "old": "    Then the 93-table count of the legacy criterion is not asserted here, because it is the monolith schema's and RWB-P3-E2042-APP's",
+   "new": "    Then the 93-table count of the legacy criterion is not asserted here, because it is the monolith schema's and RWB-P3-E2042-APP's\n\n  Scenario: AC7 Each business rule of section 8 is traced to a criterion or a test (new, readiness review)\n    Given the rules BR1 to BR13 of section 8 and their rows in section 7 and section 16\n    When the traceability check of the build runs\n    Then every rule BR1 to BR13 has at least one criterion of section 7 or one test row of section 16\n    Then a rule with no criterion and no test fails the build\n    Then a rule that is an architecture constraint, BR4, BR10 or BR11, is proved by the architecture test or the schema check of this service\n\n  Scenario: AC8 A retried or timed-out EvaluateRules activity creates at most one notice row for the same decision (new, readiness review)\n    Given notice \"N-0101\" is being decided under version \"RES-2026.12\" and the EvaluateRules activity of the notice path is started for it\n    When the activity is retried after a timeout\n    Then the retry reads the same package code, version label and checksum as the first attempt\n    Then at most one notice row exists for notice \"N-0101\" after the retry\n    Then a timed-out attempt that wrote no notice row leaves no notice and dispatches nothing for it\n    Then the retry adds no second item to the dispatch run\n\n  Scenario: AC9 A consumed call that fails or does not answer creates no notice and dispatches nothing (new, readiness review)\n    Given the rwb-decision version list call fails or does not answer\n    When a notice of case \"RW-2026-000777\" is requested under version \"RES-2026.12\"\n    Then no notice row is written and nothing is dispatched\n    Then the decision record names no package version that the call did not return\n    Then the caller is returned the failure and is not returned a version"
+  },
+  {
+   "old": "The six criteria are new under D-RCV-60 and each tests only a deliverable of this story.",
+   "new": "The six criteria are new under D-RCV-60, AC7 to AC9 are added at the readiness review, and each tests only a deliverable of this story."
+  },
+  {
+   "old": "| TC-E2-042-09 | Not specified in the source documents (DOR-RWB-P6-E2042-APP-12) | Component | Boundary values of each table of 12.7 (ASM-3438) |",
+   "new": "| TC-E2-042-09 | Not specified in the source documents (DOR-RWB-P6-E2042-APP-12) | Component | Boundary values of each table of 12.7 (ASM-3438) |\n| TC-E2-042-10 | AC7 | Component | Section 8 rules BR1 to BR13 and their rows in sections 7 and 16 |\n| TC-E2-042-11 | AC8 | Component | EvaluateRules started for \"N-0101\" under \"RES-2026.12\" and retried after a timeout |\n| TC-E2-042-12 | AC9 | Component | rwb-decision version list call failed or not answered; notice of \"RW-2026-000777\" requested |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28871",
+   "item": "GAP-2034",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added BR13: UNIVERSAL evaluated in this service from its own local copy of the approved version; authoring, scenarios and approval in rwb-decision.",
+   "note": "UNIVERSAL ownership now stated in BR13 with the rwb-decision split. Traced by AC7 and TC-E2-042-10."
+  },
+  {
+   "ruling": "R-28872",
+   "item": "GAP-2397",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR2 states the pin sits on the DP-03 decision record; no column added to notice, template or merge_field.",
+   "note": "Pin stays on the decision record. Field IDs for package code and checksum await the decision-record owner's confirmation at publish."
+  },
+  {
+   "ruling": "R-28873",
+   "item": "GAP-1296",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Metadata kept as written. Section 3 text already carries the eleven DP-added rows and the Day-1 rule; no edit needed."
+  },
+  {
+   "ruling": "R-28874",
+   "item": "GAP-2398",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 text already carries the eleven DP rows with Ready to start Day 1. Sections 13 and 18 are not in this chunk, so unchanged here."
+  },
+  {
+   "ruling": "R-31326",
+   "item": "NEWAC-RWB-P6-E2042-APP-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC7 traceability scenario in section 7 and TC-E2-042-10 in section 16.",
+   "note": "Proposed test was unspecified; AC7 traces BR1 to BR13 to a criterion or test, with architecture rules proved by architecture or schema check."
+  },
+  {
+   "ruling": "R-31327",
+   "item": "NEWAC-RWB-P6-E2042-APP-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC8 for a retried or timed-out EvaluateRules activity in section 7 and TC-E2-042-11 in section 16.",
+   "note": "Proposed test was unspecified; AC8 gives at most one notice row and no second dispatch item, with no invented timeout value."
+  },
+  {
+   "ruling": "R-31328",
+   "item": "NEWAC-RWB-P6-E2042-APP-AC9",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC9 for a failed or unanswered consumed call in section 7 and TC-E2-042-12 in section 16.",
+   "note": "Proposed test was unspecified; AC9 writes no notice, dispatches nothing and returns no version the call did not give."
+  }
+ ]
+}

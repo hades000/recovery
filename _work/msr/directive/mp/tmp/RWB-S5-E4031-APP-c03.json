@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "**Database and migrations.** No Flyway file. The three tables arrive with the DB story, and the record and the idempotency key are library objects created in `rwb_asset` by the library's migration (DP-03). No column is added for the pool, the price reference, the approval reference or the instruction reference (GAP-2954; ASM-4853).",
+   "new": "**Database and migrations.** No Flyway file. The three tables arrive with the DB story, and the record and the idempotency key are library objects created in `rwb_asset` by the library's migration (DP-03). No column is added for the pool, the price reference, the approval reference or the instruction reference (GAP-2954; ASM-4853). This story owns `rwb_asset` only: `rwb_case`, `rwb_partner`, `rwb_decision` and `rwb_payment` are other owners' schemas, and this story writes to none of them. The transfer record has no table of its own, and the pool, the transfer-price template version and the committee-approval reference have no column; the defaults of ASM-B-S5-05-E4031-1 are kept in the RWB-S5-E4031-CON baseline, and the names are confirmed with S9, P3 and P7 before the baseline is tagged (GAP-1916)."
+  },
+  {
+   "old": "| X8 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `partner_instruction` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR3, BR5 |",
+   "new": "| X8 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `partner_instruction` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC4, Section 17, BR3, BR5 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 A component reaches a forbidden read (boundary, legacy none)\n    Given the rwb-asset build is in SIT with its grants\n    When a statement reads a `v_ace_*` view, a `recovery_case` row, a `partner_instruction` row or another service's schema\n    Then the grant refuses the statement\n    Then the boundary test fails the build and nothing is released"
+  },
+  {
+   "old": "The rights are the rows of TSD S5 T6.1 and the roles of FSD S5 A2.22.3.3, and nothing wider.",
+   "new": "The rights are the rows of TSD S5 T6.1 and the roles of FSD S5 A2.22.3.3, and nothing wider. Each REST operation calls the rwb-access authorise check for its capability area and right before any read or write."
+  },
+  {
+   "old": "The two platform rows, `RWB-PLT-E1027-CON` and `RWB-PLT-N001-CON`, are the ones the plan's H row already carries.",
+   "new": "The two platform rows, `RWB-PLT-E1027-CON` and `RWB-PLT-N001-CON`, are the ones the plan's H row already carries. The three transfer references (pool, price version, approval) are identifiers with the placeholder; the rwb-decision approval and the rwb-case move are consumed rows with their placeholders, and this story declares no approval operation and no event. This story provides no operation for the transfer: the instruction is carried on the partner activity and the case move on the rwb-case row of section 12, and the legacy valuations and listings POST endpoints are other steps' operations. Each consumed row is declared with its owner, its call type and its budget, and its operation and element names carry the placeholder until the owner publishes them."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20482",
+   "item": "DOR-RWB-S5-E4031-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Named the other owners' schemas and stated that this story writes only rwb_asset.",
+   "note": "Section 13 now names rwb_case, rwb_partner, rwb_decision and rwb_payment as other owners' schemas that this story does not write."
+  },
+  {
+   "ruling": "R-23546",
+   "item": "GAP-1916",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Kept the ASM-B-S5-05-E4031-1 defaults in the RWB-S5-E4031-CON baseline and confirmed names with S9, P3 and P7 before tagging.",
+   "note": "Recommended option taken; the Ownership Map raise is only needed if the reading is not accepted."
+  },
+  {
+   "ruling": "R-20483",
+   "item": "DOR-RWB-S5-E4031-APP-3",
+   "status": "Not applied",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC4 for the X8 boundary and linked X8 to it.",
+   "note": "AC4 and the X8 link are added; its section 16 test row is not in this chunk, so the item is not complete."
+  },
+  {
+   "ruling": "R-20484",
+   "item": "DOR-RWB-S5-E4031-APP-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "Needs new criteria and test rows for BR1, BR2, BR4 to BR11 and a BR ID for R-DIS-59.",
+   "note": "Coverage needs section 16 test rows, which are not in this chunk, and no source gives the rule-to-criterion mapping."
+  },
+  {
+   "ruling": "R-20485",
+   "item": "DOR-RWB-S5-E4031-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add the role SY-DATALOAD to the roles list.",
+   "note": "The story now states the rwb-access authorise check per REST operation in section 10; the role itself lives in the roles document."
+  },
+  {
+   "ruling": "R-20486",
+   "item": "DOR-RWB-S5-E4031-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9",
+   "change": "Add or correct DF-COL-028 and DF-COL-042, and resolve the names holding_status, asset_id and decision_record in LDM v9 or Data Classification v5.",
+   "note": "The ACE reads are already prohibited by BR3; the field IDs and names are not in the story's control."
+  },
+  {
+   "ruling": "R-23547",
+   "item": "GAP-1919",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Declared the three references as identifiers with placeholders; no approval operation and no event; consumed rows kept with placeholders.",
+   "note": "Names are confirmed with S9, P3 and P7 before the baseline is tagged; the story carries the placeholders now."
+  },
+  {
+   "ruling": "R-23548",
+   "item": "GAP-2954",
+   "status": "Resolved",
+   "section": "8, 11, 13",
+   "target": "",
+   "change": "No edit needed: placeholders on the pool, price, approval, instruction names, codes and timer are already carried.",
+   "note": "Sections 8, 11 and 13 already hold the placeholders and the pool, price and approval holding rules; the baseline review fixes names and the timer."
+  },
+  {
+   "ruling": "R-23549",
+   "item": "GAP-2955",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Declared no provided operation; carried the instruction and the case move on the consumed rows; recorded the legacy endpoints as other steps' operations.",
+   "note": "The transfer has no provided operation; the legacy valuations and listings endpoints are recorded as other steps' operations."
+  },
+  {
+   "ruling": "R-23550",
+   "item": "GAP-2959",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Declared each consumed row with owner, call type and budget; placeholders on operation and element names until the owner publishes them.",
+   "note": "Each consumed row is declared with its owner, call type and budget, with placeholders until the owners publish names."
+  }
+ ]
+}

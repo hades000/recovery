@@ -1,0 +1,41 @@
+{
+ "edits": [
+  {
+   "old": "    Then the route path and the deployment topology detail are Not specified in the source documents (GAP-0624; ASM-0923; ASM-0928)",
+   "new": "    Then the route path and the deployment topology detail are Not specified in the source documents (GAP-0624; ASM-0923; ASM-0928)\n\n  Scenario: AC10 The release writes only its own schema and reads other services only through contracts (new, D-RCV-60)\n    Given the release and its reads and writes of other services\n    When its writes and reads are inspected\n    Then it writes only schema rwb_agent and holds no write right on any other schema\n    Then it reads other services only through their contracts, one hop and within the 2 s budget each\n\n  Scenario: AC11 A redelivered consumed event starts no second run (new, D-RCV-60)\n    Given the consumer of rwb.case.events.v1 and a synthetic rwb.case.CaseCreated.v1 event\n    When the same event is delivered a second time\n    Then no second run is started for the case and the event\n    Then the redelivery is recorded as processed and is not reprocessed\n\n  Scenario: AC12 A consumed call that fails or does not answer is counted and its answer is not used (new, D-RCV-60)\n    Given a consumed call to the P3 case read or the P4 authorise call\n    When the call fails or does not answer within 2 s\n    Then the failure is counted on the dashboard as a tool read failure\n    Then no answer from the failed call is used by the run"
+  },
+  {
+   "old": "| TC-P10-E2028-OPS-11 | §12.7, BR8 | NFR | Boundary: the tables of §12.7 are created, read and written only in schema `rwb_agent`, the `rwb_agent` login holds no grant on any other schema, and each table names its owner |",
+   "new": "| TC-P10-E2028-OPS-11 | §12.7, BR8 | NFR | Boundary: the tables of §12.7 are created, read and written only in schema `rwb_agent`, the `rwb_agent` login holds no grant on any other schema, and each table names its owner |\n| TC-P10-E2028-OPS-12 | AC10, BR8 | NFR | The release writes only schema `rwb_agent`, holds no write right on another schema, and reads other services only through their contracts, one hop and within 2 s each |\n| TC-P10-E2028-OPS-13 | AC11 | End to end | A synthetic redelivery of `rwb.case.CaseCreated.v1` for the same case and event ID starts no second run and is recorded as processed |\n| TC-P10-E2028-OPS-14 | AC12 | End to end | A consumed P3 case read or P4 authorise call that fails or does not answer within 2 s is counted as a tool read failure and its answer is not used |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30372",
+   "item": "NEWAC-RWB-P10-E2028-OPS-AC10",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC10 in section 7 covering BR8 and test row TC-P10-E2028-OPS-12 in section 16",
+   "note": "Added AC10 for BR8 (own schema only, reads via contracts, one hop, 2 s) with TC-P10-E2028-OPS-12. Test level NFR chosen to match boundary tests."
+  },
+  {
+   "ruling": "R-30373",
+   "item": "NEWAC-RWB-P10-E2028-OPS-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 for a redelivered rwb.case.CaseCreated.v1 and test row TC-P10-E2028-OPS-13",
+   "note": "Added AC11 for duplicate delivery of the consumed event with TC-P10-E2028-OPS-13. Test level End to end chosen to match the AC4 repeat-event case."
+  },
+  {
+   "ruling": "R-30374",
+   "item": "NEWAC-RWB-P10-E2028-OPS-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 for a failed or unanswered consumed call and test row TC-P10-E2028-OPS-14",
+   "note": "Added AC12 for a failed or unanswered P3 read or P4 authorise call, counted as tool read failure, with TC-P10-E2028-OPS-14. No retry rule added."
+  }
+ ]
+}

@@ -1,0 +1,94 @@
+{
+ "edits": [
+  {
+   "old": "| X11 | The user holds Documents R only | Actions hidden; a direct call gets 403 | MSG-P4-002 | AC14; access test TC-E2-017-14 |",
+   "new": "| X11 | The user holds Documents R only | Actions hidden; a direct call gets 403 | MSG-P4-002 | AC14, AC16; access test TC-E2-017-14 |"
+  },
+  {
+   "old": "- X11 is the authorisation decision of `rwb-access`, consumed as the cached permission decision of the service template; a role without Documents U hides the actions on both screens and a direct call answers 403 with MSG-P4-002.",
+   "new": "- X11 is the authorisation decision of `rwb-access`, consumed as the cached permission decision of the service template; a role without Documents U hides the actions on both screens and a direct call answers 403 with MSG-P4-002. An allowed look or action is recorded with decision code AC-READ and a refusal with AC-DENY."
+  },
+  {
+   "old": "    Then no signature request starts",
+   "new": "    Then no signature request starts\n\n  Scenario: AC16 A user with Documents R only cannot send (exception X11)\n    Given a team manager with role RW-TEAMMGR and scope team \"FCR-BKK\"\n    When the manager calls POST generated-documents/send for \"TRT-0401\"\n    Then the response is 403 with MSG-P4-002\n    Then no document is copied to the write-once container\n\n  Scenario: AC17 A document that does not exist is answered 404\n    Given no document with the requested documentId exists\n    When the officer calls POST /api/recovery/document/v1/documents/{documentId}/regenerate for that documentId\n    Then the response is 404\n    Then no document is created\n\n  Scenario: AC18 A send retried after the signature call does not answer starts one signature request\n    Given the rwb-comms signature contract mock does not answer the signature request for \"TRT-0401\"\n    When the officer chooses Send for signature for the three reviewed drafts of \"TRT-0401\"\n    Then the response is 503 with MSG-GEN-006 naming \"e-signature\"\n    Then the documents stay in state \"REVIEWED\"\n    Then a second send after the service returns completes with one signature request\n\n  Scenario: AC19 A status change the model does not allow is refused (BR7)\n    Given \"DOC-0411\" is in state \"SENT\"\n    When the officer tries to move \"DOC-0411\" back to state \"REVIEWED\"\n    Then the response is 409 with MSG-P5-002\n    Then \"DOC-0411\" stays in state \"SENT\""
+  },
+  {
+   "old": "| TC-E2-017-17 | Section 12.7 tables | Component | Boundary test of each table of section 12.7 (ASM-3438) |",
+   "new": "| TC-E2-017-17 | Section 12.7 tables | Component | Boundary test of each table of section 12.7 (ASM-3438) |\n| TC-E2-017-18 | AC16, X11 | Component | RW-TEAMMGR user (Documents R) calls POST generated-documents/send with three reviewed drafts; refused with MSG-P4-002 |\n| TC-E2-017-19 | AC15, BR9 | End to end | Decision log store refuses writes on a send; nothing copied, documents stay REVIEWED, MSG-P7-003 |\n| TC-E2-017-20 | AC17 | Component | Call to regenerate for a documentId that does not exist; answered 404 |\n| TC-E2-017-21 | AC18, X9 | End to end | rwb-comms stub does not answer the signature request, then ACCEPTED |\n| TC-E2-017-22 | AC19, BR7 | End to end | Document in state SENT; move back to REVIEWED refused with MSG-P5-002 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28785",
+   "item": "GAP-1017",
+   "status": "Not applied",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Section 12 operations, field lists and failure envelope are not in this chunk; the field names and legacy list needed to fix them are not supplied here."
+  },
+  {
+   "ruling": "R-28786",
+   "item": "GAP-0944",
+   "status": "Cross-document",
+   "section": "5",
+   "target": "RWB-PLT-N001-CON",
+   "change": "Publish the composite route field list for SCR-14 and SCR-30 with gateway-bff contract; add the allowed-action decision code AC-READ to the decision-code list of the ledger. Story side: section 5 X11 note now states AC-READ and AC-DENY use.",
+   "note": "Story states AC-READ for allowed actions and AC-DENY for refusals; field list and ledger code are outside this story."
+  },
+  {
+   "ruling": "R-29083",
+   "item": "GAP-3234",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "Story dependencies v5 (Dependency classes sheet)",
+   "change": "Record that platform technical-enabler work is team-type work, tracked and never blocking; keep X on the ten rows.",
+   "note": "Reading belongs on the Dependency classes sheet; no story edit needed."
+  },
+  {
+   "ruling": "R-31199",
+   "item": "NEWAC-RWB-P5-E2017-APP-AC16",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for Documents R only on send and TC-E2-017-18; X11 Covered by now lists AC16."
+  },
+  {
+   "ruling": "R-31200",
+   "item": "NEWAC-RWB-P5-E2017-APP-AC17",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "BR9 already has criterion AC15; added TC-E2-017-19 covering AC15 and BR9. No new criterion needed."
+  },
+  {
+   "ruling": "R-31201",
+   "item": "NEWAC-RWB-P5-E2017-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for 404 on regenerate and TC-E2-017-20. 403 is covered by AC14 and AC16."
+  },
+  {
+   "ruling": "R-31202",
+   "item": "NEWAC-RWB-P5-E2017-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 for a retried send after a signature call that does not answer, with TC-E2-017-21; treated as the X9 failure."
+  },
+  {
+   "ruling": "R-31203",
+   "item": "NEWAC-RWB-P5-E2017-APP-AC20",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC19 for refused move of a SENT document back to REVIEWED, with TC-E2-017-22."
+  }
+ ]
+}

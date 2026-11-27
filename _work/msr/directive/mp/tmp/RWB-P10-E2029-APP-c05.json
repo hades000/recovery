@@ -1,0 +1,101 @@
+{
+ "edits": [
+  {
+   "old": "SCR-46 Agent monitor shows SCREENING as live for MORTGAGE/BKK and shadow elsewhere.",
+   "new": "SCR-46 Agent monitor shows SCREENING as live for MORTGAGE/BKK and shadow elsewhere; its empty, loading, error and no access states are Not specified in the source documents (CG-ALL-2725)."
+  },
+  {
+   "old": "the legacy criteria name no window and this story sets none.",
+   "new": "the legacy criteria name no window and this story sets none. No deviation, screening or queue volume is stated for this module: the only quantities are the evaluation samples of 200 and 500 cases, and no source states the deviations open at go-live, the screening runs a night, the deviation queue size or the rule evaluations per screen. The platform figures are 23,600 open cases at go-live and 3,110 new a month (NFR-001), about 370 staff online of 914 (NFR-002) and 300 milliseconds per rule evaluation (NFR-011); the 05:00 to 07:00 morning run includes rwb-deviation (Architecture v5 slide 33). No volume target is set here; the real deviation rate is measured in the shadow run before the wave 2 volume test is sized."
+  },
+  {
+   "old": "| X8 | A role without Case record U confirms or rejects | Refused with 403 | MSG-P4-002 | AC11 |",
+   "new": "| X8 | A role without Case record U confirms or rejects | Refused with 403 | MSG-P4-002 | AC11, AC12 |"
+  },
+  {
+   "old": "| X10 | The raise of rwb-deviation answers 503 or does not answer inside 2 s on a confirmation | The confirmation is refused with 503, no `agent_feedback` row is stored and the owner retries; rwb-agent raises no deviation of its own | None to a user | AC2 |",
+   "new": "| X10 | The raise of rwb-deviation answers 503 or does not answer inside 2 s on a confirmation | The confirmation is refused with 503, no `agent_feedback` row is stored and the owner retries; rwb-agent raises no deviation of its own | None to a user | AC2, AC16 |"
+  },
+  {
+   "old": "    When a user without Case record U (\"RW-PHONECOL\") confirms X1\n    Then the system refuses the request with 403 and MSG-P4-002",
+   "new": "    When a user without Case record U (\"RW-PHONECOL\") confirms X1\n    Then the system refuses the request with 403 and MSG-P4-002\n\n  Scenario: AC12 A role without Case record U rejects (new in this story; X8 reject path)\n    Given the agent proposes X1 on case \"RW-2027-000801\"\n    When a user without Case record U (\"RW-PHONECOL\") rejects X1 with reason \"Customer answered on 2027-01-25\"\n    Then the system refuses the request with 403 and MSG-P4-002"
+  },
+  {
+   "old": "    When a user without Case record U (\"RW-PHONECOL\") rejects X1 with reason \"Customer answered on 2027-01-25\"\n    Then the system refuses the request with 403 and MSG-P4-002",
+   "new": "    When a user without Case record U (\"RW-PHONECOL\") rejects X1 with reason \"Customer answered on 2027-01-25\"\n    Then the system refuses the request with 403 and MSG-P4-002\n\n  Scenario: AC13 Boundary rules of the service (new in this story; BR8 to BR13)\n    Given the rwb-case contract mock returns case \"RW-2027-000801\" with product group MORTGAGE, region BKK and status \"In progress\"\n    When the agent runs\n    Then the mode is resolved from the approved policy row of rwb_agent and the case facts read through the rwb-case contract\n    Then the rejection decision record is written by the local library in the same transaction as the feedback and published on rwb.decision-record.v1\n    Then the collateral appraisal date of an X7 proposal is read through rwb-source-data or the v_ace_* view and never from an ACE table\n    Then the floor, the promotion condition and the segment values are read from the rwb-case parameters with their version\n    Then every read of another service is one hop with a 2 s client budget\n    Then the panel is reached through the gateway-bff route and no screen calls the service directly"
+  },
+  {
+   "old": "    Then the panel is reached through the gateway-bff route and no screen calls the service directly",
+   "new": "    Then the panel is reached through the gateway-bff route and no screen calls the service directly\n\n  Scenario: AC14 Error answers of the provided operations (new in this story; 401, 403, 404)\n    Given no session is presented to GET /api/recovery/agent/v1/cases/{caseId}/agent-outputs\n    When the panel reads the agent outputs\n    Then the system answers 401 and returns no output\n    Given the caller has no Case record U\n    When the caller posts a verdict to POST /api/recovery/agent/v1/agent-runs/{runId}/feedback\n    Then the system answers 403 and MSG-P4-002\n    Given run \"{runId}\" does not exist\n    When the caller posts a verdict to POST /api/recovery/agent/v1/agent-runs/{runId}/feedback\n    Then the system answers 404 and stores no agent_feedback row\n\n  Scenario: AC15 Replay of a write with the same idempotency key (new in this story)\n    Given the owner confirms X1 on case \"RW-2027-000801\" with an idempotency key\n    When the same confirmation is replayed with the same idempotency key\n    Then the system returns the outcome of the first request and raises no second deviation\n    Then no second agent_feedback row exists\n\n  Scenario: AC16 Retry and timeout of a call to rwb-deviation (new in this story; 2 s budget)\n    Given the rwb-deviation contract mock does not answer inside 2 s on a confirmation of X1\n    When the owner confirms X1 on case \"RW-2027-000801\"\n    Then the system refuses the confirmation with 503, stores no agent_feedback row and raises no deviation\n    Then the owner retries the confirmation as a new request"
+  },
+  {
+   "old": "| TC-E2-029-13 | 12.7 tables (ASM-3438) | Boundary | Tables of section 12.7 read by rwb-agent; no read of another service's table |",
+   "new": "| TC-E2-029-13 | 12.7 tables (ASM-3438) | Boundary | Tables of section 12.7 read by rwb-agent; no read of another service's table |\n| TC-E2-029-14 | AC12, Access | Contract | RW-PHONECOL rejects X1; refused with 403 and MSG-P4-002 |\n| TC-E2-029-15 | AC13, BR8, BR9, BR10, BR11, BR12, BR13 | Boundary | Not specified in the source documents (NEWAC-RWB-P10-E2029-APP-AC12) |\n| TC-E2-029-16 | AC14, Access | Contract | Request without a session; caller without Case record U; run ID that does not exist; answers 401, 403, 404 |\n| TC-E2-029-17 | AC15, BR4 | Component | Not specified in the source documents (NEWAC-RWB-P10-E2029-APP-AC14) |\n| TC-E2-029-18 | AC16, BR12 | NFR | rwb-deviation mock silent beyond 2 s on a confirmation of X1 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-24588",
+   "item": "CG-ALL-2725",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "SCR-46 empty, loading, error and no access states now stated as Not specified in the source documents (CG-ALL-2725) in section 15",
+   "note": "Screen Specifications v1 lacks these states, so they are marked Not specified rather than invented."
+  },
+  {
+   "ruling": "R-28642",
+   "item": "GAP-1833",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Section 7 paragraph now states the evaluation samples of 200 and 500, the NFR-001, NFR-002, NFR-011 and slide 33 platform figures, asserts no module volume, and defers the volume target to the shadow run",
+   "note": "No module volume is set; the real deviation rate is measured in the shadow run before the wave 2 volume test."
+  },
+  {
+   "ruling": "R-30375",
+   "item": "NEWAC-RWB-P10-E2029-APP-AC11",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "New AC12 (reject path, X8) added to section 7; TC-E2-029-14 added to section 16; X8 Covered by now AC11, AC12",
+   "note": "Assigned AC12 as the next free AC number; the reject path is covered by its own test row."
+  },
+  {
+   "ruling": "R-30376",
+   "item": "NEWAC-RWB-P10-E2029-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC13 boundary criterion for BR8 to BR13 added to section 7; TC-E2-029-15 Boundary added to section 16",
+   "note": "Assigned AC13 as the next free number; the architecture rules are proved as a boundary test."
+  },
+  {
+   "ruling": "R-30377",
+   "item": "NEWAC-RWB-P10-E2029-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC14 covering 401, 403 and 404 answers added to section 7; TC-E2-029-16 Contract added to section 16",
+   "note": "Assigned AC14 as the next free number; 403 keeps MSG-P4-002 from the legacy set."
+  },
+  {
+   "ruling": "R-30378",
+   "item": "NEWAC-RWB-P10-E2029-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC15 replay criterion added to section 7; TC-E2-029-17 Component added to section 16",
+   "note": "Assigned AC15 as the next free number; the idempotency key value is not specified and is left generic."
+  },
+  {
+   "ruling": "R-30379",
+   "item": "NEWAC-RWB-P10-E2029-APP-AC15",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "New AC16 retry and timeout criterion added to section 7; TC-E2-029-18 NFR added to section 16; X10 Covered by now AC2, AC16",
+   "note": "Assigned AC16 as the next free number; it reuses the 2 s budget and 503 refusal already in X10."
+  }
+ ]
+}

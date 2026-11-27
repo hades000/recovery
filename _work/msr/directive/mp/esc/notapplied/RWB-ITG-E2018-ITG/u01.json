@@ -1,0 +1,93 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E2018-ITG",
+ "unit": "u01",
+ "rulings": [
+  "R-03776",
+  "R-14305",
+  "R-22526",
+  "R-22530",
+  "R-22535",
+  "R-22536"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 2
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-03776",
+     "item": "DOR-RWB-ITG-E2018-ITG-22",
+     "status": "Not applied",
+     "section": "12.8",
+     "target": "",
+     "change": "",
+     "note": "No published fake library version found: searched 22 Microservice Realignment and the E2018 and PLT service story files for fake library and version; the DoR review calls it a missing record."
+    },
+    {
+     "ruling": "R-14305",
+     "item": "DOR-RWB-ITG-E2018-ITG-10",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "States taken from Screen inventory and navigation v2, Common states (md export), and Screen Specifications v1 (SCR-09, SCR-14, SCR-30 access and states; MSG-P4-002)."
+    },
+    {
+     "ruling": "R-22526",
+     "item": "GAP-0402",
+     "status": "Not applied",
+     "section": "3",
+     "target": "",
+     "change": "",
+     "note": "EasyApp test tenant and route, harness pack, seeding and evidence format not found (searched *.md for EasyApp test, sandbox, UAT). Story already marks them Not specified."
+    },
+    {
+     "ruling": "R-22530",
+     "item": "GAP-1596",
+     "status": "Resolved",
+     "section": "12.7",
+     "target": "",
+     "change": "",
+     "note": "Ownership and status read path added; found in RWB-P5-E2018-APP (list operation, signature_request) and RWB-P6-E2018-APP (BR10, API-P6-010)."
+    },
+    {
+     "ruling": "R-22535",
+     "item": "GAP-2701",
+     "status": "Resolved",
+     "section": "12.7",
+     "target": "",
+     "change": "",
+     "note": "Three-way owner split and reconciliation added; the two event names found in RWB-S2-E2018-APP."
+    },
+    {
+     "ruling": "R-22536",
+     "item": "GAP-3182",
+     "status": "Resolved",
+     "section": "12.7",
+     "target": "",
+     "change": "",
+     "note": "Table and migration stated as P5's; RWB-P5-E2018-APP section 13 already holds V2018_1__signature_request.sql in rwb_document."
+    }
+   ],
+   "edits": [
+    {
+     "old": "SCR-14 Treatment record (states Draft; submitted; approved; booked; broken): in state approved, while the offer is with the customer, the officer sees Send for signature and the request list with status. Empty, loading, error and no access states: Not specified in the source documents (CG-ALL-684). SCR-30 Case documents shows the signed copy linked to the generated agreement. Loading state as Screen Specifications v1 gives it; empty, error and no access states: Not specified in the source documents (CG-ALL-685). SCR-09 Exception queue lists held signing results. Loading state as Screen Specifications v1 gives it; empty, error and no access states: Not specified in the source documents (CG-ALL-683). The customer sees EasyApp only.",
+     "new": "SCR-14 Treatment record (states Draft; submitted; approved; booked; broken): in state approved, while the offer is with the customer, the officer sees Send for signature and the request list with status. SCR-30 Case documents (states Loading; list; upload) shows the signed copy linked to the generated agreement. SCR-09 Exception queue (states Loading; list) lists held signing results. The customer sees EasyApp only.\n\nSCR-09, SCR-14 and SCR-30 handle these states as follows (Screen inventory and navigation v2, Common states; the wording comes from the error and message standard). The harness builds none of them.\n\n| State | How it shows on SCR-09, SCR-14 and SCR-30 |\n|---|---|\n| Loading | Skeleton rows while data arrives; no spinner over the whole page |\n| Empty | A plain sentence saying there is nothing to show, and the action to take if one applies |\n| Error | The message from the error and message standard next to the field or at the top |\n| No access | Access is checked on every request; an action outside the role's permission is refused with MSG-P4-002, shown as in the Error state |"
+    },
+    {
+     "old": "None. The harness owns no table, creates no schema and reads no service's tables (DP-01).",
+     "new": "None. The harness owns no table, creates no schema and reads no service's tables (DP-01).\n\nOwnership of the signature facts the journey asserts (Architecture v5 slides 16 and 41; Ownership Map ruling):\n\n- P5 rwb-document owns `signature_request`, its statuses and the signed version, including the migration `V2018_1__signature_request.sql` in the `rwb_document` sequence (RWB-P5-E2018-APP).\n- P6 rwb-comms owns the signature basis check and the circuit: it creates the request through the rwb-document contract, receives the result and calls rwb-treatment. It holds no signature table.\n- S2 rwb-treatment owns the signature record of its treatment, the offer validity and the closure of the signature window.\n- Request status read path: the stored status is rwb-document's, listed by `GET /api/recovery/document/v1/cases/{caseId}/signature-requests`; the harness reads it through the rwb-comms operation `GET /api/recovery/comms/v1/treatments/{treatmentId}/signature-requests`.\n- The three services are reconciled through their published operations and the events `rwb.treatment.SignatureRecorded.v1` and `rwb.treatment.SignatureWindowClosed.v1` on `rwb.treatment.events.v1`, never through a shared table."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

@@ -1,0 +1,63 @@
+{
+ "edits": [
+  {
+   "old": "| X3 | Consent for the postal channel is withdrawn | A statutory notice is still sent | None | Owned by RWB-ITG-E2021-ITG (legacy AC5) |",
+   "new": "| X3 | Consent for the postal channel is withdrawn | A statutory notice is still sent | None | AC14 (legacy AC5 is owned by RWB-ITG-E2021-ITG) |"
+  },
+  {
+   "old": "    Then the response is status 422 with MSG-GEN-001 naming \"notice type\"",
+   "new": "    Then the response is status 422 with MSG-GEN-001 naming \"notice type\"\n\n  # AC14 to AC18 are added by this story and have no legacy origin.\n\n  Scenario: AC14 Postal consent withdrawn, statutory notice still sent (X3 of section 5)\n    Given case \"RC-2026-000321\" has consent for the postal channel withdrawn\n    Given notice \"N-0101\" is a notice of type \"DEMAND\" in the statutory notice list\n    When the dispatch workflow runs on 2026-12-14\n    Then notice \"N-0101\" is not held for the withdrawn consent and is written to the WIN file\n\n  Scenario: AC15 Architecture constraints hold (BR11 to BR19)\n    Given the notice, its dispatch file reference and its proof dates are stored\n    When the dispatch workflow and the proof-window step run\n    Then the rows are written and read in rwb_comms only and no other service's table is read\n    Then the state change and its outbox row are written in one transaction\n    Then the dispatch run and the proof-window step run as a Temporal Schedule and a workflow\n    Then the eligible states, proof window and statutory notice types are read from rwb-case reference data\n    Then the dispatch file and every event carry a document reference, a barcode and dates and no name, address or account number\n\n  Scenario: AC16 Error answers 401 and 403 of the provided operations\n    Given \"LIT-0101\" sends POST /cases/RC-2026-000321/notices without credentials\n    Then the response is status 401 with message Not specified in the source documents (NEWAC-RWB-P6-E2021-APP-AC16)\n    Given \"RW-CASEOWN\" sends POST /cases/RC-2026-000321/notices\n    Then the response is status 403 with MSG-P4-002\n\n  Scenario: AC17 Activity retry and timeout\n    Given a cross-service call of the decision check takes longer than its 2 s budget\n    When the dispatch workflow runs on 2026-12-14\n    Then notice \"N-0101\" stays \"Approved\" and is not in the WIN file\n    Then the activity retry count is Not specified in the source documents (NEWAC-RWB-P6-E2021-APP-AC17)\n\n  Scenario: AC18 Status change the model does not allow is refused\n    Given notice \"N-0101\" is \"Unserved\"\n    When a status change to a state the notice model does not allow is requested\n    Then the change is refused and notice \"N-0101\" stays \"Unserved\"\n    Then the refusal reason is Not specified in the source documents (NEWAC-RWB-P6-E2021-APP-AC18)"
+  },
+  {
+   "old": "| TC-E2-021-25 | BR19 | Component | Dispatch file and events carry document reference, barcode and dates; no name, address or account number |",
+   "new": "| TC-E2-021-25 | BR19 | Component | Dispatch file and events carry document reference, barcode and dates; no name, address or account number |\n| TC-E2-021-26 | AC14, BR4 | Component | Postal consent WITHDRAWN, DEMAND notice; statutory notice still sent |\n| TC-E2-021-27 | AC15, BR11 to BR19 | Component | Guardrail and boundary check; evidence in TC-E2-021-17 to TC-E2-021-25 |\n| TC-E2-021-28 | AC16 | Component | 401 without credentials; 403 with RW-CASEOWN on POST /cases/{caseId}/notices |\n| TC-E2-021-29 | AC17, BR14 | NFR | Cross-service call past its 2 s budget; activity retry and timeout |\n| TC-E2-021-30 | AC18 | Component | Status change not allowed by the notice model is refused |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31309",
+   "item": "NEWAC-RWB-P6-E2021-APP-AC14",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 scenario for X3 in section 7, X3 Covered by now AC14, and TC-E2-021-26 in section 16."
+  },
+  {
+   "ruling": "R-31310",
+   "item": "NEWAC-RWB-P6-E2021-APP-AC15",
+   "status": "Resolved",
+   "section": "8, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 in section 7 covering BR11 to BR19, with TC-E2-021-27 in section 16 pointing to the existing TC-17 to TC-25 evidence."
+  },
+  {
+   "ruling": "R-31311",
+   "item": "NEWAC-RWB-P6-E2021-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for 401 and 403 with MSG-P4-002 as the 403 message; 401 message not specified; TC-E2-021-28 added."
+  },
+  {
+   "ruling": "R-31312",
+   "item": "NEWAC-RWB-P6-E2021-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for 2 s budget timeout with no allow; retry count not specified in source; TC-E2-021-29 added."
+  },
+  {
+   "ruling": "R-31313",
+   "item": "NEWAC-RWB-P6-E2021-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 for a refused disallowed status change; refusal reason not specified in source; TC-E2-021-30 added."
+  }
+ ]
+}

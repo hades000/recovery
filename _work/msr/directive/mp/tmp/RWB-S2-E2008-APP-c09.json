@@ -1,0 +1,97 @@
+{
+ "edits": [
+  {
+   "old": "    Given the rwb-source-data contract fake returns no payment on account \"A-0555\" between 2026-12-05 and 2026-12-15",
+   "new": "    Given the rwb-source-data contract fake (DP-01, DP-05) returns no payment on account \"A-0555\" between 2026-12-05 and 2026-12-15"
+  },
+  {
+   "old": "| X5 | The parameters or the reference-data read does not answer inside the budget, or its breaker is open | Nothing is written; the activity retries on the workflow policy of 1 s initial interval, back-off 2, 10 attempts | MSG-GEN-006 | AC8 |",
+   "new": "| X5 | The parameters or the reference-data read does not answer inside the budget, or its breaker is open | Nothing is written; the activity retries on the workflow policy of 1 s initial interval, back-off 2, 10 attempts | MSG-GEN-006 | AC8, AC12 |"
+  },
+  {
+   "old": "| X6 | A component, a statement or a test reaches a payment, proceeds, rule, case or timer table | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | AC9 |",
+   "new": "| X6 | A component, a statement or a test reaches a payment, proceeds, rule, case or timer table | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | AC9, AC13 |"
+  },
+  {
+   "old": "    Then the next due date and the installment are derived from first_due_date, installments, installment_amount and installments_paid, and no frequency, amount or date is a constant of this build",
+   "new": "    Then the next due date and the installment are derived from first_due_date, installments, installment_amount and installments_paid, and no frequency, amount or date is a constant of this build\n\n  Scenario: AC12 The parameters or the reference-data breaker is open and nothing is written (new, D-RCV-60)\n    Given the rwb-case parameters and reference-data breaker is open for case \"RC-2026-000555\"\n    When TreatmentWorkflow consumes the proceedsMatched of AC1\n    Then no column of treatment \"T-0701\" changes and no decision record is written\n    Then the step answers MSG-GEN-006 and the activity retries on the workflow policy of 1 s initial interval, back-off 2, 10 attempts\n\n  Scenario: AC13 A component that reaches a payment, proceeds, rule, case or timer table fails the build (new, D-RCV-60)\n    Given a component of this service queries a payment, proceeds, rule, case or timer table of another owner\n    When the boundary test of section 12.7 runs in the build\n    Then the grant refuses the access and the boundary test fails the build\n\n  Scenario: AC14 The plan-position read answers 401, 403 and 404 (new, D-RCV-60)\n    Given a request on /api/recovery/treatment/v1 carries no credential\n    When the plan-position read is called\n    Then it answers 401 and returns no plan data\n    Given a request on /api/recovery/treatment/v1 carries a credential without Treatment and offer R\n    When the plan-position read is called\n    Then it answers 403 and returns no plan data\n    Given a request on /api/recovery/treatment/v1 names a treatment ID with no treatment record\n    When the plan-position read is called\n    Then it answers 404 and returns no plan data\n\n  Scenario: AC15 A consumed call that fails changes nothing (new, D-RCV-60)\n    Given the rwb-source-data contract fake answers the read of account \"A-0555\" with an error\n    When TreatmentWorkflow consumes the proceedsMatched of AC1\n    Then no column of treatment \"T-0701\" changes and no decision record is written\n    Then the activity retries on the workflow policy of 1 s initial interval, back-off 2, 10 attempts\n\n  Scenario: AC16 A case status or plan state change the model does not allow is refused (new, D-RCV-60)\n    Given treatment \"T-0701\" is in state PLAN_RUNNING\n    When a step of this service attempts to write a case status or to move the plan state to a state the model does not allow\n    Then the write is refused, no column of treatment \"T-0701\" changes and no decision record is written"
+  },
+  {
+   "old": "The eleven criteria are new under D-RCV-60 and test only the S2 deliverable of this story:",
+   "new": "The sixteen criteria are new under D-RCV-60 and test only the S2 deliverable of this story:"
+  },
+  {
+   "old": "| TC-S2-E2008-APP-09 | AC11, BR8 | Component | treatment \"T-0701\" with installments 24, installment_amount 12,500.00 and installments_paid 3 |",
+   "new": "| TC-S2-E2008-APP-09 | AC11, BR8 | Component | treatment \"T-0701\" with installments 24, installment_amount 12,500.00 and installments_paid 3 |\n| TC-S2-E2008-APP-10 | AC12, BR6, X5 | Component | the rwb-case parameters and reference-data breaker open for case RC-2026-000555 |\n| TC-S2-E2008-APP-11 | AC13, X6 | Contract | a component query of a payment, proceeds, rule, case or timer table of another owner; the grant refuses it and the build fails |\n| TC-S2-E2008-APP-12 | AC14 | Contract | a request on /api/recovery/treatment/v1 with no credential, with a credential lacking Treatment and offer R, and for a treatment ID with no treatment record |\n| TC-S2-E2008-APP-13 | AC15 | Component | the rwb-source-data contract fake answering the read of account A-0555 with an error |\n| TC-S2-E2008-APP-14 | AC16 | Component | treatment T-0701 in PLAN_RUNNING and a write of a case status or a plan state the model does not allow |"
+  },
+  {
+   "old": "The nine new cases prove the criteria no legacy row exercises.",
+   "new": "The fourteen new cases prove the criteria no legacy row exercises."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29675",
+   "item": "ACR-RWB-S2-E2008-APP-AC2",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC2 Given names the rwb-source-data contract fake with DP-01 and DP-05.",
+   "note": "AC2 Given already reads the rwb-source-data contract fake, not an ACE view; DP-01 and DP-05 now named in the Given."
+  },
+  {
+   "ruling": "R-32059",
+   "item": "NEWAC-RWB-S2-E2008-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC12 (breaker open) and TC-S2-E2008-APP-10; X5 covered by AC8, AC12.",
+   "note": "Breaker-open path had no criterion. New AC12 numbered after existing AC11; test case TC-S2-E2008-APP-10 added."
+  },
+  {
+   "ruling": "R-32060",
+   "item": "NEWAC-RWB-S2-E2008-APP-AC12",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC13 and TC-S2-E2008-APP-11; X6 covered by AC9, AC13.",
+   "note": "Component and test reach to payment, proceeds, rule, case or timer tables now has its own criterion and test case."
+  },
+  {
+   "ruling": "R-32061",
+   "item": "NEWAC-RWB-S2-E2008-APP-AC13",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "No new criterion. BR6 covered by AC8 and TC-S2-E2008-APP-07; BR7 by AC10 and TC-08; BR8 by AC11 and TC-09.",
+   "note": "BR6, BR7 and BR8 already have criteria AC8, AC10, AC11 and tests 07 to 09 in this story. No duplicate added."
+  },
+  {
+   "ruling": "R-32062",
+   "item": "NEWAC-RWB-S2-E2008-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 (401, 403, 404 on /api/recovery/treatment/v1) and TC-S2-E2008-APP-12.",
+   "note": "AC14 names the 401, 403 and 404 answers of the plan-position read; test case TC-S2-E2008-APP-12 added."
+  },
+  {
+   "ruling": "R-32063",
+   "item": "NEWAC-RWB-S2-E2008-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 (failed consumed read changes nothing) and TC-S2-E2008-APP-13.",
+   "note": "AC15 covers a consumed call that fails; no write and retry on workflow policy. Test case TC-S2-E2008-APP-13 added."
+  },
+  {
+   "ruling": "R-32064",
+   "item": "NEWAC-RWB-S2-E2008-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC16 (disallowed case status or plan state write is refused) and TC-S2-E2008-APP-14.",
+   "note": "AC16 refuses a case status write or plan state move the model does not allow; test case TC-S2-E2008-APP-14 added."
+  }
+ ]
+}

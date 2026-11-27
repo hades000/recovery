@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "record the outcome against the customer",
+   "new": "record the outcome against the claim and the party reference of the case"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "Given a case in state CLAIM_PAID\n    When subrogation due\n    Then record the TCG share against the case for all future recoveries\n    Then the case moves to SUBROGATION_POSITION",
+   "new": "Given a case in state CLAIM_PAID\n    When subrogation due\n    Then record the TCG share against the case for all future recoveries\n    Then the claim moves to SUBROGATION_POSITION and the stage reports the outcome to the parent case"
+  },
+  {
+   "old": "Given a case in state CLAIM_PART_PAID\n    When subrogation due\n    Then record the TCG share against the case for all future recoveries\n    Then the case moves to SUBROGATION_POSITION",
+   "new": "Given a case in state CLAIM_PART_PAID\n    When subrogation due\n    Then record the TCG share against the case for all future recoveries\n    Then the claim moves to SUBROGATION_POSITION and the stage reports the outcome to the parent case"
+  },
+  {
+   "old": "Then the stage reports RESIDUAL_TO_ROUTE under R-GUA-29",
+   "new": "Then the stage reports RESIDUAL_TO_ROUTE under R-GUA-29\n\n  Scenario: AC6 A status change the model does not allow is refused (new, D-RCV-60)\n    Given the claim is at a GUARANTEE state the stage does not accept\n    When the stage takes the signal\n    Then the signal is recorded and the stage waits\n    Then no outcome is written\n\n  Scenario: AC7 Each business rule of section 8 applies as written (new, D-RCV-60)\n    Given the business rules BR1 to BR8 of section 8 are in place\n    When the stage takes a negotiation outcome or a guarantor answer\n    Then the rule of section 8 that matches the outcome applies\n    Then a rule that does not match is not applied\n\n  Scenario: AC8 An error answer of the provided operations is 401, 403 or 404 (new, D-RCV-60)\n    Given a request the operation refuses with status 401, 403 or 404 under the contract\n    When the operation is called\n    Then the service answers with the status the contract gives"
+  },
+  {
+   "old": "and the legacy wording of `the action is taken` and `the decision log cannot be written`;",
+   "new": "and the legacy wording of `the action is taken` and `the decision log cannot be written`, where the term is now `decision record` in AC1, AC4 and TC-E4-018-06;"
+  },
+  {
+   "old": "| None | AC5, Section 8 |",
+   "new": "| None | AC5, TC-E4-018-09 |"
+  },
+  {
+   "old": "so its name, type and unit are Not specified in the source documents (GAP-2728; ASM-4535).",
+   "new": "it is published as `subrogationShare` with a numeric(18,2) basis (GAP-2730; ASM-4535)."
+  },
+  {
+   "old": "keeps its state list unchanged: Not due; due; submitted; paid; refused.",
+   "new": "keeps its state list unchanged: Not due; due; submitted; paid; refused. The empty, loading, error and no access states are absent from Screen Specifications v1 and are Not specified in the source documents (CG-ALL-8928); the no access behaviour is X1 of section 5."
+  },
+  {
+   "old": "whose mapping is a working read (GAP-2729; ASM-4530)",
+   "new": "whose mapping is a working read owned by the screen owners (GAP-2729; ASM-4530)"
+  },
+  {
+   "old": "A forced decision log write failure stops the action with MSG-P7-003",
+   "new": "A forced decision record write failure stops the action with MSG-P7-003"
+  },
+  {
+   "old": "| TC-E4-018-15 | BR8 | Component | No range, expiry or notice column in rwb_guarantee |",
+   "new": "| TC-E4-018-15 | BR8 | Component | No range, expiry or notice column in rwb_guarantee |\n| TC-E4-018-16 | AC6 | Component | A claim at a GUARANTEE state the stage does not accept; the status change is refused and no outcome is written |\n| TC-E4-018-17 | AC7, BR1 to BR8 | Component | Each rule of section 8 applied and checked by its own case above |\n| TC-E4-018-18 | AC8 | Contract | A request the operation refuses with 401, 403 or 404 under TSD S3 T-A.2 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19657",
+   "item": "DOR-RWB-S3-E4018-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "LDM v9 and Data Classification v5",
+   "change": "Add decision_record as the RWB-PLT-E1027-CON library object, or record it as outside LDM v9 and Data Classification v5. P3 wording is fixed in the story under CG-ALL-8927.",
+   "note": "P2 needs an LDM or classification entry; P3 is resolved in the story criteria and tests."
+  },
+  {
+   "ruling": "R-23403",
+   "item": "GAP-1721",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Ownership Map (Tables sheet) and the RWB-S3 DB story",
+   "change": "Add the guarantee, guarantor-pursuit and subrogation-position entity groups of schema rwb_guarantee named after Arch v5 slide 18, with owner rows and fields the sources confirm.",
+   "note": "Ownership rows and the physical table set belong to the Ownership Map and the S3 DB story."
+  },
+  {
+   "ruling": "R-23408",
+   "item": "GAP-2729",
+   "status": "Resolved",
+   "section": "7, 15",
+   "target": "",
+   "change": "",
+   "note": "AC1 to AC3 now name the claim and party reference; the state moves on the claim; screen mapping is owned by screen owners."
+  },
+  {
+   "ruling": "R-23409",
+   "item": "GAP-2730",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "TSD S3 v2 (T-A.1, T-A.2) and the rwb-guarantee contract",
+   "change": "Keep the two operations; carry the negotiation on PATCH /guarantee-claims/{claimId} as GuaranteeClaimUpdate with outcome, outcome date and range; map errors to 403, 422 and 503; fix the catalogue entry format with DL10 stories.",
+   "note": "Story section 11 now publishes subrogationShare numeric(18,2); the contract elements belong to TSD S3."
+  },
+  {
+   "ruling": "R-27044",
+   "item": "CG-ALL-8927",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC1, AC4, the AC4 target reading and TC-E4-018-06 now say decision record. No JOB-nn wording appears in the given text."
+  },
+  {
+   "ruling": "R-27045",
+   "item": "CG-ALL-8928",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 states the empty, loading, error and no access states, marked Not specified where the screen specification lacks them."
+  },
+  {
+   "ruling": "R-32331",
+   "item": "NEWAC-RWB-S3-E4018-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC6 added for a disallowed GUARANTEE state (as X6) with TC-E4-018-16."
+  },
+  {
+   "ruling": "R-32332",
+   "item": "NEWAC-RWB-S3-E4018-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X8 now cites AC5 and TC-E4-018-09 instead of Section 8 only; AC5 already covers refusal and expiry."
+  },
+  {
+   "ruling": "R-32333",
+   "item": "NEWAC-RWB-S3-E4018-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC7 covers BR1 to BR8 with TC-E4-018-17; each rule keeps its own test case in section 16."
+  },
+  {
+   "ruling": "R-32334",
+   "item": "NEWAC-RWB-S3-E4018-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 added for the 401, 403 and 404 answers with contract test TC-E4-018-18; triggers stay as in TSD S3 T-A.2."
+  }
+ ]
+}

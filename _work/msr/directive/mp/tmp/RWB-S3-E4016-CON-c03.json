@@ -1,0 +1,90 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-17 Guarantee claim | Not due; due; submitted; paid; refused |",
+   "new": "| SCR-17 Guarantee claim | Not due; due; submitted; paid; refused; empty, loading, error and no access: Not specified in the source documents (CG-ALL-8895) |"
+  },
+  {
+   "old": "    And a slice that redefines or duplicates an element fails the review and the compatibility check",
+   "new": "    And a slice that redefines or duplicates an element fails the review and the compatibility check\n\n  Scenario: C8 Every business rule of the baseline has a criterion or a test (new, D-RCV-60)\n    Given the business rules BR1 to BR11 of section 8 and their coverage rows\n    When each rule is checked against the coverage table\n    Then every rule names at least one criterion or test that covers it\n    And a rule that is an architecture constraint is covered by a guardrail or boundary test instead\n\n  Scenario: C9 A replayed write with the same idempotency key is not applied twice (new, D-RCV-60)\n    Given a write to PATCH /guarantee-claims/{claimId} sent once and then sent again with the same idempotency key\n    When the second request arrives\n    Then it is answered with the stored result of the first and no second change is written\n    And the key format is Not specified in the source documents (NEWAC-RWB-S3-E4016-CON-AC6)\n\n  Scenario: C10 A retried or timed-out activity of the workflow does not write its result twice (new, D-RCV-60)\n    Given an activity of GuaranteeClaimWorkflow that is retried or times out\n    When the retry or the timeout is handled\n    Then the activity writes its result once and the workflow reaches the same state as without the retry\n    And the retry count and the timeout values are Not specified in the source documents (NEWAC-RWB-S3-E4016-CON-AC7)\n\n  Scenario: C11 A status change the claim model does not allow is refused (new, D-RCV-60)\n    Given the claim statuses of the baseline and the list of allowed changes between them\n    When a change not on the list is sent\n    Then it is refused in the one problem envelope of C4 and the claim status does not move\n    And the allowed change list is Not specified in the source documents (NEWAC-RWB-S3-E4016-CON-AC8)"
+  },
+  {
+   "old": "| TC-S3-E4016-CON-04 | C1, C6: the boundary of the §12.7 tables and no table of another owner declared | Contract | The §12.7 table list with its owners, and a draft declaring `recovery_case` or a `v_ace_*` view, which must fail the check |",
+   "new": "| TC-S3-E4016-CON-04 | C1, C6: the boundary of the §12.7 tables and no table of another owner declared | Contract | The §12.7 table list with its owners, and a draft declaring `recovery_case` or a `v_ace_*` view, which must fail the check |\n| TC-S3-E4016-CON-05 | C8: every business rule BR1 to BR11 is covered by a criterion or a test | Contract | The §8 rule table and the coverage table |\n| TC-S3-E4016-CON-06 | C9: a replayed write with the same idempotency key is not applied twice | Contract | One write sent twice with the same idempotency key, and the stored result of the first |\n| TC-S3-E4016-CON-07 | C10: a retried and a timed-out activity of GuaranteeClaimWorkflow write their result once | Contract | One retried activity and one timed-out activity of the workflow |\n| TC-S3-E4016-CON-08 | C11: a status change the claim model does not allow is refused and the status does not move | Contract | One change on the allowed list and one change not on it |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23400",
+   "item": "GAP-2722",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Story already publishes no event (BR6, change log) and leaves peer and payment event names as placeholders; later event addition is a separate story."
+  },
+  {
+   "ruling": "R-23403",
+   "item": "GAP-1721",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "Ownership Map Tables (S3 rows)",
+   "change": "Add rows for the guarantee, guarantor pursuit and subrogation share entity groups named after Arch v5 slide 18, with the claim fields the sources confirm; physical tables fixed in the S3 DB story.",
+   "note": "Story side needs no change; the Ownership Map has only one S3 row (guarantee_claim)."
+  },
+  {
+   "ruling": "R-27034",
+   "item": "CG-ALL-8894",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows for TC-E4-016-01 to -06 and TC-S3-E4016-CON-01 to -08, with Given, When and Then copied from the criteria they cover.",
+   "note": "Story §16 now lists -05 to -08 as new cases; their rows must be added to v8 too."
+  },
+  {
+   "ruling": "R-27035",
+   "item": "CG-ALL-8895",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-17 states extended; empty, loading, error and no access marked Not specified in the source documents, as the screen specification lacks them."
+  },
+  {
+   "ruling": "R-32311",
+   "item": "NEWAC-RWB-S3-E4016-CON-AC5",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added C8 (new numbering follows C1 to C7) and TC-S3-E4016-CON-05. Paragraph after section 7 still says seven criteria; left unchanged."
+  },
+  {
+   "ruling": "R-32312",
+   "item": "NEWAC-RWB-S3-E4016-CON-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added C9 for idempotent replay and TC-S3-E4016-CON-06; the key format is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-32313",
+   "item": "NEWAC-RWB-S3-E4016-CON-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added C10 for retry and timeout and TC-S3-E4016-CON-07; retry and timeout values are Not specified in the source documents."
+  },
+  {
+   "ruling": "R-32314",
+   "item": "NEWAC-RWB-S3-E4016-CON-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added C11 for a refused disallowed transition and TC-S3-E4016-CON-08; the allowed change list is Not specified in the source documents."
+  }
+ ]
+}

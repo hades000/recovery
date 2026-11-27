@@ -1,0 +1,117 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P5-E1032-OPS",
+ "unit": "u01",
+ "rulings": [
+  "R-06142",
+  "R-06145",
+  "R-06146",
+  "R-17173",
+  "R-17177",
+  "R-22058",
+  "R-22060",
+  "R-22065"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 3
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-06142",
+     "item": "DOR-RWB-P5-E1032-OPS-14",
+     "status": "Resolved",
+     "section": "header",
+     "target": "",
+     "change": "Added Epic design sign-off row in the header table with the Not specified placeholder.",
+     "note": "No signed epic design record in the sources (searched the project folder). Row records Not specified in the source documents instead of an invented sign-off."
+    },
+    {
+     "ruling": "R-06145",
+     "item": "DOR-RWB-P5-E1032-OPS-22",
+     "status": "Resolved",
+     "section": "header",
+     "target": "",
+     "change": "Contract dependencies row now states contract fake library version as Not specified in the source documents.",
+     "note": "No published contract fake library version in the sources; placeholder recorded in the header, no version invented."
+    },
+    {
+     "ruling": "R-06146",
+     "item": "DOR-RWB-P5-E1032-OPS-23",
+     "status": "Resolved",
+     "section": "header",
+     "target": "",
+     "change": "Contract dependencies row now states contract version as Not specified in the source documents.",
+     "note": "Story names only the /v1 path and RWB-P5-E1032-CON is not yet published; the placeholder states the missing version without inventing one."
+    },
+    {
+     "ruling": "R-17173",
+     "item": "DOR-RWB-P5-E1032-OPS-10",
+     "status": "Not applied",
+     "section": "",
+     "target": "",
+     "change": "",
+     "note": "Screen-state text for SCR-31 and SCR-44 is in sections outside this chunk; no anchor available. Needs the text of those sections."
+    },
+    {
+     "ruling": "R-17177",
+     "item": "DOR-RWB-P5-E1032-OPS-7",
+     "status": "Cross-document",
+     "section": "11",
+     "target": "Logical Data Model v9 and Data Classification v5",
+     "change": "Add decision_record (PLT library table created in rwb_document, written by the app story and the relay) as a field or entity.",
+     "note": "Story side done: BR Field ID column added to section 11 with the Not specified placeholder on all rows. decision_record is missing in LDM v9 and Data Classification v5."
+    },
+    {
+     "ruling": "R-22058",
+     "item": "GAP-0742",
+     "status": "Cross-document",
+     "section": "11",
+     "target": "Logical Data Model v9 and Data Dictionary v8",
+     "change": "Add rwb_case.case_document_link (case_id, document_id, checklist_state, extracted_field_count, linked_at, source_event_id; unique key on case_id and document_id; no cross-service foreign key) with field IDs from RW-DATASTEW in the next dictionary version.",
+     "note": "Story row added to section 11. Table belongs to rwb_case, not this story's schema; field IDs are not in the sources."
+    },
+    {
+     "ruling": "R-22060",
+     "item": "GAP-0993",
+     "status": "Resolved",
+     "section": "11",
+     "target": "",
+     "change": "Added a paragraph after the deployment topology text listing the capacity values as Not specified, to be set per environment from SIT measurement and the scan throughput.",
+     "note": "Replica counts, requests, limits, KEDA ceiling, storage, hold capacity and scan rate are absent from the sources; the four-worker and 500-page figures are marked as test values."
+    },
+    {
+     "ruling": "R-22065",
+     "item": "GAP-2444",
+     "status": "Resolved",
+     "section": "11",
+     "target": "",
+     "change": "Added Decision record entry (DOCATT attach) row mapping fields to actions, model_version, recommendation, outcome and final_call ATTACHED.",
+     "note": "Field names from TSD P7 v2 T3.1. The proposal puts the new columns in rwb_decision while this story's V1032_1 is in rwb_document; the architect should confirm the schema."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| Contract dependencies | RWB-P5-E1032-CON (build status Not started; contract not yet published) |",
+     "new": "| Contract dependencies | RWB-P5-E1032-CON (build status Not started; contract not yet published); contract version Not specified in the source documents (DOR-RWB-P5-E1032-OPS-23); contract fake library version Not specified in the source documents (DOR-RWB-P5-E1032-OPS-22) |\n| Epic design sign-off | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-14) |"
+    },
+    {
+     "old": "| Item | Content |\n|---|---|\n| Deployment values | Image digest, chart version, replica counts for the API and the worker, resource requests and limits, probe paths and timings, log level, namespace, task queue, build ID, feature switch, KEDA backlog threshold, trigger name |\n| Task queue | `rwb-document` in namespace `rwb-recovery`, polled by the worker of this service only |\n| Topic | `rwb.document.events.v1` with its partitions, replication factor, retention and key, its three retry topics and its `.dlt` topic; `rwb.decision-record.v1` published by the library; no subscription of this service |\n| Schema | `rwb_document`, migrated by its own per-service Flyway sequence; the intake migration `V1032_1__intake_match.sql` is one step of it |\n| Trigger | `DocumentIntakeWorkflow` started by the `DocumentStored` event, queue `rwb-document`, namespace `rwb-recovery`, workers scaled by KEDA on the backlog threshold; overlap policy and duplicate-start rule Not specified in the source documents (CG-ALL-5846) |\n| Flag | `rwb.document.intake-autoattach`, on in DEV and SIT for the tests, from the values of each environment; the legacy `rwb.dochub.autoattach` is retired |\n| Dashboard series | Items by match status, age of the oldest held item, documents attached per run, files stored for review, decision-record failures per run, queue backlog and age; dimensions environment, release, build ID |\n| Runbook entries | Failed run, held item, stuck retry, unavailable dependency, lagging group; each with the check, the owner role and the recovery step |\n| Alerts | Four rules and one runbook entry each: MSG-P2-004 for a failed run, MSG-P7-003 for failed decision records, MSG-P5-003 for held items, MSG-GEN-006 for an unavailable dependency; the lag alert carries the identifier placeholder of GAP-0994 |\n| Secrets | The rwb-document login secret, the Kafka client credential, the Temporal mTLS material and the storage identity reference, all from the platform secret store |\n| Test data | One synthetic notice for case \"RW-2026-000123\", one forced decision-record failure and one flag-off run; synthetic identifiers only |",
+     "new": "| Item | Content | BR Field ID |\n|---|---|---|\n| Deployment values | Image digest, chart version, replica counts for the API and the worker, resource requests and limits, probe paths and timings, log level, namespace, task queue, build ID, feature switch, KEDA backlog threshold, trigger name | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Task queue | `rwb-document` in namespace `rwb-recovery`, polled by the worker of this service only | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Topic | `rwb.document.events.v1` with its partitions, replication factor, retention and key, its three retry topics and its `.dlt` topic; `rwb.decision-record.v1` published by the library; no subscription of this service | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Schema | `rwb_document`, migrated by its own per-service Flyway sequence; the intake migration `V1032_1__intake_match.sql` is one step of it | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Trigger | `DocumentIntakeWorkflow` started by the `DocumentStored` event, queue `rwb-document`, namespace `rwb-recovery`, workers scaled by KEDA on the backlog threshold; overlap policy and duplicate-start rule Not specified in the source documents (CG-ALL-5846) | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Flag | `rwb.document.intake-autoattach`, on in DEV and SIT for the tests, from the values of each environment; the legacy `rwb.dochub.autoattach` is retired | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Dashboard series | Items by match status, age of the oldest held item, documents attached per run, files stored for review, decision-record failures per run, queue backlog and age; dimensions environment, release, build ID | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Runbook entries | Failed run, held item, stuck retry, unavailable dependency, lagging group; each with the check, the owner role and the recovery step | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Alerts | Four rules and one runbook entry each: MSG-P2-004 for a failed run, MSG-P7-003 for failed decision records, MSG-P5-003 for held items, MSG-GEN-006 for an unavailable dependency; the lag alert carries the identifier placeholder of GAP-0994 | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Secrets | The rwb-document login secret, the Kafka client credential, the Temporal mTLS material and the storage identity reference, all from the platform secret store | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Test data | One synthetic notice for case \"RW-2026-000123\", one forced decision-record failure and one flag-off run; synthetic identifiers only | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Case document link | One row per case and document with the checklist state and the extracted field count; `rwb_case.case_document_link` proposed with case_id, document_id, checklist_state, extracted_field_count, linked_at and source_event_id, a unique key on (case_id, document_id) and no foreign key across services; field IDs Not specified in the source documents (GAP-0742) | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |\n| Decision record entry (DOCATT attach) | `decision_record` entry of the DOCATT attach: document reference, intake item and match method in `actions`; classifier version in `model_version`; confidence and type candidates in `recommendation`; message id of a refusal in `outcome`; `final_call` ATTACHED; the columns are added by migration V1032_1 in rwb_decision (GAP-2444) | Not specified in the source documents (DOR-RWB-P5-E1032-OPS-7) |"
+    },
+    {
+     "old": "The deployment topology (cluster names, node pools, replica counts, resource sizes, zone spread, ingress class and probe timings) belongs to each environment and is set by the platform team in its values file; the chart exposes every one of them as a value and this story fixes only their names and the rule that they are never hard-coded.",
+     "new": "The deployment topology (cluster names, node pools, replica counts, resource sizes, zone spread, ingress class and probe timings) belongs to each environment and is set by the platform team in its values file; the chart exposes every one of them as a value and this story fixes only their names and the rule that they are never hard-coded.\n\nCapacity values of the intake-match path (GAP-0993): the worker replica count, the request and limit set, the KEDA ceiling, the growth figure of `document_text` and its index budget, the clearing age of `rwb-quarantine`, the hold container capacity and the scan rate per hour are Not specified in the source documents (GAP-0993). Each is set per environment from the SIT measurement of one business-hour window and the scan product's throughput, and recorded in the environment values files. The four-worker figure and the 500-page sample of the OCR module are test values, not sizing targets."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

@@ -1,0 +1,72 @@
+{
+ "edits": [
+  {
+   "old": "    Then nothing is approved at a default level",
+   "new": "    Then the answer carries no approval level"
+  },
+  {
+   "old": "    Then a load that was refused or rolled back publishes nothing",
+   "new": "    Then a load that was refused or rolled back publishes nothing\n\n  Scenario: AC12 A new decision code is a row and the build changes nothing (new, D-RCV-60)\n    Given \"DOA-2026.11\" is in force\n    Given a new decision code is added as a row of the decision list in force\n    When \"U-3101\" loads a file that uses the new decision code and \"U-3102\" approves it\n    Then the load is accepted with no change to the code\n    Then the new row is stored and the lookup returns the level of that row\n\n  Scenario: AC13 An unauthenticated or unknown-load read of the load is refused with 401 or 404 (new, D-RCV-60)\n    Given a caller with no authentication\n    When the caller asks GET /api/recovery/access/v1/admin/doa-loads/{loadId} for any load\n    Then the call is refused with status 401\n    Then a call by \"U-3101\" for a loadId that no load holds answers status 404\n\n  Scenario: AC14 A repeated write with the same Idempotency-Key answers the first answer (new, D-RCV-60)\n    Given file \"DOA-2026.11\" was loaded by \"U-3101\" with an Idempotency-Key\n    When \"U-3101\" sends the same load again with the same Idempotency-Key\n    Then the second call answers the stored answer of the first\n    Then no second row set and no second decision-record entry is written"
+  },
+  {
+   "old": "| TC-AD-016-10 | AC8, X12 | Component | Boundary: a lookup dated 31 December 2026 answers \"DOA-2026.11\" and one dated 1 January 2027 answers \"DOA-2027.01\"; the rows of \"DOA-2026.11\" keep valid_to \"2026-12-31\" |",
+   "new": "| TC-AD-016-10 | AC8, X12 | Component | Boundary: a lookup dated 31 December 2026 answers \"DOA-2026.11\" and one dated 1 January 2027 answers \"DOA-2027.01\"; the rows of \"DOA-2026.11\" keep valid_to \"2026-12-31\" |\n| TC-AD-016-11 | AC12, BR13 | Component | A new decision code added as a row of the decision list in force is loaded and looked up; no code is changed and no build runs |\n| TC-AD-016-12 | AC13 | Component | A GET of the load with no authentication answers 401; a GET for a loadId that no load holds answers 404 |\n| TC-AD-016-13 | AC14, BR12 | Component | The same load sent twice under one `Idempotency-Key`: the second answer equals the first, with no second row set and no second decision-record entry |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29450",
+   "item": "ACR-RWB-P4-AD016-APP-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "No vague wording in AC10 steps; Then already names level L1 and reason RELATED_PARTY. No edit needed."
+  },
+  {
+   "ruling": "R-29451",
+   "item": "ACR-RWB-P4-AD016-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC11 already has a When: the outbox relay publishes after the commit. No edit needed."
+  },
+  {
+   "ruling": "R-29452",
+   "item": "ACR-RWB-P4-AD016-APP-AC9",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Vague Then replaced: nothing is approved at a default level now reads the answer carries no approval level. Then already names NOT_COVERED and MSG-P7-010."
+  },
+  {
+   "ruling": "R-30827",
+   "item": "NEWAC-RWB-P4-AD016-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added to section 7 for BR13 with TC-AD-016-11 in section 16. Proposed test taken from BR13 target-service statement."
+  },
+  {
+   "ruling": "R-30828",
+   "item": "NEWAC-RWB-P4-AD016-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 added for 401 without authentication and 404 for unknown loadId on GET doa-loads; TC-AD-016-12 added in section 16."
+  },
+  {
+   "ruling": "R-30829",
+   "item": "NEWAC-RWB-P4-AD016-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC14 added for replay under one Idempotency-Key with stored answer; TC-AD-016-13 added in section 16 (BR12)."
+  }
+ ]
+}

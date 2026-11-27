@@ -1,0 +1,53 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-PLT-NF03-OPS",
+ "unit": "u01",
+ "rulings": [
+  "R-18809",
+  "R-31821"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 2
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-18809",
+     "item": "DOR-RWB-PLT-NF03-OPS-4",
+     "status": "Resolved",
+     "section": "7; 16",
+     "target": "",
+     "change": "Added AC6 in section 7 covering BR1 to BR8 and test row TC-PLT-NF03-OPS-06 in section 16.",
+     "note": "Gaps closed for BR1-BR8 via AC6 and TC-06. Section 8 actually has nine rules; BR9 is not in this item and is not covered here."
+    },
+    {
+     "ruling": "R-31821",
+     "item": "NEWAC-RWB-PLT-NF03-OPS-AC6",
+     "status": "Resolved",
+     "section": "7; 16",
+     "target": "",
+     "change": "Added AC6 scenario (new, D-RCV-60) in section 7 and TC-PLT-NF03-OPS-06 in section 16, both covering BR1 to BR8.",
+     "note": "Sources propose no test (Not specified in the source documents (NEWAC-RWB-PLT-NF03-OPS-AC6)); TC-06 test content is derived from the AC6 check text."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    And a chart or an image that carries a host or a credential fails the pipeline check and is not deployed to any environment",
+     "new": "    And a chart or an image that carries a host or a credential fails the pipeline check and is not deployed to any environment\n\n  Scenario: AC6 The environment rules BR1 to BR8 of section 8 hold in DEV, SIT, UAT and PROD (new, D-RCV-60)\n    Given the environment rules BR1 to BR8 of section 8\n    When the environment matrix, the four values files, the Temporal clusters, the ACE databases and the key stores are checked against the rules\n    Then one chart, one migration sequence and one promotion path serve the four environments, and only the values file differs (BR1)\n    And each environment has one Temporal cluster on the shared ACE AKS cluster, with its own persistence database, UI, metrics and codec server, in the namespace rwb-recovery (BR2)\n    And the codec keys of each namespace are AES-GCM keys held in the Key Vault of that environment, and the codec server of that environment is the only way the UI reads a payload (BR3)\n    And each environment has one ACE database with the 19 schemas rwb_<name> and one login per service, each login owns its own schema and has no grant on any other schema, and each login goes through its own PgBouncer pool with a connection cap and a statement timeout (BR4)\n    And DEV holds synthetic data only, SIT and UAT hold masked copies, and PROD receives no copy from a lower environment (BR5)\n    And every secret is held in the key store, and a values file carries a reference to a key and never a value (BR6)\n    And RWB_SCHEMA is set per service per environment, the migration files are byte-identical across environments, and the Flyway history of a service is held in its own schema in that environment (BR7)\n    And the 19 services share one ACE AKS cluster and one App Gateway, each environment is a separate namespace, key store, database and pool set inside them, and no service provisions an environment (BR8)\n    When a rule is broken in an environment\n    Then the check fails, names the rule and the environment, and stops the promotion"
+    },
+    {
+     "old": "| TC-PLT-NF03-OPS-05 | AC5 | NFR | The secret scan of the chart, the four values files and each image layer with no host, connection string, password, token or key; a committed credential fails the scan and names the file and the key without printing the value; every credential of a running pod resolved from the environment's key store at deploy time (NFR-052) |",
+     "new": "| TC-PLT-NF03-OPS-05 | AC5 | NFR | The secret scan of the chart, the four values files and each image layer with no host, connection string, password, token or key; a committed credential fails the scan and names the file and the key without printing the value; every credential of a running pod resolved from the environment's key store at deploy time (NFR-052) |\n| TC-PLT-NF03-OPS-06 | AC6 | Component | The environment matrix, the four values files, the Temporal cluster and namespace per environment, the ACE schemas, logins and pools, and the key store per namespace: each of BR1 to BR8 is checked in DEV, SIT, UAT and PROD; a broken rule fails the check, names the rule and the environment, and stops the promotion |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

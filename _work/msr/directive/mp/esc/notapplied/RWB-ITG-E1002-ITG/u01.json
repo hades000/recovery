@@ -1,0 +1,137 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E1002-ITG",
+ "unit": "u01",
+ "rulings": [
+  "R-00049",
+  "R-03410",
+  "R-03411",
+  "R-09304",
+  "R-13811",
+  "R-21867"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 13
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-00049",
+     "item": "CG-ALL-133",
+     "status": "Resolved",
+     "section": "12.5, 12.9",
+     "target": "",
+     "change": "",
+     "note": "Catalog Workflows row 19 names the JOB-04 workflow 'reconciliation' in P1 rwb-source-data, started by AceDataReady; 12.5 and 12.9 now use that name and drop ReconciliationWorkflow."
+    },
+    {
+     "ruling": "R-03410",
+     "item": "DOR-RWB-ITG-E1002-ITG-21",
+     "status": "Resolved",
+     "section": "Header",
+     "target": "",
+     "change": "",
+     "note": "Header row now names the CON keys 13 already cites (DP-06, DP-07); no RWB-ITG-E1002-CON exists in the sources and the story publishes no operation (12.1)."
+    },
+    {
+     "ruling": "R-03411",
+     "item": "DOR-RWB-ITG-E1002-ITG-22",
+     "status": "Resolved",
+     "section": "12.8",
+     "target": "",
+     "change": "",
+     "note": "12.8 names the rwb-source-data contract fake, records that no rwb-case fake is used (real SIT service) and states the fake library version as not specified in the sources (item 22)."
+    },
+    {
+     "ruling": "R-09304",
+     "item": "CG-ALL-139",
+     "status": "Resolved",
+     "section": "13, 16",
+     "target": "",
+     "change": "",
+     "note": "Eight fixture and test-data lines now set up ACE state in the rwb-source-data contract fake of 12.8 instead of v_ace_account, v_ace_efs_action and v_ace_batch_status."
+    },
+    {
+     "ruling": "R-13811",
+     "item": "DOR-RWB-ITG-E1002-ITG-10",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "15 now states SCR-02 loading, empty, error (X7) and no access (X8, MSG-P4-002) beside list and filtered; both come from the story's own exception paths."
+    },
+    {
+     "ruling": "R-21867",
+     "item": "GAP-2228",
+     "status": "Not applied",
+     "section": "1, 4, 5, 7, 11-13, 16, 17",
+     "target": "",
+     "change": "",
+     "note": "Needs CaseListRow and RWB-P1-E1015-CON field names no source or story line gives; it also replaces the row, read path, refresh stamp and delivery in sections 1, 4, 5, 7, 11-13, 16 and 17."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| Contract dependencies | None |",
+     "new": "| Contract dependencies | RWB-P3-E1042-CON, RWB-P3-E1043-CON (the published rwb-case parameters and reference-data contracts the suite builds against; the build dependencies stay with the implementation stories, §13) |"
+    },
+    {
+     "old": "| CaseListBuildWorkflow (case list step of JOB-04) | Workflow, started by AceDataReady and by the DailyCaseList schedule | `rwb-source-data` | P1 rwb-source-data | Builds and replaces the `case_list_row` rows of the business date in one transaction (AC1, AC12, AC15) |",
+     "new": "| CaseListBuildWorkflow — the catalogued `reconciliation` workflow of JOB-04, the case list step running inside it | Workflow, started by AceDataReady and by the DailyCaseList schedule | `rwb-source-data` | P1 rwb-source-data | Builds and replaces the `case_list_row` rows of the business date in one transaction (AC1, AC12, AC15) |"
+    },
+    {
+     "old": "| Temporal | 2 workflows and 1 activity observed: DailyCaseRun on queue `rwb-case`, ReconciliationWorkflow on queue `rwb-source-data`, deliverFile on queue `rwb-integration` |",
+     "new": "| Temporal | 2 workflows and 1 activity observed: DailyCaseRun on queue `rwb-case`, the catalogued `reconciliation` workflow of JOB-04 on queue `rwb-source-data`, deliverFile on queue `rwb-integration` |"
+    },
+    {
+     "old": "rwb-source-data contract fake: test data that sets up ACE state is written against the rwb-source-data contract fake, not against the recovery.v_ace_* views or extension tables. The suite otherwise runs against the deployed SIT services and their published contracts, because the point of the story is that the real cross-service behaviour is proved (R5.4 class I).",
+     "new": "rwb-source-data contract fake: test data that sets up ACE state is written against the rwb-source-data contract fake, not against the recovery.v_ace_* views or extension tables. No rwb-case contract fake is used: the rwb-case reads are answered by the deployed SIT service through its published contract, and a fake endpoint fails the topology check before any load is generated. The contract fake library version published for these fakes is Not specified in the source documents (DOR-RWB-ITG-E1002-ITG-22). The suite otherwise runs against the deployed SIT services and their published contracts, because the point of the story is that the real cross-service behaviour is proved (R5.4 class I)."
+    },
+    {
+     "old": "Loading, empty, list and filtered; the error and no access states are Not specified in the source documents (CG-ALL-141)",
+     "new": "Loading, empty, list and filtered, error and no access: loading while the route answer is awaited inside the 2 s budget, empty when the queue holds no open case and the route answers an empty page with the refresh line and no error, error when the route cannot reach rwb-case inside the budget and answers the platform error envelope with no partial screen composed (X7), and no access when a role without the right is answered 403 with the platform error envelope and MSG-P4-002 with no row shown (X8)"
+    },
+    {
+     "old": "| Business date run | Business date 2026-11-30, ALS batch complete at 05:40, allocation complete at 06:52, case list step complete at 07:12, 28,140 accounts in the ACE view, 21 exclusions, 28,156 rows |",
+     "new": "| Business date run | Business date 2026-11-30, ALS batch complete at 05:40, allocation complete at 06:52, case list step complete at 07:12, 28,140 accounts in the rwb-source-data contract fake, 21 exclusions, 28,156 rows |"
+    },
+    {
+     "old": "| Contact row | EFS action PTP for an account of case RW-2026-000123 with contact_at 2026-11-30 15:42 |",
+     "new": "| Contact row | The rwb-source-data contract fake holds an EFS action PTP for an account of case RW-2026-000123 with contact_at 2026-11-30 15:42 |"
+    },
+    {
+     "old": "| Orphan row | Case RW-2026-000456 with account_key ACC0000456 and no ACE account row for 2026-11-30 |",
+     "new": "| Orphan row | Case RW-2026-000456 with account_key ACC0000456 and no account row in the rwb-source-data contract fake for 2026-11-30 |"
+    },
+    {
+     "old": "| Late batch | No COMPLETED ALS row for 2026-11-30 at 08:00 |",
+     "new": "| Late batch | The rwb-source-data contract fake shows no COMPLETED ALS batch row for 2026-11-30 at 08:00 |"
+    },
+    {
+     "old": "| TC-E1-002-01-ITG | AC1, BR1, BR2, BR4 | End to end | 28,140 synthetic accounts in v_ace_account at 90 days past due or more; 21 exclusions; 37 case accounts below 90 |",
+     "new": "| TC-E1-002-01-ITG | AC1, BR1, BR2, BR4 | End to end | 28,140 synthetic accounts in the rwb-source-data contract fake at 90 days past due or more; 21 exclusions; 37 case accounts below 90 |"
+    },
+    {
+     "old": "| TC-E1-002-04-ITG | AC4, BR9 | Integration | v_ace_efs_action PTP action with contact_at 2026-11-30 15:42 |",
+     "new": "| TC-E1-002-04-ITG | AC4, BR9 | Integration | The rwb-source-data contract fake holds a PTP action with contact_at 2026-11-30 15:42 |"
+    },
+    {
+     "old": "| TC-E1-002-05-ITG | AC5, BR3 | End to end | No COMPLETED ALS row for 2026-11-30 |",
+     "new": "| TC-E1-002-05-ITG | AC5, BR3 | End to end | The rwb-source-data contract fake shows no COMPLETED ALS batch row for 2026-11-30 |"
+    },
+    {
+     "old": "| TC-E1-002-10-ITG | AC10, BR10 | Integration | Case account ACC0000456 with no v_ace_account row |",
+     "new": "| TC-E1-002-10-ITG | AC10, BR10 | Integration | Case account ACC0000456 with no account row in the rwb-source-data contract fake |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

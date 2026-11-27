@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| Integration dependencies | RWB-P3-E1035-APP, RWB-P10-E2028-APP, RWB-P7-E2028-APP |",
+   "new": "| Integration dependencies | RWB-P3-E1035-APP, RWB-P10-E2028-APP, RWB-P7-E2028-APP (build prerequisites, not yet built) |"
+  },
+  {
+   "old": "| Contract dependencies | RWB-ITG-E2028-CON |",
+   "new": "| Contract dependencies | RWB-ITG-E2028-CON, RWB-P3-E1043-CON |\n| Platform contract dependencies | RWB-PLT-E1027-CON, RWB-PLT-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON (delivery prerequisites of the service template, not per-story blockers) |"
+  },
+  {
+   "old": "| X8 | A user without Case record U sends feedback | The feedback answers 403 | MSG-P4-002 | TC-E2-028-10-ITG |",
+   "new": "| X8 | A user without Case record U sends feedback | The feedback answers 403 | MSG-P4-002 | AC10, TC-E2-028-10-ITG |"
+  },
+  {
+   "old": "| X9 | The seed pack cannot be loaded (case not owned, policy version absent, segment missing, counts off) | The run refuses to start and names the missing seed item; no scenario is reported | None | All |",
+   "new": "| X9 | The seed pack cannot be loaded (case not owned, policy version absent, segment missing, counts off) | The run refuses to start and names the missing seed item; no scenario is reported | None | AC11 |"
+  },
+  {
+   "old": "| X10 | The evidence pack cannot be attached to the release record | The run is marked failed; the local evidence file is kept for rerun | None | All |",
+   "new": "| X10 | The evidence pack cannot be attached to the release record | The run is marked failed; the local evidence file is kept for rerun | None | AC12 |"
+  },
+  {
+   "old": "    Then no decision record is written for the case",
+   "new": "    Then no decision record is written for the case\n\n  Scenario: AC10 A user without Case record U is refused feedback (new, D-RCV-60)\n    Given the run of case \"RW-2027-000501\" has no feedback\n    When a user holding Case record R only (RW-PHONECOL) sends POST /api/recovery/agent/v1/agent-runs/{runId}/feedback with verdict \"ACCEPTED\"\n    Then the answer is 403 with MSG-P4-002\n    Then no decision record and no agent_feedback row exist for the run\n\n  Scenario: AC11 A seed pack that cannot be loaded stops the run (new, D-RCV-60)\n    Given the seed pack is missing a seed item (case not owned, policy version absent, segment missing or counts off)\n    When the harness starts the run\n    Then the run refuses to start and names the missing seed item\n    Then no scenario is reported\n\n  Scenario: AC12 An evidence pack that cannot be attached fails the run (new, D-RCV-60)\n    Given the evidence pack of the run cannot be attached to the release record\n    When the harness completes the run\n    Then the run is marked failed\n    Then the local evidence file is kept for rerun\n\n  Scenario: AC13 The summary holds masking tokens only (new, D-RCV-60)\n    Given the intake run of case \"RW-2027-000501\" has completed\n    When the harness requests GET /api/recovery/agent/v1/cases/{caseId}/agent-outputs for the case\n    Then the summary holds masking tokens only and no personal data value"
+  },
+  {
+   "old": "No legacy acceptance criterion is owned by this story: the nine above are new",
+   "new": "No legacy acceptance criterion is owned by this story: the thirteen above are new"
+  },
+  {
+   "old": "| BR7 | The summary holds masking tokens only | CTL-11 |",
+   "new": "| BR7 | The summary holds masking tokens only | CTL-11; AC13 |"
+  },
+  {
+   "old": "| TC-E2-028-10-ITG | Access | Component | RW-PHONECOL (Case record R only) sends feedback; refused with MSG-P4-002 |",
+   "new": "| TC-E2-028-10-ITG | Access | Component | RW-PHONECOL (Case record R only) sends feedback; refused with MSG-P4-002 |\n| TC-E2-028-11-ITG | Access | Component | A user without Case record U sends feedback; refused with MSG-P4-002 (AC10) |\n| TC-E2-028-12-ITG | Failure | Integration | A seed pack that cannot be loaded; the run refuses to start and names the missing seed item (AC11) |\n| TC-E2-028-13-ITG | Evidence | Integration | An evidence pack that cannot be attached; the run is marked failed and the local evidence file is kept (AC12) |\n| TC-E2-028-14-ITG | Data protection | Component | The summary holds masking tokens only (AC13) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14350",
+   "item": "DOR-RWB-ITG-E2028-ITG-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Integration dependencies row marks RWB-P3-E1035-APP, RWB-P10-E2028-APP and RWB-P7-E2028-APP as build prerequisites not yet built; Day 1 kept.",
+   "note": "The three named dependencies are shown as not yet built build prerequisites. Story stays Day 1."
+  },
+  {
+   "ruling": "R-14351",
+   "item": "DOR-RWB-ITG-E2028-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC10 (X8), AC11 (X9), AC12 (X10) and their Gherkin scenarios; X8 to X10 Covered by updated; TC-E2-028-11 to 13 rows added.",
+   "note": "Three exception paths now have criteria; section 7 holds 12 owned criteria before AC13 is counted. TC numbers assumed free."
+  },
+  {
+   "ruling": "R-14352",
+   "item": "DOR-RWB-ITG-E2028-ITG-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC13 masking criterion; BR7 Source cell now cites AC13; TC-E2-028-14 row added.",
+   "note": "BR7 now covered by AC13 and TC-E2-028-14-ITG. Section 7 holds 13 criteria; TC number assumed free."
+  },
+  {
+   "ruling": "R-22646",
+   "item": "GAP-2190",
+   "status": "Cross-document",
+   "section": "-",
+   "target": "RWB-P10-E2028-APP",
+   "change": "Name rwb-agent login (DP-02) with grants on rwb_agent only; D6 as LOV-DECISION value; freshness date from rwb-source-data read; event rwb.agent.AgentFeedbackRecorded.v1; seven lists and case-decision path as proposed.",
+   "note": "rwb-agent app slice values are not in this story's text. Change belongs to the app story."
+  },
+  {
+   "ruling": "R-22647",
+   "item": "GAP-2191",
+   "status": "Cross-document",
+   "section": "-",
+   "target": "RWB-P10-E2028-CON",
+   "change": "Fix two operations on /api/recovery/agent/v1 with legacy members; name answer and request members; event rwb.agent.AgentFeedbackRecorded.v1; DecisionRecorded on rwb.decision-record.v1; gateway-bff route of one hop and 2 s.",
+   "note": "Contract member types and route are in the contract, not this story. Physical types left to review with owners."
+  },
+  {
+   "ruling": "R-22648",
+   "item": "GAP-0410",
+   "status": "Cross-document",
+   "section": "-",
+   "target": "Wave 2 SIT harness pack and Enterprise AI test tenant (integration lead)",
+   "change": "Agree Enterprise AI test tenant and guardrail profile with P10 owner and platform team; agree harness pack, seeding and evidence format with QA.",
+   "note": "Test tenant, fixtures and harness values are not in any source. Needs owner agreement, not a story edit."
+  },
+  {
+   "ruling": "R-22649",
+   "item": "GAP-0622",
+   "status": "Cross-document",
+   "section": "-",
+   "target": "RWB-P10-E2028-APP",
+   "change": "Service identity as DP-02 with grants on rwb_agent only; D6 through local decision-record library; DecisionRecorded as rwb.decision-record.DecisionRecorded.v1; SUMMARY item key; 422 for verdict outside LOV-FEEDBACK.",
+   "note": "Login, decision record fields and migration order belong to the app story. This story already uses SUMMARY and the verdict list."
+  },
+  {
+   "ruling": "R-22650",
+   "item": "GAP-0623",
+   "status": "Cross-document",
+   "section": "-",
+   "target": "RWB-P10-E2028-CON",
+   "change": "Fix two operations on /api/recovery/agent/v1; declare record event rwb.decision-record.DecisionRecorded.v1 on rwb.decision-record.v1 keyed by case ID; settle 409 and 422 refusals with MSG-GEN-004.",
+   "note": "Member types, lengths and route belong to the contract. Story text unchanged for this gap."
+  },
+  {
+   "ruling": "R-22651",
+   "item": "GAP-1294",
+   "status": "Cross-document",
+   "section": "-",
+   "target": "rwb-decision contract (wave 2 contract review with RWB-P10-E2028-CON)",
+   "change": "Agree append operation on POST /api/recovery/decision/v1/decision-log, two read shapes, LOV-DECISION value D6, verdict list of three values, reason-code list, MSG-P7-009 text and rwb-decision login.",
+   "note": "Wire shapes and value sets are not in any source. Build and test proceed on ASM-B-P7-03 values until agreed."
+  },
+  {
+   "ruling": "R-22652",
+   "item": "GAP-1295",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Header Contract dependencies adds RWB-P3-E1043-CON; new Platform contract dependencies row lists the six DP platform contracts as delivery prerequisites.",
+   "note": "H is None plus platform contracts, not per-story blockers. P3 read and P4 authorise calls are not named by this story."
+  }
+ ]
+}

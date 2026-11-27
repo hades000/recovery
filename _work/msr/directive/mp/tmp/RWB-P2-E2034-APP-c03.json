@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "14. Resend: `POST /admin/outbox/deliveries/{deliveryId}/resend` sets the delivery PENDING with attempt count 0 under an `Idempotency-Key`, writes the resend to the decision record and starts the workflow again for the same event.",
+   "new": "14. Resend: `POST /admin/outbox/deliveries/{deliveryId}/resend` sets the delivery PENDING with attempt count 0 under an `Idempotency-Key`, writes the resend to the decision record and starts the workflow again for the same event.\n15. Screen states: for SCR-09, the empty, loading and error states are Not specified in the source documents (DOR-RWB-P2-E2034-APP-10); the no access state refuses with MSG-P4-002 before any read or write (TC-E2-034-12). For SCR-04, the empty, loading, error and no access states are Not specified in the source documents (DOR-RWB-P2-E2034-APP-10)."
+  },
+  {
+   "old": "| X6 | A fact read answers 404 | The mapper keeps the entry and leaves the link empty; the delivery is DELIVERED and the gap is logged without personal data | None | BR4 |",
+   "new": "| X6 | A fact read answers 404 | The mapper keeps the entry and leaves the link empty; the delivery is DELIVERED and the gap is logged without personal data | None | AC12; BR4 |"
+  },
+  {
+   "old": "| X8 | A message fails envelope validation, or carries a type this consumer does not declare | The message is refused before any state change and routed to `.dlt` with an alert | None | BR2 |",
+   "new": "| X8 | A message fails envelope validation, or carries a type this consumer does not declare | The message is refused before any state change and routed to `.dlt` with an alert | None | AC13; BR2 |"
+  },
+  {
+   "old": "| X9 | A role without Platform administration opens the exception queue or resends | Refused before any read or write | MSG-P4-002 | Carried by the CON story as a contract case |",
+   "new": "| X9 | A role without Platform administration opens the exception queue or resends | Refused before any read or write | MSG-P4-002 | AC14; carried by the CON story as a contract case |"
+  },
+  {
+   "old": "| X10 | The delivery is resent while the workflow for the same event is running | Refused with 409; nothing changes and no second workflow is started | MSG-GEN-004 | BR6 |",
+   "new": "| X10 | The delivery is resent while the workflow for the same event is running | Refused with 409; nothing changes and no second workflow is started | MSG-GEN-004 | AC15; BR6 |"
+  },
+  {
+   "old": "    Then the delivery is in the exception queue with a task for role RW-PLATADM",
+   "new": "    Then the delivery is in the exception queue with a task for role RW-PLATADM\n\n  Scenario: AC12 A fact read that answers 404 keeps the entry with an empty link (exception X6)\n    Given a fact read for the event answers 404\n    When the mapper maps the event\n    Then the entry is kept and its link is left empty\n    Then the delivery is DELIVERED and the gap is logged without personal data\n\n  Scenario: AC13 A message that fails envelope validation is refused before any state change (exception X8)\n    Given a message fails CloudEvents 1.0 envelope validation or carries an undeclared type\n    When the message reaches the consumer ledger-channels\n    Then the message is refused before any state change\n    Then the message is routed to its .dlt topic with an alert\n\n  Scenario: AC14 A role without Platform administration is refused before any read or write (exception X9)\n    Given a user whose role has no Platform administration\n    When the user opens the exception queue or resends a delivery\n    Then the request is refused before any read or write\n    Then the refusal uses message MSG-P4-002\n\n  Scenario: AC15 A resend while the workflow for the same event runs is refused with 409 (exception X10)\n    Given the workflow for the same event is running\n    When the delivery is resent\n    Then the request is refused with 409\n    Then nothing changes and no second workflow is started\n    Then the refusal uses message MSG-GEN-004\n\n  Scenario: AC16 The intake publishes no business event and records its decisions locally (BR10)\n    Given a resend or an exception has been decided for a delivery\n    When the decision is recorded\n    Then the decision record is written through the local library in rwb_integration\n    Then the decision record is published on rwb.decision-record.v1 and no other event is published"
+  },
+  {
+   "old": "| BR7 | An EFS row enters the ledger only when its action code is in the EFS ledger outcome list and only for an account linked to an open case; the list and the retention classes are rows of rwb-source-data and are never copied into rwb_integration | Legacy BR3, BR6; DL29; DL26; DP-18 |",
+   "new": "| BR7 | An EFS row enters the ledger only when its action code is in the EFS ledger outcome list and only for an account linked to an open case; the list and the retention classes are rows of rwb-source-data and are never copied into rwb_integration | Legacy BR3, BR6; DL29 (assumptions: Not specified in the source documents (DOR-RWB-P2-E2034-APP-18)); DL26 (assumptions: ASM-0247, ASM-0264, ASM-0275, ASM-0355); DP-18 |"
+  },
+  {
+   "old": "| Build status | Not started |",
+   "new": "| Build status | Not started; build dependencies RWB-P2-E1007-APP and RWB-P2-E2034-OPS are not done yet |"
+  },
+  {
+   "old": "| TC-E2-034-11 | AC11 | End to end | Reader of team HP-NE with Own scope |",
+   "new": "| TC-E2-034-11 | AC11 | End to end | Reader of team HP-NE with Own scope |\n| TC-E2-034-13 | §12 operations, events and activities | Contract | Each operation, consumed event and activity of section 12 against its contract |\n| TC-E2-034-14 | §12.7 tables (ASM-3438) | Boundary | Each table of section 12.7 at its limits |\n| TC-E2-034-15 | AC12, BR4 | End to end | A fact read answers 404; the entry is kept with an empty link |\n| TC-E2-034-16 | AC13, BR2 | Component | A message fails envelope validation; a message of an undeclared type |\n| TC-E2-034-17 | AC14 | Component | Role without Platform administration opens the queue and resends |\n| TC-E2-034-18 | AC15, BR6 | End to end | Resend while the workflow for the same event is running |\n| TC-E2-034-19 | AC16, BR10 | Component | Resend and exception write the decision record and publish on rwb.decision-record.v1 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10117",
+   "item": "CG-ALL-3218",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for 'A resend is accepted', distinct from MSG-GEN-005 (which holds 'Saved'); the story then cites that ID in section 14.",
+   "note": "Standard change needed first; no new ID exists yet, so the story keeps its current placeholder row."
+  },
+  {
+   "ruling": "R-15683",
+   "item": "DOR-RWB-P2-E2034-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Flow step 15 names the SCR-09 states and the SCR-04 states; SCR-04 and SCR-09 state texts are placeholders."
+  },
+  {
+   "ruling": "R-15684",
+   "item": "DOR-RWB-P2-E2034-APP-11",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "The flagged personal-data fields are not named in the detcheck and the Data Classification list is not in the source set."
+  },
+  {
+   "ruling": "R-15685",
+   "item": "DOR-RWB-P2-E2034-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16, 18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test case list per requirement REQ-ILG-006 to REQ-ILG-014 with story section 18.",
+   "note": "Added contract, boundary and AC12-AC16 test rows in section 16; RTM v7 test lists differ from section 18."
+  },
+  {
+   "ruling": "R-15686",
+   "item": "DOR-RWB-P2-E2034-APP-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Build status row now names the two build dependencies not done yet."
+  },
+  {
+   "ruling": "R-15687",
+   "item": "DOR-RWB-P2-E2034-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR7 source cell names DL26 assumptions and states DL29 has none listed in the source documents."
+  },
+  {
+   "ruling": "R-15688",
+   "item": "DOR-RWB-P2-E2034-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 to AC15 for X6, X8, X9 and X10, their TC rows, and updated the Covered by cells."
+  },
+  {
+   "ruling": "R-15689",
+   "item": "DOR-RWB-P2-E2034-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for BR10 with test case TC-E2-034-19."
+  },
+  {
+   "ruling": "R-15690",
+   "item": "DOR-RWB-P2-E2034-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-INTGR as the rwb-integration service identity.",
+   "note": "Role is missing from Users Roles and Permissions v5; the story text is unchanged."
+  },
+  {
+   "ruling": "R-15691",
+   "item": "DOR-RWB-P2-E2034-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "LDM v9",
+   "change": "Add DF-INT-036 and name decision_record and tr_interaction_append_only as LDM fields or entities, or confirm them as library objects.",
+   "note": "DF-INT-036, decision_record and the trigger name are not in LDM v9 or Data Classification v5."
+  }
+ ]
+}

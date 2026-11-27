@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P1-022 (incident detail) | Section 12.9 |",
+   "new": "| MSG-P1-022 (incident detail) | AC9 |"
+  },
+  {
+   "old": "| MSG-P1-022 on the last attempt | Section 12.7 |",
+   "new": "| MSG-P1-022 on the last attempt | AC10 |"
+  },
+  {
+   "old": "    Then the event is in the exception queue with reason \"case not found\"",
+   "new": "    Then the event is in the exception queue with reason \"case not found\"\n\n  Scenario: AC9 The ledger write is refused on every attempt and the event is parked (new, D-RCV-60)\n    Given the append of RWB-P1-E1066-APP refuses the CaseCreated entry of case \"RW-2026-000301\"\n    When the listener has retried the delivery three times\n    Then the event goes to the .dlt topic with incident LEDGER_WRITE_FAILED and message MSG-P1-022\n    Then the event is not discarded and no entry is written\n\n  Scenario: AC10 The append does not answer and the offset is not acknowledged (new, D-RCV-60)\n    Given the append of RWB-P1-E1066-APP does not answer for the CaseCreated event of case \"RW-2026-000301\"\n    When the listener processes the event\n    Then the offset is not acknowledged and the entry is not counted as written\n    Then the delivery is retried and MSG-P1-022 is reported on the last attempt\n\n  Scenario: AC11 An event payload carries references and codes only (new, D-RCV-60)\n    Given a CaseAllocated event of case \"RW-2026-000301\" is delivered to the listener\n    When the listener maps the event to a ledger entry\n    Then the map reads only the reference and code fields of the payload\n    Then no field that carries personal data is read"
+  },
+  {
+   "old": "over the six owner topics:",
+   "new": "over the six owner facts on the three topics, read by one consumer group:"
+  },
+  {
+   "old": "BR2 is the actor of the CloudEvents envelope, carried into `actorType` and `actorRef`;",
+   "new": "BR2 is the actor of the CloudEvents envelope, in the extension attribute `ce_actor`, carried into `actorType` and `actorRef`;"
+  },
+  {
+   "old": "BR3 is the inbox row `processed_event` of `rwb_source_data` and the unique key on `interaction.idempotency_key`:",
+   "new": "BR3 is the inbox row `processed_event` of `rwb_source_data`, deduplicated on the CloudEvents id with the extension attribute `ce_idempotencykey` as the business key, and the unique key on `interaction.idempotency_key`:"
+  },
+  {
+   "old": "BR4 is the case ID as the Kafka key, one partition per case, plus the writer's gap-free `caseSeq`.",
+   "new": "BR4 is the case ID as the Kafka key, one partition per case, plus the writer's gap-free `caseSeq`, assigned under the case lock at append; the ledger read orders by `occurredAt` and then `caseSeq`, and a cross-topic inversion that `occurredAt` cannot resolve is reported by the run, not reordered silently."
+  },
+  {
+   "old": "because the one call the listener makes is the same service's writer.",
+   "new": "because the one call the listener makes is the same service's writer. Open decisions DL10 and DL11 are confirmed by the directive of 26 November 2026: assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863, ASM-0553, ASM-0703, ASM-1051 and ASM-1104 stand, and no decision stays open in this story."
+  },
+  {
+   "old": "| TC-E1-067-10 | ASM-3438 | Component | Tables of section 12.7 (interaction, processed_event); no column or index added |",
+   "new": "| TC-E1-067-10 | ASM-3438 | Component | Tables of section 12.7 (interaction, processed_event); no column or index added |\n| TC-E1-067-11 | AC9, BR5 | End to end | Ledger write refused on every attempt; retry limit 3 |\n| TC-E1-067-12 | AC10, BR5 | End to end | Append does not answer; offset not acknowledged |\n| TC-E1-067-13 | AC11, BR7 | End to end | CaseAllocated payload with references and codes only |"
+  },
+  {
+   "old": "TC-E1-067-02, TC-E1-067-04, TC-E1-067-06, TC-E1-067-07 and TC-E1-067-08 are the evidence of the five criteria this story owns. TC-E1-067-01, TC-E1-067-03 and TC-E1-067-05 are kept as regression rows: AC1, AC3 and AC5 are the criteria of RWB-P1-E1066-APP, the writer and its duplicate rule, and the listener must not break them.",
+   "new": "TC-E1-067-02, TC-E1-067-04, TC-E1-067-06, TC-E1-067-07, TC-E1-067-08, TC-E1-067-11, TC-E1-067-12 and TC-E1-067-13 are the evidence of the eight criteria this story owns (AC2, AC4, AC6, AC7, AC8, AC9, AC10 and AC11). TC-E1-067-01, TC-E1-067-03 and TC-E1-067-05 are run by RWB-P1-E1066-APP, the owner of AC1, AC3 and AC5, the writer and its duplicate rule; they stay in this table as regression rows only, and the listener must not break them."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15156",
+   "item": "DOR-RWB-P1-E1067-APP-18",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "DL10 and DL11 assumptions confirmed by the 26 Nov 2026 directive; note added to the section 7 target reading."
+  },
+  {
+   "ruling": "R-15157",
+   "item": "DOR-RWB-P1-E1067-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "X3 and X7 now covered by new AC9 and AC10 in section 7; Covered by column updated; section 7 holds eight criteria."
+  },
+  {
+   "ruling": "R-15158",
+   "item": "DOR-RWB-P1-E1067-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR7 covered by new AC11 and test row TC-E1-067-13."
+  },
+  {
+   "ruling": "R-22258",
+   "item": "GAP-1612",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Functional specification P7 (FSD P7) and wave 1 contract review",
+   "change": "Confirm rwb-source-data owns the one ledger (table, write, deduplication, ordered read, retention class) and rwb-case serves the timeline; re-issue FSD P7 without FEAT-ILG-01 to FEAT-ILG-10 and A2.26 to A2.35; keep REQ-ILG-001 to REQ-ILG-014 traced to CAP-P1-012.",
+   "note": "Ledger ownership is fixed in this story (DP-01, DP-18); the P7 specification must be re-issued."
+  },
+  {
+   "ruling": "R-22266",
+   "item": "GAP-0376",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "",
+   "note": "BR1 names one consumer group over the three topics; BR3 dedupes on CloudEvents id; BR4 orders by occurredAt then caseSeq and reports inversions."
+  },
+  {
+   "ruling": "R-22267",
+   "item": "GAP-0507",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "RWB-P1-E1067-CON",
+   "change": "Fix intake map rows: EV-16 DocumentStored maps to rwb.document.DocumentStored.v1 and EV-19 TimerBreached maps to rwb.case.TimerBreached.v1 (Architecture v5 slide 15 rows 16 and 19), with producer sign-off.",
+   "note": "Map rows belong to the contract; story BR1 already lists the legacy codes."
+  },
+  {
+   "ruling": "R-22268",
+   "item": "GAP-1055",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Technical specification P5 (T5.3 header schema)",
+   "change": "Add the DocumentStored idempotency key, derived from the document row, as a CloudEvents extension attribute read from configuration, with the key format stated.",
+   "note": "Header schema of the document event is owned by the producer spec, not this story."
+  },
+  {
+   "ruling": "R-22269",
+   "item": "GAP-1056",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR2 names the actor extension attribute ce_actor; the relay envelope test stays with section 12.3."
+  },
+  {
+   "ruling": "R-22270",
+   "item": "GAP-2257",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "rwb-case API and event specification (RWB-P1-E1067-CON contract owner)",
+   "change": "Record ce_idempotencykey and ce_actor, the key shape (event code, case number, action date) for the four events, the relay publish limit as a platform parameter, and the registry subject derived from rwb.case.events.v1 for the four types; re-test envelopes at contract level.",
+   "note": "Story BR2 and BR3 now name ce_actor and ce_idempotencykey; the remaining values sit in rwb-case."
+  },
+  {
+   "ruling": "R-24427",
+   "item": "CG-ALL-2313",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-01, TC-03 and TC-05 marked run by RWB-P1-E1066-APP as regression rows; owned criteria listed and new rows added."
+  }
+ ]
+}

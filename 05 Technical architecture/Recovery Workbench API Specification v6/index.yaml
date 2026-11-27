@@ -1,0 +1,545 @@
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - index"
+  version: 5.0.0
+  description: >-
+    Index and document map of Recovery Workbench API version 5.0.0, 22 November 2026, D-RCV-60 microservice
+    realignment. The v4 document (one OpenAPI file for the whole module) is split into one document per service
+    (19), the gateway-bff document and this index: every operation sits in exactly one document, and every
+    document carries the same operation, schema, response, parameter, number and date text as v4.
+    Owner of every operation is the owner of Microservice Ownership Map v1 (sheet Endpoints); where that owner
+    differs from the v4 x-module, the operation carries x-owner and x-owner-note and the move is listed under
+    x-owner-changes. REST base of each service is /api/recovery/<short>/v1, topic rwb.<short>.events.v1, task
+    queue rwb-<short> in namespace rwb-recovery (Template and Rules R4; Arch v5 slide 41).
+    Each served topic has an AsyncAPI 3.0 document under asyncapi/, one per service plus one shared document for
+    rwb.decision-record.v1 (Arch v5 slide 42 notes: the AsyncAPI document per service is the contract).
+    Version 4.0.0 description follows unchanged.
+    Endpoints of the recovery module in the ACE service. Every endpoint checks the role, the capability area,
+    the right and the scope. Version 4.0.0, 16 November 2026: rule packages in embedded Drools replace rule
+    versions (D-RCV-36, T3 to T5); the three former rule-version paths become the seven rule-package paths and
+    POST /admin/workflows/smoke is added. Version 3.0.0, 15 November 2026: re-based on the ACE database under
+    D-RCV-35 (U1 to U5). The Workbench takes no inbound source data; source records are read only through the
+    SELECT-only recovery.v_ace_* views and linked by ACE business keys (account_key, person_key, payment_code,
+    contact_key, asset_key, valuation_key) with no foreign key into ACE. Removed: the tracker endpoints
+    (/admin/trackers and its sub-paths, RWB-E1-005, E1-010, E1-012; trackers are retired through the Cutover
+    plan), source load reruns, the data quality exception list (RWB-E1-006; ACE ingestion checks) and the manual
+    interface retirement sign-off. Re-keyed: CaseAccount.accountKey, CaseParty.personKey, Proceeds.paymentCode
+    and the other links in Change Register v1 Appendix B. (C) Siam Commercial Bank and Henka Pte Ltd
+servers:
+- url: "/api/recovery"
+  description: "Shared App Gateway route to the Recovery gateway-bff (Arch v5 slide 34); each service document carries its own base /api/recovery/<short>/v1"
+security:
+- entraId: []
+tags:
+- name: "Cases"
+- name: "Work"
+- name: "Decisions"
+- name: "Treatment"
+- name: "Litigation"
+- name: "Assets"
+- name: "Debt sale"
+- name: "Write-off"
+- name: "Money"
+- name: "Documents"
+- name: "Interactions"
+- name: "Partners"
+- name: "Partner portal"
+- name: "Administration"
+- name: "Rules and parameters"
+- name: "Reporting"
+x-source:
+  file: "05 Technical architecture/Recovery Workbench API Specification v4.yaml"
+  title: "Recovery Workbench API"
+  version: "4.0.0"
+  date: "16 November 2026"
+  paths: 131
+  operations: 141
+  schemas: 172
+  responses: 9
+  securitySchemes: 1
+  document: "05 Technical architecture/Recovery Workbench API Specification v4.yaml"
+  document-set: "05 Technical architecture/Recovery Workbench API Specification v5"
+x-owner-map: "22 Microservice Realignment/Recovery Workbench Microservice Ownership Map v1.xlsx (sheet Endpoints); _work/msr/plan/ownership.json, section api"
+x-decision: "D-RCV-60"
+x-tool: "T3 Code / OpenCode / DeepSeek v4.1 Flash"
+x-document-set:
+- code: "P1"
+  service: "rwb-source-data"
+  name: "Source data"
+  wave: 1
+  schema: "rwb_source_data"
+  rest-base: "/api/recovery/source-data/v1"
+  topic: "rwb.source-data.events.v1"
+  task-queue: "rwb-source-data"
+  file: "rwb-source-data.yaml"
+  asyncapi: "asyncapi/rwb-source-data.asyncapi.yaml"
+  operations: 12
+  tags: ["Cases", "Interactions", "Administration"]
+- code: "P2"
+  service: "rwb-integration"
+  name: "Integration"
+  wave: 1
+  schema: "rwb_integration"
+  rest-base: "/api/recovery/integration/v1"
+  topic: "rwb.integration.events.v1"
+  task-queue: "rwb-integration"
+  file: "rwb-integration.yaml"
+  asyncapi: "asyncapi/rwb-integration.asyncapi.yaml"
+  operations: 9
+  tags: ["Cases", "Treatment", "Administration"]
+- code: "P3"
+  service: "rwb-case"
+  name: "Case and workflow"
+  wave: 1
+  schema: "rwb_case"
+  rest-base: "/api/recovery/case/v1"
+  topic: "rwb.case.events.v1"
+  task-queue: "rwb-case"
+  file: "rwb-case.yaml"
+  asyncapi: "asyncapi/rwb-case.asyncapi.yaml"
+  operations: 22
+  tags: ["Cases", "Work", "Administration"]
+- code: "P4"
+  service: "rwb-access"
+  name: "Access and authority"
+  wave: 1
+  schema: "rwb_access"
+  rest-base: "/api/recovery/access/v1"
+  topic: "rwb.access.events.v1"
+  task-queue: "rwb-access"
+  file: "rwb-access.yaml"
+  asyncapi: "asyncapi/rwb-access.asyncapi.yaml"
+  operations: 4
+  tags: ["Work", "Administration"]
+- code: "P5"
+  service: "rwb-document"
+  name: "Document"
+  wave: 1
+  schema: "rwb_document"
+  rest-base: "/api/recovery/document/v1"
+  topic: "rwb.document.events.v1"
+  task-queue: "rwb-document"
+  file: "rwb-document.yaml"
+  asyncapi: "asyncapi/rwb-document.asyncapi.yaml"
+  operations: 17
+  tags: ["Documents"]
+- code: "P6"
+  service: "rwb-comms"
+  name: "Communications"
+  wave: 1
+  schema: "rwb_comms"
+  rest-base: "/api/recovery/comms/v1"
+  topic: "rwb.comms.events.v1"
+  task-queue: "rwb-comms"
+  file: "rwb-comms.yaml"
+  asyncapi: "asyncapi/rwb-comms.asyncapi.yaml"
+  operations: 11
+  tags: ["Treatment", "Litigation", "Interactions", "Administration"]
+- code: "P7"
+  service: "rwb-decision"
+  name: "Decision and rules"
+  wave: 1
+  schema: "rwb_decision"
+  rest-base: "/api/recovery/decision/v1"
+  topic: "rwb.decision.events.v1"
+  task-queue: "rwb-decision"
+  file: "rwb-decision.yaml"
+  asyncapi: "asyncapi/rwb-decision.asyncapi.yaml"
+  operations: 15
+  tags: ["Decisions", "Rules and parameters"]
+- code: "P8"
+  service: "rwb-payment"
+  name: "Payment"
+  wave: 2
+  schema: "rwb_payment"
+  rest-base: "/api/recovery/payment/v1"
+  topic: "rwb.payment.events.v1"
+  task-queue: "rwb-payment"
+  file: "rwb-payment.yaml"
+  asyncapi: "asyncapi/rwb-payment.asyncapi.yaml"
+  operations: 2
+  tags: ["Money"]
+- code: "P9"
+  service: "rwb-reporting"
+  name: "Reporting"
+  wave: 1
+  schema: "rwb_reporting"
+  rest-base: "/api/recovery/reporting/v1"
+  topic: "rwb.reporting.events.v1"
+  task-queue: "rwb-reporting"
+  file: "rwb-reporting.yaml"
+  asyncapi: "asyncapi/rwb-reporting.asyncapi.yaml"
+  operations: 1
+  tags: ["Reporting"]
+- code: "P10"
+  service: "rwb-agent"
+  name: "Agent"
+  wave: 1
+  schema: "rwb_agent"
+  rest-base: "/api/recovery/agent/v1"
+  topic: "rwb.agent.events.v1"
+  task-queue: "rwb-agent"
+  file: "rwb-agent.yaml"
+  asyncapi: "asyncapi/rwb-agent.asyncapi.yaml"
+  operations: 11
+  tags: ["Cases", "Administration"]
+- code: "S1"
+  service: "rwb-valuation"
+  name: "Valuation and route"
+  wave: 3
+  schema: "rwb_valuation"
+  rest-base: "/api/recovery/valuation/v1"
+  topic: "rwb.valuation.events.v1"
+  task-queue: "rwb-valuation"
+  file: "rwb-valuation.yaml"
+  asyncapi: "asyncapi/rwb-valuation.asyncapi.yaml"
+  operations: 2
+  tags: ["Treatment", "Assets"]
+- code: "S2"
+  service: "rwb-treatment"
+  name: "Treatment and offer"
+  wave: 2
+  schema: "rwb_treatment"
+  rest-base: "/api/recovery/treatment/v1"
+  topic: "rwb.treatment.events.v1"
+  task-queue: "rwb-treatment"
+  file: "rwb-treatment.yaml"
+  asyncapi: "asyncapi/rwb-treatment.asyncapi.yaml"
+  operations: 4
+  tags: ["Treatment"]
+- code: "S3"
+  service: "rwb-guarantee"
+  name: "Guarantee"
+  wave: 3
+  schema: "rwb_guarantee"
+  rest-base: "/api/recovery/guarantee/v1"
+  topic: "rwb.guarantee.events.v1"
+  task-queue: "rwb-guarantee"
+  file: "rwb-guarantee.yaml"
+  asyncapi: "asyncapi/rwb-guarantee.asyncapi.yaml"
+  operations: 2
+  tags: ["Treatment"]
+- code: "S4"
+  service: "rwb-litigation"
+  name: "Litigation"
+  wave: 3
+  schema: "rwb_litigation"
+  rest-base: "/api/recovery/litigation/v1"
+  topic: "rwb.litigation.events.v1"
+  task-queue: "rwb-litigation"
+  file: "rwb-litigation.yaml"
+  asyncapi: "asyncapi/rwb-litigation.asyncapi.yaml"
+  operations: 5
+  tags: ["Litigation"]
+- code: "S5"
+  service: "rwb-asset"
+  name: "Asset"
+  wave: 2
+  schema: "rwb_asset"
+  rest-base: "/api/recovery/asset/v1"
+  topic: "rwb.asset.events.v1"
+  task-queue: "rwb-asset"
+  file: "rwb-asset.yaml"
+  asyncapi: "asyncapi/rwb-asset.asyncapi.yaml"
+  operations: 4
+  tags: ["Assets"]
+- code: "S6"
+  service: "rwb-debtsale"
+  name: "Debt sale"
+  wave: 3
+  schema: "rwb_debtsale"
+  rest-base: "/api/recovery/debtsale/v1"
+  topic: "rwb.debtsale.events.v1"
+  task-queue: "rwb-debtsale"
+  file: "rwb-debtsale.yaml"
+  asyncapi: "asyncapi/rwb-debtsale.asyncapi.yaml"
+  operations: 5
+  tags: ["Debt sale", "Partner portal"]
+- code: "S7"
+  service: "rwb-writeoff"
+  name: "Write-off"
+  wave: 4
+  schema: "rwb_writeoff"
+  rest-base: "/api/recovery/writeoff/v1"
+  topic: "rwb.writeoff.events.v1"
+  task-queue: "rwb-writeoff"
+  file: "rwb-writeoff.yaml"
+  asyncapi: "asyncapi/rwb-writeoff.asyncapi.yaml"
+  operations: 2
+  tags: ["Write-off"]
+- code: "S8"
+  service: "rwb-deviation"
+  name: "Deviation"
+  wave: 2
+  schema: "rwb_deviation"
+  rest-base: "/api/recovery/deviation/v1"
+  topic: "rwb.deviation.events.v1"
+  task-queue: "rwb-deviation"
+  file: "rwb-deviation.yaml"
+  asyncapi: "asyncapi/rwb-deviation.asyncapi.yaml"
+  operations: 2
+  tags: ["Cases"]
+- code: "S9"
+  service: "rwb-partner"
+  name: "Partner"
+  wave: 4
+  schema: "rwb_partner"
+  rest-base: "/api/recovery/partner/v1"
+  topic: "rwb.partner.events.v1"
+  task-queue: "rwb-partner"
+  file: "rwb-partner.yaml"
+  asyncapi: "asyncapi/rwb-partner.asyncapi.yaml"
+  operations: 6
+  tags: ["Partners", "Partner portal"]
+- code: "PLT"
+  service: "gateway-bff"
+  name: "Edge and gateway (platform library surface)"
+  wave: 0
+  file: "gateway-bff.yaml"
+  asyncapi: "none (no topic of its own)"
+  operations: 5
+  platform-operations: ["POST /admin/workflows/smoke", "GET /feature-flags", "GET /admin/feature-flags", "POST /admin/feature-flags", "PATCH /admin/feature-flags/{flagKey}"]
+x-totals:
+  documents: 21
+  service-documents: 19
+  operations: 141
+  asyncapi-documents: 20
+  components-copied-per-document: true
+x-owner-changes:
+- operation: "POST /assets/{assetKey}/valuations"
+  x-module: "S5"
+  owner: "S1"
+  file: "rwb-valuation.yaml"
+  asm: "ASM-0043"
+- operation: "GET /cases/{caseId}/interactions"
+  x-module: "P3"
+  owner: "P1"
+  file: "rwb-source-data.yaml"
+  asm: "ASM-0038"
+- operation: "POST /cases/{caseId}/interactions"
+  x-module: "P3"
+  owner: "P1"
+  file: "rwb-source-data.yaml"
+  asm: "ASM-0038"
+- operation: "GET /admin/rule-packages"
+  x-module: "P3"
+  owner: "P7"
+  file: "rwb-decision.yaml"
+  asm: "ASM-0040"
+- operation: "POST /admin/rule-packages/{packageCode}/versions"
+  x-module: "P3"
+  owner: "P7"
+  file: "rwb-decision.yaml"
+  asm: "ASM-0040"
+- operation: "GET /admin/rule-packages/{packageCode}/versions"
+  x-module: "P3"
+  owner: "P7"
+  file: "rwb-decision.yaml"
+  asm: "ASM-0040"
+- operation: "POST /admin/rule-package-versions/{versionId}/approve"
+  x-module: "P3"
+  owner: "P7"
+  file: "rwb-decision.yaml"
+  asm: "ASM-0040"
+- operation: "POST /admin/rule-package-versions/{versionId}/rollback"
+  x-module: "P3"
+  owner: "P7"
+  file: "rwb-decision.yaml"
+  asm: "ASM-0040"
+- operation: "GET /admin/rule-package-versions/{versionId}/dry-run"
+  x-module: "P3"
+  owner: "P7"
+  file: "rwb-decision.yaml"
+  asm: "ASM-0040"
+- operation: "GET /admin/rule-packages/change-report"
+  x-module: "P3"
+  owner: "P7"
+  file: "rwb-decision.yaml"
+  asm: "ASM-0040"
+- operation: "POST /admin/workflows/smoke"
+  x-module: "P3"
+  owner: "PLT"
+  file: "gateway-bff.yaml"
+  asm: "ASM-0042"
+- operation: "GET /admin/lists/{listCode}"
+  x-module: "P4"
+  owner: "P3"
+  file: "rwb-case.yaml"
+  asm: "ASM-0041"
+- operation: "POST /admin/reference-loads"
+  x-module: "P4"
+  owner: "P3"
+  file: "rwb-case.yaml"
+  asm: "ASM-0041"
+- operation: "POST /admin/reference-loads/{loadId}/approve"
+  x-module: "P4"
+  owner: "P3"
+  file: "rwb-case.yaml"
+  asm: "ASM-0041"
+- operation: "GET /feature-flags"
+  x-module: "P2"
+  owner: "PLT"
+  file: "gateway-bff.yaml"
+  asm: "ASM-0039"
+- operation: "GET /admin/feature-flags"
+  x-module: "P2"
+  owner: "PLT"
+  file: "gateway-bff.yaml"
+  asm: "ASM-0039"
+- operation: "POST /admin/feature-flags"
+  x-module: "P2"
+  owner: "PLT"
+  file: "gateway-bff.yaml"
+  asm: "ASM-0039"
+- operation: "PATCH /admin/feature-flags/{flagKey}"
+  x-module: "P2"
+  owner: "PLT"
+  file: "gateway-bff.yaml"
+  asm: "ASM-0039"
+- operation: "POST /admin/reference-loads/{loadId}/verify"
+  x-module: "P4"
+  owner: "P3"
+  file: "rwb-case.yaml"
+  asm: "ASM-0041"
+- operation: "POST /admin/reference-loads/{loadId}/rollback"
+  x-module: "P4"
+  owner: "P3"
+  file: "rwb-case.yaml"
+  asm: "ASM-0041"
+x-unreferenced-schemas:
+- schema: "DocumentVersion"
+  file: "rwb-document.yaml"
+  note: "Kept from v4; no operation of v4 references it. Not retired: GET /documents/{documentId} is the operation that returns it (versions), as its description states (GAP-0098; ASM-0162)"
+- schema: "FieldCaptureItem"
+  file: "rwb-document.yaml"
+  note: "Kept from v4; no operation of v4 references it. Retired in the first release of the registry: no operation returns it (GAP-0098; ASM-0162)"
+- schema: "FieldCaptureManifest"
+  file: "rwb-document.yaml"
+  note: "Kept from v4; no operation of v4 references it. Retired in the first release of the registry: no operation returns it (GAP-0098; ASM-0162)"
+- schema: "Listing"
+  file: "rwb-asset.yaml"
+  note: "Kept from v4; no operation of v4 references it. Retired in the first release of the registry: no operation returns it (GAP-0098; ASM-0162)"
+- schema: "PlacementResult"
+  file: "rwb-case.yaml"
+  note: "Kept from v4; no operation of v4 references it. Not retired: POST /queues/{queueId}/placements is the operation that returns it (201), as its description states (GAP-0098; ASM-0162)"
+- schema: "QueueOwnerLoad"
+  file: "rwb-case.yaml"
+  note: "Kept from v4; no operation of v4 references it. Not retired: GET /queues is the operation that returns it (Queue owners), as its description states (GAP-0098; ASM-0162)"
+- schema: "WriteOff"
+  file: "rwb-writeoff.yaml"
+  note: "Kept from v4; no operation of v4 references it. Retired in the first release of the registry: no operation returns it (GAP-0098; ASM-0162)"
+x-tag-index:
+  "Cases": ["rwb-source-data", "rwb-integration", "rwb-case", "rwb-agent", "rwb-deviation"]
+  "Work": ["rwb-case", "rwb-access"]
+  "Decisions": ["rwb-decision"]
+  "Treatment": ["rwb-integration", "rwb-comms", "rwb-valuation", "rwb-treatment", "rwb-guarantee"]
+  "Litigation": ["rwb-comms", "rwb-litigation"]
+  "Assets": ["rwb-valuation", "rwb-asset"]
+  "Debt sale": ["rwb-debtsale"]
+  "Write-off": ["rwb-writeoff"]
+  "Money": ["rwb-payment"]
+  "Documents": ["rwb-document"]
+  "Interactions": ["rwb-source-data", "rwb-comms"]
+  "Partners": ["rwb-partner"]
+  "Partner portal": ["rwb-debtsale", "rwb-partner"]
+  "Administration": ["rwb-source-data", "rwb-integration", "rwb-case", "rwb-access", "rwb-comms", "rwb-agent"]
+  "Rules and parameters": ["rwb-decision"]
+  "Reporting": ["rwb-reporting"]
+x-asyncapi-documents:
+- file: "asyncapi/rwb-source-data.asyncapi.yaml"
+  service: "rwb-source-data"
+  topic: "rwb.source-data.events.v1"
+  events: ["AceDataReady", "AceDataLate"]
+- file: "asyncapi/rwb-integration.asyncapi.yaml"
+  service: "rwb-integration"
+  topic: "rwb.integration.events.v1"
+  events: ["FileDelivered", "FileFailed"]
+- file: "asyncapi/rwb-case.asyncapi.yaml"
+  service: "rwb-case"
+  topic: "rwb.case.events.v1"
+  events: ["CaseCreated", "CaseAllocated", "CaseAllocationFailed", "CaseTransferred", "CaseStateChanged", "TimerBreached"]
+- file: "asyncapi/rwb-access.asyncapi.yaml"
+  service: "rwb-access"
+  topic: "rwb.access.events.v1"
+  events: ["AccessPolicyChanged", "DoaLimitChanged"]
+- file: "asyncapi/rwb-document.asyncapi.yaml"
+  service: "rwb-document"
+  topic: "rwb.document.events.v1"
+  events: ["DocumentStored", "DocumentFieldsExtracted"]
+- file: "asyncapi/rwb-comms.asyncapi.yaml"
+  service: "rwb-comms"
+  topic: "rwb.comms.events.v1"
+  events: ["NoticeGenerated", "NoticeDispatched", "NoticeDelivered"]
+- file: "asyncapi/rwb-decision.asyncapi.yaml"
+  service: "rwb-decision"
+  topic: "rwb.decision.events.v1"
+  events: ["DecisionRecorded", "ApprovalRequested", "RulePackageInForce"]
+- file: "asyncapi/rwb-payment.asyncapi.yaml"
+  service: "rwb-payment"
+  topic: "rwb.payment.events.v1"
+  events: ["TreatmentBooked", "PaymentMissed", "ProceedsMatched"]
+- file: "asyncapi/rwb-reporting.asyncapi.yaml"
+  service: "rwb-reporting"
+  topic: "rwb.reporting.events.v1"
+  events: []
+- file: "asyncapi/rwb-agent.asyncapi.yaml"
+  service: "rwb-agent"
+  topic: "rwb.agent.events.v1"
+  events: ["AgentRunCompleted"]
+- file: "asyncapi/rwb-valuation.asyncapi.yaml"
+  service: "rwb-valuation"
+  topic: "rwb.valuation.events.v1"
+  events: ["RouteDecided"]
+- file: "asyncapi/rwb-treatment.asyncapi.yaml"
+  service: "rwb-treatment"
+  topic: "rwb.treatment.events.v1"
+  events: ["TreatmentApproved", "TreatmentClosed"]
+- file: "asyncapi/rwb-guarantee.asyncapi.yaml"
+  service: "rwb-guarantee"
+  topic: "rwb.guarantee.events.v1"
+  events: ["GuaranteeClaim"]
+- file: "asyncapi/rwb-litigation.asyncapi.yaml"
+  service: "rwb-litigation"
+  topic: "rwb.litigation.events.v1"
+  events: ["JudgmentRecorded", "AuctionResult"]
+- file: "asyncapi/rwb-asset.asyncapi.yaml"
+  service: "rwb-asset"
+  topic: "rwb.asset.events.v1"
+  events: ["AssetTakenOn", "AssetSold"]
+- file: "asyncapi/rwb-debtsale.asyncapi.yaml"
+  service: "rwb-debtsale"
+  topic: "rwb.debtsale.events.v1"
+  events: ["LotAwarded", "AccountsTransferred"]
+- file: "asyncapi/rwb-writeoff.asyncapi.yaml"
+  service: "rwb-writeoff"
+  topic: "rwb.writeoff.events.v1"
+  events: ["WriteOffApproved"]
+- file: "asyncapi/rwb-deviation.asyncapi.yaml"
+  service: "rwb-deviation"
+  topic: "rwb.deviation.events.v1"
+  events: ["DeviationRaised", "DeviationCleared"]
+- file: "asyncapi/rwb-partner.asyncapi.yaml"
+  service: "rwb-partner"
+  topic: "rwb.partner.events.v1"
+  events: ["InstructionIssued", "PartnerResultSubmitted"]
+- file: "asyncapi/rwb.decision-record.v1.asyncapi.yaml"
+  service: "all 19 producers"
+  topic: "rwb.decision-record.v1"
+  events: ["DecisionRecorded"]
+x-change-log:
+- version: "5.0.0"
+  date: "22 November 2026"
+  decision: "D-RCV-60 microservice realignment"
+  tool: "T3 Code / OpenCode / DeepSeek v4.1 Flash"
+  change: "Split into 19 service documents, gateway-bff and this index; owner from Microservice Ownership Map v1; AsyncAPI 3.0 per topic under asyncapi/"
+- version: "4.0.0"
+  date: "16 November 2026"
+  decision: "D-RCV-36 (rule packages in embedded Drools)"
+  tool: "not stated in the source"
+paths: {}

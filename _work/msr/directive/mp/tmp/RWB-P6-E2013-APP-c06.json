@@ -1,0 +1,72 @@
+{
+ "edits": [
+  {
+   "old": "Then the delivery address of the recipient is resolved by the ACE notification path and is not stored in rwb_comms",
+   "new": "Then the delivery address of the recipient is resolved by the ACE notification path and is not stored in rwb_comms\n\n  Scenario: AC8 A second notice for the same approval and escalation level is refused by the unique key (new, D-RCV-60)\n    Given the notice of AC1 exists for approval \"A-2\" at escalation level 1\n    When a second notice row is written for approval \"A-2\" at escalation level 1 with its own message\n    Then the unique key of the notice kind, the approval reference and the escalation level refuses the second row\n    Then no second message is handed to the ACE notification path and no outbox row is added\n\n  Scenario: AC9 The message text comes from the template and carries the message ID MSG-P7-011 (new, D-RCV-60)\n    Given the template of the escalation notice is Approved and current and carries the message ID \"MSG-P7-011\"\n    When rwb-decision publishes ApprovalRequested for \"A-2\" at escalation level 1 on 15 December 2026\n    Then the merged message is the template's wording with \"{decision}\" = \"D7.1\" and \"{caseNo}\" = \"RW-2026-000123\"\n    Then no wording of the message is held in the code of rwb_comms\n\n  Scenario: AC10 The channel is read from the template and the send goes through the ACE notification path (new, D-RCV-60)\n    Given the template of the escalation notice holds a channel value of LOV-CHANNEL on its template row\n    When rwb-decision publishes ApprovalRequested for \"A-2\" at escalation level 1 on 15 December 2026\n    Then the notice carries the channel held on the template row\n    Then the send goes through the ACE notification path and no channel, template code or notice state is written in code\n\n  Scenario: AC11 The notice is held in rwb_comms and this service reads no other service's table (new, D-RCV-60)\n    Given the notice of AC1 exists\n    When the rows and the queries of this story are inspected\n    Then the notice and its send facts are rows of rwb_comms only\n    Then no query reads an `approval` row or a `delegation_limit` row of another service\n\n  Scenario: AC12 The notice, the trail and the logs carry role codes, user references, case number, decision code and dates only (new, D-RCV-60)\n    Given the notice of AC1 and its decision record and log entries\n    When the notice, the template merge values, the events, the trail and the logs of this story are inspected\n    Then they carry role codes, user references, the case number, the decision code and dates only\n    Then the delivery address of the recipient is the ACE notification path's and is not written by this story\n\n  Scenario: AC13 A notice whose send fails keeps sent_at empty until the outbox retry succeeds (new, D-RCV-60)\n    Given the ACE notification path returns \"unavailable\" for the first send of the notice of AC1\n    When rwb-decision publishes ApprovalRequested for \"A-2\" at escalation level 1 and the send fails\n    Then the notice is kept with sent_at empty and its outbox retry is pending\n    When the outbox retry succeeds\n    Then the send happens once and sent_at is set once\n\n  Scenario: AC14 The notice read answers 401, 403 and 404 for the refused callers (new, D-RCV-60)\n    Given the rwb-access contract mock returns the authorise answer refusing the caller to read the notice\n    When a caller with no authentication sends GET /api/recovery/comms/v1/notices/{noticeId} for the notice of AC1\n    Then the response is status 401\n    When an authorised caller without the Litigation right sends GET /api/recovery/comms/v1/notices/{noticeId} for the notice of AC1\n    Then the response is status 403 with MSG-P4-002\n    When an authorised caller sends GET /api/recovery/comms/v1/notices/{noticeId} for a notice out of scope\n    Then the response is status 404 with MSG-P4-003\n\n  Scenario: AC15 A replayed write with the same idempotency key returns the existing notice (new, D-RCV-60)\n    Given the notice of AC1 exists for approval \"A-2\" at escalation level 1\n    When the notice write for approval \"A-2\" at escalation level 1 is replayed with the same idempotency key, being the approval reference and escalation level of BR13\n    Then the existing notice is returned and no second notice row, decision record or outbox row is written\n    Then no second message is handed to the ACE notification path\n\n  Scenario: AC16 A redelivered consumed event is acknowledged and processed once (new, D-RCV-60)\n    Given the ApprovalRequested fact for \"A-2\" at escalation level 1 has been consumed and the notice of AC1 exists\n    When the same event is redelivered from rwb.decision.events.v1\n    Then the redelivery is acknowledged and no second notice, decision record or outbox row is written\n    Then no second message is handed to the ACE notification path\n\n  Scenario: AC17 A status change the model does not allow is refused and produces no notice (new, D-RCV-60)\n    Given the rwb-decision contract mock refuses a status change for approval \"A-2\" that the model does not allow\n    When rwb-decision refuses the status change for \"A-2\" on 15 December 2026\n    Then no notice is written and nothing is handed to the ACE notification path\n    Then no approval, no task and no case status changes in this story"
+  },
+  {
+   "old": "These seven criteria are new for the rwb-comms slice",
+   "new": "AC1 to AC7 are new for the rwb-comms slice"
+  },
+  {
+   "old": "| TC-E2-013-20 | Tables of 12.7 (boundary) | Not specified in the source documents (DOR-RWB-P6-E2013-APP-12) | Boundary values of the notice, template and merge_field tables |",
+   "new": "| TC-E2-013-20 | Tables of 12.7 (boundary) | Not specified in the source documents (DOR-RWB-P6-E2013-APP-12) | Boundary values of the notice, template and merge_field tables |\n| TC-E2-013-21 | AC8, BR13 | Component | Second notice row for approval \"A-2\" at escalation level 1; the unique key refuses it |\n| TC-E2-013-22 | AC9, BR14 | Contract | Approved template carrying MSG-P7-011; merged message with D7.1 and RW-2026-000123 |\n| TC-E2-013-23 | AC10, BR15 | Contract | Template row with a LOV-CHANNEL value; the notice carries it and the send goes through the ACE notification path |\n| TC-E2-013-24 | AC11, BR16 | Component | Notice of AC1; rows and queries inspected for other services' tables |\n| TC-E2-013-25 | AC12, BR17 | Contract | Notice of AC1 and its log entries; no personal data beyond the listed fields |\n| TC-E2-013-26 | AC13, BR18 | Component | ACE notification path unavailable on first send; sent_at empty until one successful outbox retry |\n| TC-E2-013-27 | AC14 | Component | Unauthenticated caller 401; caller without the Litigation right 403 with MSG-P4-002; out of scope notice 404 with MSG-P4-003 |\n| TC-E2-013-28 | AC15, BR13 | Contract | Replay of the notice write with the same idempotency key (approval A-2, escalation level 1) |\n| TC-E2-013-29 | AC16 | Component | Redelivered ApprovalRequested for A-2 at escalation level 1 after consumption |\n| TC-E2-013-30 | AC17, BR6 | Contract | Status change the model does not allow, refused by rwb-decision; no notice follows |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29618",
+   "item": "ACR-RWB-P6-E2013-APP-AC7",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E2-013-19 in section 16 already covers AC7; no edit made."
+  },
+  {
+   "ruling": "R-31295",
+   "item": "NEWAC-RWB-P6-E2013-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 to AC13 for BR13 to BR18 in section 7, with TC-E2-013-21 to TC-E2-013-26 in section 16."
+  },
+  {
+   "ruling": "R-31296",
+   "item": "NEWAC-RWB-P6-E2013-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for 401, 403, 404 of the notice read, with TC-E2-013-27. No 401 message ID is in the source."
+  },
+  {
+   "ruling": "R-31297",
+   "item": "NEWAC-RWB-P6-E2013-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for replay using the BR13 key (approval reference and level), with TC-E2-013-28."
+  },
+  {
+   "ruling": "R-31298",
+   "item": "NEWAC-RWB-P6-E2013-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for a redelivered consumed event, with TC-E2-013-29."
+  },
+  {
+   "ruling": "R-31299",
+   "item": "NEWAC-RWB-P6-E2013-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for a refused disallowed status change producing no notice, with TC-E2-013-30."
+  }
+ ]
+}

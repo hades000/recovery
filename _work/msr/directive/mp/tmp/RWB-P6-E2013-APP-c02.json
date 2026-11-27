@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| (assumed column) | `notice` | approval_ref, escalation_level, recipient_role, recipient_user_ref, template_code, template_version, sent_at, message_text | Write; the columns are Not specified in the source documents (GAP-1222; ASM-2180) |",
+   "new": "| (assumed column) | `notice` | approval_ref, escalation_level, recipient_role, recipient_user_ref, template_code, template_version, sent_at, message_text | Write; the columns are Not specified in the source documents (GAP-1222; ASM-2180); approval_ref and escalation_level are not fields of notice in LDM v9 (DOR-RWB-P6-E2013-APP-7) |"
+  },
+  {
+   "old": "| DF-REF-252 to DF-REF-260 | `merge_field` | merge_code, source_entity, source_field, field_id, is_required, personal_data, catalog_version, valid_from | Read |",
+   "new": "| DF-REF-252 to DF-REF-260 | `merge_field` | merge_code, source_entity, source_field, field_id, is_required, personal_data, catalog_version, valid_from | Read; a field flagged personal_data is not written (DOR-RWB-P6-E2013-APP-11) |"
+  },
+  {
+   "old": "| `rwb.comms.NoticeGenerated.v1` (EV-13) | `rwb.comms.events.v1` | P6 | caseId | notice ID, case ID, case number, notice kind `ESCALATION`, decision code, approval reference, escalation level, template code and version, recipient role, generated at |",
+   "new": "| `rwb.comms.NoticeGenerated.v1` (EV-13) | `rwb.comms.events.v1` | P6 | caseId | notice ID (`noticeid`), case ID (`caseid`), notice type (`type`) `ESCALATION`, template version (`templateversion`) |"
+  },
+  {
+   "old": "| `rwb.comms.NoticeDispatched.v1` (EV-14) | `rwb.comms.events.v1` | P6 | caseId | notice ID, case ID, notice kind, approval reference, escalation level, recipient role, channel, sent at |",
+   "new": "| `rwb.comms.NoticeDispatched.v1` (EV-14) | `rwb.comms.events.v1` | P6 | caseId | notice ID (`noticeid`), sent date (`sentdate`), barcode (`barcode`: Not specified in the source documents (CG-ALL-6474)) |"
+  },
+  {
+   "old": "| TC-E2-013-17 | AC5 | Not specified in the source documents (DOR-RWB-P6-E2013-APP-12) | Data of AC5 in section 7 |",
+   "new": "| TC-E2-013-17 | AC5 | Component | Data of AC5 in section 7 |"
+  },
+  {
+   "old": "| TC-E2-013-18 | AC6 | Not specified in the source documents (DOR-RWB-P6-E2013-APP-12) | Data of AC6 in section 7 |",
+   "new": "| TC-E2-013-18 | AC6 | Component | Data of AC6 in section 7 |"
+  },
+  {
+   "old": "| TC-E2-013-19 | AC7 | Not specified in the source documents (DOR-RWB-P6-E2013-APP-12) | Data of AC7 in section 7 |",
+   "new": "| TC-E2-013-19 | AC7 | Contract | Data of AC7 in section 7 |"
+  },
+  {
+   "old": "DP-06 and DP-07 are read in process and never resolved into a level, a limit or a holder by this service.",
+   "new": "DP-06 and DP-07 are read in process and never resolved into a level, a limit or a holder by this service. SCR-10 is `rwb-decision`'s and SCR-11 is not served here; the empty, loading, error and no-access states of SCR-10 and SCR-11 are not specified in this story and belong to their owning slice."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-06462",
+   "item": "DOR-RWB-P6-E2013-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Add notice.approval_ref and notice.escalation_level as fields of notice, and the other assumed notice columns of section 11",
+   "note": "Story row now flags approval_ref and escalation_level as not LDM v9 fields. The LDM needs the fields."
+  },
+  {
+   "ruling": "R-06463",
+   "item": "DOR-RWB-P6-E2013-APP-8",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "rwb-access API yaml (RWB-P4 contract)",
+   "change": "Publish POST /api/recovery/access/v1/authorise",
+   "note": "Path is not published by rwb-access. Story unchanged; the other contract items are dispositioned separately."
+  },
+  {
+   "ruling": "R-11028",
+   "item": "CG-ALL-6472",
+   "status": "Not applied",
+   "section": "4, 12.1",
+   "target": "",
+   "change": "",
+   "note": "Standard's message ID for 401 no session is not in the source documents; the business analyst must supply it. No ID invented."
+  },
+  {
+   "ruling": "R-11029",
+   "item": "CG-ALL-6473",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "",
+   "note": "NoticeGenerated payload aligned to Kafka Catalog v1 fields caseid, noticeid, templateversion and type."
+  },
+  {
+   "ruling": "R-11030",
+   "item": "CG-ALL-6474",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "",
+   "note": "NoticeDispatched payload aligned to catalog fields noticeid, sentdate and barcode; barcode value is not specified in the sources."
+  },
+  {
+   "ruling": "R-11031",
+   "item": "CG-ALL-6476",
+   "status": "Cross-document",
+   "section": "12.4",
+   "target": "Kafka Catalog v1",
+   "change": "Add rwb-comms as a consumer of rwb.decision.ApprovalRequested.v1 (EV-09) and add its ACL",
+   "note": "Catalog lists only gateway-bff as consumer. Story keeps the handler and needs the catalog change."
+  },
+  {
+   "ruling": "R-11032",
+   "item": "CG-ALL-6477",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for notification path unavailable or merge value absent, then the story cites it",
+   "note": "A new ID is needed from the standard. No story edit until it exists."
+  },
+  {
+   "ruling": "R-11033",
+   "item": "CG-ALL-6479",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Test cases TC-E2-013-17 to 19 exist for AC5 to AC7; their Level is now set to Component, Component and Contract."
+  },
+  {
+   "ruling": "R-17628",
+   "item": "DOR-RWB-P6-E2013-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Story serves no screen; SCR-10 and SCR-11 states are stated as not specified here and belong to the owning slice."
+  },
+  {
+   "ruling": "R-17629",
+   "item": "DOR-RWB-P6-E2013-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Merge_field personal_data fields are read only and not written, consistent with AC7; the notice carries no personal data."
+  }
+ ]
+}

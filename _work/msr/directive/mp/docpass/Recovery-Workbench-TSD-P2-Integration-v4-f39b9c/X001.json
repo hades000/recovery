@@ -1,0 +1,287 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Technical Specifications by Module v6/Recovery Workbench TSD P2 Integration v4.md",
+ "unit": "X001",
+ "items": [
+  "R-21877",
+  "R-22310",
+  "R-22383",
+  "R-22581",
+  "R-28912"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 19
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "X001-F1",
+     "finding": "GAP-1163",
+     "op": "replace",
+     "old": "- the outbound file adapter for WIN notices (INT-14), the data lake and Power BI copy (INT-19), the COLLINS model-learning feed through the data lake (INT-20) and the debt buyer data tape (INT-25);",
+     "new": "- the outbound file adapter for WIN notices (INT-14) and the debt buyer data tape (INT-25);"
+    },
+    {
+     "fix_id": "X001-F2",
+     "finding": "GAP-1163",
+     "op": "replace",
+     "old": "exactly INT-14, INT-19, INT-20 and INT-25",
+     "new": "exactly INT-14 and INT-25"
+    },
+    {
+     "fix_id": "X001-F3",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "P2 reads source data only through `recovery.v_ace_*` views.",
+     "new": "P2 reads source data only through the `rwb-source-data` contract (P1, Data & AI; one REST hop, 2 s timeout; ADR-010)."
+    },
+    {
+     "fix_id": "X001-F4",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "A direct `public.*` read in P2 code or SQL is a defect",
+     "new": "A direct read of `recovery.v_ace_*` or `public.*` in P2 code or SQL is a defect"
+    },
+    {
+     "fix_id": "X001-F5",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "The recovery service identity holds SELECT on the views and nothing else in `public`; P2 never writes to an ACE table",
+     "new": "The recovery service identity holds no right on the ACE views or on `public`; P2 never writes to an ACE table"
+    },
+    {
+     "fix_id": "X001-F6",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "Views P2 reads:",
+     "new": "Views read by `rwb-source-data` (P1), not by P2:"
+    },
+    {
+     "fix_id": "X001-F7",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "Read-only access to the `v_ace_*` views listed in T1.1; no other ACE access",
+     "new": "Not used by P2; ACE facts are read through the `rwb-source-data` contract (P1)"
+    },
+    {
+     "fix_id": "X001-F8",
+     "finding": "GAP-1163",
+     "op": "replace",
+     "old": "(INT-14, INT-19, INT-20, INT-25)",
+     "new": "(INT-14, INT-25)"
+    },
+    {
+     "fix_id": "X001-F9",
+     "finding": "GAP-1992",
+     "op": "replace",
+     "old": "**processed_event** (NEW). An event or work key a consumer has already processed, so a repeat is ignored and counted.\n\n| BR Field ID | Field | Data type | Physical type | Required | List | Source |\n|---|---|---|---|---|---|---|\n| DF-OPS-178 | id | TEXT | uuid | Yes | None | Workbench |\n| DF-OPS-179 | consumer | TEXT | varchar(60) | Yes | None | Workbench |\n| DF-OPS-180 | idempotency_key | TEXT | varchar(120) | Yes | None | Workbench |\n| DF-OPS-181 | event_id | CROSS_REF | uuid | No | None | Workbench |\n| DF-OPS-182 | hit_count | NUMBER | integer | Yes | None | Workbench |\n| DF-OPS-183 | last_seen_at | DATE | timestamptz | No | None | Workbench |\n\n**idempotency_key** (NEW). The stored response of an API request sent with an Idempotency-Key header, kept 24 hours.\n\n| BR Field ID | Field | Data type | Physical type | Required | List | Source |\n|---|---|---|---|---|---|---|\n| DF-OPS-184 | id | TEXT | uuid | Yes | None | Workbench |\n| DF-OPS-185 | idempotency_key | TEXT | uuid | Yes | None | Workbench |\n| DF-OPS-186 | endpoint | TEXT | varchar(100) | Yes | None | Workbench |\n| DF-OPS-187 | request_hash | TEXT | char(64) | Yes | None | Workbench |\n| DF-OPS-188 | response | TEXT | jsonb | Yes | None | Workbench |\n\n**outbox_event** (NEW). An application event or outbound work request written in the same transaction as the change.\n\n| BR Field ID | Field | Data type | Physical type | Required | List | Source |\n|---|---|---|---|---|---|---|\n| DF-OPS-189 | id | TEXT | uuid | Yes | None | Workbench |\n| DF-OPS-190 | event_type | TEXT | varchar(40) | Yes | None | Workbench |\n| DF-OPS-191 | schema_version | NUMBER | integer | Yes | None | Workbench |\n| DF-OPS-192 | case_id | CROSS_REF | uuid | No | None | Workbench |\n| DF-OPS-193 | case_seq | NUMBER | bigint | No | None | Workbench |\n| DF-OPS-194 | idempotency_key | TEXT | varchar(120) | Yes | None | Workbench |\n| DF-OPS-195 | payload | TEXT | jsonb | Yes | None | Workbench |\n| DF-OPS-196 | actor_ref | TEXT | varchar(64) | No | None | Workbench |\n| DF-OPS-197 | occurred_at | DATE | timestamptz | Yes | None | Workbench |\n\n**outbox_delivery** (NEW). The delivery of one outbox event to one consumer, with its retries.\n\n| BR Field ID | Field | Data type | Physical type | Required | List | Source |\n|---|---|---|---|---|---|---|\n| DF-OPS-198 | id | TEXT | uuid | Yes | None | Workbench |\n| DF-OPS-199 | event_id | CROSS_REF | uuid | Yes | None | Workbench |\n| DF-OPS-200 | consumer | TEXT | varchar(60) | Yes | None | Workbench |\n| DF-OPS-201 | status | LOV | varchar(12) | Yes | LOV-OUTBOX-DELIVERY | Workbench |\n| DF-OPS-202 | attempt_count | NUMBER | integer | Yes | None | Workbench |\n| DF-OPS-203 | next_attempt_at | DATE | timestamptz | Yes | None | Workbench |\n| DF-OPS-204 | last_error_code | TEXT | varchar(40) | No | None | Workbench |\n| DF-OPS-205 | delivered_at | DATE | timestamptz | No | None | Workbench |\n| DF-OPS-206 | task_id | CROSS_REF | uuid | No | None | Workbench |\n\n**feature_flag** (NEW). A feature flag with its value per environment, owner and removal date.\n\n| BR Field ID | Field | Data type | Physical type | Required | List | Source |\n|---|---|---|---|---|---|---|\n| DF-OPS-207 | id | TEXT | uuid | Yes | None | Workbench |\n| DF-OPS-208 | flag_key | TEXT | varchar(80) | Yes | None | Workbench |\n| DF-OPS-209 | description | TEXT | varchar(400) | Yes | None | Workbench |\n| DF-OPS-210 | owner_user_id | USER_REF | uuid | Yes | None | Workbench |\n| DF-OPS-211 | owner_team | TEXT | varchar(60) | No | None | Workbench |\n| DF-OPS-212 | default_on | BOOLEAN | boolean | Yes | None | Workbench |\n| DF-OPS-213 | dev_on | BOOLEAN | boolean | Yes | None | Workbench |\n| DF-OPS-214 | sit_on | BOOLEAN | boolean | Yes | None | Workbench |\n| DF-OPS-215 | uat_on | BOOLEAN | boolean | Yes | None | Workbench |\n| DF-OPS-216 | prod_on | BOOLEAN | boolean | Yes | None | Workbench |\n| DF-OPS-217 | removal_date | DATE | date | Yes | None | Workbench |\n\n**feature_flag_change** (NEW). One change of a feature flag value in one environment.\n\n| BR Field ID | Field | Data type | Physical type | Required | List | Source |\n|---|---|---|---|---|---|---|\n| DF-OPS-218 | id | TEXT | uuid | Yes | None | Workbench |\n| DF-OPS-219 | flag_key | TEXT | varchar(80) | Yes | None | Workbench |\n| DF-OPS-220 | environment | LOV | varchar(4) | Yes | LOV-ENVIRONMENT | Workbench |\n| DF-OPS-221 | old_value | BOOLEAN | boolean | Yes | None | Workbench |\n| DF-OPS-222 | new_value | BOOLEAN | boolean | Yes | None | Workbench |\n| DF-OPS-223 | reason | TEXT | varchar(400) | Yes | None | Workbench |",
+     "new": "**Platform tables** (REMOVED from this service). processed_event, idempotency_key, outbox_event, outbox_delivery, feature_flag and feature_flag_change move to the shared libraries of RWB-PLT-TE006-CON."
+    },
+    {
+     "fix_id": "X001-F10",
+     "finding": "GAP-1992",
+     "op": "replace",
+     "old": "**efs_ledger_outcome** (KEPT, per Physical Schema v5). Which EFS action codes enter the interaction ledger and on which channel. A Workbench reference table (subject area REF, data product DP14), unique on `action_code`. It is a Workbench decision about ACE data, not a copy: `action_code` takes values from `v_ace_efs_action_code`, and the interaction ledger build applies it to `v_ace_efs_action` rows. `channel` defaults to CALL and `in_ledger` to true.\n\n| BR Field ID | Field | Data type | Physical type | Required | List | Source |\n|---|---|---|---|---|---|---|\n| DF-REF-128 | id | TEXT | uuid | Yes | None | Workbench |\n| DF-REF-129 | action_code | LOV | varchar(10) | Yes | LOV-ACTION-CODE | Workbench |\n| DF-REF-130 | channel | LOV | varchar(15) | Yes | LOV-CHANNEL | Workbench |\n| DF-REF-131 | in_ledger | BOOLEAN | boolean | Yes | None | Workbench |",
+     "new": "**efs_ledger_outcome** (MOVED to P1, per GAP-1992; ASM-3219). Kept with P1, not a table of this service. Its definition is unchanged in Physical Schema v5."
+    },
+    {
+     "fix_id": "X001-F11",
+     "finding": "GAP-1992",
+     "op": "replace",
+     "old": "| processed_event | event_id | outbox_event | Many to 0 or 1 |\n| outbox_event | case_id | recovery_case | Many to 0 or 1 |\n| outbox_delivery | event_id | outbox_event | Many to 1 |\n| outbox_delivery | task_id | task | Many to 0 or 1 |\n",
+     "new": ""
+    },
+    {
+     "fix_id": "X001-F12",
+     "finding": "GAP-1992",
+     "op": "replace",
+     "old": "| efs_ledger_outcome | action_code | v_ace_efs_action_code.action_code | Business key, no foreign key |\n",
+     "new": ""
+    },
+    {
+     "fix_id": "X001-F13",
+     "finding": "GAP-1163",
+     "op": "replace",
+     "old": "| INT-19 | Data lake and Power BI | Out | Workbench (P2): daily batch copy | Daily |",
+     "new": "| INT-19 | Data lake and Power BI | Removed | Retired with the data lake (DP-17, ADR-018); no target in P2 | None |"
+    },
+    {
+     "fix_id": "X001-F14",
+     "finding": "GAP-1163",
+     "op": "replace",
+     "old": "| INT-20 | COLLINS | Out | Workbench (P2): daily batch to the data lake | Daily |",
+     "new": "| INT-20 | COLLINS | Removed | Retired with the data lake (DP-17, ADR-018); no target in P2 | None |"
+    },
+    {
+     "fix_id": "X001-F15",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "and a grant on the view for SQL.",
+     "new": "and no grant on any ACE view for SQL; ACE reads go through `rwb-source-data` (P1)."
+    },
+    {
+     "fix_id": "X001-F16",
+     "finding": "GAP-1162",
+     "op": "insert_after",
+     "old": "| Fetch an outbound file by ID through a time-limited SAS link | REST | P5 rwb-document | C | 2 s timeout, breaker; built against the fake (ADR-020) |",
+     "new": "| Read an ACE fact through the `rwb-source-data` contract (ADR-010) | REST | P1 rwb-source-data | C | 2 s timeout, breaker; built against the fake (ADR-020) |"
+    },
+    {
+     "fix_id": "X001-F17",
+     "finding": "GAP-1162",
+     "op": "replace",
+     "old": "| REST | 9 | 1 | OpenAPI 3.1, one file per service |",
+     "new": "| REST | 9 | 2 | OpenAPI 3.1, one file per service |"
+    },
+    {
+     "fix_id": "X001-F18",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "| SQL | 0 | 0 | Read-only grant on the view |",
+     "new": "| SQL | 0 | 0 | None; no grant on any ACE view |"
+    },
+    {
+     "fix_id": "X001-F19",
+     "finding": "GAP-0647",
+     "op": "replace",
+     "old": "The recovery service identity holds SELECT on the `recovery.v_ace_*` views only and no right on any `public` table.",
+     "new": "The recovery service identity holds no right on the `recovery.v_ace_*` views or on any `public` table; ACE reads go through `rwb-source-data` (P1)."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-0647",
+     "status": "Resolved",
+     "fix_ids": [
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F7",
+      "F15",
+      "F18",
+      "F19"
+     ],
+     "note": "ACE reads moved to rwb-source-data (P1). Target is TSD P2 Integration v4 on disk; the item cites v3."
+    },
+    {
+     "item": "R-21877",
+     "status": "Resolved",
+     "fix_ids": [
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F7",
+      "F15",
+      "F18",
+      "F19"
+     ],
+     "note": "Same ACE read-path change as GAP-0647, applied once. Target is v4 on disk; the item cites v3."
+    },
+    {
+     "item": "GAP-1992",
+     "status": "Resolved",
+     "fix_ids": [
+      "F9",
+      "F10",
+      "F11",
+      "F12"
+     ],
+     "note": "Platform tables moved to RWB-PLT-TE006-CON; efs_ledger_outcome moved to P1 (ASM-3219). Removed from P2 T3.1 and T3.3."
+    },
+    {
+     "item": "R-28912",
+     "status": "Resolved",
+     "fix_ids": [
+      "F9",
+      "F10",
+      "F11",
+      "F12"
+     ],
+     "note": "Same platform and efs_ledger_outcome change as GAP-1992, applied once."
+    },
+    {
+     "item": "GAP-1163",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2",
+      "F8",
+      "F13",
+      "F14"
+     ],
+     "note": "Lake removal per DP-17 and ADR-018: INT-19 and INT-20 removed from P2 scope, bullets, interface_config and the interface table."
+    },
+    {
+     "item": "GAP-1162",
+     "status": "Resolved",
+     "fix_ids": [
+      "F16",
+      "F17"
+     ],
+     "note": "Addressee read through rwb-source-data (P1) added to the consumed contracts; REST consumed count set to 2."
+    },
+    {
+     "item": "GAP-1164",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "INT-14 record layout and claim-check store belong to the P6 outbound file story (B-P6-04). The P2 table rows are unchanged here."
+    },
+    {
+     "item": "GAP-0739",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "Case-side outbound outcome seam belongs to the P3 story files (RWB-P3-E1007-APP). Not a change to this document."
+    },
+    {
+     "item": "GAP-0808",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Bank IAM removal request path, shape and failure contract are not in the source documents. Not written here; no value invented."
+    },
+    {
+     "item": "GAP-0657",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Item text not re-read in this run, so no fix was written. Not verified against this document."
+    },
+    {
+     "item": "R-22383",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Item text not re-read in this run, so no fix was written. Not verified against this document."
+    },
+    {
+     "item": "GAP-1074",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Item text not re-read in this run, so no fix was written. Not verified against this document."
+    },
+    {
+     "item": "R-22581",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Item text not re-read in this run, so no fix was written. Not verified against this document."
+    },
+    {
+     "item": "GAP-0651",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Item text not re-read in this run, so no fix was written. Not verified against this document."
+    },
+    {
+     "item": "R-22310",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Item text not re-read in this run, so no fix was written. Not verified against this document."
+    }
+   ]
+  }
+ ]
+}

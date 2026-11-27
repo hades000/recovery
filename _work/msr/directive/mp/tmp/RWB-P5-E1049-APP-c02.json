@@ -1,0 +1,143 @@
+{
+ "edits": [
+  {
+   "old": "- The legacy rerun of JOB-12 from the job monitor is the rerun of the workflow run for its business date, refused while the run is active and refused for a completed business date; the operation itself is the platform job view's and this story adds no endpoint for it.",
+   "new": "- The legacy rerun of JOB-12 from the job monitor is the rerun of the workflow run for its business date, refused while the run is active and refused for a completed business date; the operation itself is the platform job view's and this story adds no endpoint for it.\n- Screen states: the error state of SCR-44 (job monitor) is the alert of X3 and the failed-run count of BR5; the empty, loading and no-access states of SCR-44 and the empty, loading, error and no-access states of SCR-31 are Not specified in the source documents (DOR-RWB-P5-E1049-APP-10)."
+  },
+  {
+   "old": "| X7 | A user without the Documents right reads a document holding OCR text | Refused with 403; no text returned | MSG-P4-002 | TC-E1-049-10 (Access) |",
+   "new": "| X7 | A user without the Documents right reads a document holding OCR text | Refused with 403; no text returned | MSG-P4-002 | AC10 |"
+  },
+  {
+   "old": "| X8 | The intake read, the text read or the OCR status read names a case outside the caller's scope | Refused with 403; no page text and no status is returned | MSG-P4-003 | TC-E1-049-10 (target read) |",
+   "new": "| X8 | The intake read, the text read or the OCR status read names a case outside the caller's scope | Refused with 403; no page text and no status is returned | MSG-P4-003 | AC11 |"
+  },
+  {
+   "old": "Then the item has one set of document_text rows\n```",
+   "new": "Then the item has one set of document_text rows\n\n  Scenario: AC10 Access refused without the Documents right (exception X7)\n    Given a user with role RW-CAPACITY and no Documents right\n    When the user reads a document holding OCR text\n    Then the read is refused with 403 and MSG-P4-002\n    Then no OCR text is returned\n\n  Scenario: AC11 Case outside the caller's scope (exception X8)\n    Given a user whose scope does not include case \"RW-2026-000123\"\n    When the user reads the intake item, the text or the OCR status of a document on that case\n    Then the read is refused with 403 and MSG-P4-003\n    Then no page text and no status is returned\n\n  Scenario: AC12 Unscanned file is not read (BR3)\n    Given one CLEAN pending intake item and one intake item whose scan result is not CLEAN\n    When the OCR step runs\n    Then the OCR service receives exactly one call, for the CLEAN item\n    Then the item whose scan result is not CLEAN has no document_text row\n```"
+  },
+  {
+   "old": "Every Given, When and Then line above is the legacy line unchanged, except the two Background Givens",
+   "new": "Every Given, When and Then line of AC1 to AC9 is the legacy line unchanged, except the two Background Givens"
+  },
+  {
+   "old": "DP-07 keeps the four lists in reference data; DP-15 puts the intake migration in the per-service Flyway sequence as one step in `rwb_document`; DP-09 puts the event in the outbox inside the activity transaction; DP-13 and DP-19 give the reads their own base and the composite route.",
+   "new": "DP-07 keeps the four lists in reference data; DP-15 puts the intake migration in the per-service Flyway sequence as one step in `rwb_document`; DP-09 puts the event in the outbox inside the activity transaction; DP-13 and DP-19 give the reads their own base and the composite route.\n\nOpen decisions DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863) and DL11 (assumptions ASM-0553, ASM-0703, ASM-1051, ASM-1104) remain open; the directive of 26 November 2026 confirms each of these assumptions, and BR4 holds on that basis."
+  },
+  {
+   "old": "| TC-E1-049-10 | Access | Component | Capacity and workforce planner (RW-CAPACITY, no Documents right) calls the document read on a document with OCR text; refused with MSG-P4-002 |",
+   "new": "| TC-E1-049-10 | Access, AC10 | Component | Capacity and workforce planner (RW-CAPACITY, no Documents right) calls the document read on a document with OCR text; refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E1-049-09 | AC9 | End to end | One item, 4 workers |",
+   "new": "| TC-E1-049-09 | AC9 | End to end | One item, 4 workers |\n| TC-E1-049-11 | Contract (section 12 operations, events and activities) | Contract | Each operation, event and activity named in section 12, checked against the rwb-document contract |\n| TC-E1-049-12 | Boundary (section 12.7 tables, ASM-3438) | Component | Each table of section 12.7 at its boundary; boundary values Not specified in the source documents (ASM-3438) |\n| TC-E1-049-13 | AC11 | Component | Caller outside the scope of case \"RW-2026-000123\" calls the intake item, text or OCR status read; refused with MSG-P4-003 |\n| TC-E1-049-14 | AC12, BR3 | End to end | One CLEAN pending intake item and one intake item whose scan result is not CLEAN |"
+  },
+  {
+   "old": "The service identity that writes the text and the event is SY-OCR; the writer of the run record is the workflow's.",
+   "new": "The service identity that writes the text and the event is SY-OCR; the writer of the run record is the workflow's. The authorise check of `rwb-access` (DP-08) runs on each REST operation of 12.1; its operation name is Not specified in the source documents (DOR-RWB-P5-E1049-APP-6)."
+  },
+  {
+   "old": "Personal data never enters the event payload, the workflow input or the log; the OCR text is held only in `document_text` and the text container, and logs carry the intake ID and the counts only.",
+   "new": "Personal data never enters the event payload, the workflow input or the log; the OCR text is held only in `document_text` and the text container, and logs carry the intake ID and the counts only. The Data Classification v5 class of DF-CAS-009 and of the OCR text is Not specified in the source documents (DOR-RWB-P5-E1049-APP-11); both stay out of the event payload, the workflow input and the log."
+  },
+  {
+   "old": "Field IDs are those in the Logical Data Model and Data Dictionary and the TSD P5 T3.1 table.",
+   "new": "Field IDs are those in the Logical Data Model and Data Dictionary and the TSD P5 T3.1 table. The index name `uk_document_text_page` is a physical object of this story (section 13), not a field of LDM v9 or Data Classification v5."
+  },
+  {
+   "old": "| Event | Topic | Use |\n|---|---|---|\n| `rwb.document.DocumentStored.v1` (EV-16) | `rwb.document.events.v1` | The `ingest` activity creates one `document_intake` row for each stored document with source UPLOAD; the inbox row of DP-09 drops a redelivery |",
+   "new": "| Event | Topic | Use | Owner or service |\n|---|---|---|---|\n| `rwb.document.DocumentStored.v1` (EV-16) | `rwb.document.events.v1` | The `ingest` activity creates one `document_intake` row for each stored document with source UPLOAD; the inbox row of DP-09 drops a redelivery | Publisher: RWB-P5-E1024-APP; consumer: rwb-document (this story) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17231",
+   "item": "DOR-RWB-P5-E1049-APP-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added screen-state note: SCR-44 error state mapped to X3 and BR5; other empty, loading, no-access and SCR-31 states marked not specified."
+  },
+  {
+   "ruling": "R-17232",
+   "item": "DOR-RWB-P5-E1049-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now names DF-CAS-009 and OCR text as personal data, with Data Classification v5 class not specified; both kept out of payload, input, log."
+  },
+  {
+   "ruling": "R-17233",
+   "item": "DOR-RWB-P5-E1049-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Confirm §18 test lists of REQ-DCM-006, REQ-DCM-009 and REQ-DCM-010 in RWB-P5-E1049-APP against TC-E1-049-01 to TC-E1-049-14; story §18 not changed here. Added TC-E1-049-11 (contract) and TC-E1-049-12 (boundary)."
+  },
+  {
+   "ruling": "R-17234",
+   "item": "DOR-RWB-P5-E1049-APP-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "All 13 dependencies are named in the header; the four not yet done are in Ready to start and External dependencies rows. No text change needed."
+  },
+  {
+   "ruling": "R-17235",
+   "item": "DOR-RWB-P5-E1049-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added note that DL10 and DL11 remain open and their listed assumptions are confirmed by the 26 November 2026 directive."
+  },
+  {
+   "ruling": "R-17236",
+   "item": "DOR-RWB-P5-E1049-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Added Owner or service column to the events consumed table: publisher RWB-P5-E1024-APP, consumer rwb-document."
+  },
+  {
+   "ruling": "R-17237",
+   "item": "DOR-RWB-P5-E1049-APP-3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 (X7) and AC11 (X8) with TC-E1-049-13 for X8; §5 Covered by cells now point to these criteria. Gherkin text kept in style."
+  },
+  {
+   "ruling": "R-17238",
+   "item": "DOR-RWB-P5-E1049-APP-4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for BR3 (read only after CLEAN scan) and TC-E1-049-14 covering it."
+  },
+  {
+   "ruling": "R-17239",
+   "item": "DOR-RWB-P5-E1049-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 now states the rwb-access authorise check (DP-08) on each REST operation; its operation name is not specified in the sources."
+  },
+  {
+   "ruling": "R-17240",
+   "item": "DOR-RWB-P5-E1049-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states uk_document_text_page is a physical index of this story (section 13), not an LDM v9 or Data Classification v5 field."
+  }
+ ]
+}

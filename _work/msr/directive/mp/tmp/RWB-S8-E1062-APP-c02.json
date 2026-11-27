@@ -1,0 +1,172 @@
+{
+ "edits": [
+  {
+   "old": "7. The build check that fails on a code, an actor value, an owner role or the marker in the source, and on any statement outside `rwb_deviation` (BR5, BR1, X7).",
+   "new": "7. The build check that fails on a code, an actor value, an owner role or the marker in the source, and on any statement outside `rwb_deviation`, including a read of a `v_ace_*` view or an ACE table; this service carries no ACE field, and any ACE data it needs comes from the rwb-source-data contract (BR5, BR1, X7)."
+  },
+  {
+   "old": "so the answer carries no interaction and this service writes no ledger row.",
+   "new": "so the answer carries no interaction and this service writes no ledger row. Neither call notes nor documents are read here: the screening run reads them on the rwb-source-data and rwb-document contracts, and this service holds no copy of a document (GAP-1822)."
+  },
+  {
+   "old": "A case with no open deviation answers both arrays, `openDeviations` empty, with 200.",
+   "new": "A case with no open deviation answers both arrays, `openDeviations` empty, with 200. Screen states of SCR-06 and SCR-08, which read this answer through DP-19: empty is the empty list above; error is 503 with MSG-GEN-006; no access is 403 with MSG-P4-002; loading is Not specified in the source documents (DOR-RWB-S8-E1062-APP-10)."
+  },
+  {
+   "old": "a statement on `rwb_case` or on a `v_ace_*` view fails the boundary test.",
+   "new": "a statement on any other service's schema or on a `v_ace_*` view fails the boundary test."
+  },
+  {
+   "old": "| MSG-GEN-001 | Section 14 |",
+   "new": "| MSG-GEN-001 | AC6, TC-E1-062-15 |"
+  },
+  {
+   "old": "no partial answer is built | MSG-GEN-006 | Section 14 |",
+   "new": "no partial answer is built | MSG-GEN-006 | AC7, TC-E1-062-16 |"
+  },
+  {
+   "old": "\"raise\" | MSG-GEN-006 | Section 14 |",
+   "new": "\"raise\" | MSG-GEN-006 | AC8, TC-E1-062-17 |"
+  },
+  {
+   "old": "| Section 17, BR1, BR6 |",
+   "new": "| AC9, TC-E1-062-18; Section 17, BR1, BR6 |"
+  },
+  {
+   "old": "The five criteria are new and test only this slice:",
+   "new": "The nine criteria are new and test only this slice:"
+  },
+  {
+   "old": "    Then the service reads no table outside rwb_deviation and holds no v_ace_* grant",
+   "new": "    Then the service reads no table outside rwb_deviation and holds no v_ace_* grant\n\n  Scenario: AC6 A read without a case reference is refused before any read (new, D-RCV-60)\n    When \"SY-AGENT\" calls GET /api/recovery/deviation/v1/deviations with no caseId\n    Then the call is refused with status 422 and message MSG-GEN-001\n    Then no row is read and nothing is written\n\n  Scenario: AC7 A read that misses the budget or has no package version in force returns no partial answer (new, D-RCV-60)\n    Given the reference-data mock does not answer inside the 2 s budget, or the rule-package mock has no version in force\n    When \"SY-AGENT\" calls GET /api/recovery/deviation/v1/deviations with case \"RW-2026-000403\"\n    Then the call is refused with status 503 and message MSG-GEN-006 naming the system\n    Then no partial answer is built\n\n  Scenario: AC8 An unknown agent policy is never read as raise (new, D-RCV-60)\n    Given the rwb-agent contract mock does not answer for policy \"SCREENING\"\n    When a raise request names raised_by \"SCREENING_AGENT\" for case \"RW-2026-000404\" with code \"X2\"\n    Then the raise is refused with status 503 and message MSG-GEN-006, and the reason names the agent contract\n    Then no deviation row, no event and no outbox row is written\n\n  Scenario: AC9 A statement outside rwb_deviation fails the build (new, D-RCV-60)\n    Given the build holds a statement on a recovery_case row, a rwb_case table, a v_ace_* view or another service's schema\n    When the boundary build check runs\n    Then the grant refuses the statement and the build fails\n    Then nothing is released"
+  },
+  {
+   "old": "| TC-E1-062-13 | Boundary: every statement of the read sits in rwb_deviation and reads only the tables of section 12.7 | Component | The build check; a statement on rwb_case and a statement on a v_ace_* view |",
+   "new": "| TC-E1-062-13 | Boundary: every statement of the read sits in rwb_deviation and reads only the tables of section 12.7 | Component | The build check; a statement on rwb_case and a statement on a v_ace_* view |\n| TC-E1-062-14 | AC2: every open code of the case is in one answer, read in one call | Component | Case RW-2026-000502 with X3 open and X6 open; one call to the read |\n| TC-E1-062-15 | AC6: a read with no case reference is refused with 422 and no read | Component | `caseId` absent; no case reference on the call |\n| TC-E1-062-16 | AC7: a budget miss or no package version in force answers 503 with no partial answer | Component | Reference-data fake silent beyond the 2 s budget; rule-package fake with no version in force |\n| TC-E1-062-17 | AC8: the policy read does not answer, so the raise is refused with 503 and never read as raise | Component | rwb-agent fake silent for policy \"SCREENING\"; raise request for X2 |\n| TC-E1-062-18 | AC9: a statement on a recovery_case row, a rwb_case table, a v_ace_* view or another service's schema fails the build | Component | The build check run on each statement in turn |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Story element | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-DVH-001 | X1 to X7 detected from case data, call notes, documents and flags (Business Requirements Program, section 5.15; FEAT-DVH-01, FEAT-AGT-08) | The open estate of the case, so the detection is measured on the deviations the case actually carries | TC-E1-062-01, TC-E1-062-11 |",
+   "new": "| REQ-DVH-001 | X1 to X7 detected from case data, call notes, documents and flags (Business Requirements Program, section 5.15; FEAT-DVH-01, FEAT-AGT-08) | The open estate of the case, so the detection is measured on the deviations the case actually carries | TC-E1-062-01, TC-E1-062-11 | FEAT-DVH-01, FEAT-AGT-08 | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) |"
+  },
+  {
+   "old": "| REQ-DVH-003 | Each code routes to its named owner; an unmapped code goes to the team manager (FEAT-DVH-04) | The owner projection over R-DEV-02 to R-DEV-06, with \"RW-TEAMMGR\" and \"unmapped\" for a code without a row | TC-E1-062-04 |",
+   "new": "| REQ-DVH-003 | Each code routes to its named owner; an unmapped code goes to the team manager (FEAT-DVH-04) | The owner projection over R-DEV-02 to R-DEV-06, with \"RW-TEAMMGR\" and \"unmapped\" for a code without a row | TC-E1-062-04 | FEAT-DVH-04 | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) |"
+  },
+  {
+   "old": "| REQ-DVH-007 | A complaint is matched to the contact before it (FEAT-DVH-08) | Not answered here: the ledger window is rwb-source-data's and this answer carries no interaction | TC-E1-062-05 (no criterion here) |",
+   "new": "| REQ-DVH-007 | A complaint is matched to the contact before it (FEAT-DVH-08) | Not answered here: the ledger window is rwb-source-data's and this answer carries no interaction | TC-E1-062-05 (no criterion here) | FEAT-DVH-08 | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) |"
+  },
+  {
+   "old": "| D-RCV-60 DP-01 | The row and the view are this service's, and no other service's table is read | `deviation` and `v_open_deviation` in `rwb_deviation`, the boundary test | TC-E1-062-01, TC-E1-062-10, TC-E1-062-13 |",
+   "new": "| D-RCV-60 DP-01 | The row and the view are this service's, and no other service's table is read | `deviation` and `v_open_deviation` in `rwb_deviation`, the boundary test | TC-E1-062-01, TC-E1-062-10, TC-E1-062-13 | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) |"
+  },
+  {
+   "old": "| D-RCV-60 DP-04 | The owner role is evaluated in the embedded kit with the package of rwb-decision | `DeviationOwnerProjection` and the package read | TC-E1-062-04 |",
+   "new": "| D-RCV-60 DP-04 | The owner role is evaluated in the embedded kit with the package of rwb-decision | `DeviationOwnerProjection` and the package read | TC-E1-062-04 | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) |"
+  },
+  {
+   "old": "| D-RCV-60 DP-13 | The read is served on the base of the service | `GET /api/recovery/deviation/v1/deviations` | TC-E1-062-01, TC-E1-062-10, TC-E1-062-12 |",
+   "new": "| D-RCV-60 DP-13 | The read is served on the base of the service | `GET /api/recovery/deviation/v1/deviations` | TC-E1-062-01, TC-E1-062-10, TC-E1-062-12 | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) |"
+  },
+  {
+   "old": "| D-RCV-60 DP-20 | The autonomy mode is read on the rwb-agent contract and the runtime is never embedded | `ScreeningRaiseGate` and `AgentPolicyClient` | TC-E1-062-01 |",
+   "new": "| D-RCV-60 DP-20 | The autonomy mode is read on the rwb-agent contract and the runtime is never embedded | `ScreeningRaiseGate` and `AgentPolicyClient` | TC-E1-062-01 | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) | Not specified in the source documents (DOR-RWB-S8-E1062-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09191",
+   "item": "GAP-1816",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "No ACE read in this service; step 7 boundary check now names v_ace_* views and ACE tables; ACE data comes only from the rwb-source-data contract."
+  },
+  {
+   "ruling": "R-09192",
+   "item": "GAP-1822",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Call notes and documents are not read by this service; DP-18 bullet names the rwb-source-data and rwb-document contracts and that no document copy is held."
+  },
+  {
+   "ruling": "R-13360",
+   "item": "CG-ALL-11307",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Recovery Workbench LDM v9",
+   "change": "Record view v_open_deviation in rwb_deviation as a read-only object over deviation, created by migration V1062_1 of RWB-S8-E1062-APP.",
+   "note": "Design view created by this story's migration; no dictionary entry exists. Story keeps the name; LDM must record the object."
+  },
+  {
+   "ruling": "R-13361",
+   "item": "CG-ALL-11309",
+   "status": "Not applied",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 message IDs are not in this chunk; a 401 mapping cannot be made without inventing an ID."
+  },
+  {
+   "ruling": "R-13362",
+   "item": "CG-ALL-11312",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-062-14 covering AC2: one answer, one call, codes X3 and X6."
+  },
+  {
+   "ruling": "R-21099",
+   "item": "DOR-RWB-S8-E1062-APP-10",
+   "status": "Resolved",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "Mapped empty, error and no-access states of SCR-06 and SCR-08 to the answer; loading state has no source and stays a placeholder."
+  },
+  {
+   "ruling": "R-21100",
+   "item": "DOR-RWB-S8-E1062-APP-11",
+   "status": "Not applied",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "Detail names no P2 field and the sources give no classification for the fields carried; the field list cannot be set without inventing it."
+  },
+  {
+   "ruling": "R-21101",
+   "item": "DOR-RWB-S8-E1062-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Added Feature and L3 process columns to the traceability table; features taken from REQ rows, L3 process is a placeholder as no source gives it."
+  },
+  {
+   "ruling": "R-21102",
+   "item": "DOR-RWB-S8-E1062-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "The DP-01 boundary rule no longer names another schema; it refers to any other service's schema."
+  },
+  {
+   "ruling": "R-21103",
+   "item": "DOR-RWB-S8-E1062-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 to AC9 for X2, X3, X6 and X7 with TC-E1-062-15 to 18; the §5 Covered by column now names them."
+  }
+ ]
+}

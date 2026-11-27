@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The case is outside the caller's scope, or does not exist | 404; nothing returned | MSG-P4-003 | AC5 |",
+   "new": "| X2 | The case is outside the caller's scope, or does not exist | 404; nothing returned; a refusal of the case contract for a case the caller may not see is mapped to this 404; a role with no Case record R is refused with 403 and MSG-P4-002 (section 4, step 7) | MSG-P4-003 | AC5 |"
+  },
+  {
+   "old": "10. When a personal field is returned unmasked, `PiiAccessLogClient` writes the read through the rwb-access access log; when that write fails, the read is refused rather than returned unmasked (FSD P1 A2.15, BR-P1-015-4; its operation is Not specified in the source documents (GAP-0586; ASM-0828)).",
+   "new": "10. When a personal field is returned unmasked, `PiiAccessLogClient` writes the read through the rwb-access access log, each entry carrying user, role, case ID, data product, field ID and time and no value; when that write fails, the read is refused rather than returned unmasked (FSD P1 A2.15, BR-P1-015-4; its operation and retry rule are Not specified in the source documents (GAP-0586; ASM-0828))."
+  },
+  {
+   "old": "- The masking rule for `interaction.summary` is policy of rwb-access: no row for the caller's roles means masked, and an unmasking row writes the read to the access log (DP-08).",
+   "new": "- The masking rule for `interaction.summary` is policy of rwb-access: no row for the caller's roles means masked, and an unmasking row writes the read to the access log (DP-08).\n- Open values of the masking and access-log rules: the masking version label, the personal field IDs the masking rows cover, the AC-READ granularity of the access log, the parameter names and defaults of the access-log page and of the field-ID batch limit, and the database login name are Not specified in the source documents (GAP-2321). They are settled at the wave-2 policy load and change no rule, criterion or test; the authorise element is confirmed at contract review."
+  },
+  {
+   "old": "- The scope answer and the masking answer are never cached: a stale scope answer is a scope leak, a stale masking answer can disclose a summary, and a call that does not answer inside 2 s either refuses the read (scope) or masks it (masking).",
+   "new": "- The scope answer and the masking answer are never cached: a stale scope answer is a scope leak, a stale masking answer can disclose a summary, and a call that does not answer inside 2 s either refuses the read (scope) or masks it (masking).\n- The read is one call from gateway-bff to this service. Its three calls (the scope of the rwb-case contract, and the authorise and the masking of rwb-access) run concurrently, each one hop with a 2 s budget and a breaker, and none nests a further call; the parameters and the channel list come from their versioned cache. The chain is recorded for the architecture review list of the edge decision (GAP-0587)."
+  },
+  {
+   "old": "Its states are Loading (skeleton rows), Empty (a sentence that no interaction is recorded on the case) and Error (the message of section 14 above the panel); a masked summary shows as `MASKED`.",
+   "new": "Its states are Loading (skeleton rows), Empty (a sentence that no interaction is recorded on the case) and Error (the message of section 14 above the panel); a masked summary shows as `MASKED`. Screen Specifications v1 does not state the Empty, Error or No access state of SCR-03; those are Not specified in the source documents (CG-ALL-2329), and this story serves only the data behind them."
+  },
+  {
+   "old": "and SCR-04, the full timeline, arrives in Epic 2 (RWB-E2-034);",
+   "new": "and SCR-04, the full timeline, arrives in Epic 2 (RWB-E2-034; its Empty, Error and No access states are Not specified in the source documents (CG-ALL-2330));"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22259",
+   "item": "GAP-1511",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Story already states this service owns the ledger tables and rwb-case reads through this contract (change log, target reading, section 13). Intake writes sit in RWB-P1-E1066-APP."
+  },
+  {
+   "ruling": "R-22570",
+   "item": "GAP-2321",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Open values recorded in section 13 as Not specified, settled at the wave-2 policy load; rules, criteria and tests unchanged."
+  },
+  {
+   "ruling": "R-22957",
+   "item": "GAP-0583",
+   "status": "Cross-document",
+   "section": "5, 7",
+   "target": "RWB-P1-E1066-CON and API-P3-014",
+   "change": "Record the mapping of every case-contract refusal for a case the caller may not see to 404 MSG-P4-003, keep 403 MSG-P4-002 for a role without Case record R, and correct the error set of API-P3-014.",
+   "note": "Story X2 now carries the mapping. The contract record and the API-P3-014 correction sit outside this story."
+  },
+  {
+   "ruling": "R-22958",
+   "item": "GAP-0585",
+   "status": "Cross-document",
+   "section": "12, 13",
+   "target": "RWB-P1-E1066-CON (interaction-ledger contract) and Physical Schema",
+   "change": "Publish actor as an optional query parameter of the read and index ix_interaction_case_actor on (case_id, actor_ref) in the next API specification and Physical Schema versions.",
+   "note": "Story section 13 migration and flow already carry the actor filter and index; publication in the other documents is open."
+  },
+  {
+   "ruling": "R-22959",
+   "item": "GAP-0582",
+   "status": "Cross-document",
+   "section": "4, 12",
+   "target": "API Specification v4 and TSD P3 v3",
+   "change": "Correct API-P3-014 and API-P3-015 to x-module P1 on base /api/recovery/source-data/v1 in their next versions; rwb-case keeps the case record and timeline.",
+   "note": "Story already builds the read in rwb-source-data on the legacy relative path. The two published documents are not corrected here."
+  },
+  {
+   "ruling": "R-22960",
+   "item": "GAP-0586",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "RWB-P4-E1037-CON (P4 contract set)",
+   "change": "Open one row in the P4 contract set for the access-log write operation, its payload and its retry rule.",
+   "note": "Story step 10 now names the payload fields and the refusal on failed write. Operation and retry rule stay open in the contract set."
+  },
+  {
+   "ruling": "R-22961",
+   "item": "GAP-0587",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Section 13 now states one hop from gateway-bff, concurrent one-hop calls with 2 s and breaker, no nesting, uncached scope and masking, and the chain recorded for the architecture review list."
+  },
+  {
+   "ruling": "R-24436",
+   "item": "CG-ALL-2327",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the test lists of REQ-ILG-006, REQ-ILG-003 and REQ-ILG-014 with section 18 of RWB-P1-E1068-APP in the next version.",
+   "note": "Section 18 of this story stands as the trace. The RTM row changes sit in RTM v7."
+  },
+  {
+   "ruling": "R-24437",
+   "item": "CG-ALL-2329",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 now marks the SCR-03 Empty, Error and No access states as Not specified in the source documents (CG-ALL-2329)."
+  },
+  {
+   "ruling": "R-24438",
+   "item": "CG-ALL-2330",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 now marks the SCR-04 Empty, Error and No access states as Not specified in the source documents (CG-ALL-2330)."
+  }
+ ]
+}

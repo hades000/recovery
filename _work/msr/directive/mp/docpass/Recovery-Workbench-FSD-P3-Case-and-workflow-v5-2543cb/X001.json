@@ -1,0 +1,80 @@
+{
+ "target": "03 Requirements and specifications/Recovery Workbench Functional Specifications by Module v7/Recovery Workbench FSD P3 Case and workflow v5.md",
+ "unit": "X001",
+ "items": [
+  "R-09171",
+  "R-14088",
+  "R-22259",
+  "R-28487"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "tries": [
+    {
+     "error": "DISPOSITION INCOMPLETE: no row for ['R-09171', 'R-14088', 'R-22259', 'R-28487']"
+    },
+    {
+     "ok": true,
+     "fixes": 3
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "X001-F1",
+     "finding": "R-09171",
+     "op": "replace",
+     "old": "The module reads ACE through the `recovery.v_ace_*` views only. A direct read of a `public` table",
+     "new": "The module reads ACE through the rwb-source-data contract only (Architecture v5, slide 45; ADR-010), using the `recovery.v_ace_*` views listed below. A direct read of a `public` table"
+    },
+    {
+     "fix_id": "X001-F2",
+     "finding": "R-22259",
+     "op": "insert_after",
+     "old": "**Links.** Each link is a `varchar(255)` business key with no foreign key, because ACE deletes on `account` cascade. Referential integrity is checked by the read model and by REC-05, not by the database.",
+     "new": "**Ledger.** The interaction ledger is owned by `rwb-source-data` (DP-18). This module writes ledger entries only through the rwb-source-data ledger contract, with one writer per ledger. This document defines no interaction table and no ledger intake rule table."
+    },
+    {
+     "fix_id": "X001-F3",
+     "finding": "R-14088",
+     "op": "insert_after",
+     "old": "**Case list.** SCR-02 and every queue view read the case, queue and owner from Workbench tables and the account columns (account number, days past due, balance, data as of) from `v_ace_account` by `case_list_row.account_key`. Reconciliation of the case list to `v_ace_account` is `reconciliation_result` (JOB-04); a business key with no ACE row is listed by REC-05.",
+     "new": "**Screen states (SCR-46).** SCR-46 has empty, loading, error and no-access states. Their content: Not specified in the source documents (DOR-RWB-ITG-E1059-ITG-10)."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "R-09171",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "A1.5 now reads ACE through the rwb-source-data contract; business-key link rules in A1.5 unchanged."
+    },
+    {
+     "item": "R-14088",
+     "status": "Resolved",
+     "fix_ids": [
+      "F3"
+     ],
+     "note": "SCR-46 empty, loading, error and no-access states added; screen content not in sources, so recorded as Not specified."
+    },
+    {
+     "item": "R-22259",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "No interaction or ledger intake table is defined here; added ledger ownership by rwb-source-data with one writer per ledger."
+    },
+    {
+     "item": "R-28487",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "Held facts release message belongs to the rwb-case message catalogue; SCR-44 release columns belong to Screen Specifications v1."
+    }
+   ]
+  }
+ ]
+}

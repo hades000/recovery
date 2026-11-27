@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "| Contract dependencies | RWB-P3-E1042-CON, RWB-P3-E1043-CON |",
+   "new": "| Contract dependencies | RWB-P3-E1042-CON, RWB-P3-E1043-CON |\n| Contract version | v1: REST base `/api/recovery/agent/v1` and the event types `rwb.agent.*.v1` of section 12.3 |\n| Contract fake library version | Not specified in the source documents (DOR-RWB-P10-E1062-APP-22) |"
+  },
+  {
+   "old": "4. ScreeningInputAssembler reads its inputs through their owners' contracts: the case facts, the open deviations, the ledger entries of the last 180 days, and the documents and their stored fields (DP-01, DP-18; AC1, AC5).",
+   "new": "4. ScreeningInputAssembler reads its inputs through their owners' contracts: the case facts, the open deviations, the ledger entries of the last 180 days, and the documents and their stored fields (DP-01, DP-18; AC1, AC5). Every source field is taken from the rwb-source-data contract under its contract field names; no SQL view or ACE table is read, and the boundary test fails the build on either. The document read is a contract dependency on rwb-document and the call-note read is a field of the rwb-source-data contract; both are confirmed with their owners before the shadow screening test. No copy of a document is held in schema rwb_deviation. The party-flag, deceased-marker and freshness fields are confirmed with P1 before the wave 2 system test."
+  },
+  {
+   "old": "Errors: 401 no session, 403 no right (MSG-P4-002), 404 an unknown run, 409 a repeat that returns the stored run, 422 a request member missing or a trigger event outside the two of this story, 503 the store or a consumed contract unavailable.",
+   "new": "Errors: 401 no session, 403 no right (MSG-P4-002), 404 an unknown run, 409 a repeat that returns the stored run, 422 a request member missing or a trigger event outside the two of this story, 503 the store or a consumed contract unavailable. Message IDs for 401, 404, 409, 422 and 503: Not specified in the source documents (CG-ALL-2611)."
+  },
+  {
+   "old": "| `rwb.agent.AgentRunCompleted.v1` (EV-28) | `rwb.agent.events.v1` | P10 | the case ID | run ID, agent_code, agent_version, model_version, case_id, autonomy_mode, trigger_event, status, fallback, confidence, latency_ms, run_at |",
+   "new": "| `rwb.agent.AgentRunCompleted.v1` (EV-28) | `rwb.agent.events.v1` | P10 | the case ID | runid, agent, caseid, outcome, fallback (the Kafka Catalog v1 EV-28 payload names; status is carried as outcome) |"
+  },
+  {
+   "old": "| AgentRunWorkflow | Workflow (Arch v5 slide 16) | `rwb-agent` | Input: agent code \"SCREENING\", case ID, subject ID, trigger event, event ID, idempotency key. One execution per idempotency key, the 60-second policy budget, then the rule result (R-UNI-32) |",
+   "new": "| AgentRunWorkflow | Workflow (Arch v5 slide 16) | `rwb-agent` | Input: agent code \"SCREENING\", case ID, subject ID, trigger event, event ID, idempotency key. One execution per idempotency key, the 60-second policy budget, then the rule result (R-UNI-32). Workflow ID form: Not specified in the source documents (CG-ALL-2615). Start: on the screening trigger CaseCreated named by the Temporal Catalog v1 row. Duplicate-start policy: Not specified in the source documents (CG-ALL-2615) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-04605",
+   "item": "DOR-RWB-P10-E1062-APP-22",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "Added row Contract fake library version, recorded as Not specified in the source documents (DOR-RWB-P10-E1062-APP-22).",
+   "note": "No fake library version exists in the sources; the story now records that as Not specified."
+  },
+  {
+   "ruling": "R-04606",
+   "item": "DOR-RWB-P10-E1062-APP-23",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "Added row Contract version: v1 for the REST base and the event types of section 12.3.",
+   "note": "The contract version the story builds against is now stated as v1."
+  },
+  {
+   "ruling": "R-04607",
+   "item": "DOR-RWB-P10-E1062-APP-5",
+   "status": "Cross-document",
+   "section": "9",
+   "target": "LOV-DEVIATION closed list (owning document not specified in the source documents)",
+   "change": "Remove PR1 from the closed list LOV-DEVIATION, or confirm it is not a deviation value; section 9 keeps its nine transitions.",
+   "note": "The PR1 list entry belongs to the LOV document, so no story edit is made."
+  },
+  {
+   "ruling": "R-04608",
+   "item": "DOR-RWB-P10-E1062-APP-8",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "rwb-agent.yaml; rwb-deviation API yaml; rwb-document API yaml; twelve further detcheck paths",
+   "change": "Publish POST and GET /agent-runs (GET /agent-runs/{runId}) in rwb-agent.yaml; GET /api/recovery/deviation/v1/deviations in rwb-deviation; both rwb-document paths; and the twelve further paths.",
+   "note": "The paths named by this story are missing from the owning API yamls."
+  },
+  {
+   "ruling": "R-09191",
+   "item": "GAP-1816",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Step 4 routes every source field through the rwb-source-data contract; no view or ACE table read; boundary test fails the build; P1 confirms fields before wave 2.",
+   "note": "Step 4 now states the contract-only read path and the P1 confirmation."
+  },
+  {
+   "ruling": "R-09192",
+   "item": "GAP-1822",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Step 4 carries the document read as a dependency on rwb-document and the call-note read as an rwb-source-data field, confirmed before the shadow test; no document copy in rwb_deviation.",
+   "note": "Document and call-note reads are now named in step 4 with their owners."
+  },
+  {
+   "ruling": "R-09864",
+   "item": "CG-ALL-2611",
+   "status": "Resolved",
+   "section": "12.1",
+   "target": "",
+   "change": "Errors line: message IDs for 401, 404, 409, 422 and 503 recorded as Not specified in the source documents; 403 keeps MSG-P4-002.",
+   "note": "Standard message IDs are not in the sources; the business analyst supplies them."
+  },
+  {
+   "ruling": "R-09865",
+   "item": "CG-ALL-2613",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "AgentRunCompleted payload aligned to Kafka Catalog v1 EV-28: runid, agent, caseid, outcome, fallback.",
+   "note": "Payload now uses the catalog field names; status is carried as outcome."
+  },
+  {
+   "ruling": "R-09866",
+   "item": "CG-ALL-2615",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "AgentRunWorkflow row: workflow ID form and duplicate-start policy recorded as Not specified; start on the CaseCreated trigger named in the catalog.",
+   "note": "The catalog gives no workflow ID form or duplicate-start policy; both are marked Not specified."
+  },
+  {
+   "ruling": "R-09867",
+   "item": "CG-ALL-2616",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1 (Activities sheet)",
+   "change": "Add activity AssembleScreeningInputs, task queue rwb-agent, with the output stated for it in section 12.5.",
+   "note": "The activity belongs in the catalog, so the story is not edited."
+  }
+ ]
+}

@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "is not an event of this service's own topic.",
+   "new": "is not an event of this service's own topic.\n\n**Owner of each consumed event.** The producing service owns each consumed event: rwb-source-data owns `AceDataReady`, rwb-treatment owns `TreatmentApproved` and rwb-decision owns `RulePackageInForce`; this service owns only the consumer group `rwb-payment.match-run.v1`.\n\n**Payloads.** `ProceedsMatched` carries the identifiers and facts of the modelled proceeds row (`case_id`, `treatment_id`, `account_payment_id`, `source`, `amount`, `received_date`, `matched_to`) in the CloudEvents envelope of Architecture v5 slide 22, keyed by `caseId`; every other field is Not specified in the source documents (GAP-1367). The payload of `TreatmentBooked`, named in the event catalogue for rwb-payment, is Not specified in the source documents (GAP-1367) and is not published by this step."
+  },
+  {
+   "old": "**Database and migrations.** No Flyway file of this story.",
+   "new": "**Database and migrations.** No Flyway file of this story. The schemas `rwb_case`, `rwb_decision` and `rwb_treatment` named in this story are owned by rwb-case, rwb-decision and rwb-treatment; this story reads them only through their contracts and writes none of their rows."
+  },
+  {
+   "old": "- No parameter is named in the sources for the step itself; the 2 s budget and the single hop are the platform rule of ADR-020.",
+   "new": "- No parameter is named in the sources for the step itself; the 2 s budget and the single hop are the platform rule of ADR-020.\n- The outcome fields, the thresholds, the tolerance, the window and the state of the money-side close are rule rows and reference data governed in rwb-decision and never values written in code; this step writes only `matched_to` = `SETTLEMENT` and the references in `rwb_payment.proceeds` (GAP-2511; ASM-4160)."
+  },
+  {
+   "old": "**No personal data.** The rows this story writes carry",
+   "new": "**API elements.** `Proceeds` carries the nine columns of DF-FIN-001 to DF-FIN-009 (`id`, `case_id`, `treatment_id`, `account_payment_id`, `source`, `amount`, `received_date`, `matched_to`, `posting_ref`); `ProceedsPage` carries the platform pagination convention with the query parameters `matched`, `from`, `to`, `page` and `size` of TSD P8 T-A.2; `MatchRequest` carries `treatment_id` and `account_payment_id` where the receipt carries one. Every other field of these three elements is Not specified in the source documents (GAP-1366) and is marked with the placeholder in the document and in its fakes.\n\n**No personal data.** The rows this story writes carry"
+  },
+  {
+   "old": "| - | `payment_match_rule` (P7, by the Temporal and Drools design) | The rule rows of the match, replacing the legacy table | Not read as a table: evaluated from the package in force (BR10) |",
+   "new": "| Not specified in the source documents (GAP-2511; ASM-4160) | `payment_match_rule` (P7, by the Temporal and Drools design) | The rule rows of the match, replacing the legacy table | Not read as a table: evaluated from the package in force (BR10) |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E4-043-03 |",
+   "new": "| MSG-P4-002 | AC3, TC-E4-043-03 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5, BR8 |",
+   "new": "| None (pipeline log) | AC4, TC-E4-043-05, Section 17, BR5, BR8 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Access refused (FSD P8 A2.3.4.3, X2)\n    Given the role holds neither the Write-off and posting right R for GET /proceeds nor the right U for POST /proceeds/{proceedsId}/match\n    When the role reads the proceeds list or attempts the match\n    Then the system answers 403 with MSG-P4-002 before any read or write\n    Then nothing changes and no decision record is written\n\n  Scenario: AC4 Boundary held at build (DP-01, DP-05, X8)\n    Given the build contains the statements of rwb-payment\n    When the boundary test runs\n    Then a statement that reaches a v_ace_* view or a row of rwb_case, rwb_treatment or rwb_decision fails the build\n    Then nothing is released"
+  },
+  {
+   "old": "The two criteria are the legacy criteria of RWB-E4-043 word for word, with their origin tag added and nothing else changed:",
+   "new": "The two criteria are the legacy criteria of RWB-E4-043 word for word, with their origin tag added and nothing else changed (requirement reference: FEAT-PAY-03 with AC-P8-003-01, in place of a requirement ID):"
+  },
+  {
+   "old": "The two rows VR-P8-003-1 and BR-P8-003 are the rows of FSD P8 A2.3.3.1, copied character for character; the rest are the rules the target split fixes.",
+   "new": "The two rows VR-P8-003-1 and BR-P8-003 are the rows of FSD P8 A2.3.3.1, copied character for character; the rest are the rules the target split fixes. Coverage: VR-P8-003-1 and BR-P8-003 carry their own rule IDs as their BR IDs and are cited by those IDs; BR1, BR2 and BR7 by TC-E4-043-06; BR3 and BR4 by AC1, AC2, TC-E4-043-01 and TC-E4-043-02; BR5, BR6 and BR8 by AC4 and TC-E4-043-05; BR9, BR10 and BR11 by TC-E4-043-07."
+  },
+  {
+   "old": "The rights are the rows of TSD P8 T6.1 and of the legacy permission table of this key, and nothing wider.",
+   "new": "The rights are the rows of TSD P8 T6.1 and of the legacy permission table of this key, and nothing wider. Each operation is authorised by the rwb-access check of the capability area Write-off and posting and of its right, R for `GET /proceeds` and U for `POST /proceeds/{proceedsId}/match`, made before any read or write."
+  },
+  {
+   "old": "| TC-E4-043-03 | Access | Contract | A role without the Write-off and posting right R or U; 403 with MSG-P4-002 on both operations and no read |",
+   "new": "| TC-E4-043-03 | Access | Contract | A role without the Write-off and posting right R or U; 403 with MSG-P4-002 on both operations and no read |\n| TC-E4-043-05 | Boundary | Build | No statement outside `rwb_payment`, no `v_ace_*` read and no write to `rwb_case`, `rwb_treatment` or `rwb_decision`; the build fails on any of them (AC4; BR5, BR6, BR8) |\n| TC-E4-043-06 | Data | Contract | A settlement receipt writes one proceeds row with `matched_to` = `SETTLEMENT` and one `ProceedsMatched` event keyed by `caseId`, with references only (BR1, BR2, BR7) |\n| TC-E4-043-07 | Rules | Contract | A repeated fact or `Idempotency-Key` counts once; rule rows are read from the package in force; no person data reaches the outputs (BR9, BR10, BR11) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18294",
+   "item": "DOR-RWB-P8-E4043-APP-24",
+   "status": "Resolved",
+   "section": "12.4, 13",
+   "target": "",
+   "change": "Owner of each consumed event stated in 12.4; schemas rwb_case, rwb_decision and rwb_treatment owners stated in 13.",
+   "note": "Owners of consumed events and of the named schemas now stated in sections 12.4 and 13."
+  },
+  {
+   "ruling": "R-18295",
+   "item": "DOR-RWB-P8-E4043-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "AC3 for X2 and AC4 for X8 added to section 7; TC-E4-043-05 added; Covered by column of section 5 updated.",
+   "note": "Exceptions X2 and X8 now covered by criteria AC3 and AC4 with test cases; section 5 Covered by updated."
+  },
+  {
+   "ruling": "R-18296",
+   "item": "DOR-RWB-P8-E4043-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "Coverage statement for all 13 rules added to section 8; TC-E4-043-05, -06 and -07 added to section 16.",
+   "note": "All 11 uncovered rules mapped to criteria or new test cases; the two rule rows cite their own rule IDs."
+  },
+  {
+   "ruling": "R-18297",
+   "item": "DOR-RWB-P8-E4043-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD (data load from COLLINS) with Write-off and posting U. Story side adds the rwb-access authorise check per operation.",
+   "note": "Role SY-DATALOAD needs listing in Users Roles and Permissions v5; authorise check now stated in section 10."
+  },
+  {
+   "ruling": "R-18298",
+   "item": "DOR-RWB-P8-E4043-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "LDM v9 and Data Classification v5",
+   "change": "Record field account_payment_id on proceeds and entity decision_record, or confirm they are platform library objects. Section 11 row without BR Field ID now carries the placeholder.",
+   "note": "account_payment_id and decision_record are absent from LDM v9 and Data Classification v5; story row ID fixed."
+  },
+  {
+   "ruling": "R-18299",
+   "item": "DOR-RWB-P8-E4043-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Align MSG-P1-001 text with the standard, or confirm the FSD wording as the standard text. Story keeps the FSD wording until then.",
+   "note": "MSG-P1-001 text differs from Error and Message Standard v4; the standard owns the wording decision."
+  },
+  {
+   "ruling": "R-23123",
+   "item": "GAP-1363",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Requirement reference FEAT-PAY-03 with AC-P8-003-01 cited in section 7; legacy criteria kept word for word.",
+   "note": "Legacy criteria kept with origin tag; FEAT-PAY-03 and AC-P8-003-01 cited in place of a requirement ID."
+  },
+  {
+   "ruling": "R-23124",
+   "item": "GAP-1364",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Configuration bullet added: outcome fields, thresholds, tolerance, window and close state held in rwb-decision; only matched_to SETTLEMENT and references written.",
+   "note": "Outcome fields and thresholds held as rule rows and reference data in rwb-decision; no value written in code."
+  },
+  {
+   "ruling": "R-23125",
+   "item": "GAP-1366",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "API elements paragraph added: Proceeds on DF-FIN columns, ProceedsPage on pagination convention, MatchRequest on match fields; other fields carry the placeholder.",
+   "note": "Proceeds, ProceedsPage and MatchRequest fields declared where sources allow; the rest marked with the placeholder."
+  },
+  {
+   "ruling": "R-23126",
+   "item": "GAP-1367",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Payloads paragraph added: ProceedsMatched on modelled row identifiers and facts with slide 22 envelope; unstated fields and TreatmentBooked marked with the placeholder.",
+   "note": "ProceedsMatched payload declared on modelled fields; TreatmentBooked and unstated fields carry the placeholder."
+  }
+ ]
+}

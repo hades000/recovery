@@ -1,0 +1,156 @@
+{
+ "edits": [
+  {
+   "old": "No legacy acceptance criterion is owned by this story. The eight criteria below are new and test only the integration deliverable.",
+   "new": "No legacy acceptance criterion is owned by this story. The seventeen criteria below are new and test only the integration deliverable."
+  },
+  {
+   "old": "    Then no second document and no second decision record exist",
+   "new": "    Then no second document and no second decision record exist\n\n  Scenario: AC9 A withdrawn template with no approved successor holds generation (new, D-RCV-60)\n    Given template \"DIL-MORTGAGE\" is withdrawn and has no approved successor\n    When the harness calls generated-documents for treatment \"TRT-0301\" and template \"DIL-MORTGAGE\"\n    Then the response is 422 with MSG-P6-003\n    Then generation is held and a task to the restructuring officer is recorded by the owner\n\n  Scenario: AC10 Two parallel requests for one treatment and template (new, D-RCV-60)\n    When the harness sends two requests for treatment \"TRT-0301\" and template \"DIL-CONTRACT\" at the same time\n    Then one request gets 201 and the other gets 409 with MSG-GEN-004\n\n  Scenario: AC11 A template body that cannot be rendered is refused (new, D-RCV-60)\n    Given the body of template \"DIL-CONTRACT\" version 2 cannot be rendered\n    When the harness calls generated-documents for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the response is 503 with MSG-GEN-006\n    Then nothing is stored, the draft file is removed and an incident is recorded\n\n  Scenario: AC12 No template exists for the product group or language (new, D-RCV-60)\n    Given a hire purchase case with no template for its product group or language\n    When the harness calls generated-documents for the case and template \"DIL-MORTGAGE\"\n    Then the response is 422 naming the template and the product group\n\n  Scenario: AC13 A case outside the caller's scope is not found (new, D-RCV-60)\n    Given the case \"RW-2026-000301\" is outside the scope of the caller\n    When the caller calls generated-documents for treatment \"TRT-0301\"\n    Then the response is 404 with MSG-P4-003\n\n  Scenario: AC14 A caller without Documents C is refused (new, D-RCV-60)\n    Given a user with role RW-TEAMMGR who holds Documents R only\n    When the user calls generated-documents for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the response is 403 with MSG-P4-002\n\n  Scenario: AC15 A seed pack that cannot be loaded stops the run (new, D-RCV-60)\n    Given the seed pack cannot be loaded, or a seeded template is not approved, or a treatment has no decision_log_id where the scenario needs one\n    When the harness starts the run\n    Then the run refuses to start and names the missing seed item\n    Then no scenario is reported\n\n  Scenario: AC16 A run is refused while another run holds the lock (new, D-RCV-60)\n    Given another run holds the environment lock\n    When the harness starts the run\n    Then the run refuses to start\n\n  Scenario: AC17 The national ID number is filled at render time (new, D-RCV-60)\n    Given the template requires the borrower national ID number\n    When the harness generates the document for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the national ID number is filled from the token service at render time\n    Then the clear value exists only inside the stored PDF"
+  },
+  {
+   "old": "| X3 | The template is withdrawn with no approved successor | 422; generation held; a task to the restructuring officer is recorded by the owner | MSG-P6-003 | TC-E2-026-05-ITG |",
+   "new": "| X3 | The template is withdrawn with no approved successor | 422; generation held; a task to the restructuring officer is recorded by the owner | MSG-P6-003 | AC9, TC-E2-026-05-ITG |"
+  },
+  {
+   "old": "| X7 | Two requests for the same treatment and template run at once | One succeeds with 201; the other gets 409 | MSG-GEN-004 | TC-E2-026-09-ITG |",
+   "new": "| X7 | Two requests for the same treatment and template run at once | One succeeds with 201; the other gets 409 | MSG-GEN-004 | AC10, TC-E2-026-09-ITG |"
+  },
+  {
+   "old": "| X8 | A template body cannot be rendered | 503; nothing stored; an incident; the draft file removed | MSG-GEN-006 | TC-E2-026-10-ITG |",
+   "new": "| X8 | A template body cannot be rendered | 503; nothing stored; an incident; the draft file removed | MSG-GEN-006 | AC11, TC-E2-026-10-ITG |"
+  },
+  {
+   "old": "| X9 | No template exists for the product group or language | 422; the template and the product group are named | MSG-P5-010 | TC-E2-026-11-ITG |",
+   "new": "| X9 | No template exists for the product group or language | 422; the template and the product group are named | MSG-P5-010 | AC12, TC-E2-026-11-ITG |"
+  },
+  {
+   "old": "| X11 | The case is outside the caller's scope | 404 | MSG-P4-003 | TC-E2-026-12-ITG |",
+   "new": "| X11 | The case is outside the caller's scope | 404 | MSG-P4-003 | AC13, TC-E2-026-12-ITG |"
+  },
+  {
+   "old": "| X12 | The caller lacks Documents C | 403 | MSG-P4-002 | TC-E2-026-15-ITG |",
+   "new": "| X12 | The caller lacks Documents C | 403 | MSG-P4-002 | AC14, TC-E2-026-15-ITG |"
+  },
+  {
+   "old": "| X13 | The seed pack cannot be loaded, or a seeded template is not approved or a treatment has no decision_log_id where the scenario needs one | The run refuses to start and names the missing seed item; no scenario is reported | None | All |",
+   "new": "| X13 | The seed pack cannot be loaded, or a seeded template is not approved or a treatment has no decision_log_id where the scenario needs one | The run refuses to start and names the missing seed item; no scenario is reported | None | AC15, TC-E2-026-17-ITG |"
+  },
+  {
+   "old": "| X14 | Another run holds the environment lock | The run refuses to start | None | All |",
+   "new": "| X14 | Another run holds the environment lock | The run refuses to start | None | AC16, TC-E2-026-18-ITG |"
+  },
+  {
+   "old": "The rules are unchanged by the split. The harness asserts them across the five service boundaries and restates none of them in code; each rule stays owned by RWB-P5-E2026-APP or RWB-P6-E2026-APP.",
+   "new": "The rules are unchanged by the split. The harness asserts them across the five service boundaries and restates none of them in code; each rule stays owned by RWB-P5-E2026-APP or RWB-P6-E2026-APP.\n\nOpen decisions: DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863) and DL26 (assumptions ASM-0247, ASM-0264, ASM-0275, ASM-0355) are still open; each assumption stands until its decision closes."
+  },
+  {
+   "old": "| BR3 | Every required merge field must have a value; otherwise nothing is generated and the field is named | Merge field catalog (RWB-E1-046); FEAT-OCC-07 |",
+   "new": "| BR3 | Every required merge field must have a value; otherwise nothing is generated and the field is named | Merge field catalog (P6 rwb-comms, RWB-P6-E1046-CON) |"
+  },
+  {
+   "old": "| BR4 | Values are formatted by the catalog format: Thai long date in Buddhist Era, amounts with two decimals and in Thai words | Merge field catalog; Principle 1 |",
+   "new": "| BR4 | Values are formatted by the catalog format: Thai long date in Buddhist Era, amounts with two decimals and in Thai words | Merge field catalog (P6 rwb-comms, RWB-P6-E1046-CON); Principle 1 |"
+  },
+  {
+   "old": "| Contract dependencies | None |",
+   "new": "| Contract dependencies | RWB-P4-E1037-CON (authorise schema); RWB-P5-E2026-CON (generation stub) |"
+  },
+  {
+   "old": "| TC-E2-026-12-ITG | BR1, X11 (owned by RWB-P4-E2026-APP) | Integration | Case of team HP-NE, officer of team FCR-BKK |",
+   "new": "| TC-E2-026-12-ITG | BR1, X11 (owned by RWB-P4-E2026-APP) | Integration | Case of team HP-NE, officer of team FCR-BKK |\n| TC-E2-026-17-ITG | X13, AC15 | Integration | Seed pack missing an item or a seeded template not approved |\n| TC-E2-026-18-ITG | X14, AC16 | Integration | Environment lock held by another run |\n| TC-E2-026-19-ITG | BR11, AC17 | Integration | National ID filled at render time from the token service |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14339",
+   "item": "DOR-RWB-ITG-E2026-ITG-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Open decisions DL10 and DL26 are listed with their assumptions as still open in section 8."
+  },
+  {
+   "ruling": "R-14340",
+   "item": "DOR-RWB-ITG-E2026-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Exceptions X3, X7, X8, X9, X11, X12, X13 and X14 now map to AC9 to AC16; X13 and X14 use new TC-17 and TC-18."
+  },
+  {
+   "ruling": "R-14341",
+   "item": "DOR-RWB-ITG-E2026-ITG-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR11 is now covered by AC17 and new test case TC-E2-026-19-ITG."
+  },
+  {
+   "ruling": "R-22121",
+   "item": "GAP-1023",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "TSD P5 (Technical Specification Document P5)",
+   "change": "Add template_code varchar(30) and template_version integer to document; partial unique index on (treatment_id, template_id) where state is DRAFT and is_active.",
+   "note": "Story already uses the Ownership Map path and reads templates only through RWB-P6-E1046-CON; the document columns and index are TSD changes."
+  },
+  {
+   "ruling": "R-22122",
+   "item": "GAP-1879",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR3 and BR4 sources now name P6 rwb-comms via RWB-P6-E1046-CON; no legacy catalogue table is read."
+  },
+  {
+   "ruling": "R-22347",
+   "item": "GAP-1713",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Service contracts and FSD S2 prerequisites",
+   "change": "Map feature-code prerequisites to owning service contracts: approval to P7, case to P3, documents to P5, communications to P6, valuation to S1; carry the duplicate FEAT-CHO-08 as written.",
+   "note": "Story now names services only in BR3; the feature-code mapping is recorded in the service contract, not the story."
+  },
+  {
+   "ruling": "R-22511",
+   "item": "GAP-1580",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "FSD P5 v3",
+   "change": "Add a generation section for REQ-DCM-012 in the next FSD P5 version, stating the behaviour of FR-P5-026 and AC-P5-019.",
+   "note": "The behaviour is required and covered in the story by AC1 to AC8; the functional section belongs to FSD P5."
+  },
+  {
+   "ruling": "R-22615",
+   "item": "GAP-0938",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "TSD P4 appendix T-A and API specification (RWB-P4-E1037-CON)",
+   "change": "Add the authorise request and answer schema to TSD P4 appendix T-A and publish it with RWB-P4-E1037-CON; stub generation facts in RWB-P5-E2026-CON.",
+   "note": "Header Contract dependencies now name RWB-P4-E1037-CON and the RWB-P5-E2026-CON stub."
+  },
+  {
+   "ruling": "R-22616",
+   "item": "GAP-0408",
+   "status": "Not applied",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Fixtures, PDF/A check, font pack, harness environment and evidence format appear in no source; agreeing them with P5, P6 and QA needs owner input, so no value is written."
+  },
+  {
+   "ruling": "R-22617",
+   "item": "GAP-0937",
+   "status": "Cross-document",
+   "section": "5",
+   "target": "PM-2026.12 policy pack (RBAC matrix)",
+   "change": "Add Documents letters: C for RW-RESTRUCT, RW-CASEOWN and SY-CASEWF; R for RW-TEAMMGR; no row for RW-PHONECOL.",
+   "note": "Story X12 and TC-E2-026-15-ITG already state the C and R letters; the policy pack row load sits outside this story."
+  }
+ ]
+}

@@ -1,0 +1,234 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+asyncapi: 3.0.0
+info:
+  title: "Recovery Workbench events - rwb-source-data"
+  version: 5.1.0
+  description: >-
+    AsyncAPI 3.0 contract for the business-event topic of rwb-source-data (Source data, module P1). One document
+    per service, as Arch v5 slide 42 notes require; the document set is version 5.0.0 of 22 November 2026
+    (D-RCV-60 microservice realignment).
+    Producer and consumer names are those of the Arch v5 event catalogue, slides 42 and 43; payload field names
+    are those of Event and Messaging Design v4 (sheet Events, payload column). Property types, required flags
+    and formats are not specified in the source documents (GAP-0096; ASM-0160).
+    Events carry IDs and facts, never personal data (Arch v5 slide 42 notes).
+x-topic:
+  name: "rwb.source-data.events.v1"
+  partitions: 12
+  replication-factor: 3
+  retention: "7 days"
+  key: "sourceSystem:businessDate (no case)"
+  mode: "CloudEvents 1.0 Kafka binding, binary mode (ce_* headers)"
+  retry: "retry topics 1 min, 10 min, 1 h, then .dlt with alert"
+  schema-registry: "JSON Schema registry, BACKWARD compatibility"
+  fallback: "Event Hubs Premium"
+  source: "Arch v5 slide 35 (Kafka line) and slide 42 notes"
+  dead-letter: "rwb.source-data.events.v1.dlt"
+  dead-letter-note: "Top-level name derived by appending .dlt to the service topic (Template and Rules R4)"
+defaultContentType: "application/cloudevents+json"
+channels:
+  "rwb.source-data.events.v1":
+    address: "rwb.source-data.events.v1"
+    title: "rwb.source-data.events.v1"
+    messages:
+      AceDataReady:
+        $ref: '#/components/messages/AceDataReady'
+      AceDataLate:
+        $ref: '#/components/messages/AceDataLate'
+  "rwb.case.events.v1":
+    address: "rwb.case.events.v1"
+    title: "rwb.case.events.v1 (consumed)"
+    messages:
+      CaseCreated:
+        $ref: 'rwb-case.asyncapi.yaml#/components/messages/CaseCreated'
+      CaseAllocated:
+        $ref: 'rwb-case.asyncapi.yaml#/components/messages/CaseAllocated'
+      CaseTransferred:
+        $ref: 'rwb-case.asyncapi.yaml#/components/messages/CaseTransferred'
+      TimerBreached:
+        $ref: 'rwb-case.asyncapi.yaml#/components/messages/TimerBreached'
+  "rwb.document.events.v1":
+    address: "rwb.document.events.v1"
+    title: "rwb.document.events.v1 (consumed)"
+    messages:
+      DocumentStored:
+        $ref: 'rwb-document.asyncapi.yaml#/components/messages/DocumentStored'
+  "rwb.decision-record.v1":
+    address: "rwb.decision-record.v1"
+    title: "rwb.decision-record.v1 (written by the decision-record library and consumed)"
+    messages:
+      DecisionRecorded:
+        $ref: 'rwb.decision-record.v1.asyncapi.yaml#/components/messages/DecisionRecorded'
+operations:
+  publishAceDataReady:
+    action: send
+    channel:
+      $ref: '#/channels/rwb.source-data.events.v1'
+    summary: "Publish AceDataReady (EV-26) to rwb.source-data.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.source-data.events.v1/messages/AceDataReady'
+  publishAceDataLate:
+    action: send
+    channel:
+      $ref: '#/channels/rwb.source-data.events.v1'
+    summary: "Publish AceDataLate (EV-27) to rwb.source-data.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.source-data.events.v1/messages/AceDataLate'
+  receiveCaseLedgerEvents:
+    action: receive
+    channel:
+      $ref: '#/channels/rwb.case.events.v1'
+    summary: "Ledger intake of EV-01, EV-02, EV-04 and EV-19 (RD-P1-009); retry topics and .dlt"
+    x-consumer-group: "rwb-source-data.rwb.case.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.case.events.v1/messages/CaseCreated'
+    - $ref: '#/channels/rwb.case.events.v1/messages/CaseAllocated'
+    - $ref: '#/channels/rwb.case.events.v1/messages/CaseTransferred'
+    - $ref: '#/channels/rwb.case.events.v1/messages/TimerBreached'
+  receiveDocumentStored:
+    action: receive
+    channel:
+      $ref: '#/channels/rwb.document.events.v1'
+    summary: "Ledger intake of EV-16 (RD-P1-009); retry topics and .dlt"
+    x-consumer-group: "rwb-source-data.rwb.document.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.document.events.v1/messages/DocumentStored'
+  receiveDecisionRecorded:
+    action: receive
+    channel:
+      $ref: '#/channels/rwb.decision-record.v1'
+    summary: "Ledger intake of EV-08 (RD-P1-009); an event with no data.caseId is committed and ignored"
+    x-consumer-group: "rwb-source-data.rwb.decision-record.v1"
+    messages:
+    - $ref: '#/channels/rwb.decision-record.v1/messages/DecisionRecorded'
+x-shared-topics:
+- name: "rwb.decision-record.v1"
+  asyncapi: "asyncapi/rwb.decision-record.v1.asyncapi.yaml"
+  note: "Every service publishes DecisionRecorded (DP-03); the shared contract sits in one document"
+x-consumer-dead-letter-headers:
+  rwb-dlt-reason: "MISSING_ATTRIBUTE | UNSUPPORTED_VERSION | SCHEMA_INVALID | RETRIES_EXHAUSTED"
+  rwb-dlt-consumer: "rwb-source-data"
+  rwb-dlt-owner: "P1 squad"
+components:
+  messages:
+    AceDataReady:
+      name: "rwb.source-data.AceDataReady.v1"
+      title: "AceDataReady"
+      summary: "EV-26 AceDataReady"
+      description: "Produced by rwb-source-data; consumers: rwb-case, rwb-payment, rwb-deviation, rwb-writeoff"
+      x-consumers: ["rwb-case", "rwb-payment", "rwb-deviation", "rwb-writeoff"]
+      contentType: "application/cloudevents+json"
+      headers:
+        $ref: '#/components/schemas/CloudEventsHeaders'
+      payload:
+        $ref: '#/components/schemas/AceDataReadyEvent'
+    AceDataLate:
+      name: "rwb.source-data.AceDataLate.v1"
+      title: "AceDataLate"
+      summary: "EV-27 AceDataLate"
+      description: "Produced by rwb-source-data; consumers: alerts, gateway-bff banner"
+      x-consumers: ["alerts", "gateway-bff banner"]
+      contentType: "application/cloudevents+json"
+      headers:
+        $ref: '#/components/schemas/CloudEventsHeaders'
+      payload:
+        $ref: '#/components/schemas/AceDataLateEvent'
+  schemas:
+    CloudEventsHeaders:
+      type: object
+      description: "CloudEvents 1.0 Kafka binding in binary mode; ce_* headers (Arch v5 slide 35)"
+      properties:
+        ce_specversion:
+          type: string
+        ce_id:
+          type: string
+          description: "Event ID; also the idempotency key (Event and Messaging Design v4, sheet Rules)"
+        ce_source:
+          type: string
+        ce_type:
+          type: string
+        ce_time:
+          type: string
+          format: date-time
+        ce_subject:
+          type: string
+          description: "sourceSystem (these events have no case); the Kafka record key is {sourceSystem}:{businessDate} (RD-P1-003)"
+        ce_datacontenttype:
+          type: string
+    AceDataReadyEvent:
+      allOf:
+      - $ref: '#/components/schemas/CloudEventEnvelope'
+      - type: object
+        properties:
+          type:
+            const: "rwb.source-data.AceDataReady.v1"
+          data:
+            type: object
+            description: "EV-26 AceDataReady payload (RD-P1-003): once per source system and business date, written through the outbox in the transaction of the freshness stamp"
+            properties:
+              sourceSystem:
+                type: string
+                maxLength: 10
+              businessDate:
+                type: string
+                format: date
+              status:
+                type: string
+                description: "The v_ace_batch_status status value copied unchanged"
+              completedAt:
+                type: [string, "null"]
+                format: date-time
+                description: "Completion time of the source batch"
+            required: [sourceSystem, businessDate, status, completedAt]
+    AceDataLateEvent:
+      allOf:
+      - $ref: '#/components/schemas/CloudEventEnvelope'
+      - type: object
+        properties:
+          type:
+            const: "rwb.source-data.AceDataLate.v1"
+          data:
+            type: object
+            description: "EV-27 AceDataLate payload (RD-P1-003): once per source system and business date, written through the outbox in the transaction of the freshness stamp"
+            properties:
+              sourceSystem:
+                type: string
+                maxLength: 10
+              businessDate:
+                type: string
+                format: date
+              status:
+                type: string
+                description: "The v_ace_batch_status status value copied unchanged"
+              completedAt:
+                type: [string, "null"]
+                format: date-time
+                description: "Null when no batch completed"
+            required: [sourceSystem, businessDate, status, completedAt]
+    CloudEventEnvelope:
+      type: object
+      description: "CloudEvents 1.0 envelope (specversion, id, source, type, time, subject, data); Kafka binary mode carries the attributes in ce_* headers (Arch v5 slide 35)"
+      required: [specversion, id, source, type, time, subject, data]
+      properties:
+        specversion:
+          type: string
+          const: "1.0"
+        id:
+          type: string
+        source:
+          type: string
+        type:
+          type: string
+        time:
+          type: string
+          format: date-time
+        subject:
+          type: string
+        datacontenttype:
+          type: string
+        data:
+          type: object

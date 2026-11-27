@@ -1,0 +1,62 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-33 Template approval | No access | Not specified in the source documents (CG-ALL-5507) |",
+   "new": "| SCR-33 Template approval | No access | Not specified in the source documents (CG-ALL-5507) |\n| SCR-41 Delegation of authority | Empty | As named in Screen Specifications v1 for SCR-41 |\n| SCR-41 Delegation of authority | Loading | Not specified in the source documents (CG-ALL-5509) |\n| SCR-41 Delegation of authority | Error | Not specified in the source documents (CG-ALL-5509) |\n| SCR-41 Delegation of authority | No access | Not specified in the source documents (CG-ALL-5509) |"
+  },
+  {
+   "old": "SCR-39 and SCR-41 are not screens of this story, so they carry no state here.",
+   "new": "SCR-39 is not a screen of this story, so it carries no state here. The SCR-41 rows in the table above restate the states that Screen Specifications v1 names for SCR-41; this story does not render that screen."
+  },
+  {
+   "old": "    Then exactly one approval entry exists for version \"3\" and the rwb-comms contract fake records one approve call for it",
+   "new": "    Then exactly one approval entry exists for version \"3\" and the rwb-comms contract fake records one approve call for it\n\n  Scenario: AC6 Rules with no criterion of their own hold: no template row, an approval reference from the parameter row in force, a checklist field refused, and an empty history never a 404 (new, D-RCV-60)\n    When \"U-6102\" calls POST /api/recovery/access/v1/admin/template-approvals for templateId \"TPL-SETTLE-EN\", templateVersion 3 and approvalReference \"APR-2027-000412\" with a checklist field and Idempotency-Key \"k-010-6\"\n    Then the response is 422 by the schema and no approval is answered\n    Then no row of template is read and no approval entry is appended\n    When \"U-6102\" calls POST /api/recovery/access/v1/admin/template-approvals for templateId \"TPL-SETTLE-EN\", templateVersion 3 and an approvalReference that differs from the parameter row in force with Idempotency-Key \"k-010-7\"\n    Then the answer carries MSG-GEN-001 and no approval is answered\n    When \"U-6103\" calls GET /api/recovery/access/v1/admin/template-approvals/TPL-SETTLE-EN for a template this service has never approved\n    Then the answer carries total 0 and no 404\n\n  Scenario: AC7 A call without authentication is answered 401, and a version rwb-comms does not hold is answered 404 (new, D-RCV-60)\n    When a caller without authentication calls POST /api/recovery/access/v1/admin/template-approvals for templateId \"TPL-SETTLE-EN\", templateVersion 3 and approvalReference \"APR-2027-000412\" with Idempotency-Key \"k-010-8\"\n    Then the response is 401 and no approval is answered\n    When \"U-6102\" calls POST /api/recovery/access/v1/admin/template-approvals for a templateVersion that the rwb-comms contract fake does not hold with Idempotency-Key \"k-010-9\"\n    Then the response is 404 with message Not specified in the source documents (NEWAC-RWB-P4-E8010-APP-AC7) and no approval is answered\n    Then the rwb-comms contract fake records no approve call\n\n  Scenario: AC8 A consumed rwb-comms call that fails or does not answer records no approval (new, D-RCV-60)\n    Given the rwb-comms contract fake fails or does not answer the approve call for template \"TPL-SETTLE-EN\" version \"3\"\n    When \"U-6102\" calls POST /api/recovery/access/v1/admin/template-approvals for templateId \"TPL-SETTLE-EN\", templateVersion 3 and approvalReference \"APR-2027-000412\" with Idempotency-Key \"k-010-10\"\n    Then the response status is Not specified in the source documents (NEWAC-RWB-P4-E8010-APP-AC8) and the approval is not answered\n    Then no approval entry is appended and GET /api/recovery/access/v1/admin/template-approvals/TPL-SETTLE-EN still answers an empty history"
+  },
+  {
+   "old": "AC3 to AC5 are new under D-RCV-60 and test only what this story adds: the right, the two refusals and the recorded history.",
+   "new": "AC3 to AC8 are new under D-RCV-60 and test only what this story adds: the right, the two refusals, the recorded history, the rules that had no criterion, the error answers and the failed consumed call."
+  },
+  {
+   "old": "| TC-E8-010-10 | BR14 | Component | A template with no recorded approval answers an empty history with total 0 and no 404 |",
+   "new": "| TC-E8-010-10 | BR14 | Component | A template with no recorded approval answers an empty history with total 0 and no 404 |\n| TC-E8-010-11 | AC6, BR5, BR8, BR11, BR13, BR14 | Component | A approval with a checklist field refused 422 with no template read; an approval reference that differs from the parameter row refused with MSG-GEN-001; an empty history for a template never approved answers total 0 with no 404 |\n| TC-E8-010-12 | AC7 | Component | A call without authentication answered 401; a version rwb-comms does not hold answered 404 with no approve call and no entry |\n| TC-E8-010-13 | AC8 | Component | The rwb-comms approve call forced to fail or left unanswered: the answer is withheld with status Not specified in the source documents (NEWAC-RWB-P4-E8010-APP-AC8) and no entry is appended |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25600",
+   "item": "CG-ALL-5509",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added SCR-41 Empty (as named in spec), Loading, Error, No access rows; lacking states marked Not specified; prose updated."
+  },
+  {
+   "ruling": "R-31009",
+   "item": "NEWAC-RWB-P4-E8010-APP-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 for BR5, BR8, BR11, BR13, BR14 with new scenario and test row TC-E8-010-11 in section 16."
+  },
+  {
+   "ruling": "R-31010",
+   "item": "NEWAC-RWB-P4-E8010-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 for 401 and 404; 404 message Not specified in source; test row TC-E8-010-12 added."
+  },
+  {
+   "ruling": "R-31011",
+   "item": "NEWAC-RWB-P4-E8010-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 for failed or unanswered rwb-comms call; status Not specified in source; test row TC-E8-010-13 added."
+  }
+ ]
+}

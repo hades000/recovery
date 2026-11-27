@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P1-001 | A product is stale, or the gate holds a job, shown in the case record data panel and the alert | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | A product is stale, or the gate holds a job, shown in the case record data panel and the alert | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "with \"Account and arrears is from 2026-11-27. Today's ACE batch has not arrived.\"",
+   "new": "with \"Account and arrears is from 2026-11-27. Today's load has not arrived.\""
+  },
+  {
+   "old": "Then JOB-02, JOB-04, JOB-07 and JOB-08 are started for 2026-11-30",
+   "new": "Then JOB-02 and JOB-04 are started for 2026-11-30; JOB-07 and JOB-08 (rwb-payment, P8) are verified in RWB-ITG-W2"
+  },
+  {
+   "old": "Then JOB-02, JOB-04, JOB-07 and JOB-08 start for 2026-11-30",
+   "new": "Then JOB-02 and JOB-04 start for 2026-11-30; JOB-07 and JOB-08 are verified in RWB-ITG-W2"
+  },
+  {
+   "old": "receive MSG-P1-001 \"DP05 Contact and promises is from 2026-11-27. Today's ACE batch has not arrived.\"",
+   "new": "receive MSG-P1-001 \"DP05 Contact and promises is from 2026-11-27. Today's load has not arrived.\""
+  },
+  {
+   "old": "Then the lake keeps the released case list of 2026-11-27",
+   "new": "Then the P1 case_list_row keeps the released case list of 2026-11-27"
+  },
+  {
+   "old": "so the AC1 and AC6 lines that name all four jobs are read as the legacy text with the P8 pair recorded as not run.",
+   "new": "so the AC1 and AC6 lines name JOB-02 and JOB-04 only, and the P8 pair is verified in RWB-ITG-W2."
+  },
+  {
+   "old": "because the data lake is removed (GAP-0340; ASM-0434).",
+   "new": "because the data lake is removed (GAP-0340; ASM-0434). Before the ACE batch record exists, freshness is read from the batch-status view v_ace_batch_status populated with synthetic batch rows in SIT; where that view is absent the product is shown as not stamped, and no date is inferred from a row count, a file or a view's data date (GAP-1507). The source time of the stamp is the batch started_at and the load time is the batch completed_at (GAP-0492). AceDataReady and AceDataLate are published by rwb-source-data on rwb.source-data.events.v1 and keyed by sourceSystem and businessDate; the envelope carries id, source, type, specversion, time, subject (the source system) and datacontenttype, and the seven payload fields are typed in the AsyncAPI document; the registry subject is named by the platform event owner, and the login is referenced as the rwb_source_data login (DP-02) until it is allocated (GAP-0493). ACE ingestion is not a producer of these events on a Recovery topic (GAP-1504). The ready call of the bank scheduler and its status read are implemented with a poll of the ACE batch record as the fallback, and the path live at go-live is confirmed before the integration test (GAP-1513)."
+  },
+  {
+   "old": "| TC-E1-015-03-ITG | BR5 (AC3 not owned by this story) | Integration |",
+   "new": "| TC-E1-015-03-ITG | BR5 (AC3 run by Not specified in the source documents (CG-ALL-206)) | Integration |"
+  },
+  {
+   "old": "| TC-E1-015-08-ITG | BR7 (AC8 owned by RWB-P1-E1015-APP) | Integration |",
+   "new": "| TC-E1-015-08-ITG | BR7 (AC8 run by RWB-P1-E1015-APP) | Integration |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21954",
+   "item": "GAP-0357",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-E1-034 (legacy story) and the P6 rwb-comms contract in the API registry",
+   "change": "Read the five template operations from the P6 registry contract under /api/recovery/comms/v1/admin/templates, keep request, response, state and message unchanged, and route SCR-33 via gateway-bff.",
+   "note": "Not in this story's text; the legacy story and registry carry the five operations and SCR-33 route."
+  },
+  {
+   "ruling": "R-21955",
+   "item": "GAP-1507",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading names v_ace_batch_status with synthetic SIT rows and the not-stamped fallback; no inference from row count, file or data date."
+  },
+  {
+   "ruling": "R-21956",
+   "item": "GAP-0340",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 and AC6 assert JOB-02 and JOB-04 only; JOB-07 and JOB-08 are verified in RWB-ITG-W2; AC9 reads P1 case_list_row."
+  },
+  {
+   "ruling": "R-21957",
+   "item": "GAP-0492",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "TSD P1 v3 T3.6 (rows DF-OPS-005 and DF-OPS-006)",
+   "change": "Map source_extracted_at to started_at and loaded_at to completed_at as in FSD P1 v3 A2.14.2, and correct both rows in the next version.",
+   "note": "Story target reading now states started_at and completed_at mapping, matching legacy values."
+  },
+  {
+   "ruling": "R-21958",
+   "item": "GAP-0493",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading fixes envelope attributes, event key, payload typing and the DP-02 login reference; registry subject left to platform owner."
+  },
+  {
+   "ruling": "R-21959",
+   "item": "GAP-1504",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Event and Messaging Design v4 (EV-26)",
+   "change": "Set EV-26 direction to produced by rwb-source-data on rwb.source-data.events.v1, with ACE ingestion outside the 19 services; correct at the next version.",
+   "note": "Story states rwb-source-data as sole publisher of both events on its own topic."
+  },
+  {
+   "ruling": "R-21960",
+   "item": "GAP-1513",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading names the scheduler ready and status path with batch-record poll fallback; live path confirmed before integration test."
+  },
+  {
+   "ruling": "R-23752",
+   "item": "CG-ALL-204",
+   "status": "Resolved",
+   "section": "7, 14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4 in sections 14, 7 AC2 and AC9; gate-hold use needs a BA message ID."
+  },
+  {
+   "ruling": "R-23753",
+   "item": "CG-ALL-206",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E1-015-08-ITG marked run by RWB-P1-E1015-APP; TC-E1-015-03-ITG marked run by an owner not named in the sources."
+  },
+  {
+   "ruling": "R-23754",
+   "item": "CG-ALL-207",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7 (REQ-RDF-009 rows)",
+   "change": "Align REQ-RDF-009 test trace with story section 18 range TC-E1-015-01-ITG to TC-E1-015-12-ITG in the next RTM version.",
+   "note": "Story section 18 is unchanged; the RTM carries different test IDs for REQ-RDF-009."
+  }
+ ]
+}

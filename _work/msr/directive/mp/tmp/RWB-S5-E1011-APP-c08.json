@@ -1,0 +1,104 @@
+{
+ "edits": [
+  {
+   "old": "    Then the response is 401 with MSG-P4-001 and nothing is written",
+   "new": "    Then the response is 401 with MSG-P4-001 and nothing is written\n\n  Scenario: AC13 A role without the right of the capability area is refused (new, D-RCV-60)\n    Given the caller holds a Workbench role without the right of the capability area\n    When the caller calls any operation of rwb-asset for the quality run of 2026-11-30\n    Then the response is 403 with MSG-P4-002 and nothing is written\n\n  Scenario: AC14 The provided operations answer 404 for a run that does not exist (new, D-RCV-60)\n    Given the caller holds a Workbench role with the Platform administration right R\n    When the caller reads GET /quality-runs/{businessDate} for a business date with no quality run\n    Then the response is 404 and nothing is written\n\n  Scenario: AC15 An activity of the quality run is retried or times out (new, D-RCV-60)\n    Given a reconciliation activity of the quality run of 2026-11-30 times out and is retried\n    When the retried activity completes\n    Then no row is written twice for the same rec_code, quality_check and business_date\n    Then the retry count and the timeout are Not specified in the source documents (NEWAC-RWB-S5-E1011-APP-AC15)\n\n  Scenario: AC16 A consumed call fails or does not answer (new, D-RCV-60)\n    Given the rwb-source-data contract mock does not answer the read of DP06 Collateral and assets for 2026-11-30\n    When the quality run of 2026-11-30 runs\n    Then the system writes no quality result for 2026-11-30 and the run state of 2026-11-30 is FAILED with the failing system named\n    Then the system shows MSG-GEN-006 naming that system\n\n  Scenario: AC17 A status change the model does not allow is refused (new, D-RCV-60)\n    Given the run state of 2026-11-30 is RELEASED\n    When a change of the run state that the state model does not allow is requested\n    Then the change is refused, the run state of 2026-11-30 stays RELEASED and nothing is written\n    Then the allowed transitions and the message of the refusal are Not specified in the source documents (NEWAC-RWB-S5-E1011-APP-AC17)"
+  },
+  {
+   "old": "| TC-E1-011-11 | AC11, BR10 | Component | asset_quality_run, asset_quality_result, asset_quality_break, listing and asset_sale written and read by rwb-asset only; reads of recovery_case, treatment, proceeds, notice, document and the DP06 rows attempted at the boundary |",
+   "new": "| TC-E1-011-11 | AC11, BR10 | Component | asset_quality_run, asset_quality_result, asset_quality_break, listing and asset_sale written and read by rwb-asset only; reads of recovery_case, treatment, proceeds, notice, document and the DP06 rows attempted at the boundary |\n| TC-E1-011-12 | AC10 | Component | Caller with a Workbench role without Platform administration R reads GET /quality-runs/2026-11-30 and a break row; 403 with MSG-P4-002; nothing written |\n| TC-E1-011-13 | AC11, BR10 | Component | Caller reads a path outside /api/recovery/asset/v1; a cross-schema read appears; an extract file or lake path is written; the boundary test of rwb-asset fails the build |\n| TC-E1-011-14 | AC12 | Component | Token with no Workbench role calls GET /quality-runs/2026-11-30; 401 with MSG-P4-001; nothing written |\n| TC-E1-011-15 | AC13, BR14 | Component | Caller with a Workbench role without the right of the capability area calls an operation of rwb-asset for 2026-11-30; 403 with MSG-P4-002; nothing written |\n| TC-E1-011-16 | AC14 | Component | Caller with the Platform administration right R reads GET /quality-runs/{businessDate} for a business date with no quality run; 404; nothing written |\n| TC-E1-011-17 | AC15 | NFR | A reconciliation activity of 2026-11-30 times out and is retried; no row is written twice; retry count and timeout Not specified in the source documents (NEWAC-RWB-S5-E1011-APP-AC15) |\n| TC-E1-011-18 | AC16 | Component | rwb-source-data contract mock does not answer the DP06 read for 2026-11-30; no quality result written; run FAILED; MSG-GEN-006 naming the system |\n| TC-E1-011-19 | AC17 | Component | Run of 2026-11-30 in state RELEASED; a status change the state model does not allow is requested; the change is refused and the state stays RELEASED |\n| TC-E1-011-20 | AC9 | Component | rwb-source-data contract or parameters contract fails after the first read of 2026-11-30; no quality result written; run state FAILED; MSG-GEN-006 naming the system |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28479",
+   "item": "GAP-1457",
+   "status": "Resolved",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "Headings kept unchanged per directive; section 9 trace table names the primary service epic of each key. No BRD renumbering needed."
+  },
+  {
+   "ruling": "R-32559",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC10",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-011-12 as a dedicated component test for AC10 and X8 with MSG-P4-002 and 403."
+  },
+  {
+   "ruling": "R-32560",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC11",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-011-13 as a dedicated component boundary test for AC11 and X9."
+  },
+  {
+   "ruling": "R-32561",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-011-14 as a dedicated component test for AC12 and X10 with 401 and MSG-P4-001."
+  },
+  {
+   "ruling": "R-32562",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 for BR14 (403 MSG-P4-002 for a role without the capability right) and TC-E1-011-15."
+  },
+  {
+   "ruling": "R-32563",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for 404 on an unknown run and TC-E1-011-16. Message code for 404 not in source; 401 and 403 are AC12 and AC10."
+  },
+  {
+   "ruling": "R-32564",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for retried or timed-out activity with no duplicate rows and TC-E1-011-17. Retry count and timeout not specified in source."
+  },
+  {
+   "ruling": "R-32565",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for a consumed rwb-source-data call that fails or does not answer, and TC-E1-011-18."
+  },
+  {
+   "ruling": "R-32566",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for a disallowed run-state change being refused, and TC-E1-011-19. Allowed transitions and refusal message not in source."
+  },
+  {
+   "ruling": "R-32567",
+   "item": "NEWAC-RWB-S5-E1011-APP-AC9",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-011-20 as a dedicated component test for AC9 and X7 with FAILED state and MSG-GEN-006."
+  }
+ ]
+}

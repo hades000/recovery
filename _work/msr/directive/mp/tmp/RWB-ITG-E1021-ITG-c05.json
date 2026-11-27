@@ -1,0 +1,97 @@
+{
+ "edits": [
+  {
+   "old": "| X1 | Two transfers reach the same case in the same second | The first commits; the second is refused on the version check and recorded as rejected | MSG-GEN-004 | AC11, TC-E1-021-03-ITG, TC-E1-021-18-ITG |",
+   "new": "| X1 | Two transfers reach the same case in the same second | The first commits; the second is refused on the version check and recorded as rejected | MSG-GEN-004 | AC11, AC15, TC-E1-021-03-ITG, TC-E1-021-18-ITG |"
+  },
+  {
+   "old": "| X3 | A named target owner at the caseload cap | The call is refused with status 422 and nothing changes | MSG-P3-002 | AC12, TC-E1-021-07-ITG, TC-E1-021-19-ITG |",
+   "new": "| X3 | A named target owner at the caseload cap | The call is refused with status 422 and nothing changes | MSG-P3-002 | AC12, AC16, TC-E1-021-07-ITG, TC-E1-021-19-ITG |"
+  },
+  {
+   "old": "| X4 | A transfer of a closed case | The call is refused with status 409 | MSG-P3-005 | AC13, TC-E1-021-08-ITG, TC-E1-021-20-ITG |",
+   "new": "| X4 | A transfer of a closed case | The call is refused with status 409 | MSG-P3-005 | AC13, AC17, TC-E1-021-08-ITG, TC-E1-021-20-ITG |"
+  },
+  {
+   "old": "| X5 | The decision record cannot be written | The transfer is refused and the case keeps its queue and owner; for a rule transfer the event is retried from the topic | MSG-P7-003 | AC14, TC-E1-021-09-ITG, TC-E1-021-16-ITG, TC-E1-021-21-ITG |",
+   "new": "| X5 | The decision record cannot be written | The transfer is refused and the case keeps its queue and owner; for a rule transfer the event is retried from the topic | MSG-P7-003 | AC14, AC18, TC-E1-021-09-ITG, TC-E1-021-16-ITG, TC-E1-021-21-ITG |"
+  },
+  {
+   "old": "| X9 | A legal hold is placed on a case already on hold | The call is refused with status 409 | MSG-P3-005 | AC15, TC-E1-021-13-ITG, TC-E1-021-22-ITG |",
+   "new": "| X9 | A legal hold is placed on a case already on hold | The call is refused with status 409 | MSG-P3-005 | AC19, TC-E1-021-13-ITG, TC-E1-021-22-ITG |"
+  },
+  {
+   "old": "  Scenario: AC14 A decision record that cannot be written refuses the transfer and the event is retried (new, D-RCV-60)",
+   "new": "  Scenario: AC15 Two transfers reach the same case in the same second and the second is refused with MSG-GEN-004 (new, D-RCV-60)\n    Given case RW-2026-000313 is in queue \"TDR-BKK-CO\" with owner U-21\n    When two transfer triggers for case RW-2026-000313 commit in the same second\n    Then the first transfer commits and the case moves once\n    Then the second transfer is refused on the version check with MSG-GEN-004\n    Then the second transfer is recorded as rejected and writes no decision record\n\n  Scenario: AC16 A named target owner at the caseload cap is refused with status 422 and nothing changes (new, D-RCV-60)\n    Given owner U-24 holds 150 open cases in queue \"LIT-BKK-OFF\"\n    Given case RW-2026-000304 is in queue \"TDR-BKK-CO\" with owner U-21\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000304/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-24\n    Then the call returns status 422 with MSG-P3-002\n    Then the case keeps its queue, its owner and its assignment\n\n  Scenario: AC17 A transfer of a closed case is refused with status 409 and nothing changes (new, D-RCV-60)\n    Given case RW-2026-000305 is closed in queue \"TDR-BKK-CO\" with owner U-21\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000305/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the call returns status 409 with MSG-P3-005\n    Then the case keeps its queue, its owner and its assignment\n\n  Scenario: AC18 A manual transfer whose decision record cannot be written is refused and the case keeps its queue and owner (new, D-RCV-60)\n    Given the decision record write of rwb-case is forced to fail for a manual call\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000306/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the transfer is refused with MSG-P7-003\n    Then the case keeps its queue, its owner and its assignment\n    Then no decision record is written for the refused transfer\n\n  Scenario: AC19 A legal hold placed on a case already on hold is refused with status 409 (new, D-RCV-60)\n    Given case RW-2026-000310 is on legal hold through POST /api/recovery/case/v1/cases/{caseId}/legal-hold with reason \"Court order\" and reference \"ORD-2026-0412\"\n    When an identity with the Case record right U places a second legal hold on RW-2026-000310 with reason \"Court order\" and reference \"ORD-2026-0412\"\n    Then the call returns status 409 with MSG-P3-005\n    Then the legal-hold status and status_before_hold of the case are unchanged\n\n  Scenario: AC20 Rules BR10 to BR18 hold on every transfer path (new, D-RCV-60)\n    Given the transfer paths of AC1, AC4, AC7 and AC11 have run\n    Then a transfer changes the queue, the team and the owner and never the status or the clocks of the case (BR10)\n    Then the manual transfer keeps its endpoint, request, response, errors and authorization (BR11)\n    Then a trigger with no TRANSFER version in force stays in the outbox and moves no case (BR12)\n    Then the TRANSFER version is fetched from rwb-decision, its SHA-256 is verified and it is evaluated inside the activity of rwb-case (BR13)\n    Then the decision record commits in the same transaction as the case move and is collected into the central ledger within five minutes (BR14)\n    Then each move leaves one rwb.case.CaseTransferred.v1 on rwb.case.events.v1 with key caseId and no personal data (BR15)\n    Then the case router signals CaseWorkflow through signalWithStart and makes no REST call to any service (BR16)\n    Then every cross-service call of the run is one hop to its owner with the 2 s budget (BR17)\n    Then the caller right comes from the authorise contract of rwb-access and an identity without it is refused (BR18)\n\n  Scenario: AC21 A consumed call that fails or does not answer stops the transfer and moves no case (new, D-RCV-60)\n    Given the call of rwb-case to rwb-decision for the TRANSFER version fails or does not answer within the 2 s budget\n    When the EvaluateRules activity evaluates a transfer trigger for case RW-2026-000309\n    Then the activity fails and no decision record is written\n    Then the trigger stays in the outbox of rwb-case and the case keeps its queue and owner\n    Then the failure is reported against the owning service and no fake is put in its place\n\n  Scenario: AC14 A decision record that cannot be written refuses the transfer and the event is retried (new, D-RCV-60)"
+  },
+  {
+   "old": "| TC-E1-021-26-ITG | AC5, BR15 | Integration | Move of RW-2026-000303 and its CaseTransferred event; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-26-ITG | AC5, BR15 | Integration | Move of RW-2026-000303 and its CaseTransferred event; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-27-ITG | AC15, BR5 | Integration | Two transfers of RW-2026-000313 in the same second; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-28-ITG | AC16, BR4 | Integration | Owner U-24 at 150 named as target; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-29-ITG | AC17 | Integration | Closed case RW-2026-000305 transferred; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-30-ITG | AC18, BR9 | Integration | Decision record write forced to fail for a manual call on RW-2026-000306; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-31-ITG | AC19, BR6 | Integration | Second legal hold on RW-2026-000310; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-32-ITG | AC20, BR10 to BR18 | Integration | Rules checked on the transfer paths of AC1, AC4, AC7 and AC11; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-33-ITG | AC21, BR17 | Integration | rwb-decision call fails or does not answer for RW-2026-000309; end-to-end: real services on the wave 1 contracts |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29779",
+   "item": "NEWAC-RWB-ITG-E1021-ITG-AC15",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 scenario for same-second transfers, linked in section 5 X1 and TC-E1-021-27-ITG."
+  },
+  {
+   "ruling": "R-29780",
+   "item": "NEWAC-RWB-ITG-E1021-ITG-AC16",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 scenario for owner at cap, linked in section 5 X3 and TC-E1-021-28-ITG."
+  },
+  {
+   "ruling": "R-29781",
+   "item": "NEWAC-RWB-ITG-E1021-ITG-AC17",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 scenario for closed case transfer, linked in section 5 X4 and TC-E1-021-29-ITG."
+  },
+  {
+   "ruling": "R-29782",
+   "item": "NEWAC-RWB-ITG-E1021-ITG-AC18",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 scenario for refused decision record on manual transfer, linked in section 5 X5 and TC-E1-021-30-ITG."
+  },
+  {
+   "ruling": "R-29783",
+   "item": "NEWAC-RWB-ITG-E1021-ITG-AC19",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC19 scenario for legal hold on a case on hold; section 5 X9 now cites AC19; TC-E1-021-31-ITG added."
+  },
+  {
+   "ruling": "R-29784",
+   "item": "NEWAC-RWB-ITG-E1021-ITG-AC20",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC20 scenario asserting BR10 to BR18 on transfer paths; TC-E1-021-32-ITG added. Scenario sits before AC14 in file."
+  },
+  {
+   "ruling": "R-29785",
+   "item": "NEWAC-RWB-ITG-E1021-ITG-AC21",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC21 scenario for failed or silent consumed call with no case move; TC-E1-021-33-ITG added."
+  }
+ ]
+}

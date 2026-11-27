@@ -1,0 +1,67 @@
+{
+ "edits": [
+  {
+   "old": "| TC-TE-013-12 | §12.7 table boundary (DP-01) | Component | Writes and reads only in schema rwb_decision; no row of another service is read or copied and no foreign key crosses a schema |",
+   "new": "| TC-TE-013-12 | §12.7 table boundary (DP-01) | Component | Writes and reads only in schema rwb_decision; no row of another service is read or copied and no foreign key crosses a schema |\n| TC-TE-013-13 | AC8, BR2 | Component | Decision code D99 on the record of step key CASEWF:RW-2026-000201:ENTRY:2026-11-30; MSG-P7-009 naming decisionCode, nothing chained, no entry |\n| TC-TE-013-14 | AC9, BR1, BR11, BR12, BR13, BR14, BR16 | Contract | One entry per agent step with agent version and fallback on the same row; no update or delete of an entry; a record failing the ledger schema is refused with MSG-P7-009 and not chained |\n| TC-TE-013-15 | AC10, BR10 | Component | GET decision-log and GET decision-log/{entryId} sent without a credential; 401 on both, no entry returned |"
+  },
+  {
+   "old": "TC-TE-013-11 and TC-TE-013-12 are added by this story for AC8 and the table boundary of section 12.7; they carry no legacy ID.",
+   "new": "TC-TE-013-11 to TC-TE-013-15 are added by this story for AC8, AC9, AC10 and the table boundary of section 12.7; they carry no legacy ID."
+  },
+  {
+   "old": "    Then the rate is a read of these entries and neither the measure definition nor its threshold is written in this service",
+   "new": "    Then the rate is a read of these entries and neither the measure definition nor its threshold is written in this service\n\n  Scenario: AC9 The ledger keeps one entry per agent step, stays append only and chained, and holds no personal data (new, D-RCV-60)\n    Given the record of the step on case \"RW-2026-000201\" was written with the rule result applied and fallback false\n    When rwb-decision consumes the DecisionRecorded event of that step\n    Then the case holds one agent step record and one entry, and the entry holds the agent version and the fallback fact on the same row\n    Then this service makes no update and no delete of any decision_log_entry row, and the nightly JOB-14 chain check covers the entry\n    Then the event, the trail and the logs carry case and run identifiers, a decision code, version labels, a final call, statuses, reasons and dates only, and the inputs reference points at a masked snapshot\n    Then the decision code, the fallback reasons, the agent version form and the message texts are read from their list, contract and message rows and are not constants of this service\n    Given a record that fails the ledger schema is delivered for case \"RW-2026-000202\"\n    When rwb-decision consumes that record\n    Then it is refused with MSG-P7-009 naming the field, nothing is chained, the chain stays continuous and the record is held on the retry and dead-letter path with an alert\n\n  Scenario: AC10 A read without a credential is answered 401 on both reads (new, D-RCV-60)\n    Given the entry of the step on case \"RW-2026-000201\" is on the ledger at chain_seq 231\n    When a caller sends GET /api/recovery/decision/v1/decision-log?caseId=RW-2026-000201 without a credential\n    Then the answer is 401 and no entry is returned\n    When a caller sends GET /api/recovery/decision/v1/decision-log/{entryId} without a credential\n    Then the answer is 401 and no entry is returned"
+  },
+  {
+   "old": "These eight criteria are new",
+   "new": "These ten criteria are new"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28934",
+   "item": "GAP-1319",
+   "status": "Not applied",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "Section 9 text is not in this chunk, so the dependency map is not edited here; metadata rows are to be corrected at the next story set version per the directive."
+  },
+  {
+   "ruling": "R-28935",
+   "item": "GAP-1318",
+   "status": "Resolved",
+   "section": "none",
+   "target": "",
+   "change": "No edit: the story keeps the phrase the rwb-decision login (DP-02) and needs no change when the login name is allocated.",
+   "note": "Login name is allocated with the schema at RWB-PLT-NF06-DB and written to the platform secret store; the story keeps the phrase."
+  },
+  {
+   "ruling": "R-29652",
+   "item": "ACR-RWB-P7-TE013-APP-AC8",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-TE-013-13 for the D99 refusal of AC8 (BR2); TC-TE-013-11 already covers the rate count.",
+   "note": "AC8 now has a test case for its refusal scenario and for its count scenario."
+  },
+  {
+   "ruling": "R-31558",
+   "item": "NEWAC-RWB-P7-TE013-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 to section 7 (401 without a credential on both reads) and TC-TE-013-15 to section 16.",
+   "note": "AC10 states the 401 answer on GET decision-log and GET decision-log/{entryId}; no message code is given in the sources."
+  },
+  {
+   "ruling": "R-31559",
+   "item": "NEWAC-RWB-P7-TE013-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 to section 7 covering BR1, BR2, BR11, BR12, BR13, BR14 and BR16 and TC-TE-013-14 to section 16.",
+   "note": "AC9 covers the uncovered business rules in one criterion; BR2 is also covered by AC8 and TC-TE-013-13."
+  }
+ ]
+}

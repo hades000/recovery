@@ -1,0 +1,236 @@
+{
+ "edits": [
+  {
+   "old": "| `RaiseDeviation`, `DeviationQueue` | React components | The form and saved states of SCR-06 and the loading and list states of SCR-08, with the refusal and not-recorded states |",
+   "new": "| `RaiseDeviation`, `DeviationQueue` | React components | The form and saved states of SCR-06 and the list states of SCR-08; both screens carry the empty, loading, error and no-access states, with the refusal and not-recorded states |"
+  },
+  {
+   "old": "no write to `rwb_case`, `rwb_decision` or `rwb_source_data` (X6, X9).",
+   "new": "no write to the schemas of the case, decision and source-data services (X6, X9)."
+  },
+  {
+   "old": "Given the caller holds Case record U",
+   "new": "Given the caller holds Case record U unless the scenario states otherwise"
+  },
+  {
+   "old": "No new criterion is written here: the split plan gives this key's new criteria to the CON story and to the harness (GAP-3057; ASM-5169).",
+   "new": "The exception paths X2 and X6 to X9 of section 5 are written here as AC3 to AC7 in the same style; the split plan gives this key's other new criteria to the CON story and to the harness (GAP-3057; ASM-5169)."
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Caller without Case record U (exception X2)\n    Given the caller does not hold Case record U\n    When the action is taken\n    Then the caller gets 403 with MSG-P4-002, nothing changes and no record is written\n\n  Scenario: AC4 Deviation past its service level (exception X6)\n    Given the deviation is in DEV_WITH_OWNER and its time there exceeds the service level of R-DEV-20 of 10 working days\n    When the service level is breached\n    Then the case escalates to the team manager, the breach is reported and the state does not change\n\n  Scenario: AC5 Unmapped code (exception X7)\n    Given a deviation_code outside X1 to X7 with no owner set for the code\n    When the flag is raised\n    Then R-DEV-21 assigns the deviation to the case owner's team manager and logs the unmapped code\n\n  Scenario: AC6 Repeated raise or second outcome (exception X8)\n    Given a deviation has been raised with an Idempotency-Key\n    When the same key is repeated, or a second outcome is sent for the deviation\n    Then a repeated raise answers the deviation it created, a conflicting outcome is answered 409, and each stays at one row, one record and one event\n\n  Scenario: AC7 Boundary breach (exception X9)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case row, a timer row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the boundary test fails the build and nothing is released"
+  },
+  {
+   "old": "| X2 | The caller does not hold Case record U of the operation | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | TC-E7-004-03 |",
+   "new": "| X2 | The caller does not hold Case record U of the operation | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC3, TC-E7-004-03 |"
+  },
+  {
+   "old": "| X6 | The deviation sits with its owner past the service level of R-DEV-20 | The case escalates to the team manager and the breach is reported; the state does not change | None named | X6 |",
+   "new": "| X6 | The deviation sits with its owner past the service level of R-DEV-20 | The case escalates to the team manager and the breach is reported; the state does not change | None named | AC4, TC-E7-004-07 |"
+  },
+  {
+   "old": "| X7 | A code outside X1 to X7, or a code with no owner | R-DEV-21 assigns it to the case owner's team manager and logs the unmapped code | None named | X7 |",
+   "new": "| X7 | A code outside X1 to X7, or a code with no owner | R-DEV-21 assigns it to the case owner's team manager and logs the unmapped code | None named | AC5, TC-E7-004-08 |"
+  },
+  {
+   "old": "| X8 | A repeated raise with the same `Idempotency-Key`, or a second outcome on one deviation | One row, one record and one event; the key answers the deviation it created, a conflicting outcome answers 409 | None | X8 |",
+   "new": "| X8 | A repeated raise with the same `Idempotency-Key`, or a second outcome on one deviation | One row, one record and one event; the key answers the deviation it created, a conflicting outcome answers 409 | None | AC6, TC-E7-004-09 |"
+  },
+  {
+   "old": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR4, BR5 |",
+   "new": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC7, TC-E7-004-10, Section 17, BR4, BR5 |"
+  },
+  {
+   "old": "| TC-E7-004-03 | Access | Component |",
+   "new": "| TC-E7-004-03 | Access, AC3 | Component |"
+  },
+  {
+   "old": "| TC-E7-004-04 | Principle 5 | Component | A forced decision log write failure inside the raise transaction; no `deviation` row, no outbox row and no state answer |",
+   "new": "| TC-E7-004-04 | Principle 5 | Component | A forced decision log write failure inside the raise transaction; no `deviation` row, no outbox row and no state answer |\n| TC-E7-004-05 | Contract of the operations, events and activities of section 12 | Contract | The two operations, the two events and the activities of section 12 checked against their contracts and fakes |\n| TC-E7-004-06 | Boundary of the tables of section 12.7 (ASM-3438) | Component | Each table of section 12.7 checked against its owner; no statement outside `rwb_deviation` |\n| TC-E7-004-07 | AC4 | Component | A deviation in DEV_WITH_OWNER past the service level of R-DEV-20; escalation and breach reported, state unchanged |\n| TC-E7-004-08 | AC5 | Component | A deviation_code outside X1 to X7 with no owner; R-DEV-21 assigns it and logs the unmapped code |\n| TC-E7-004-09 | AC6 | Component | A repeated raise with the same Idempotency-Key and a second outcome on one deviation; one row, one record and one event; 409 on conflict |\n| TC-E7-004-10 | AC7 | Component | A statement reaching a v_ace_* view, a recovery_case row, a timer row or another service's schema; the boundary test fails the build |"
+  },
+  {
+   "old": "The four legacy cases are those of RWB-E7-004 in their legacy order, with the Level column added: every case is tested on the fakes, so every case is `Component`.",
+   "new": "The four legacy cases are those of RWB-E7-004 in their legacy order, with the Level column added: TC-E7-004-01 to TC-E7-004-04 are tested on the fakes, so each is `Component`. TC-E7-004-05 to TC-E7-004-10 are added by this story for the contract and boundary of sections 12 and 12.7 and for criteria AC3 to AC7."
+  },
+  {
+   "old": "| Test cases | TC-E7-004-01 to TC-E7-004-04 |",
+   "new": "| Test cases | TC-E7-004-01 to TC-E7-004-10 |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Feature | L3 process | Requirement (short) | Story element | Test cases |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-S8-001 | ",
+   "new": "| REQ-S8-001 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| REQ-DVH-010 | ",
+   "new": "| REQ-DVH-010 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| REQ-DVH-002 | ",
+   "new": "| REQ-DVH-002 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| ADR-013 | ",
+   "new": "| ADR-013 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| ADR-014 | ",
+   "new": "| ADR-014 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| ADR-015 | ",
+   "new": "| ADR-015 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| ADR-016 | ",
+   "new": "| ADR-016 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| ADR-020 | ",
+   "new": "| ADR-020 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| ADR-022 | ",
+   "new": "| ADR-022 | FEAT-DVF-04 | Not specified in the source documents (DOR-RWB-S8-E7004-APP-2) | "
+  },
+  {
+   "old": "| Rule | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer |",
+   "new": "| BR ID | Rule | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer |"
+  },
+  {
+   "old": "|---|---|---|---|---|---|---|---|---|---|---|",
+   "new": "|---|---|---|---|---|---|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| R-UNI-08 | Universal rules |",
+   "new": "| BR12 | R-UNI-08 | Universal rules |"
+  },
+  {
+   "old": "| R-DEV-01 | Deviations |",
+   "new": "| BR13 | R-DEV-01 | Deviations |"
+  },
+  {
+   "old": "| R-DEV-04 | Deviations |",
+   "new": "| BR14 | R-DEV-04 | Deviations |"
+  },
+  {
+   "old": "| R-DEV-13 | Deviations |",
+   "new": "| BR15 | R-DEV-13 | Deviations |"
+  },
+  {
+   "old": "| R-DEV-14 | Deviations |",
+   "new": "| BR16 | R-DEV-14 | Deviations |"
+  },
+  {
+   "old": "| R-DEV-19 | Deviations |",
+   "new": "| BR17 | R-DEV-19 | Deviations |"
+  },
+  {
+   "old": "| R-DEV-20 | Deviations |",
+   "new": "| BR18 | R-DEV-20 | Deviations |"
+  },
+  {
+   "old": "| R-DEV-21 | Deviations |",
+   "new": "| BR19 | R-DEV-21 | Deviations |"
+  },
+  {
+   "old": "| BR11 | The document number of the case and every other case fact are read through the rwb-case contract and never copied into `rwb_deviation` | DP-05 as a prohibition; ASM-5163 |",
+   "new": "| BR11 | The document number of the case and every other case fact are read through the rwb-case contract and never copied into `rwb_deviation` | DP-05 as a prohibition; ASM-5163 |\n| BR12 | The fraud flag of R-UNI-08 raises X4, holds the case and refers it to the fraud team | Business Rules and Routing Logic v4, row R-UNI-08 |\n| BR13 | R-DEV-01 pauses the stage clock and routes the deviation to its named owner | Business Rules and Routing Logic v4, row R-DEV-01 |\n| BR14 | R-DEV-04 assigns an X4 deviation to the fraud team | Business Rules and Routing Logic v4, row R-DEV-04 |\n| BR15 | R-DEV-13 routes a confirmed fraud to write-off | Business Rules and Routing Logic v4, row R-DEV-13 |\n| BR16 | R-DEV-14 returns a cleared fraud to the collections decision | Business Rules and Routing Logic v4, row R-DEV-14 |\n| BR17 | R-DEV-19 recomputes the segment and re-runs the hard gates on reopen | Business Rules and Routing Logic v4, row R-DEV-19 |\n| BR18 | R-DEV-20 escalates to the team manager when the service level is breached | Business Rules and Routing Logic v4, row R-DEV-20 |\n| BR19 | R-DEV-21 assigns an unmapped code to the case owner's team manager and logs it | Business Rules and Routing Logic v4, row R-DEV-21 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13431",
+   "item": "CG-ALL-11511",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add rows TC-E7-004-01 to TC-E7-004-04 to tab Story test cases with Given, When and Then copied from the covered criteria; add TC-E7-004-05 to TC-E7-004-10 as well",
+   "note": "Story side done: rows and criteria added. Test Cases v8 row additions are needed in the workbook."
+  },
+  {
+   "ruling": "R-21215",
+   "item": "DOR-RWB-S8-E7004-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Empty, loading, error and no-access states named for SCR-06 and SCR-08 in the components row",
+   "note": "States for SCR-06 and SCR-08 now written in the components table of section 13."
+  },
+  {
+   "ruling": "R-21216",
+   "item": "DOR-RWB-S8-E7004-APP-11",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Fields of section 11 are not in this chunk; the personal-data field to reclassify cannot be named without inventing it."
+  },
+  {
+   "ruling": "R-21217",
+   "item": "DOR-RWB-S8-E7004-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16, 18",
+   "target": "",
+   "change": "Added TC-E7-004-05 contract and TC-E7-004-06 boundary rows; test case lists updated",
+   "note": "RTM v7 test lists are not in this chunk, so the section 18 RTM difference is not resolved here."
+  },
+  {
+   "ruling": "R-21218",
+   "item": "DOR-RWB-S8-E7004-APP-18",
+   "status": "Cross-document",
+   "section": "not located",
+   "target": "Not specified in the source documents (DOR-RWB-S8-E7004-APP-18)",
+   "change": "Record open decision DL22 with assumptions ASM-1162, ASM-1304, ASM-2217 and ASM-2569 in the open decisions register",
+   "note": "DL22 does not appear in the story text; the register holding open decisions is not named in the sources."
+  },
+  {
+   "ruling": "R-21219",
+   "item": "DOR-RWB-S8-E7004-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Feature column (FEAT-DVF-04) and L3 process column added to the traceability table",
+   "note": "L3 process not specified in sources, placeholder used. Rows here are 9; item cites 17."
+  },
+  {
+   "ruling": "R-21220",
+   "item": "DOR-RWB-S8-E7004-APP-20",
+   "status": "Not applied",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Parameters and reference-data contract names are not in the source documents; adding DP-06 or DP-07 would add a pattern the plan excludes."
+  },
+  {
+   "ruling": "R-21221",
+   "item": "DOR-RWB-S8-E7004-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 9 names the owning services of the schemas, not the schema names",
+   "note": "Other schema names removed from section 13; the ownership boundary is kept in words."
+  },
+  {
+   "ruling": "R-21222",
+   "item": "DOR-RWB-S8-E7004-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "AC3 to AC7 added for X2 and X6 to X9 in section 7; section 5 Covered by column updated; TC rows added in section 16",
+   "note": "X1, X3, X4, X5 remain covered by AC2 as before. Scenario Background relaxed for AC3."
+  },
+  {
+   "ruling": "R-21223",
+   "item": "DOR-RWB-S8-E7004-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR IDs BR12 to BR19 added to the eight rule rows and their BR table rows",
+   "note": "IDs added. Criterion and test coverage of BR1 to BR19 is not added here and remains open."
+  }
+ ]
+}

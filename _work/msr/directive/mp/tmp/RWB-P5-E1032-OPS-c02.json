@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "As a **platform engineer**, I want",
+   "new": "As a **DevOps engineer**, I want"
+  },
+  {
+   "old": "the 15-minute intake Schedule registered in Temporal on queue `rwb-document` in namespace `rwb-recovery`, the feature flag that turns the automatic attach on and off",
+   "new": "the intake trigger on the DocumentStored event with KEDA-scaled workers on queue `rwb-document` in namespace `rwb-recovery`, the feature flag that turns the automatic attach on and off"
+  },
+  {
+   "old": "JOB-12 is a Temporal Schedule in the service that owns it, so the release registers the Schedule and the worker that serves it (DP-10).",
+   "new": "JOB-12 is an event-started DocumentIntakeWorkflow in the service that owns it, started from the DocumentStored event with KEDA-scaled workers, so the release registers the worker that serves it (DP-10)."
+  },
+  {
+   "old": "a migration gate, a Schedule, a flag",
+   "new": "a migration gate, a trigger, a flag"
+  },
+  {
+   "old": "One Schedule and one scheduler: the intake Schedule is the only timer for JOB-12, registered in Temporal on queue `rwb-document` in namespace `rwb-recovery`;",
+   "new": "One trigger and one scheduler: the intake starts on the `DocumentStored` event on queue `rwb-document` in namespace `rwb-recovery` with KEDA-scaled workers;"
+  },
+  {
+   "old": "The login name is Not specified in the source documents (GAP-0994; ASM-1768).",
+   "new": "The login name is Not specified in the source documents (GAP-0994; ASM-1768).\n\nEach of the four intake operations checks the caller with an rwb-access authorise call (DP-08) before it acts; the check's role mapping is Not specified in the source documents (DOR-RWB-P5-E1032-OPS-6)."
+  },
+  {
+   "old": "feature switch, KEDA backlog threshold, Schedule ID and interval",
+   "new": "feature switch, KEDA backlog threshold, trigger name"
+  },
+  {
+   "old": "| Schedule | The intake Schedule: `DocumentIntakeWorkflow`, queue `rwb-document`, namespace `rwb-recovery`, every 15 minutes in business hours (JOB-12), overlap policy skip, catch-up window one run, ID fixed by the release |",
+   "new": "| Trigger | `DocumentIntakeWorkflow` started by the `DocumentStored` event, queue `rwb-document`, namespace `rwb-recovery`, workers scaled by KEDA on the backlog threshold; overlap policy and duplicate-start rule Not specified in the source documents (CG-ALL-5846) |"
+  },
+  {
+   "old": "The start trigger is an event from the scanner folder, SFTP or mailbox pickup (JOB-12), or a child start from a stage workflow.",
+   "new": "The start trigger is the `DocumentStored` event from the scanner folder, SFTP or mailbox pickup (JOB-12), or a child start from a stage workflow."
+  },
+  {
+   "old": "| TC-P5-E1032-OPS-06 | AC6, BR4, BR9 | NFR | The flag off holds every classified item; the legacy flag name appears nowhere; five synthetic conditions map to five runbook entries; the rollback redeploys the previous build; the smoke run leaves no duplicate |",
+   "new": "| TC-P5-E1032-OPS-06 | AC6, BR4, BR9 | NFR | The flag off holds every classified item; the legacy flag name appears nowhere; five synthetic conditions map to five runbook entries; the rollback redeploys the previous build; the smoke run leaves no duplicate |\n| TC-P5-E1032-OPS-07 | BR2, BR8 | NFR | Contract test: the four intake operations, the events and the activities of section 12 match their declared shapes and paths; a shape outside the declared set is refused; the activity `matchStep` is registered on `rwb-document` |\n| TC-P5-E1032-OPS-08 | BR1, BR11 | NFR | Boundary test: each table of section 12.7 is written only by its owner; a write to a table outside the owner list is refused; no ACE view, other service table or lake object is touched |\n| TC-P5-E1032-OPS-09 | BR6 | NFR | A chart with a hard-coded replica count, threshold, interval, quota or flag is refused; the same values come from the values files of each environment |\n| TC-P5-E1032-OPS-10 | BR8 | NFR | The four intake operations are reached only through the chart and its ingress; a path declared by the release is refused; SCR-31 is reached through the gateway-bff composite route |\n| TC-P5-E1032-OPS-11 | AC3, BR3 | NFR | A DocumentStored event starts one run per document with KEDA-scaled workers; a duplicate event starts no second run; the P6 letter copy and the S9 partner result come from the same match path |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10855",
+   "item": "CG-ALL-5847",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add an Activities row for matchStep on task queue rwb-document, owned by RWB-P5-E1032-APP, or name a catalogued activity.",
+   "note": "Story already names matchStep in 12.5; catalog row is missing in Temporal Catalog v1."
+  },
+  {
+   "ruling": "R-17172",
+   "item": "DOR-RWB-P5-E1032-OPS-1",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Section 1 role changed to DevOps engineer, the role used in section 10. Confirm it matches Users Roles and Permissions v5."
+  },
+  {
+   "ruling": "R-17173",
+   "item": "DOR-RWB-P5-E1032-OPS-10",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Screen-state text for SCR-31 and SCR-44 sits in sections outside this chunk; no anchor available to add the states."
+  },
+  {
+   "ruling": "R-17174",
+   "item": "DOR-RWB-P5-E1032-OPS-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Test Cases v8",
+   "change": "Add TC-P5-E1032-OPS-01 to -06 and the new -07 to -11 rows from section 16.",
+   "note": "Contract test TC-07 and boundary test TC-08 added to section 16 for section 12 and 12.7."
+  },
+  {
+   "ruling": "R-17175",
+   "item": "DOR-RWB-P5-E1032-OPS-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "TC-09 covers BR6 and TC-10 covers BR8. Criterion wording in section 7 is outside this chunk."
+  },
+  {
+   "ruling": "R-17176",
+   "item": "DOR-RWB-P5-E1032-OPS-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Added the rwb-access authorise check per DP-08 to section 10; role mapping is still Not specified."
+  },
+  {
+   "ruling": "R-17177",
+   "item": "DOR-RWB-P5-E1032-OPS-7",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "BR Field ID values for the 11 rows of section 11 are not in the source documents; adding them would invent values."
+  },
+  {
+   "ruling": "R-22055",
+   "item": "GAP-0992",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Intake-match contract baseline and plan slice RWB-P5-E1032-CON",
+   "change": "Fix the four shapes as the smallest superset of the legacy list, keep unnamed elements behind the placeholder, and add the two rwb-case case reads the baseline consumes to the C list.",
+   "note": "Plan slice C list carries only RWB-P3-E1042-CON and RWB-P3-E1043-CON; the two rwb-case reads are missing."
+  },
+  {
+   "ruling": "R-22056",
+   "item": "GAP-0065",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "W-MAP kept: wave 1 stays. The story header already reads Wave 1; no edit needed."
+  },
+  {
+   "ruling": "R-22057",
+   "item": "GAP-0356",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Trigger moved to DocumentStored with KEDA in 1, 8, 11, 12.5, TC-11; parameters stay as document_hub_parameter. BR2 subscription wording may need review."
+  }
+ ]
+}

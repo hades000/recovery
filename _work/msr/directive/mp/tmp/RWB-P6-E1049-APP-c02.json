@@ -1,0 +1,204 @@
+{
+ "edits": [
+  {
+   "old": "Errors: 401, 403, 404, 503.",
+   "new": "Errors: 401 (Not specified in the source documents (CG-ALL-6374)), 403 (MSG-P4-002), 404 (Not specified in the source documents (CG-ALL-6374)), 503."
+  },
+  {
+   "old": "| TC-E1-049-11 | AC5 | Component | Not specified in the source documents (DOR-RWB-P6-E1049-APP-12) |",
+   "new": "| TC-E1-049-11 | AC5 | Component | Template version of the rescan notice withdrawn and no later version Approved; rescan event for page 3 of the court notice on case \"RW-2026-000123\"; case \"CASE-0001\" with owner \"TEST-CO-01\"; notice row in state Held with hold reason \"TEMPLATE_WITHDRAWN\", nothing sent |"
+  },
+  {
+   "old": "| X7 | A caller without the read right of the notice area calls the notice read | Refused at the edge with 403; no notice returned | MSG-P4-002 | TC-E1-049-10 |",
+   "new": "| X7 | A caller without the read right of the notice area calls the notice read | Refused at the edge with 403; no notice returned | MSG-P4-002 | AC8 |"
+  },
+  {
+   "old": "    Then the message text is sent only in the request to the ACE notification path",
+   "new": "    Then the message text is sent only in the request to the ACE notification path\n\n  Scenario: AC8 A caller without the read right of the notice area is refused (new, D-RCV-60)\n    Given a caller without the read right of the notice area\n    When the caller calls GET /api/recovery/comms/v1/notices/{noticeId} for the notice of case \"RW-2026-000123\"\n    Then the request is refused at the edge with status 403 and MSG-P4-002\n    Then no notice is returned"
+  },
+  {
+   "old": "    Then no notice is returned",
+   "new": "    Then no notice is returned\n\n  Scenario: AC9 A notice uses only the current Approved template version of its language (new, D-RCV-60)\n    Given a superseded version of the rescan notice in \"TH\" is held next to the current Approved version\n    Given the rwb-document contract mock returns the rescan event for page 3 of the court notice on case \"RW-2026-000123\"\n    Given the rwb-case contract mock returns case \"CASE-0001\" with case number \"RW-2026-000123\" and owner \"TEST-CO-01\"\n    When RescanNoticeListener consumes the rescan event\n    Then the notice row holds the template ID and version of the current Approved version in \"TH\" only\n    Then the message is rendered from no other template version\n\n  Scenario: AC10 A notice whose merge value cannot be read from an owner's contract is held (new, D-RCV-60)\n    Given the rwb-case contract call for the case number does not answer inside 2 s\n    Given the rwb-document contract mock returns the rescan event for page 3 of the court notice on case \"RW-2026-000123\"\n    When RescanNoticeListener consumes the rescan event\n    Then the notice is held and its message is not completed with a missing value\n    Then nothing is sent through the ACE notification path and the caller is told the system is unavailable with MSG-GEN-006\n\n  Scenario: AC11 The notice is dispatched only through the ACE notification path (new, D-RCV-60)\n    Given the ACE notification path stub returns accepted reference and result code \"ACCEPTED\"\n    Given the rwb-document contract mock returns the rescan event for page 3 of the court notice on case \"RW-2026-000123\"\n    When NoticeDispatchWorkflow runs for the notice\n    Then one message is sent through the ACE notification path\n    Then the service calls no other external system\n\n  Scenario: AC12 The notice writes only the tables of its own schema (new, D-RCV-60)\n    Given the rwb-document contract mock returns the rescan event for page 3 of the court notice on case \"RW-2026-000123\"\n    When RescanNoticeListener consumes the rescan event and the notice is dispatched\n    Then the rows written are in the rwb_comms schema only\n    Then no row is written to another service's tables\n\n  Scenario: AC13 The template reference, channel and notice type are data rows, not code (new, D-RCV-60)\n    Given the rescan notice template row holds its channel and notice type as data\n    When RescanNoticeService writes the notice row\n    Then the template reference, channel and notice type are read from data rows only\n    Then no template reference, channel or notice type value is set in code"
+  },
+  {
+   "old": "The seven criteria above are new and tagged (new, D-RCV-60)",
+   "new": "The thirteen criteria above are new and tagged (new, D-RCV-60)"
+  },
+  {
+   "old": "`document_intake` and `document_text` stay in `rwb_document` | none |",
+   "new": "the intake and text tables of the document service stay with that service | none |"
+  },
+  {
+   "old": "No column of `document_intake` or `document_text` is copied (DP-01).",
+   "new": "No column of the document service's intake or text tables is copied (DP-01)."
+  },
+  {
+   "old": "| TC-E1-049-10 | Access, AC1 | Component |",
+   "new": "| TC-E1-049-10 | Access, AC8 | Component |"
+  },
+  {
+   "old": "| TC-E1-049-13 | Section 12.7 tables | Component | Boundary values on each table of section 12.7 (notice, template, merge_field, outbox_event, processed_event, idempotency_key); ASM-3438 |",
+   "new": "| TC-E1-049-13 | Section 12.7 tables | Component | Boundary values on each table of section 12.7 (notice, template, merge_field, outbox_event, processed_event, idempotency_key); ASM-3438 |\n| TC-E1-049-14 | AC9, BR4 | Component | Current Approved version of the rescan notice in \"TH\" and a superseded version; the notice uses the current version only |\n| TC-E1-049-15 | AC10, BR6 | Component | Rescan event for page 3 on case \"RW-2026-000123\"; rwb-case contract call not answering inside 2 s; notice held, no missing merge value, nothing sent |\n| TC-E1-049-16 | AC11, BR8 | Component | ACE notification path stub returning \"ACCEPTED\"; one message through the notification path and no other external call |\n| TC-E1-049-17 | AC12, BR10 | Component | Rescan event for page 3 on case \"RW-2026-000123\"; every write checked against the rwb_comms schema only |\n| TC-E1-049-18 | AC13, BR11 | Component | Template row for the rescan notice with channel and notice type as data; no template value set in code |"
+  },
+  {
+   "old": "The last three cases, TC-E1-049-11 to 13, cover AC5, the section 12 contract and the section 12.7 tables.",
+   "new": "The cases TC-E1-049-11 to 13 cover AC5, the section 12 contract and the section 12.7 tables, and TC-E1-049-14 to 18 cover AC9 to AC13, the rules BR4, BR6, BR8, BR10 and BR11 that had no criterion."
+  },
+  {
+   "old": "| Requirement or decision | Requirement (short) | Contract element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement or decision | Requirement (short) | Feature | L3 process | Contract element | Test cases |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-DCM-006 | Fields extracted for the agreed types in Thai and English, which needs Thai and English text first | The rescan notice of an unreadable page in the language of the case; `template.language` and the message text of MSG-P5-018 | TC-E1-049-01, TC-E1-049-03, TC-E1-049-05 |",
+   "new": "| REQ-DCM-006 | Fields extracted for the agreed types in Thai and English, which needs Thai and English text first | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | The rescan notice of an unreadable page in the language of the case; `template.language` and the message text of MSG-P5-018 | TC-E1-049-01, TC-E1-049-03, TC-E1-049-05 |"
+  },
+  {
+   "old": "| REQ-DCM-009 | Documents from every path through the same intake | One rescan event per intake item, one notice per event, and the intake item reference on the notice and its event | TC-E1-049-02, TC-E1-049-04, TC-E1-049-08, TC-E1-049-09 |",
+   "new": "| REQ-DCM-009 | Documents from every path through the same intake | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | One rescan event per intake item, one notice per event, and the intake item reference on the notice and its event | TC-E1-049-02, TC-E1-049-04, TC-E1-049-08, TC-E1-049-09 |"
+  },
+  {
+   "old": "| REQ-DCM-010 | A file is read only after its malware scan is CLEAN | The rescan event is raised only for a CLEAN intake item, so no notice exists for an item the document service did not read | TC-E1-049-04, TC-E1-049-07 |",
+   "new": "| REQ-DCM-010 | A file is read only after its malware scan is CLEAN | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | The rescan event is raised only for a CLEAN intake item, so no notice exists for an item the document service did not read | TC-E1-049-04, TC-E1-049-07 |"
+  },
+  {
+   "old": "| DP-01 | Owner's schema; no service reads another service's tables | `notice`, `template` and `merge_field` in `rwb_comms` and the not-owned list of 12.7 | TC-E1-049-01, TC-E1-049-09 |",
+   "new": "| DP-01 | Owner's schema; no service reads another service's tables | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | `notice`, `template` and `merge_field` in `rwb_comms` and the not-owned list of 12.7 | TC-E1-049-01, TC-E1-049-09 |"
+  },
+  {
+   "old": "| DP-06 | Parameters contract of rwb-case and the client library | No parameter is read here; `OCR_MIN_QUALITY` stays P5's and the template reference and channel are rows of `template` | TC-E1-049-01, TC-E1-049-05 |",
+   "new": "| DP-06 | Parameters contract of rwb-case and the client library | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | No parameter is read here; `OCR_MIN_QUALITY` stays P5's and the template reference and channel are rows of `template` | TC-E1-049-01, TC-E1-049-05 |"
+  },
+  {
+   "old": "| DP-07 | Reference data through rwb-case's contract | LOV-NOTICE, LOV-CHANNEL, LOV-LANG and LOV-SENT-TYPE reads | TC-E1-049-01, TC-E1-049-05 |",
+   "new": "| DP-07 | Reference data through rwb-case's contract | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | LOV-NOTICE, LOV-CHANNEL, LOV-LANG and LOV-SENT-TYPE reads | TC-E1-049-01, TC-E1-049-05 |"
+  },
+  {
+   "old": "| DP-09 | Outbox, inbox and CloudEvents | `NoticeGenerated` and `NoticeDispatched` on `rwb.comms.events.v1`; the rescan event deduped through the inbox | TC-E1-049-01, TC-E1-049-02, TC-E1-049-09 |",
+   "new": "| DP-09 | Outbox, inbox and CloudEvents | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | `NoticeGenerated` and `NoticeDispatched` on `rwb.comms.events.v1`; the rescan event deduped through the inbox | TC-E1-049-01, TC-E1-049-02, TC-E1-049-09 |"
+  },
+  {
+   "old": "| DP-10 | Temporal replaces Quartz; event-started workflow | `NoticeDispatchWorkflow` on rwb-comms; no Schedule in this story | TC-E1-049-06 |",
+   "new": "| DP-10 | Temporal replaces Quartz; event-started workflow | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | `NoticeDispatchWorkflow` on rwb-comms; no Schedule in this story | TC-E1-049-06 |"
+  },
+  {
+   "old": "| DP-11 | REST contract with mock, one hop, 2 s | The three consumed rows of 12.2 and the fakes of 12.8 | TC-E1-049-01, TC-E1-049-06, TC-E1-049-10 |",
+   "new": "| DP-11 | REST contract with mock, one hop, 2 s | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | The three consumed rows of 12.2 and the fakes of 12.8 | TC-E1-049-01, TC-E1-049-06, TC-E1-049-10 |"
+  },
+  {
+   "old": "| DP-13 | Per-service REST base | `/api/recovery/comms/v1` for the notice read | TC-E1-049-01, TC-E1-049-10 |",
+   "new": "| DP-13 | Per-service REST base | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | `/api/recovery/comms/v1` for the notice read | TC-E1-049-01, TC-E1-049-10 |"
+  },
+  {
+   "old": "| DP-15 | Per-service Flyway | `V1049_1__rescan_notice.sql` in `rwb_comms` | TC-E1-049-08 |",
+   "new": "| DP-15 | Per-service Flyway | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | `V1049_1__rescan_notice.sql` in `rwb_comms` | TC-E1-049-08 |"
+  },
+  {
+   "old": "| DP-19 | Screen through gateway-bff | The notice read of the case timeline of section 15 | TC-E1-049-10 |",
+   "new": "| DP-19 | Screen through gateway-bff | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | The notice read of the case timeline of section 15 | TC-E1-049-10 |"
+  },
+  {
+   "old": "| ADR-013 | 19 services inside ACE | The service boundary: rwb-comms writes `rwb_comms` only, and the OCR pipeline stays in rwb-document | TC-E1-049-01 |",
+   "new": "| ADR-013 | 19 services inside ACE | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | The service boundary: rwb-comms writes `rwb_comms` only, and the OCR pipeline stays in rwb-document | TC-E1-049-01 |"
+  },
+  {
+   "old": "| ADR-015 | Kafka with outbox, inbox and CloudEvents | The outbox writes of 12.3 and the inbox of 12.4 | TC-E1-049-02, TC-E1-049-09 |",
+   "new": "| ADR-015 | Kafka with outbox, inbox and CloudEvents | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | The outbox writes of 12.3 and the inbox of 12.4 | TC-E1-049-02, TC-E1-049-09 |"
+  },
+  {
+   "old": "| ADR-020 | Contract-first REST, one hop, 2 s | The 2 s budget and the retry rule of 12.2 | TC-E1-049-06, TC-E1-049-10 |",
+   "new": "| ADR-020 | Contract-first REST, one hop, 2 s | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | Not specified in the source documents (DOR-RWB-P6-E1049-APP-2) | The 2 s budget and the retry rule of 12.2 | TC-E1-049-06, TC-E1-049-10 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11002",
+   "item": "CG-ALL-6374",
+   "status": "Resolved",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "403 mapped to MSG-P4-002; 401 and 404 have no message ID in the sources, so the placeholder is used for the business analyst to confirm."
+  },
+  {
+   "ruling": "R-11003",
+   "item": "CG-ALL-6378",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "TC-E1-049-11 now carries the AC5 data from section 7 (withdrawn template, hold reason TEMPLATE_WITHDRAWN, nothing sent)."
+  },
+  {
+   "ruling": "R-17562",
+   "item": "DOR-RWB-P6-E1049-APP-10",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "P3 screen specification for SCR-01, SCR-31 and SCR-44",
+   "change": "Add empty, loading, error and no-access states to SCR-01, SCR-31 and SCR-44; this story owns no screen.",
+   "note": "The three screens belong to P3; this story is an API story with no screen of its own."
+  },
+  {
+   "ruling": "R-17563",
+   "item": "DOR-RWB-P6-E1049-APP-15",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "The sentence stating Small fits two weeks lies in a section that is not in this chunk, so it cannot be edited here."
+  },
+  {
+   "ruling": "R-17564",
+   "item": "DOR-RWB-P6-E1049-APP-18",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "The open decision DL10 and its assumptions sit in a section not in this chunk, so the text cannot be edited here."
+  },
+  {
+   "ruling": "R-17565",
+   "item": "DOR-RWB-P6-E1049-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to every traceability row; values are placeholders as the sources do not give them."
+  },
+  {
+   "ruling": "R-17566",
+   "item": "DOR-RWB-P6-E1049-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Other-schema names of rwb_document removed from the DP-01 row and the migration note; wording now refers to the document service."
+  },
+  {
+   "ruling": "R-17567",
+   "item": "DOR-RWB-P6-E1049-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "New AC8 covers exception X7 with TC-E1-049-10; X7 now points to AC8; criteria count updated to thirteen."
+  },
+  {
+   "ruling": "R-17568",
+   "item": "DOR-RWB-P6-E1049-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 to AC13 added for BR4, BR6, BR8, BR10 and BR11, each with a test case TC-E1-049-14 to 18."
+  },
+  {
+   "ruling": "R-17569",
+   "item": "DOR-RWB-P6-E1049-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "rwb-access API contract",
+   "change": "Publish the authorise check for the notice read (GET /api/recovery/comms/v1/notices/{noticeId}; right R, notice area) under DP-08.",
+   "note": "The authorise check is an rwb-access contract item, which this story cannot supply; the story keeps its current stance."
+  }
+ ]
+}

@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| X5 | The `account_key` of the installment read has no row in `v_ace_account` | 404 with a problem body naming the account key and the check REC-05; no installment date is invented | None | Section 12.1 |",
+   "new": "| X5 | The `account_key` of the installment read has no row in `v_ace_account` | 404 with a problem body naming the account key and the check REC-05; no installment date is invented | None | AC7 |"
+  },
+  {
+   "old": "| X6 | `businessDate` or `accountKey` is missing or malformed | 400 with a problem body naming the field; nothing is read | MSG-GEN-001 | Section 12.1 |",
+   "new": "| X6 | `businessDate` or `accountKey` is missing or malformed | 400 with a problem body naming the field; nothing is read | MSG-GEN-001 | AC8 |"
+  },
+  {
+   "old": "| X7 | A view does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database as the unavailable system; nothing is guessed from a cache | MSG-GEN-006 | Section 12.1 |",
+   "new": "| X7 | A view does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database as the unavailable system; nothing is guessed from a cache | MSG-GEN-006 | AC9 |"
+  },
+  {
+   "old": "| X8 | A caller without the right calls either read | 403, and the refusal is logged without a key value | MSG-P4-002 | Section 10 |",
+   "new": "| X8 | A caller without the right calls either read | 403, and the refusal is logged without a key value | MSG-P4-002 | AC10 |"
+  },
+  {
+   "old": "X6, X7 and X8 are the paths of every read of this service.",
+   "new": "X6, X7 and X8 are the paths of every read of this service. This story owns no screen; the empty, loading, error and no-access states of SCR-04, SCR-14, SCR-28, SCR-44 and the one further screen in the detcheck belong to those screens and are not stated here. The states this service answers are X3 (an empty day), X7 (a view error) and X8 (no access)."
+  },
+  {
+   "old": "    Then the run's own repeat, with no second proceeds row and no second event for 2026-12-14, is RWB-P8-E2008-APP's",
+   "new": "    Then the run's own repeat, with no second proceeds row and no second event for 2026-12-14, is RWB-P8-E2008-APP's\n\n  Scenario: AC7 An account key with no row in v_ace_account is refused with 404 and no installment date is invented (new, D-RCV-60)\n    When the payment matching run calls GET /api/recovery/source-data/v1/accounts/{accountKey}/installment-facts?businessDate=2026-12-14 for an account key with no row in v_ace_account\n    Then the answer is 404 with a problem body that names the account key and the check REC-05\n    Then the answer carries no nextInstallmentDate and no installment amount\n\n  Scenario: AC8 A missing query value is refused with 400 before any view is read (new, D-RCV-60)\n    When the payment matching run calls GET /api/recovery/source-data/v1/payments without businessDate\n    Then the answer is 400 with a problem body that names the field businessDate and carries MSG-GEN-001\n    Then no view is read\n\n  Scenario: AC9 A view that does not answer inside 5 s is refused with 503 and nothing is guessed from a cache (new, D-RCV-60)\n    Given v_ace_payment does not answer inside 5 s\n    When the payment matching run calls GET /api/recovery/source-data/v1/payments?businessDate=2026-12-14\n    Then the answer is 503 with a problem body that names the ACE database as the unavailable system and carries MSG-GEN-006\n    Then no cached row is answered\n\n  Scenario: AC10 A caller without the right is refused with 403 and the refusal is logged without a key value (new, D-RCV-60)\n    Given the caller holds no right on either read\n    When the caller calls GET /api/recovery/source-data/v1/payments?businessDate=2026-12-14\n    Then the answer is 403 with MSG-P4-002 naming the action\n    Then the refusal is logged without a key value"
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, whose assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed by the programme directive of 26 November 2026; the decision itself stays open and is not this story's to close."
+  },
+  {
+   "old": "| TC-E2-008-10 | Access — regression evidence: `GET /proceeds` is RWB-P8-E2008-APP's operation, and the access test of these two reads is X8 | Component | RW-CASEOWN calls GET /proceeds; refused with MSG-P4-002 |",
+   "new": "| TC-E2-008-10 | Access — regression evidence: `GET /proceeds` is RWB-P8-E2008-APP's operation, and the access test of these two reads is X8 | Component | RW-CASEOWN calls GET /proceeds; refused with MSG-P4-002 |\n| TC-E2-008-11 | AC1, AC2, BR1, BR2 — contract evidence: the two GET operations of §12 answer the payments answer and the installment answer, and publish no event | Component | Payments of businessDate 2026-12-14; installment facts of A-0555 for 2026-12-14 |\n| TC-E2-008-12 | AC4, BR4 — boundary evidence: the two reads touch v_ace_payment, v_ace_account and v_ace_batch_status only, and write no table listed in §12.7 | Component | Read-only login; two calls for 2026-12-14 |\n| TC-E2-008-13 | AC7, X5 — account key with no row in v_ace_account | Component | Account key absent from v_ace_account for 2026-12-14 |\n| TC-E2-008-14 | AC8, X6 — businessDate missing on the payments read | Component | GET payments without businessDate |\n| TC-E2-008-15 | AC9, X7 — v_ace_payment does not answer inside 5 s | Component | View delayed beyond 5 s |\n| TC-E2-008-16 | AC10, X8 — caller without the right on either read | Component | Caller with no right; refused with MSG-P4-002 |\n| TC-E2-008-17 | AC6, BR8 — this story's own evidence on the read side: a repeat of both reads for 2026-12-14 answers the same rows | Component | Both reads repeated for 2026-12-14 and A-0555 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09783",
+   "item": "CG-ALL-2388",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for the story's 'No token' text; RWB-P1-E2008-APP then cites it. The ID does not exist yet, so the story is not edited",
+   "note": "New ID needed from business analyst; no ID invented, so no story edit."
+  },
+  {
+   "ruling": "R-09784",
+   "item": "CG-ALL-2389",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add the TC-E2-008-10 row to the next version, with Given, When and Then copied from the criterion it covers (AC10 for X8)",
+   "note": "Test rows belong to the Test Cases workbook; the story row TC-E2-008-10 already exists."
+  },
+  {
+   "ruling": "R-15204",
+   "item": "DOR-RWB-P1-E2008-APP-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Section 5 now states the story owns no screen and names its own empty, error and no-access answers (X3, X7, X8)",
+   "note": "Story is service-only; screen states of SCR-04, 14, 28, 44 belong to their screens, not this story."
+  },
+  {
+   "ruling": "R-15205",
+   "item": "DOR-RWB-P1-E2008-APP-11",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Detcheck names no field and no source classes a field as personal data, so none can be marked without invention."
+  },
+  {
+   "ruling": "R-15206",
+   "item": "DOR-RWB-P1-E2008-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16, 18",
+   "target": "",
+   "change": "Added TC-E2-008-11 (contract test of §12 operations) and TC-E2-008-12 (boundary test of §12.7 views)",
+   "note": "RTM v7 and TC-E2-008-10 gaps remain Cross-document under other items."
+  },
+  {
+   "ruling": "R-15207",
+   "item": "DOR-RWB-P1-E2008-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Section 14 now states that assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed by the 26 November 2026 directive",
+   "note": "DL10 stays open; closing it is a business decision, outside this story."
+  },
+  {
+   "ruling": "R-15208",
+   "item": "DOR-RWB-P1-E2008-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Covered-by of X5, X6, X7, X8 now names AC7, AC8, AC9, AC10; four Gherkin criteria added to section 7",
+   "note": "Legacy refs to AC7-AC9 in §16 rows 07-09 now point at new criteria; check them."
+  },
+  {
+   "ruling": "R-15209",
+   "item": "DOR-RWB-P1-E2008-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "Added TC-E2-008-17 covering AC6 and BR8 (repeat of both reads returns the same rows)",
+   "note": "BR8 now has a criterion (AC6) and a test case row."
+  },
+  {
+   "ruling": "R-15210",
+   "item": "DOR-RWB-P1-E2008-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Standard v4 wording for MSG-P1-001 and MSG-P2-007 is not in the source set; cannot copy it. MSG-P4-001 is under CG-ALL-2388."
+  },
+  {
+   "ruling": "R-22303",
+   "item": "GAP-3175",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Event and Messaging next version; Kafka Topic and Event Catalog v1",
+   "change": "List AceDataReady (EV-26) as the target name on rwb.source-data.events.v1, with LoadCompleted as its legacy alias",
+   "note": "Story already uses AceDataReady in §4 step 1, so no story edit."
+  }
+ ]
+}

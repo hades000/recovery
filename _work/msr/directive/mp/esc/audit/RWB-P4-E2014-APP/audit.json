@@ -1,0 +1,127 @@
+{
+ "stage": "audit",
+ "story": "RWB-P4-E2014-APP",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 9
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-30924",
+     "item": "AC11: §5 X5: The decision record of the access entry cannot be written (covered by 'BR7' only)",
+     "status": "Resolved",
+     "section": "5, 7, 16",
+     "target": "",
+     "change": "X5 mapped to AC9; duplicate AC11 scenario removed",
+     "note": "Test data uses the existing decision-record fake; X5 is covered by AC9 and TC-14."
+    },
+    {
+     "ruling": "R-30925",
+     "item": "AC12: §5 X6: A second call arrives with the same `Idempotency-Key` (covered by 'BR7' only)",
+     "status": "Resolved",
+     "section": "5, 7, 16",
+     "target": "",
+     "change": "X6 mapped to AC10; duplicate AC12 scenario removed",
+     "note": "X6 is covered by AC10 and TC-15; no proposed test was given in the source."
+    },
+    {
+     "ruling": "R-30926",
+     "item": "AC13: error answers 401, 404 of the provided operations (no criterion names these status codes)",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "Renumbered AC13 to AC11; TC-18 updated",
+     "note": "401 taken from the authorise row; 404 is not in that row's answer list, so it is not added."
+    },
+    {
+     "ruling": "R-30927",
+     "item": "AC14: replay of a write with the same idempotency key (no criterion covers a replay)",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "Renumbered AC14 to AC12; TC-19 updated",
+     "note": "Replay assertion uses versions from the first answer; no proposed test was given in the source."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| Contract dependencies | RWB-P7-E2014-CON; RWB-P4-E1037-CON; RWB-P1-E1015-CON; RWB-P3-E1018-CON |",
+     "new": "| Contract dependencies | RWB-P7-E2014-CON; RWB-P4-E1037-CON |"
+    },
+    {
+     "old": "with the 2 s timeout of DP-11 per downstream and a 1.2 s composition budget for the approval screen, whose measured p95 is recorded on the dashboard (RWB-PLT-N001-CON AC2, AC4) |",
+     "new": "with the 2 s timeout of DP-11 per downstream and a 1.2 s composition budget for the approval screen (RWB-PLT-N001-CON AC2, AC4) |"
+    },
+    {
+     "old": "| MSG-P7-003 | AC9, AC11 |",
+     "new": "| MSG-P7-003 | AC9 |"
+    },
+    {
+     "old": "| None | AC10, AC12 |",
+     "new": "| None | AC10 |"
+    },
+    {
+     "old": "  Scenario: AC11 A decision record that cannot be written returns 503 and no answer (new, D-RCV-60)\n    Given the decision-record fake forces the write of the access entry to fail\n    When \"U-9212\" asks the authorise path for area \"LITIGATION\" and right \"R\" on notice \"N-0201\"\n    Then the call returns status 503 and message MSG-P7-003\n    Then the call holds no answer and no data and the cache is unchanged\n\n  Scenario: AC12 A second call with the same Idempotency-Key returns the first answer (new, D-RCV-60)\n    Given \"U-9212\" has made an authorise call with an Idempotency-Key for area \"LITIGATION\" and right \"R\" on notice \"N-0201\"\n    When the second call arrives with the same Idempotency-Key\n    Then the first answer is returned and no second access-log entry is written\n\n  Scenario: AC13 An authorise call without a valid caller session is refused with 401 (new, D-RCV-60)",
+     "new": "  Scenario: AC11 An authorise call without a valid caller session is refused with 401 (new, D-RCV-60)"
+    },
+    {
+     "old": "  Scenario: AC14 A replayed write with the same Idempotency-Key answers with the first answer's versions (new, D-RCV-60)",
+     "new": "  Scenario: AC12 A replayed write with the same Idempotency-Key answers with the first answer's versions (new, D-RCV-60)"
+    },
+    {
+     "old": "The fourteen criteria above",
+     "new": "The twelve criteria above"
+    },
+    {
+     "old": "| TC-E2-014-16 | AC11, BR7 | Component | Decision-record write forced to fail through the decision-record fake; 503 MSG-P7-003, no answer and no data, cache unchanged |\n| TC-E2-014-17 | AC12, BR7 | Component | Second authorise call with the same Idempotency-Key; the first answer is returned and no second entry is written |\n| TC-E2-014-18 | AC13 | Component | Authorise call with no valid caller session; 401, no answer and no data |",
+     "new": "| TC-E2-014-18 | AC11 | Component | Authorise call with no valid caller session; 401, no answer and no data |"
+    },
+    {
+     "old": "| TC-E2-014-19 | AC14, BR7 |",
+     "new": "| TC-E2-014-19 | AC12, BR7 |"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-30924",
+     "kind": "wrong",
+     "issue": "AC11 repeats AC9 (same 503 MSG-P7-003 on a failed decision-record write). Duplicate removed; X5 now points to AC9."
+    },
+    {
+     "ruling": "R-30925",
+     "kind": "wrong",
+     "issue": "AC12 repeats AC10 (same Idempotency-Key replay, first answer returned). Duplicate removed; X6 now points to AC10."
+    },
+    {
+     "ruling": "R-30926",
+     "kind": "wrong",
+     "issue": "Removing AC11 and AC12 leaves a numbering gap, so the 401 scenario is renumbered AC11 and its TC-18 reference updated."
+    },
+    {
+     "ruling": "R-30927",
+     "kind": "wrong",
+     "issue": "Removing AC11 and AC12 leaves a numbering gap, so the replay scenario is renumbered AC12 and TC-19 updated."
+    },
+    {
+     "ruling": "R-22496",
+     "kind": "invented",
+     "issue": "Gateway row claims the p95 is recorded on the dashboard. Sources give only the 1.2 s and 2 s budgets (AC2, AC4); the dashboard claim is not there."
+    },
+    {
+     "ruling": "R-05803",
+     "kind": "invented",
+     "issue": "Contract dependencies add RWB-P1-E1015-CON and RWB-P3-E1018-CON, which no disposition or source supports. Only RWB-P4-E1037-CON is traceable."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 6
+}

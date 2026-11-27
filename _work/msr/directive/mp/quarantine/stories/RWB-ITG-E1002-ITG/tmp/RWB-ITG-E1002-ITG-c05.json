@@ -1,0 +1,87 @@
+{
+ "edits": [
+  {
+   "old": "    Given case \"RW-2026-000456\" links account_key \"ACC0000456\", which has no v_ace_account row for 2026-11-30",
+   "new": "    Given case \"RW-2026-000456\" links account_key \"ACC0000456\", which has no account row for 2026-11-30 in the rwb-source-data contract"
+  },
+  {
+   "old": "    Given v_ace_efs_action holds an action \"PTP\" for an account of case \"RW-2026-000123\" with contact_at 2026-11-30 15:42",
+   "new": "    Given the rwb-source-data contract serves an action \"PTP\" for an account of case \"RW-2026-000123\" with contact_at 2026-11-30 15:42"
+  },
+  {
+   "old": "    Given v_ace_batch_status shows no COMPLETED ALS row for 2026-11-30 at 08:00",
+   "new": "    Given the rwb-source-data contract shows no COMPLETED ALS batch row for 2026-11-30 at 08:00"
+  },
+  {
+   "old": "    Then the refresh time stays the time of the first completed run",
+   "new": "    Then the refresh time stays the time of the first completed run\n\n  Scenario: AC16 A role without the right lists the JOB-04 runs is refused (new, D-RCV-60)\n    Given RW-CASEOWN signs in with a role that does not include the ReconciliationWorkflow run listing\n    When RW-CASEOWN lists the JOB-04 runs on the rwb-source-data base\n    Then the call is refused with 403 and the error envelope carries MSG-P4-002 \"You cannot {action} here. Your role does not include it.\"\n\n  Scenario: AC17 Case and ACE data are read only through published contracts and no lake path is written (new, D-RCV-60)\n    Given the chain of AC12, AC13 and AC14 has run on the real SIT services\n    When the boundary check reads the calls and statements of that run\n    Then every call is one hop between two services with a 2 s timeout and a published contract, and no call chain is deeper than one\n    Then no statement reads a table of another service's schema and no step writes a lake path"
+  },
+  {
+   "old": "| X8 | A role without the right lists the JOB-04 runs | 403 with the error envelope | MSG-P4-002 | AC11 |",
+   "new": "| X8 | A role without the right lists the JOB-04 runs | 403 with the error envelope | MSG-P4-002 | AC11, AC16 |"
+  },
+  {
+   "old": "| BR8 | Case data is read only through the P3 published interface. ACE data is read only through `recovery.v_ace_*` views | ADR-002; DT08; ADR-010; covered by AC12 and AC14 |",
+   "new": "| BR8 | Case data is read only through the P3 published interface. ACE data is read only through `recovery.v_ace_*` views | ADR-002; DT08; ADR-010; covered by AC12, AC14 and AC17 |"
+  },
+  {
+   "old": "| BR11 | Every call in the chain is one hop between two services with a 2 s timeout and a published contract: the browser reaches gateway-bff, gateway-bff reaches rwb-case, rwb-source-data reaches rwb-case and rwb-integration by contract and activity. No service reads another service's tables and no call chain is deeper than one | DP-01; DP-11; ADR-020; Arch v5 slide 11; covered by AC12 and AC14 |",
+   "new": "| BR11 | Every call in the chain is one hop between two services with a 2 s timeout and a published contract: the browser reaches gateway-bff, gateway-bff reaches rwb-case, rwb-source-data reaches rwb-case and rwb-integration by contract and activity. No service reads another service's tables and no call chain is deeper than one | DP-01; DP-11; ADR-020; Arch v5 slide 11; covered by AC12, AC14 and AC17 |"
+  },
+  {
+   "old": "| BR12 | There is no data lake and no lake copy. Reporting is fed by events into rwb-reporting and by files delivered through `deliverFile`, and no step of the list writes to a lake path | DP-17; ADR-018; Arch v5 slide 37; covered by AC13 and AC14 |",
+   "new": "| BR12 | There is no data lake and no lake copy. Reporting is fed by events into rwb-reporting and by files delivered through `deliverFile`, and no step of the list writes to a lake path | DP-17; ADR-018; Arch v5 slide 37; covered by AC13, AC14 and AC17 |"
+  },
+  {
+   "old": "| TC-E1-002-11-ITG | AC11, Access | Integration | RW-CASEOWN calls the ReconciliationWorkflow run listing on the rwb-source-data base; refused with MSG-P4-002 |",
+   "new": "| TC-E1-002-11-ITG | AC11, Access | Integration | RW-CASEOWN calls the ReconciliationWorkflow run listing on the rwb-source-data base; refused with MSG-P4-002 |\n| Not specified in the source documents (NEWAC-RWB-ITG-E1002-ITG-AC16) | AC16, Access | Integration | RW-CASEOWN with a role without the right lists the JOB-04 runs on the rwb-source-data base; refused with 403 and MSG-P4-002 |\n| Not specified in the source documents (NEWAC-RWB-ITG-E1002-ITG-AC17) | AC17, Boundary | Integration | Boundary check of the AC12 to AC14 run: one hop per call, no other service's tables read, no lake path written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29245",
+   "item": "ACR-RWB-ITG-E1002-ITG-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC10 Given now reads the rwb-source-data contract, not the ACE view v_ace_account",
+   "note": "Given rewritten to rwb-source-data contract. Then steps and REC-05 unchanged."
+  },
+  {
+   "ruling": "R-29246",
+   "item": "ACR-RWB-ITG-E1002-ITG-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC4 Given now reads the rwb-source-data contract, not the ACE view v_ace_efs_action",
+   "note": "Given rewritten to rwb-source-data contract. Then step unchanged."
+  },
+  {
+   "ruling": "R-29247",
+   "item": "ACR-RWB-ITG-E1002-ITG-AC5",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC5 Given now reads the rwb-source-data contract, not the ACE view v_ace_batch_status",
+   "note": "Given rewritten to rwb-source-data contract. Legacy lake Then kept as carried wording."
+  },
+  {
+   "ruling": "R-29735",
+   "item": "NEWAC-RWB-ITG-E1002-ITG-AC16",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC16 in section 7 and a test row in section 16; X8 Covered by now AC11, AC16",
+   "note": "Test ID not specified in the source documents, placeholder used in section 16 row."
+  },
+  {
+   "ruling": "R-29736",
+   "item": "NEWAC-RWB-ITG-E1002-ITG-AC17",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added AC17 boundary criterion in section 7 and test row in section 16; BR8, BR11, BR12 now cite AC17",
+   "note": "Test ID not specified in the source documents, placeholder used in section 16 row."
+  }
+ ]
+}

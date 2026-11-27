@@ -1,0 +1,138 @@
+{
+ "stage": "audit",
+ "story": "RWB-ITG-E7017-ITG",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 4
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-00284",
+     "item": "CG-ALL-1236",
+     "status": "Resolved",
+     "section": "9",
+     "target": "",
+     "change": "",
+     "note": "§9 row kept; its from-state now reads 'Any active instruction (not a case status)' in place of ANY_ACTIVE."
+    },
+    {
+     "ruling": "R-00285",
+     "item": "CG-ALL-1237",
+     "status": "Resolved",
+     "section": "9",
+     "target": "",
+     "change": "",
+     "note": "§9 row kept; its from-state now reads 'Any active instruction (not a case status)' in place of ANY_ACTIVE."
+    },
+    {
+     "ruling": "R-00286",
+     "item": "CG-ALL-1238",
+     "status": "Resolved",
+     "section": "9",
+     "target": "",
+     "change": "",
+     "note": "§9 row kept; DONE is now qualified as an instruction status of DF-PRT-014, not a case status."
+    },
+    {
+     "ruling": "R-00287",
+     "item": "CG-ALL-1239",
+     "status": "Resolved",
+     "section": "9",
+     "target": "",
+     "change": "",
+     "note": "§9 row kept; SENT is now qualified as an instruction status of DF-PRT-014, not a case status."
+    },
+    {
+     "ruling": "R-04138",
+     "item": "DOR-RWB-ITG-E7017-ITG-5",
+     "status": "Resolved",
+     "section": "9",
+     "target": "",
+     "change": "",
+     "note": "§9 holds the four transitions, with instruction statuses qualified as DF-PRT-014 values and not LOV-CASE-STATUS."
+    },
+    {
+     "ruling": "R-24147",
+     "item": "CG-ALL-1243",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "SCR-34 states are in the §15 screen table: loading and list, MSG-P4-002 for no access; empty and error Not specified in the source documents."
+    },
+    {
+     "ruling": "R-24148",
+     "item": "CG-ALL-1244",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "SCR-35 states are in the §15 screen table: loading and list, MSG-P4-002 for no access; empty and error Not specified in the source documents."
+    },
+    {
+     "ruling": "R-30082",
+     "item": "NEWAC-RWB-ITG-E7017-ITG-AC7",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC7 added: a failed or silent consumed read stops the run before the cost approval and is reported as an evidence gap; TC-E7-017-08-ITG added."
+    }
+   ],
+   "edits": [
+    {
+     "old": "|---|---|---|---|\n\nSENT, ACCEPTED, DECLINED, IN_PROGRESS, DONE and RECALLED are",
+     "new": "|---|---|---|---|\n| Instruction status SENT (DF-PRT-014) | `PartnerResultSubmitted` on `rwb.partner.events.v1` | the partner records the cost claim against the instruction | Instruction status IN_PROGRESS (DF-PRT-014) |\n| Instruction status IN_PROGRESS (DF-PRT-014) | `PartnerResultSubmitted` on `rwb.partner.events.v1` | the claim is the final one for the instruction | Instruction status DONE (DF-PRT-014) |\n| Any active instruction (not a case status) | DECISION_LOG_WRITE_FAILED | the decision record of the cost approval cannot be written (R-UNI-39) | EXCEPTION_QUEUE, with the instruction and the asset unchanged |\n| Any active instruction (not a case status) | RULE_VERSION_EFFECTIVE | a new rule version reaches its effective date (R-UNI-38) | RESUME_STATE; the approval keeps the version it was decided under |\n\nSENT, ACCEPTED, DECLINED, IN_PROGRESS, DONE and RECALLED are"
+    },
+    {
+     "old": "never set by the harness |\n| SCR-34 Partner list: empty, loading, error, no access | Screen Specifications v1 SCR-34 | Loading as the screen specification gives it; empty, error and no access are Not specified in the source documents (CG-ALL-1243) |\n| SCR-35 Placement and allocation: empty, loading, error, no access | Screen Specifications v1 SCR-35 | Loading as the screen specification gives it; empty, error and no access are Not specified in the source documents (CG-ALL-1244) |",
+     "new": "never set by the harness |"
+    },
+    {
+     "old": "  Scenario: AC7 A consumed call that fails or does not answer stops the cost approval and is reported as a gap (new, D-RCV-60)",
+     "new": "  Scenario: AC7 A consumed call that fails or does not answer stops the run before the cost approval and is reported as a gap (new, D-RCV-60)"
+    },
+    {
+     "old": "    When the cost approval is taken through POST /api/recovery/partner/v1/partner/instructions/{instructionId}/results\n    Then no claim is recorded against the instruction and no decision entry is written\n    And the missing answer is reported as a gap in the evidence, never as a pass",
+     "new": "    When the run reaches that read\n    Then the run stops at that hop and takes no cost approval, so the run records no claim and causes no decision entry\n    And the missing answer is reported as a gap in the evidence, never as a pass"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-00284",
+     "kind": "wrong",
+     "issue": "All four §9 rows were deleted, leaving an empty table and losing the instruction and rule transitions. Restored with the values qualified as not case statuses."
+    },
+    {
+     "ruling": "R-04138",
+     "kind": "incomplete",
+     "issue": "DoR item 5 (State transitions) was marked Resolved while the §9 state table had no transitions."
+    },
+    {
+     "ruling": "R-24147",
+     "kind": "wrong",
+     "issue": "§15 gave SCR-34 no access as both MSG-P4-002 and Not specified. The row also sat under 'What the run asserts' although the harness asserts no screen state."
+    },
+    {
+     "ruling": "R-24148",
+     "kind": "wrong",
+     "issue": "§15 gave SCR-35 no access as both MSG-P4-002 and Not specified. The row also duplicated the new screen table."
+    },
+    {
+     "ruling": "R-30082",
+     "kind": "invented",
+     "issue": "AC7 had the approval taken after a failed harness read and claimed the service then writes nothing. The item and diff do not support that behaviour."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 5
+}

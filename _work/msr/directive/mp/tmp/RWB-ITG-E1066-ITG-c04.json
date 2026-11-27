@@ -1,0 +1,71 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | A required value is missing (event code, occurred time, actor) | 422; nothing written | MSG-GEN-001 | AC5, owned by RWB-P1-E1066-APP |",
+   "new": "| X2 | A required value is missing (event code, occurred time, actor) | 422; nothing written | MSG-GEN-001 | AC13 |"
+  },
+  {
+   "old": "| X3 | Two entries for one case at the same moment | Both written with consecutive case_seq under the case lock; no gap and no repeat | None | AC6, owned by RWB-P1-E1066-APP |",
+   "new": "| X3 | Two entries for one case at the same moment | Both written with consecutive case_seq under the case lock; no gap and no repeat | None | AC14 |"
+  },
+  {
+   "old": "| X4 | A call names a case that does not exist or is out of scope, for example case ID \"00000000-0000-0000-0000-000000000999\" | 404; nothing written | MSG-P4-003 | AC7, owned by RWB-P1-E1066-APP |",
+   "new": "| X4 | A call names a case that does not exist or is out of scope, for example case ID \"00000000-0000-0000-0000-000000000999\" | 404; nothing written | MSG-P4-003 | AC15 |"
+  },
+  {
+   "old": "    Then no service other than P1 rwb-source-data reads an ACE view, and the 4 EFS history entries of case \"RW-2026-000201\" reach the ledger through P1 alone",
+   "new": "    Then no service other than P1 rwb-source-data reads an ACE view, and the 4 EFS history entries of case \"RW-2026-000201\" reach the ledger through P1 alone\n\n  Scenario: AC13 A call with a required value missing is refused with 422 and nothing is written (new, D-RCV-60)\n    Given case \"RW-2026-000201\" holds 6 ledger entries, case_seq 1 to 6\n    When the case owner records an outbound call on case \"RW-2026-000201\" through POST /api/recovery/source-data/v1/cases/{caseId}/interactions with one required value missing (event code, occurred time or actor)\n    Then the system refuses the call with status 422 and MSG-GEN-001\n    Then nothing is written to the ledger and the ledger still holds 6 entries\n\n  Scenario: AC14 Two entries for one case at the same moment are both written with consecutive case_seq (new, D-RCV-60)\n    Given case \"RW-2026-000201\" holds 6 ledger entries, case_seq 1 to 6\n    When two calls are recorded on case \"RW-2026-000201\" at the same occurred time\n    Then both entries are written under the case lock\n    Then the two entries carry consecutive case_seq values with no gap and no repeat\n\n  Scenario: AC15 A call that names a case that does not exist or is out of scope is refused with 404 (new, D-RCV-60)\n    Given case \"RW-2026-000201\" holds 6 ledger entries, case_seq 1 to 6\n    When the case owner records an outbound call through POST /api/recovery/source-data/v1/cases/00000000-0000-0000-0000-000000000999/interactions\n    Then the system refuses the call with status 404 and MSG-P4-003\n    Then nothing is written to the ledger\n\n  Scenario: AC16 A status change the model does not allow is refused and writes no entry (new, D-RCV-60)\n    Given ledger entry case_seq 3 of case \"RW-2026-000201\" exists\n    When a status change that the model does not allow is requested for case \"RW-2026-000201\"\n    Then the system refuses the change with the message Not specified in the source documents (NEWAC-RWB-ITG-E1066-ITG-AC15) and writes no entry"
+  },
+  {
+   "old": "| TC-ITG-E1066-04 | AC12, BR12 | Integration | LOV-LEDGER-EVENT values read through the rwb-case contract; the 4 EFS history entries read through P1 alone |",
+   "new": "| TC-ITG-E1066-04 | AC12, BR12 | Integration | LOV-LEDGER-EVENT values read through the rwb-case contract; the 4 EFS history entries read through P1 alone |\n| TC-ITG-E1066-05 | AC13 | Integration | Outbound call on case RW-2026-000201 with one required value missing (event code, occurred time or actor) |\n| TC-ITG-E1066-06 | AC14 | Integration | Two calls recorded on case RW-2026-000201 at the same occurred time |\n| TC-ITG-E1066-07 | AC15 | Integration | Call naming case 00000000-0000-0000-0000-000000000999 |\n| TC-ITG-E1066-08 | AC16 | Integration | Not specified in the source documents (NEWAC-RWB-ITG-E1066-ITG-AC15) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29863",
+   "item": "NEWAC-RWB-ITG-E1066-ITG-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X2 now covered by new AC13 (422, MSG-GEN-001) with TC-ITG-E1066-05; coverage cell points to AC13."
+  },
+  {
+   "ruling": "R-29864",
+   "item": "NEWAC-RWB-ITG-E1066-ITG-AC12",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X3 now covered by new AC14 (consecutive case_seq) with TC-ITG-E1066-06; coverage cell points to AC14."
+  },
+  {
+   "ruling": "R-29865",
+   "item": "NEWAC-RWB-ITG-E1066-ITG-AC13",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X4 now covered by new AC15 (404, MSG-P4-003) with TC-ITG-E1066-07; coverage cell points to AC15."
+  },
+  {
+   "ruling": "R-29866",
+   "item": "NEWAC-RWB-ITG-E1066-ITG-AC14",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR11 and BR12 already covered by AC11 and AC12 with TC-ITG-E1066-03 and -04 in section 16; no edit needed."
+  },
+  {
+   "ruling": "R-29867",
+   "item": "NEWAC-RWB-ITG-E1066-ITG-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "New AC16 refuses a disallowed status change and writes no entry; message left as not specified; TC-ITG-E1066-08 added."
+  }
+ ]
+}

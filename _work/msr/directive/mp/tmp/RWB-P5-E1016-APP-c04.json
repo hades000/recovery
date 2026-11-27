@@ -1,0 +1,76 @@
+{
+ "edits": [
+  {
+   "old": "The seven criteria are new and test only the P5 delivery: the DP10 retention-class contribution, the authorised, scope-checked read, the access-row refusal, the masking rule, the scope refusal and the boundary and log path.",
+   "new": "The nine criteria, AC1 to AC9, are new and test only the P5 delivery: the DP10 retention-class contribution, the authorised, scope-checked read, the access-row refusal, the masking rule, the scope refusal, the boundary and log path, the source-access and no-tokenization rules and the login refusal."
+  },
+  {
+   "old": "    Then the answer is 200 with the document metadata\n```",
+   "new": "    Then the answer is 200 with the document metadata\n\n  Scenario: AC8 The identity number is never tokenized and each field comes from the contract (new, D-RCV-60)\n    Given user \"u-comply-01\" holds RW-COMPLY, whose Documents letters are \"R\", with an access row in force for product \"DP10\"\n    When the user calls GET /api/recovery/document/v1/documents/DOC-0102-01\n    Then no token and no detokenization call is made on the read path\n    And the value and the personal tag of each field come from the rwb-source-data contract fake\n    And no \"recovery.v_ace_*\" view is read by the rwb-document login\n\n  Scenario: AC9 A call without a valid login is refused with 401 (new, D-RCV-60)\n    Given no valid login is presented with the call\n    When the caller calls GET /api/recovery/document/v1/documents/DOC-0102-01\n    Then the system refuses the call with status 401\n    And no document row, no field value and no retention class is returned\n    When the caller calls GET /api/recovery/document/v1/retention-classes?productCode=DP10\n    Then the system refuses the call with status 401\n    And the same 401 is returned by GET /api/recovery/document/v1/cases/RW-2026-000102/documents\n```"
+  },
+  {
+   "old": "| TC-E1-016-15 | AC4, BR10 (no tokenization) |",
+   "new": "| TC-E1-016-15 | AC4, AC8, BR10 (no tokenization) |"
+  },
+  {
+   "old": "| TC-E1-016-16 | AC6, BR8 (source access through the contract) | Component | The rwb-source-data data-dictionary contract fake; the value and the personal tag come from the contract and no ACE view is read |",
+   "new": "| TC-E1-016-16 | AC6, AC8, BR8 (source access through the contract) | Component | The rwb-source-data data-dictionary contract fake; the value and the personal tag come from the contract and no ACE view is read |\n| TC-E1-016-17 | AC9 (401 without a valid login) | Component | The four document and class reads called with no valid login |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28493",
+   "item": "GAP-0484",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "RWB-P1-E1016-DB story (Work Package B-P1-01 deliverable list)",
+   "change": "E1016-DB delivers the three indexes, the read model v_data_product_catalog, the DPA-2026.11 seed, the 122/1,366 dictionary conformance check and the schema checks; it creates no table that RWB-P1-E1001-APP or RWB-P1-E1069-DB already creates, owns no masking row, and a repeated run changes nothing.",
+   "note": "Slice boundary belongs to the DB story; this P5 story creates no table and names no DB-story object. Change goes to RWB-P1-E1016-DB."
+  },
+  {
+   "ruling": "R-28494",
+   "item": "GAP-0983",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "TSD P4 appendix T-A and the OpenAPI file of the rwb-access service",
+   "change": "Publish the request and answer schemas of GET /admin/roles, GET /masking-policies and POST /authorise in TSD P4 appendix T-A and in the OpenAPI file of the service, with the marker values, the maskingExceptions part, the two version fields and the access resolution the request carries.",
+   "note": "Schemas for the three rwb-access answers are not in any source. Story section 8 relies on the authorise answer; the contract change belongs to TSD P4 and OpenAPI."
+  },
+  {
+   "ruling": "R-28496",
+   "item": "GAP-1028",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Split and criteria are recorded in section 7 closing note. Section 12 is not in this chunk, so C entries, login wording and product code need the section 12 chunk."
+  },
+  {
+   "ruling": "R-31073",
+   "item": "NEWAC-RWB-P5-E1016-APP-AC12",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X6 is already covered by AC7 and TC-E1-016-08 in the story; AC7 tests the valid-from refusal and the later-date success. No new criterion added."
+  },
+  {
+   "ruling": "R-31074",
+   "item": "NEWAC-RWB-P5-E1016-APP-AC13",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 for BR8 and BR10 (no tokenization, source via contract); TC-E1-016-15 and TC-E1-016-16 now cover AC8."
+  },
+  {
+   "ruling": "R-31075",
+   "item": "NEWAC-RWB-P5-E1016-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 for status 401 on the document and class reads, with TC-E1-016-17 row in section 16."
+  }
+ ]
+}

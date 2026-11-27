@@ -1,0 +1,141 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Technical Specifications by Module v6/Recovery Workbench TSD P8 Payments and posting v3.md",
+ "unit": "X001",
+ "items": [
+  "R-21862",
+  "R-22408",
+  "R-22410",
+  "R-22417",
+  "R-22788",
+  "R-28438",
+  "R-28440",
+  "R-28737",
+  "R-28738",
+  "R-28825"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "tries": [
+    {
+     "error": "DISPOSITION INCOMPLETE: no row for ['R-21862', 'R-22408', 'R-22410', 'R-22417', 'R-22788', 'R-28438', 'R-28440', 'R-28737', 'R-28738', 'R-28825']"
+    },
+    {
+     "ok": true,
+     "fixes": 5
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "X001-F1",
+     "finding": "R-21862",
+     "op": "insert_after",
+     "old": "| proceeds | account_payment_id | account_payment | Many to 0 or 1 |",
+     "new": "\nThe links from proceeds to recovery_case, treatment and account_payment are uuid values held as case_id, treatment_id and account_payment_id with no foreign key. Each reference resolves through the owning service's contract."
+    },
+    {
+     "fix_id": "X001-F2",
+     "finding": "R-28440",
+     "op": "insert_after",
+     "old": "| proceeds | account_payment_id | account_payment | Many to 0 or 1 |",
+     "new": "\nRead indexes on proceeds: the unmatched list on matched_to and received_date, and the case read on case_id and received_date. Screen field lists are left to the screen stories."
+    },
+    {
+     "fix_id": "X001-F3",
+     "finding": "R-28438",
+     "op": "insert_after",
+     "old": "| updated_by | uuid | Who or which service identity last changed it |",
+     "new": "\nPrimary key, the two indexes and the Field IDs of the seven standard columns: Not specified in the source documents (GAP-2534)."
+    },
+    {
+     "fix_id": "X001-F4",
+     "finding": "R-22410",
+     "op": "insert_after",
+     "old": "| DL35 | Deployment slots |",
+     "new": "\nDeployment of the rwb-payment unit: render from the pinned chart with two api replicas; worker floor, ceiling and sizes: Not specified in the source documents (GAP-1352); create the three topics with platform partition and retention defaults; gate every environment; canary or blue/green for PROD; a down script for each migration."
+    },
+    {
+     "fix_id": "X001-F5",
+     "finding": "R-28738",
+     "op": "insert_after",
+     "old": "| NFR-056 | Penetration testing and a security review are completed before the first production release. | Before the first production release and before the partner portal opens to users outside the bank | Proposed, DL11 |",
+     "new": "\nOutbox-lag, dead-letter and workflow-failure thresholds are held as service values with no default. DL11 is closed with the solution architect and platform administrator before PROD."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "R-21862",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2"
+     ],
+     "note": "T3.3 now states case_id, treatment_id and account_payment_id as uuid with no foreign key; references resolve via owner contracts. Index note in F2."
+    },
+    {
+     "item": "R-22408",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "T3.1 proceeds field set and account_payment_id identity already present; no payment_missed_event_key in this doc. Data owner confirmation is open, not a document change."
+    },
+    {
+     "item": "R-22410",
+     "status": "Resolved",
+     "fix_ids": [
+      "F4"
+     ],
+     "note": "Deployment targets added after Appendix T-B. Worker floor, ceiling and sizes are not in the sources and are marked GAP-1352."
+    },
+    {
+     "item": "R-22417",
+     "status": "Not applied",
+     "fix_ids": [],
+     "note": "Conflicts with R-22408 and R-21862, which keep account_payment_id as uuid. Dropping it for a varchar(255) payment_code column needs a data owner decision."
+    },
+    {
+     "item": "R-22788",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "Contract baseline allocation belongs to the split plan. ALS interface values and data product code are not in the sources (GAP-2548)."
+    },
+    {
+     "item": "R-28438",
+     "status": "Not applied",
+     "fix_ids": [
+      "F3"
+     ],
+     "note": "Primary key, index names and Field IDs need values not in the sources. Placeholder added after T3.0 (GAP-2534)."
+    },
+    {
+     "item": "R-28440",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "Read indexes on matched_to, received_date and case_id added after T3.3. Screen field lists left to the screen stories."
+    },
+    {
+     "item": "R-28737",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "T5.3 already names DecisionRecorded (EV-08) on rwb.decision-record.v1, published through the DP-03 outbox."
+    },
+    {
+     "item": "R-28738",
+     "status": "Resolved",
+     "fix_ids": [
+      "F5"
+     ],
+     "note": "Thresholds stated as service values with no default. DL11 closure with solution architect and platform administrator before PROD added after T7."
+    },
+    {
+     "item": "R-28825",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "Row order belongs to the rule_row catalogue. DF-REF-270 priority is already the TSD name in T3.1."
+    }
+   ]
+  }
+ ]
+}

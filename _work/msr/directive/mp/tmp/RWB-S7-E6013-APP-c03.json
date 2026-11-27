@@ -1,0 +1,164 @@
+{
+ "edits": [
+  {
+   "old": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the cut-off date of a run is a parameter of the operation and not a constant.",
+   "new": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the cut-off date of a run is a parameter of the operation and not a constant.\n- Parameters and reference-data contract: the eligibility condition, the tax criteria, the cut-off date, the third working day and the two tracks are rule rows of the WO package read from rwb-decision (RulePackageClient), and the reference data of rwb-case is read by its default ruling. Parameter-catalog keys are Not specified in the source documents (DOR-RWB-S7-E6013-APP-20)."
+  },
+  {
+   "old": "9. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to `rwb_case`, `rwb_decision` or `rwb_source_data` (X8, BR3, BR5).",
+   "new": "9. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to any schema of rwb-case, rwb-decision or rwb-source-data (X8, BR3, BR5)."
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E6-013-04 |",
+   "new": "| MSG-P4-002 | AC4, TC-E6-013-04, TC-E6-013-06 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR3, BR4 |",
+   "new": "| None (pipeline log) | AC5, TC-E6-013-07, Section 17, BR3, BR4 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 A role without the Write-off and posting right is refused (X2)\n    Given a role that does not hold the Write-off and posting right C of the operation\n    When the operation is called\n    Then the answer is 403 before any read or write, nothing changes and no record is written, and the user sees MSG-P4-002\n\n  Scenario: AC5 A statement outside rwb_writeoff or a v_ace_* read fails the build (X8, BR1, BR3, BR4, BR5)\n    Given the build contains a component, a statement or a test that reaches a v_ace_* view, a recovery_case row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the build fails and nothing is released\n\n  Scenario: AC6 The parameters are read with their version (BR6)\n    Given the eligibility condition, the tax criteria, the cut-off date, the third working day and the two tracks are rule rows of the package in force\n    When the scan reads its parameters\n    Then each value is read with the version of its rule row and none is written in code\n\n  Scenario: AC7 The two holds write nothing and the restart runs once (BR7, R-WO-02, R-WO-03, R-WO-04)\n    Given the ACE batch status of source ALS is absent for the cut-off date, or the tax criteria version is absent\n    When the scan runs\n    Then the scan is held at SCAN_HELD, nothing is written and no move is answered\n    Given the ALS extract is complete and the tax criteria are published\n    When the hold is released\n    Then the scan restarts once for the same cut-off date at SCAN_DUE\n\n  Scenario: AC8 A repeated trigger writes once (BR8, X7)\n    Given the same cut-off date and batch business date, or the same Idempotency-Key, is sent twice\n    When the scan runs for the second time\n    Then one row set, one decision record and one answer per case exist, and the repeat is counted\n\n  Scenario: AC9 No personal data enters the write-off record (BR9)\n    Given the case list and the package are read for the cut-off date\n    When the rows, the record, a log and the workflow input are written\n    Then no person name, address, contact value or identity number is among them\n\n  Scenario: AC10 The write-off row carries the route state (BR10)\n    Given the case in state SCAN_DUE is proposed by R-WO-01\n    When its write-off row is written\n    Then the row carries the state POPULATION_PROPOSED"
+  },
+  {
+   "old": "so the check is stated here and not built here.",
+   "new": "so the check is stated here and not built here. The guard makes the rwb-access authorise check of the capability area Write-off and posting and of right C of API-S7-001 before any read or write, and that check is not built in this story."
+  },
+  {
+   "old": "and `decision_record` and `idempotency_key` are library objects created in `rwb_writeoff` by the library's own migration (DP-03).",
+   "new": "and the decision record and `idempotency_key` are library objects created in `rwb_writeoff` by the library's own migration (DP-03). `decision_record` is a library object name and is not a field or entity of LDM v9 or Data Classification v5, so its LDM entry is Not specified in the source documents (DOR-RWB-S7-E6013-APP-7)."
+  },
+  {
+   "old": "**No personal data.** The rows carry identifiers, amounts, dates, a state and a rule version.",
+   "new": "**Parameter name.** `tax_criteria_version` is a parameter of the WO rule package read from rwb-decision, not a field or entity of LDM v9 or Data Classification v5; its LDM entry is Not specified in the source documents (DOR-RWB-S7-E6013-APP-7).\n\n**No personal data.** The rows carry identifiers, amounts, dates, a state and a rule version."
+  },
+  {
+   "old": "The `decision log` of the legacy text is the local decision record of DP-03 in `rwb_writeoff`, with the central `decision_log_entry` ledger of rwb-decision behind it.",
+   "new": "The `decision log` of the legacy text is the local decision record of DP-03 in `rwb_writeoff`, with the central `decision_log_entry` ledger of rwb-decision behind it. The `job` of the legacy text is JOB-16, which runs from a Temporal Schedule and is the trigger of the step."
+  },
+  {
+   "old": "| R-WO-01 | Write-off |",
+   "new": "| R-WO-01 (BR11) | Write-off |"
+  },
+  {
+   "old": "| R-WO-02 | Write-off |",
+   "new": "| R-WO-02 (BR12) | Write-off |"
+  },
+  {
+   "old": "| R-WO-03 | Write-off |",
+   "new": "| R-WO-03 (BR13) | Write-off |"
+  },
+  {
+   "old": "| R-WO-04 | Write-off |",
+   "new": "| R-WO-04 (BR14) | Write-off |"
+  },
+  {
+   "old": "The four rows are the rows of the Business Rules and Routing Logic v4, copied character for character.",
+   "new": "The four rows are the rows of the Business Rules and Routing Logic v4, copied character for character; the BR ID in brackets is the story's own ID for the row."
+  },
+  {
+   "old": "| BR10 | The write-off row carries the route state the rule names, `POPULATION_PROPOSED`, because no list of values for a write-off state exists | TSD S7 T3.2 (empty); ASM-5009 |",
+   "new": "| BR10 | The write-off row carries the route state the rule names, `POPULATION_PROPOSED`, because no list of values for a write-off state exists | TSD S7 T3.2 (empty); ASM-5009 |\n\nCoverage of the rules: the fourteen rules are the ten BR rows above and the four R-WO rows of the table in this section. Each is covered by a criterion of section 7 and a test case of section 16.\n\n| BR ID | Covered by criterion | Covered by test case |\n|---|---|---|\n| BR1 | AC5 | TC-E6-013-07 |\n| BR2 | AC3 | TC-E6-013-03 |\n| BR3 | AC5 | TC-E6-013-07 |\n| BR4 | AC5 | TC-E6-013-07 |\n| BR5 | AC5 | TC-E6-013-07 |\n| BR6 | AC6 | TC-E6-013-08 |\n| BR7 | AC7 | TC-E6-013-09 |\n| BR8 | AC8 | TC-E6-013-10 |\n| BR9 | AC9 | TC-E6-013-11 |\n| BR10 | AC10 | TC-E6-013-12 |\n| BR11 (R-WO-01) | AC2 | TC-E6-013-02 |\n| BR12 (R-WO-02) | AC7 | TC-E6-013-09 |\n| BR13 (R-WO-03) | AC7 | TC-E6-013-09 |\n| BR14 (R-WO-04) | AC7 | TC-E6-013-09 |"
+  },
+  {
+   "old": "**Feature flag.** `rwb.writeoff.scan-v1`, a flag of the platform library; off means the Schedule holds the run, writes nothing and answers no move, and the sibling stories are unaffected.",
+   "new": "**Feature flag.** `rwb.writeoff.scan-v1`, a flag of the platform library; off means the Schedule holds the run, writes nothing and answers no move, and the sibling stories are unaffected.\n\n**Points of no return.** The pivot of the step is the local decision-record write of `WriteOffDecisionRecordWriter`, which commits with the rows before any change (DP-03). The pivot activity waits on the central ledger acknowledgement (strict mode) on the workflow's own retry schedule (X5); the timeout is Not specified in the source documents (GAP-2018). When the timeout is reached the workflow fails with an incident and does not repeat a completed step."
+  },
+  {
+   "old": "| TC-E6-013-04 | Access | Component | A role without the Write-off and posting right C; 403 with MSG-P4-002 and no read |",
+   "new": "| TC-E6-013-04 | Access | Component | A role without the Write-off and posting right C; 403 with MSG-P4-002 and no read |\n| TC-E6-013-06 | Access | Component | A role without right C of the operation; 403 with MSG-P4-002 before any read or write, and no record written (AC4) |\n| TC-E6-013-07 | Boundary | Pipeline | A statement, a v_ace_* read or a write to another service's schema is reached from the build; the boundary test fails and nothing is released (AC5) |\n| TC-E6-013-08 | Reference data | Component | Each parameter is read with the version of its rule row and no value is coded (AC6) |\n| TC-E6-013-09 | Hold | Component | ALS load or tax version absent: SCAN_HELD, nothing written; restored and published: restart once at SCAN_DUE (AC7) |\n| TC-E6-013-10 | Idempotency | Component | Same trigger or same Idempotency-Key twice: one row set, one record and one answer per case (AC8) |\n| TC-E6-013-11 | Data | Component | Rows, record, log and workflow input carry no person name, address, contact value or identity number (AC9) |\n| TC-E6-013-12 | Data | Component | Write-off row carries POPULATION_PROPOSED for a case proposed by R-WO-01 (AC10) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20793",
+   "item": "DOR-RWB-S7-E6013-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Section 13 names the parameters and the reference-data contract (rwb-decision package read, rwb-case default ruling)",
+   "note": "Parameter-catalog keys are Not specified in the source documents (DOR-RWB-S7-E6013-APP-20)."
+  },
+  {
+   "ruling": "R-20794",
+   "item": "DOR-RWB-S7-E6013-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 9 names the owning services, not their schemas",
+   "note": "Boundary test now names rwb-case, rwb-decision and rwb-source-data without schema names."
+  },
+  {
+   "ruling": "R-20795",
+   "item": "DOR-RWB-S7-E6013-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "X2 covered by AC4 and TC-E6-013-06; X8 covered by AC5 and TC-E6-013-07; AC6 to AC10 added with test rows",
+   "note": "Seven criteria added in Gherkin; test case IDs assume TC-E6-013-05 is the last existing row."
+  },
+  {
+   "ruling": "R-20796",
+   "item": "DOR-RWB-S7-E6013-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR11 to BR14 added to R-WO rows; coverage table maps all 14 rules to criteria and test cases",
+   "note": "BR1 to BR10 now covered by AC3 and AC5 to AC10; BR11 by AC2 and TC-E6-013-02."
+  },
+  {
+   "ruling": "R-20797",
+   "item": "DOR-RWB-S7-E6013-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Recovery Workbench Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD (service identity, Write-off and posting R) to Users Roles and Permissions v5",
+   "note": "Rwb-access authorise check now named in section 10; the role row itself belongs to the register."
+  },
+  {
+   "ruling": "R-20798",
+   "item": "DOR-RWB-S7-E6013-APP-7",
+   "status": "Resolved",
+   "section": "7, 11",
+   "target": "",
+   "change": "decision_record and tax_criteria_version named as library object and rule-package parameter; job wording mapped to JOB-16 Schedule",
+   "note": "LDM entries for these names are Not specified in the source documents (DOR-RWB-S7-E6013-APP-7)."
+  },
+  {
+   "ruling": "R-22738",
+   "item": "GAP-2018",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Points of no return paragraph: pivot waits on ledger acknowledgement, workflow retry schedule, incident at timeout",
+   "note": "Timeout value is Not specified in the source documents (GAP-2018); structure is now stated."
+  },
+  {
+   "ruling": "R-22820",
+   "item": "GAP-3025",
+   "status": "Cross-document",
+   "section": "not in this story",
+   "target": "Split plan slice RWB-S7-E6017-APP (story RWB-S7-E6017-APP)",
+   "change": "Keep H, C, I, X rows; record rwb-case, rwb-deviation, rwb-decision as class C with placeholders; track RWB-PLT-E1072-CON, RWB-P7-E1073-CON, RWB-PLT-TE006-CON and a meeting-calendar element as dependencies; state no REST operation and placeholder SCR-27 read; record decision_log_id meaning; land freshness fact; add requirement row at next revision",
+   "note": "Gap concerns the routing slice RWB-S7-E6017-APP, not this story."
+  },
+  {
+   "ruling": "R-22821",
+   "item": "GAP-3033",
+   "status": "Cross-document",
+   "section": "not in this story",
+   "target": "Split plan slice RWB-S7-E6021-APP",
+   "change": "Record four consumed rows as class C without changing H; treat DP-05 as consumed on rwb-source-data contract; keep ALS/GL crossing, re-post and provision release with RWB-ITG-E6021-ITG; read R-WO-05 as the assertion of pack RWB-S7-E6015-APP; add REQ-S7-002 and REQ-S7-005 to traceability at D1",
+   "note": "Gap concerns the pack-prepared story RWB-S7-E6021-APP, not this story."
+  },
+  {
+   "ruling": "R-22832",
+   "item": "GAP-1794",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Recovery Workbench Microservice Ownership Map v1 (Tables sheet) and Logical Data Model v9",
+   "change": "State the four entity groups of rwb_writeoff with key fields, fix write_off as the one table the map holds, write remaining tables with the S7 DB story, add missing Ownership Map rows in the same change",
+   "note": "Story BR1 already names write_off as the one table; register and LDM need the other entity groups."
+  }
+ ]
+}

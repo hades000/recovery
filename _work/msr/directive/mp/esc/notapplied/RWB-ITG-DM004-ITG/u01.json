@@ -1,0 +1,113 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-DM004-ITG",
+ "unit": "u01",
+ "rulings": [
+  "R-09262",
+  "R-09263",
+  "R-13712",
+  "R-13717"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 12
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-09262",
+     "item": "CG-ALL-981",
+     "status": "Resolved",
+     "section": "11",
+     "target": "",
+     "change": "",
+     "note": "LDM v9 Fields table: recovery_case is DF-CAS-001 to 023 and 046 to 055 (33 fields)."
+    },
+    {
+     "ruling": "R-09263",
+     "item": "CG-ALL-982",
+     "status": "Resolved",
+     "section": "11",
+     "target": "",
+     "change": "",
+     "note": "LDM v9 Fields table: treatment is DF-TRT-001 to 014 and 027 to 033 (21). 023 to 026 appear only in its source mapping."
+    },
+    {
+     "ruling": "R-13712",
+     "item": "DOR-RWB-ITG-DM004-ITG-10",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "All states named. Screen Specifications v1 SCR-45 gives only Loading and breaks, plus access and MSG-P4-002; Empty and Error stay marked Not specified."
+    },
+    {
+     "ruling": "R-13717",
+     "item": "DOR-RWB-ITG-DM004-ITG-4",
+     "status": "Resolved",
+     "section": "8",
+     "target": "",
+     "change": "",
+     "note": "Covered by column, AC7 to AC10 and TC-07 to TC-10 added. The new test cases still need rows in Test Cases v8.xlsx, tab Story test cases."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| DF-CAS-001 to DF-CAS-055 | recovery_case | All 55 fields of the case, read through the rwb-case contract | Read |",
+     "new": "| DF-CAS-001 to DF-CAS-023 and DF-CAS-046 to DF-CAS-055 | recovery_case | All 33 recovery_case fields in these ranges, read through the rwb-case contract | Read |"
+    },
+    {
+     "old": "| DF-TRT-001 to DF-TRT-033 | treatment | All 33 fields of the treatment, read through the rwb-treatment contract | Read |",
+     "new": "| DF-TRT-001 to DF-TRT-014 and DF-TRT-027 to DF-TRT-033 | treatment | All 21 treatment fields in these ranges, read through the rwb-treatment contract | Read |"
+    },
+    {
+     "old": "Field IDs are those in the Logical Data Model and Data Dictionary, and the three ranges are the ones the legacy story names.",
+     "new": "Field IDs are those in the Logical Data Model and Data Dictionary v9. The ACE plan view range is the one the legacy story names; the case and treatment ranges are narrowed from the legacy ranges to the rows of recovery_case and treatment. DF-TRT-023 to DF-TRT-026 have no row in the v9 Fields table, and its source mapping places them on v_ace_credit_decision."
+    },
+    {
+     "old": "    And the wave gate does not pass\n```",
+     "new": "    And the wave gate does not pass\n\n  Scenario: AC7 Referential completeness below 100 percent is not accepted for a cutover date (new, D-RCV-60)\n    Given migrated treatment \"TRT-0604\" refers to plan_ref \"PLAN-SYN-0777\" with no view row\n    When the harness reads the reconciliation result for business date \"2026-12-31\"\n    Then the referential completeness of the business date is below 100 percent\n    And the target stays 100 percent for the cutover date\n\n  Scenario: AC8 ACE data is read only through the owning contract (new, D-RCV-60)\n    Given the reconciliation for business date \"2026-12-31\" has run\n    When the harness reads the case, the treatment and the ACE plan data\n    Then every ACE value is read through the rwb-source-data contract\n    And the harness queries no view and no table of any service\n\n  Scenario: AC9 A migrated record keeps its source and migration date and no ACE row copy (new, D-RCV-60)\n    Given migrated treatment \"TRT-0604\" on case \"RW-2026-000604\"\n    When the harness reads both records through the rwb-case and rwb-treatment contracts\n    Then each record carries its source and its migrated_at\n    And neither record holds a copy of an ACE row\n\n  Scenario: AC10 Each service loads its own records under its own Flyway sequence (new, D-RCV-60)\n    Given the cutover loads of the services that own the migrated records\n    When the wave entry check reviews the load evidence\n    Then each service's records are loaded by its own cutover load under its own Flyway sequence\n    And no service's sequence or load writes the tables of another service\n```"
+    },
+    {
+     "old": "Legacy AC1 and AC3 belong to RWB-P1-DM004-APP, and the four criteria above are the ones this ITG story owns.",
+     "new": "Legacy AC1 and AC3 belong to RWB-P1-DM004-APP, and the criteria above are the ones this ITG story owns."
+    },
+    {
+     "old": "| ID | Rule | Source |\n|---|---|---|\n| BR1 | Every business key on a migrated record resolves to its view row, and an orphan is a break, not a warning | REQ-RDF-007; DL25 (assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602) |\n| BR2 | Every break is listed with its key, its reason and its owner, visible to the data steward and, where the row is missing in ACE, to the ACE team | REQ-RDF-008; BR-P1-011-3 |\n| BR3 | Zero tolerance: referential completeness is 100 percent, and the target is not relaxed for a cutover date | DL25; FSD P1 v3 quality measure |\n| BR4 | ACE data is read only through the views owned by rwb-source-data, and no service reads the views or another service's tables | D-RCV-35; ADR-010; DP-05 |\n| BR5 | No plan record is copied and no plan is booked by the migration; the plan is read from ACE | Legacy RWB-DM-004 AC1, owned by RWB-P1-DM004-APP |\n| BR6 | A migrated record keeps its source and its migration date, and never a copy of an ACE row | Legacy RWB-DM-004 guardrails |\n| BR7 | Each service owns its own Flyway sequence and its own cutover load | DP-15; ADR-021 |",
+     "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|\n| BR1 | Every business key on a migrated record resolves to its view row, and an orphan is a break, not a warning | REQ-RDF-007; DL25 (assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602) | AC1, AC2 |\n| BR2 | Every break is listed with its key, its reason and its owner, visible to the data steward and, where the row is missing in ACE, to the ACE team | REQ-RDF-008; BR-P1-011-3 | AC1, AC2 |\n| BR3 | Zero tolerance: referential completeness is 100 percent, and the target is not relaxed for a cutover date | DL25; FSD P1 v3 quality measure | AC7 |\n| BR4 | ACE data is read only through the views owned by rwb-source-data, and no service reads the views or another service's tables | D-RCV-35; ADR-010; DP-05 | AC8 |\n| BR5 | No plan record is copied and no plan is booked by the migration; the plan is read from ACE | Legacy RWB-DM-004 AC1, owned by RWB-P1-DM004-APP | AC2 |\n| BR6 | A migrated record keeps its source and its migration date, and never a copy of an ACE row | Legacy RWB-DM-004 guardrails | AC9 |\n| BR7 | Each service owns its own Flyway sequence and its own cutover load | DP-15; ADR-021 | AC10 |"
+    },
+    {
+     "old": "shows the breaks this harness reads, in the states below:",
+     "new": "shows the breaks this harness reads (loading; breaks; empty; error; no access), in the states below:"
+    },
+    {
+     "old": "| No access | Not specified in the source documents (CG-ALL-990) | Not specified in the source documents (CG-ALL-990) |",
+     "new": "| No access | A user without the Platform administration right, checked on every request, gets MSG-P4-002 | The composite route assertion: Not specified in the source documents (DOR-RWB-ITG-DM004-ITG-10); AC4 asserts 403 with MSG-P4-002 on the reconciliation run |"
+    },
+    {
+     "old": "| TC-DM-004-01-ITG | AC1 (legacy); ITG AC1 | Integration |",
+     "new": "| TC-DM-004-01-ITG | AC1 (legacy); ITG AC1; BR1, BR2 | Integration |"
+    },
+    {
+     "old": "| TC-DM-004-02-ITG | AC2 (legacy); ITG AC1, ITG AC2 | Integration |",
+     "new": "| TC-DM-004-02-ITG | AC2 (legacy); ITG AC1, ITG AC2; BR1, BR2, BR5 | Integration |"
+    },
+    {
+     "old": "| TC-DM-004-06-ITG | ITG AC6 | Not specified in the source documents (NEWAC-RWB-ITG-DM004-ITG-AC6) | Not specified in the source documents (NEWAC-RWB-ITG-DM004-ITG-AC6) |",
+     "new": "| TC-DM-004-06-ITG | ITG AC6 | Not specified in the source documents (NEWAC-RWB-ITG-DM004-ITG-AC6) | Not specified in the source documents (NEWAC-RWB-ITG-DM004-ITG-AC6) |\n| TC-DM-004-07-ITG | ITG AC7; BR3 | Integration | Treatment TRT-0604 with orphan plan_ref PLAN-SYN-0777, business date 2026-12-31 |\n| TC-DM-004-08-ITG | ITG AC8; BR4 | Integration | Case RW-2026-000604 and treatment TRT-0604, with the calls the harness made in the run |\n| TC-DM-004-09-ITG | ITG AC9; BR6 | Integration | Migrated case RW-2026-000604 and treatment TRT-0604 |\n| TC-DM-004-10-ITG | ITG AC10; BR7 | Integration | Cutover load evidence and Flyway history of each owning service |"
+    },
+    {
+     "old": "The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same test case ID.",
+     "new": "The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same test case ID. For TC-DM-004-07-ITG to TC-DM-004-10-ITG the Given, When and Then are those of AC7 to AC10 in section 7."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

@@ -1,0 +1,81 @@
+{
+ "edits": [
+  {
+   "old": "| X12 | The caller lacks Documents C | 403 | MSG-P4-002 | Access test TC-E2-026-15 |",
+   "new": "| X12 | The caller lacks Documents C | 403 | MSG-P4-002 | AC15 |"
+  },
+  {
+   "old": "    Then the system stores none of the three documents and no decision log entry is written",
+   "new": "    Then the system stores none of the three documents and no decision log entry is written\n\n  Scenario: AC15 A caller without Documents C is refused with 403 (new, D-RCV-60)\n    Given an officer in scope of case \"RW-2026-000301\" who lacks Documents C\n    When the officer requests generation for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the response is 403 with MSG-P4-002\n    Then the system stores nothing\n\n  Scenario: AC16 A national ID number is filled at render time and never logged (new, D-RCV-60)\n    Given the party of case \"RW-2026-000301\" has a national ID number\n    When the engine runs for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the token service is called at render time for that national ID number\n    Then the clear value appears only inside the stored PDF and in no log entry\n\n  Scenario: AC17 The provided operations answer 401 without a valid token and 403 without Documents C (new, D-RCV-60)\n    Given a request to the generate operation with no valid token\n    When the request is sent\n    Then the response is 401 and the system stores nothing\n    Given a request to the generate operation with a valid token and no Documents C\n    When the request is sent\n    Then the response is 403 with MSG-P4-002\n\n  Scenario: AC18 A downstream contract that does not answer within 2 s is refused with 503 (new, D-RCV-60)\n    Given the rwb-comms template catalog contract does not answer within 2 s\n    When the engine runs for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then the response is 503 with MSG-GEN-006 naming \"rwb-comms\"\n    Then the system stores nothing and the drafting area is cleaned as in X5\n    Then the retry count is Not specified in the source documents (NEWAC-RWB-P5-E2026-APP-AC18)"
+  },
+  {
+   "old": "| TC-E2-026-18 | Section 12.7 tables, ASM-3438 | Component | Boundary test: only the tables of section 12.7 are written or read, and no foreign-schema table is read (DP-01) |",
+   "new": "| TC-E2-026-18 | Section 12.7 tables, ASM-3438 | Component | Boundary test: only the tables of section 12.7 are written or read, and no foreign-schema table is read (DP-01) |\n| TC-E2-026-19 | AC15, Access | Component | Officer in scope of the case without Documents C calls the generate operation; refused with 403 and MSG-P4-002 |\n| TC-E2-026-20 | AC16, BR11 | End to end | Case party with a national ID number; token service stub |\n| TC-E2-026-21 | AC17 | Component | Request with no token; request with a token and no Documents C |\n| TC-E2-026-22 | AC18 | NFR | rwb-comms catalog contract stub that does not answer within 2 s |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28819",
+   "item": "GAP-1024",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Generation contract baseline: Ownership Map, TSD P5 API-P5-016, Architecture v5 slide 16 record, API Specification v4",
+   "change": "Declare POST /cases/{caseId}/generated-documents as the path and record slide 16 name as loser (ASM-115); publish the four provider interfaces as typed contracts; declare one event with five payload fields (ASM-111 to ASM-113).",
+   "note": "Story section 8 already declares the path (ASM-101); provider shapes, schema constraints and event declaration sit in the baseline documents."
+  },
+  {
+   "ruling": "R-28821",
+   "item": "GAP-2394",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "P6 API specification (API-P6 operation inventory)",
+   "change": "Allocate the next API-P6-nnn ID at D1 for POST /cases/{caseId}/generated-documents and add the operation with the gateway-bff route.",
+   "note": "The ID allocation and P6 API specification row belong to the P6 inventory, not this story."
+  },
+  {
+   "ruling": "R-28822",
+   "item": "GAP-1288",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "Dependency map of the story set (DP-added entries)",
+   "change": "Carry the store baseline and the rwb-access authorise contract as DP-added dependencies; keep Ready to start as Day 1. Header metadata already lists the six H and two C dependencies.",
+   "note": "Story header already carries the platform H and rwb-case C rows; remaining dependency-map entries are outside this story."
+  },
+  {
+   "ruling": "R-31225",
+   "item": "NEWAC-RWB-P5-E2026-APP-AC15",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC15 scenario for a caller without Documents C (403, MSG-P4-002); X12 now covered by AC15; test row TC-E2-026-19 added.",
+   "note": "X12 Covered by changed to AC15; Access test TC-E2-026-15 retained in section 16."
+  },
+  {
+   "ruling": "R-31226",
+   "item": "NEWAC-RWB-P5-E2026-APP-AC16",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added AC16 scenario for BR11 (national ID filled at render time, clear value only in stored PDF); test row TC-E2-026-20 added.",
+   "note": "BR11 now has a criterion and a test row."
+  },
+  {
+   "ruling": "R-31227",
+   "item": "NEWAC-RWB-P5-E2026-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC17 scenario naming 401 without a valid token and 403 without Documents C; test row TC-E2-026-21 added.",
+   "note": "Status codes 401 and 403 now named in a criterion with a test row."
+  },
+  {
+   "ruling": "R-31228",
+   "item": "NEWAC-RWB-P5-E2026-APP-AC18",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC18 scenario for the 2 s timeout (503, MSG-GEN-006, no partial set); retry count Not specified in source; test row TC-E2-026-22 added.",
+   "note": "Timeout covered; retry count not in source documents, flagged in the Then line."
+  }
+ ]
+}

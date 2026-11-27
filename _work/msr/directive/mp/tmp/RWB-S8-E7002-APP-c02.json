@@ -1,0 +1,192 @@
+{
+ "edits": [
+  {
+   "old": "The workflow ID form and start rule are not specified in the source documents (DOR-RWB-S8-E7002-APP-8).",
+   "new": "The start trigger is the Temporal Catalog v1 row: an agent or officer flags the deviation (EV-06 starts screening), or universal rules R-UNI-04 to 09 fire. The workflow ID form and the start and duplicate-start rule are not specified in the source documents (DOR-RWB-S8-E7002-APP-8, CG-ALL-11438)."
+  },
+  {
+   "old": "| X2 | The role does not hold the Case record right the request declares | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | TC-E7-002-04 |",
+   "new": "| X2 | The role does not hold the Case record right the request declares | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC4, TC-E7-002-04 |"
+  },
+  {
+   "old": "MSG-GEN-001 | Section 14 |",
+   "new": "MSG-GEN-001 | AC5, TC-E7-002-08, Section 14 |"
+  },
+  {
+   "old": "MSG-P1-001 | Section 14 |",
+   "new": "MSG-P1-001 | AC6, TC-E7-002-09, Section 14 |"
+  },
+  {
+   "old": "| Section 4 |",
+   "new": "| AC7, TC-E7-002-10, Section 4 |"
+  },
+  {
+   "old": "| Section 17, BR3, BR4 |",
+   "new": "| AC8, TC-E7-002-07, Section 17, BR3, BR4 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 Access without the Case record right (exception X2)\n    Given a role without the Case record right\n    When the role requests the handling of the X2 deviation\n    Then the request is refused with 403 before any read or write, nothing changes and the user sees MSG-P4-002\n\n  Scenario: AC5 Deviation code not handled (exception X4)\n    Given a deviation whose code is not one of X1 to X7\n    When the step runs\n    Then nothing is written, the reason is reported, the deviation stays where it is and the user sees MSG-GEN-001\n\n  Scenario: AC6 Stale ACE data product (exception X5)\n    Given an ACE data product is stale after a late or failed batch\n    When the step runs\n    Then the step holds, nothing is written, the date it waits on is shown, the user sees MSG-P1-001 and the step resumes on the next fresh answer\n\n  Scenario: AC7 Repeated request (exception X7)\n    Given a repeated request for the same deviation, outcome and package version\n    When the request is repeated\n    Then one row, one record, one event and one answer exist for the deviation and the repeat is counted\n\n  Scenario: AC8 Boundary (exception X8)\n    Given a component, a statement or a test reaches a recovery_case row, a v_ace_* view or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the build fails and nothing is released"
+  },
+  {
+   "old": "The two criteria are the legacy criteria of RWB-E7-002 word for word",
+   "new": "The two criteria AC2 and AC3 are the legacy criteria of RWB-E7-002 word for word; AC4 to AC8 are the exception-path criteria added for section 5"
+  },
+  {
+   "old": "**Feature flag.** `rwb.deviation.x2-v1`; off means the step holds the case in `DEV_WITH_OWNER`, writes nothing, publishes nothing and answers no move, and the sibling keys are unaffected.",
+   "new": "**Screen states.** SCR-06 Raise deviation and SCR-08 Deviation queue each show an empty state, a loading state, an error state and a no-access state. The no-access state is the 403 of X2 with MSG-P4-002; the error state shows the platform error envelope.\n\n**Feature flag.** `rwb.deviation.x2-v1`; off means the step holds the case in `DEV_WITH_OWNER`, writes nothing, publishes nothing and answers no move, and the sibling keys are unaffected."
+  },
+  {
+   "old": "they are the owners' facts and are referenced, not copied.",
+   "new": "they are the owners' facts and are referenced, not copied. The personal-data class of each column of section 11 is Not specified in the source documents (DOR-RWB-S8-E7002-APP-11); the contact point is referenced and not carried into `rwb_deviation`."
+  },
+  {
+   "old": "no write to `rwb_case` or `rwb_decision` (X8, BR3, BR4).",
+   "new": "no write to the schema of rwb-case or of rwb-decision (X8, BR3, BR4)."
+  },
+  {
+   "old": "access rows of rwb-access, read through the guard.",
+   "new": "access rows of rwb-access, read through the guard.\n- Parameters and reference data: the parameters read are Not specified in the source documents (DOR-RWB-S8-E7002-APP-20); the reference-data contract is the rwb-decision package read of `RulePackageClient` at its version in force and the rwb-source-data contact read of `SourceDataProductClient`."
+  },
+  {
+   "old": "| TC-E7-002-01 | The raise path of AC1, component half; the criterion and its end-to-end journey are RWB-ITG-E7002-ITG's |",
+   "new": "| TC-E7-002-01 | The raise path of the X2 deviation, component half; AC1 itself is RWB-ITG-E7002-ITG's and is not owned here |"
+  },
+  {
+   "old": "| TC-E7-002-04 | Access |",
+   "new": "| TC-E7-002-04 | Access, AC4 |"
+  },
+  {
+   "old": "| TC-E7-002-05 | Principle 5 | Component | A forced decision log write failure inside the transaction; no `deviation` row, no outbox row and no answer |",
+   "new": "| TC-E7-002-05 | Principle 5 | Component | A forced decision log write failure inside the transaction; no `deviation` row, no outbox row and no answer |\n| TC-E7-002-06 | Contract test of the operations, events and activities of section 12 | Component | The operation, the event of 12.3 and the activity applyDeviationOutcome of 12.5 checked against their published contracts on the fakes; a field missing from a contract fails the test |\n| TC-E7-002-07 | Boundary test of the tables of section 12.7 (ASM-3438); AC8 and X8 | Component | Every statement of the build checked against the tables of 12.7; a statement outside `rwb_deviation` fails the build |\n| TC-E7-002-08 | AC5 (X4) | Component | A deviation whose code is not one of X1 to X7; nothing written, the reason reported and MSG-GEN-001 shown |\n| TC-E7-002-09 | AC6 (X5) | Component | An ACE data product stale after a failed batch, or the package version absent; the step holds, nothing written, the date or version shown with MSG-P1-001 |\n| TC-E7-002-10 | AC7 (X7) | Component | A repeated request for the same deviation, outcome and package version; one row, one record, one event and one answer, the repeat counted |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Story element | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "TC-E7-002-01, TC-E7-002-02, TC-E7-002-05 |",
+   "new": "TC-E7-002-01, TC-E7-002-02, TC-E7-002-05 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  },
+  {
+   "old": "The `DEV_REROUTE` answer of R-DEV-10 and R-DEV-17 | TC-E7-002-02 |",
+   "new": "The `DEV_REROUTE` answer of R-DEV-10 and R-DEV-17 | TC-E7-002-02 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  },
+  {
+   "old": "R-DEV-17 and the `DEV_REROUTE` answer | TC-E7-002-02 |",
+   "new": "R-DEV-17 and the `DEV_REROUTE` answer | TC-E7-002-02 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  },
+  {
+   "old": "rwb-deviation as the owner of `deviation` | TC-E7-002-01 |",
+   "new": "rwb-deviation as the owner of `deviation` | TC-E7-002-01 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  },
+  {
+   "old": "`rwb_deviation` and its own login | TC-E7-002-01 |",
+   "new": "`rwb_deviation` and its own login | TC-E7-002-01 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  },
+  {
+   "old": "The DEV rule evaluation on the package read | TC-E7-002-02 |",
+   "new": "The DEV rule evaluation on the package read | TC-E7-002-02 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  },
+  {
+   "old": "The four consumed rows with their budget and breaker | TC-E7-002-02, TC-E7-002-03 |",
+   "new": "The four consumed rows with their budget and breaker | TC-E7-002-02, TC-E7-002-03 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  },
+  {
+   "old": "The record written before the change | TC-E7-002-03, TC-E7-002-05 |",
+   "new": "The record written before the change | TC-E7-002-03, TC-E7-002-05 | FEAT-DVF-02 | Not specified in the source documents (DOR-RWB-S8-E7002-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13404",
+   "item": "CG-ALL-11438",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "State the start trigger from the catalog row; ID form and duplicate-start rule written as Not specified in the source documents",
+   "note": "Catalog row gives the trigger only; ID form and duplicate-start policy are not given, so marked Not specified."
+  },
+  {
+   "ruling": "R-13405",
+   "item": "CG-ALL-11439",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity applyDeviationOutcome to the Activities sheet, or name a catalogued activity",
+   "note": "Catalog change; story already flags the activity as not in the catalog."
+  },
+  {
+   "ruling": "R-13406",
+   "item": "CG-ALL-11441",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add rows TC-E7-002-01 to TC-E7-002-05 to Story test cases, with Given, When and Then from the criteria they cover; add TC-E7-002-06 to TC-E7-002-10",
+   "note": "Test Cases workbook change; story side adds TC-06 to TC-10 rows."
+  },
+  {
+   "ruling": "R-21179",
+   "item": "DOR-RWB-S8-E7002-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added screen states paragraph for SCR-06 and SCR-08: empty, loading, error, no access",
+   "note": "States named for both screens in section 13."
+  },
+  {
+   "ruling": "R-21180",
+   "item": "DOR-RWB-S8-E7002-APP-11",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Stated that personal-data class of section 11 columns is Not specified; contact point not carried",
+   "note": "Field classification not given in sources, so marked Not specified."
+  },
+  {
+   "ruling": "R-21181",
+   "item": "DOR-RWB-S8-E7002-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added contract test TC-E7-002-06 and boundary test TC-E7-002-07; reworded TC-E7-002-01 so it claims no unowned criterion",
+   "note": "Story side done; Test Cases v8 gap stays with CG-ALL-11441."
+  },
+  {
+   "ruling": "R-21182",
+   "item": "DOR-RWB-S8-E7002-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added Feature column (FEAT-DVF-02) and L3 process column to section 18",
+   "note": "L3 process not in sources, so marked Not specified."
+  },
+  {
+   "ruling": "R-21183",
+   "item": "DOR-RWB-S8-E7002-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added parameters and reference-data contract bullet to configuration and reference data",
+   "note": "Parameters Not specified; contracts named as RulePackageClient and SourceDataProductClient."
+  },
+  {
+   "ruling": "R-21184",
+   "item": "DOR-RWB-S8-E7002-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Replaced names of rwb_case and rwb_decision schemas with service names in build step 8",
+   "note": "Other schema names removed from section 13."
+  },
+  {
+   "ruling": "R-21185",
+   "item": "DOR-RWB-S8-E7002-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC4 to AC8 in section 7 with test rows TC-E7-002-08 to 10 and TC-04, TC-07; section 5 Covered by updated",
+   "note": "Every exception now covered by a criterion; section 7 now holds AC2 to AC8."
+  }
+ ]
+}

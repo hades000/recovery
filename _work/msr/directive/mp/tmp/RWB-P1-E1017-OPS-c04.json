@@ -1,0 +1,50 @@
+{
+ "edits": [
+  {
+   "old": "Then the runbook covers a refused rule set, an unreachable container, a failed delete, a duplicate start, a failed migration and a probe failure",
+   "new": "Then the runbook covers a refused rule set, an unreachable container, a failed delete, a duplicate start, a failed migration and a probe failure\n\n  Scenario: AC9 The business rules BR1 to BR8 hold in the release (new, D-RCV-60)\n    Given the release and the business rules in section 8\n    When the release is built, deployed to SIT and checked against the database and the namespace\n    Then only the rwb-source-data login and schema rwb_source_data are used (BR1, BR8)\n    Then the migration is the per-service Flyway sequence and runs before the deployment is ready (BR2)\n    Then no Schedule for JOB-17 exists in namespace rwb-recovery (BR3)\n    Then the worker polls only the queue rwb-source-data in namespace rwb-recovery (BR4)\n    Then the write-once container is written under retention/ only and its immutability policy is not bypassed (BR5)\n    Then no environment value is hard-coded and the batch size and container name come from values files (BR6)\n    Then every alert carries a message ID and the agreed text and links one runbook entry (BR7)\n\n  Scenario: AC10 A retried or timed-out activity does not duplicate a delete (new, D-RCV-60)\n    Given a RetentionRunWorkflow activity that fails or exceeds its timeout\n    When the worker retries the activity\n    Then the retry does not delete any row a previous attempt already deleted\n    Then the run records the retry count and the activity outcome\n    Then an activity that exhausts its retries marks the run failed and links the failed-delete runbook entry"
+  },
+  {
+   "old": "| TC-E1-017-12 | §12.7 (ASM-3438) | NFR | Each table owned by this release in §12.7 is created by the per-service Flyway sequence; `retention_rule`, `retention_action` and `decision_log_entry` are not created, mounted, read or touched |",
+   "new": "| TC-E1-017-12 | §12.7 (ASM-3438) | NFR | Each table owned by this release in §12.7 is created by the per-service Flyway sequence; `retention_rule`, `retention_action` and `decision_log_entry` are not created, mounted, read or touched |\n| TC-E1-017-13 | AC9 | NFR | Not specified in the source documents (NEWAC-RWB-P1-E1017-OPS-AC9) |\n| TC-E1-017-14 | AC10 | NFR | Not specified in the source documents (NEWAC-RWB-P1-E1017-OPS-AC10) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28504",
+   "item": "GAP-3230",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Recovery Workbench sequence v6 (tracker)",
+   "change": "Drop rows 19 and 21 at tracker cut-over or keep them struck through as 'retired, not pulled'; remove RWB-E1-014 and RWB-TE-007 from Depends on of RWB-E1-056 and RWB-E1-017.",
+   "note": "Retired items still listed in v6 sequence; no story edit in this chunk, change belongs to the tracker."
+  },
+  {
+   "ruling": "R-28505",
+   "item": "GAP-2429",
+   "status": "Not applied",
+   "section": "3, 12.2, 12.8, 13",
+   "target": "",
+   "change": "Name the added H rows RWB-PLT-E1027-CON, RWB-PLT-E1043-CON, RWB-PLT-E1071-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON, C row RWB-P3-E1043-CON and the DP-11 P4 authorise contract in sections 3, 12.2, 12.8 and 13; keep Depends on (build) None.",
+   "note": "Sections 3, 12.2, 12.8 and 13 are not in this chunk, so the named rows cannot be added here. Header dependencies left as the Work Package fixes them."
+  },
+  {
+   "ruling": "R-30233",
+   "item": "NEWAC-RWB-P1-E1017-OPS-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 scenario on retried and timed-out activities, and TC-E1-017-14 with the proposed test not specified in the source documents.",
+   "note": "AC10 added to section 7 with TC-E1-017-14 in section 16; test data is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-30234",
+   "item": "NEWAC-RWB-P1-E1017-OPS-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 scenario covering BR1 to BR8 from section 8, and TC-E1-017-13 with the proposed test not specified in the source documents.",
+   "note": "AC9 added to section 7 with TC-E1-017-13 in section 16. Existing TC-E1-017-09 also cites AC9; its content was not changed."
+  }
+ ]
+}

@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "- The rwb-comms contract of RWB-P6-E1063-APP is published for the notification path: it takes one notice request for the alert role and returns an accepted reference or a refusal. Its operation is Not specified in the source documents (GAP-0616; ASM-0892).",
+   "new": "- The rwb-comms contract of RWB-P6-E1063-APP is published for the notification path: the notice is sent on `POST /api/recovery/comms/v1/cases/{caseId}/messages` with the agent alert reference in the case position and no case lookup, for the alert role, and returns an accepted reference or a refusal. The notice is read back through `GET /api/recovery/comms/v1/notices/{noticeId}`. The cost alert is not case-bound (ASM-B-P6-05-E1063-1, ASM-B-P6-05-E1063-2)."
+  },
+  {
+   "old": "| aggregateAgentRuns | Activity | `rwb-agent` | Output: the daily aggregate rows of the date, per agent, policy version, prompt version and model version, with the count check result |",
+   "new": "| aggregateAgentRuns | Activity | `rwb-agent` | Output: the daily measure rows of the date, a projection over the run record for the date, produced once per agent and version and idempotent on the date, per agent, policy version, prompt version and model version, with the count check result |"
+  },
+  {
+   "old": "| AgentRunDailyRollupWorkflow | Workflow, one per business date, workflow ID = the business date | `rwb-agent` | Input: business date, the requested-by role and the flag of a manual start. Ends COMPLETE, HELD or FAILED with the counts of the date |",
+   "new": "| AgentRunDailyRollupWorkflow | Workflow, one per business date, workflow ID = the business date | `rwb-agent` | Input: business date, the requested-by role and the flag of a manual start. Started once per business date after the run record of the date closes; the rwb-reporting extract does not start it. Ends COMPLETE, HELD or FAILED with the counts of the date |"
+  },
+  {
+   "old": "| dispatchAgentAlerts | Activity | `rwb-agent` | Output: the notice requests and the outbox rows; no partial write |",
+   "new": "| dispatchAgentAlerts | Activity | `rwb-agent` | Output: the agent alert event on `rwb.agent.events.v1` carrying the alert reference and facts, the notice requests and the outbox rows; no partial write |"
+  },
+  {
+   "old": "and unavailable (a consumed contract down, the aggregate still shown and the measure marked unavailable).",
+   "new": "and unavailable (a consumed contract down, the aggregate still shown and the measure marked unavailable). Screen Specifications v1 gives no states for SCR-46; the loading, error and no access states, and the empty state as the screen specification does not state it, are Not specified in the source documents (CG-ALL-2655)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22231",
+   "item": "GAP-1211",
+   "status": "Resolved",
+   "section": "3; 12.5",
+   "target": "",
+   "change": "",
+   "note": "rwb-comms notice now on the case-bound POST with alert reference and no lookup, read via GET notices; alert event on rwb.agent.events.v1 added to dispatchAgentAlerts."
+  },
+  {
+   "ruling": "R-22232",
+   "item": "GAP-1517",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "aggregateAgentRuns output now a run-record projection, once per agent and version, idempotent on date; no physical table named."
+  },
+  {
+   "ruling": "R-22233",
+   "item": "GAP-1519",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "Rollup workflow starts after the run record of the date closes; rwb-reporting extract stated as not a trigger. No job ID invented."
+  },
+  {
+   "ruling": "R-22234",
+   "item": "GAP-2333",
+   "status": "Cross-document",
+   "section": "15",
+   "target": "FSD P4 v3 (REQ-ACA-006, NFR-042); TSD P4 v3 (T6.1); role matrix load",
+   "change": "Keep Reporting R and Rules and parameters R as they are; record Reporting letters for the other roles in the matrix load; replace the lake copy of the access rule with the served read's access entry and correct REQ-ACA-006 and NFR-042 in the next FSD and TSD versions; keep the two access event names; add the five platform contracts to H and the two rwb-case contracts to C in the plan.",
+   "note": "Four source disagreements sit in FSD, TSD and the matrix, not in this story text. Story already states Reporting read and metric-read rights."
+  },
+  {
+   "ruling": "R-24555",
+   "item": "CG-ALL-2652",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Set the REQ-DRI-009 trace to TC-E1-063-01 to TC-E1-063-08 as section 18 lists, and remove TC-E1-014-01 to 03 and TC-E2-031-03 from that requirement.",
+   "note": "Section 18 already lists the story's own tests; the RTM row differs and is corrected in its next version."
+  },
+  {
+   "ruling": "R-24556",
+   "item": "CG-ALL-2653",
+   "status": "Not applied",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Migration file name is not in this chunk, and the next Flyway number of the service sequence is not specified in the source documents."
+  },
+  {
+   "ruling": "R-24557",
+   "item": "CG-ALL-2654",
+   "status": "Not applied",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "The JOB-nn, decision log and job record lines sit in sections 7 and 16, which are outside this chunk; section 12.5 already uses workflow names."
+  },
+  {
+   "ruling": "R-24558",
+   "item": "CG-ALL-2655",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Loading, error and no access states added; the screen specification gives none, so they are marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-28649",
+   "item": "GAP-0618",
+   "status": "Cross-document",
+   "section": "15",
+   "target": "rwb-agent deployment configuration (Platform administrator)",
+   "change": "Expose every topology value as a chart value; register schedule AgentRunDailyRollup at 01:30 in namespace rwb-recovery on queue rwb-agent with overlap SKIP; provision rwb.agent.events.v1 with retry and .dlt topics and the publish right of rwb-agent; publish the metric read and baseline reads behind the gateway-bff route; wire the four alerts to MSG-P10-004.",
+   "note": "Topology, host, SKU, budget, login, retention and thresholds are not in any source; the story keeps the route path as Not specified."
+  },
+  {
+   "ruling": "R-28651",
+   "item": "GAP-1212",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "_work/msr/wp/B-P6-05.md (plan line for this story)",
+   "change": "Add the eight DP-added rows to the plan dependency lists: H RWB-PLT-E1042-CON, C RWB-P3-E1042-CON, H RWB-PLT-E1043-CON, C RWB-P3-E1043-CON, H RWB-PLT-TE006-CON, H RWB-PLT-E1071-CON, H RWB-PLT-E1044-CON, H RWB-PLT-N001-CON.",
+   "note": "The story header already lists all eight; the plan line that carries only RWB-P10-E1063-CON sits in the work plan."
+  }
+ ]
+}

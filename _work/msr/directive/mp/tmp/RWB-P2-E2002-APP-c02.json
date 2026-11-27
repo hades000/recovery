@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| BR1 | The plan status is read from the ACE common module through its published interface `RestructurePlanQuery`, never from ACE tables and never from a `recovery.v_ace_*` view | INT-34; DL14; ADR-010; DP-05 |",
+   "new": "| BR1 | The plan status is read from the ACE common module through its published interface `RestructurePlanQuery`, never from ACE tables and never from a `recovery.v_ace_*` view | INT-34; DL14 (ASM-0189, ASM-5687); ADR-010; DP-05 |"
+  },
+  {
+   "old": "| BR2 | The account number is the join between the case and the ACE plan | DL21 |",
+   "new": "| BR2 | The account number is the join between the case and the ACE plan | DL21 (assumption: Not specified in the source documents (DOR-RWB-P2-E2002-APP-18)) |"
+  },
+  {
+   "old": "| X7 | A role without the Case record R right calls the operation | Refused with 403 before any ACE call; nothing changes | MSG-P4-002 | TC-E2-002-10 |",
+   "new": "| X7 | A role without the Case record R right calls the operation | Refused with 403 before any ACE call; nothing changes | MSG-P4-002 | AC10, TC-E2-002-10 |"
+  },
+  {
+   "old": "    Then the case goes to the exception queue for role \"RW-TEAMMGR\" with the gap",
+   "new": "    Then the case goes to the exception queue for role \"RW-TEAMMGR\" with the gap\n\n  Scenario: AC10 Role without Case record R (new in this story; covers exception X7)\n    Given the caller holds the role \"RW-REFADM\" with no Case record right on case \"RW-2026-000310\"\n    Given the rwb-access contract mock returns no Case record right for the caller on the case\n    When the caller calls GET /cases/{caseId}/plan-status for \"RW-2026-000310\"\n    Then the response is 403 with message MSG-P4-002\n    Then no ACE call is made and nothing changes"
+  },
+  {
+   "old": "Each line of the legacy background and of each criterion is kept; no value is changed and no line is dropped.",
+   "new": "Each line of the legacy background and of each criterion is kept; no value is changed and no line is dropped. AC10 is this story's own criterion for exception X7 and has no legacy counterpart."
+  },
+  {
+   "old": "| TC-E2-002-10 | Access | Component | RW-REFADM (no Case record right) calls GET /cases/{caseId}/plan-status; refused with MSG-P4-002 |",
+   "new": "| TC-E2-002-10 | Access | Component | RW-REFADM (no Case record right) calls GET /cases/{caseId}/plan-status; refused with MSG-P4-002 |\n| TC-E2-002-12 | Read | Component | A plan status read is repeated and the store, outbox, decision log and cache are checked: nothing is written (BR12) |\n| TC-E2-002-13 | Data | Component | The grants and foreign keys of rwb_integration are checked: no grant on recovery and no foreign key into another schema (BR13) |\n| TC-E2-002-14 | Platform | Component | The operation is served on /api/recovery/integration/v1 on the rwb-integration task queue and no Schedule or workflow is created (BR14) |\n| TC-E2-002-15 | Config | Component | The status list, batch size, timeout, flag and breaker thresholds are read as rows and parameters and none is coded (BR15) |\n| TC-E2-002-16 | Privacy | Component | An event, activity input, log line and test report carry no account number or personal data (BR16) |\n| TC-E2-002-17 | Answer | Component | An answer never reports live true for a value not read from ACE and never returns a stored value (BR17) |\n| TC-E2-002-18 | Route | Component | The case record reaches the plan section only through the gateway-bff composite route, not by the browser calling this service (BR18) |"
+  },
+  {
+   "old": "| No field ID | The ACE common module interface |",
+   "new": "| Not specified in the source documents (DOR-RWB-P2-E2002-APP-7) | The ACE common module interface |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15609",
+   "item": "DOR-RWB-P2-E2002-APP-18",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "DL14 assumptions added to BR1. DL21 has no assumption ID in the sources, so none invented. DL11 is not in the supplied text."
+  },
+  {
+   "ruling": "R-15610",
+   "item": "DOR-RWB-P2-E2002-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC10 added in section 7 for exception X7; X7 now covered by AC10 and TC-E2-002-10."
+  },
+  {
+   "ruling": "R-15611",
+   "item": "DOR-RWB-P2-E2002-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Test case rows TC-E2-002-12 to TC-E2-002-18 added in section 16 for BR12 to BR18."
+  },
+  {
+   "ruling": "R-15612",
+   "item": "DOR-RWB-P2-E2002-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "ACE interface row BR Field ID now states the source gap; no field ID invented."
+  },
+  {
+   "ruling": "R-15613",
+   "item": "DOR-RWB-P2-E2002-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 wording for MSG-P3-027 is not in the supplied sources, so it cannot be copied without inventing text."
+  },
+  {
+   "ruling": "R-22325",
+   "item": "GAP-2395",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P6-E1073-APP",
+   "change": "Name the rwb-comms rule package codes and version labels read through the contract as the fixture set, and settle package assignment with the rule registry owner before integration.",
+   "note": "rwb-comms is not in this story; no story edit."
+  },
+  {
+   "ruling": "R-22326",
+   "item": "GAP-0907",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P4-AD002-APP",
+   "change": "Add a Case record column for all roles to TSD P4 T6.1, publish the 14-area matrix as data, and confirm CASE_RECORD letters and default scopes with the matrix owner.",
+   "note": "Matrix is outside this story; AC1 and AC8 depend on it."
+  },
+  {
+   "ruling": "R-22327",
+   "item": "GAP-0908",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Add the authorise path and the resolved permission view with request and answer schemas, stub them in the contract fake, and record whether the plan reference travels in the authorise request.",
+   "note": "Authorise contract is owned outside this story; X10 depends on it."
+  },
+  {
+   "ruling": "R-22328",
+   "item": "GAP-0654",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P2-E2002-CON",
+   "change": "Settle the rwb-integration login, the case read contract, the field sets, the owner of live and messageCode, the settings owner, the connection-matrix rows and the daily step; record in RWB-P2-E2002-OPS and RWB-P3-E2002-APP.",
+   "note": "Gap already flagged in section 11 with GAP-0654 and ASM-1102; no further story edit."
+  },
+  {
+   "ruling": "R-22329",
+   "item": "GAP-0655",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P2-E2002-CON",
+   "change": "Approve the four assumptions: answer shape with accountNo, live and messageCode rule, interface contract with batch, budget and answer rules, and consumed read shapes; reconcile interface-versus-view wording in the Service Contract Catalog.",
+   "note": "accountNo already in AC1 and section 11; the baseline approval belongs to the contract."
+  }
+ ]
+}

@@ -1,0 +1,212 @@
+{
+ "edits": [
+  {
+   "old": "**No new table, no column, no migration**: the tables come with the DB story and",
+   "new": "**No new table, no column, no migration**: the tables come with the DB story, a residual column missing from `asset_sale` is added there in its own Flyway sequence (GAP-1912), and"
+  },
+  {
+   "old": "**No personal data**: identifiers, codes, amounts, dates and a rule version only; every fixture is synthetic.",
+   "new": "**No personal data**: identifiers, codes, amounts, dates and a rule version only; every fixture is synthetic. Reference data is read only as the DISPOSAL package in force: the rule rows DF-REF-001 to DF-REF-015 through the rwb-decision package contract (DP-06, DP-07), with the parameters package version and the shortfall threshold of 0 in R-DIS-55 (DOR-RWB-S5-E4030-APP-20)."
+  },
+  {
+   "old": "| Not specified in the source documents (GAP-2947; ASM-4843) | none | the residual, its route and its D9 hand-off | No element; recorded with the outcome and answered to rwb-case |",
+   "new": "| Not specified in the source documents (GAP-2947; ASM-4843; GAP-1912) | none | the residual, its route and its D9 hand-off | No element; recorded with the outcome and answered to rwb-case |"
+  },
+  {
+   "old": "| Event | Topic | Envelope | Subscription | Idempotency |\n|---|---|---|---|---|",
+   "new": "| Event | Topic | Envelope | Subscription | Idempotency | Owner |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| EV-25 `ProceedsMatched` (proceedsId, caseId, amount) | `rwb.payment.events.v1`, event `rwb.payment.ProceedsMatched.v1`, with `.retry` and `.dlt` | CloudEvents, schema version, event id, correlation reference | Consumer group `rwb-asset`, inbox row in `rwb_asset`, then a signal to `AssetDisposalWorkflow` | Event id and idempotency key; a repeat is ignored and counted (BR9) |",
+   "new": "| EV-25 `ProceedsMatched` (proceedsId, caseId, amount) | `rwb.payment.events.v1`, event `rwb.payment.ProceedsMatched.v1`, with `.retry` and `.dlt` | CloudEvents, schema version, event id, correlation reference | Consumer group `rwb-asset`, inbox row in `rwb_asset`, then a signal to `AssetDisposalWorkflow` | Event id and idempotency key; a repeat is ignored and counted (BR9) | rwb-payment (P8) |"
+  },
+  {
+   "old": "the catalogue slide wins under R-PREC and the subscription is declared here (GAP-2945; ASM-4841). No other topic is consumed: the litigation events of the matrix's S4 column serve other steps of this service.",
+   "new": "the catalogue slide wins under R-PREC and the subscription is declared here (GAP-2945; ASM-4841). No other topic is consumed: the litigation events of the matrix's S4 column serve other steps of this service. The operation names of the rwb-payment proceeds and vendor-fee read, the rwb-case case-move answer and the rwb-source-data account and sale data product are Not specified in the source documents (GAP-1911); each owner publishes its name before the wave 3 tag, and RWB-S5-E4030-CON replaces the placeholder in a minor version."
+  },
+  {
+   "old": "| X9 | A statement reaches a `v_ace_*` view, `recovery_case` or a foreign schema | The grant refuses it and the boundary test fails the build | None (pipeline log) | §17 |",
+   "new": "| X9 | A statement reaches a `v_ace_*` view, `recovery_case` or a foreign schema | The grant refuses it and the boundary test fails the build | None (pipeline log) | AC5, TC-E4-030-09 |"
+  },
+  {
+   "old": "| X10 | The residual routes nowhere because `residual_route` is unset | The case is held in `UNMATCHED_EXCEPTION` by R-DIS-71, which is the adjacent step and not owned here | MSG-GEN-001 on the task | GAP-2950 |",
+   "new": "| X10 | The residual routes nowhere because `residual_route` is unset | The case is held in `UNMATCHED_EXCEPTION` by R-DIS-71, which is the adjacent step and not owned here | MSG-GEN-001 on the task | AC6, TC-E4-030-10 |"
+  },
+  {
+   "old": "X10 is the adjacent rule the feature names but no criterion covers.",
+   "new": "X10 is the adjacent rule the feature names; AC6 covers only its hand-off and does not own the route."
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "writes the result to the decision log with the rule version",
+   "new": "writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Boundary refuses a statement outside the owned schema (X9; DP-01, DP-05)\n    Given a statement reaches a `v_ace_*` view, `recovery_case` or a foreign schema\n    When the boundary test runs\n    Then the grant refuses the statement and the build fails\n\n  Scenario: AC6 Residual with no route is answered and not routed (X10)\n    Given the case \"RC-2026-000593\" is in state SHORTFALL_RAISED with residual_route unset\n    When the residual is answered to rwb-case\n    Then the answer carries the shortfall_amount and no route\n    Then the hold in UNMATCHED_EXCEPTION is the adjacent step's R-DIS-71 and is not claimed here\n\n  Scenario: AC7 Sale outcome is written and the money is not (BR1, BR3)\n    Given the rwb-payment contract mock returns ProceedsMatched for case \"RC-2026-000593\" with its proceeds fact\n    When the sale outcome is recorded\n    Then asset_sale holds the price, the fee and gain_loss\n    Then no balance, posting or proceeds row is written by this story\n\n  Scenario: AC8 Case move is answered and not written (BR4)\n    Given the case \"RC-2026-000593\" is in state PROCEEDS_APPLIED\n    When the move is answered to rwb-case\n    Then the answer carries the outcome and the residual, and no state is written here\n\n  Scenario: AC9 One event is consumed and a repeat is counted (BR8, BR9)\n    Given ProceedsMatched for case \"RC-2026-000593\" arrives twice with the same event id\n    When the second delivery is processed\n    Then one sale outcome and one answer are written, the repeat is counted, and no event is published"
+  },
+  {
+   "old": "The vendor fee's match is read from the proceeds fact (GAP-2949; ASM-4845).",
+   "new": "The vendor fee's match is read from the proceeds fact (GAP-2949; ASM-4845). AC5 to AC9 carry no legacy tag: AC5 is the boundary of X9, AC6 the residual hand-off of X10, and AC7 to AC9 the business rules BR1, BR3, BR4, BR8 and BR9 of section 8."
+  },
+  {
+   "old": "| BR1 | The sale outcome is this service's: `asset_sale` in `rwb_asset`, with the price, the fee and `gain_loss` | Ownership Map; TSD S5 T3.1 |",
+   "new": "| BR1 | The sale outcome is this service's: `asset_sale` in `rwb_asset`, with the price, the fee and `gain_loss` | Ownership Map; TSD S5 T3.1; AC7, TC-E4-030-11 |"
+  },
+  {
+   "old": "| BR2 | The record precedes the change, one per outcome, with the rule and package version; a failed write changes nothing | DP-03; AC1, AC4 |",
+   "new": "| BR2 | The record precedes the change, one per outcome, with the rule and package version; a failed write changes nothing | DP-03; AC1, AC4; TC-E4-030-04, TC-E4-030-06 |"
+  },
+  {
+   "old": "| BR3 | The money is P8's: no balance application, no posting and no `proceeds` row is written here | Ownership Map (`proceeds`, P8); GAP-2948 |",
+   "new": "| BR3 | The money is P8's: no balance application, no posting and no `proceeds` row is written here | Ownership Map (`proceeds`, P8); GAP-2948; GAP-1759; AC7, TC-E4-030-11 |"
+  },
+  {
+   "old": "| BR4 | The case move is answered, not written; the states are rwb-case's | Ownership Map (P3); GAP-2944 |",
+   "new": "| BR4 | The case move is answered, not written; the states are rwb-case's | Ownership Map (P3); GAP-2944; AC8, TC-E4-030-12 |"
+  },
+  {
+   "old": "| BR5 | No element holds the residual: it is recorded with the decision outcome and answered to rwb-case, and no column is invented | GAP-2947; ASM-4843 |",
+   "new": "| BR5 | No element holds the residual: it is recorded with the decision outcome and answered to rwb-case, and no column is invented | GAP-2947; ASM-4843; GAP-1912; AC6, TC-E4-030-10 |"
+  },
+  {
+   "old": "| BR6 | The vendor fee is matched from the proceeds fact; a missing match is named on the task and does not reverse the sale | GAP-2949; ASM-4845 |",
+   "new": "| BR6 | The vendor fee is matched from the proceeds fact; a missing match is named on the task and does not reverse the sale | GAP-2949; ASM-4845; GAP-1912; AC3, TC-E4-030-14 |"
+  },
+  {
+   "old": "| BR7 | ACE data only through the owner's contract: no `v_ace_account` and no `v_ace_npa_sale` read here | DP-05; GAP-2946 |",
+   "new": "| BR7 | ACE data only through the owner's contract: no `v_ace_account` and no `v_ace_npa_sale` read here | DP-05; GAP-2946; AC5, TC-E4-030-09 |"
+  },
+  {
+   "old": "| BR8 | One event is consumed and none is published; EV-22 `AssetTakenOn` and the sale event belong to other stories | Event and Messaging Design v5 (EV-22, EV-25); GAP-2945 |",
+   "new": "| BR8 | One event is consumed and none is published; EV-22 `AssetTakenOn` and the sale event belong to other stories | Event and Messaging Design v5 (EV-22, EV-25); GAP-2945; AC9, TC-E4-030-13 |"
+  },
+  {
+   "old": "| BR9 | A repeated event id or key writes once, answers once and is counted | Event and Messaging Design v5 (Duplicates, R-UNI-40) |",
+   "new": "| BR9 | A repeated event id or key writes once, answers once and is counted | Event and Messaging Design v5 (Duplicates, R-UNI-40); AC9, TC-E4-030-13 |"
+  },
+  {
+   "old": "| BR10 | No cross-schema join and no foreign key leaves `rwb_asset`; no personal data in a row, a record, a log or a workflow input | DP-01; Template and Rules v1 §R7.2 (s17) |",
+   "new": "| BR10 | No cross-schema join and no foreign key leaves `rwb_asset`; no personal data in a row, a record, a log or a workflow input | DP-01; Template and Rules v1 §R7.2 (s17); AC5, TC-E4-030-09 |\n| BR11 | Rule row R-DIS-54 above: the proceeds are applied to the case and the loan account and the vendor fee is matched, from ASSET_SOLD to PROCEEDS_APPLIED | Business Rules and Routing Logic v4; AC3, TC-E4-030-14 |\n| BR12 | Rule row R-DIS-55 above: a shortfall above 0 raises the residual for the D9 decision, from PROCEEDS_APPLIED to SHORTFALL_RAISED | Business Rules and Routing Logic v4; AC2, TC-E4-030-15 |"
+  },
+  {
+   "old": "Both rows are copied character for character from the Business Rules and Routing Logic v4.",
+   "new": "Both rows are copied character for character from the Business Rules and Routing Logic v4 and carry the BR IDs BR11 (R-DIS-54) and BR12 (R-DIS-55) in the table below."
+  },
+  {
+   "old": "DP-08 is not in the pattern set: the right is declared per operation and the guard is a service-template capability.",
+   "new": "DP-08 is not in the pattern set: the right is declared per operation and the guard is a service-template capability. The rwb-access authorise check of each read operation is Not specified in the source documents (DOR-RWB-S5-E4030-APP-6)."
+  },
+  {
+   "old": "| MSG-P7-003 | The record cannot be written before the sale changes (X1) | The action was not taken because the decision could not be recorded. Try again in a few minutes. |",
+   "new": "| MSG-P7-003 | The record cannot be written before the sale changes (X1) | The action was not taken because the decision could not be recorded. Try again in a few minutes. |\n| MSG-P1-001 | The proceeds fact is missing, stale or carries no sale (X6) | Not specified in the source documents (DOR-RWB-S5-E4030-APP-9) |"
+  },
+  {
+   "old": "The five IDs are the legacy set, copied unchanged; no message is reworded and none is added. The stale-data message MSG-P1-001 is the data product's and is shown with its own ID (X6).",
+   "new": "The five IDs are the legacy set, copied unchanged; no message is reworded. The stale-data message MSG-P1-001 is the data product's and is shown with its own ID (X6); its text is Not specified in the source documents (DOR-RWB-S5-E4030-APP-9)."
+  },
+  {
+   "old": "| TC-E4-030-08 | §12.7 tables | Component | Boundary values on the owned tables of §12.7 (ASM-3438): asset_sale, listing, asset, decision_record, idempotency_key, inbox; no read of a table not owned |",
+   "new": "| TC-E4-030-08 | §12.7 tables | Component | Boundary values on the owned tables of §12.7 (ASM-3438): asset_sale, listing, asset, decision_record, idempotency_key, inbox; no read of a table not owned |\n| TC-E4-030-09 | AC5 (X9; BR7, BR10) | Component | A statement on a v_ace_* view, recovery_case or a foreign schema is refused by the grant and fails the build |\n| TC-E4-030-10 | AC6 (X10; BR5) | Component | A residual with residual_route unset is answered to rwb-case with the shortfall_amount and no route |\n| TC-E4-030-11 | AC7 (BR1, BR3) | Component | The sale outcome is written in asset_sale and no balance, posting or proceeds row is written by this service |\n| TC-E4-030-12 | AC8 (BR4) | Component | The case move is answered and no case state is written in rwb-asset |\n| TC-E4-030-13 | AC9 (BR8, BR9) | Component | One event is consumed, none is published, and a repeat is counted and writes once |\n| TC-E4-030-14 | AC3 (BR6, BR11) | Component | The vendor fee is matched from the proceeds fact and a missing match is named without reversing the sale |\n| TC-E4-030-15 | AC2 (BR12) | Component | A shortfall above 0 raises the residual and moves the case to SHORTFALL_RAISED |"
+  },
+  {
+   "old": "- The case stays with rwb-case and the money with rwb-payment: no `recovery_case` row and no `proceeds` row here (BR3, BR4).",
+   "new": "- The case stays with rwb-case and the money with rwb-payment: no `recovery_case` row and no `proceeds` row here (BR3, BR4).\n- No ALS interface and no general-ledger interface here: every posting goes to rwb-payment through `postProceeds`, the cost of carry travels with its period, and the result is recorded from `ProceedsMatched` (GAP-1759)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20461",
+   "item": "DOR-RWB-S5-E4030-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Named the DISPOSAL package rule rows DF-REF-001 to DF-REF-015, the parameters and the rwb-decision contract (DP-06, DP-07).",
+   "note": "Reference data and parameters now named in section 11."
+  },
+  {
+   "ruling": "R-20462",
+   "item": "DOR-RWB-S5-E4030-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Added Owner column to the events consumed table; EV-25 owner is rwb-payment (P8).",
+   "note": "Owner column added to §12.4."
+  },
+  {
+   "ruling": "R-20463",
+   "item": "DOR-RWB-S5-E4030-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC5 (X9) and AC6 (X10) and AC7 to AC9; X9 and X10 now cite them; TC-E4-030-09 to TC-E4-030-15 added.",
+   "note": "Exception paths X9 and X10 now covered by criteria."
+  },
+  {
+   "ruling": "R-20464",
+   "item": "DOR-RWB-S5-E4030-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added BR11 and BR12 for R-DIS-54 and R-DIS-55; BR1 to BR12 cite their AC and TC rows.",
+   "note": "Every rule now has a BR ID and a criterion and test case."
+  },
+  {
+   "ruling": "R-20465",
+   "item": "DOR-RWB-S5-E4030-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD or remove it from section 10 of this story. Story now names the authorise check as Not specified in the source documents.",
+   "note": "SY-DATALOAD missing in roles v5; authorise check named as unspecified."
+  },
+  {
+   "ruling": "R-20466",
+   "item": "DOR-RWB-S5-E4030-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Add DF-COL-028 and DF-COL-042, and fields shortfall_amount, residual_route and decision_record, or name where they are held. Story decision-log wording fixed in AC1 and AC4.",
+   "note": "Field IDs and names absent from LDM v9 and DC v5."
+  },
+  {
+   "ruling": "R-20467",
+   "item": "DOR-RWB-S5-E4030-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Added MSG-P1-001 row to the messages table; its text is Not specified in the source documents.",
+   "note": "MSG-P1-001 now listed in §14."
+  },
+  {
+   "ruling": "R-23487",
+   "item": "GAP-1759",
+   "status": "Cross-document",
+   "section": "17",
+   "target": "FSD S5 and Architecture v5",
+   "change": "Remove ALS and GL as integration points of FSD A2.5, A2.18, A2.21 and A2.23; route all posting through rwb-payment postProceeds (Arch v5 slides 19, 41, 43).",
+   "note": "Story drops ALS and GL interfaces; source documents still name them."
+  },
+  {
+   "ruling": "R-23540",
+   "item": "GAP-1911",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Recorded the four unpublished operation names as Not specified in the source documents, with owner publication before wave 3 and a minor-version replacement by RWB-S5-E4030-CON.",
+   "note": "Placeholder and publication path now stated in §12.4."
+  },
+  {
+   "ruling": "R-23541",
+   "item": "GAP-1912",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "TSD S5 T3.1; Ownership Map",
+   "change": "S5 data owner confirms the residual column on asset_sale or names the rwb-writeoff store; P8 owner confirms the vendor-fee match as its own fact.",
+   "note": "Story cites GAP-1912 and adds the column in the DB story if absent."
+  }
+ ]
+}

@@ -1,0 +1,200 @@
+{
+ "edits": [
+  {
+   "old": "1. The contract author writes the OpenAPI 3.1 document for the six published operations, one tag per resource: Queues, Queue membership, Queue measures, Lists, Reference loads.",
+   "new": "1. The contract author writes the OpenAPI 3.1 document for the six published operations, one tag per resource: Queues, Queue membership, Queue measures, Lists, Reference loads. The author also publishes the Queues template as an xlsx workbook with one header row per sheet, a column per queue and queue_member field, and one check per required column (GAP-0681)."
+  },
+  {
+   "old": "| ID | Trigger | What happens | Message |\n|---|---|---|---|\n| X1 | An operation is published without a 4xx error envelope | The lint step fails the build and the document is not published | Lint finding, no message id |",
+   "new": "| ID | Trigger | What happens | Message | Covered by |\n|---|---|---|---|---|\n| X1 | An operation is published without a 4xx error envelope | The lint step fails the build and the document is not published | Lint finding, no message id | AC4 |"
+  },
+  {
+   "old": "| X2 | A POST operation declares no `Idempotency-Key` header | The lint step fails the build | Lint finding, no message id |",
+   "new": "| X2 | A POST operation declares no `Idempotency-Key` header | The lint step fails the build | Lint finding, no message id | AC3 |"
+  },
+  {
+   "old": "| X3 | A path is published outside `/api/recovery/case/v1` | The lint step fails the build; the monolith base is never republished | Lint finding, no message id |",
+   "new": "| X3 | A path is published outside `/api/recovery/case/v1` | The lint step fails the build; the monolith base is never republished | Lint finding, no message id | AC6 |"
+  },
+  {
+   "old": "| X4 | An example carries a personal name, an email address or an account number | The review step rejects the example; only user IDs and case numbers appear | Review finding |",
+   "new": "| X4 | An example carries a personal name, an email address or an account number | The review step rejects the example; only user IDs and case numbers appear | Review finding | AC5 |"
+  },
+  {
+   "old": "| X5 | The AsyncAPI schema adds a field holding a personal name | The schema review rejects the change; the queue and owner fields stay codes and references | Review finding |",
+   "new": "| X5 | The AsyncAPI schema adds a field holding a personal name | The schema review rejects the change; the queue and owner fields stay codes and references | Review finding | AC5 |"
+  },
+  {
+   "old": "| X6 | A consumer needs a field that no source defines | The field is not invented: the example carries the placeholder and a gap is raised | GAP-0680 |",
+   "new": "| X6 | A consumer needs a field that no source defines | The field is not invented: the example carries the placeholder and a gap is raised | GAP-0680 | AC2, AC5 |"
+  },
+  {
+   "old": "Then the fake answers every operation and every example, and a breaking change raises a new version and marks v1 deprecated",
+   "new": "Then the fake answers every operation and every example, and a breaking change raises a new version and marks v1 deprecated\n\n  Scenario: AC7 The assignment method, the cap parameter and the version status are published (new, D-RCV-60)\n    Given the business rules BR2, BR3 and BR6 of section 8\n    When the contract documents are validated\n    Then the assignment method of the Queue schema is one of ROUND_ROBIN, LOWEST_LOAD, NAMED_OWNER, SKILL\n    Then the capacity cap range is 1 to 500 and is published as the parameter `queue.cap.max`, never as a constant in the schema\n    Then the version status vocabulary is LOADED, VALIDATED, APPROVED, IN_FORCE, SUPERSEDED, ROLLED_BACK, REFUSED"
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|\n| BR1 | Every queue in the contract belongs to one team code and one role code | Legacy BR1; DF-WRK-004, DF-WRK-005 |",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|\n| BR1 | Every queue in the contract belongs to one team code and one role code | Legacy BR1; DF-WRK-004, DF-WRK-005 | AC1; TC-P3-E1019-CON-01 |"
+  },
+  {
+   "old": "| BR2 | The assignment method is one of ROUND_ROBIN, LOWEST_LOAD, NAMED_OWNER, SKILL | LOV-ASSIGN |",
+   "new": "| BR2 | The assignment method is one of ROUND_ROBIN, LOWEST_LOAD, NAMED_OWNER, SKILL | LOV-ASSIGN | AC1, AC7; TC-P3-E1019-CON-01, TC-P3-E1019-CON-07 |"
+  },
+  {
+   "old": "| BR3 | The capacity cap range is 1 to 500, published as the parameter `queue.cap.max` and never as a constant in the schema | Legacy BR8; DL23 |",
+   "new": "| BR3 | The capacity cap range is 1 to 500, published as the parameter `queue.cap.max` and never as a constant in the schema | Legacy BR8; DL23 (ASM-1232, ASM-1237, ASM-1259, ASM-1560) | AC7; TC-P3-E1019-CON-07 |"
+  },
+  {
+   "old": "| BR4 | A load is refused whole when any row fails, and the refusal names rows and checks | Legacy BR2; MSG-P1-002 |",
+   "new": "| BR4 | A load is refused whole when any row fails, and the refusal names rows and checks | Legacy BR2; MSG-P1-002 | AC3, AC4; TC-P3-E1019-CON-03, TC-P3-E1019-CON-04 |"
+  },
+  {
+   "old": "| BR5 | The author of a load cannot approve it, and the contract publishes the refusal as 409 | Legacy BR4; MSG-P7-002 |",
+   "new": "| BR5 | The author of a load cannot approve it, and the contract publishes the refusal as 409 | Legacy BR4; MSG-P7-002 | AC4; TC-P3-E1019-CON-04 |"
+  },
+  {
+   "old": "| BR6 | The version status vocabulary is LOADED, VALIDATED, APPROVED, IN_FORCE, SUPERSEDED, ROLLED_BACK, REFUSED | LOV-VERSION-STATUS (TSD P3 v3 T3.2) |",
+   "new": "| BR6 | The version status vocabulary is LOADED, VALIDATED, APPROVED, IN_FORCE, SUPERSEDED, ROLLED_BACK, REFUSED | LOV-VERSION-STATUS (TSD P3 v3 T3.2) | AC7; TC-P3-E1019-CON-07 |"
+  },
+  {
+   "old": "| BR7 | Every POST requires an `Idempotency-Key`; a repeat returns the first result | Legacy contract, idempotency row |",
+   "new": "| BR7 | Every POST requires an `Idempotency-Key`; a repeat returns the first result | Legacy contract, idempotency row | AC3; TC-P3-E1019-CON-03 |"
+  },
+  {
+   "old": "| BR8 | The contract publishes rwb-case resources only; role, permission and scope resources are rwb-access | DP-08; ownership map |",
+   "new": "| BR8 | The contract publishes rwb-case resources only; role, permission and scope resources are rwb-access | DP-08; ownership map | AC6; TC-P3-E1019-CON-06 |"
+  },
+  {
+   "old": "| Item | Value |\n|---|---|\n| Field identifiers published | DF-WRK-001 to DF-WRK-008, DF-WRK-037, DF-WRK-038 (queue); DF-WRK-045 to DF-WRK-052 (queue member); DF-RPT-020 to DF-RPT-030 (queue measure); DF-REF-028, DF-REF-029 (list of values); DF-REF-181 to DF-REF-184 (reference row); DF-REF-159 to DF-REF-180 (reference version, referenced only) |",
+   "new": "| Item | Value | BR Field ID |\n|---|---|---|\n| Field identifiers published | DF-WRK-001 to DF-WRK-008, DF-WRK-037, DF-WRK-038 (queue); DF-WRK-045 to DF-WRK-052 (queue member); DF-RPT-020 to DF-RPT-030 (queue measure); DF-REF-028, DF-REF-029 (list of values); DF-REF-181 to DF-REF-184 (reference row); DF-REF-159 to DF-REF-180 (reference version, referenced only) | DF-WRK-001 to DF-WRK-008, DF-WRK-037, DF-WRK-038, DF-WRK-045 to DF-WRK-052, DF-RPT-020 to DF-RPT-030, DF-REF-028, DF-REF-029, DF-REF-181 to DF-REF-184, DF-REF-159 to DF-REF-180 |"
+  },
+  {
+   "old": "| Field identifiers not published, consumed instead | DF-REF-035 (`role.role_code`) and the permission, scope and delegation fields of rwb-access: reached over the rwb-access contract, never in this document (DP-01, DP-08) |",
+   "new": "| Field identifiers not published, consumed instead | DF-REF-035 (`role.role_code`) and the permission, scope and delegation fields of rwb-access: reached over the rwb-access contract, never in this document (DP-01, DP-08) | DF-REF-035 |"
+  },
+  {
+   "old": "| Field identifiers with no source | The remaining `lov_value` columns and the queue-measure column order: Not specified in the source documents (GAP-0680; ASM-1227) |",
+   "new": "| Field identifiers with no source | Queue-measure columns are DF-RPT-020 to DF-RPT-030 (TSD P3 v3 T3.1); list-of-values columns are DF-REF-028 and DF-REF-029 at minimum; any further `lov_value` column is added by a later migration, not by a guess (GAP-0680; ASM-1227) | Not specified in the source documents (DOR-RWB-P3-E1019-CON-7) |"
+  },
+  {
+   "old": "| File format | The Queues template is an xlsx workbook with the two sheets QUEUE and QUEUE_MEMBER, sent as multipart on the load operation; the column order and the required columns per sheet are Not specified in the source documents (GAP-0681; ASM-1228) |",
+   "new": "| File format | The Queues template is an xlsx workbook with the two sheets QUEUE and QUEUE_MEMBER, sent as multipart on the load operation; it has one header row per sheet, a column per queue and queue_member field and one check per required column; v1 does not fix the column order (GAP-0681; ASM-1228) | Not specified in the source documents (DOR-RWB-P3-E1019-CON-7) |"
+  },
+  {
+   "old": "| Personal data in examples | None. Members and approvers appear as user IDs only (U-11, U-12, U-90) |",
+   "new": "| Personal data in examples | None. Members and approvers appear as user IDs only (U-11, U-12, U-90) | None |"
+  },
+  {
+   "old": "| POST /api/recovery/case/v1/admin/reference-loads | reference-loads.yaml | `multipart/form-data`: file, table, validFrom; `Idempotency-Key` | 201 ReferenceLoad; 401; 403 MSG-P4-002; 409; 413; 422 MSG-GEN-001, MSG-GEN-002, MSG-P1-002; 503 | P3 |",
+   "new": "| POST /api/recovery/case/v1/admin/reference-loads | reference-loads.yaml | `multipart/form-data`: file (Queues template, GAP-0681), table, validFrom; `Idempotency-Key` | 201 ReferenceLoad; 401; 403 MSG-P4-002; 409; 413; 422 MSG-GEN-001, MSG-GEN-002, MSG-P1-002; 503 | P3 |"
+  },
+  {
+   "old": "**12.2 REST operations consumed**",
+   "new": "The rollback and verify operations of reference loads (POST /api/recovery/case/v1/admin/reference-loads/{loadId}/rollback and .../verify) are owned by P3 and are published in a later rwb-case contract story; this document does not claim them (GAP-0682).\n\n**12.2 REST operations consumed**"
+  },
+  {
+   "old": "The column-level split of the legacy role and permission tables between the two services is not stated by any source (GAP-0679; ASM-1226), so the documents carry `role_code` and `team_code` as codes and never publish a role resource.",
+   "new": "Roles, permissions, scope, masking and delegation stay with rwb-access; `team_code` stays reference data here and only `role_code` is carried, as a code validated at load time over the rwb-access authorise contract (DP-08); the column list of the split is confirmed with P4 in RWB-P4-E1037-CON (GAP-0679; ASM-1226), so the documents never publish a role resource."
+  },
+  {
+   "old": "| TC-P3-E1019-CON-06 | AC6 | Component | schema-baseline.sql with the nine P3 tables; the fake run against every operation and example; a breaking change raises v2 and deprecates v1 |",
+   "new": "| TC-P3-E1019-CON-06 | AC6 | Component | schema-baseline.sql with the nine P3 tables; the fake run against every operation and example; a breaking change raises v2 and deprecates v1 |\n| TC-P3-E1019-CON-07 | AC7 | Contract | Queue assignment method compared with LOV-ASSIGN; queue.cap.max referenced as a parameter, not a constant; version status enumeration compared with LOV-VERSION-STATUS (TSD P3 v3 T3.2) |"
+  },
+  {
+   "old": "| REQ-CWC-006 | Roles, teams, queues, membership and capacity as versioned data | Epic 1, 3.3; Program, 5.3 | FEAT-CWC-06 | R-UNI-38 | TC-P3-E1019-CON-01 to TC-P3-E1019-CON-06 |",
+   "new": "| REQ-CWC-006 | Roles, teams, queues, membership and capacity as versioned data | Epic 1, 3.3; Program, 5.3 | FEAT-CWC-06 | R-UNI-38 | TC-P3-E1019-CON-01 to TC-P3-E1019-CON-07 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15810",
+   "item": "DOR-RWB-P3-E1019-CON-12",
+   "status": "Cross-document",
+   "section": "16, 18",
+   "target": "Test Cases v8; RTM v7",
+   "change": "Register TC-P3-E1019-CON-01 to TC-P3-E1019-CON-07 in Test Cases v8 and align the RWB-P3-E1019-CON test list with RTM v7.",
+   "note": "Story adds TC-P3-E1019-CON-07 in section 16 and extends section 18 to it; the two other workbooks need the matching change."
+  },
+  {
+   "ruling": "R-15811",
+   "item": "DOR-RWB-P3-E1019-CON-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "DL23 is the open decision; BR3 now names ASM-1232, ASM-1237, ASM-1259 and ASM-1560 as its assumptions."
+  },
+  {
+   "ruling": "R-15812",
+   "item": "DOR-RWB-P3-E1019-CON-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Section 5 gains a Covered by column tying X1 to X6 to AC2 to AC6; section 7 now holds seven criteria."
+  },
+  {
+   "ruling": "R-15813",
+   "item": "DOR-RWB-P3-E1019-CON-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 gains Covered by; new AC7 and TC-P3-E1019-CON-07 cover BR2, BR3 and BR6; other rules map to existing criteria."
+  },
+  {
+   "ruling": "R-15814",
+   "item": "DOR-RWB-P3-E1019-CON-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 gains a BR Field ID column; rows with no field identifier carry the Not specified placeholder or None."
+  },
+  {
+   "ruling": "R-21988",
+   "item": "GAP-0679",
+   "status": "Cross-document",
+   "section": "11, 12",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Confirm the column list of the role and TEAM split with P4 in the rwb-access authorise contract; story section 12.7 records the split.",
+   "note": "Split recorded in 12.7: rwb-access keeps roles, permissions, scope, masking and delegation; role_code is validated at load over DP-08."
+  },
+  {
+   "ruling": "R-21989",
+   "item": "GAP-0344",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "rwb-access OpenAPI (GET /me/session); rwb-comms OpenAPI (POST /cases/{caseId}/notices)",
+   "change": "Publish the team scope field and the queue and team code fields of the notice response, or record them in the Service Contract Catalog, before wave 1 exit.",
+   "note": "No criterion in this story asserts these values; the owning services publish them."
+  },
+  {
+   "ruling": "R-21990",
+   "item": "GAP-0680",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Queue-measure columns taken from DF-RPT-020 to DF-RPT-030 (TSD P3 v3 T3.1); lov_value columns DF-REF-028 and DF-REF-029; further columns by later migration."
+  },
+  {
+   "ruling": "R-21991",
+   "item": "GAP-0681",
+   "status": "Resolved",
+   "section": "4, 12",
+   "target": "",
+   "change": "",
+   "note": "Flow step 1, the section 11 file-format row and the section 12.1 reference-load request describe the Queues template; column order not fixed in v1."
+  },
+  {
+   "ruling": "R-21992",
+   "item": "GAP-0682",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Section 12 states rollback and verify are P3 and come in a later rwb-case contract story; this document does not claim them."
+  }
+ ]
+}

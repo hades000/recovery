@@ -1,0 +1,41 @@
+{
+ "edits": [
+  {
+   "old": "    Then the system reads no case and writes no access-log entry",
+   "new": "    Then the system reads no case and writes no access-log entry\n\n  Scenario: AC13 The service keeps the rules of section 8 on the page and the export (new, D-RCV-60)\n    Given the rwb-case contract mock returns the page size limits, the export row limit and the ageing fields for the cases in scope\n    When the manager reads the list and chooses Extract\n    Then every fact comes through the owner contract and the limits are read from the rwb-case parameter rows at the version in force\n    Then the page and the export write no business row, publish no event, start no workflow and create no Schedule; the only write is one access-log entry of the export\n    Then the extract is a file made on request and no data-lake file is written\n    Then with the flag rwb.casewf.case-list-ageing off the breached parameter is ignored and the case-side columns are kept\n    Then the composed page and the P3 ageing contract give the same age and service level state for the same case\n\n  Scenario: AC14 The list and the export answer 401, 403 and 404 as their contract allows (new, D-RCV-60)\n    Given the rwb-access contract mock returns no authenticated caller for the request\n    When the caller requests the list\n    Then the response is 401 with message Not specified in the source documents (NEWAC-RWB-P2-E2033-APP-AC14) and the system reads no case\n    Given the rwb-access contract mock returns role \"RW-REFADM\" without the Case record right\n    When the caller requests the export\n    Then the response is 403 with message MSG-P4-002 and the system reads no case and writes no access-log entry\n    When the caller requests a path that the service does not provide\n    Then the response is 404 with message Not specified in the source documents (NEWAC-RWB-P2-E2033-APP-AC14)\n\n  Scenario: AC15 A consumed call that fails or does not answer returns no list and no file (new, D-RCV-60)\n    Given the rwb-case contract mock does not answer the case read\n    When the manager requests the list\n    Then the response is an error with message Not specified in the source documents (NEWAC-RWB-P2-E2033-APP-AC15) and no case is returned\n    Given the rwb-access contract mock does not answer the authorise call\n    When the manager chooses Extract\n    Then the system produces no file and writes no access-log entry"
+  },
+  {
+   "old": "| TC-E2-033-18 | BR13 | End to end | Same case read through the composed page and the P3 ageing contract; age and service level state agree |",
+   "new": "| TC-E2-033-18 | BR13 | End to end | Same case read through the composed page and the P3 ageing contract; age and service level state agree |\n| TC-E2-033-19 | AC13, BR8, BR9, BR10, BR11, BR12, BR13 | End to end | Contract mocks as in AC13; flag rwb.casewf.case-list-ageing off and on |\n| TC-E2-033-20 | AC14, Access | Component | Caller with no authenticated session; RW-REFADM export; path the service does not provide |\n| TC-E2-033-21 | AC15 | End to end | rwb-case read not answered; rwb-access authorise not answered on Extract |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30472",
+   "item": "NEWAC-RWB-P2-E2033-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC13 added in section 7 covering BR8 to BR13; TC-E2-033-19 added in section 16",
+   "note": "AC13 states the section 8 rules on the page and export; TC-E2-033-19 is its proposed test. BR8 and BR9 also keep TC-13 and TC-14."
+  },
+  {
+   "ruling": "R-30473",
+   "item": "NEWAC-RWB-P2-E2033-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC14 added in section 7 for 401, 403 and 404; TC-E2-033-20 added in section 16",
+   "note": "401 and 404 messages are not in the sources, so the placeholder is used. 403 reuses MSG-P4-002 from AC12. TC-E2-033-20 is the proposed test."
+  },
+  {
+   "ruling": "R-30474",
+   "item": "NEWAC-RWB-P2-E2033-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC15 added in section 7 for a failed or unanswered consumed call; TC-E2-033-21 added in section 16",
+   "note": "Error message is not in the sources, so the placeholder is used. No list or file is produced when a call fails. TC-E2-033-21 is the proposed test."
+  }
+ ]
+}

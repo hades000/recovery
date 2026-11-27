@@ -1,0 +1,86 @@
+{
+ "edits": [
+  {
+   "old": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n```",
+   "new": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC7 Timeout (exception X5; added by this story)\n    Given the rwb-case contract mock does not answer inside 2 s for \"RW-2026-000702\"\n    When the outcome is requested for the case\n    Then the step retries on the workflow's own schedule, nothing is written, no move is answered and no event is relayed, and the caller sees 503 with the platform error envelope\n\n  Scenario: AC8 Failed call or open breaker (exception X5; added by this story)\n    Given the breaker of the rwb-decision contract is open\n    When the outcome is requested for the case\n    Then nothing is written, no move is answered and no event is relayed, and the caller sees 503 with the platform error envelope\n\n  Scenario: AC9 Disallowed transition (exception X4; added by this story)\n    Given the case is not at \"DEV_FLAGGED\" or its outcome has already been taken\n    When the outcome is requested for the case\n    Then the request is refused with 409, nothing is written for that case and a decision is not taken twice\n\n  Scenario: AC10 Error answers (exceptions X2, X3, X4, X5; added by this story)\n    Given a request reaches the outcome operation of the deviation service\n    When the request is refused or a consumed contract is unavailable\n    Then the answer is 403 for a role without the Case record right U, 422 for an absent or invalid required element, 409 for a case not at DEV_FLAGGED, or 503 with the platform error envelope; the 401 and 404 answers are Not specified in the source documents (AC10)\n\n  Scenario: AC11 Replay (exception X7; added by this story)\n    Given the same request arrives twice, or the outcome is confirmed twice\n    When the repeat is received\n    Then one decision record, one row update, one event and one answer exist, and the repeat answers the outcome that exists and is counted\n```"
+  },
+  {
+   "old": "| TC-E7-007-08 | AC6 (exception X9); boundary of the section 12.7 tables (ASM-3438) | Component | Each table of section 12.7 and every statement of the build checked: no statement outside `rwb_deviation`, no `v_ace_*` read, no write to another service's schema |",
+   "new": "| TC-E7-007-08 | AC6 (exception X9); boundary of the section 12.7 tables (ASM-3438) | Component | Each table of section 12.7 and every statement of the build checked: no statement outside `rwb_deviation`, no `v_ace_*` read, no write to another service's schema |\n| TC-E7-007-09 | AC7 (exception X5) | Component | `RW-2026-000702` with the rwb-case contract not answering inside 2 s; the retry on the workflow's schedule, nothing written, no move, no event and 503 with the platform error envelope asserted |\n| TC-E7-007-10 | AC8 (exception X5) | Component | The rwb-decision contract fake with its breaker open; nothing written, no move, no event and 503 with the platform error envelope asserted |\n| TC-E7-007-11 | AC9 (exception X4) | Component | `RW-2026-000702` not at `DEV_FLAGGED`, and a second outcome for a taken decision; 409 asserted and nothing written |\n| TC-E7-007-12 | AC10 (exceptions X2, X3, X4, X5) | Component | One request per refusal path; 403, 422, 409 and 503 asserted with their envelopes; the 401 and 404 cases are Not specified in the source documents (AC10) |\n| TC-E7-007-13 | AC11 (exception X7) | Component | The same request sent twice and the outcome confirmed twice; one record, one row update, one event and one answer asserted |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-33153",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC7 (timeout, X5) and TC-E7-007-09",
+   "note": "Retry and 2 s timeout covered by exception X5 of section 5; the proposed test is the new TC-E7-007-09."
+  },
+  {
+   "ruling": "R-33154",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC8 (failed call or open breaker, X5) and TC-E7-007-10",
+   "note": "Open breaker and failed call covered by exception X5 of section 5; the proposed test is the new TC-E7-007-10."
+  },
+  {
+   "ruling": "R-33155",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC9 (disallowed transition, X4) and TC-E7-007-11",
+   "note": "A move from a state other than DEV_FLAGGED, or a repeated outcome, is refused with 409 per X4; test is TC-E7-007-11."
+  },
+  {
+   "ruling": "R-33156",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "No edit: X2 row already cites AC5 with TC-E7-007-05",
+   "note": "Covered by row X2 already names AC5 and TC-E7-007-05; AC5 is in section 7. Nothing further needed."
+  },
+  {
+   "ruling": "R-33157",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "No edit: X9 row already cites AC6, BR5 and BR6",
+   "note": "X9 row names AC6 with BR5 and BR6; AC6 is in section 7 and TC-E7-007-08 in section 16."
+  },
+  {
+   "ruling": "R-33158",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "No edit: section 8 coverage line already maps BR1 to BR12",
+   "note": "The coverage line maps BR1 to BR12 to AC2 to AC6 and TC rows, so each rule has a criterion and a test. No new AC needed."
+  },
+  {
+   "ruling": "R-33159",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC10 (error answers, X2 to X5) and TC-E7-007-12",
+   "note": "403, 409, 422 and 503 named from section 5. 401 and 404 are Not specified in the source documents (AC10)."
+  },
+  {
+   "ruling": "R-33160",
+   "item": "NEWAC-RWB-S8-E7007-APP-AC9",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC11 (replay, X7) and TC-E7-007-13",
+   "note": "A repeated request or confirmation answers the existing outcome per X7; the replay test is TC-E7-007-13."
+  }
+ ]
+}

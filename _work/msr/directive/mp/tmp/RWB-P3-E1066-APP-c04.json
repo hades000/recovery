@@ -1,0 +1,58 @@
+{
+ "edits": [
+  {
+   "old": "    Then the system appends no second entry",
+   "new": "    Then the system appends no second entry\n\n  Scenario: AC11 A case action commits only after its entry is written, and the case side holds no ledger row (new, D-RCV-60)\n    Given the rwb-source-data contract mock returns one entry reference with case_seq 7 for event \"CONTACT\"\n    When the case owner records a call on case \"RW-2026-000201\" and repeats it with the same Idempotency-Key\n    Then the link row of the action is written as COMMITTED only after the entry reference is returned\n    Then the repeat appends no second entry\n    Then rwb_case holds no ledger row, no ledger column and no sequence column"
+  },
+  {
+   "old": "    Then rwb_case holds no ledger row, no ledger column and no sequence column",
+   "new": "    Then rwb_case holds no ledger row, no ledger column and no sequence column\n\n  Scenario: AC12 A timed-out append is refused, and a retry after the commit returns the stored entry (new, D-RCV-60)\n    Given the rwb-source-data contract mock does not answer inside 2 s for the first append of case \"RW-2026-000201\", and the first call had committed at the owner with case_seq 7\n    When the case owner records a call on case \"RW-2026-000201\" and the same action is retried with the same Idempotency-Key\n    Then the first call is refused with status 503 and MSG-P1-022, and its link row is \"REFUSED\"\n    Then the retry returns the stored entry with case_seq 7 and the action commits once\n    Then one entry exists for the action"
+  },
+  {
+   "old": "| TC-E1-066-12 | AC1, BR9 | Contract | Same action retried with the same Idempotency-Key; one entry and one COMMITTED link |",
+   "new": "| TC-E1-066-12 | AC1, BR9 | Contract | Same action retried with the same Idempotency-Key; one entry and one COMMITTED link |\n| TC-E1-066-13 | AC11, BR8, BR9 | Component | Same action repeated; rwb_case checked for ledger rows and sequence columns |"
+  },
+  {
+   "old": "| TC-E1-066-13 | AC11, BR8, BR9 | Component | Same action repeated; rwb_case checked for ledger rows and sequence columns |",
+   "new": "| TC-E1-066-13 | AC11, BR8, BR9 | Component | Same action repeated; rwb_case checked for ledger rows and sequence columns |\n| TC-E1-066-14 | AC12, BR9 | Contract | Append does not answer inside 2 s; first call committed at the owner with case_seq 7; retry with the same key |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28667",
+   "item": "GAP-2254",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-P1-E1066-CON and RWB-P1-E1066-APP (physical schema of rwb_source_data)",
+   "change": "Record that event_code, actor_type, actor_ref, source_ref and case_seq are NOT NULL as the legacy migration states them, and that idempotency_key, decision_log_id and corrects_entry_id are optional.",
+   "note": "This story always sends the five required values, so no edit here. The NOT NULL flags belong to the rwb_source_data physical schema."
+  },
+  {
+   "ruling": "R-30621",
+   "item": "NEWAC-RWB-P3-E1066-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC10 already exists in section 7, X8 is covered by AC10, and TC-E1-066-11 tests the 409 replay. No edit needed."
+  },
+  {
+   "ruling": "R-30622",
+   "item": "NEWAC-RWB-P3-E1066-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for BR8 and BR9 (commit after entry, retry writes no second entry, no ledger row in rwb_case) and TC-E1-066-13 in section 16."
+  },
+  {
+   "ruling": "R-30623",
+   "item": "NEWAC-RWB-P3-E1066-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for a timed-out append refused with 503 and a retry returning the stored entry, and TC-E1-066-14 in section 16."
+  }
+ ]
+}

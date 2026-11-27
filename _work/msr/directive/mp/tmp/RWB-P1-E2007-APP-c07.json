@@ -1,0 +1,70 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-GEN-006 | AC7 |",
+   "new": "| MSG-GEN-006 | AC7, AC10 |"
+  },
+  {
+   "old": "| MSG-GEN-001 | AC8 |",
+   "new": "| MSG-GEN-001 | AC8, AC11 |"
+  },
+  {
+   "old": "| MSG-P4-002, MSG-P4-001 | AC9 |",
+   "new": "| MSG-P4-002, MSG-P4-001 | AC9, AC12 |"
+  },
+  {
+   "old": "    Then the system refuses the call with status 403 and MSG-P4-002\n    Then no view is read for the call",
+   "new": "    Then the system refuses the call with status 403 and MSG-P4-002\n    Then no view is read for the call\n\n  Scenario: AC10 A batch-status view that does not answer (new, D-RCV-60)\n    Given the statement timeout of 5 s fires on recovery.v_ace_batch_status for source ALS at business date 2026-12-16\n    When a caller reads GET /batch-status?sourceSystem=ALS&businessDate=2026-12-16\n    Then the system refuses the call with status 503 and MSG-GEN-006\n    Then the answer carries no batch status and no partial page\n    Then no fact is read for any account\n\n  Scenario: AC11 A malformed case reference (new, D-RCV-60)\n    When a caller reads GET /booking-facts?caseId=<malformed case reference>&businessDate=2026-12-16\n    Then the system refuses the call with status 400 and MSG-GEN-001\n    Then no view is read for the call\n\n  Scenario: AC12 A caller without a session or without the read right on the batch-status read (new, D-RCV-60)\n    Given a caller holds no session\n    When the caller reads GET /batch-status?sourceSystem=ALS&businessDate=2026-12-16\n    Then the system refuses the call with status 401 and MSG-P4-001\n    Given a signed-in caller whose identity does not include the read right\n    When the caller reads GET /batch-status?sourceSystem=ALS&businessDate=2026-12-16\n    Then the system refuses the call with status 403 and MSG-P4-002\n    Then no view is read for the call\n\n  Scenario: AC13 The error answers of the provided operations carry their status codes (new, D-RCV-60)\n    Given a request to an operation that the base /api/recovery/source-data/v1 does not provide\n    When the request is sent\n    Then the system answers with status 404 and the message is Not specified in the source documents (NEWAC-RWB-P1-E2007-APP-AC13)\n    Then the 401 and 403 answers of AC9 and AC12 carry MSG-P4-001 and MSG-P4-002 as stated there"
+  },
+  {
+   "old": "The nine criteria above are new, and each of them tests only",
+   "new": "The thirteen criteria above are new, and each of them tests only"
+  },
+  {
+   "old": "| TC-E2-007-16 | AC9 — this story's own evidence: the 401 without a session and the 403 without the read right | Component | Caller without a session; caller without the read right |",
+   "new": "| TC-E2-007-16 | AC9 — this story's own evidence: the 401 without a session and the 403 without the read right | Component | Caller without a session; caller without the read right |\n| TC-E2-007-17 | AC10 — this story's own evidence: the 503 of a batch-status view that does not answer | Component | Statement timeout of 5 s fires on v_ace_batch_status |\n| TC-E2-007-18 | AC11 — this story's own evidence: the 400 of a malformed case reference | Component | Malformed caseId; the value is Not specified in the source documents (NEWAC-RWB-P1-E2007-APP-AC11) |\n| TC-E2-007-19 | AC12 — this story's own evidence: the 401 without a session and the 403 without the read right on GET /batch-status | Component | Caller without a session; caller without the read right, on sourceSystem ALS |\n| TC-E2-007-20 | AC13 — this story's own evidence: the 404 of an operation the base does not provide | Component | Request to a path the base /api/recovery/source-data/v1 does not provide |"
+  },
+  {
+   "old": "TC-E2-007-12 to TC-E2-007-16 are the rows this story adds for its contract, its boundary and its criteria AC7 to AC9;",
+   "new": "TC-E2-007-12 to TC-E2-007-20 are the rows this story adds for its contract, its boundary and its criteria AC7 to AC13;"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30281",
+   "item": "NEWAC-RWB-P1-E2007-APP-AC10",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for the batch-status view not answering with 503 and MSG-GEN-006; X2 covered by AC7, AC10; TC-E2-007-17 added."
+  },
+  {
+   "ruling": "R-30282",
+   "item": "NEWAC-RWB-P1-E2007-APP-AC11",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for a malformed case reference giving 400 and MSG-GEN-001; X6 covered by AC8, AC11; TC-E2-007-18 added with the value left unspecified."
+  },
+  {
+   "ruling": "R-30283",
+   "item": "NEWAC-RWB-P1-E2007-APP-AC12",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for 401 and 403 on the batch-status read; X7 covered by AC9, AC12; TC-E2-007-19 added."
+  },
+  {
+   "ruling": "R-30284",
+   "item": "NEWAC-RWB-P1-E2007-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 naming 401, 403 and 404; the 404 message is Not specified in the source documents. TC-E2-007-20 added."
+  }
+ ]
+}

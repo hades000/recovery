@@ -1,0 +1,102 @@
+{
+ "edits": [
+  {
+   "old": "| X4 | The reference list of scope or capability is not available | No answer rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | AC10, TC-E2-034-16 |",
+   "new": "| X4 | The reference list of scope or capability is not available | No answer rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | AC10, AC13, TC-E2-034-16, TC-E2-034-19 |"
+  },
+  {
+   "old": "| X7 | Two roles of the caller conflict, for example RW-SECADM with a business role | The session is refused at sign-in from the `role_conflict` rows; no ledger ask is made | MSG-P4-006 | AC11, TC-E2-034-17 |",
+   "new": "| X7 | Two roles of the caller conflict, for example RW-SECADM with a business role | The session is refused at sign-in from the `role_conflict` rows; no ledger ask is made | MSG-P4-006 | AC11, AC14, TC-E2-034-17, TC-E2-034-20 |"
+  },
+  {
+   "old": "| X9 | The page size of the access-log read is out of bounded range | 422 naming the field and its bounds, before any row is read | MSG-GEN-002 | AC12, TC-E2-034-18 |",
+   "new": "| X9 | The page size of the access-log read is out of bounded range | 422 naming the field and its bounds, before any row is read | MSG-GEN-002 | AC12, AC15, TC-E2-034-18, TC-E2-034-21 |"
+  },
+  {
+   "old": "    Then no row is read",
+   "new": "    Then no row is read\n\n  Scenario: AC13 A ledger read is refused when the capability reference list is not available (new, D-RCV-60)\n    Given the reference-data contract of DP-07 cannot return the capability reference list\n    When \"U-2001\" reads the ledger of case \"RW-2026-000301\" with area \"CASE_RECORD\", right \"R\" and field IDs DF-INT-011 and DF-INT-022\n    Then the response is 503 with message MSG-GEN-006\n    Then no marker, no scope and no case data is returned\n    Then one AC-DENY entry is written with area \"CASE_RECORD\" and right \"R\" and it carries no case ID\n\n  Scenario: AC14 A caller holding a conflicting role pair gets no ledger answer (new, D-RCV-60)\n    Given the role_conflict rows of rwb_access hold a conflict between RW-SECADM and RW-CASEOWN\n    Given test user \"U-2001\" holds RW-CASEOWN and additionally RW-SECADM\n    When a session of \"U-2001\" with both roles asks for the ledger of case \"RW-2026-000301\" with area \"CASE_RECORD\", right \"R\" and field IDs DF-INT-011 and DF-INT-022\n    Then the ask is refused with message MSG-P4-006 naming both roles\n    Then no marker, no scope and no case data is returned and no AC-READ entry exists\n\n  Scenario: AC15 A page size at its bound is answered and one just outside it is refused (new, D-RCV-60)\n    Given test user \"U-4001\" holds RW-PLATADM with Platform administration right \"R\"\n    When \"U-4001\" calls GET /api/recovery/access/v1/admin/access-log with a page size at its lower bound\n    Then the page is answered with rows within the bound\n    When \"U-4001\" calls GET /api/recovery/access/v1/admin/access-log with a page size one above its upper bound\n    Then the response is 422 with message MSG-GEN-002 naming the field and its bounds\n    Then no row is read\n\n  Scenario: AC16 A role scope or version change in rwb_access takes effect with no deployment (new, D-RCV-60)\n    Given test user \"U-3005\" holds RW-AUDIT with default scope \"ALL\" under matrix version \"PM-2026.12\"\n    When the permission data of rwb_access changes the default scope of RW-AUDIT under a new matrix version and \"U-3005\" asks for case \"RW-2026-000301\" with area \"CASE_RECORD\", right \"R\" and field IDs DF-INT-011 and DF-INT-022\n    Then the answer is given under the new matrix version with no deployment"
+  },
+  {
+   "old": "AC1 to AC12 are the criteria this story owns; it owns no legacy criterion.",
+   "new": "AC1 to AC16 are the criteria this story owns; it owns no legacy criterion."
+  },
+  {
+   "old": "| TC-E2-034-18 | AC12, BR6 | Component | U-4001 holds RW-PLATADM and calls the access-log read with a page size outside its bounds: 422 with MSG-GEN-002, no row read |",
+   "new": "| TC-E2-034-18 | AC12, BR6 | Component | U-4001 holds RW-PLATADM and calls the access-log read with a page size outside its bounds: 422 with MSG-GEN-002, no row read |\n| TC-E2-034-19 | AC13, BR8 | Component | Capability reference list not available through DP-07 for \"U-2001\" reading case \"RW-2026-000301\": 503 with MSG-GEN-006, no marker, one AC-DENY with no case ID |\n| TC-E2-034-20 | AC14, BR8 | Component | U-2001 holds RW-CASEOWN and RW-SECADM with the conflict in role_conflict: refused at sign-in with MSG-P4-006 naming both roles, no ledger ask, no AC-READ |\n| TC-E2-034-21 | AC15, BR6 | Component | U-4001 holds RW-PLATADM: access-log read at the lower page bound is answered; one above the upper bound: 422 with MSG-GEN-002, no row read |\n| TC-E2-034-22 | AC16, BR8 | Component | RW-AUDIT default scope changed in rwb_access under a new matrix version: the next ask for RW-2026-000301 is answered under that version with no deployment |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28845",
+   "item": "GAP-2226",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Recorded per ASM-B2-P3-010-2: merged list keeps occurred time and case-sequence tie-break; page order left to the timeline contract. Shown story text sets no page order; no edit."
+  },
+  {
+   "ruling": "R-29529",
+   "item": "ACR-RWB-P4-E2034-APP-AC3",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC3 already has test cases in section 16: TC-E2-034-13 (Covers AC3) and TC-E2-034-03. No edit needed."
+  },
+  {
+   "ruling": "R-29530",
+   "item": "ACR-RWB-P4-E2034-APP-AC9",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC9 already has test cases in section 16: TC-E2-034-09 and TC-E2-034-14 (Covers AC9). No edit needed."
+  },
+  {
+   "ruling": "R-30971",
+   "item": "NEWAC-RWB-P4-E2034-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC13 (capability reference list) and TC-E2-034-19; X4 covered-by now includes AC13 and TC-E2-034-19.",
+   "note": "Proposed test Not specified in source; test written from the X4 row. Numbered AC13 as next free AC."
+  },
+  {
+   "ruling": "R-30972",
+   "item": "NEWAC-RWB-P4-E2034-APP-AC13",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC14 (conflicting role pair) and TC-E2-034-20; X7 covered-by now includes AC14 and TC-E2-034-20.",
+   "note": "Proposed test Not specified in source; test written from the X7 row. Numbered AC14 as next free AC."
+  },
+  {
+   "ruling": "R-30973",
+   "item": "NEWAC-RWB-P4-E2034-APP-AC14",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC15 (page size at bound) and TC-E2-034-21; X9 covered-by now includes AC15 and TC-E2-034-21.",
+   "note": "Proposed test Not specified in source; bounds given as lower and upper without numbers. Numbered AC15 as next free AC."
+  },
+  {
+   "ruling": "R-30974",
+   "item": "NEWAC-RWB-P4-E2034-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC16 (role, scope and version read from rwb_access, no deployment) and TC-E2-034-22 covering BR8.",
+   "note": "Proposed test Not specified in source; written from BR8 text. Numbered AC16 as next free AC; section 7 range line updated to AC1 to AC16."
+  },
+  {
+   "ruling": "R-30975",
+   "item": "NEWAC-RWB-P4-E2034-APP-AC16",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Story defines no idempotency key or write replay; a replay criterion needs an undefined key and its semantics. Not specified in the source documents (NEWAC-RWB-P4-E2034-APP-AC16)."
+  }
+ ]
+}

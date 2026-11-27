@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "so `V1025_1__document_type.sql` runs after the V0001 baseline",
+   "new": "so `V0002__document_type.sql` runs after the V0001 baseline"
+  },
+  {
+   "old": "- DL19, DL26 and DL27 stay open: the six proposed types apply until the bank provides its own list (DL19); the retention periods (DL26) and the storage, backup, legal hold and e-discovery arrangements (DL27) are not set, and this story carries only the retention class codes.",
+   "new": "- DL19, DL26 and DL27 stay open: the six proposed types apply until the bank provides its own list (DL19); the retention periods (DL26) and the storage, backup, legal hold and e-discovery arrangements (DL27) are not set, and this story carries only the retention class codes.\n- The per-case document count and the version depth of a seeded document are Not specified in the source documents (GAP-1051); they are seed parameters of this story, so a change is a parameter and not a code release."
+  },
+  {
+   "old": "The only state a version has is the one in section 9: LOADED, APPROVED (and in force from its date), SUPERSEDED, REFUSED.",
+   "new": "The only state a version has is the one in section 9: LOADED, APPROVED (and in force from its date), SUPERSEDED, REFUSED. SCR-40 states empty, loading, error and no access: Not specified in the source documents (CG-ALL-5808)."
+  },
+  {
+   "old": "    When the document type table is read\n    Then it holds DEMAND_LETTER, COURT_NOTICE, APPRAISAL_REPORT, TITLE_DEED, SETTLEMENT_AGREEMENT and GUARANTOR_NOTICE",
+   "new": "    When the document type table is read\n    Then it holds DEMAND_LETTER, COURT_NOTICE, APPRAISAL_REPORT, TITLE_DEED, SETTLEMENT_AGREEMENT and GUARANTOR_NOTICE\n\n  Scenario: AC11 A provided operation answers 401, 403 or 404 instead of a result (new, D-RCV-60)\n    Given a request to the load operation with no valid credential\n    When the request is sent\n    Then the system answers 401 and writes no row\n    Given a request to the load operation by a user without Reference data C\n    When the request is sent\n    Then the system answers 403 and writes no row\n    Given a request to the approve operation for a version that does not exist\n    When the request is sent\n    Then the system answers 404 and changes nothing\n\n  Scenario: AC12 A consumed call that fails or does not answer refuses the load whole (new, D-RCV-60)\n    Given the rwb-case reference-data contract mock answers the list read with an error\n    When \"TEST-REFADM-01\" loads the file \"DOCTYPE-2026.11\" for table \"DOCUMENT_TYPE\" with valid from 30 November 2026\n    Then the system refuses the load with 503 and an RFC 9457 problem detail\n    Then no row is written and no retention class is guessed"
+  },
+  {
+   "old": "Every AC from AC1 to AC7 is the legacy AC, value for value; AC8 to AC10 are new (D-RCV-60).",
+   "new": "Every AC from AC1 to AC7 is the legacy AC, value for value; AC8 to AC12 are new (D-RCV-60)."
+  },
+  {
+   "old": "| TC-E1-025-10 | Boundary, section 12.7 tables (ASM-3438) | Component | Boundary rows for each table in section 12.7: document_type, document_hub_parameter, lov_value, reference_row, reference_version |",
+   "new": "| TC-E1-025-10 | Boundary, section 12.7 tables (ASM-3438) | Component | Boundary rows for each table in section 12.7: document_type, document_hub_parameter, lov_value, reference_row, reference_version |\n| TC-E1-025-11 | AC8, X6 | Component | User without Reference data C loads DOCTYPE-2026.11; refused with 403 and MSG-P4-002; no row written |\n| TC-E1-025-12 | AC9, X7 | End to end | rwb-case reference-data contract mock does not answer within 2 s; load refused with 503 and no row written |\n| TC-E1-025-13 | AC10, BR7 | End to end | Version DOCTYPE-2026.11 in force; read of the document type table |\n| TC-E1-025-14 | AC11 | Component | No credential on the load operation (401); user without Reference data C on the load operation (403); unknown version on the approve operation (404) |\n| TC-E1-025-15 | AC12 | End to end | rwb-case reference-data contract mock answers the list read with an error; load refused with 503 and no row written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25735",
+   "item": "CG-ALL-5806",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 now names V0002__document_type.sql, the next number after the V0001 baseline."
+  },
+  {
+   "ruling": "R-25736",
+   "item": "CG-ALL-5807",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "V1_5_025 name does not occur in the story text; the only migration named is now V0002__document_type.sql (CG-ALL-5806)."
+  },
+  {
+   "ruling": "R-25737",
+   "item": "CG-ALL-5808",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 states SCR-40 empty, loading, error and no access as Not specified in the source documents, since the screen specification lacks them."
+  },
+  {
+   "ruling": "R-28546",
+   "item": "GAP-1041",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-PLT-E1044-CON",
+   "change": "Allocate the rwb-document login name, secret reference and grants (schema rwb_document only, no privilege on rwb_case) and record them in the service catalogue.",
+   "note": "Story already states the login name as Not specified (GAP-1041); allocation belongs to the platform contract."
+  },
+  {
+   "ruling": "R-28598",
+   "item": "GAP-1051",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-P1-E1065-CON (Service Contract Catalog)",
+   "change": "Publish the per-case document count and the version depth of a seeded document, held as seed parameters.",
+   "note": "Story adds a section 3 line holding both as seed parameters, Not specified until published."
+  },
+  {
+   "ruling": "R-31092",
+   "item": "NEWAC-RWB-P5-E1025-APP-AC10",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-025-13 covering AC10 and BR7."
+  },
+  {
+   "ruling": "R-31093",
+   "item": "NEWAC-RWB-P5-E1025-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 (401, 403, 404) to section 7 and TC-E1-025-14 to section 16."
+  },
+  {
+   "ruling": "R-31094",
+   "item": "NEWAC-RWB-P5-E1025-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 (failed or silent consumed call refuses load with 503) to section 7 and TC-E1-025-15 to section 16."
+  },
+  {
+   "ruling": "R-31095",
+   "item": "NEWAC-RWB-P5-E1025-APP-AC8",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-025-11 covering AC8 and X6 in section 16, separate from TC-E1-025-08."
+  },
+  {
+   "ruling": "R-31096",
+   "item": "NEWAC-RWB-P5-E1025-APP-AC9",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-025-12 covering AC9 and X7 in section 16 (2 s timeout, 503)."
+  }
+ ]
+}

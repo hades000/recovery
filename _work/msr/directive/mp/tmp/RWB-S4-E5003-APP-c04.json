@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "and the standard columns of TSD S4 T3.0. **No new table, no new column and no migration:**",
+   "new": "and the standard columns of TSD S4 T3.0. The names `served_result`, `period_expires_at`, `prescription_days_remaining` and `decision_record` are not fields of LDM v9 or Data Classification v5: `served_result` and `period_expires_at` are elements of the `noticeDeliveryResult` signal and of the case read answer, `prescription_days_remaining` is a value of the case contract, and `decision_record` is the platform library object of DP-03, whose LDM status is Not specified in the source documents (DOR-RWB-S4-E5003-APP-7). **No new table, no new column and no migration:**"
+  },
+  {
+   "old": "Read on the case contract for the period length and the warning date; never written here",
+   "new": "Read on the case contract for the warning date; the period length is a versioned reference row whose value is Not specified in the source documents (GAP-2749); never written here"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "| SCR-18 Notice approval | Failed | A 503 when the proof attach or the case contract did not answer, and the decision record the step kept |",
+   "new": "| SCR-18 Notice approval | Failed | A 503 when the proof attach or the case contract did not answer, and the decision record the step kept |\n| SCR-18 Notice approval | Empty | Not specified in the source documents (CG-ALL-9060) |\n| SCR-18 Notice approval | Loading | Not specified in the source documents (CG-ALL-9060) |\n| SCR-18 Notice approval | Error | Not specified in the source documents (CG-ALL-9060) |\n| SCR-18 Notice approval | No access | Not specified in the source documents (CG-ALL-9060) |"
+  },
+  {
+   "old": "| SCR-19 Litigation workspace | Judgment | The judgment date and amount, read only |",
+   "new": "| SCR-19 Litigation workspace | Judgment | The judgment date and amount, read only |\n| SCR-19 Litigation workspace | Empty | Not specified in the source documents (CG-ALL-9061) |\n| SCR-19 Litigation workspace | Loading | Not specified in the source documents (CG-ALL-9061) |\n| SCR-19 Litigation workspace | Error | Not specified in the source documents (CG-ALL-9061) |\n| SCR-19 Litigation workspace | No access | Not specified in the source documents (CG-ALL-9061) |"
+  },
+  {
+   "old": "and SCR-19 carries pack, instructed, filed, hearing and judgment.",
+   "new": "and SCR-19 carries pack, instructed, filed, hearing and judgment. The empty, loading, error and no access states of both screens are not given by Screen Specifications v1, so their rows read Not specified in the source documents (CG-ALL-9060, CG-ALL-9061)."
+  },
+  {
+   "old": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released",
+   "new": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC7 Activity retried or timed out (new in this story, from the activities of section 12.5)\n    Given a case in state NOTICE_DISPATCHED\n    Given the attachProof activity does not answer inside the activity timeout of Not specified in the source documents (NEWAC-RWB-S4-E5003-APP-AC10)\n    When the activity is retried\n    Then the retry sends the same Idempotency-Key, the proof is attached once and one decision record is written\n\n  Scenario: AC8 Consumed call fails or does not answer (new in this story, from the Failed state of section 15)\n    Given a case in state NOTICE_DISPATCHED\n    Given the rwb-document contract mock does not answer the proof attach\n    When attachProof is called\n    Then the step ends with a 503, the decision record the step kept stays, and the notice period does not start\n\n  Scenario: AC9 Disallowed status change is refused (new in this story, from the state model of section 9)\n    Given a case in state NOTICE_UNSERVED\n    When a route to WITH_CUSTOMER_NOTICE_PERIOD is requested\n    Then the change is refused with Not specified in the source documents (NEWAC-RWB-S4-E5003-APP-AC12), nothing is written and no timer starts"
+  },
+  {
+   "old": "AC5 and AC6 are not legacy criteria: they are this story's own, for exceptions X7 and X11, and their origin tag says so.",
+   "new": "AC5 and AC6 are not legacy criteria: they are this story's own, for exceptions X7 and X11, and their origin tag says so. AC7 to AC9 are also this story's own, added for the activity, call and state-model cases of sections 12.5, 15 and 9, and carry the same origin tag."
+  },
+  {
+   "old": "calls carry no borrower or guarantor data |",
+   "new": "calls carry no borrower or guarantor data |\n| TC-E5-003-10 | AC7 | Component | An activity of section 12.5 is retried after a timeout; the timeout and the retry count are Not specified in the source documents (NEWAC-RWB-S4-E5003-APP-AC10); the retry sends the same Idempotency-Key, the proof is attached once and the decision record is written once |\n| TC-E5-003-11 | AC8 | Component | The rwb-document contract mock does not answer on attachProof; the step ends with a 503 and the decision record the step kept; no period starts |\n| TC-E5-003-12 | AC9 | Component | Case `RC-2026-000301` at `NOTICE_UNSERVED`; a route request to `WITH_CUSTOMER_NOTICE_PERIOD` is refused with Not specified in the source documents (NEWAC-RWB-S4-E5003-APP-AC12); the state, the notice and the timer are unchanged |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19757",
+   "item": "DOR-RWB-S4-E5003-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Names not in LDM v9 or Data Classification v5 are stated as workflow, signal or contract elements in section 11; LDM status of decision_record Not specified."
+  },
+  {
+   "ruling": "R-19758",
+   "item": "DOR-RWB-S4-E5003-APP-8",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add rows for the nine activities of 12.5: openNoticeAction, evaluateNoticePeriodRule, recordDecision, attachProof, startNoticePeriod, announceCaseRoute, announceNoticeUnserved, expireNoticePeriod, prescriptionWarning.",
+   "note": "Workflow ID form and start rule already marked Not specified (CG-ALL-9048); activity rows need the catalog."
+  },
+  {
+   "ruling": "R-23419",
+   "item": "GAP-2749",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Target reading recorded in 11 and 12.5; period length and R-UNI-31 warning threshold Not specified (GAP-2749); the DF-CAS period-length conflict is corrected."
+  },
+  {
+   "ruling": "R-27084",
+   "item": "CG-ALL-9059",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 and AC4 now say decision record instead of decision log; no job or JOB-nn wording remains in the criteria."
+  },
+  {
+   "ruling": "R-27085",
+   "item": "CG-ALL-9060",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access rows added to SCR-18; each marked Not specified as the screen specification lacks them."
+  },
+  {
+   "ruling": "R-27086",
+   "item": "CG-ALL-9061",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access rows added to SCR-19; each marked Not specified as the screen specification lacks them."
+  },
+  {
+   "ruling": "R-29123",
+   "item": "GAP-2750",
+   "status": "Cross-document",
+   "section": "12.4",
+   "target": "RWB-S4-E5003-CON",
+   "change": "Publish the three operations on base /api/recovery/litigation/v1, the LegalActionRequest, LegalAction and NoticeActionUpdate schemas over DF-LEG-001 to DF-LEG-014, the legal_action DDL with the primary key only, the six error statuses with the problem envelope, the Idempotency-Key rule, the versioning rule and the fakes; the period element is declared on noticeDeliveryResult and the read answer; index set and period length Not specified (GAP-2750).",
+   "note": "Contract surface belongs to the contract story; story-side period and index gaps already marked Not specified."
+  },
+  {
+   "ruling": "R-32383",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 and TC-E5-003-10 for activity retry and timeout; timeout and retry count Not specified (NEWAC-RWB-S4-E5003-APP-AC10)."
+  },
+  {
+   "ruling": "R-32384",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 and TC-E5-003-11 for a consumed call that fails or does not answer, ending in the 503 of section 15."
+  },
+  {
+   "ruling": "R-32385",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 and TC-E5-003-12 for a refused disallowed transition; refusal message Not specified (NEWAC-RWB-S4-E5003-APP-AC12)."
+  }
+ ]
+}

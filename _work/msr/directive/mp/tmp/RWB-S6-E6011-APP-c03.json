@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "X1 to X3 and X8 are the exception paths of RWB-E6-011 carried onto the split, X4 to X7 are the paths the event subscription and the DP-05 read add, and X9 is the DP-01 boundary. The settlement period and the list values are values in force, so neither is a constant of this story.",
+   "new": "X1 to X3 and X8 are the exception paths of RWB-E6-011 carried onto the split, X4 to X7 are the paths the event subscription and the DP-05 read add, and X9 is the DP-01 boundary. The settlement period and the list values are values in force, so neither is a constant of this story.\n\n**Screen states of SCR-26 Award.** Empty: no matched proceeds for the lot, so nothing changes and the case keeps `SETTLEMENT_PENDING` (X6). Loading: Not specified in the source documents (DOR-RWB-S6-E6011-APP-10). Error: a decision record that cannot be written shows MSG-P7-003 (X1), and a contract that does not answer inside 2 s returns 503 with the platform error envelope (X5). No access: a role without the Debt sale right sees MSG-P4-002 and no read (X2)."
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5, BR9 |",
+   "new": "| None (pipeline log) | AC5, Section 17, BR5, BR9, TC-E6-011-08 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Boundary of the owned schemas (X9; DP-01)\n    Given a component, a statement or a test reads or writes `rwb_payment`, `rwb_case`, `rwb_source_data` or a `recovery.v_ace_*` view\n    When the build runs the boundary test\n    Then the grant refuses the statement, the build fails and nothing is released"
+  },
+  {
+   "old": "| BR11 | The settlement is released to the transfer step and not performed here: R-DS-29, the data transfer, the derecognition and the general ledger posting are the sibling stories of this legacy key | Business Rules and Routing Logic v4 rows R-DS-29 to R-DS-31; FSD S6 A2.15.2 (prerequisite FEAT-DBS-12); GAP-3012 |",
+   "new": "| BR11 | The settlement is released to the transfer step and not performed here: R-DS-29, the data transfer, the derecognition and the general ledger posting are the sibling stories of this legacy key | Business Rules and Routing Logic v4 rows R-DS-29 to R-DS-31; FSD S6 A2.15.2 (prerequisite FEAT-DBS-12); GAP-3012 |\n| BR12 | R-DS-24 opens the state SETTLEMENT_PENDING and carries the settlement period; its start is the award and derecognition story's | Business Rules and Routing Logic v4, row R-DS-24 |\n| BR13 | R-DS-25: a payment received in full confirms the settlement and releases the data transfer; the case moves to SETTLED | Business Rules and Routing Logic v4, row R-DS-25 |\n| BR14 | R-DS-26: a cancellation recorded with a reason cancels the award and scores it against the buyer; the case moves to AWARD_CANCELED_DS | Business Rules and Routing Logic v4, row R-DS-26 |\n| BR15 | R-DS-27: payment absent and the settlement period passed cancels the award and scores the buyer; the case moves to AWARD_CANCELED_DS | Business Rules and Routing Logic v4, row R-DS-27 |\n\n**Coverage of the rules.** BR1: AC1, TC-E6-011-01. BR2: AC1, AC4, TC-E6-011-04, TC-E6-011-06. BR3: AC1, AC2, TC-E6-011-01, TC-E6-011-02. BR4: AC2, AC3, TC-E6-011-02, TC-E6-011-03. BR5 and BR6: AC5, TC-E6-011-08. BR7 and BR8: TC-E6-011-07. BR9: TC-E6-011-09. BR10: TC-E6-011-10. BR11 and BR13: AC2, TC-E6-011-02. BR14: AC3, TC-E6-011-03. BR12 and BR15: Not specified in the source documents (DOR-RWB-S6-E6011-APP-4)."
+  },
+  {
+   "old": "Where the rwb-source-data contract returns a payment reference, it is an ACE reference and is stored as a reference, not copied with its narrative fields.",
+   "new": "Where the rwb-source-data contract returns a payment reference, it is an ACE reference and is stored as a reference, not copied with its narrative fields.\n\n**Reference data.** The lists `LOV-LOT-STATUS`, `LOV-BUYER-CLASS`, `LOV-SEGMENT` and `LOV-PUTBACK` and the settlement period of `payment_terms` are read through the reference-data contract (DP-06, DP-07); the parameters they bind are Not specified in the source documents (DOR-RWB-S6-E6011-APP-20)."
+  },
+  {
+   "old": "| TC-E6-011-06 | Principle 5 | Component | A forced decision log write failure at the moment of the settlement; no record, no release, no move and no second attempt |",
+   "new": "| TC-E6-011-06 | Principle 5 | Component | A forced decision log write failure at the moment of the settlement; no record, no release, no move and no second attempt |\n| TC-E6-011-07 | Section 12 operations, events and activities; BR7, BR8 | Contract | The published contracts of the consumed rows and of the `ProceedsMatched` event checked against their fakes; no REST operation declared by this story; the reference-data contract (DP-06, DP-07) answers the four LOV lists |\n| TC-E6-011-08 | AC5, Section 12.7, BR5, BR6 | Component | A component, a statement and a test that touch each table outside section 12.7 or a `recovery.v_ace_*` view; each owned table of section 12.7 accepted, each other refused and the build fails (ASM-3438) |\n| TC-E6-011-09 | X7, BR9 | Component | The same `ProceedsMatched` event delivered twice and a second proceeds for the same lot; one record, one move, one release and the repeat counted from the inbox row |\n| TC-E6-011-10 | BR10 | Component | Decision record, log, event and workflow input checked for a person name, identity number, date of birth, contact value or unmasked account identifier; none found |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Feature | L3 process | Requirement (short) | Story element | Test cases |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-S6-008 | ",
+   "new": "| REQ-S6-008 | FEAT-DBS-15 | Not specified in the source documents (DOR-RWB-S6-E6011-APP-2) | "
+  },
+  {
+   "old": "| REQ-S6-006 | ",
+   "new": "| REQ-S6-006 | FEAT-DBS-15 | Not specified in the source documents (DOR-RWB-S6-E6011-APP-2) | "
+  },
+  {
+   "old": "| ADR-013 | ",
+   "new": "| ADR-013 | FEAT-DBS-15 | Not specified in the source documents (DOR-RWB-S6-E6011-APP-2) | "
+  },
+  {
+   "old": "| ADR-014 | ",
+   "new": "| ADR-014 | FEAT-DBS-15 | Not specified in the source documents (DOR-RWB-S6-E6011-APP-2) | "
+  },
+  {
+   "old": "| ADR-015 | ",
+   "new": "| ADR-015 | FEAT-DBS-15 | Not specified in the source documents (DOR-RWB-S6-E6011-APP-2) | "
+  },
+  {
+   "old": "| ADR-020 | ",
+   "new": "| ADR-020 | FEAT-DBS-15 | Not specified in the source documents (DOR-RWB-S6-E6011-APP-2) | "
+  },
+  {
+   "old": "| ADR-022 | ",
+   "new": "| ADR-022 | FEAT-DBS-15 | Not specified in the source documents (DOR-RWB-S6-E6011-APP-2) | "
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13170",
+   "item": "CG-ALL-10800",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Story test cases tab: add rows TC-E6-011-01 to TC-E6-011-06 with Given, When and Then from AC1 to AC4 and the Access and Principle 5 cases; also TC-E6-011-07 to TC-E6-011-10.",
+   "note": "Test rows belong to the workbook. Story section 16 already lists the IDs; new TC-07 to TC-10 added there."
+  },
+  {
+   "ruling": "R-20766",
+   "item": "DOR-RWB-S6-E6011-APP-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added SCR-26 empty, loading, error and no access states to section 5, linked to X1, X2, X5 and X6.",
+   "note": "Loading state is Not specified in the source documents (DOR-RWB-S6-E6011-APP-10); the other states use existing exceptions and messages."
+  },
+  {
+   "ruling": "R-20767",
+   "item": "DOR-RWB-S6-E6011-APP-11",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Detcheck names no field. Which fields Data Classification v5 classes as personal data is not in the story. Not specified in the source documents (DOR-RWB-S6-E6011-APP-11)."
+  },
+  {
+   "ruling": "R-20768",
+   "item": "DOR-RWB-S6-E6011-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16",
+   "target": "",
+   "change": "Added TC-E6-011-07 contract test for section 12 and TC-E6-011-08 boundary test for the section 12.7 tables (ASM-3438).",
+   "note": "Test case rows added to section 16; the Test Cases v8 gap is tracked under CG-ALL-10800."
+  },
+  {
+   "ruling": "R-20769",
+   "item": "DOR-RWB-S6-E6011-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added Feature column (FEAT-DBS-15) and L3 process column to the requirement traceability table; L3 process value is Not specified.",
+   "note": "L3 process is Not specified in the source documents (DOR-RWB-S6-E6011-APP-2), so the column carries that value."
+  },
+  {
+   "ruling": "R-20770",
+   "item": "DOR-RWB-S6-E6011-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Named LOV-LOT-STATUS, LOV-BUYER-CLASS, LOV-SEGMENT, LOV-PUTBACK and payment_terms as reference data read via DP-06 and DP-07.",
+   "note": "Parameters bound to these lists are Not specified in the source documents (DOR-RWB-S6-E6011-APP-20)."
+  },
+  {
+   "ruling": "R-20771",
+   "item": "DOR-RWB-S6-E6011-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC5 in Gherkin for the X9 boundary, linked X9 to AC5 and TC-E6-011-08 in section 5, added TC-E6-011-08 in section 16.",
+   "note": "X9 now has its own criterion; section 7 holds five owned criteria."
+  },
+  {
+   "ruling": "R-20772",
+   "item": "DOR-RWB-S6-E6011-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "Added BR12 to BR15 for R-DS-24 to R-DS-27 and a coverage line mapping BR1 to BR15 to AC and TC IDs; added TC-E6-011-07 to TC-E6-011-10.",
+   "note": "BR12 and BR15 coverage is Not specified in the source documents (DOR-RWB-S6-E6011-APP-4)."
+  },
+  {
+   "ruling": "R-20773",
+   "item": "DOR-RWB-S6-E6011-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Add account_id, decision_record and inbox_event as fields or entities, or confirm them as platform library objects (DP-03).",
+   "note": "Legacy job and decision-log wording is kept word for word by the section 7 rule, so no story edit is made."
+  },
+  {
+   "ruling": "R-20774",
+   "item": "DOR-RWB-S6-E6011-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Standard v4 text for MSG-P1-001 is not in the source documents. Story keeps FSD S6 A2.15.3.1 wording. Not specified in the source documents (DOR-RWB-S6-E6011-APP-9)."
+  }
+ ]
+}

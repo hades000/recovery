@@ -1,0 +1,115 @@
+{
+ "edits": [
+  {
+   "old": "    Then the next item obeys the new version, or no item is created, the lot stays unposted and the refusal is in the run log",
+   "new": "    Then the next item obeys the new version, or no item is created, the lot stays unposted and the refusal is in the run log\n\n  Scenario: AC12 The rules BR1 to BR11 hold at build (section 8)\n    Given the rules BR1 to BR11 of section 8 are the architecture constraints of this service\n    When the build runs the guardrail and boundary tests\n    Then each rule passes its covering test and the build fails when one does not\n\n  Scenario: AC13 A consumed activity is retried or times out\n    Given a consumed activity call times out or is retried by the workflow\n    When the step calls the activity again\n    Then the retry follows the workflow's own schedule, the timed-out activity writes nothing and the same Idempotency-Key answers the item that exists\n\n  Scenario: AC14 A consumed call fails or does not answer\n    Given rwb-source-data, rwb-case or rwb-decision fails or does not answer\n    When the step calls it\n    Then nothing is written, no move is answered and the caller sees 503 with the platform error envelope\n\n  Scenario: AC15 A status change the model does not allow is refused\n    Given a case is at a state from which the requested status change is not a rule row of section 8\n    When the run requests the change\n    Then the request is refused with 409, nothing is written for that case and the case state does not change\n\n  Scenario: AC16 Role without the Debt sale right is refused before any read (X2)\n    Given a role without the Debt sale right of the surface calls the step\n    When the call is made\n    Then the caller gets 403 before any read and no record is written\n\n  Scenario: AC17 Stale account or balance product holds the step (X4)\n    Given the account or balance product is stale after a late or failed ACE batch\n    When the step reads the account and balance facts\n    Then the step holds, writes nothing and the user sees MSG-P1-001 with the data date\n\n  Scenario: AC18 A dependency does not answer inside 2 s or its breaker is open (X5)\n    Given rwb-source-data, rwb-case or rwb-decision does not answer inside 2 s or its breaker is open\n    When the step calls it\n    Then the step retries on the workflow's own schedule and the caller sees 503 with the platform error envelope\n\n  Scenario: AC19 ALS or the general ledger rejects the posting (X6)\n    Given ALS or the general ledger rejects the posting\n    When the rejection code is returned\n    Then the posting is held at POSTING_REJECTED_DS, the rejection code is written to the record, the exception task is raised and no further item is sent\n\n  Scenario: AC20 A repeated lot, business date, package version or Idempotency-Key writes once (X7)\n    Given the same lot, business date and package version, or the same Idempotency-Key, is sent again\n    When the repeat arrives\n    Then one record, one item set and one answer per case exist and the repeat is counted"
+  },
+  {
+   "old": "| TC-E6-008-08 | Boundary: the tables of section 12.7 are read or written only as stated, with no column changed and no foreign key (ASM-3438) | Component | The lot and account tables read at this step with `status` staying `TRANSFERRED`; the library objects present in `rwb_debtsale`; no ACE view read |",
+   "new": "| TC-E6-008-08 | Boundary: the tables of section 12.7 are read or written only as stated, with no column changed and no foreign key (ASM-3438) | Component | The lot and account tables read at this step with `status` staying `TRANSFERRED`; the library objects present in `rwb_debtsale`; no ACE view read |\n| TC-E6-008-17 | AC12: the architecture rules BR1 to BR11 of section 8 are proved by the guardrail and boundary tests | Component | Guardrail and boundary test suite of rwb_debtsale; each rule's covering test run; the build fails on a failing rule |\n| TC-E6-008-18 | AC13: a retried or timed-out activity writes nothing and follows the workflow's own schedule | Component | Activity timed out on the fake; retry on the workflow's own schedule; retry count Not specified in the source documents (NEWAC-RWB-S6-E6008-APP-AC13) |\n| TC-E6-008-19 | AC14: a failed or unanswered consumed call writes nothing, answers no move and gives 503 | Component | Failed or silent answer from the rwb-source-data, rwb-case or rwb-decision fake; no write; no move; 503 with the platform error envelope |\n| TC-E6-008-20 | AC15: a status change the model does not allow is refused with 409 | Component | Case at SETTLED offered DERECOGNITION_RUN, which has no rule row for that state in section 8; 409; nothing written |\n| TC-E6-008-21 | AC16 (X2): a role without the Debt sale right is refused with 403 before any read | Component | Role without the right; 403 before the read; no record written |\n| TC-E6-008-22 | AC17 (X4): a stale account or balance product holds the step and shows MSG-P1-001 | Component | Stale answer from the owner's contract; nothing written, no item sent, no move |\n| TC-E6-008-23 | AC18 (X5): a dependency that does not answer inside 2 s, or whose breaker is open, gives 503 and no move | Component | Dependency slower than 2 s or breaker open; retry on schedule; platform error envelope |\n| TC-E6-008-24 | AC19 (X6): an ALS or general ledger rejection holds at POSTING_REJECTED_DS and sends no further item | Component | Rejection from the rwb-integration fake; hold at POSTING_REJECTED_DS; rejection code recorded; no further item |\n| TC-E6-008-25 | AC20 (X7): a repeated lot, business date, package version or Idempotency-Key writes once | Component | Same trigger and same key sent twice; one record, one item set, one answer per case |"
+  },
+  {
+   "old": "| AC5, TC-E6-008-05, TC-E6-008-07 |",
+   "new": "| AC5, TC-E6-008-05, TC-E6-008-07, AC16, TC-E6-008-21 |"
+  },
+  {
+   "old": "| MSG-P1-001 | AC6, TC-E6-008-08 |",
+   "new": "| MSG-P1-001 | AC6, TC-E6-008-08, AC17, TC-E6-008-22 |"
+  },
+  {
+   "old": "| None | AC7, TC-E6-008-09 |",
+   "new": "| None | AC7, TC-E6-008-09, AC18, TC-E6-008-23 |"
+  },
+  {
+   "old": "(DOR-RWB-S6-E6008-APP-9) | AC8, TC-E6-008-10 |",
+   "new": "(DOR-RWB-S6-E6008-APP-9) | AC8, TC-E6-008-10, AC19, TC-E6-008-24 |"
+  },
+  {
+   "old": "| None | AC9, TC-E6-008-11 |",
+   "new": "| None | AC9, TC-E6-008-11, AC20, TC-E6-008-25 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32862",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 (architecture rules BR1 to BR11 proved by guardrail and boundary tests) and TC-E6-008-17."
+  },
+  {
+   "ruling": "R-32863",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 for retried or timed-out activity and TC-E6-008-18; retry count is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-32864",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for a failed or unanswered consumed call and TC-E6-008-19."
+  },
+  {
+   "ruling": "R-32865",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for a disallowed status change refused with 409 and TC-E6-008-20."
+  },
+  {
+   "ruling": "R-32866",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC5",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for the X2 role refusal, TC-E6-008-21, and linked both in the section 5 X2 row."
+  },
+  {
+   "ruling": "R-32867",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC6",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for the X4 stale-data hold, TC-E6-008-22, and linked both in the section 5 X4 row."
+  },
+  {
+   "ruling": "R-32868",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC7",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 for the X5 dependency timeout or open breaker, TC-E6-008-23, and linked both in the section 5 X5 row."
+  },
+  {
+   "ruling": "R-32869",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC8",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC19 for the X6 posting rejection hold, TC-E6-008-24, and linked both in the section 5 X6 row."
+  },
+  {
+   "ruling": "R-32870",
+   "item": "NEWAC-RWB-S6-E6008-APP-AC9",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC20 for the X7 repeated input write-once rule, TC-E6-008-25, and linked both in the section 5 X7 row."
+  }
+ ]
+}

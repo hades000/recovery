@@ -1,0 +1,316 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-deviation (Deviation)"
+  version: 5.1.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-deviation (Deviation, module S8, service wave 2)
+    under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16 November
+    2026) by the D-RCV-60 microservice realignment.
+    This document holds 2 operations under REST base /api/recovery/deviation/v1; schema rwb_deviation; topic
+    rwb.deviation.events.v1; Temporal task queue rwb-deviation in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-deviation.asyncapi.yaml.
+servers:
+- url: "/api/recovery/deviation/v1"
+  description: "Relative to the rwb-deviation service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Cases"
+x-service:
+  code: "S8"
+  service: "rwb-deviation"
+  name: "Deviation"
+  wave: 2
+  schema: "rwb_deviation"
+  rest-base: "/api/recovery/deviation/v1"
+  topic: "rwb.deviation.events.v1"
+  task-queue: "rwb-deviation"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-deviation.asyncapi.yaml"
+  operations: 2
+paths:
+  /cases/{caseId}/deviations:
+    post:
+      tags:
+      - Cases
+      summary: Raise a deviation X1 to X7 on the case
+      operationId: postCasesCaseidDeviations
+      x-module: S8
+      x-owner: "S8"
+      x-capability:
+        area: Case record
+        right: U
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviationRequest'
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deviation'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /deviations/{deviationId}:
+    patch:
+      tags:
+      - Cases
+      summary: Record the outcome of a deviation and return or re-route the case
+      operationId: patchDeviationsDeviationid
+      x-module: S8
+      x-owner: "S8"
+      x-capability:
+        area: Case record
+        right: U
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviationOutcome'
+      parameters:
+      - name: deviationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deviation'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Deviation:
+      type: object
+      description: A deviation X1 to X7 raised on a case.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the deviation
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        deviationCode:
+          type: string
+          maxLength: 3
+          enum:
+          - X1
+          - X2
+          - X3
+          - X4
+          - X5
+          - X6
+          - X7
+          description: X1 to X7
+        raisedAt:
+          type: string
+          format: date-time
+          description: When it was raised
+        raisedBy:
+          type: string
+          maxLength: 20
+          enum:
+          - SCREENING_AGENT
+          - RULE
+          - OFFICER
+          - CUSTOMER_CONTACT
+          description: Screening agent, rule, officer, customer contact
+        pausedState:
+          type: string
+          maxLength: 60
+          description: The routing state the case was in when paused
+        handlerUserId:
+          type: string
+          format: uuid
+          description: The named handler
+        contactStop:
+          type: boolean
+          description: True when customer contact is stopped
+        clearedAt:
+          type: string
+          format: date-time
+          description: When it cleared
+        outcome:
+          type: string
+          maxLength: 20
+          enum:
+          - RETURNED
+          - RE_ROUTED
+          - CASE_ENDED
+          description: Returned, re-routed, case ended
+      required:
+      - id
+      - caseId
+      - deviationCode
+      - raisedAt
+      - raisedBy
+      - pausedState
+      - contactStop
+    DeviationRequest:
+      type: object
+      properties:
+        deviationCode:
+          type: string
+          enum:
+          - X1
+          - X2
+          - X3
+          - X4
+          - X5
+          - X6
+          - X7
+        reason:
+          type: string
+        documentIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    DeviationOutcome:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum:
+          - RETURNED
+          - RE_ROUTED
+          - CASE_ENDED
+        note:
+          type: string
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI of the error-map row
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          description: Request path and trace ID, stamped by the owning service
+        messageCode:
+          type: string
+          pattern: '^MSG-[A-Z0-9]+(-[A-Z0-9]+)*-\d{3}$'
+        messageTh:
+          type: string
+          description: Thai text of the message code
+        field:
+          type: string
+          description: JSON Pointer or parameter or header name of the first failing input
+        errors:
+          type: array
+          description: Present only on 400 or 422 when more than one input fails
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              messageCode:
+                type: string
+                pattern: '^MSG-[A-Z0-9]+(-[A-Z0-9]+)*-\d{3}$'
+              detail:
+                type: string
+            required: [field, messageCode, detail]
+        traceId:
+          type: string
+          pattern: '^[0-9a-fA-F]{32}$'
+          description: 32-hex W3C trace ID of the request
+      required: [type, title, status, messageCode, traceId]

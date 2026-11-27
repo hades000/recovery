@@ -1,0 +1,94 @@
+{
+ "edits": [
+  {
+   "old": "| X8 | The rwb-case contract does not answer inside the 2 s budget | 404 with the not-found answer and no case fact; the entries are not listed rather than listed without the case they belong to, and the caller retries | The not-found message of RWB-P3-E1028-CON | AC3 |",
+   "new": "| X8 | The rwb-case contract does not answer inside the 2 s budget | 404 with the not-found answer and no case fact; the entries are not listed rather than listed without the case they belong to, and the caller retries | The not-found message of RWB-P3-E1028-CON | AC3, AC16, AC17 |"
+  },
+  {
+   "old": "| X9 | The caller holds no Decision log right R | Refused before any entry is read: 403 with no case fact and no entry | MSG-P4-002 | AC8, TC-E1-028-12 |",
+   "new": "| X9 | The caller holds no Decision log right R | Refused before any entry is read: 403 with no case fact and no entry | MSG-P4-002 | AC8, AC13, AC15, TC-E1-028-12 |"
+  },
+  {
+   "old": "    Then no decision_log_entry row is read",
+   "new": "    Then no decision_log_entry row is read\n\n  Scenario: AC13 A role that holds no Decision log row is refused on the read (new, D-RCV-60)\n    Given the caller holds role RW-PHONECOL, which holds no Decision log row in TSD P7 T6.1\n    When the caller calls GET /api/recovery/decision/v1/decision-log?caseId=RW-2026-000401\n    Then the answer is 403 with MSG-P4-002 and carries no case fact and no entry\n    Then no decision_log_entry row is read\n\n  Scenario: AC14 The module holds no rule engine and computes no rule answer (new, D-RCV-60)\n    Given the rwb-decision module is built\n    When its code and dependencies are scanned for a KieBase, a rule package and a rule registry call\n    Then none is found\n    When the breach of case RW-2026-000401 is consumed\n    Then the entry is stored with its rule and version and no rule call is made\n\n  Scenario: AC15 Both provided operations refuse a caller without the Decision log right R (new, D-RCV-60)\n    Given the caller holds no Decision log right R\n    When the caller calls GET /api/recovery/decision/v1/decision-log/{entryId} for the warning entry of case RW-2026-000401\n    Then the answer is 403 with MSG-P4-002 and carries no case fact and no entry\n    Then no decision_log_entry row is read\n\n  Scenario: AC16 A contract read that times out is answered 404 and lists no entry (new, D-RCV-60)\n    Given the rwb-case contract does not answer case RW-2026-000401 inside the 2 s budget\n    When a reader holding the Decision log right R calls GET /api/recovery/decision/v1/decision-log?caseId=RW-2026-000401\n    Then the contract is read once, within the 2 s budget, and the answer is 404 with the not-found answer and no case fact\n    Then no entry is listed without the case it belongs to, and the caller retries\n\n  Scenario: AC17 A failed call to the rwb-case contract gives the answer named in the source and lists no entry (new, D-RCV-60)\n    Given the rwb-case contract call for case RW-2026-000401 fails\n    When a reader holding the Decision log right R calls GET /api/recovery/decision/v1/decision-log?caseId=RW-2026-000401\n    Then the answer is Not specified in the source documents (NEWAC-RWB-P7-E1028-APP-AC17)\n    Then no entry is listed without the case it belongs to"
+  },
+  {
+   "old": "| TC-E1-028-16 | BR11: the module holds no rule engine and computes no rule answer | Component | Scan of the `rwb-decision` module for a KieBase, a rule package and a rule registry call; the breach of case `RW-2026-000401` consumed with no rule call |",
+   "new": "| TC-E1-028-16 | BR11: the module holds no rule engine and computes no rule answer | Component | Scan of the `rwb-decision` module for a KieBase, a rule package and a rule registry call; the breach of case `RW-2026-000401` consumed with no rule call |\n| TC-E1-028-17 | AC13, X9: a role with no Decision log row is refused on the list read | Component | Role `RW-PHONECOL`, which holds no Decision log row in TSD P7 T6.1, calls `GET /decision-log` for `RW-2026-000401`; refused with MSG-P4-002 |\n| TC-E1-028-18 | AC14, BR11: no rule engine is in the module and no rule answer is computed for a breach | Component | Scan of the `rwb-decision` module for a KieBase, a rule package and a rule registry call; the breach of case `RW-2026-000401` (R-UNI-30) consumed with no rule call |\n| TC-E1-028-19 | AC15, X9: both provided operations refuse a caller without right R with 403 | Component | Caller without the Decision log right R calls `GET /decision-log/{entryId}` for the warning entry of `RW-2026-000401`; 403 with MSG-P4-002 |\n| TC-E1-028-20 | AC16, X8: a contract read over the 2 s budget is answered 404 and lists no entry | NFR | rwb-case contract stub silent beyond 2 s for `RW-2026-000401`; caller holds the Decision log right R; 404 with the not-found answer |\n| TC-E1-028-21 | AC17, X8: a failed contract call gives the answer named in the source and lists no entry | NFR | rwb-case contract stub returns an error for `RW-2026-000401`; answer Not specified in the source documents (NEWAC-RWB-P7-E1028-APP-AC17) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28554",
+   "item": "GAP-2204",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-case values files and the runbook entry each alert links",
+   "change": "Set the poll window, catch-up window, breach band and record-failure rate in the rwb-case values files; confirm at UAT; record the agreed values in the runbook entry.",
+   "note": "No operational values in sources; the story carries no threshold, so no story edit. Values and runbook belong to the deployment."
+  },
+  {
+   "ruling": "R-29010",
+   "item": "GAP-1324",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Confirmed in the verification loop per the directive. Story already carries the GAP-1324 placeholder in section 8 BR9 and AC2; no value in sources."
+  },
+  {
+   "ruling": "R-29011",
+   "item": "GAP-1325",
+   "status": "Resolved",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Confirmed in the verification loop per the directive. No story text cites GAP-1325; no value in sources, so no story edit."
+  },
+  {
+   "ruling": "R-31441",
+   "item": "NEWAC-RWB-P7-E1028-APP-AC13",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 for role RW-PHONECOL refusal, TC-E1-028-17, and AC13 to X9 Covered by. AC8 already covers the generic case."
+  },
+  {
+   "ruling": "R-31442",
+   "item": "NEWAC-RWB-P7-E1028-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for no rule engine and no rule answer in the module, with test row TC-E1-028-18."
+  },
+  {
+   "ruling": "R-31443",
+   "item": "NEWAC-RWB-P7-E1028-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for 403 MSG-P4-002 on the by-ID operation as well as the list; test row TC-E1-028-19."
+  },
+  {
+   "ruling": "R-31444",
+   "item": "NEWAC-RWB-P7-E1028-APP-AC16",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for the contract read over the 2 s budget, 404 with no entry; X8 Covered by updated; test row TC-E1-028-20."
+  },
+  {
+   "ruling": "R-31445",
+   "item": "NEWAC-RWB-P7-E1028-APP-AC17",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for a failed contract call; answer is Not specified in the source documents; X8 Covered by updated; test row TC-E1-028-21."
+  }
+ ]
+}

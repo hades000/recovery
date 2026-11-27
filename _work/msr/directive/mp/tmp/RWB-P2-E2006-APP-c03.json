@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "| BR4 | NLEADS has no interface: the officer submits in NLEADS, ACE ingests the decision, and the decision is read only through the rwb-source-data contract over `v_ace_credit_decision` | INT-26; DL12; DP-05; ADR-010 |",
+   "new": "| BR4 | NLEADS has no interface: the officer submits in NLEADS, ACE ingests the decision, and the decision is read only through the rwb-source-data contract over `v_ace_credit_decision` | INT-26; DL12 (ASM-0189, ASM-2559, ASM-2608); DP-05; ADR-010; AC13; TC-E2-006-17 |"
+  },
+  {
+   "old": "| BR5 | The approval level must be at or above the level the delegation of authority sets for the decision, the product and the amount, read through the rwb-access contract with the version in force and recorded with the decision | doa.txt item 2.1.1; CTL-04; DL18 |",
+   "new": "| BR5 | The approval level must be at or above the level the delegation of authority sets for the decision, the product and the amount, read through the rwb-access contract with the version in force and recorded with the decision | doa.txt item 2.1.1; CTL-04; DL18 (ASM-2569, ASM-2839, ASM-2859, ASM-2883) |"
+  },
+  {
+   "old": "| BR6 | The pack documents are the rows of the NLEADS pack checklist of rwb-case, with the version in force; a row with no document on the case is shown as missing | Document types reference table; DL19; DP-07 |",
+   "new": "| BR6 | The pack documents are the rows of the NLEADS pack checklist of rwb-case, with the version in force; a row with no document on the case is shown as missing | Document types reference table; DL19 (ASM-1051, ASM-1164, ASM-1809, ASM-1810); DP-07 |"
+  },
+  {
+   "old": "| BR7 | An input past its age limit is shown with its age, and an accepted result records the freshness of the data it used | MSG-P7-006; REQ-RDF-009 |",
+   "new": "| BR7 | An input past its age limit is shown with its age, and an accepted result records the freshness of the data it used | MSG-P7-006; REQ-RDF-009; DL22 (ASM-1162, ASM-1304, ASM-2217, ASM-2569) |"
+  },
+  {
+   "old": "| BR10 | One credit result per treatment: a second result is refused and writes no second decision record | Legacy RWB-E2-006 AC8 and X6 |",
+   "new": "| BR10 | One credit result per treatment: a second result is refused and writes no second decision record | Legacy RWB-E2-006 AC8 and X6; AC8; TC-E2-006-21 |"
+  },
+  {
+   "old": "| BR11 | The integration base holds no copy of a case, a treatment, an account or a document, and no foreign key into another schema; the pack is composed at request time from the owners' contracts | DP-01; D-RCV-35 U4; ADR-010 |",
+   "new": "| BR11 | The integration base holds no copy of a case, a treatment, an account or a document, and no foreign key into another schema; the pack is composed at request time from the owners' contracts | DP-01; D-RCV-35 U4; ADR-010; AC14; TC-E2-006-18 |"
+  },
+  {
+   "old": "| BR12 | The treatment columns and the treatment state are written only by rwb-treatment, and the route state and the queue only by rwb-case; this story asks for both and writes neither | Arch v5 slide 41; DP-01 |",
+   "new": "| BR12 | The treatment columns and the treatment state are written only by rwb-treatment, and the route state and the queue only by rwb-case; this story asks for both and writes neither | Arch v5 slide 41; DP-01; AC15; TC-E2-006-19 |"
+  },
+  {
+   "old": "| BR13 | The pack and the result are reached only through the gateway-bff composite route of SCR-14, never directly from the browser | DP-19 |",
+   "new": "| BR13 | The pack and the result are reached only through the gateway-bff composite route of SCR-14, never directly from the browser | DP-19; AC16; TC-E2-006-20 |"
+  },
+  {
+   "old": "| X10 | A role without the Treatment and offer right opens the pack or records a result | Refused before any read or write; nothing changes | MSG-P4-002 | TC-E2-006-12 |",
+   "new": "| X10 | A role without the Treatment and offer right opens the pack or records a result | Refused before any read or write; nothing changes | MSG-P4-002 | AC12; TC-E2-006-12, TC-E2-006-16 |"
+  },
+  {
+   "old": "    Then the system raises an incident",
+   "new": "    Then the system raises an incident\n\n  Scenario: AC12 Role without the Treatment and offer right (exception X10)\n    Given the rwb-access contract mock returns no Treatment and offer right for the officer's role\n    When the officer opens the credit approval pack or records a result for treatment \"TRT-SYN-0610\"\n    Then the request is refused with message MSG-P4-002 before any read or write\n    Then the treatment does not change\n\n  Scenario: AC13 NLEADS decision read only through the source-data contract (BR4)\n    Given NLEADS has no interface to the platform\n    Given the rwb-source-data contract mock returns the NLEADS decision for reference \"NL-SYN-000614\"\n    When the officer records reference \"NL-SYN-000614\" with result \"APPROVED\" for treatment \"TRT-SYN-0610\"\n    Then the decision is read only through the rwb-source-data contract over v_ace_credit_decision\n    Then no call to NLEADS is made\n\n  Scenario: AC14 Pack composed at request time (BR11)\n    When the officer opens the credit approval pack for treatment \"TRT-SYN-0610\"\n    Then the pack is composed at request time from the rwb-source-data, rwb-treatment, rwb-document, rwb-access and rwb-case contracts\n    Then no row of case, treatment, account or document is written to rwb_integration\n\n  Scenario: AC15 Treatment and route state not written here (BR12)\n    When the officer records result \"APPROVED\" with reference \"NL-SYN-000615\" for treatment \"TRT-SYN-0610\"\n    Then the operation writes no treatment column and no treatment state\n    Then the operation writes no route state and no queue entry\n\n  Scenario: AC16 Pack reached only through the composite route (BR13)\n    When the browser calls the pack operation directly and not through the gateway-bff composite route of SCR-14\n    Then the call is refused and no pack data is returned"
+  },
+  {
+   "old": "with the cross-service parts replaced by a contract-mock Given.",
+   "new": "with the cross-service parts replaced by a contract-mock Given. AC12 to AC16 are the story's own criteria for exception X10 and for business rules BR4, BR11, BR12 and BR13; they are proved by TC-E2-006-16 to TC-E2-006-20."
+  },
+  {
+   "old": "| TC-E2-006-15 | Section 12.7 tables | Component | Boundary values for decision_record, idempotency_key, outbox_event and outbox_delivery |",
+   "new": "| TC-E2-006-15 | Section 12.7 tables | Component | Boundary values for decision_record, idempotency_key, outbox_event and outbox_delivery |\n| TC-E2-006-16 | Access | Component | A role without the Treatment and offer right opens the pack or records a result; refused with MSG-P4-002 before any read or write |\n| TC-E2-006-17 | BR4 | Component | NLEADS decision read only through the rwb-source-data contract; no NLEADS call |\n| TC-E2-006-18 | BR11 | Component | Pack composed at request time; no copy of case, treatment, account or document written to rwb_integration |\n| TC-E2-006-19 | BR12 | Component | Result writes no treatment column, treatment state, route state or queue entry |\n| TC-E2-006-20 | BR13 | Access | Direct browser call to the pack operation is refused; no pack data returned |\n| TC-E2-006-21 | BR10 | Component | Second result for a treatment refused with MSG-P2-010; no second decision record written |"
+  },
+  {
+   "old": "| MSG-GEN-006 | A source contract did not answer | {source} could not be read. Try again in a few minutes. |",
+   "new": "| MSG-GEN-006 | A source contract did not answer | {source} could not be read. Try again in a few minutes. |\n| MSG-P4-001 | Not specified in the source documents (DOR-RWB-P2-E2006-APP-9) | Not specified in the source documents (DOR-RWB-P2-E2006-APP-9) |\n| MSG-P4-003 | Not specified in the source documents (DOR-RWB-P2-E2006-APP-9) | Not specified in the source documents (DOR-RWB-P2-E2006-APP-9) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15642",
+   "item": "DOR-RWB-P2-E2006-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Assumption IDs added to the source cells of BR4 (DL12), BR5 (DL18), BR6 (DL19) and BR7 (DL22)."
+  },
+  {
+   "ruling": "R-15643",
+   "item": "DOR-RWB-P2-E2006-APP-3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for exception X10 in section 7, TC-E2-006-16 in section 16, and AC12 coverage in the X10 row."
+  },
+  {
+   "ruling": "R-15644",
+   "item": "DOR-RWB-P2-E2006-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 to AC16 for BR4, BR11, BR12, BR13 with TC-E2-006-17 to 20; BR10 cites AC8 and TC-E2-006-21."
+  },
+  {
+   "ruling": "R-15645",
+   "item": "DOR-RWB-P2-E2006-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Register DF-ACC-009, DF-ACC-010, DF-TRT-023, DF-TRT-024, DF-TRT-025, DF-TRT-026 and the names credit_result_at and decision_record, or give their registered IDs and names.",
+   "note": "Story IDs in section 11 cannot be matched to LDM v9 or Data Classification v5; no story edit made."
+  },
+  {
+   "ruling": "R-15646",
+   "item": "DOR-RWB-P2-E2006-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Message catalogue standard",
+   "change": "Confirm the standard meaning of MSG-GEN-006; if it differs from source contract not answering, the story moves that case to the standard ID.",
+   "note": "MSG-P4-001 and MSG-P4-003 added to section 14 with placeholders; their text is not in the source set."
+  },
+  {
+   "ruling": "R-22347",
+   "item": "GAP-1713",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Service contract of rwb-integration",
+   "change": "Record the owning-service contract for FEAT-APD-01, FEAT-CHO-02, -06, -07, -08 (twice as written), FEAT-DCM-12, FEAT-OCC-01, -07, -09, -11, FEAT-TRT-04, FEAT-VAL-06: approval P7, case P3, documents P5, communications P6, valuation S1.",
+   "note": "Mapping belongs in the service contract; no story text carries the feature codes to change."
+  },
+  {
+   "ruling": "R-22371",
+   "item": "GAP-1344",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-ITG-E2006-ITG",
+   "change": "Attribute the required level to rwb-access (P4), not rwb-decision; add the DoA limit read to the Ownership Map API catalogue with P4 owner and P7, P3, P2 consumers.",
+   "note": "This story already reads the level from rwb-access (BR5) and needs no edit."
+  },
+  {
+   "ruling": "R-22372",
+   "item": "GAP-0394",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Credit approval pack harness pack",
+   "change": "Record the composite route path and merge order, harness environment and repository, seed data, evidence format and retention, and pass/fail gate, agreed at the wave 2 entry check.",
+   "note": "Harness values are not in any source read; they must be agreed and recorded in the harness pack."
+  },
+  {
+   "ruling": "R-22373",
+   "item": "GAP-0663",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Service Contract Catalog",
+   "change": "Settle the rwb-integration login, the field sets of the source-data, treatment, document, case and access reads, the NLEADS read operation, the resource placement, and the AC2 and AC7 levels against doa.txt item 2.1.1.",
+   "note": "Settled in the wave 2 contract review; AC2 and AC7 levels stay as legacy until doa.txt is read."
+  },
+  {
+   "ruling": "R-22374",
+   "item": "GAP-0729",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Service Contract Catalog",
+   "change": "Agree the rwb-case login with the ACE DB story, the SCR-14 route with the edge story, the NLEADS read and treatment result fields with the P1 and S2 contract stories, and the AC2 and AC7 levels before wave 2 build.",
+   "note": "Contract agreements sit outside this story; approval levels remain as legacy until doa.txt item 2.1.1 is read."
+  }
+ ]
+}

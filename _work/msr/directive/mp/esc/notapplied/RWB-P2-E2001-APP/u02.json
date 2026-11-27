@@ -1,0 +1,61 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P2-E2001-APP",
+ "unit": "u02",
+ "rulings": [
+  "R-30442",
+  "R-30443"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 4
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-30442",
+     "item": "NEWAC-RWB-P2-E2001-APP-AC14",
+     "status": "Resolved",
+     "section": "5",
+     "target": "",
+     "change": "",
+     "note": "Already covered: section 7 AC12 (feature flag off, X10), TC-E2-001-12 in section 16, and X10 'Covered by' names both. No edit needed."
+    },
+    {
+     "ruling": "R-30443",
+     "item": "NEWAC-RWB-P2-E2001-APP-AC15",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "Added AC17-AC21 for BR9-BR13; TC-E2-001-19 to -21 added, TC-E2-001-14 and -15 linked. Test Cases v8 workbook will need the new rows."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then the system tries \"A-0003\" again in the next run\n```",
+     "new": "    Then the system tries \"A-0003\" again in the next run\n\n  Scenario: AC17 Hand-over data read only through the rwb-source-data contract (rule BR9) (new, D-RCV-60)\n    Given the rwb-source-data contract mock serves the candidates, the person keys, the freshness stamps and the EFS history for business date 2026-12-14\n    When the hand-over step runs for business date 2026-12-14\n    Then the step reads them only through that contract, in one hop with a 2 s budget\n    Then the step reads no \"recovery.v_ace_*\" view\n\n  Scenario: AC18 Hand-over is an event-started step (rule BR10) (new, D-RCV-60)\n    Given the feature flag rwb.integration.efs-handover is on\n    When AceDataReady is delivered for ALS with business date 2026-12-14\n    Then the hand-over starts as a Temporal step from that event\n    Then no Quartz job, JOB-02 run, shared job table or Schedule is used to start it\n\n  Scenario: AC19 The step asks the owners and writes none of their facts (rule BR11) (new, D-RCV-60)\n    Given the rwb-case, rwb-source-data and rwb-decision contract mocks are in place\n    When case creation runs for business date 2026-12-14\n    Then the case, the account link, CaseCreated and the case-creation decision record are left to rwb-case\n    Then the interaction entries and the EFS outcome list are left to rwb-source-data and the central ledger to rwb-decision\n    Then the step writes none of them itself\n\n  Scenario: AC20 Run summary has no table of its own (rule BR12) (new, D-RCV-60)\n    Given the run for business date 2026-12-14 has handled its accounts\n    When the run writes its summary\n    Then the counts are the activity result and no run summary table is written\n    Then one local decision record is written with the decision code read as data from LOV-DECISION\n    Then the REC-01 row is written through the rwb-source-data contract\n\n  Scenario: AC21 Step not reachable directly from the browser (rule BR13) (new, D-RCV-60)\n    Given the step is exposed through gateway-bff composite routes for SCR-02, SCR-04 and SCR-45\n    When a browser calls the step directly\n    Then the call is refused\n    Then the step is reached only through those composite routes\n```"
+    },
+    {
+     "old": "| TC-E2-001-14 | BR12 | Component |",
+     "new": "| TC-E2-001-14 | AC20, BR12 | Component |"
+    },
+    {
+     "old": "| TC-E2-001-15 | BR13 | Component |",
+     "new": "| TC-E2-001-15 | AC21, BR13 | Component |"
+    },
+    {
+     "old": "no case or link is requested for it, and it is read again on the next run |",
+     "new": "no case or link is requested for it, and it is read again on the next run |\n| TC-E2-001-19 | AC17, BR9 | Component | Run for business date 2026-12-14 against the rwb-source-data contract fake (§12.8); candidates, person keys, freshness stamps and EFS history are read only through the contract; no recovery.v_ace_* view is read |\n| TC-E2-001-20 | AC18, BR10 | Component | Flag rwb.integration.efs-handover on; AceDataReady for ALS of 2026-12-14 starts the Temporal step; no Quartz job, JOB-02 run, shared job table or Schedule is used |\n| TC-E2-001-21 | AC19, BR11 | Component | Run for business date 2026-12-14 with the rwb-case, rwb-source-data and rwb-decision contract fakes; the step writes no case, account link, CaseCreated, interaction entry, EFS outcome list or central ledger entry |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

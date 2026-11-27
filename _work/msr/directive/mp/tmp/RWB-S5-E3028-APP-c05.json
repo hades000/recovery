@@ -1,0 +1,95 @@
+{
+ "edits": [
+  {
+   "old": "    Then nothing is released",
+   "new": "    Then nothing is released\n\n  Scenario: AC7 Rules BR1 to BR11 of section 8 hold\n    Given case \"RC-2026-000512\" is at a state the rules of section 8 name\n    When the step is tested on its fakes and the boundary test runs\n    Then every rule BR1 to BR11 of section 8 holds, each checked by the test case of section 16 that names it\n\n  Scenario: AC8 Error answers 422, 409, 403 and 503 of the provided operations\n    Given a request for case \"RC-2026-000512\" is sent with a required field absent\n    Then the caller sees 422 with MSG-GEN-001 and nothing is written\n    Given a request for case \"RC-2026-000512\" is sent at a state the rule does not allow\n    Then the caller sees 409 and nothing is written\n    Given the calling role does not hold the Asset and disposal right of the operation\n    Then the caller sees 403 with MSG-P4-002 and nothing is written\n    Given a consumed call does not answer\n    Then the caller sees 503 with the platform error envelope and nothing is written\n\n  Scenario: AC9 Replay of a write with the same idempotency key writes once\n    Given the write for case \"RC-2026-000512\" has been made once\n    When the same request is sent again with the same idempotency key\n    Then the replay writes nothing and the listing holds one row\n\n  Scenario: AC10 A consumed call does not answer inside 2 s and is retried\n    Given rwb-case does not answer inside 2 s for case \"RC-2026-000512\"\n    When the step runs\n    Then the step waits and retries on the workflow's own schedule\n    Then nothing is written, no case move is answered and the caller sees 503 with the platform error envelope\n\n  Scenario: AC11 A consumed call fails with its breaker open\n    Given the breaker of rwb-valuation is open for \"AST-2026-000512\"\n    When the step runs\n    Then nothing is written, no case move is answered and the caller sees 503 with the platform error envelope\n\n  Scenario: AC12 A status change the model does not allow is refused\n    Given the rwb-case contract mock returns the case state \"ASSET_HELD\" for \"RC-2026-000512\"\n    When the step runs\n    Then the caller sees 409, the step reports the state to the parent and no price is fixed\n    Then nothing is written"
+  },
+  {
+   "old": "| TC-E3-028-10 | BR9, BR10, BR11 | Component | A repeated request for `RC-2026-000512` writes once under the lock of `version`; channel, status and step schedule read by version; synthetic data only and no personal data |",
+   "new": "| TC-E3-028-10 | BR9, BR10, BR11 | Component | A repeated request for `RC-2026-000512` writes once under the lock of `version`; channel, status and step schedule read by version; synthetic data only and no personal data |\n| TC-E3-028-11 | AC7, BR1 to BR11 | Boundary | The test cases TC-E3-028-01 to TC-E3-028-10 each named against the rule of section 8 it checks; no fixture of its own |\n| TC-E3-028-12 | AC8, X2, X3, X4, X7 | Component | Requests for `RC-2026-000512` with a required field absent, at a state the rule does not allow, from a role without the right, and with a consumed call that does not answer; 401 and 404 not specified in the source documents (NEWAC-RWB-S5-E3028-APP-AC8) |\n| TC-E3-028-13 | AC9, BR11 | Component | The same request for `RC-2026-000512` sent twice with the same idempotency key; the listing holds one row and the second request writes nothing; key name not specified in the source documents (NEWAC-RWB-S5-E3028-APP-AC9) |\n| TC-E3-028-14 | AC10, X7 | Component | rwb-case does not answer inside 2 s for `RC-2026-000512`; the step waits and retries on the workflow's own schedule, nothing is written and 503 is shown with the platform error envelope |\n| TC-E3-028-15 | AC11, X7 | Component | The breaker of rwb-valuation is open for `AST-2026-000512`; nothing is written, no case move is answered and 503 is shown with the platform error envelope |\n| TC-E3-028-16 | AC12, X3 | Component | Case `RC-2026-000512` at `ASSET_HELD` sent to the step; 409 is shown, the state is reported to the parent, no price is fixed and nothing is written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29166",
+   "item": "GAP-2884",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "Ownership Map",
+   "change": "Add the asset row with owner S5 at its next version; the DB story of the service creates the table in schema rwb_asset",
+   "note": "Story keeps S5 as owner of the asset row per architecture and TSD; no story edit made, as the item does not ask for one."
+  },
+  {
+   "ruling": "R-32640",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Adds AC10 in section 7 and TC-E3-028-14 in section 16",
+   "note": "Retry and timeout of rwb-case call per X7 (2 s, workflow schedule, 503, nothing written)."
+  },
+  {
+   "ruling": "R-32641",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Adds AC11 in section 7 and TC-E3-028-15 in section 16",
+   "note": "Failed consumed call with breaker open per X7; nothing written, no case move, 503."
+  },
+  {
+   "ruling": "R-32642",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Adds AC12 in section 7 and TC-E3-028-16 in section 16",
+   "note": "Disallowed state refused with 409 and nothing written, per X3."
+  },
+  {
+   "ruling": "R-32643",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Section 5 X2 Covered by already names AC5 and TC-E3-028-05; AC5 exists in section 7. No edit needed."
+  },
+  {
+   "ruling": "R-32644",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Section 5 X9 Covered by already names AC6 and TC-E3-028-09; AC6 exists in section 7. No edit needed."
+  },
+  {
+   "ruling": "R-32645",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Adds AC7 in section 7 and TC-E3-028-11 in section 16 covering BR1 to BR11",
+   "note": "Criterion states the section 8 rules and maps each to its existing test case in section 16."
+  },
+  {
+   "ruling": "R-32646",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Adds AC8 in section 7 and TC-E3-028-12 in section 16 for 422, 409, 403 and 503",
+   "note": "401 and 404 are not specified in any source document, so they are not asserted; only the answers section 5 defines are covered."
+  },
+  {
+   "ruling": "R-32647",
+   "item": "NEWAC-RWB-S5-E3028-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Adds AC9 in section 7 and TC-E3-028-13 in section 16",
+   "note": "Replay covered per BR11 (one write under lock, repeat writes nothing); idempotency key name is not in the sources."
+  }
+ ]
+}

@@ -1,0 +1,147 @@
+{
+ "edits": [
+  {
+   "old": "    Then a role without Decision log R is refused with 403 and MSG-P4-002",
+   "new": "    Then a role without Decision log R is refused with 403 and MSG-P4-002\n\n  Scenario: AC10 This service writes no row of another owner (new, D-RCV-60)\n    Given settlement treatment \"TRT-SYN-0701\" on case \"RW-2026-000701\" was decided \"BOOKED\" for business date 2026-12-16\n    When the decision is recorded and published\n    Then no row of the treatment state, the booking difference, the task, the route move or the posting is written by this service\n    Then the service holds only the treatment identifier, the case identifier and the record of the decision\n\n  Scenario: AC11 An unauthenticated read is refused with 401 and an unknown job with 404 (new, D-RCV-60)\n    When a caller without a token calls GET /api/recovery/decision/v1/booking-decisions?businessDate=2026-12-16\n    Then the answer is 401 and no decision is returned\n    When RW-PLATADM calls POST /api/recovery/decision/v1/admin/jobs/{jobId}/rerun with a jobId that does not exist\n    Then the answer is 404 and no run starts\n\n  Scenario: AC12 A replayed write with the same idempotency key answers the first result and writes nothing new (new, D-RCV-60)\n    Given a decision for \"TRT-SYN-0701\" and business date 2026-12-16 was written with an idempotency key\n    When the same write is replayed with the same idempotency key\n    Then the first entry ID is answered and no second decision_log_entry and no second rwb.decision.BookingDecisionMade.v1 are written\n\n  Scenario: AC13 A retried or timed-out decision activity takes the decision once (new, D-RCV-60)\n    Given the decision activity for \"TRT-SYN-0701\" on business date 2026-12-16 times out before it returns\n    When the activity is retried\n    Then one decision_log_entry and one rwb.decision.BookingDecisionMade.v1 exist for the treatment and the date\n    Then the retry writes no second record"
+  },
+  {
+   "old": "The nine criteria are new under D-RCV-60 and test only this deliverable: the evaluation of the version in force, the record, the event, the batch gate, the no-version refusal, the repeat, the fail-closed write and the read.",
+   "new": "The thirteen criteria are new under D-RCV-60 and test only this deliverable: the evaluation of the version in force, the record, the event, the batch gate, the no-version refusal, the repeat, the fail-closed write, the read, the boundary of the owners' rows, the error answers, the replay of a write and the retry of an activity."
+  },
+  {
+   "old": "Legacy AC1 (BR1, BR3, BR7, BR10); the treatment state and the route move are other slices'; BR3, BR9, AC1:",
+   "new": "AC1 (BR1, BR3, BR7, BR10); the treatment state and the route move are other slices'; BR3, BR9:"
+  },
+  {
+   "old": "Legacy AC2 (BR5); the task row is rwb-case's; BR5, AC2:",
+   "new": "AC2 (BR5); the task row is rwb-case's; BR5:"
+  },
+  {
+   "old": "Legacy AC3 (BR2, BR4, BR6); BR2, BR4, AC3:",
+   "new": "AC3 (BR2, BR4, BR6); BR2, BR4:"
+  },
+  {
+   "old": "Legacy AC4 (BR2); BR2, AC4:",
+   "new": "AC4 (BR2); BR2:"
+  },
+  {
+   "old": "Legacy AC5 (BR8); BR11, AC5:",
+   "new": "AC5 (BR11):"
+  },
+  {
+   "old": "Legacy AC6; BR10, AC7:",
+   "new": "AC7 (BR10):"
+  },
+  {
+   "old": "Legacy AC7 (BR5); BR5, BR10, AC2:",
+   "new": "AC2 (BR5, BR10):"
+  },
+  {
+   "old": "Legacy AC8 (BR9); BR9, AC8:",
+   "new": "AC8 (BR9):"
+  },
+  {
+   "old": "Legacy AC9, legacy BR11; BR8, AC6:",
+   "new": "AC6 (BR8):"
+  },
+  {
+   "old": "The legacy Access criterion (legacy X8); the right is rwb-access's; AC7:",
+   "new": "AC7 (refused rerun); the right is rwb-access's:"
+  },
+  {
+   "old": "Legacy Principle 5 (legacy BR9); BR9, AC8:",
+   "new": "AC8 (BR9); Principle 5:"
+  },
+  {
+   "old": "| TC-E2-007-12 | Boundary of the tables of section 12.7 (ASM-3438): each table owned there is read and written only as the section states | Component | Not specified in the source documents (ASM-3438) |",
+   "new": "| TC-E2-007-12 | Boundary of the tables of section 12.7 (ASM-3438): each table owned there is read and written only as the section states | Component | Not specified in the source documents (ASM-3438) |\n| TC-E2-007-13 | AC10 (BR12); the boundary of the owners' rows, which this service never writes | Component | Settlement `TRT-SYN-0701`, account `A-0701`; no write to the treatment, case, task, route or posting owner |\n| TC-E2-007-14 | AC11 (401 and 404 of the provided operations) | Contract | Read of `businessDate=2026-12-16` with no token; `POST /admin/jobs/{jobId}/rerun` with an unknown `jobId` |\n| TC-E2-007-15 | AC12 (replay of a write with the same idempotency key) | Component | Decision for `TRT-SYN-0701` and 2026-12-16 replayed with the same idempotency key |\n| TC-E2-007-16 | AC13 (retry and timeout of the decision activity) | NFR | Decision activity for `TRT-SYN-0701` timed out on 2026-12-16 and retried |"
+  },
+  {
+   "old": "| BR12 | The treatment state, the booking difference, the task, the route move and the posting are the owners'; this service holds their identifiers and the record of the decision, never the case | DP-01; DP-03; DP-11; legacy section 10 |",
+   "new": "| BR12 | The treatment state, the booking difference, the task, the route move and the posting are the owners'; this service holds their identifiers and the record of the decision, never the case | DP-01; DP-03; DP-11; legacy section 10 |\n| BR13 | BookingConfirmationWorkflow starts on the AceDataReady event for ALS with business date D on queue rwb-decision at Asia/Bangkok, one run per business date; a second start is refused with MSG-P2-006 and a failed gate is retried on the next AceDataReady for the date; no fallback Schedule exists, and with the flag rwb.integration.booking-confirmation off the start stops while the records already written stay readable | GAP-2491 (R-28728) |\n| BR14 | The run writes no reconciliation_result table: each decision and its outcome are published as events, the counts of the run are served from decision_log_entry on the read of section 12.1, and the REC-03 break list is built by rwb-reporting from the events, with the field IDs DF-OPS-118 to DF-OPS-129 carried as values | GAP-2492 (R-28729) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28727",
+   "item": "GAP-2490",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Section 16 Covers column now names this slice's AC criteria and rules; legacy levels mapped System to Component, Access to Contract, Resilience to NFR."
+  },
+  {
+   "ruling": "R-28728",
+   "item": "GAP-2491",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR13 records the event-started run on rwb-decision at Asia/Bangkok, one run per date, MSG-P2-006 refusal, no fallback Schedule, flag-off behaviour."
+  },
+  {
+   "ruling": "R-28729",
+   "item": "GAP-2492",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR14 creates no reconciliation_result table; counts come from decision_log_entry; rwb-reporting builds the REC-03 break list from events."
+  },
+  {
+   "ruling": "R-28730",
+   "item": "GAP-2692",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "parameter-catalog.csv; reference-data register; event catalogue; rwb-case contract baseline",
+   "change": "Add booking.missing.grace_loads and the treatment-type and outcome list codes; record TreatmentBooked ownership against rwb-payment; record the parent stage outcome contract.",
+   "note": "Split confirmed as written; RWB-P2-E2007-CON not yet published, so the story builds against fakes."
+  },
+  {
+   "ruling": "R-28731",
+   "item": "GAP-2488",
+   "status": "Not applied",
+   "section": "3, 12.2, 12.8, 13",
+   "target": "",
+   "change": "",
+   "note": "Those sections are not in this chunk, so the added pattern rows and fakes cannot be edited here; header rows kept as the Work Package fixes them."
+  },
+  {
+   "ruling": "R-31480",
+   "item": "NEWAC-RWB-P7-E2007-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for the BR12 owner boundary; TC-E2-007-13 added at Component level."
+  },
+  {
+   "ruling": "R-31481",
+   "item": "NEWAC-RWB-P7-E2007-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 adds 401 and 404 answers for the provided operations; TC-E2-007-14 added at Contract level."
+  },
+  {
+   "ruling": "R-31482",
+   "item": "NEWAC-RWB-P7-E2007-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 covers replay of a write with the same idempotency key; TC-E2-007-15 added at Component level."
+  },
+  {
+   "ruling": "R-31483",
+   "item": "NEWAC-RWB-P7-E2007-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 covers activity retry and timeout; TC-E2-007-16 added at NFR level."
+  }
+ ]
+}

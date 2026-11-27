@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "Given the rwb-source-data contract mock returns the ACE payment rows and the batch-status record of business date 2026-12-14",
+   "new": "Given the rwb-source-data data-product fake (§12.8) returns the ACE payment rows and the batch-status record of business date 2026-12-14"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003\n```",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Rule row not readable (exception X2)\n    Given the rwb-decision rule-in-force fake has no rule in force for REC-04 and REC-05 at business date 2026-12-14\n    When the reconciliation step runs\n    Then the step stops before computing anything and nothing is kept, and the user sees MSG-P7-003\n\n  Scenario: AC4 Batch record absent (exception X3)\n    Given the rwb-source-data data-product fake returns a batch record that is absent for business date 2026-12-14\n    When the reconciliation step runs\n    Then the run does not reconcile a guessed date, the step waits for the next record, and the user sees MSG-P1-001\n\n  Scenario: AC5 Source does not answer in 2 s (exception X4)\n    Given the rwb-source-data data-product fake does not answer the payment rows within 2 s for business date 2026-12-14\n    When the reconciliation step runs\n    Then the step stops and retries, the breaker opens per downstream, no partial outcome is kept, and the response is HTTP 503\n\n  Scenario: AC6 Owner's result unavailable (exception X5)\n    Given the reconciliation-result fake returns a read that is unavailable for business date 2026-12-14\n    When the reconciliation step runs\n    Then the counts of this service are recorded, the owner's panel shows its own unavailable state, no figure is invented, and the user sees MSG-P1-001\n\n  Scenario: AC7 Repeat for the same business date (exception X6)\n    Given a decision record already exists for business date 2026-12-14\n    When the run is repeated for that business date\n    Then one record and one outcome stand, the repeat is counted as an idempotency hit, and no second record is written\n\n  Scenario: AC8 Key does not resolve (exception X7)\n    Given the proceeds of business date 2026-12-14 hold no row for a payment_code of account A-0001\n    When the reconciliation step runs\n    Then the key is listed on the break list with its account_key, and nothing is deleted, overwritten or excluded silently\n\n  Scenario: AC9 Caller without the right or case outside scope (exception X8)\n    Given a caller without Write-off and posting R reads GET /proceeds, and a case outside its scope\n    When the read is taken\n    Then the caller is refused with MSG-P4-002 and nothing changes, and the read of the case outside scope answers 404\n```"
+  },
+  {
+   "old": "`outbox_event` is not written by this story, which publishes no event. `reconciliation_result` and the ACE views are P1's, `write_off` is S7's, `rule_row` and the ledger are P7's, `recovery_case` and `task` are P3's, and the rights are P4's; none is read as a table here.",
+   "new": "`outbox_event` is not written by this story, which publishes no event. `reconciliation_result` and the ACE views are P1's, `write_off` is S7's, `rule_row` and the ledger are P7's, `recovery_case` and `task` are P3's, and the rights are P4's; none is read as a table here.\n\nPersonal data: the personal-data classification of the fields this story reads (`account_key`, `payment_code`, the receipt and the case) is Not specified in the source documents (DOR-RWB-P8-E4050-APP-11). This story adds no new column (section 6)."
+  },
+  {
+   "old": "groups them by `matched_to` value of LOV-MATCH (DF-FIN-001 to DF-FIN-009).",
+   "new": "groups them by `matched_to` value of LOV-MATCH, read on the reference-data contract (DP-06, DP-07), with the parameter key Not specified in the source documents (DOR-RWB-P8-E4050-APP-20) (DF-FIN-001 to DF-FIN-009)."
+  },
+  {
+   "old": "| Event | Read or topic | Payload used | When |\n|---|---|---|---|\n| `AceDataReady` (EV-26) | `recovery.v_ace_batch_status` through rwb-source-data, not delivered on a topic | `source_system`, `business_date`, `status`, `is_complete` | Starts the daily reconciliation of a business date when the batch of the source is COMPLETED |",
+   "new": "| Event | Read or topic | Payload used | When | Owner and service |\n|---|---|---|---|---|\n| `AceDataReady` (EV-26) | `recovery.v_ace_batch_status` through rwb-source-data, not delivered on a topic | `source_system`, `business_date`, `status`, `is_complete` | Starts the daily reconciliation of a business date when the batch of the source is COMPLETED | P1, rwb-source-data |"
+  },
+  {
+   "old": "| X2 | The rule row of REC-04 or REC-05 is not readable, or no version is in force | The step stops before computing anything; nothing is kept | MSG-P7-003 | TC-E4-050-01, TC-E4-050-02 |",
+   "new": "| X2 | The rule row of REC-04 or REC-05 is not readable, or no version is in force | The step stops before computing anything; nothing is kept | MSG-P7-003 | AC3, TC-E4-050-01, TC-E4-050-02, TC-E4-050-05 |"
+  },
+  {
+   "old": "| X3 | The batch record of the source is absent for the business date, or `is_complete` is not set | The run does not reconcile a guessed date; the products show their date and the step waits for the next record | MSG-P1-001 | TC-E4-050-01 |",
+   "new": "| X3 | The batch record of the source is absent for the business date, or `is_complete` is not set | The run does not reconcile a guessed date; the products show their date and the step waits for the next record | MSG-P1-001 | AC4, TC-E4-050-01, TC-E4-050-06 |"
+  },
+  {
+   "old": "| X4 | rwb-source-data does not answer the payment rows inside 2 s | The step of that business date stops and retries; the breaker opens per downstream; no partial outcome is kept | HTTP 503 | TC-E4-050-01 |",
+   "new": "| X4 | rwb-source-data does not answer the payment rows inside 2 s | The step of that business date stops and retries; the breaker opens per downstream; no partial outcome is kept | HTTP 503 | AC5, TC-E4-050-01, TC-E4-050-07 |"
+  },
+  {
+   "old": "| X5 | The owner's `reconciliation_result` read is not available | The counts of this service are still recorded, the owner's panel shows its own unavailable state, and no figure is invented in its place | MSG-P1-001 | TC-E4-050-01 |",
+   "new": "| X5 | The owner's `reconciliation_result` read is not available | The counts of this service are still recorded, the owner's panel shows its own unavailable state, and no figure is invented in its place | MSG-P1-001 | AC6, TC-E4-050-01, TC-E4-050-08 |"
+  },
+  {
+   "old": "| X6 | The run is repeated for the same business date | One record and one outcome stand; the repeat is counted as an idempotency hit and no second record is written | None | TC-E4-050-01 |",
+   "new": "| X6 | The run is repeated for the same business date | One record and one outcome stand; the repeat is counted as an idempotency hit and no second record is written | None | AC7, TC-E4-050-01, TC-E4-050-09 |"
+  },
+  {
+   "old": "| X7 | A key does not resolve in the view | The key is listed on the break list with its `account_key`; nothing is deleted, overwritten or excluded silently | None | TC-E4-050-01 |",
+   "new": "| X7 | A key does not resolve in the view | The key is listed on the break list with its `account_key`; nothing is deleted, overwritten or excluded silently | None | AC8, TC-E4-050-01, TC-E4-050-10 |"
+  },
+  {
+   "old": "| X8 | A caller without the right tries the read, or a case outside its scope | Refused, nothing changes; the read answers 404 for an object outside scope | MSG-P4-002 | TC-E4-050-03 |",
+   "new": "| X8 | A caller without the right tries the read, or a case outside its scope | Refused, nothing changes; the read answers 404 for an object outside scope | MSG-P4-002 | AC9, TC-E4-050-03, TC-E4-050-11 |"
+  },
+  {
+   "old": "| TC-E4-050-01 | AC1 as the component check of the payment side: the three payments of the ACE batch date are compared with the proceeds on the case, the unresolved keys are listed, the outcome is recorded by `rec_code` and business date with the rule version, and the owner's result is read beside it; AC1 itself is owned by RWB-ITG-E4050-ITG | Component | Account `A-0001` with three payments at business date `2026-12-14`, one of them with no proceeds row, and the proceeds of case `RC-2026-000555` |",
+   "new": "| TC-E4-050-01 | AC1 as the component check of the payment side: the three payments of the ACE batch date are compared with the proceeds on the case, the unresolved keys are listed, the outcome is recorded by `rec_code` and business date with the rule version, and the owner's result is read beside it; AC1 itself is owned by RWB-ITG-E4050-ITG | Component | rwb-source-data data-product fake (§12.8): account `A-0001` with three payments at business date `2026-12-14`, one of them with no proceeds row, and the proceeds of case `RC-2026-000555` |"
+  },
+  {
+   "old": "| TC-E4-050-04 | Principle 5: a forced decision-log write failure stops the action with MSG-P7-003 and raises one incident under R-UNI-39 | NFR | The record store stopped during a business date; the run is repeated after recovery |",
+   "new": "| TC-E4-050-04 | Principle 5: a forced decision-log write failure stops the action with MSG-P7-003 and raises one incident under R-UNI-39 | NFR | The record store stopped during a business date; the run is repeated after recovery |\n| TC-E4-050-05 | AC3: the rule row of REC-04 or REC-05 is not readable, so the step stops before computing anything and nothing is kept | Component | The rwb-decision rule-in-force fake with no rule in force for REC-04 and REC-05 at business date `2026-12-14` |\n| TC-E4-050-06 | AC4: the batch record of the source is absent for the business date, so no date is guessed, the step waits, and MSG-P1-001 is answered | Component | The rwb-source-data data-product fake with a batch record that is absent for business date `2026-12-14` |\n| TC-E4-050-07 | AC5: rwb-source-data does not answer the payment rows within 2 s, so the step stops and retries, keeps no partial outcome, and answers HTTP 503 | Component | The rwb-source-data data-product fake that does not answer the payment rows of business date `2026-12-14` within 2 s |\n| TC-E4-050-08 | AC6: the owner's `reconciliation_result` read is unavailable, so this service's counts are recorded, the owner's panel shows its unavailable state, and no figure is invented; MSG-P1-001 | Component | The reconciliation-result fake with a read that is unavailable for business date `2026-12-14` |\n| TC-E4-050-09 | AC7: the run is repeated for the same business date, so one record and one outcome stand and no second record is written | Component | A decision record already written for business date `2026-12-14`, and the repeated run for that date |\n| TC-E4-050-10 | AC8: a key does not resolve in the view, so it is listed on the break list with its `account_key` and nothing is deleted, overwritten or excluded | Component | Account `A-0001` with a `payment_code` that has no proceeds row at business date `2026-12-14` |\n| TC-E4-050-11 | AC9: a caller without the right is refused with MSG-P4-002, and a case outside its scope answers 404 | Component | A caller without Write-off and posting R on `GET /proceeds`, and a case outside its scope |\n| TC-E4-050-12 | Contract: the operations, events and activities of section 12 hold against the contract fakes of section 12.8 | Contract | The fakes of section 12.8, each answering only what its owner documents |\n| TC-E4-050-13 | Boundary: the tables of section 12.7 are read or written only as that table states, and no other table is touched | Component | The tables of section 12.7 (ASM-3438) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11517",
+   "item": "CG-ALL-7784",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8 (Story test cases)",
+   "change": "Add rows for TC-E4-050-01 to TC-E4-050-04 with the Given, When and Then copied from the criteria they cover.",
+   "note": "Story side unchanged; TC-E4-050-01 to -04 are in section 16. The missing rows belong in Test Cases v8."
+  },
+  {
+   "ruling": "R-11519",
+   "item": "CG-ALL-7787",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC2 Given and TC-E4-050-01 data now name the rwb-source-data data-product fake (section 12.8)."
+  },
+  {
+   "ruling": "R-18399",
+   "item": "DOR-RWB-P8-E4050-APP-10",
+   "status": "Not applied",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-28 states are written in section 15, which is not in this chunk; empty, loading, error and no-access states not written blind."
+  },
+  {
+   "ruling": "R-18400",
+   "item": "DOR-RWB-P8-E4050-APP-11",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "",
+   "note": "Personal-data classification of the read fields recorded as Not specified in the source documents in section 12.7."
+  },
+  {
+   "ruling": "R-18401",
+   "item": "DOR-RWB-P8-E4050-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E4-050-12 (contract) and TC-E4-050-13 (boundary) added. Test Cases v8 gap is CG-ALL-7784. TC-01 already states AC1 is owned by ITG."
+  },
+  {
+   "ruling": "R-18402",
+   "item": "DOR-RWB-P8-E4050-APP-15",
+   "status": "Resolved",
+   "section": "6",
+   "target": "",
+   "change": "",
+   "note": "Each INVEST letter has its result in the Verdict column of section 6; no edit needed."
+  },
+  {
+   "ruling": "R-18403",
+   "item": "DOR-RWB-P8-E4050-APP-2",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "L3 process is Not specified in the source documents; adding the columns rewrites 22 rows, so not applied."
+  },
+  {
+   "ruling": "R-18404",
+   "item": "DOR-RWB-P8-E4050-APP-20",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 3 names LOV-MATCH on the reference-data contract (DP-06, DP-07); parameter key Not specified in the source documents."
+  },
+  {
+   "ruling": "R-18405",
+   "item": "DOR-RWB-P8-E4050-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Section 12.4 gains an Owner and service column: P1, rwb-source-data."
+  },
+  {
+   "ruling": "R-18406",
+   "item": "DOR-RWB-P8-E4050-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "New criteria AC3 to AC9 cover exceptions X2 to X8, each with a TC row in section 16 and a Covered by entry in section 5."
+  }
+ ]
+}

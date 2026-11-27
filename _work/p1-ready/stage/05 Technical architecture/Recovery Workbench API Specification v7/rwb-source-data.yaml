@@ -1,0 +1,2747 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-source-data (Source data)"
+  version: 5.1.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-source-data (Source data, module P1, service
+    wave 1) under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16
+    November 2026) by the D-RCV-60 microservice realignment.
+    This document holds 32 operations under REST base /api/recovery/source-data/v1; schema rwb_source_data;
+    topic rwb.source-data.events.v1; Temporal task queue rwb-source-data in namespace rwb-recovery. The v4 text
+    of every operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: GET /cases/{caseId}/interactions (x-module P3, owner
+    P1); POST /cases/{caseId}/interactions (x-module P3, owner P1).
+    Moved out of this document to another service: none.
+    Added by the D-RCV-60 P1 developer readiness run: GET /customers/{personKey}, GET /accounts/{accountKey} and
+    GET /collateral/{assetKey} (RD-P1-060).
+    Pending: account-page read path and maximum keys per call, owner Solution architect, tracked as GAP-3274.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-source-data.asyncapi.yaml.
+servers:
+- url: "/api/recovery/source-data/v1"
+  description: "Relative to the rwb-source-data service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Cases"
+- name: "Interactions"
+- name: "Administration"
+x-service:
+  code: "P1"
+  service: "rwb-source-data"
+  name: "Source data"
+  wave: 1
+  schema: "rwb_source_data"
+  rest-base: "/api/recovery/source-data/v1"
+  topic: "rwb.source-data.events.v1"
+  task-queue: "rwb-source-data"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-source-data.asyncapi.yaml"
+  operations: 32
+paths:
+  /cases/{caseId}/interactions:
+    get:
+      tags:
+      - Interactions
+      summary: Read the interaction ledger for a case
+      operationId: getCasesCaseidInteractions
+      x-module: P3
+      x-owner: "P1"
+      x-owner-note: "API Specification v4 x-module P3; owner P1 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0038"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: channel
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+      - name: actor
+        in: query
+        required: false
+        description: Matches actorRef
+        schema:
+          type: string
+          maxLength: 64
+      description: Interaction adds eventCode (string), caseSeq (integer), actorType (string), actorRef (string), sourceRef
+        (string) and decisionLogEntryId (uuid); summary masked by role. Errors add 422 (MSG-GEN-001, MSG-GEN-002, MSG-GEN-003); 503 when the access
+        event cannot be written (MSG-GEN-006). Interaction adds the channel ledger fields contactKey (string, composite contact_type:key from v_ace_contact),
+        fromHolderRef (string), toHolderRef (string), treatmentId (uuid), proceedsId (uuid) and retentionClass (string). An empty ledger returns
+        an empty page with MSG-P3-024. While the flag rwb.dataengine.ledger-read is off the operation answers 404 (RD-P1-045).
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InteractionPage'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+    post:
+      tags:
+      - Interactions
+      summary: Record a contact, promise or hand-over
+      operationId: postCasesCaseidInteractions
+      x-module: P3
+      x-owner: "P1"
+      x-owner-note: "API Specification v4 x-module P3; owner P1 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0038"
+      x-capability:
+        area: Case record
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InteractionRequest'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: 'Schema Interaction adds deliveryStatus (string) and externalRef (string), returned by POST /cases/{caseId}/messages and in
+        the ledger. REST callers, each under its own workload identity: rwb-case, rwb-comms, rwb-integration, rwb-document, rwb-payment,
+        rwb-treatment and rwb-partner; rwb-source-data appends in process (RD-P1-007, RD-P1-064). The same Idempotency-Key with another body
+        answers 409 MSG-PLT-N009-05; a new key with an existing business key answers 200 with the existing entry. On 503 MSG-P1-022 the caller
+        does not commit its action, or retries with the same header key and business key. While the flag rwb.dataengine.ledger-writer is off
+        the append path answers 404 (RD-P1-045).'
+      responses:
+        '200':
+          description: Business key repeat; returns the existing entry without allocating another caseSeq
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interaction'
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interaction'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/jobs:
+    get:
+      tags: [Administration]
+      summary: List rwb-source-data job runs
+      operationId: getAdminJobs
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: type
+        in: query
+        required: false
+        description: JOB-nn or workflow type string
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [PENDING, RUNNING, COMPLETE, FAILED, WAITING]
+      - name: from
+        in: query
+        required: false
+        description: Inclusive businessDate; defaults to today minus 7 days in Asia/Bangkok
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: false
+        description: Inclusive businessDate; defaults to today in Asia/Bangkok
+        schema:
+          type: string
+          format: date
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+      description: 'One item per rwb-source-data run, ordered by startedAt descending. P1 jobs are AceIngestCheck, ReconciliationWorkflow (JOB-04), Stage2ProductWorkflow and RetentionRunWorkflow. Cross-service job monitoring is a gateway-bff composite. Errors 422: size outside its range (MSG-GEN-002) or from later than to (MSG-GEN-003). While the flag rwb.p1.jobmonitor is off both job operations answer 404 MSG-P4-003 (RD-P1-045).'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPage'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/jobs/{jobId}/rerun:
+    post:
+      tags: [Administration]
+      summary: Rerun a failed rwb-source-data job run
+      operationId: postAdminJobsJobidRerun
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: U
+      x-first-release: E1
+      parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          description: Run ID of a FAILED P1 run
+      - $ref: '#/components/parameters/IdempotencyKey'
+      description: 'Only a FAILED run is rerun: a new run for the same business date, started with Temporal reuse policy ALLOW_DUPLICATE_FAILED_ONLY. A complete or running run answers 409 MSG-P1-011 (RD-P1-012, RD-P1-065). While the flag rwb.p1.jobmonitor is off the operation answers 404 MSG-P4-003 (RD-P1-045).'
+      responses:
+        '202':
+          description: New asynchronous run, status PENDING and runNo incremented
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          description: MSG-P1-011 if the run is not FAILED or another run is active; MSG-P1-001 if the ACE batch is not COMPLETED; MSG-PLT-N009-05 for key reuse
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /data-products/freshness:
+    get:
+      tags:
+      - Cases
+      summary: Read the freshness stamp of each data product from the ACE batch business date
+      operationId: getDataProductsFreshness
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: product
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: '^DP(0[1-9]|1[0-4])$'
+      - name: asOf
+        in: query
+        required: false
+        schema:
+          type: string
+      description: 'D-RCV-35: the stamp is data_product_load, written from recovery.v_ace_batch_status over ACE ace_batch_run (RWB-ACE-001). The
+        Workbench loads nothing: businessDate is the ACE business date of the last completed source batch, sourceExtractedAt its completion time,
+        loadedAt when the Workbench recorded the stamp. A product is stale when no completed batch exists for the expected business date (RWB-E1-015). A never-stamped product answers businessDate null, status STALE, staleSince null and no sourceExtractedAt or loadedAt; a reader treats it as having no data date (RD-P1-062).'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataProductFreshness'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /data-products/{productCode}/records:
+    get:
+      tags:
+      - Cases
+      summary: Read the rows of one data product for a case through the ACE views, masked by role, with its freshness stamp
+      operationId: getDataProductsProductcodeRecords
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: productCode
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^DP(0[1-9]|1[0-4])$'
+      - name: caseId
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+      description: 'D-RCV-35: source rows are read live through the recovery.v_ace_* views (for example v_ace_account, v_ace_payment, v_ace_customer,
+        v_ace_contact, v_ace_collateral), filtered by the case''s account_key and person_key values; Workbench rows come from the recovery tables
+        and the extension tables. Nothing is copied. Masking is applied by role (RWB-E1-037) and every read is written to the access log. A DP02 contact row has the fields contactKey, contactType, consentStatus (GIVEN, WITHDRAWN, UNKNOWN) and verifiedAt; no contact value, address, name or identity number (RWB-P1-E2021-APP).'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataProductRecordPage'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/data-products:
+    get:
+      tags:
+      - Administration
+      summary: List the data catalog entries
+      operationId: getAdminDataProducts
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: product
+        in: query
+        required: false
+        schema:
+          type: string
+      description: 'D-RCV-35: the catalog lists each data product with its read path. Source products name ACE as the system of record ("ACE (ingested
+        from X)") and the v_ace_* views they read; Workbench products name the recovery tables.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataProductCatalogEntry'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/data-dictionary/fields:
+    get:
+      tags:
+      - Administration
+      summary: Search the data dictionary
+      operationId: getAdminDataDictionaryFields
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Reference data
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: product
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: entity
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: field
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sourceSystem
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [ACE, WORKBENCH]
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      description: 'D-RCV-35: reads v_data_dictionary over sys_objects and sys_fields: at least 123 objects (93 tables and 30 v_ace_* views) and 1,379
+        fields (RD-P1-025). A view field carries sourceSystem ACE and sourceField the ACE column it maps (for example public.account.delay_days for days_past_due).
+        The sourceSystem filter takes ACE or WORKBENCH.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataDictionaryFieldPage'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/data-dictionary/fields/{fieldCode}:
+    patch:
+      tags:
+      - Administration
+      summary: Change a field definition with a reason, creating a new version
+      operationId: patchAdminDataDictionaryFieldsFieldcode
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Reference data
+        right: U
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataDictionaryFieldChange'
+      parameters:
+      - $ref: '#/components/parameters/IfMatch'
+      - name: fieldCode
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          headers:
+            ETag:
+              description: New resource version after the successful update, formatted as a quoted integer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataDictionaryField'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '428':
+          $ref: '#/components/responses/E428'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/data-contracts:
+    get:
+      tags:
+      - Administration
+      summary: 'List data contracts: the ACE view contract and the outbound interfaces'
+      operationId: getAdminDataContracts
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Reference data
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: sourceSystem
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      description: 'D-RCV-35: there is no inbound load contract. The ACE contract is the v_ace_* view list and the RWB-ACE-001 field appendix,
+        confirmed by the ACE team lead (DL43); the other contracts cover outbound interfaces only.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataContract'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/data-contracts/{contractId}:
+    patch:
+      tags:
+      - Administration
+      summary: Record the system owner's confirmation of a data contract (the ACE team lead for the view contract)
+      operationId: patchAdminDataContractsContractid
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Reference data
+        right: U
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataContractConfirmation'
+      parameters:
+      - $ref: '#/components/parameters/IfMatch'
+      - name: contractId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          headers:
+            ETag:
+              description: New resource version after the successful update, formatted as a quoted integer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataContract'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '428':
+          $ref: '#/components/responses/E428'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/data-contracts/{contractId}/publish:
+    post:
+      tags:
+      - Administration
+      summary: Publish a confirmed data contract
+      operationId: postAdminDataContractsContractidPublish
+      x-module: P1
+      x-owner: "P1"
+      x-capability:
+        area: Reference data
+        right: U
+      x-first-release: E1
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: contractId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataContract'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /business-days/{date}/ready:
+    post:
+      tags: [Administration]
+      summary: Start the readiness check for a business date
+      operationId: postBusinessDaysDateReady
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: U
+      x-first-release: E1
+      parameters:
+      - name: date
+        in: path
+        required: true
+        schema:
+          type: string
+          format: date
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: 'Readiness check accepted. While rwb.dataengine.freshness-stamp is off, record the readiness row and start no AceIngestCheck (RD-P1-080). A date that already has a business_day_readiness row answers 202 with the stored state: while AceIngestCheck runs the call attaches (USE_EXISTING); once the row is DONE or LATE it starts nothing. A second ReconciliationWorkflow run of a date exists only through the rerun of a FAILED run (RD-P1-040, RD-P1-065).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessDayStatus'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          description: Idempotency key conflict
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /business-days/{date}/status:
+    get:
+      tags: [Administration]
+      summary: Read readiness status for a business date
+      operationId: getBusinessDaysDateStatus
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: date
+        in: path
+        required: true
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessDayStatus'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/interactions/{entryId}:
+    get:
+      tags: [Interactions]
+      summary: Read one interaction ledger entry for a case
+      operationId: getCasesCaseidInteractionsEntryid
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: entryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interaction'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          description: Entry does not exist or is not on this case
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          $ref: '#/components/responses/E503'
+  /efs-history:
+    get:
+      tags: [Cases]
+      summary: Read EFS contact and promise history for one account
+      operationId: getEfsHistory
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: accountKey
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: businessDate
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      description: 'Reads one account from v_ace_efs_action for its collection period. Rows are ordered by contactAt then efsRecordKey. Access requires the rwb-integration workload identity. The DP01 and DP05 freshness gate must pass; rows are cut at 23:59:59 Asia/Bangkok on businessDate. On 409 the rwb-integration hand-over run waits on a durable timer and retries every 5 minutes until DP05 is stamped for the date or until handover.hold_until (Pending: parameter row, owner rwb-integration owner with RW-COE, GAP-3286; interim 09:00); at that limit it hands over without history and appends the rows when DP05 arrives (business key EFS:<efsRecordKey>). Only that run appends them (RD-P1-007, RD-P1-067). While the flag rwb.dataengine.efs-handover-reads is off the operation answers 404 (RD-P1-045).'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EfsHistoryAnswer'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          description: 'Freshness gate refused, including a never-stamped DP01 or DP05; MSG-P1-001 (RD-P1-062)'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          $ref: '#/components/responses/E503'
+  /retention-runs:
+    post:
+      tags: [Administration]
+      summary: Start a retention run
+      operationId: postRetentionRuns
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: U
+      x-first-release: E1
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetentionRunRequest'
+      responses:
+        '202':
+          description: Retention run accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionRunAccepted'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          description: MSG-P2-006 when the date is running or complete; MSG-PLT-N009-05 for key reuse
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '422':
+          description: Rules refused; MSG-GEN-001, MSG-GEN-002, MSG-GEN-007 or MSG-P1-002
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          $ref: '#/components/responses/E503'
+  /retention-runs/{runId}:
+    get:
+      tags: [Administration]
+      summary: Read a retention run
+      operationId: getRetentionRunsRunid
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionRun'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/reconciliation/results:
+    get:
+      tags: [Administration]
+      summary: List reconciliation results
+      operationId: getAdminReconciliationResults
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      description: 'RWB-P1-E1011-CON (RD-P1-022). Platform administration R with scope applied. Dates filter business_date. Pending: result page envelope, sort, page and date defaults and limits, owner P1 contract owner, tracked as GAP-3412. P1 computes REC-01, REC-02 and REC-05 only; REC-04 and REC-06 are computed by the daily reconciliation of rwb-payment (RD-P1-069). rwb-case reads reconciliation results here. While the reconciliation flag is off the operation answers 404 MSG-P4-003 (RD-P1-045).'
+      parameters:
+      - name: recCode
+        in: query
+        required: false
+        schema: {type: string, enum: [REC-01, REC-02]}
+      - name: product
+        in: query
+        required: false
+        description: 'LOV-PRODUCT'
+        schema: {type: string}
+      - name: result
+        in: query
+        required: false
+        schema: {type: string, enum: [PASS, BREAK]}
+      - name: from
+        in: query
+        required: false
+        schema: {type: string, format: date}
+      - name: to
+        in: query
+        required: false
+        schema: {type: string, format: date}
+      responses:
+        '200':
+          description: Result page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationResultPage'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/reconciliation/results/{resultId}:
+    get:
+      tags: [Administration]
+      summary: Read one reconciliation result
+      operationId: getAdminReconciliationResultsResultid
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      description: 'RWB-P1-E1011-CON (RD-P1-022). Aggregate result. Pending: break detail store and locator, including REC-05 orphans, owner P1 data architect with the contract owner, tracked as GAP-1508 and GAP-3413.'
+      parameters:
+      - name: resultId
+        in: path
+        required: true
+        schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Aggregate result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReconciliationResult'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /proof-of-delivery:
+    get:
+      tags: [Cases]
+      summary: Read the proof-of-delivery rows of one business date
+      operationId: getProofOfDelivery
+      x-module: P1
+      x-owner: P1
+      x-first-release: E1
+      description: 'RWB-P1-E1055-APP (RD-P1-007 rule 7). Rows of v_ace_pod ordered by podKey, only when the WIN batch of the date is COMPLETED. Writes nothing. Access: rwb-comms workload identity. Behind a feature flag until v_ace_pod is available (DL43). Pending: page parameter names, defaults, maximum and paging shape, owner data architect, tracked as GAP-0577. rwb-comms is the one caller and the one appender of delivery ledger entries (RD-P1-064). While the flag rwb.dataengine.pod-read is off the read answers 200 with no row and DP07 STALE with a null businessDate (RD-P1-043); the answer has no member for the reason (Pending: GAP-0579). No read of held rows or of the REC-09 break is published in version 1 (GAP-0577, GAP-1508; RD-P1-069). Pending: capability area and right, tracked as GAP-3463.'
+      parameters:
+      - name: businessDate
+        in: query
+        required: true
+        schema: {type: string, format: date}
+      responses:
+        '200':
+          description: Proof-of-delivery rows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProofOfDeliveryAnswer'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '400':
+          $ref: '#/components/responses/E400'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /booking-facts:
+    get:
+      tags: [Cases]
+      summary: Read the booking facts of one case for one ALS business date
+      operationId: getBookingFacts
+      x-module: P1
+      x-owner: P1
+      x-first-release: E2
+      description: 'RWB-P1-E2007-APP. Access: the booking-confirmation workload identity (rwb-integration). Pending: roles through gateway-bff, tracked as GAP-3513.'
+      parameters:
+      - name: caseId
+        in: query
+        required: true
+        schema: {type: string, format: uuid}
+      - name: businessDate
+        in: query
+        required: true
+        schema: {type: string, format: date}
+      responses:
+        '200':
+          description: Booking facts with the DP01 freshness record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingFactsAnswer'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          description: 'MSG-P1-001: the gate does not answer COMPLETE or the account data is current as of another date; includes a never-stamped product, with {date} empty (wording Pending, GAP-3284; RD-P1-062). Flag rwb.dataengine.booking-facts off answers 404 (RD-P1-045)'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          $ref: '#/components/responses/E503'
+  /batch-status:
+    get:
+      tags: [Cases]
+      summary: Read the ACE batch row of one source and business date
+      operationId: getBatchStatus
+      x-module: P1
+      x-owner: P1
+      x-first-release: E2
+      description: 'RWB-P1-E2007-APP. Access: the booking-confirmation workload identity (rwb-integration) and the rwb-payment workload identity (RD-P1-066). The answer carries the v_ace_batch_status checksum, used by the proceeds reconciliation of rwb-payment (RD-P1-069). While the flag rwb.dataengine.booking-facts is off the operation answers 404 (RD-P1-045).'
+      parameters:
+      - name: sourceSystem
+        in: query
+        required: true
+        schema: {type: string, maxLength: 20}
+      - name: businessDate
+        in: query
+        required: true
+        schema: {type: string, format: date}
+      responses:
+        '200':
+          description: Batch row
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchStatusAnswer'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          description: 'MSG-P1-001: no batch row for the source and date (GAP-0597)'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          $ref: '#/components/responses/E503'
+  /payments:
+    get:
+      tags: [Cases]
+      summary: Read the payments of one business date or of one account
+      operationId: getPayments
+      x-module: P1
+      x-owner: P1
+      x-first-release: E2
+      description: 'Builder RWB-P1-E1013-APP; contract published in RWB-P1-E1015-CON (RD-P1-022, RD-P1-061). Exactly one of the queries businessDate or accountKey; both or neither answers 400 MSG-GEN-001 with field. businessDate form (rules of RWB-P1-E2008-APP): one row per payment_code from v_ace_payment for the date, ordered by paymentCode, with batchStatus and productStatus. accountKey form: the v_ace_payment rows of the account, ordered by paymentDate then paymentCode, in the same PaymentsAnswer shape with businessDate = the DP01 stamp in use. Both forms are unpaged (Pending: paging and row cap, owner data architect, GAP-0601, GAP-3508). Callers: date form - rwb-payment JOB-07 (RWB-P8-E2008-APP), RWB-P8-E4044-APP, RWB-P8-E4045-APP and RWB-P8-E4050-APP; account form - RWB-P1-E1013-APP baseline measures and gateway-bff. While the flag rwb.source-data.payment-facts is off the operation answers 404 (RD-P1-045).'
+      x-one-of-query: [businessDate, accountKey]
+      parameters:
+      - name: businessDate
+        in: query
+        required: false
+        schema: {type: string, format: date}
+      - name: accountKey
+        in: query
+        required: false
+        schema: {type: string, maxLength: 255}
+      responses:
+        '200':
+          description: Payments with the DP01 freshness record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsAnswer'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          description: 'MSG-P1-001: the gate refuses or the data is current as of another date; includes a never-stamped product, with {date} empty (wording Pending, GAP-3284; RD-P1-062)'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          $ref: '#/components/responses/E503'
+  /accounts/{accountKey}/installment-facts:
+    get:
+      tags: [Cases]
+      summary: Read the next installment date of one account
+      operationId: getAccountsAccountkeyInstallmentFacts
+      x-module: P1
+      x-owner: P1
+      x-first-release: E2
+      description: 'RWB-P1-E2008-APP. Read from v_ace_account. Access: the payment-matching run of rwb-payment.'
+      parameters:
+      - name: accountKey
+        in: path
+        required: true
+        schema: {type: string}
+      - name: businessDate
+        in: query
+        required: true
+        schema: {type: string, format: date}
+      responses:
+        '200':
+          description: Installment facts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstallmentFacts'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          description: 'MSG-P1-001: the gate refuses or the data is current as of another date; includes a never-stamped product, with {date} empty (wording Pending, GAP-3284; RD-P1-062)'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '503':
+          $ref: '#/components/responses/E503'
+  /contact-points:
+    get:
+      tags: [Interactions]
+      summary: Read the contact points of one party on one channel
+      operationId: getContactPoints
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E2
+      description: 'RWB-P1-E2022-APP. Never answers a phone number or a LINE identifier. Access: the rwb-comms service identity.'
+      parameters:
+      - name: personKey
+        in: query
+        required: true
+        schema: {type: string}
+      - name: channel
+        in: query
+        required: true
+        schema: {type: string, enum: [MOBILE, LINE]}
+      responses:
+        '200':
+          description: Contact points
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactPointAnswer'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /contact-points/{contactPointKey}/failed-contacts:
+    post:
+      tags: [Interactions]
+      summary: Count one failed contact once for one reference
+      operationId: postContactPointsContactpointkeyFailedContacts
+      x-module: P1
+      x-owner: P1
+      x-first-release: E2
+      description: 'RWB-P1-E2022-APP. Raises failed_count once per contact point and reference; a repeated reference under a new key answers counted false. Access: the rwb-comms service identity. Counted references are processed_event rows (consumer rwb-source-data.failed-contacts; idempotency_key FC: followed by the lowercase hex SHA-256 of <contactPointKey>|<reference>; event_id null), written in one transaction with the failed_count increase; a repeat adds 1 to hit_count and answers 201 with counted false (RD-P1-070). While the flag rwb.source-data.ledger-message is off the operation answers 404 (RD-P1-045).'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: contactPointKey
+        in: path
+        required: true
+        schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FailedContactRequest'
+      responses:
+        '201':
+          description: Count after the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FailedContactAnswer'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /extension-facts/parties/{personKey}:
+    put:
+      tags: [Cases]
+      summary: Write the extension facts of one party
+      operationId: putExtensionFactsPartiesPersonkey
+      x-module: P1
+      x-owner: P1
+      x-first-release: E1
+      description: 'RWB-P1-E1018-APP; If-Match per RD-P1-006; no Idempotency-Key. One row per business key; an equal body writes nothing. Called by the exclusion screen through gateway-bff. Pending: the If-Match value of the first write of a key, owner API contract owner, tracked as GAP-3555.'
+      parameters:
+      - $ref: '#/components/parameters/IfMatch'
+      - name: personKey
+        in: path
+        required: true
+        schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartyExtFacts'
+      responses:
+        '200':
+          description: Stored row
+          headers:
+            ETag:
+              description: Resource version, formatted as a quoted integer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartyExtFactsRecord'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '428':
+          $ref: '#/components/responses/E428'
+        '503':
+          $ref: '#/components/responses/E503'
+  /extension-facts/accounts/{accountKey}:
+    put:
+      tags: [Cases]
+      summary: Write the extension facts of one account
+      operationId: putExtensionFactsAccountsAccountkey
+      x-module: P1
+      x-owner: P1
+      x-first-release: E1
+      description: 'RWB-P1-E1018-APP; If-Match per RD-P1-006; no Idempotency-Key. One row per business key; an equal body writes nothing. Called by the exclusion screen through gateway-bff. Pending: the If-Match value of the first write of a key, owner API contract owner, tracked as GAP-3555.'
+      parameters:
+      - $ref: '#/components/parameters/IfMatch'
+      - name: accountKey
+        in: path
+        required: true
+        schema: {type: string}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountExtFacts'
+      responses:
+        '200':
+          description: Stored row
+          headers:
+            ETag:
+              description: Resource version, formatted as a quoted integer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountExtFactsRecord'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '428':
+          $ref: '#/components/responses/E428'
+        '503':
+          $ref: '#/components/responses/E503'
+  /customers/{personKey}:
+    get:
+      tags: [Cases]
+      summary: Read the ACE customer of one person key
+      operationId: getCustomer
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      description: 'RD-P1-060; builder RWB-P1-E1069-APP. The v_ace_customer columns, the contact points of v_ace_contact with consentStatus and verifiedAt of contact_point_ext, the party_ext facts and the DP02 freshness record. No freshness refusal: the caller applies its own stale rule. contactValue, firstName, lastName and the address columns are clear only when isUnmasked is true for the session, else masked. partyType, idType and segment are added when RWB-ACE-001 is deployed (DL43 flag, RD-P1-043). Callers: gateway-bff (case screen composite), rwb-comms, rwb-integration, rwb-deviation, rwb-case (portal offer view facts through gateway-bff) and RWB-P1-DM002-APP verification. The clear recipient name and postal address are read only here, by the rwb-comms notice and rwb-integration outbound-file workload identities. Pending: the masking rule rows that unmask them for those identities, owner data protection officer with the rwb-access owner, tracked as GAP-3283. Every read is written to the access log. Every field tagged is_personal passes through FieldMasker.mask for the user session or workload identity of the caller; a field with no rule is masked. GET only: no Idempotency-Key.'
+      parameters:
+      - name: personKey
+        in: path
+        required: true
+        schema: {type: string, maxLength: 255}
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /accounts/{accountKey}:
+    get:
+      tags: [Cases]
+      summary: Read the ACE account of one account key
+      operationId: getAccount
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      description: 'RD-P1-060; builder RWB-P1-E1069-APP. The v_ace_account columns, the relations of v_ace_ca_relation, the account_ext facts and the DP01 freshness record. No freshness refusal. Callers: gateway-bff, rwb-case, rwb-payment (RWB-P8-E4045-APP, collectionsFee) and RWB-P3-E2006-APP. This is the single-account form; the multi-key account-page read stays Pending, GAP-3274. Every read is written to the access log. Every field tagged is_personal passes through FieldMasker.mask for the user session or workload identity of the caller; a field with no rule is masked. GET only: no Idempotency-Key.'
+      parameters:
+      - name: accountKey
+        in: path
+        required: true
+        schema: {type: string, maxLength: 255}
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /collateral/{assetKey}:
+    get:
+      tags: [Cases]
+      summary: Read the ACE collateral of one asset key
+      operationId: getCollateral
+      x-module: P1
+      x-owner: P1
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      description: 'RD-P1-060; builder RWB-P1-E1069-APP. The v_ace_collateral rows of the asset key, the v_ace_collateral_detail columns once Section B is live (DL43 flag, RD-P1-043) and the DP06 freshness record. No freshness refusal. Callers: RWB-P3-E2006-APP and rwb-asset. A date-wide DP06 read is not published (Pending, GAP-3328). Every read is written to the access log. Every field tagged is_personal passes through FieldMasker.mask for the user session or workload identity of the caller; a field with no rule is masked. GET only: no Idempotency-Key.'
+      parameters:
+      - name: assetKey
+        in: path
+        required: true
+        schema: {type: string, maxLength: 255}
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collateral'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Canonical UUID key for one POST request.
+      schema:
+        type: string
+        format: uuid
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: The ETag version returned for the resource.
+      schema:
+        type: string
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E400:
+      description: Bad request. Messages MSG-GEN-001, MSG-GEN-007 and MSG-PLT-N009-03
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: "Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003. Also answered while the feature flag of the operation is off (RD-P1-045); Pending: message ID of the flag-off 404 where the owning story names none, tracked as GAP-3506."
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. Stale version, operation state, incomplete ACE batch or idempotency conflict. Messages MSG-GEN-004, MSG-P1-001, MSG-P1-011, MSG-P2-006, MSG-PLT-N009-05
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation or a retention rule set is refused. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003, MSG-GEN-007, MSG-P1-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E428:
+      description: Precondition required. If-Match is required on PUT and PATCH. Message MSG-GEN-004.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. Idempotency store, ledger write or system of record is unavailable. Messages MSG-PLT-N009-06, MSG-P1-022, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Customer:
+      type: object
+      description: 'v_ace_customer in camelCase, with the contact points, the party_ext facts and the DP02 freshness (RD-P1-060). partyType, idType and segment are present once Section B is live.'
+      properties:
+        personKey: {type: string, maxLength: 255}
+        cifNo: {type: [string, 'null']}
+        firstName: {type: [string, 'null'], x-personal-data: true}
+        lastName: {type: [string, 'null'], x-personal-data: true}
+        dateOfBirth: {type: [string, 'null'], format: date}
+        deceasedDate: {type: [string, 'null'], format: date}
+        deceasedFlag: {type: [boolean, 'null']}
+        gender: {type: [string, 'null']}
+        nationality: {type: [string, 'null']}
+        maritalStatus: {type: [string, 'null']}
+        occupation: {type: [string, 'null']}
+        spouseName: {type: [string, 'null'], x-personal-data: true}
+        customerStatus: {type: [string, 'null']}
+        category: {type: [string, 'null']}
+        countryOfResidence: {type: [string, 'null']}
+        isStaff: {type: [boolean, 'null']}
+        branchCode: {type: [string, 'null']}
+        vatNumber: {type: [string, 'null'], x-personal-data: true}
+        idNoMasked: {type: [string, 'null'], x-personal-data: true}
+        idNoLast4: {type: [string, 'null'], x-personal-data: true}
+        partyType: {type: [string, 'null']}
+        idType: {type: [string, 'null']}
+        segment: {type: [string, 'null']}
+        partyFacts:
+          description: 'The party_ext facts; null when the person has no party_ext row'
+          oneOf:
+          - $ref: '#/components/schemas/PartyExtFacts'
+          - type: 'null'
+        contacts:
+          type: array
+          items:
+            type: object
+            properties:
+              contactKey: {type: string, maxLength: 255}
+              contactType: {type: string, enum: [PHONE, EMAIL, ADDRESS]}
+              usageCode: {type: [string, 'null']}
+              contactValue: {type: [string, 'null'], x-personal-data: true}
+              contactValueMasked: {type: [string, 'null']}
+              city: {type: [string, 'null'], x-personal-data: true}
+              postCode: {type: [string, 'null'], x-personal-data: true}
+              country: {type: [string, 'null'], x-personal-data: true}
+              consentStatus: {type: string, enum: [GIVEN, WITHDRAWN, UNKNOWN]}
+              verifiedAt: {type: [string, 'null'], format: date-time}
+            required: [contactKey, contactType]
+        freshness: {$ref: '#/components/schemas/DataProductFreshness'}
+      required: [personKey, partyFacts, contacts, freshness]
+    Account:
+      type: object
+      description: 'v_ace_account in camelCase, with the customer-account relations, the account_ext facts and the DP01 freshness (RD-P1-060).'
+      properties:
+        accountKey: {type: string, maxLength: 255}
+        accountCode: {type: [string, 'null']}
+        accountName: {type: [string, 'null']}
+        accountStatus: {type: [string, 'null']}
+        accountStatusDate: {type: [string, 'null'], format: date}
+        contractNo: {type: [string, 'null']}
+        contractDate: {type: [string, 'null'], format: date}
+        productKey: {type: [string, 'null']}
+        productType: {type: [string, 'null']}
+        productCategory: {type: [string, 'null']}
+        productCategoryEfs: {type: [string, 'null']}
+        branchCode: {type: [string, 'null']}
+        branchName: {type: [string, 'null']}
+        ocCode: {type: [string, 'null']}
+        companyCode: {type: [string, 'null']}
+        collectionOfficer: {type: [string, 'null']}
+        collectionPhase: {type: [string, 'null']}
+        daysPastDue: {type: [integer, 'null']}
+        classification: {type: [string, 'null']}
+        totalBalance: {type: [number, 'null']}
+        accountingBalance: {type: [number, 'null']}
+        pastDueAmount: {type: [number, 'null']}
+        totalInterestFinCharge: {type: [number, 'null']}
+        collectionsFee: {type: [number, 'null']}
+        interestRate: {type: [number, 'null']}
+        lastPaymentDate: {type: [string, 'null'], format: date}
+        lastPaymentAmount: {type: [number, 'null']}
+        nextInstallmentDate: {type: [string, 'null'], format: date}
+        nextInstallmentAmount: {type: [number, 'null']}
+        lastTdrDate: {type: [string, 'null'], format: date}
+        tdrFlag: {type: [boolean, 'null']}
+        rescheduledFlag: {type: [boolean, 'null']}
+        numberReschedules: {type: [integer, 'null']}
+        tdrAging: {type: [integer, 'null']}
+        principleNotReduce: {type: [string, 'null']}
+        dataAsOf: {type: [string, 'null'], format: date}
+        daysSinceLastContact: {type: [integer, 'null']}
+        daysSinceLastCollectionActivity: {type: [integer, 'null']}
+        relationshipManager: {type: [string, 'null']}
+        relationshipManagerPhone: {type: [string, 'null']}
+        specialMemo: {type: [string, 'null']}
+        expiryDate: {type: [string, 'null'], format: date}
+        relations:
+          type: array
+          items:
+            type: object
+            properties:
+              personKey: {type: string, maxLength: 255}
+              accountKey: {type: string, maxLength: 255}
+              relationType: {type: [string, 'null']}
+              amountOfGuarantee: {type: [number, 'null']}
+              dateOfGuarantee: {type: [string, 'null'], format: date}
+            required: [personKey, accountKey]
+        accountFacts:
+          description: 'The account_ext facts; null when the account has no account_ext row'
+          oneOf:
+          - $ref: '#/components/schemas/AccountExtFacts'
+          - type: 'null'
+        freshness: {$ref: '#/components/schemas/DataProductFreshness'}
+      required: [accountKey, relations, accountFacts, freshness]
+    Collateral:
+      type: object
+      description: 'The v_ace_collateral rows of one asset key, the v_ace_collateral_detail columns once Section B is live, and the DP06 freshness (RD-P1-060).'
+      properties:
+        assetKey: {type: string, maxLength: 255}
+        rows:
+          type: array
+          description: 'One row per account-collateral-asset link'
+          items:
+            type: object
+            properties:
+              collateralNo: {type: string, maxLength: 255}
+              assetKey: {type: string, maxLength: 255}
+              accountKey: {type: string, maxLength: 255}
+              collateralValue: {type: [number, 'null']}
+              registerDate: {type: [string, 'null'], format: date}
+              inActive: {type: [boolean, 'null']}
+              collateralType: {type: [string, 'null']}
+              description: {type: [string, 'null']}
+            required: [assetKey, accountKey]
+        detail:
+          description: 'v_ace_collateral_detail; null while Section B is absent or when there is no row'
+          type: [object, 'null']
+          properties:
+            titleDocNo: {type: [string, 'null']}
+            plotNo: {type: [string, 'null']}
+            areaText: {type: [string, 'null']}
+            province: {type: [string, 'null']}
+            district: {type: [string, 'null']}
+            subdistrict: {type: [string, 'null']}
+            insuredValue: {type: [number, 'null']}
+            insuranceExpiry: {type: [string, 'null'], format: date}
+            lienRank: {type: [integer, 'null']}
+            sourceSystem: {type: [string, 'null']}
+            dataAsOf: {type: [string, 'null'], format: date}
+        freshness: {$ref: '#/components/schemas/DataProductFreshness'}
+      required: [assetKey, rows, freshness]
+    BusinessDayStatus:
+      type: object
+      properties:
+        businessDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [RUNNING, DONE, LATE]
+        changedAt:
+          type: string
+          format: date-time
+      required: [businessDate, status, changedAt]
+    RetentionRunRequest:
+      type: object
+      description: P1 retention rules cover the seven in-scope tables; periods remain proposed data pending GAP-1029 (Compliance). ARCHIVE and REVIEW only; no destruction step.
+      properties:
+        ruleVersion:
+          type: string
+        runDate:
+          type: string
+          format: date
+        rules:
+          type: array
+          items:
+            type: object
+            properties:
+              productCode:
+                type: string
+              tableName:
+                type: string
+                description: 'One of interaction (ARCHIVE), party_ext, account_ext, contact_point_ext, valuation_ext, dp_treatment, dp_guarantee_claim (REVIEW only) (RD-P1-048)'
+              recordClass:
+                type: string
+              retentionMonths:
+                type: integer
+                minimum: 1
+                maximum: 600
+                description: 'Outside the range: 422 MSG-GEN-002'
+              ageBasis:
+                type: string
+                description: 'Validated against sys_fields; for interaction the only allowed value is case.closedAt (RD-P1-048). A row exactly at the boundary is kept.'
+              endAction:
+                type: string
+                enum: [ARCHIVE, REVIEW]
+            required: [productCode, tableName, recordClass, retentionMonths, ageBasis, endAction]
+      required: [ruleVersion, runDate, rules]
+    RetentionRunAccepted:
+      type: object
+      properties:
+        runId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          const: ACCEPTED
+      required: [runId, status]
+    RetentionTableCount:
+      type: object
+      properties:
+        tableName:
+          type: string
+          enum: [interaction, party_ext, account_ext, contact_point_ext, valuation_ext, dp_treatment, dp_guarantee_claim]
+        selected:
+          type: integer
+        archived:
+          type: integer
+        deleted:
+          type: integer
+        listed:
+          type: integer
+        held:
+          type: integer
+      required: [tableName, selected, archived, deleted, listed, held]
+    RetentionRun:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [RUNNING, COMPLETED, FAILED]
+        countsPerTable:
+          type: array
+          items:
+            $ref: '#/components/schemas/RetentionTableCount'
+        archiveLocation:
+          type: string
+        holdReport:
+          type: object
+          description: 'Pending: holdReport fields, owner Solution architect, tracked as GAP-3450.'
+      required: [status, countsPerTable, archiveLocation, holdReport]
+    EfsHistoryAnswer:
+      type: object
+      properties:
+        accountKey:
+          type: string
+        businessDate:
+          type: string
+          format: date
+        sourceSystem:
+          type: string
+          const: EFS
+        collectionPeriodFrom:
+          type: string
+          format: date
+        collectionPeriodTo:
+          type: string
+          format: date
+        productStatus:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [LOADED, STALE]
+        rowCount:
+          type: integer
+        duplicateCount:
+          type: integer
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/EfsHistoryRow'
+      required: [accountKey, businessDate, sourceSystem, collectionPeriodFrom, collectionPeriodTo, productStatus, rowCount, duplicateCount, rows]
+    EfsHistoryRow:
+      type: object
+      properties:
+        efsRecordKey:
+          type: string
+        idempotencyKey:
+          type: string
+          description: EFS:<efsRecordKey>
+        actionCode:
+          type: string
+        actionCodeName:
+          type: string
+        contactAt:
+          type: string
+          format: date-time
+        isCall:
+          type: boolean
+        isRpc:
+          type: boolean
+        isPtp:
+          type: boolean
+        promiseStatus:
+          type: string
+        promiseDate:
+          type: string
+          format: date
+        promiseAmount:
+          type: number
+        collectionPhase:
+          type: string
+        personKey:
+          type: string
+      required: [efsRecordKey, idempotencyKey, actionCode, contactAt, isPtp, promiseDate, promiseAmount, collectionPhase]
+    ReconciliationResult:
+      type: object
+      properties:
+        resultId: {type: string, format: uuid}
+        recCode: {type: string, maxLength: 6, enum: [REC-01, REC-02]}
+        businessDate: {type: string, format: date}
+        productGroup: {type: string, maxLength: 15, enum: [MORTGAGE, HIRE_PURCHASE, SSME, UNSECURED]}
+        sourceCount: {type: integer}
+        workbenchCount: {type: integer}
+        sourceAmount: {type: [number, 'null']}
+        workbenchAmount: {type: [number, 'null']}
+        varianceCount: {type: integer}
+        variancePct: {type: number}
+        tolerancePct: {type: number}
+        result: {type: string, maxLength: 8, enum: [PASS, BREAK]}
+      required: [resultId, recCode, businessDate, productGroup, sourceCount, workbenchCount, varianceCount, variancePct, tolerancePct, result]
+    ReconciliationResultPage:
+      type: object
+      description: 'Pending: page envelope members, owner P1 contract owner, tracked as GAP-3412. Each result is a ReconciliationResult.'
+    ProofOfDeliveryAnswer:
+      type: object
+      properties:
+        businessDate: {type: string, format: date}
+        productCode: {type: string, const: DP07}
+        freshness: {$ref: '#/components/schemas/DataProductFreshness'}
+        rows:
+          type: array
+          items: {$ref: '#/components/schemas/ProofOfDeliveryRow'}
+      required: [businessDate, productCode, freshness, rows]
+    ProofOfDeliveryRow:
+      type: object
+      description: The ten columns of v_ace_pod.
+      properties:
+        podKey: {type: string, maxLength: 255}
+        accountKey: {type: [string, 'null'], maxLength: 255}
+        noticeRef: {type: [string, 'null'], maxLength: 60}
+        sentDate: {type: [string, 'null'], format: date}
+        barcode: {type: [string, 'null'], maxLength: 40}
+        callbackDate: {type: [string, 'null'], format: date}
+        deliveryStatus: {type: [string, 'null'], maxLength: 15}
+        sentType: {type: [string, 'null'], maxLength: 10}
+        sourceSystem: {type: [string, 'null'], maxLength: 20}
+        dataAsOf: {type: string, format: date}
+      required: [podKey]
+    BookingFactsAnswer:
+      type: object
+      properties:
+        freshness: {$ref: '#/components/schemas/DataProductFreshness'}
+        facts:
+          type: array
+          items: {$ref: '#/components/schemas/BookingFact'}
+      required: [freshness, facts]
+    BookingFact:
+      type: object
+      properties:
+        accountKey: {type: string}
+        productGroup: {type: string}
+        tdrFlag: {type: [boolean, 'null']}
+        lastTdrDate: {type: [string, 'null'], format: date}
+        principalOutstanding: {type: [number, 'null']}
+        interestRate: {type: [number, 'null']}
+        settlementBookedDate: {type: [string, 'null'], format: date}
+        settlementBookedAmount: {type: [number, 'null']}
+        dataAsOf: {type: string, format: date}
+        fieldState: {$ref: '#/components/schemas/FieldState'}
+      required: [accountKey, fieldState]
+    FieldState:
+      type: object
+      description: NOT_AVAILABLE means the view has no such column and the value is null.
+      properties:
+        principalOutstanding: {type: string, enum: [AVAILABLE, NOT_AVAILABLE]}
+        settlementBookedDate: {type: string, enum: [AVAILABLE, NOT_AVAILABLE]}
+        settlementBookedAmount: {type: string, enum: [AVAILABLE, NOT_AVAILABLE]}
+      required: [principalOutstanding, settlementBookedDate, settlementBookedAmount]
+    BatchStatusAnswer:
+      type: object
+      properties:
+        sourceSystem: {type: string, maxLength: 20}
+        businessDate: {type: string, format: date}
+        status: {type: string, enum: [COMPLETED, FAILED, RUNNING]}
+        isComplete: {type: boolean}
+        startedAt: {type: string, format: date-time}
+        completedAt: {type: [string, 'null'], format: date-time}
+        recordCount: {type: [integer, 'null']}
+        feedVersion: {type: [string, 'null'], maxLength: 20}
+        checksum: {type: [string, 'null'], maxLength: 64, description: 'v_ace_batch_status.checksum'}
+      required: [sourceSystem, businessDate, status, isComplete, completedAt]
+    BatchStatusStamp:
+      type: object
+      properties:
+        sourceSystem: {type: string, maxLength: 20}
+        businessDate: {type: string, format: date}
+        status: {type: string, enum: [COMPLETED, FAILED, RUNNING]}
+        isComplete: {type: boolean}
+        completedAt: {type: [string, 'null'], format: date-time}
+      required: [sourceSystem, businessDate, status, isComplete, completedAt]
+    PaymentsAnswer:
+      type: object
+      properties:
+        businessDate: {type: string, format: date}
+        sourceSystem: {type: string, const: ALS}
+        rowCount: {type: integer}
+        batchStatus: {$ref: '#/components/schemas/BatchStatusStamp'}
+        productStatus: {$ref: '#/components/schemas/DataProductFreshness'}
+        rows:
+          type: array
+          items: {$ref: '#/components/schemas/PaymentFact'}
+      required: [businessDate, sourceSystem, rowCount, batchStatus, productStatus, rows]
+    PaymentFact:
+      type: object
+      properties:
+        paymentCode: {type: string}
+        accountKey: {type: string}
+        paymentDate: {type: [string, 'null'], format: date}
+        paymentAmount: {type: [number, 'null']}
+        dataAsOf: {type: [string, 'null'], format: date}
+      required: [paymentCode, accountKey]
+    InstallmentFacts:
+      type: object
+      properties:
+        accountKey: {type: string}
+        businessDate: {type: string, format: date}
+        nextInstallmentDate: {type: [string, 'null'], format: date}
+        productKey: {type: [string, 'null']}
+        daysPastDue: {type: [integer, 'null']}
+        dataAsOf: {type: string, format: date}
+        batchStatus: {$ref: '#/components/schemas/BatchStatusStamp'}
+        productStatus: {$ref: '#/components/schemas/DataProductFreshness'}
+      required: [accountKey, businessDate, dataAsOf, batchStatus, productStatus]
+    ContactPointAnswer:
+      type: object
+      properties:
+        personKey: {type: string}
+        channel: {type: string, enum: [MOBILE, LINE]}
+        asOf: {type: string}
+        rowCount: {type: integer}
+        rows:
+          type: array
+          items: {$ref: '#/components/schemas/ContactPointRow'}
+      required: [personKey, channel, asOf, rowCount, rows]
+    ContactPointRow:
+      type: object
+      properties:
+        contactKey: {type: string, maxLength: 255, description: 'Token contact_type:key; never the number or LINE identifier'}
+        contactType: {type: string}
+        consentStatus: {type: string, enum: [GIVEN, WITHDRAWN, UNKNOWN]}
+        verifiedAt: {type: [string, 'null'], format: date-time}
+        failedCount: {type: integer}
+        dataAsOf: {type: string, format: date}
+      required: [contactKey, contactType, consentStatus, verifiedAt, failedCount]
+    FailedContactRequest:
+      type: object
+      properties:
+        reference: {type: string}
+        channel: {type: string}
+        occurredAt: {type: string, format: date-time}
+        caseId: {type: string, format: uuid}
+      required: [reference, channel, occurredAt]
+    FailedContactAnswer:
+      type: object
+      properties:
+        contactKey: {type: string}
+        reference: {type: string}
+        failedCount: {type: integer}
+        counted: {type: boolean}
+      required: [contactKey, reference, failedCount, counted]
+    PartyExtFacts:
+      type: object
+      properties:
+        vulnerable: {type: boolean}
+        deceasedOverride: {type: boolean}
+        bankruptcy: {type: boolean}
+        fraudFlag: {type: boolean}
+      required: [vulnerable, deceasedOverride, bankruptcy, fraudFlag]
+    PartyExtFactsRecord:
+      type: object
+      description: The stored party_ext row. The standard record columns are also returned.
+      properties:
+        personKey: {type: string}
+        vulnerable: {type: boolean}
+        deceasedOverride: {type: boolean}
+        bankruptcy: {type: boolean}
+        fraudFlag: {type: boolean}
+        version: {type: integer}
+      required: [personKey, vulnerable, deceasedOverride, bankruptcy, fraudFlag, version]
+    AccountExtFacts:
+      type: object
+      properties:
+        disputeOpen: {type: boolean}
+      required: [disputeOpen]
+    AccountExtFactsRecord:
+      type: object
+      description: The stored account_ext row. The standard record columns are also returned.
+      properties:
+        accountKey: {type: string}
+        disputeOpen: {type: boolean}
+        version: {type: integer}
+      required: [accountKey, disputeOpen, version]
+    Interaction:
+      type: object
+      description: 'One entry in the interaction ledger: a contact, letter, promise, payment or hand-over.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the interaction
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        personKey:
+          type: string
+          maxLength: 255
+          description: ACE person_key of the customer (v_ace_customer)
+        occurredAt:
+          type: string
+          format: date-time
+          description: When it happened
+        channel:
+          type: string
+          maxLength: 15
+          enum:
+          - MOBILE
+          - HOME_PHONE
+          - WORK_PHONE
+          - LINE
+          - EMAIL
+          - POSTAL_ADDRESS
+          - CALL
+          - VISIT
+          - SMS
+          - LETTER
+          - PORTAL
+          - BRANCH
+          description: Call, visit, SMS, LINE, email, letter, portal, branch; empty for Workbench events such as CASE_CREATED
+        direction:
+          type: string
+          maxLength: 8
+          enum:
+          - INBOUND
+          - OUTBOUND
+          description: Inbound or outbound; empty for Workbench events such as CASE_CREATED
+        actionCode:
+          type: string
+          maxLength: 10
+          description: Action code
+        contactResult:
+          type: string
+          maxLength: 20
+          enum:
+          - RIGHT_PARTY
+          - THIRD_PARTY
+          - NO_ANSWER
+          - WRONG_NUMBER
+          - REFUSED
+          description: Right party, third party, no answer, wrong number
+        promiseAmount:
+          type: number
+          description: Amount promised, baht
+        promiseDate:
+          type: string
+          format: date
+          description: Date promised
+        summary:
+          type: string
+          maxLength: 2000
+          x-personal-data: true
+          description: Summary of what was said. Masked unless the caller's role may see it
+        conductCheck:
+          type: string
+          maxLength: 15
+          enum:
+          - PASSED
+          - BLOCKED
+          - NOT_APPLICABLE
+          description: Passed, blocked, not applicable
+        sourceSystem:
+          type: string
+          maxLength: 10
+          enum:
+          - EFS
+          - WORKBENCH
+          description: EFS for collections history read from ACE (v_ace_efs_action), or the Workbench
+        eventCode:
+          type: string
+          maxLength: 40
+          enum:
+          - CONTACT
+          - LETTER
+          - PROMISE
+          - PAYMENT
+          - HANDOVER
+          - CASE_CREATED
+          - CASE_ALLOCATED
+          - CASE_TRANSFERRED
+          - CASE_ESCALATED
+          - DOCUMENT_ATTACHED
+          - DECISION_TAKEN
+          - CORRECTION
+          - PARTNER_RESULT
+          - OFFER
+          description: Ledger event
+        actorType:
+          type: string
+          maxLength: 10
+          enum:
+          - USER
+          - SERVICE
+          - PARTNER
+          description: User, service or partner
+        actorRef:
+          type: string
+          maxLength: 64
+          description: User ID or service identity code that acted
+        sourceRef:
+          type: string
+          maxLength: 60
+          description: Producing module and event, or the interface, for example EV-02 CaseAllocated or INT-07
+        idempotencyKey:
+          type: string
+          maxLength: 120
+          description: Unique key of the event or request; repeats are rejected; unique on its own
+        caseSeq:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Gap-free sequence of the entry within its case; unique with case_id
+        decisionLogId:
+          type: string
+          format: uuid
+          description: Decision log entry the entry records, for DECISION_TAKEN
+        correctsEntryId:
+          type: string
+          format: uuid
+          description: Entry this entry corrects
+        contactKey:
+          type: string
+          maxLength: 255
+          description: The contact point reached, as the v_ace_contact composite key contact_type:key (PHONE, EMAIL or ADDRESS); the number or
+            address is masked by role
+        fromHolderRef:
+          type: string
+          maxLength: 60
+          description: 'Who held the case before a hand-over: USER:<user id> or PARTNER:<partner code>'
+        toHolderRef:
+          type: string
+          maxLength: 60
+          description: 'Who holds the case after a hand-over: USER:<user id> or PARTNER:<partner code>'
+        treatmentId:
+          type: string
+          format: uuid
+          description: The treatment offered, for an OFFER entry
+        proceedsId:
+          type: string
+          format: uuid
+          description: The proceeds matched, for a PAYMENT entry
+        documentId:
+          type: string
+          format: uuid
+          description: Document attached for DOCUMENT_ATTACHED
+        retentionClass:
+          type: string
+          maxLength: 10
+          description: Retention class of the entry, set by entry type
+        deliveryStatus:
+          type: string
+          maxLength: 15
+          enum:
+          - SENT
+          - DELIVERED
+          - READ
+          - FAILED
+          description: Delivery state of an outbound SMS, LINE message or letter
+        externalRef:
+          type: string
+          maxLength: 60
+          description: Reference returned by NSS, LINE OA or WIN
+        barcodeStatus:
+          type: string
+          enum: [SENT, DELIVERED, READ, FAILED]
+          readOnly: true
+          description: Case read only, on an entry with an externalRef; deliveryStatus of the entry of that externalRef with the latest occurredAt, then the highest caseSeq
+      required:
+      - id
+      - caseId
+      - occurredAt
+      - sourceSystem
+    InteractionRequest:
+      type: object
+      properties:
+        eventCode:
+          type: string
+          maxLength: 40
+          enum: [CONTACT, LETTER, PROMISE, PAYMENT, HANDOVER, CASE_CREATED, CASE_ALLOCATED, CASE_TRANSFERRED, CASE_ESCALATED, DOCUMENT_ATTACHED, DECISION_TAKEN, CORRECTION, PARTNER_RESULT, OFFER]
+        occurredAt:
+          type: string
+          format: date-time
+        actorType:
+          type: string
+          enum: [USER, SERVICE, PARTNER]
+        actorRef:
+          type: string
+          maxLength: 64
+        sourceRef:
+          type: string
+          maxLength: 60
+        idempotencyKey:
+          type: string
+          maxLength: 120
+          description: Permanent ledger business key; distinct from the Idempotency-Key header
+        channel:
+          type: string
+          enum: [MOBILE, HOME_PHONE, WORK_PHONE, LINE, EMAIL, POSTAL_ADDRESS, CALL, VISIT, SMS, LETTER, PORTAL, BRANCH]
+        direction:
+          type: string
+          enum: [INBOUND, OUTBOUND]
+        contactResult:
+          type: string
+          enum: [RIGHT_PARTY, THIRD_PARTY, NO_ANSWER, WRONG_NUMBER, REFUSED]
+        actionCode:
+          type: string
+          maxLength: 10
+        summary:
+          type: string
+          maxLength: 2000
+          x-personal-data: true
+        promiseAmount:
+          type: number
+        promiseDate:
+          type: string
+          format: date
+        contactKey:
+          type: string
+          maxLength: 255
+        conductCheck:
+          type: string
+          enum: [PASSED, BLOCKED, NOT_APPLICABLE]
+        decisionLogId:
+          type: string
+          format: uuid
+        correctsEntryId:
+          type: string
+          format: uuid
+        fromHolderRef:
+          type: string
+          maxLength: 60
+        toHolderRef:
+          type: string
+          maxLength: 60
+        treatmentId:
+          type: string
+          format: uuid
+        proceedsId:
+          type: string
+          format: uuid
+        documentId:
+          type: string
+          format: uuid
+        deliveryStatus:
+          type: string
+          enum: [SENT, DELIVERED, READ, FAILED]
+        externalRef:
+          type: string
+          maxLength: 60
+      description: >-
+        For eventCode LETTER (RWB-P1-E2021-APP): conductCheck is required when deliveryStatus is SENT or absent; externalRef is required
+        when deliveryStatus is present. Ledger callers (RD-P1-064). Dispatch entry, appended by rwb-comms when the WIN file is sent: channel
+        LETTER, direction OUTBOUND, deliveryStatus SENT, externalRef = the WIN barcode of the notice, conductCheck PASSED, actorType SERVICE,
+        actorRef rwb-comms, sourceRef INT-14 WIN, idempotencyKey LETTER-<caseNo>-<yyyyMMdd of sent date>-<noticeId>. A letter refused by the
+        conduct check appends conductCheck BLOCKED with no deliveryStatus and no externalRef. Delivery entry, appended by rwb-comms only, one
+        per matched row of GET /proof-of-delivery: deliveryStatus from the row, externalRef = barcode, else noticeRef when barcode is null (a
+        row with neither gets no entry), occurredAt = callbackDate at 00:00 Asia/Bangkok, idempotencyKey
+        LETTER-<caseNo>-<yyyyMMdd of callbackDate>-<u>, where <u> is the UUID version 5 of podKey in the RFC 9562 URL namespace. Hand-recorded
+        proof, through rwb-comms only: actorType USER, actorRef the user ID, externalRef = the barcode of the notice, idempotencyKey
+        LETTER-<caseNo>-<yyyyMMdd>-<id of the rwb-comms record of the hand entry>. Pending: mapping of WIN delivery_status to SENT,
+        DELIVERED, READ and FAILED, owner rwb-comms owner with the WIN interface owner, tracked as GAP-3285. Other entries: PROMISE when
+        the entry records a promise to pay, else CONTACT; SMS and LINE messages are CONTACT entries with channel SMS or LINE, direction
+        OUTBOUND and deliveryStatus; partner results are PARTNER_RESULT with actorType PARTNER and actorRef the partner code, over this
+        append; an answer given on HOME.SCB is CONTACT, INBOUND, channel PORTAL (Pending confirmation, owner product owner, GAP-3365),
+        actorType SERVICE, actorRef rwb-comms. No eventCode identifies a complaint (Pending, GAP-3327).
+      required: [eventCode, occurredAt, actorType, actorRef, sourceRef, idempotencyKey]
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Run ID
+        type:
+          type: string
+          description: JOB-nn or workflow type string
+        jobName:
+          type: string
+        workflowId:
+          type: string
+        runNo:
+          type: integer
+          description: Run number for this type and business date
+        businessDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [PENDING, RUNNING, COMPLETE, FAILED, WAITING]
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: [string, 'null']
+          format: date-time
+          description: Null until the run ends
+        durationMinutes:
+          type: [integer, 'null']
+          description: Whole minutes; null while the run is active
+        lastAceBusinessDate:
+          type: string
+          format: date
+        checks:
+          type: object
+          description: REC-01, REC-02 and REC-05 controls
+          additionalProperties:
+            type: object
+            properties:
+              expected:
+                type: number
+              actual:
+                type: number
+              passed:
+                type: boolean
+            required: [expected, actual, passed]
+      required: [id, type, businessDate, status]
+      description: One run of a P1 rwb-source-data workflow. Source loads and other services' jobs are excluded.
+    JobPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+      required: [items, page, size, total]
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI of the error-map row
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          description: Request path and trace ID, stamped by the owning service
+        messageCode:
+          type: string
+          pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+        messageTh:
+          type: string
+          description: Thai text of the message code
+        field:
+          type: string
+          description: JSON Pointer or parameter or header name of the first failing input
+        errors:
+          type: array
+          description: Present only on 400 or 422 when more than one input fails
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              messageCode:
+                type: string
+                pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+              detail:
+                type: string
+            required: [field, messageCode, detail]
+        traceId:
+          type: string
+          pattern: '^[0-9a-fA-F]{32}$'
+          description: 32-hex W3C trace ID of the request
+      required: [type, title, status, messageCode, traceId]
+    DataProductFreshness:
+      type: object
+      properties:
+        productCode:
+          type: string
+          description: Data product code
+        productName:
+          type: string
+          description: Data product name
+        sourceSystem:
+          type: string
+          description: System ACE ingested the data from, as in ace_batch_run.source_system
+        businessDate:
+          type: [string, 'null']
+          format: date
+          description: ACE business date of the last completed batch; null only for a never-stamped product or while the Section B flag is off. A reader treats null as no data date (RD-P1-062)
+        sourceExtractedAt:
+          type: string
+          format: date-time
+          description: ace_batch_run.completed_at; absent for a never-stamped product
+        loadedAt:
+          type: string
+          format: date-time
+          description: Instant the Workbench wrote the freshness stamp; absent for a never-stamped product
+        status:
+          type: string
+          enum: [LOADED, STALE]
+        staleSince:
+          type: [string, 'null']
+          format: date
+          description: First business date with no completed ACE batch; null when LOADED and for a never-stamped product, whose status is STALE
+      required: [productCode, status]
+      description: Freshness of a data product from its source batch and Workbench stamp.
+    DataProductRecordPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataProductRecord'
+        freshness:
+          $ref: '#/components/schemas/DataProductFreshness'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    DataProductRecord:
+      type: object
+      properties:
+        recordId:
+          type: string
+          description: 'Business key of the row: an ACE key such as account_key, person_key, payment_code, contact_key or asset_key, or the Workbench
+            id'
+        entity:
+          type: string
+          description: The v_ace_* view or the Workbench table the row is read from
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldValue'
+      description: One row of a data product, from a v_ace_* view or a Workbench table.
+    FieldValue:
+      type: object
+      properties:
+        fieldName:
+          type: string
+        value:
+          type: string
+        masked:
+          type: boolean
+    DataProductCatalogEntry:
+      type: object
+      properties:
+        productCode:
+          type: string
+        productName:
+          type: string
+        definition:
+          type: string
+        ownerRole:
+          type: string
+        systemOfRecord:
+          type: string
+          description: ACE (ingested from the source system) for source data, or the Workbench
+        sourceViews:
+          type: array
+          items:
+            type: string
+          description: The recovery.v_ace_* views the product is read through; empty for Workbench data
+        reconciliations:
+          type: array
+          items:
+            type: string
+          description: REC codes that apply to the data product
+        access:
+          type: object
+          properties:
+            capabilityArea:
+              type: string
+            right:
+              type: string
+        refreshCycle:
+          type: string
+          description: Refresh cycle, as ACE ingests the source, or On change for Workbench data
+        expectedBy:
+          type: string
+        retentionClass:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataProductField'
+    DataProductField:
+      type: object
+      properties:
+        entity:
+          type: string
+        fieldName:
+          type: string
+        fieldId:
+          type: string
+        dataType:
+          type: string
+        isPersonal:
+          type: boolean
+    DataDictionaryFieldPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataDictionaryField'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    DataDictionaryField:
+      type: object
+      properties:
+        fieldId:
+          type: string
+        entity:
+          type: string
+          description: Workbench table or v_ace_* view
+        fieldName:
+          type: string
+        dataType:
+          type: string
+        physicalType:
+          type: string
+        mandatory:
+          type: boolean
+        listCode:
+          type: string
+        sourceSystem:
+          type: string
+          enum: [ACE, WORKBENCH]
+          description: ACE for a field read through a v_ace_* view; WORKBENCH for a Workbench field
+        sourceField:
+          type: string
+          description: The ACE table and column the view field maps, for example public.account.delay_days
+        refreshCycle:
+          type: string
+        ownerRole:
+          type: string
+        lateBehavior:
+          type: string
+        interfaceId:
+          type: string
+          description: Outbound interface that publishes the field, if any; no inbound interface remains
+        isPersonal:
+          type: boolean
+        version:
+          type: integer
+        versionDate:
+          type: string
+          format: date
+    DataDictionaryFieldChange:
+      type: object
+      properties:
+        dataType:
+          type: string
+        physicalType:
+          type: string
+        mandatory:
+          type: boolean
+        listCode:
+          type: string
+        sourceSystem:
+          type: string
+        sourceField:
+          type: string
+        refreshCycle:
+          type: string
+        ownerRole:
+          type: string
+        lateBehavior:
+          type: string
+        interfaceId:
+          type: string
+        isPersonal:
+          type: boolean
+        reason:
+          type: string
+    DataContract:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        contractCode:
+          type: string
+        sourceSystem:
+          type: string
+          description: ACE for the view contract, or the receiving system of an outbound interface
+        interfaceIds:
+          type: array
+          items:
+            type: string
+          description: Outbound interfaces the contract covers; empty for the ACE view contract
+        contractVersion:
+          type: integer
+        status:
+          type: string
+        fieldCount:
+          type: integer
+        confirmedByRole:
+          type: string
+        confirmedOn:
+          type: string
+          format: date
+        confirmationDocumentId:
+          type: string
+          format: uuid
+        publishedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+    DataContractConfirmation:
+      type: object
+      properties:
+        confirmedByRole:
+          type: string
+        confirmedOn:
+          type: string
+          format: date
+        confirmationDocumentId:
+          type: string
+          format: uuid
+    InteractionPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interaction'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer

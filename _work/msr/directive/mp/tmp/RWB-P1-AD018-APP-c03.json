@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "7. A permitted rerun writes a **new** run row with `run_no` + 1 and the Idempotency-Key of the request; the earlier row is unchanged, so both runs are in the run log.",
+   "new": "7. A permitted rerun writes a **new** run row with `run_no` + 1 and the Idempotency-Key of the request (a header required on the rerun request); the earlier row is unchanged, so both runs are in the run log."
+  },
+  {
+   "old": "5. `JobsController` serves `GET /api/recovery/source-data/v1/admin/jobs` from the catalogue joined to the latest run per job and business date, and adds the last complete business date of each source from `v_ace_batch_status`.",
+   "new": "5. `JobsController` serves `GET /api/recovery/source-data/v1/admin/jobs` from the Workbench jobs this service owns in its job map, joined to the latest run per job and business date; catalogue fields are read through the rwb-integration contract only, never by table. It adds the last complete business date of each source from `v_ace_batch_status`."
+  },
+  {
+   "old": "6. `JobsController` serves `POST /api/recovery/source-data/v1/admin/jobs/{jobId}/rerun`: it checks the Platform administration U right, that the job exists, that no run of the job is RUNNING, and that the business date is complete in `v_ace_batch_status`; otherwise 409.",
+   "new": "6. `JobsController` serves `POST /api/recovery/source-data/v1/admin/jobs/{jobId}/rerun`: it checks the Platform administration U right from the platform session, that the job exists, that no run of the job is RUNNING, and that the business date is complete in `v_ace_batch_status`; otherwise 409. A role without the right is refused with MSG-P4-002."
+  },
+  {
+   "old": "8. `FreshnessController` serves `GET /api/recovery/source-data/v1/data-products/freshness` from `data_product_load`, with the business date, the status LOADED or STALE and the ACE completion time of the stamp.",
+   "new": "8. `FreshnessController` serves `GET /api/recovery/source-data/v1/data-products/freshness` from `data_product_load`, with the business date, the status LOADED or STALE and the ACE completion time of the stamp. The freshness answer shape is owned by RWB-P1-E1015-CON; this story serves it with the stale flag the monitor shows and restates no field."
+  },
+  {
+   "old": "| DF-OPS-224 to DF-OPS-232 | job_catalog (rwb_source_data) | id, job_id, job_name, owner_role, schedule_text, runbook_path, expected_minutes, alert_after_minutes, first_release | Read |",
+   "new": "| DF-OPS-224 to DF-OPS-232 | job_catalog fields, read through the rwb-integration contract (P2), never by table | id, job_id, job_name, owner_role, schedule_text, runbook_path, expected_minutes, alert_after_minutes, first_release | Read |"
+  },
+  {
+   "old": "| Not specified in the source documents (GAP-2162; ASM-3464) | run log (rwb_source_data) |",
+   "new": "| Run log, one row per attempt (GAP-2162; ASM-3464) | run log (rwb_source_data) |"
+  },
+  {
+   "old": "The run log is the one table this story adds; ",
+   "new": "The run status is closed to five values: PENDING, RUNNING, COMPLETE, FAILED and WAITING; `started_at` is set on RUNNING and `finished_at` on COMPLETE or FAILED. The run log is the one table this story adds; "
+  },
+  {
+   "old": "The catalogue and the freshness stamp are read, never written here:",
+   "new": "The answers to the job read, the rerun and the freshness read carry the field IDs above, published in RWB-P1-AD018-CON. The catalogue and the freshness stamp are read, never written here:"
+  },
+  {
+   "old": "| MSG-P4-002 | A role without Platform administration R or U | You cannot {action} here. Your role does not include it. |",
+   "new": "| MSG-P4-002 | A role without Platform administration R or U | You cannot {action} here. Your role does not include it. |\n| MSG-P4-001 | Not specified in the source documents (DOR-RWB-P1-AD018-APP-9) | Not specified in the source documents (DOR-RWB-P1-AD018-APP-9) |\n| Not specified in the source documents (DOR-RWB-P1-AD018-APP-8) | HTTP 400 on a malformed query; 409 on a running job or an incomplete business date; 503 store down | Not specified in the source documents (DOR-RWB-P1-AD018-APP-8) |"
+  },
+  {
+   "old": "The three texts are copied unchanged from the legacy story;",
+   "new": "The texts of MSG-P1-001, MSG-GEN-001 and MSG-P4-002 are copied unchanged from the legacy story;"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14767",
+   "item": "DOR-RWB-P1-AD018-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add run_no, duration_minutes and message_id, and the run log that holds them, to LDM v9 and Data Classification v5 for rwb_source_data.",
+   "note": "Section 11 run log fields need entries in LDM v9 and Data Classification v5; the story side is unchanged."
+  },
+  {
+   "ruling": "R-14768",
+   "item": "DOR-RWB-P1-AD018-APP-8",
+   "status": "Resolved",
+   "section": "4, 14",
+   "target": "",
+   "change": "",
+   "note": "Idempotency-Key header stated on rerun in section 4; HTTP 400, 409 and 503 rows added to section 14 with placeholder IDs; freshness shape owned by E1015-CON."
+  },
+  {
+   "ruling": "R-14769",
+   "item": "DOR-RWB-P1-AD018-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P4-001 listed in section 14; its text and trigger are not in the source documents, so placeholders are used."
+  },
+  {
+   "ruling": "R-21784",
+   "item": "GAP-0440",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "P1 rwb-source-data OpenAPI and AsyncAPI documents and the message catalogue",
+   "change": "Publish the job read, rerun, job-log, freshness and v_ace_batch_status read schemas at the wave 4 entry check, and add the refused-rerun and not-a-Workbench-job messages.",
+   "note": "Schemas and message catalogue entries are in other documents; the harness cites this row until published."
+  },
+  {
+   "ruling": "R-21785",
+   "item": "GAP-0514",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P1-AD018-CON",
+   "change": "Publish the response fields of the job read, rerun and freshness answers by field ID DF-OPS-224 to DF-OPS-232, DF-OPS-001 to DF-OPS-008 and DF-ACE-178 to DF-ACE-186.",
+   "note": "Section 11 now names the field IDs for each answer; publication in RWB-P1-AD018-CON is outside this story."
+  },
+  {
+   "ruling": "R-21786",
+   "item": "GAP-0515",
+   "status": "Resolved",
+   "section": "4, 11",
+   "target": "",
+   "change": "",
+   "note": "Section 4 step 5 lists owned jobs and reads catalogue fields via P2 contract only; section 11 job_catalog row updated. P2 operation not named."
+  },
+  {
+   "ruling": "R-21787",
+   "item": "GAP-2162",
+   "status": "Resolved",
+   "section": "4, 11",
+   "target": "",
+   "change": "",
+   "note": "Run log per attempt set in section 11; platform-session right and MSG-P4-002 refusal set in section 4. Outbound-action operation is not named in these parts."
+  },
+  {
+   "ruling": "R-21788",
+   "item": "GAP-2163",
+   "status": "Resolved",
+   "section": "4, 11",
+   "target": "",
+   "change": "",
+   "note": "Five run states and their dates fixed in section 11; freshness answer declared served here and owned by RWB-P1-E1015-CON in section 4."
+  },
+  {
+   "ruling": "R-24210",
+   "item": "CG-ALL-1847",
+   "status": "Not applied",
+   "section": "4, 14",
+   "target": "",
+   "change": "",
+   "note": "Standard text differs for the job-wait use of MSG-P1-001; a new message ID is needed from the business analyst and cannot be invented here."
+  },
+  {
+   "ruling": "R-24211",
+   "item": "CG-ALL-1848",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7 (Recovery Workbench RTM)",
+   "change": "Align the REQ-DRI-007 test cases between RTM v7 and section 18 in the next version of each.",
+   "note": "The RTM test list is in RTM v7; section 18 is unchanged until the next version."
+  }
+ ]
+}

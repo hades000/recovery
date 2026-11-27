@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| Condition | What happens | Message or reference |\n|---|---|---|\n| The decision record cannot be written | Nothing changes; the receipt stays unmatched and the action is refused; an incident is raised | MSG-P7-003; R-UNI-39; AC2 |\n| The ACE batch for source ALS is late or failed | The run does not match; the product is shown with its date | MSG-P1-001 {product} is from {date}. Today's ACE batch has not arrived. (VR-P8-004-1) |\n| A role without the right tries the read or the match | Refused, nothing changes | MSG-P4-002 |\n| The proceeds reference is unknown or out of the caller's scope | One problem document, no change | HTTP 404 |\n| The receipt is already matched and a second match is posted under a new key | Refused, the stored answer is not overwritten | HTTP 409 |\n| A required element of the match is missing or invalid | Refused, nothing changes | MSG-GEN-001; HTTP 422 |\n| A consumed read does not answer inside 2 s | The run stops for that receipt and retries; the breaker opens per downstream | HTTP 503; ADR-020 |\n| The same business date is run twice | No second row and no second event; the repeat is counted | R-UNI-40 |\n| A receipt resolves to no case | No matched row; the receipt is reported unmatched on SCR-28 | R-LIT-72; `matched_to` UNMATCHED |\n| A receipt on no open case at all | Held on the exception list of the matching family, which is RWB-P8-E2008-APP's behaviour, not a new row here | FSD P8 AC-EXC-P8-001-02 |",
+   "new": "| Condition | What happens | Message or reference | Covered by |\n|---|---|---|---|\n| The decision record cannot be written | Nothing changes; the receipt stays unmatched and the action is refused; an incident is raised | MSG-P7-003; R-UNI-39; AC2 | AC2 |\n| The ACE batch for source ALS is late or failed | The run does not match; the product is shown with its date | MSG-P1-001 {product} is from {date}. Today's ACE batch has not arrived. (VR-P8-004-1) | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| A role without the right tries the read or the match | Refused, nothing changes | MSG-P4-002 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| The proceeds reference is unknown or out of the caller's scope | One problem document, no change | HTTP 404 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| The receipt is already matched and a second match is posted under a new key | Refused, the stored answer is not overwritten | HTTP 409 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| A required element of the match is missing or invalid | Refused, nothing changes | MSG-GEN-001; HTTP 422 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| A consumed read does not answer inside 2 s | The run stops for that receipt and retries; the breaker opens per downstream | HTTP 503; ADR-020 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| The same business date is run twice | No second row and no second event; the repeat is counted | R-UNI-40 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| A receipt resolves to no case | No matched row; the receipt is reported unmatched on SCR-28 | R-LIT-72; `matched_to` UNMATCHED | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |\n| A receipt on no open case at all | Held on the exception list of the matching family, which is RWB-P8-E2008-APP's behaviour, not a new row here | FSD P8 AC-EXC-P8-001-02 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-3) |"
+  },
+  {
+   "old": "| ID | Rule | Message |\n|---|---|---|\n| BR-P8-004 | No value a business person may change is written in code; it is read from reference data or the rule package with its version | None |\n| VR-P8-004-1 | Data product stale after a late or failed ACE batch for its source (`v_ace_batch_status`) | MSG-P1-001 {product} is from {date}. Today's ACE batch has not arrived. |\n| R-LIT-65 | LED auction round sold: match the proceeds to the case | None |\n| R-LIT-72 | Proceeds with no case reference: hold the cash unmatched and raise a daily exception to the case owner | None |\n| R-UNI-39 | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |\n| R-UNI-48 | Asset proceeds clear the balance in full: close the case, release the remaining security and refund any surplus per policy | None |",
+   "new": "| ID | Rule | Message | BR ID |\n|---|---|---|---|\n| BR-P8-004 | No value a business person may change is written in code; it is read from reference data or the rule package with its version | None | BR-P8-004 |\n| VR-P8-004-1 | Data product stale after a late or failed ACE batch for its source (`v_ace_batch_status`) | MSG-P1-001 {product} is from {date}. Today's ACE batch has not arrived. | Not specified in the source documents (DOR-RWB-P8-E4044-APP-4) |\n| R-LIT-65 | LED auction round sold: match the proceeds to the case | None | Not specified in the source documents (DOR-RWB-P8-E4044-APP-4) |\n| R-LIT-72 | Proceeds with no case reference: hold the cash unmatched and raise a daily exception to the case owner | None | Not specified in the source documents (DOR-RWB-P8-E4044-APP-4) |\n| R-UNI-39 | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-4) |\n| R-UNI-48 | Asset proceeds clear the balance in full: close the case, release the remaining security and refund any surplus per policy | None | Not specified in the source documents (DOR-RWB-P8-E4044-APP-4) |"
+  },
+  {
+   "old": "R-LIT-65 and R-LIT-72 are the two rows of the litigation route set whose event is `PROCEEDS_MATCHED`, and the proceeds they describe are the money this story matches (Business Rules and Routing Logic v4). R-UNI-48 is the downstream case move of rwb-case and is stated here only because the matched amount is its input.",
+   "new": "R-LIT-65 and R-LIT-72 are the two rows of the litigation route set whose event is `PROCEEDS_MATCHED`, and the proceeds they describe are the money this story matches (Business Rules and Routing Logic v4). R-UNI-48 is the downstream case move of rwb-case and is stated here only because the matched amount is its input.\n\nThe lists this story uses are `LOV-PROCEEDS-SRC` and `LOV-MATCH` (TSD P8 T3.2), read through the reference-data contract (DP-06, DP-07); the parameters it reads are Not specified in the source documents (DOR-RWB-P8-E4044-APP-20)."
+  },
+  {
+   "old": "| Element | Type | Source | Note |\n|---|---|---|---|\n| `proceeds.id` | uuid | Workbench | DF-FIN-001 |\n| `case_id` | uuid | rwb-case reference | DF-FIN-002 |\n| `treatment_id` | uuid, optional | rwb-treatment reference | DF-FIN-003 |\n| `account_payment_id` | uuid, optional | ACE payment reference | DF-FIN-004; GAP-2521 |\n| `source` | `LOV-PROCEEDS-SRC` | Workbench | DF-FIN-005: CUSTOMER, LED, AUCTION, BUYER, AGENCY, INSURER, GUARANTOR |\n| `amount` | numeric(18,2) | ACE payment fact | DF-FIN-006 |\n| `received_date` | date | ACE payment fact | DF-FIN-007 |\n| `matched_to` | `LOV-MATCH` | Workbench | DF-FIN-008: INSTALLMENT, SETTLEMENT, FEE, SALE_PROCEEDS, UNMATCHED |\n| `posting_ref` | varchar(40), optional | ACE payment fact | DF-FIN-009 |",
+   "new": "| Element | Type | Source | Note | BR Field ID |\n|---|---|---|---|---|\n| `proceeds.id` | uuid | Workbench | DF-FIN-001 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `case_id` | uuid | rwb-case reference | DF-FIN-002 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `treatment_id` | uuid, optional | rwb-treatment reference | DF-FIN-003 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `account_payment_id` | uuid, optional | ACE payment reference | DF-FIN-004; GAP-2521 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `source` | `LOV-PROCEEDS-SRC` | Workbench | DF-FIN-005: CUSTOMER, LED, AUCTION, BUYER, AGENCY, INSURER, GUARANTOR | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `amount` | numeric(18,2) | ACE payment fact | DF-FIN-006 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `received_date` | date | ACE payment fact | DF-FIN-007 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `matched_to` | `LOV-MATCH` | Workbench | DF-FIN-008: INSTALLMENT, SETTLEMENT, FEE, SALE_PROCEEDS, UNMATCHED | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |\n| `posting_ref` | varchar(40), optional | ACE payment fact | DF-FIN-009 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-7) |"
+  },
+  {
+   "old": "| Event | Read or topic | Payload used | When |\n|---|---|---|---|\n| `AceDataReady` (EV-26) | `recovery.v_ace_batch_status`, the ACE batch record of source ALS (read, not delivered on a topic) | `source_system`, `business_date`, `status`, `completed_at` | Starts the run of a business date when the batch is COMPLETED |",
+   "new": "| Event | Read or topic | Payload used | When | Owner |\n|---|---|---|---|---|\n| `AceDataReady` (EV-26) | `recovery.v_ace_batch_status`, the ACE batch record of source ALS (read, not delivered on a topic) | `source_system`, `business_date`, `status`, `completed_at` | Starts the run of a business date when the batch is COMPLETED | ACE; read by rwb-payment |"
+  },
+  {
+   "old": "  Scenario: AC2 Not recorded (legacy RWB-E4-044 AC2)",
+   "new": "  Scenario: AC2 Not recorded (legacy RWB-E4-044 AC2)\n    Given the decision log write is mocked to fail"
+  },
+  {
+   "old": "| Contract dependencies | None |",
+   "new": "| Contract dependencies | rwb-source-data payment data product; rwb-case reference-data read; rwb-case case-state read; rwb-decision rule package; rwb-integration posting file (class C; one hop each, 2 s budget; built on published documents and fakes from Day 1) |"
+  },
+  {
+   "old": "| Source | Reference | Used in |\n|---|---|---|\n| Legacy story | RWB-E4-044, AC1 and AC2, owned word for word by this story | 7, 16 |\n| Feature | FEAT-PAY-04 Match auction and enforcement proceeds, module P8 (E4) | 1, 2, 18 |\n| FSD P8 v3 | A2.4 (intent, steps, VR-P8-004-1, BR-P8-004, roles); AC-P8-004-01; AC-EXC-P8-004-01 and -02; AC-BG-P8-004-01; SCR-28 | 3, 4, 5, 8, 14, 15 |\n| TSD P8 v2 | T2 components; T3.1 `proceeds` DF-FIN-001 to DF-FIN-009; T3.2 `LOV-MATCH` and `LOV-PROCEEDS-SRC`; T6.1 rights; T-A.1 and T-A.2 API-P8-001 and API-P8-002 | 10, 11, 12, 16 |\n| Events | EV-25 `ProceedsMatched` (published), EV-26 `AceDataReady` (read) | 12.3, 12.4 |\n| Jobs | JOB-07 payment matching | 4, 12.5 |\n| Routing logic | R-LIT-65, R-LIT-72, R-UNI-39, R-UNI-48 (Business Rules and Routing Logic v4) | 8, 9 |\n| Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules §R5.5) | 13 |\n| Gaps and assumptions | GAP-2517, -2, -3, -4, -5; ASM-4167, -2, -3, -4, -5 | 3, 4, 5, 7, 11, 12 |\n| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | all |",
+   "new": "| Source | Reference | Feature | L3 process | Used in |\n|---|---|---|---|---|\n| Legacy story | RWB-E4-044, AC1 and AC2, owned word for word by this story | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 7, 16 |\n| Feature | FEAT-PAY-04 Match auction and enforcement proceeds, module P8 (E4) | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 1, 2, 18 |\n| FSD P8 v3 | A2.4 (intent, steps, VR-P8-004-1, BR-P8-004, roles); AC-P8-004-01; AC-EXC-P8-004-01 and -02; AC-BG-P8-004-01; SCR-28 | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 3, 4, 5, 8, 14, 15 |\n| TSD P8 v2 | T2 components; T3.1 `proceeds` DF-FIN-001 to DF-FIN-009; T3.2 `LOV-MATCH` and `LOV-PROCEEDS-SRC`; T6.1 rights; T-A.1 and T-A.2 API-P8-001 and API-P8-002 | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 10, 11, 12, 16 |\n| Events | EV-25 `ProceedsMatched` (published), EV-26 `AceDataReady` (read) | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 12.3, 12.4 |\n| Jobs | JOB-07 payment matching | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 4, 12.5 |\n| Routing logic | R-LIT-65, R-LIT-72, R-UNI-39, R-UNI-48 (Business Rules and Routing Logic v4) | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 8, 9 |\n| Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules §R5.5) | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 13 |\n| Gaps and assumptions | GAP-2517, -2, -3, -4, -5; ASM-4167, -2, -3, -4, -5 | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | 3, 4, 5, 7, 11, 12 |\n| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | FEAT-PAY-04 | Not specified in the source documents (DOR-RWB-P8-E4044-APP-2) | all |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18313",
+   "item": "DOR-RWB-P8-E4044-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added Feature and L3 process columns to the traceability table; Feature set to FEAT-PAY-04 on every row.",
+   "note": "L3 process is not in the source documents, so the column carries the standard placeholder on every row."
+  },
+  {
+   "ruling": "R-18314",
+   "item": "DOR-RWB-P8-E4044-APP-20",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added a paragraph naming LOV-PROCEEDS-SRC and LOV-MATCH and the reference-data contract DP-06 and DP-07 after the rules table.",
+   "note": "Parameter keys are not in the source documents; the paragraph carries the placeholder for them."
+  },
+  {
+   "ruling": "R-18315",
+   "item": "DOR-RWB-P8-E4044-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Added an Owner column to the events consumed table: ACE, read by rwb-payment.",
+   "note": "Owner taken from the DF-ACE prefix and the recovery.v_ace_batch_status view named in the story."
+  },
+  {
+   "ruling": "R-18316",
+   "item": "DOR-RWB-P8-E4044-APP-3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added a Covered by column to the exception paths; the decision record row is covered by AC2, the other rows carry the placeholder.",
+   "note": "Only AC1 and AC2 exist in section 7, so no other exception path can be tied to a criterion from the source."
+  },
+  {
+   "ruling": "R-18317",
+   "item": "DOR-RWB-P8-E4044-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added a BR ID column to the business rules table: BR-P8-004 carries its own ID, the other rows carry the placeholder.",
+   "note": "Rule IDs for VR-P8-004-1 and the R-LIT and R-UNI rows are not in the source documents."
+  },
+  {
+   "ruling": "R-18318",
+   "item": "DOR-RWB-P8-E4044-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD with the match right (U) in Users Roles and Permissions v5, or remove it from section 10 of this story.",
+   "note": "The role is missing from the module authority document; no edit made here."
+  },
+  {
+   "ruling": "R-18319",
+   "item": "DOR-RWB-P8-E4044-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9",
+   "change": "Add account_payment_id, inbox_event and decision_record to LDM v9 or Data Classification v5 (or re-point them); confirm the ACE view reads in the criteria.",
+   "note": "Added a BR Field ID column with placeholders; the unmatched names belong to the data documents."
+  },
+  {
+   "ruling": "R-18320",
+   "item": "DOR-RWB-P8-E4044-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text must match Error and Message Standard v4, but that text is not in the chunk; copying it would invent wording."
+  },
+  {
+   "ruling": "R-23133",
+   "item": "GAP-1369",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Kept both legacy lines word for word and added one mocked Given to AC2 (decision log write mocked to fail), matching AC1.",
+   "note": "FSD AC-P8-004-01 generic row is a cross-document point for FSD P8; section 16 test rows were not in this chunk."
+  },
+  {
+   "ruling": "R-23134",
+   "item": "GAP-1370",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Contract dependencies row now lists the five class C reads: source-data payment product, case reference and state reads, decision rule package, integration posting file.",
+   "note": "Build on published documents and fakes from Day 1; split_plan row left unchanged until the assembler renumbers."
+  }
+ ]
+}

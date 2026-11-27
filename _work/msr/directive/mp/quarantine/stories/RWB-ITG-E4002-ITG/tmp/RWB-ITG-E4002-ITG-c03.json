@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "and v_ace_valuation holds appraised value 4250000",
+   "new": "and the rwb-source-data contract returns appraised value 4250000 for the asset key"
+  },
+  {
+   "old": "Then the Workbench reads the appraisal number, value, type and date from v_ace_valuation for the asset_key",
+   "new": "Then the Workbench reads the appraisal number, value, type and date for the asset_key through the rwb-source-data contract (DP-01, DP-05)"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision log with the rule version\n\n  Scenario: AC3 No value is accepted by the harness or by a system step (new, D-RCV-60)\n    Given the appraisal for the asset is older than the 12-month policy limit\n    When the case owner assesses the route without accepting the value\n    Then stale_flag is set in valuation_ext against the valuation_key\n    Then accepted is not set by the harness or by a system step\n\n  Scenario: AC4 A consumed call fails or does not answer (new, D-RCV-60)\n    Given the rwb-valuation call fails or does not answer\n    When the case owner assesses the route\n    Then no value is accepted and no decision is recorded"
+  },
+  {
+   "old": "| submitted | The assessment is submitted; the acceptance and the record exist |",
+   "new": "| submitted | The assessment is submitted; the acceptance and the record exist |\n| Empty | Not specified in the source documents (CG-ALL-873) |\n| Error | Not specified in the source documents (CG-ALL-873) |\n| No access | Not specified in the source documents (CG-ALL-873) |"
+  },
+  {
+   "old": "the Workbench holds no copy of the appraisal and loads no SVAF file",
+   "new": "the Workbench holds no copy of the appraisal, reads it SELECT-only and loads no SVAF file"
+  },
+  {
+   "old": "are held in `valuation_ext` against the `valuation_key`",
+   "new": "are held in `valuation_ext` against the `valuation_key`, in table rwb_valuation.valuation_ext, which this service creates and owns"
+  },
+  {
+   "old": "| TC-E4-002-02-ITG | BR6 | Integration | Decision log forced to fail; MSG-P7-003 |",
+   "new": "| TC-E4-002-02-ITG | BR6 (run by RWB-S1-E4002-APP) | Integration | Decision log forced to fail; MSG-P7-003 |"
+  },
+  {
+   "old": "| TC-E4-002-05-ITG | BR3, BR7 | Integration | Appraisal older than the 12-month policy limit (date Not specified in the source documents (DOR-RWB-ITG-E4002-ITG-4)); no acceptance by the case owner |",
+   "new": "| TC-E4-002-05-ITG | AC3, BR3, BR7 | Integration | Appraisal older than the 12-month policy limit (date Not specified in the source documents (DOR-RWB-ITG-E4002-ITG-4)); no acceptance by the case owner |\n| TC-E4-002-06-ITG | AC4 | Integration | Consumed rwb-valuation call fails or does not answer; Not specified in the source documents (NEWAC-RWB-ITG-E4002-ITG-AC4) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22776",
+   "item": "GAP-0430",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Story builds against fakes until wave 3 entry check; the open values stay Not specified in the source documents (GAP-0430), agreed by owners then."
+  },
+  {
+   "ruling": "R-22777",
+   "item": "GAP-1682",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Story names no asset valuation operation; the appraisal has one writer, and this story reads it SELECT-only via v_ace_valuation (BR1)."
+  },
+  {
+   "ruling": "R-22778",
+   "item": "GAP-2594",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "S1 context pack (ownership rows) and ACE view catalogue",
+   "change": "Add a rwb_valuation table row for valuation_ext owned by this service; confirm the SELECT grant on recovery.v_ace_valuation and v_ace_batch_status. Story side done in BR1 and BR2.",
+   "note": "Story side: BR1 SELECT-only read, BR2 table ownership. Trigger is the route assessment (AC1), no Schedule. Table row and view grant confirmed cross-document."
+  },
+  {
+   "ruling": "R-24055",
+   "item": "CG-ALL-870",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E4-002-02-ITG marked run by RWB-S1-E4002-APP, the owner of AC2."
+  },
+  {
+   "ruling": "R-24056",
+   "item": "CG-ALL-871",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists for REQ-RDF-004, REQ-RDF-009 and REQ-DRI-001 with section 18 of RWB-ITG-E4002-ITG in its next version.",
+   "note": "Three requirements differ between §18 and RTM v7; the RTM side is aligned in its next version."
+  },
+  {
+   "ruling": "R-24057",
+   "item": "CG-ALL-873",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added Empty, Error and No access rows to SCR-13; each is Not specified because Screen Specifications v1 lacks them. Loading is already present."
+  },
+  {
+   "ruling": "R-28892",
+   "item": "GAP-2595",
+   "status": "Cross-document",
+   "section": "12.8",
+   "target": "Platform API registry artefact for the RWB-E4-002 rwb-valuation contract (S1)",
+   "change": "Publish v1 with the appraisal elements as one flat group in Approval, valuation_ext types from TSD S1 T3.1, 404 and 409 wording as messageId slots, and retention as an open P3 item.",
+   "note": "The contract sits in section 12.8, outside this chunk; the artefact is published through the platform registry in the same way as other contracts."
+  },
+  {
+   "ruling": "R-29305",
+   "item": "ACR-RWB-ITG-E4002-ITG-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 Given and Then now read through the rwb-source-data contract (DP-01, DP-05), not an ACE view."
+  },
+  {
+   "ruling": "R-30003",
+   "item": "NEWAC-RWB-ITG-E4002-ITG-AC3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC3 added to section 7 covering BR3 and BR7; TC-E4-002-05-ITG now covers AC3, BR3 and BR7."
+  },
+  {
+   "ruling": "R-30004",
+   "item": "NEWAC-RWB-ITG-E4002-ITG-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC4 added to section 7 for a failed or unanswered consumed call; TC-E4-002-06-ITG added to section 16 with data Not specified."
+  }
+ ]
+}

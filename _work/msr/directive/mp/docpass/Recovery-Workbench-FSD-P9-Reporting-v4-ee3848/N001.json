@@ -1,0 +1,118 @@
+{
+ "target": "03 Requirements and specifications/Recovery Workbench Functional Specifications by Module v7/Recovery Workbench FSD P9 Reporting v4.md",
+ "unit": "N001",
+ "items": [
+  "GAP-1650",
+  "GAP-1660"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 10
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "N001-F1",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "**Functional overview.** Builds the operational reporting from the log, so reporting and audit read the same record.",
+     "new": "**Functional overview.** Builds the operational reporting from the log, so reporting and audit read the same record.\n\n**Source of the record (D-RCV-60, GAP-1650).** The operational measures are built from the decision record that `rwb-reporting` receives on `rwb.decision-record.v1`; the live decision log store is not read for a measure. The nightly decision log copy to the data lake (JOB-13, RWB-E1-014) is retired (ADR-018), and so are its partitions and lake retention step. The checks of the copy are carried as the extract's own reconciliation: the extract is compared with the projection it was built from; when the record count or the last hash differ, it is not marked delivered, check REC-08 fails with MSG-P1-019 and the watermark stays unchanged; a rerun for a date writes no duplicates. The Story column of A2.4.4 keeps RWB-E1-014 as the trace to the retired story."
+    },
+    {
+     "fix_id": "N001-F2",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "**Integration points.** Power BI, Data lake\n\n**Prerequisites.** FEAT-RDF-20",
+     "new": "**Integration points.** Power BI, Kafka `rwb.decision-record.v1` (consumed)\n\n**Prerequisites.** FEAT-RDF-20"
+    },
+    {
+     "fix_id": "N001-F3",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "| AC-P9-004-01 | Daily copy | 380 entries were written on business date 2026-11-30 | JOB-13 runs at 01:00 on 2026-12-01 | the partition \"business_date=2026-11-30\" holds 380 rows And the manifest shows cumulative count 12,480 and last hash \"a3f1...09c2\" And the data lake copy has the same row count and the same last hash as the live log And the watermark moves to 12,480 and \"a3f1...09c2\" | RWB-E1-014 |",
+     "new": "| AC-P9-004-01 | Daily extract | 380 decision records of business date 2026-11-30 were received on `rwb.decision-record.v1` | the extract for 2026-11-30 is built and reconciled | the extract holds 380 rows And the cumulative count is 12,480 and the last hash \"a3f1...09c2\" And the extract has the same row count and the same last hash as the projection it was built from And the watermark moves to 12,480 and \"a3f1...09c2\" | RWB-E1-014 |"
+    },
+    {
+     "fix_id": "N001-F4",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "| AC-ALT-P9-004-01 | Retention rule | lake partitions for business dates 2024-11-29 and 2024-11-30 exist | the retention step of JOB-13 runs on 2026-12-01 | the partition \"business_date=2024-11-29\" moves to the archive tier And the job run records 1 partition archived under rule version \"RET-2026.11\" | RWB-E1-014 |",
+     "new": "| AC-ALT-P9-004-01 | Retired: retention of the lake copy (D-RCV-60, GAP-1650) | None; there are no lake partitions | None | None; not tested | RWB-E1-014 |"
+    },
+    {
+     "fix_id": "N001-F5",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "| AC-ALT-P9-004-02 | Two runs at the same time | JOB-13 is running for 2026-11-30 | a platform administrator posts a rerun of JOB-13 | the rerun is refused with status 409 and MSG-P2-006 And one run continues | RWB-E1-014 |",
+     "new": "| AC-ALT-P9-004-02 | Two runs at the same time | the extract for 2026-11-30 is running | a platform administrator posts a rerun of the same extract for the same date | the rerun is refused with status 409 and MSG-P2-006 And one run continues | RWB-E1-014 |"
+    },
+    {
+     "fix_id": "N001-F6",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "| AC-EXC-P9-004-01 | A copy that does not match is not published | the lake write for 2026-11-30 stops after 379 of 380 rows | the reconciliation step compares the copy with the live log | the partition is not marked complete And the watermark stays at 12,100 and \"77be...41d0\" And the job run shows check \"REC-08\" failed with MSG-P1-019 | RWB-E1-014 |",
+     "new": "| AC-EXC-P9-004-01 | An extract that does not match is not published | the delivery of the extract for 2026-11-30 stops after 379 of 380 rows | the reconciliation step compares the delivered extract with the projection | the extract is not marked delivered And the watermark stays at 12,100 and \"77be...41d0\" And the run shows check \"REC-08\" failed with MSG-P1-019 | RWB-E1-014 |"
+    },
+    {
+     "fix_id": "N001-F7",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "| AC-EXC-P9-004-02 | A repeat run for the same date writes no duplicates | JOB-13 completed for 2026-11-30 with 380 rows | JOB-13 is rerun for 2026-11-30 | the partition \"business_date=2026-11-30\" still holds 380 rows And the cumulative count stays 12,480 | RWB-E1-014 |",
+     "new": "| AC-EXC-P9-004-02 | A repeat run for the same date writes no duplicates | the extract for 2026-11-30 completed with 380 rows | it is rerun for 2026-11-30 | the extract for 2026-11-30 still holds 380 rows And the cumulative count stays 12,480 | RWB-E1-014 |"
+    },
+    {
+     "fix_id": "N001-F8",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "| AC-EXC-P9-004-03 | The decision log interface is unavailable | DecisionLogExport returns an error for every call | JOB-13 runs for 2026-11-30 | the job run ends with status \"FAILED\" and MSG-GEN-006 for system \"Decision log\" And the watermark and the previous partitions are unchanged | RWB-E1-014 |",
+     "new": "| AC-EXC-P9-004-03 | Retired: DecisionLogExport served the copy (D-RCV-60, GAP-1650) | None; the records are received on `rwb.decision-record.v1` | None | Not tested. Behaviour when the records do not arrive: Not specified in the source documents (GAP-1650) | RWB-E1-014 |"
+    },
+    {
+     "fix_id": "N001-F9",
+     "finding": "GAP-1650",
+     "op": "replace",
+     "old": "| AC-EXC-P9-004-04 | A day with no new decisions | no entry was written after \"77be...41d0\" | JOB-13 runs for 2026-11-30 | the partition holds 0 rows and the manifest shows cumulative count 12,100 And check \"REC-08\" passes | RWB-E1-014 |",
+     "new": "| AC-EXC-P9-004-04 | A day with no new decisions | no decision record was received after \"77be...41d0\" | the extract for 2026-11-30 is built and reconciled | the extract holds 0 rows and the cumulative count is 12,100 And check \"REC-08\" passes | RWB-E1-014 |"
+    },
+    {
+     "fix_id": "N001-F10",
+     "finding": "GAP-1660",
+     "op": "insert_after",
+     "old": "## A2. Functional decomposition",
+     "new": "\n**Shared messages (GAP-1660).** Every message ID in this document is kept as written. An ID with another module's prefix, such as MSG-P1-001, MSG-P1-012, MSG-P1-019, MSG-P2-006, MSG-P3-011, MSG-P3-028, MSG-P3-029 or MSG-P7-003, is a shared message, not a copy, and is not renumbered or reissued here. Of the messages with a module prefix named in GAP-1660, only MSG-P9-002 and MSG-P9-003 belong to this module."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-1650",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F7",
+      "F8",
+      "F9"
+     ],
+     "note": "A2.4 rebased on rwb.decision-record.v1. AC-ALT-004-01 and AC-EXC-004-03 marked retired; behaviour on non-arrival of records is unsourced. AC-EXC-004-05/-06 unchanged."
+    },
+    {
+     "item": "GAP-1660",
+     "status": "Resolved",
+     "fix_ids": [
+      "F10"
+     ],
+     "note": "Shared-message statement added at the head of A2; no message ID changed."
+    }
+   ]
+  }
+ ]
+}

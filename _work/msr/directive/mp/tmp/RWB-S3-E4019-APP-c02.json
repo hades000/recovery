@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "Given the data and the rule version this feature needs are in place",
+   "new": "Given the rwb-source-data contract fake serves the ACE data and the rule version this feature needs are in place"
+  },
+  {
+   "old": "| ACE balance and payment fixture | `v_ace_account`, `v_ace_payment` and `v_ace_batch_status` |",
+   "new": "| rwb-source-data contract fake (ACE balance and payment fixture) | `v_ace_account`, `v_ace_payment` and `v_ace_batch_status` |"
+  },
+  {
+   "old": "2. `GuaranteeClaimWorkflow`: the close branch opens the step, calls `EvaluateRules` and the GUARANTEE route set in force returns the row that applies, with the rule ID and the package version (R-GUA-19 for `RESUBMISSION_NOT_POSSIBLE`, R-GUA-26 for `BALANCE_SATISFIED`, R-GUA-27 for `LOSS_RECORDED`).",
+   "new": "2. `GuaranteeClaimWorkflow`: the close branch opens the step, calls `EvaluateRules` and the GUARANTEE route set in force returns the row that applies, with the rule ID and the package version (R-GUA-19 for `RESUBMISSION_NOT_POSSIBLE`, R-GUA-26 for `BALANCE_SATISFIED`, R-GUA-27 for `LOSS_RECORDED`). The lists and parameters it reads are the GUARANTEE route set in force and LOV-CLAIM-STATUS of TSD S3 T3.2, read under the reference-data contract of DP-06 and DP-07; no parameter key is named in the source documents (DOR-RWB-S3-E4019-APP-20)."
+  },
+  {
+   "old": "9. The officer reads the claim result, the position and the case status on SCR-17 through the gateway-bff composite route and through the claim read of this service, and works the returned case where the residual went back to the route decision (DP-19).",
+   "new": "9. The officer reads the claim result, the position and the case status on SCR-17 through the gateway-bff composite route and through the claim read of this service, and works the returned case where the residual went back to the route decision (DP-19). SCR-17 has four states: empty, loading, error and no access; the error state shows MSG-GEN-006, the no-access state shows MSG-P4-002, and the empty and loading texts are Not specified in the source documents (DOR-RWB-S3-E4019-APP-10)."
+  },
+  {
+   "old": "| None | Section 9 |",
+   "new": "| None | AC5 |"
+  },
+  {
+   "old": "| MSG-P7-009 | Section 12.8 |",
+   "new": "| MSG-P7-009 | AC6 |"
+  },
+  {
+   "old": "| MSG-P4-002 | Section 10 |",
+   "new": "| MSG-P4-002 | AC7 |"
+  },
+  {
+   "old": "| None | Section 12.5 |",
+   "new": "| None | AC8 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 The balance above zero after the share is not closed (new, D-RCV-60)\n    Given the rwb-source-data contract fake returns a balance above zero after the guaranteed share\n    Given a case in state SUBROGATION_POSITION\n    When the step tests the balance after the guaranteed share\n    Then the step answers R-GUA-25 and moves nothing\n\n  Scenario: AC6 A decision record refused for a missing field is not written (new, D-RCV-60)\n    Given the decision-record writer fake refuses the record with MSG-P7-009 and the field\n    When the claim result is recorded\n    Then nothing is written, the field is named and the claim stays where it was\n\n  Scenario: AC7 A role without the right is refused (new, D-RCV-60)\n    Given a user whose role does not include the right to re-run the step or read its result\n    When the user re-runs the step or reads its result\n    Then the access guard returns 403 with MSG-P4-002 and nothing changes\n\n  Scenario: AC8 A second case signal with the same cloud event id is deduped (new, D-RCV-60)\n    Given the branch is running on the case signal\n    When a second case signal with the same cloud event id arrives\n    Then the inbox dedupes it and no second result is written\n\n  Scenario: AC9 Rule IDs, conditions and messages come from rule rows (new, D-RCV-60)\n    Given the rule-package fake serves version GUA-2026.11\n    When the step runs\n    Then the rule IDs, conditions, to states and messages are read from rule rows and no value a business person may change is written in code\n\n  Scenario: AC10 The balance after the share is composed, not stored (new, D-RCV-60)\n    Given the rwb-source-data contract fake returns the balance and the guaranteed share\n    When the step composes the balance after the guaranteed share\n    Then the balance is computed per call and no balance, share or position column is written to rwb_guarantee\n\n  Scenario: AC11 The close is one of three answers of the route set (new, D-RCV-60)\n    Given the rule-package fake serves version GUA-2026.11 with R-GUA-19, R-GUA-25, R-GUA-26 and R-GUA-27\n    When the step tests the balance against zero\n    Then R-GUA-19 and R-GUA-27 return the full balance to the route decision and R-GUA-26 closes the guarantee and the case\n\n  Scenario: AC12 The balance and payments are read only, one hop, inside the budget (new, D-RCV-60)\n    Given the rwb-source-data contract fake serves the balance and the payments at the ACE batch date\n    When the step reads them\n    Then the reads are read only, one hop and inside the 2 s budget, and nothing is copied into rwb_guarantee\n\n  Scenario: AC13 A stale data product blocks the step (new, D-RCV-60)\n    Given the rwb-source-data contract fake serves a product dated yesterday\n    When the step runs\n    Then the step blocks, names the product and its date with MSG-P1-001 and decides nothing\n\n  Scenario: AC14 The claim result, the element and the decision record are written in one transaction (new, D-RCV-60)\n    Given the decision-record writer fake accepts the record with its chain sequence\n    When the step records the result\n    Then the claim result, the element and the decision record are committed together\n\n  Scenario: AC15 The case status and the case task are never written here (new, D-RCV-60)\n    Given the case-signal fake delivers the case signal\n    When the stage reports the outcome\n    Then the stage reports the outcome, the reason and the task due date, and the parent applies the case status, the closure, the task and the timer\n\n  Scenario: AC16 The claim status stays inside its published list (new, D-RCV-60)\n    Given LOV-CLAIM-STATUS of TSD S3 T3.2 is the published list\n    When the close is recorded\n    Then the status stays within PREPARING, FILED, DEFECT, PAID and REJECTED and the closing basis is carried in the element"
+  },
+  {
+   "old": "| TC-E4-019-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E4-019-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E4-019-07 | Operations, events and activities of section 12 | Component | The GuaranteeClose element and the claim contract against the RWB-S3-E4019-CON element fake |\n| TC-E4-019-08 | Tables of section 12.7 (ASM-3438) | Component | Only guarantee_claim and decision_record are written; the three ACE views are read at the batch date; no other table is named |\n| TC-E4-019-09 | AC5 | Component | A balance above zero after the share answers R-GUA-25 and moves nothing |\n| TC-E4-019-10 | AC6 | Component | A refused record with MSG-P7-009 and the field; nothing is written |\n| TC-E4-019-11 | AC7 | Component | A role without the right is refused with MSG-P4-002 |\n| TC-E4-019-12 | AC8 | Component | A second case signal with the same cloud event id is deduped |\n| TC-E4-019-13 | AC9 (BR1) | Component | Rule IDs, conditions and messages are read from rule rows |\n| TC-E4-019-14 | AC10 (BR2) | Component | The balance is composed per call; no balance, share or position column is written |\n| TC-E4-019-15 | AC11 (BR3) | Component | The three condition tests of the answered row |\n| TC-E4-019-16 | AC12 (BR4) | Component | Read only, one hop, inside the 2 s budget, nothing copied |\n| TC-E4-019-17 | AC13 (BR5) | Component | A product dated yesterday blocks the step with MSG-P1-001 |\n| TC-E4-019-18 | AC14 (BR6) | Component | The claim result, the element and the decision record commit together |\n| TC-E4-019-19 | AC15 (BR7) | Component | The stage reports the outcome and the parent applies the case status |\n| TC-E4-019-20 | AC16 (BR8) | Component | The status stays within LOV-CLAIM-STATUS and the closing basis is in the element |"
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, which is open and rests on assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 (DOR-RWB-S3-E4019-APP-18)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12453",
+   "item": "CG-ALL-8943",
+   "status": "Resolved",
+   "section": "4, 7, 12.8",
+   "target": "",
+   "change": "",
+   "note": "Fake row and AC1 Given now name the rwb-source-data contract fake (12.8); section 4 runtime reads unchanged."
+  },
+  {
+   "ruling": "R-19668",
+   "item": "DOR-RWB-S3-E4019-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 9 names the empty, loading, error and no-access states of SCR-17; empty and loading texts are not specified."
+  },
+  {
+   "ruling": "R-19669",
+   "item": "DOR-RWB-S3-E4019-APP-12",
+   "status": "Cross-document",
+   "section": "12.7, 16",
+   "target": "Test Cases v8",
+   "change": "Add TC-E4-019-01 to TC-E4-019-06 and new TC-E4-019-07 to TC-E4-019-20 to Test Cases v8; story side adds contract test TC-07 and boundary test TC-08.",
+   "note": "Story rows added in section 16 for contract and boundary tests; the workbook still needs the rows."
+  },
+  {
+   "ruling": "R-19670",
+   "item": "DOR-RWB-S3-E4019-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "DL10 named as open with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863."
+  },
+  {
+   "ruling": "R-19671",
+   "item": "DOR-RWB-S3-E4019-APP-20",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 2 names the GUARANTEE route set, LOV-CLAIM-STATUS and DP-06/DP-07; no parameter key in sources."
+  },
+  {
+   "ruling": "R-19672",
+   "item": "DOR-RWB-S3-E4019-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X2, X5, X6, X7 now covered by AC5 to AC8 with TC-E4-019-09 to -12 in section 16."
+  },
+  {
+   "ruling": "R-19673",
+   "item": "DOR-RWB-S3-E4019-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR1 to BR8 each covered by AC9 to AC16 and TC-E4-019-13 to -20 in section 16."
+  },
+  {
+   "ruling": "R-19674",
+   "item": "DOR-RWB-S3-E4019-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add decision_record as an entity or field; confirm DF-ACE-001 to DF-ACE-042 are fields of the ACE view named in section 11.",
+   "note": "decision_record is absent from LDM v9 and Data Classification v5; the story cannot supply it."
+  },
+  {
+   "ruling": "R-19675",
+   "item": "DOR-RWB-S3-E4019-APP-8",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity closeGuarantee of GuaranteeClaimWorkflow on queue rwb-guarantee.",
+   "note": "Activity closeGuarantee is missing from Temporal Catalog v1."
+  },
+  {
+   "ruling": "R-19676",
+   "item": "DOR-RWB-S3-E4019-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 standard text is not in the sources; text not changed without inventing it."
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+{
+ "edits": [
+  {
+   "old": "    Then the registry refuses it with MSG-P7-002 and version \"ENTRY-2027.01\" stays \"LOADED\"",
+   "new": "    Then the registry refuses it with MSG-P7-002 and version \"ENTRY-2027.01\" stays \"LOADED\"\n\n  Scenario: AC6 The boundary rules hold: no registry table is read, the parameters version is carried and the record holds no person (new, D-RCV-60)\n    Given the rwb-decision contract mock returns package version \"ENTRY-2027.01\" in state \"LOADED\"\n    When \"U-7101\" posts a change for packageCode \"ENTRY\" and that versionId with all seven checklist items\n    Then the reads and writes of this service reach only the permitted tables and no foreign key crosses a schema\n    Then the parameters version is the one read through DP-06 and carried on the change, and no threshold is held\n    Then the entry holds references, codes, versions, dates and times only\n    Then no route for a load or an approve is found in this service\n\n  Scenario: AC7 A call without an authenticated caller is answered 401 and an unknown change is answered 404 (new, D-RCV-60)\n    When POST /api/recovery/access/v1/admin/rule-changes is called without an authenticated caller\n    Then the response is 401 and no changeId is returned and no decision-record entry is appended\n    When GET /api/recovery/access/v1/admin/rule-changes/{changeId} is called for a changeId that does not exist\n    Then the response is 404 with message \"Not specified in the source documents (NEWAC-RWB-P4-E8007-APP-AC7)\"\n\n  Scenario: AC8 A consumed call that fails or does not answer writes nothing (new, D-RCV-60)\n    Given the rwb-decision contract mock fails or does not answer\n    When \"U-7101\" posts a change for packageCode \"ENTRY\" and that versionId with all seven checklist items\n    Then the response is \"Not specified in the source documents (NEWAC-RWB-P4-E8007-APP-AC8)\" and no changeId is returned\n    Then no decision-record entry is appended and no change exists for that version"
+  },
+  {
+   "old": "AC3 to AC5 are new under D-RCV-60 and test only what this story adds: the checklist gate and the right, the state gate, and the evidence and four-eyes answer of the change.",
+   "new": "AC3 to AC8 are new under D-RCV-60 and test only what this story adds: the checklist gate and the right, the state gate, the evidence and four-eyes answer of the change, the boundary rules, the 401 and 404 answers, and the failed consumed call."
+  },
+  {
+   "old": "| TC-E8-007-09 | BR13 | Component | A request to a load or approve path of RWB-P4-AD011-APP or RWB-P4-AD012-APP finds no route in this service, and no registry load or approve call is made |",
+   "new": "| TC-E8-007-09 | BR13 | Component | A request to a load or approve path of RWB-P4-AD011-APP or RWB-P4-AD012-APP finds no route in this service, and no registry load or approve call is made |\n| TC-E8-007-10 | AC6, BR7, BR11, BR12, BR13 | Component | The registry fake answers version \"ENTRY-2027.01\" `LOADED`: the table reads, the parameters version, the entry fields and the route list of this service are checked against the boundary rules |\n| TC-E8-007-11 | AC7 | Component | A call without an authenticated caller: 401 and no change; a read of an unknown changeId: 404; neither writes an entry |\n| TC-E8-007-12 | AC8 | Component | The rwb-decision contract mock fails or does not answer on a change for \"ENTRY\": the answer is as AC8 states, with no changeId, no entry and no change for that version |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25578",
+   "item": "CG-ALL-5454",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 already names Empty, Loading, Error and No access for SCR-41, each marked Not specified (DOR-RWB-P4-E8007-APP-10). No edit needed."
+  },
+  {
+   "ruling": "R-30993",
+   "item": "NEWAC-RWB-P4-E8007-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC6 added as a boundary criterion covering BR7, BR11, BR12 and BR13; TC-E8-007-10 added. Architecture rules are tested as boundaries."
+  },
+  {
+   "ruling": "R-30994",
+   "item": "NEWAC-RWB-P4-E8007-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC7 added for 401 and 404 of the provided operations; the message is marked Not specified; TC-E8-007-11 added."
+  },
+  {
+   "ruling": "R-30995",
+   "item": "NEWAC-RWB-P4-E8007-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 added for a consumed call that fails or does not answer; the status and message are marked Not specified; TC-E8-007-12 added."
+  }
+ ]
+}

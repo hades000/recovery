@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| Architecture decisions | ADR-013, ADR-014, ADR-015, ADR-018, ADR-019, ADR-020, ADR-021, ADR-022 |",
+   "new": "| Architecture decisions | ADR-013, ADR-014, ADR-015, ADR-018, ADR-019, ADR-020, ADR-021, ADR-022 |\n| L3 process | Not specified in the source documents (DOR-RWB-P9-E8002-APP-2) |"
+  },
+  {
+   "old": "The legacy Flyway name of the module is the monolith's; the target migration, if one is needed at all, takes the next number of the `rwb_reporting` sequence.",
+   "new": "The legacy Flyway name of the module is the monolith's; the target migration, if one is needed at all, takes the next number of the `rwb_reporting` sequence.\n\nReference data: the parameters read are Not specified in the source documents (DOR-RWB-P9-E8002-APP-20); the rule rows and the rule version are read on the reference-data contract of rwb-decision under DP-06 and DP-07 (BR1). Names no source fixes are placeholders: the classification rule set, the upstream reclassification event of rwb-source-data (named by the Kafka Topic and Event Catalog) and the step inside JOB-15 are Not specified in the source documents (GAP-2585). Each change record carries FEAT-RPT-10 as its decision reference."
+  },
+  {
+   "old": "`recovery_case`, `decision_log_entry` and `rule_row` are other owners' and are named here only as consumed answers. No foreign key leaves `rwb_reporting` and no statement reads another `rwb_*` schema or a `v_ace_*` view.",
+   "new": "`recovery_case`, `decision_log_entry` and `rule_row` are other owners' and are named here only as consumed answers. No foreign key leaves `rwb_reporting` and no statement reads another `rwb_*` schema or a `v_ace_*` view.\n\nOwner service of each table above: `rwb-reporting` (the service identity of rwb-reporting, section 10); no other service writes them."
+  },
+  {
+   "old": "| X7 | The caller lacks Reporting R on the read, or lacks the step's service right | 403 with the refusal; nothing changes | MSG-P4-002 | TC-E8-002-03 |",
+   "new": "| X7 | The caller lacks Reporting R on the read, or lacks the step's service right | 403 with the refusal; nothing changes | MSG-P4-002 | AC3; TC-E8-002-03 |"
+  },
+  {
+   "old": "| X8 | A component, a statement or a test reaches another `rwb_*` schema or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | Section 17 |",
+   "new": "| X8 | A component, a statement or a test reaches another `rwb_*` schema or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | AC4; Section 17 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 A caller without the right is refused (new, D-RCV-60)\n    Given the caller lacks Reporting R on the read or lacks the step's service right\n    When the caller reads the reported rows\n    Then the caller gets 403 with the refusal, the user sees MSG-P4-002 and nothing changes\n\n  Scenario: AC4 A statement that reaches another schema is refused (new, D-RCV-60)\n    Given a component, a statement or a test reaches another `rwb_*` schema or a `v_ace_*` view\n    When the statement runs\n    Then the grant refuses the statement and the boundary test fails the build\n\n  Scenario: AC5 A decision keeps the version it was taken under (new, D-RCV-60)\n    Given a decision was taken under a rule version and a newer version has a valid-from date\n    When the open account is recomputed\n    Then the decision keeps its version and the new version applies from its valid-from date only\n\n  Scenario: AC6 No personal data enters a row, an event, a workflow input or a log (new, D-RCV-60)\n    Given a snapshot row, an event, a workflow input or a log is written for a changed account\n    When the write completes\n    Then it holds account and case references, codes, dates and counts only"
+  },
+  {
+   "old": "| BR9 | No personal data enters a snapshot row, an event, a workflow input or a log: account and case references, codes, dates and counts only | Guardrail 2 |",
+   "new": "| BR9 | No personal data enters a snapshot row, an event, a workflow input or a log: account and case references, codes, dates and counts only | Guardrail 2 |\n\nCoverage by criterion: BR1, BR2 and BR3 under AC1; BR4 under AC5; BR5 under AC1 (through X5); BR6 under AC2; BR7 under AC1 (through X6); BR8 under AC4 and TC-E8-002-05; BR9 under AC6 and TC-E8-002-09."
+  },
+  {
+   "old": "The rights are the rows of TSD P9 T6.1 and nothing wider; no person is named, every duty is a role.",
+   "new": "The rights are the rows of TSD P9 T6.1 and nothing wider; no person is named, every duty is a role.\n\nEach REST operation of this story is authorised by the rwb-access authorise check (DP-08) before it runs; the rights above are the inputs of that check."
+  },
+  {
+   "old": "| MSG-P3-027 | No rule version is in force on the business date | The {table} load was refused: {check}. The version in force is unchanged. |",
+   "new": "| MSG-P3-027 | No rule version is in force on the business date | The {table} load was refused: {check}. The version in force is unchanged. |\n| MSG-GEN-003 | Not specified in the source documents (DOR-RWB-P9-E8002-APP-9) | Not specified in the source documents (DOR-RWB-P9-E8002-APP-9) |"
+  },
+  {
+   "old": "| TC-E8-002-05 | §12.7 tables (ASM-3438) | Component | Boundary check of each table in §12.7: the STAGE, AGE_BAND and ROUTE rows of the business date in measure_snapshot; measure_definition and measure_publish read only; one decision_record per changed account in the same transaction |",
+   "new": "| TC-E8-002-05 | §12.7 tables (ASM-3438) | Component | Boundary check of each table in §12.7: the STAGE, AGE_BAND and ROUTE rows of the business date in measure_snapshot; measure_definition and measure_publish read only; one decision_record per changed account in the same transaction |\n| TC-E8-002-06 | Access (AC3, X7) | Contract | A caller without Reporting R or the service right is refused with 403 and MSG-P4-002; nothing changes |\n| TC-E8-002-07 | Boundary (AC4, X8) | Component | A statement reaching another rwb_* schema or a v_ace_* view is refused by the grant and fails the build |\n| TC-E8-002-08 | Version (AC5, BR4) | Component | A decision keeps the rule version it was taken under; a recompute applies the new version from its valid-from date only |\n| TC-E8-002-09 | Personal data (AC6, BR9) | Contract | A snapshot row, event, workflow input or log for a changed account holds account and case references, codes, dates and counts only |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18503",
+   "item": "DOR-RWB-P9-E8002-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "L3 process row added as a placeholder; feature is already in the Requirement and feature row."
+  },
+  {
+   "ruling": "R-18504",
+   "item": "DOR-RWB-P9-E8002-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "DP-06 and DP-07 named on the reference-data read; parameter names not in sources, so placeholder added."
+  },
+  {
+   "ruling": "R-18505",
+   "item": "DOR-RWB-P9-E8002-APP-24",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "",
+   "note": "Owner service stated for all four tables as the rwb-reporting service identity; no column added."
+  },
+  {
+   "ruling": "R-18506",
+   "item": "DOR-RWB-P9-E8002-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC3 for X7 and AC4 for X8 with TC-E8-002-06 and TC-E8-002-07; section 5 Covered by updated."
+  },
+  {
+   "ruling": "R-18507",
+   "item": "DOR-RWB-P9-E8002-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Coverage paragraph maps BR1 to BR9; added AC5 for BR4 and AC6 for BR9 with TC-E8-002-08 and TC-E8-002-09."
+  },
+  {
+   "ruling": "R-18508",
+   "item": "DOR-RWB-P9-E8002-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "REST operations now name the rwb-access authorise check (DP-08); §10 roles unchanged."
+  },
+  {
+   "ruling": "R-18509",
+   "item": "DOR-RWB-P9-E8002-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add or confirm the entity name decision_record (local record per changed account, DP-03) in both documents.",
+   "note": "decision_record is not an entity or field in either model; story side needs no change."
+  },
+  {
+   "ruling": "R-18510",
+   "item": "DOR-RWB-P9-E8002-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-GEN-003 row added with placeholders. MSG-P1-001 and MSG-P3-027 text needs Standard v4 wording, which is not in this chunk."
+  },
+  {
+   "ruling": "R-23165",
+   "item": "GAP-1653",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Architecture v5 (slide 41, row P9)",
+   "change": "Add classification, staging and re-ageing to P9 scope; name the service holding the duty (case or source-data service); owner Solution architect.",
+   "note": "Architecture scope gap; the story already builds the duty in P9 under BR-083 pending confirmation."
+  },
+  {
+   "ruling": "R-23166",
+   "item": "GAP-2585",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Decision reference FEAT-RPT-10 and held location stated; names no source fixes kept as placeholders pending the event catalogue."
+  }
+ ]
+}

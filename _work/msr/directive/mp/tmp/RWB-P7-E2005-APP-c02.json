@@ -1,0 +1,172 @@
+{
+ "edits": [
+  {
+   "old": "| X1 | A role without Decision log R queries | Refused with 403; the refusal is recorded as an access record | MSG-P4-002 | AC3 |",
+   "new": "| X1 | A role without Decision log R queries | Refused with 403; the refusal is recorded as an access record; SCR-38 shows the no access state | MSG-P4-002 | AC3 |"
+  },
+  {
+   "old": "| X5 | No entry matches | 200 with an empty page and `total` 0; SCR-38 shows the empty state | None | AC9 |",
+   "new": "| X5 | No entry matches | 200 with an empty page and `total` 0; SCR-38 shows the empty state; the loading state of SCR-38 is Not specified in the source documents (DOR-RWB-P7-E2005-APP-10) | None | AC9 |"
+  },
+  {
+   "old": "| X7 | The ledger query does not answer inside the budget | 503 with the platform unavailable message; the page is not partially returned | MSG-GEN-006 | Section 12.1 |",
+   "new": "| X7 | The ledger query does not answer inside the budget | 503 with the platform unavailable message; the page is not partially returned; SCR-38 shows the error state | MSG-GEN-006 | AC11 |"
+  },
+  {
+   "old": "| X8 | An entry is asked for by ID and is absent or outside the scope | 404; nothing is read and nothing is recorded as a successful read | MSG-P4-003 | Section 12.1 |",
+   "new": "| X8 | An entry is asked for by ID and is absent or outside the scope | 404; nothing is read and nothing is recorded as a successful read | MSG-P4-003 | AC12 |"
+  },
+  {
+   "old": "    Then 12 entries return, grouped by case and in chain_seq order within each case",
+   "new": "    Then 12 entries return, grouped by case and in chain_seq order within each case\n\n  Scenario: AC11 The ledger query that does not answer inside the budget returns no page (new, D-RCV-60)\n    Given the ledger read of the query runs past the 2 s budget of BR13\n    When \"U-8101\" calls GET /decision-log with ruleId \"R-LIT-03\" and ruleVersion \"LIT-2026.12\"\n    Then the call returns status 503 with message MSG-GEN-006\n    Then no page is returned, not even a partial one\n\n  Scenario: AC12 An entry asked for by ID that is absent or outside the scope is refused (new, D-RCV-60)\n    Given the rwb-access contract mock returns \"U-8104\" with the Decision log right \"R\" and scope \"OWN\"\n    Given the rwb-case contract mock returns case \"RW-2026-000123\" with an owner other than \"U-8104\"\n    When \"U-8104\" asks for the entry with chain_seq 230 of case \"RW-2026-000123\" by ID\n    Then the call returns status 404 with message MSG-P4-003\n    Then when \"U-8101\" asks by ID for an entry that does not exist in case \"RW-2026-000123\", the call returns status 404 with message MSG-P4-003\n    Then nothing is recorded as a successful read"
+  },
+  {
+   "old": "| BR2 | The scope filters entries through their case before any is returned, and the excluded count is never shown | LOV-SCOPE; legacy BR2; Admin and access model, section 4.3 |",
+   "new": "| BR2 | The scope filters entries through their case before any is returned, and the excluded count is never shown; the case facts of the scope test come from the rwb-case read in the contract dependencies | LOV-SCOPE; legacy BR2; Admin and access model, section 4.3 |"
+  },
+  {
+   "old": "| BR4 | An entry that does not verify is returned flagged, never hidden, and one incident per entry goes to Compliance | NFR-035; REQ-DRI-002; legacy BR4 |",
+   "new": "| BR4 | An entry that does not verify is returned flagged, never hidden, and one incident per entry goes to the Compliance queue read from platform configuration | NFR-035; REQ-DRI-002; legacy BR4 |"
+  },
+  {
+   "old": "| BR6 | Page size is 1 to `rwb.decision.query.max-size` and a population holds at most `rwb.decision.query.max-cases` cases, both parameters and not code | DP-06; legacy BR6; DL11 |",
+   "new": "| BR6 | Page size is 1 to `rwb.decision.query.max-size` and a population holds at most `rwb.decision.query.max-cases` cases, both parameters and not code | DP-06; legacy BR6; DL11 (open; assumptions ASM-0553, ASM-0703, ASM-1051, ASM-1104) |"
+  },
+  {
+   "old": "| BR9 | The right, the role and the scope come from the authorise contract of rwb-access through the guard library; no role name and no scope value is written in code | DP-08; FSD P4 access model; RWB-P4-E1037-CON |",
+   "new": "| BR9 | The right, the role and the scope come from the authorise contract of rwb-access through the guard library, which carries the scope kind and the case-scope predicate applied to the case ID of each entry inside the query; no role name and no scope value is written in code | DP-08; FSD P4 access model; RWB-P4-E1037-CON |"
+  },
+  {
+   "old": "| BR15 | The answer carries IDs, codes, versions, hashes, dates and counts; a personal field in `recommendation` or `actions` is masked per the masking policy before it is returned or exported | NFR-039; NFR-040; Template and Rules §R7.2 s17 |",
+   "new": "| BR15 | The answer carries IDs, codes, versions, hashes, dates and counts and carries personal data only in `recommendation` and `actions`; a personal field in those two is masked per the masking policy before it is returned or exported; the field list of personal data is Not specified in the source documents (DOR-RWB-P7-E2005-APP-11) | NFR-039; NFR-040; Template and Rules §R7.2 s17 |"
+  },
+  {
+   "old": "| BR17 | The retention of the ledger is Compliance's and is not yet a value, so nothing in this story purges, archives or truncates an entry | NFR-030; DL26; GAP-1241 |",
+   "new": "| BR17 | The retention of the ledger is Compliance's and is not yet a value, so nothing in this story purges, archives or truncates an entry | NFR-030; DL26 (open; assumptions ASM-0247, ASM-0264, ASM-0275, ASM-0355); GAP-1241 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | The ledger does not answer inside the budget | {system} is not available. Your request is queued and will be retried. |",
+   "new": "| MSG-GEN-006 | The ledger does not answer inside the budget | {system} is not available. Your request is queued and will be retried. |\n| MSG-P7-009 | Not specified in the source documents (DOR-RWB-P7-E2005-APP-9) | Not specified in the source documents (DOR-RWB-P7-E2005-APP-9) |"
+  },
+  {
+   "old": "Thai text for each message follows decision DL10, as the legacy story states;",
+   "new": "Thai text for each message follows decision DL10 (open; assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863), as the legacy story states;"
+  },
+  {
+   "old": "| TC-E2-005-01 | AC1, BR1, BR3 | End to end | Case with six synthetic entries |",
+   "new": "| TC-E2-005-01 | AC1, BR1, BR3, BR16 | End to end | Case with six synthetic entries |"
+  },
+  {
+   "old": "| TC-E2-005-12 | Principle 5 | NFR | The decision log write of the access event forced to fail; the query returns nothing |",
+   "new": "| TC-E2-005-12 | Principle 5, BR11, BR12 | NFR | The decision log write of the access event forced to fail; the query returns nothing |\n| TC-E2-005-13 | AC11, BR13 | NFR | Ledger read held past the 2 s budget |\n| TC-E2-005-14 | AC12, BR2, BR9 | End to end | Entry 230 of RW-2026-000123 asked for by U-8104, whose case has another owner |\n| TC-E2-005-15 | Section 12, BR9, BR10, BR13, BR14, BR15 | Contract | Contract mocks of rwb-access and rwb-case for the operations of section 12 |\n| TC-E2-005-16 | Section 12.7, BR7, BR8, BR17 | Component | Service login tried with a write on decision_log_entry; SELECT only |"
+  },
+  {
+   "old": "| Legacy criteria owned here | AC1, AC2, AC3, AC4, AC5, AC6, AC7, AC8, AC9, AC10, each tagged (legacy RWB-E2-005 ACn) |",
+   "new": "| Legacy criteria owned here | AC1, AC2, AC3, AC4, AC5, AC6, AC7, AC8, AC9, AC10, each tagged (legacy RWB-E2-005 ACn); AC11 and AC12 are new under D-RCV-60 and carry no legacy tag |"
+  },
+  {
+   "old": "| Test cases | TC-E2-005-01 to TC-E2-005-12, all twelve in the legacy order |",
+   "new": "| Test cases | TC-E2-005-01 to TC-E2-005-16; TC-E2-005-01 to TC-E2-005-12 in the legacy order, TC-E2-005-13 to TC-E2-005-16 new under D-RCV-60 |"
+  },
+  {
+   "old": "| REQ-DRI-012 | Audit queries the ledger for a population of cases with inputs, versions, approver and final call | Business Requirements Epic 2, section 3.7; Program, section 5.7 | FEAT-CHO-11 | 17 Run the decision center | BR1, BR2, BR6, BR16 | TC-E2-005-01, TC-E2-005-02, TC-E2-005-04, TC-E2-005-06, TC-E2-005-09, TC-E2-005-10 |",
+   "new": "| REQ-DRI-012 | Audit queries the ledger for a population of cases with inputs, versions, approver and final call | Business Requirements Epic 2, section 3.7; Program, section 5.7 | FEAT-CHO-11 | 17 Run the decision center | BR1, BR2, BR6, BR16 | TC-E2-005-01, TC-E2-005-02, TC-E2-005-04, TC-E2-005-06, TC-E2-005-09, TC-E2-005-10, TC-E2-005-13, TC-E2-005-14, TC-E2-005-15 |"
+  },
+  {
+   "old": "| REQ-DRI-002 | The ledger is append only and a correction is a new record naming the one it corrects | Business Requirements Epic 2, section 3.7; Program, section 5.7 | FEAT-DRI-01 | 17 Run the decision center | BR4, BR7, BR8 | TC-E2-005-01, TC-E2-005-05 |",
+   "new": "| REQ-DRI-002 | The ledger is append only and a correction is a new record naming the one it corrects | Business Requirements Epic 2, section 3.7; Program, section 5.7 | FEAT-DRI-01 | 17 Run the decision center | BR4, BR7, BR8 | TC-E2-005-01, TC-E2-005-05, TC-E2-005-16 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18014",
+   "item": "DOR-RWB-P7-E2005-APP-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X1 shows the no access state; X5 names the loading state as not specified; X7 shows the error state.",
+   "note": "Empty, no access and error states now in §5; loading state recorded as not specified in the source documents."
+  },
+  {
+   "ruling": "R-18015",
+   "item": "DOR-RWB-P7-E2005-APP-11",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR15 names recommendation and actions as the only carriers of personal data and points to the classification field list.",
+   "note": "Personal-data carriage now stated in BR15; the field list itself is not in the source documents."
+  },
+  {
+   "ruling": "R-18016",
+   "item": "DOR-RWB-P7-E2005-APP-12",
+   "status": "Resolved",
+   "section": "16, 18",
+   "target": "",
+   "change": "Added TC-E2-005-15 (contract test of §12 operations) and TC-E2-005-16 (boundary test of §12.7 tables); §18 lists aligned to §16.",
+   "note": "§16 now has 16 test cases; §18 test lists updated. RTM v7 not read here, so alignment is to §16 only."
+  },
+  {
+   "ruling": "R-18017",
+   "item": "DOR-RWB-P7-E2005-APP-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "No edit: the header Ready to start row already gates on RWB-P7-E1008-APP, and the 13 named dependencies match the rows.",
+   "note": "Unfinished build dependency RWB-P7-E1008-APP is the start gate in the header; 13 dependencies are named correctly."
+  },
+  {
+   "ruling": "R-18018",
+   "item": "DOR-RWB-P7-E2005-APP-18",
+   "status": "Resolved",
+   "section": "8, 14",
+   "target": "",
+   "change": "Added assumptions to DL11 (BR6), DL26 (BR17) and DL10 (§14). DL10 assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863; DL11 ASM-0553, ASM-0703, ASM-1051, ASM-1104; DL26 ASM-0247, ASM-0264, ASM-0275, ASM-0355.",
+   "note": "Each open decision now cites its assumptions; decisions remain open as the item states."
+  },
+  {
+   "ruling": "R-18019",
+   "item": "DOR-RWB-P7-E2005-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC11 (ledger budget, 503 MSG-GEN-006) and AC12 (entry by ID absent or out of scope, 404 MSG-P4-003); X7 and X8 now cite them.",
+   "note": "X7 and X8 now covered by AC11 and AC12 with new Gherkin scenarios; §7 holds 12 owned criteria."
+  },
+  {
+   "ruling": "R-18020",
+   "item": "DOR-RWB-P7-E2005-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "BR7 and BR8 to TC-16; BR9 to TC-14, TC-15; BR10, BR14, BR15 to TC-15; BR11 and BR12 to TC-12; BR13 to TC-13, TC-15; BR16 to TC-01; BR17 to TC-16.",
+   "note": "All 17 rules now covered by at least one test case; BR1 to BR6 coverage unchanged."
+  },
+  {
+   "ruling": "R-18021",
+   "item": "DOR-RWB-P7-E2005-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Added MSG-P7-009 row to §14 with its text and trigger recorded as not specified in the source documents.",
+   "note": "MSG-P7-009 now listed in §14 (8 messages); its text and trigger are not in any source read here."
+  },
+  {
+   "ruling": "R-21986",
+   "item": "GAP-2434",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "API specification, service rwb-decision, operation API-P7-006",
+   "change": "Add finalCall to the query parameters of API-P7-006 (Query: caseId, decision, ruleId, approver, from, to, page, size, finalCall).",
+   "note": "Needs API yaml change. Story §12 answer shape of the creation filter is not in this chunk and is not edited here."
+  },
+  {
+   "ruling": "R-22090",
+   "item": "GAP-1245",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR2 names rwb-case read for scope facts; BR4 routes incidents to the Compliance queue from platform configuration; BR9 states the authorise scope predicate applied per entry.",
+   "note": "Scope predicate and Compliance queue now stated in §8; owner confirmation with P4 and P3 owners remains a process step."
+  }
+ ]
+}

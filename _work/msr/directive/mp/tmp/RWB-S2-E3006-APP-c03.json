@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P1-001 | A data product the step reads is older than today's ACE batch | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | A data product the step reads is older than today's ACE batch | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "1. rwb-case: the parent `CaseWorkflow` forwards the case signal to the `TreatmentWorkflow` child of the case when the treatment reaches the plan-installment step (Temporal and Drools Design slide 13; EV-29).",
+   "new": "1. rwb-case: the parent `CaseWorkflow` forwards the case signal to the `TreatmentWorkflow` child of the case when the treatment reaches the plan-installment step (Temporal and Drools Design slide 13; EV-29). No Schedule and no batch trigger starts this step (GAP-1702); the case signal is the trigger named for it (GAP-2656; ASM-4364)."
+  },
+  {
+   "old": "obtains the data product date through the rwb-source-data contract and compares it with today's business date",
+   "new": "obtains the data product date from `recovery.v_ace_batch_status`, this service's own SELECT-only view (GAP-2654), and compares it with today's business date"
+  },
+  {
+   "old": "obtains `total_balance`, `contract_no`, `product_category_efs` and the account identifiers of each account of the case through the rwb-source-data contract at the batch date, read only, one hop, inside the 2 s budget, and keeps no copy (DP-05).",
+   "new": "obtains `total_balance`, `contract_no`, `product_category_efs` and the account identifiers of each account of the case from `recovery.v_ace_account` at the batch date, with the batch date read from `recovery.v_ace_batch_status`, read only through this service's own SELECT-only views, one hop, inside the 2 s budget, and keeps no copy (DP-05; GAP-2654)."
+  },
+  {
+   "old": "reads the band bounds, the floor and the freshness limit from the reference sets of rwb-case through the client library, with the set version, and refuses the step when no set is in force with MSG-GEN-006 (DP-07).",
+   "new": "reads the band bounds, the floor and the freshness limit from the reference sets of rwb-case through the client library, with the set version, and refuses the step when no set is in force with MSG-GEN-006 (DP-07). The set identifiers are not specified in the source documents (GAP-2652)."
+  },
+  {
+   "old": "the ALS balance obtained at the ACE batch date through the rwb-source-data contract (DP-05",
+   "new": "the ALS balance obtained at the ACE batch date from `recovery.v_ace_account` through this service's own SELECT-only views (DP-05; GAP-2654"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19315",
+   "item": "DOR-RWB-S2-E3006-APP-8",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity calculatePlanInstallment under P2 Activity so the catalog lists the activity used by TreatmentWorkflow.",
+   "note": "Activity is a step of TreatmentWorkflow on rwb-treatment; the catalog entry belongs to the Temporal Catalog, not this story."
+  },
+  {
+   "ruling": "R-19316",
+   "item": "DOR-RWB-S2-E3006-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text in section 14 now matches Error and Message Standard v4. Message list unchanged."
+  },
+  {
+   "ruling": "R-22739",
+   "item": "GAP-1707",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "rwb-decision",
+   "change": "Name package codes, labels and owners for RESTRUCTURE, PAYMENT_MATCH and BOOKING_MATCH before wave 3 release; record package and rule version on every treatment.",
+   "note": "Story already records package version on each treatment; the package register belongs to rwb-decision."
+  },
+  {
+   "ruling": "R-22740",
+   "item": "GAP-1702",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Flow step 1 states no Schedule or batch trigger starts the step; the case signal is the trigger."
+  },
+  {
+   "ruling": "R-22741",
+   "item": "GAP-2654",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Steps 3 and 4 and the change log read the two v_ace views of this service. SELECT grant is a platform action before wave 2 tag."
+  },
+  {
+   "ruling": "R-22742",
+   "item": "GAP-2652",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Technical Service Design S2 (TSD S2)",
+   "change": "Correct T5.2 so reference data is read from P3 rwb-case through RWB-P3-E1043-CON; publish set identifiers and freshness limit before wave 2 tag.",
+   "note": "Story states the P3 read and marks set identifiers not specified; the TSD and P3 reference-set rows are other documents."
+  },
+  {
+   "ruling": "R-22744",
+   "item": "GAP-2651",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Story keeps the element on the treatment row with no new object; field list is not specified and is confirmed at wave 2 freeze."
+  },
+  {
+   "ruling": "R-22746",
+   "item": "GAP-2656",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Flow step 1 names the case signal as the trigger and adds no Kafka subscription; confirmation sits at wave 2 freeze."
+  },
+  {
+   "ruling": "R-22747",
+   "item": "GAP-2657",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Service Story Catalog",
+   "change": "Attribute AC2 and TC-E3-006-02 to the rwb-treatment settlement state story, or raise a delta story for it.",
+   "note": "Story already states AC2 is not assigned to it; catalog attribution belongs to the coordinator."
+  },
+  {
+   "ruling": "R-26908",
+   "item": "CG-ALL-8552",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4: Today's load has not arrived."
+  }
+ ]
+}

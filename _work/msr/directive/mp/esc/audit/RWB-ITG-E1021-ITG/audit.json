@@ -1,0 +1,177 @@
+{
+ "stage": "audit",
+ "story": "RWB-ITG-E1021-ITG",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 10
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-23781",
+     "item": "CG-ALL-261",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "TC-E1-021-11, 12 and 14 repointed to AC2, AC8 and AC9, the section 7 criteria they test. The AC cell of TC-E1-021-13 was not visible to this audit and still needs checking."
+    },
+    {
+     "ruling": "R-29779",
+     "item": "NEWAC-RWB-ITG-E1021-ITG-AC15",
+     "status": "Resolved",
+     "section": "5, 7, 16",
+     "target": "",
+     "change": "",
+     "note": "Covered by AC11 and TC-E1-021-18-ITG, linked in section 5 X1; no duplicate criterion added."
+    },
+    {
+     "ruling": "R-29780",
+     "item": "NEWAC-RWB-ITG-E1021-ITG-AC16",
+     "status": "Resolved",
+     "section": "5, 7, 16",
+     "target": "",
+     "change": "",
+     "note": "Covered by AC12 and TC-E1-021-19-ITG, linked in section 5 X3; no duplicate criterion added."
+    },
+    {
+     "ruling": "R-29781",
+     "item": "NEWAC-RWB-ITG-E1021-ITG-AC17",
+     "status": "Resolved",
+     "section": "5, 7, 16",
+     "target": "",
+     "change": "",
+     "note": "Covered by AC13 and TC-E1-021-20-ITG, linked in section 5 X4; no duplicate criterion added."
+    },
+    {
+     "ruling": "R-29782",
+     "item": "NEWAC-RWB-ITG-E1021-ITG-AC18",
+     "status": "Resolved",
+     "section": "5, 7, 16",
+     "target": "",
+     "change": "",
+     "note": "Covered by AC14 and TC-E1-021-21-ITG, linked in section 5 X5; no duplicate criterion added."
+    },
+    {
+     "ruling": "R-29783",
+     "item": "NEWAC-RWB-ITG-E1021-ITG-AC19",
+     "status": "Resolved",
+     "section": "5, 7, 16",
+     "target": "",
+     "change": "",
+     "note": "Covered by AC15 and TC-E1-021-22-ITG, linked in section 5 X9; no duplicate criterion added."
+    },
+    {
+     "ruling": "R-29784",
+     "item": "NEWAC-RWB-ITG-E1021-ITG-AC20",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Added as AC16, asserting BR10 to BR18 on transfer paths, with TC-E1-021-27-ITG."
+    },
+    {
+     "ruling": "R-29785",
+     "item": "NEWAC-RWB-ITG-E1021-ITG-AC21",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Added as AC17, for a failed or silent consumed call with no case move, with TC-E1-021-28-ITG."
+    }
+   ],
+   "edits": [
+    {
+     "old": "  Scenario: AC15 Two transfers reach the same case in the same second and the second is refused with MSG-GEN-004 (new, D-RCV-60)\n    Given case RW-2026-000313 is in queue \"TDR-BKK-CO\" with owner U-21\n    When two transfer triggers for case RW-2026-000313 commit in the same second\n    Then the first transfer commits and the case moves once\n    Then the second transfer is refused on the version check with MSG-GEN-004\n    Then the second transfer is recorded as rejected and writes no decision record\n\n  Scenario: AC16 A named target owner at the caseload cap is refused with status 422 and nothing changes (new, D-RCV-60)\n    Given owner U-24 holds 150 open cases in queue \"LIT-BKK-OFF\"\n    Given case RW-2026-000304 is in queue \"TDR-BKK-CO\" with owner U-21\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000304/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-24\n    Then the call returns status 422 with MSG-P3-002\n    Then the case keeps its queue, its owner and its assignment\n\n  Scenario: AC17 A transfer of a closed case is refused with status 409 and nothing changes (new, D-RCV-60)\n    Given case RW-2026-000305 is closed in queue \"TDR-BKK-CO\" with owner U-21\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000305/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the call returns status 409 with MSG-P3-005\n    Then the case keeps its queue, its owner and its assignment\n\n  Scenario: AC18 A manual transfer whose decision record cannot be written is refused and the case keeps its queue and owner (new, D-RCV-60)\n    Given the decision record write of rwb-case is forced to fail for a manual call\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000306/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the transfer is refused with MSG-P7-003\n    Then the case keeps its queue, its owner and its assignment\n    Then no decision record is written for the refused transfer\n\n  Scenario: AC19 A legal hold placed on a case already on hold is refused with status 409 (new, D-RCV-60)\n    Given case RW-2026-000310 is on legal hold through POST /api/recovery/case/v1/cases/{caseId}/legal-hold with reason \"Court order\" and reference \"ORD-2026-0412\"\n    When an identity with the Case record right U places a second legal hold on RW-2026-000310 with reason \"Court order\" and reference \"ORD-2026-0412\"\n    Then the call returns status 409 with MSG-P3-005\n    Then the legal-hold status and status_before_hold of the case are unchanged\n\n  Scenario: AC20 Rules BR10 to BR18 hold on every transfer path (new, D-RCV-60)\n    Given the transfer paths of AC1, AC4, AC7 and AC11 have run\n    Then a transfer changes the queue, the team and the owner and never the status or the clocks of the case (BR10)\n    Then the manual transfer keeps its endpoint, request, response, errors and authorization (BR11)\n    Then a trigger with no TRANSFER version in force stays in the outbox and moves no case (BR12)\n    Then the TRANSFER version is fetched from rwb-decision, its SHA-256 is verified and it is evaluated inside the activity of rwb-case (BR13)\n    Then the decision record commits in the same transaction as the case move and is collected into the central ledger within five minutes (BR14)\n    Then each move leaves one rwb.case.CaseTransferred.v1 on rwb.case.events.v1 with key caseId and no personal data (BR15)\n    Then the case router signals CaseWorkflow through signalWithStart and makes no REST call to any service (BR16)\n    Then every cross-service call of the run is one hop to its owner with the 2 s budget (BR17)\n    Then the caller right comes from the authorise contract of rwb-access and an identity without it is refused (BR18)\n\n  Scenario: AC21 A consumed call that fails or does not answer stops the transfer and moves no case (new, D-RCV-60)\n    Given the call of rwb-case to rwb-decision for the TRANSFER version fails or does not answer within the 2 s budget\n    When the EvaluateRules activity evaluates a transfer trigger for case RW-2026-000309\n    Then the activity fails and no decision record is written\n    Then the trigger stays in the outbox of rwb-case and the case keeps its queue and owner\n    Then the failure is reported against the owning service and no fake is put in its place\n\n  Scenario: AC14 A decision record that cannot be written refuses the transfer and the event is retried (new, D-RCV-60)\n    Given the decision record write of rwb-case is forced to fail for one case of the run\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/{caseId}/transfer for that case with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the call is refused with MSG-P7-003 and the case keeps its queue and owner\n    Then a rule trigger for that case that matches rule \"TRF-009\" is retried from the topic and the case does not move until the record is written\n\n  Scenario: AC15 A legal hold placed on a case already on hold is refused with status 409 (new, D-RCV-60)\n    Given case RW-2026-000310 is on hold through the legal-hold endpoint\n    When an identity with the Case record right U places a legal hold through POST /api/recovery/case/v1/cases/RW-2026-000310/legal-hold with reason \"Court order\" and reference \"ORD-2026-0412\"\n    Then the call returns status 409 with MSG-P3-005\n    Then the hold already in force is unchanged",
+     "new": "  Scenario: AC14 A decision record that cannot be written refuses the transfer and the event is retried (new, D-RCV-60)\n    Given the decision record write of rwb-case is forced to fail for one case of the run\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/{caseId}/transfer for that case with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the call is refused with MSG-P7-003 and the case keeps its queue and owner\n    Then a rule trigger for that case that matches rule \"TRF-009\" is retried from the topic and the case does not move until the record is written\n\n  Scenario: AC15 A legal hold placed on a case already on hold is refused with status 409 (new, D-RCV-60)\n    Given case RW-2026-000310 is on hold through the legal-hold endpoint\n    When an identity with the Case record right U places a legal hold through POST /api/recovery/case/v1/cases/RW-2026-000310/legal-hold with reason \"Court order\" and reference \"ORD-2026-0412\"\n    Then the call returns status 409 with MSG-P3-005\n    Then the hold already in force is unchanged\n\n  Scenario: AC16 Rules BR10 to BR18 hold on every transfer path (new, D-RCV-60)\n    Given the transfer paths of AC1, AC4, AC7 and AC11 have run\n    Then a transfer changes the queue, the team and the owner and never the status or the clocks of the case (BR10)\n    Then the manual transfer keeps its endpoint, request, response, errors and authorization (BR11)\n    Then a trigger with no TRANSFER version in force stays in the outbox and moves no case (BR12)\n    Then the TRANSFER version is fetched from rwb-decision, its SHA-256 is verified and it is evaluated inside the activity of rwb-case (BR13)\n    Then the decision record commits in the same transaction as the case move and is collected into the central ledger within five minutes (BR14)\n    Then each move leaves one rwb.case.CaseTransferred.v1 on rwb.case.events.v1 with key caseId and no personal data (BR15)\n    Then the case router signals CaseWorkflow through signalWithStart and makes no REST call to any service (BR16)\n    Then every cross-service call of the run is one hop to its owner with the 2 s budget (BR17)\n    Then the caller right comes from the authorise contract of rwb-access and an identity without it is refused (BR18)\n\n  Scenario: AC17 A consumed call that fails or does not answer stops the transfer and moves no case (new, D-RCV-60)\n    Given the call of rwb-case to rwb-decision for the TRANSFER version fails or does not answer within the 2 s budget\n    When the EvaluateRules activity evaluates a transfer trigger for case RW-2026-000309\n    Then the activity fails and no decision record is written\n    Then the trigger stays in the outbox of rwb-case and the case keeps its queue and owner\n    Then the failure is reported against the owning service and no fake is put in its place"
+    },
+    {
+     "old": "| AC11, AC15, TC-E1-021-03-ITG, TC-E1-021-18-ITG |",
+     "new": "| AC11, TC-E1-021-03-ITG, TC-E1-021-18-ITG |"
+    },
+    {
+     "old": "| AC12, AC16, TC-E1-021-07-ITG, TC-E1-021-19-ITG |",
+     "new": "| AC12, TC-E1-021-07-ITG, TC-E1-021-19-ITG |"
+    },
+    {
+     "old": "| AC13, AC17, TC-E1-021-08-ITG, TC-E1-021-20-ITG |",
+     "new": "| AC13, TC-E1-021-08-ITG, TC-E1-021-20-ITG |"
+    },
+    {
+     "old": "| AC14, AC18, TC-E1-021-09-ITG, TC-E1-021-16-ITG, TC-E1-021-21-ITG |",
+     "new": "| AC14, TC-E1-021-09-ITG, TC-E1-021-16-ITG, TC-E1-021-21-ITG |"
+    },
+    {
+     "old": "| AC19, TC-E1-021-13-ITG, TC-E1-021-22-ITG |",
+     "new": "| AC15, TC-E1-021-13-ITG, TC-E1-021-22-ITG |"
+    },
+    {
+     "old": "| TC-E1-021-11-ITG | AC11, BR8, BR16 |",
+     "new": "| TC-E1-021-11-ITG | AC2, BR8, BR16 |"
+    },
+    {
+     "old": "| TC-E1-021-12-ITG | AC12 |",
+     "new": "| TC-E1-021-12-ITG | AC8 |"
+    },
+    {
+     "old": "| TC-E1-021-14-ITG | AC14, BR1 |",
+     "new": "| TC-E1-021-14-ITG | AC9, BR1 |"
+    },
+    {
+     "old": "| TC-E1-021-27-ITG | AC15, BR5 | Integration | Two transfers of RW-2026-000313 in the same second; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-28-ITG | AC16, BR4 | Integration | Owner U-24 at 150 named as target; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-29-ITG | AC17 | Integration | Closed case RW-2026-000305 transferred; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-30-ITG | AC18, BR9 | Integration | Decision record write forced to fail for a manual call on RW-2026-000306; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-31-ITG | AC19, BR6 | Integration | Second legal hold on RW-2026-000310; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-32-ITG | AC20, BR10 to BR18 | Integration | Rules checked on the transfer paths of AC1, AC4, AC7 and AC11; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-33-ITG | AC21, BR17 | Integration | rwb-decision call fails or does not answer for RW-2026-000309; end-to-end: real services on the wave 1 contracts |",
+     "new": "| TC-E1-021-27-ITG | AC16, BR10 to BR18 | Integration | Rules checked on the transfer paths of AC1, AC4, AC7 and AC11; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-28-ITG | AC17, BR17 | Integration | rwb-decision call fails or does not answer for RW-2026-000309; end-to-end: real services on the wave 1 contracts |"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-29779",
+     "kind": "wrong",
+     "issue": "NEWAC AC15 repeats AC11 (same-second transfers), and the ID AC15 is used twice. TC-27 repeats TC-18."
+    },
+    {
+     "ruling": "R-29780",
+     "kind": "wrong",
+     "issue": "AC16 duplicates AC12 (named owner at cap); TC-28 duplicates TC-19."
+    },
+    {
+     "ruling": "R-29781",
+     "kind": "wrong",
+     "issue": "AC17 duplicates AC13 (closed case); TC-29 duplicates TC-20."
+    },
+    {
+     "ruling": "R-29782",
+     "kind": "wrong",
+     "issue": "AC18 duplicates AC14 (decision record write fails); TC-30 duplicates TC-21."
+    },
+    {
+     "ruling": "R-29783",
+     "kind": "wrong",
+     "issue": "AC19 duplicates the second AC15 (hold on a held case); TC-31 duplicates TC-22."
+    },
+    {
+     "ruling": "R-29784",
+     "kind": "wrong",
+     "issue": "After removing the duplicates, AC20 and TC-32 must become AC16 and TC-27, placed in numeric order."
+    },
+    {
+     "ruling": "R-29785",
+     "kind": "wrong",
+     "issue": "After removing the duplicates, AC21 and TC-33 must become AC17 and TC-28, placed in numeric order."
+    },
+    {
+     "ruling": "R-23781",
+     "kind": "wrong",
+     "issue": "TC-11, TC-12 and TC-14 cite AC11, AC12 and AC14, which are now different scenarios. They test AC2, AC8 and AC9."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 8
+}

@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| Item | Content |\n|---|---|",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Case resource | The RWB-P3-E1035-CON Case resource plus `deviations[]` and `deviationsAvailable`; the existing properties are unchanged |",
+   "new": "| Case resource | The RWB-P3-E1035-CON Case resource plus `deviations[]` and `deviationsAvailable`; the existing properties are unchanged | Not specified in the source documents (DOR-RWB-P3-E2015-CON-7) |"
+  },
+  {
+   "old": "| Deviation object | `deviationCode`, `raisedAt`, `handlerUserId`, `approverUserId`, `pausedState`, `contactStop`, `clearedAt`, `outcome`, taken from the S8 deviation fields DF-CAS-038 to DF-CAS-045 |",
+   "new": "| Deviation object | `deviationCode`, `raisedAt`, `handlerUserId`, `approverUserId`, `pausedState`, `contactStop`, `clearedAt`, `outcome`, taken from the S8 deviation fields DF-CAS-038 to DF-CAS-045 | Not specified in the source documents (DOR-RWB-P3-E2015-CON-7) |"
+  },
+  {
+   "old": "| Timer resource | The existing `timerType`, `startedAt`, `expiresAt`, `warnAt`, `paused`, `status`, `escalationLevel` plus `nextStepOwnerRole`, `escalatedToRole`, `escalatedAt`, `nextEscalationRole`, `inWarning`, taken from `timer` DF-WRK-027 to DF-WRK-036 and DF-WRK-043 to DF-WRK-044 and from `task.owner_role` DF-WRK-023 |",
+   "new": "| Timer resource | The existing `timerType`, `startedAt`, `expiresAt`, `warnAt`, `paused`, `status`, `escalationLevel` plus `nextStepOwnerRole`, `escalatedToRole`, `escalatedAt`, `nextEscalationRole`, `inWarning`, taken from `timer` DF-WRK-027 to DF-WRK-036 and DF-WRK-043 to DF-WRK-044 and from `task.owner_role` DF-WRK-023 | Not specified in the source documents (DOR-RWB-P3-E2015-CON-7) |"
+  },
+  {
+   "old": "| Approver | `approverUserId` only, taken from `decision_log_entry.approver_user_id` DF-DEC-010 through the P7 contract; the entry itself is never returned |",
+   "new": "| Approver | `approverUserId` only, taken from `decision_log_entry.approver_user_id` DF-DEC-010 through the P7 contract, which the approval step inside DeviationWorkflow (S8) records; the P7 ApprovalWorkflow edge is an open question; the entry itself is never returned | Not specified in the source documents (DOR-RWB-P3-E2015-CON-7) |"
+  },
+  {
+   "old": "| Event payloads | IDs, codes, dates and amounts only; no name, address, identity number or contact point |",
+   "new": "| Event payloads | IDs, codes, dates and amounts only; no name, address, identity number or contact point | Not specified in the source documents (DOR-RWB-P3-E2015-CON-7) |"
+  },
+  {
+   "old": "### 8. Business rules",
+   "new": "\nScenario: AC7 The timer answer shows the pause, the owner role and the escalation as the projection holds them, with no recomputation (new, D-RCV-60)\n\n### 8. Business rules"
+  },
+  {
+   "old": "| REQ-DRI-001 | Every decision writes one record holding the case, the decision, the recommendation, the approval and the outcome | `approverUserId` from the decision log and the DecisionRecorded row | TC-P3-E2015-CON-02, TC-P3-E2015-CON-04 |",
+   "new": "| REQ-DRI-001 | Every decision writes one record holding the case, the decision, the recommendation, the approval and the outcome | `approverUserId` from the decision record and the DecisionRecorded row | TC-P3-E2015-CON-02, TC-P3-E2015-CON-04 |"
+  },
+  {
+   "old": "| TC-P3-E2015-CON-05 | AC5 | Contract | Five event rows with their key and envelope; the workflow row; the absence test for JOB-05, the timer-check topic and TimerDue |",
+   "new": "| TC-P3-E2015-CON-05 | AC5 | Contract | Five event rows with their key and envelope; the workflow row; the absence test for the timer-check job, the timer-check topic and TimerDue |"
+  },
+  {
+   "old": "| TC-P3-E2015-CON-06 | AC6 | Component | The nine sub-tables present with owners; the three fakes match the document; a drifted fake fails the build |",
+   "new": "| TC-P3-E2015-CON-06 | AC6 | Component | The nine sub-tables present with owners; the three fakes match the document; a drifted fake fails the build |\n| TC-P3-E2015-CON-07 | AC6 | Contract | Boundary of the four tables of section 12.7: the P3 owner and contracted use of timer, recovery_case and task, and the PLT rows; no read path writes outbox_event, processed_event or idempotency_key |\n| TC-P3-E2015-CON-08 | AC7 | Contract | The timer answer returns `paused`, `nextStepOwnerRole` and `escalatedAt` as the projection holds them; no consumer recomputes `inWarning`; the deviation `contactStop` and `clearedAt` come from S8 unchanged |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09207",
+   "item": "GAP-1820",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Approver row ties approval to the S8 DeviationWorkflow step; P7 ApprovalWorkflow edge left open",
+   "note": "Approval recorded as a DeviationWorkflow step per FSD; P7 ApprovalWorkflow edge left open. Role code not in sources."
+  },
+  {
+   "ruling": "R-10433",
+   "item": "CG-ALL-4218",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "No edit: workflow ID stays case ID per Temporal Catalog v1 CaseWorkflow row",
+   "note": "Catalog row governs; ADR-011 case-{caseId} form stays under GAP-0148 and is not copied."
+  },
+  {
+   "ruling": "R-10434",
+   "item": "CG-ALL-4219",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for schema failure of a response body or query, text 'The request could not be read: {detail}.'; keep MSG-P3-030 for the scheduled job row",
+   "note": "Needs a new ID from the standard; story cites it once it exists. No ID invented."
+  },
+  {
+   "ruling": "R-16182",
+   "item": "DOR-RWB-P3-E2015-CON-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add or name the role for tech lead with its role code; section 1 then cites that code",
+   "note": "tech lead is not a role code or name in v5; no code invented, so section 1 waits for it."
+  },
+  {
+   "ruling": "R-16183",
+   "item": "DOR-RWB-P3-E2015-CON-10",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-P3-E2015-APP",
+   "change": "Add empty, loading, error and no-access states for SCR-03 to the app story",
+   "note": "SCR-03 screen states are outside this contract story; no edit here."
+  },
+  {
+   "ruling": "R-16184",
+   "item": "DOR-RWB-P3-E2015-CON-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8; RTM v7",
+   "change": "Add TC-P3-E2015-CON-01 to -08 to Test Cases v8; align section 18 lists to RTM v7",
+   "note": "Story adds TC-07 boundary for section 12.7 (ASM-3438) and TC-08 for GAP-1823; section 18 not realigned."
+  },
+  {
+   "ruling": "R-16185",
+   "item": "DOR-RWB-P3-E2015-CON-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Criteria for BR1 to BR10 belong in section 7, which is outside this chunk; not written without its text."
+  },
+  {
+   "ruling": "R-16186",
+   "item": "DOR-RWB-P3-E2015-CON-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "BR Field ID column added to section 11 with placeholder; JOB-05 and decision-log wording replaced in 16 and 18",
+   "note": "BR Field IDs not in sources; placeholder used. Section 7 wording is outside this chunk."
+  },
+  {
+   "ruling": "R-16187",
+   "item": "DOR-RWB-P3-E2015-CON-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add the same new schema-failure message ID as CG-ALL-4219; keep MSG-P3-030 for the scheduled job",
+   "note": "Same new ID as CG-ALL-4219; story cites it once it exists."
+  },
+  {
+   "ruling": "R-22212",
+   "item": "GAP-1823",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC7 step criterion on pause, owner role and escalation read as data, with TC-08; FSD rows kept as evidence",
+   "note": "AC7 and TC-08 assert behaviour the FSD rows do not; groomer rewrites the FSD criterion with its owner."
+  }
+ ]
+}

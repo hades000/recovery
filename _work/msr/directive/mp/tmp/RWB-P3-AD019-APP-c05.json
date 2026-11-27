@@ -1,0 +1,72 @@
+{
+ "edits": [
+  {
+   "old": "| TC-AD-019-04 | Access, BR8 | Component | A role without Platform administration R calls the console operations and is refused with MSG-P4-002 |",
+   "new": "| TC-AD-019-04 | AC4, Access, BR8 | Component | A role without Platform administration R calls the console operations and is refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-AD-019-07 | §12.5 workflow and activities | Contract | rwb-source-data WireMock (§12.8) with `GET /freshness` for every data product and one data product past its expected business date; refreshStaleSet checked with the 2 s budget and one GET retry |",
+   "new": "| TC-AD-019-07 | §12.5 workflow and activities | Contract | rwb-source-data WireMock (§12.8) with `GET /freshness` for every data product and one data product past its expected business date; refreshStaleSet checked with the 2 s budget and one GET retry |\n| TC-AD-019-08 | AC5, X9 | Component | Business date parameter missing, then malformed, on the console call |\n| TC-AD-019-09 | AC6, BR1, BR9 | Component | A break, an orphan and a stale product shown on the console; the console operations checked for any write, acknowledgement or export |\n| TC-AD-019-10 | AC7, BR10 | Component | A break key held by no case and a break key held by a case in rwb_case |\n| TC-AD-019-11 | AC8, BR12 | Component | Freshness Schedule not run since a restart; stale block checked for any product shown as fresh |\n| TC-AD-019-12 | AC9, BR11, BR13 | Contract | refreshStaleSet run by the Schedule in rwb-case; no Quartz job table and no shared job table read; read shape per contract (Not specified in the source documents, GAP-0728) |\n| TC-AD-019-13 | AC10 | Contract | Provided operations called with no valid user, with a user without the right, and for an unknown resource; answers checked for 401, 403 and 404 |\n| TC-AD-019-14 | AC11, BR12 | Contract | rwb-source-data WireMock (§12.8) with `GET /freshness` not answering inside the 2 s budget; one GET retry checked |\n| TC-AD-019-15 | AC12 | Contract | rwb-source-data WireMock (§12.8) with the reconciliation read and the key-resolution read failing |"
+  },
+  {
+   "old": "Then the stale block shows the business date of its last refresh and marks nothing as fresh",
+   "new": "Then the stale block shows the business date of its last refresh and marks nothing as fresh\n\n  Scenario: AC9 The scheduled refresh runs in rwb-case without a shared job table\n    Given the freshness Schedule is due in rwb-case\n    When the Schedule runs refreshStaleSet\n    Then the stale set is refreshed through the workflow kit and no Quartz job table and no shared job table is read\n    And the reconciliation and key-resolution reads follow the read shape Not specified in the source documents (GAP-0728; ASM-1278)\n\n  Scenario: AC10 The provided operations answer 401, 403 and 404 with no data\n    Given a call to a provided operation with no valid user, or with a user without the right, or for a resource that does not exist\n    When the call is made\n    Then the call is answered 401 with no valid user, 403 without the right and 404 for a resource that does not exist, and no data shows\n\n  Scenario: AC11 A freshness read that does not answer is retried once and never shown as fresh\n    Given the rwb-source-data freshness read does not answer inside the 2 s budget\n    When refreshStaleSet runs\n    Then the activity retries the GET once\n    And when the retry does not answer the stale block shows the business date of its last refresh and marks nothing as fresh\n\n  Scenario: AC12 A failed consumed call shows its error state and resolves no key\n    Given the rwb-source-data reconciliation read or the key-resolution read fails\n    When I open the console\n    Then the affected block shows its error state\n    And no key is reported as resolved without an answer"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30501",
+   "item": "NEWAC-RWB-P3-AD019-APP-AC4",
+   "status": "Resolved",
+   "section": "5, 16",
+   "target": "",
+   "change": "AC4 added to the Covers of TC-AD-019-04 so the X6 criterion has a test row alongside the access test.",
+   "note": "AC4 already states the criterion for X6; it now also maps to a test case row, so X6 is no longer covered by the access test alone."
+  },
+  {
+   "ruling": "R-30502",
+   "item": "NEWAC-RWB-P3-AD019-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "TC-AD-019-08 added with Covers AC5, X9 for the missing and malformed business date.",
+   "note": "AC5 already states the criterion; the new test row gives X9 a test beyond the validation label."
+  },
+  {
+   "ruling": "R-30503",
+   "item": "NEWAC-RWB-P3-AD019-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC6 gets TC-AD-019-09 (BR1, BR9); AC7 gets TC-AD-019-10 (BR10); AC8 gets TC-AD-019-11 (BR12); new AC9 with TC-AD-019-12 covers BR11 and BR13.",
+   "note": "Each rule BR1, BR9 to BR13 now maps to a criterion and a test row; BR13 read shape stays Not specified (GAP-0728)."
+  },
+  {
+   "ruling": "R-30504",
+   "item": "NEWAC-RWB-P3-AD019-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC10 in section 7 for 401, 403 and 404 of the provided operations, with TC-AD-019-13 in section 16.",
+   "note": "Adds a criterion naming the three error statuses and a contract test row for them."
+  },
+  {
+   "ruling": "R-30505",
+   "item": "NEWAC-RWB-P3-AD019-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC11 in section 7 for one GET retry and the 2 s budget with a stale-block fallback, with TC-AD-019-14 in section 16.",
+   "note": "Covers the retried and timed-out freshness activity, using the 2 s budget and one retry already in TC-AD-019-07."
+  },
+  {
+   "ruling": "R-30506",
+   "item": "NEWAC-RWB-P3-AD019-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC12 in section 7 for a failed reconciliation or key-resolution read, with TC-AD-019-15 in section 16.",
+   "note": "Covers a consumed call that fails or does not answer; no key is reported as resolved without an answer."
+  }
+ ]
+}

@@ -1,0 +1,119 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P8-E2008-CON",
+ "unit": "u02",
+ "rulings": [
+  "R-22417",
+  "R-26474",
+  "R-28738",
+  "R-28744",
+  "R-28746",
+  "R-28747",
+  "R-31572"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 6
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22417",
+     "item": "GAP-1634",
+     "status": "Resolved",
+     "section": "11",
+     "target": "",
+     "change": "",
+     "note": "Section 11 DF-FIN row: uuid cross-reference account_payment_id replaced by payment_code, varchar(255) ACE business key, no foreign key (API Spec v4 Proceeds.paymentCode)."
+    },
+    {
+     "ruling": "R-26474",
+     "item": "CG-ALL-7545",
+     "status": "Not applied",
+     "section": "3",
+     "target": "",
+     "change": "",
+     "note": "Migration name V2_008 is not in the supplied story text (line 298 is the event table). Next number of the service Flyway sequence is not in the sources; project search found none."
+    },
+    {
+     "ruling": "R-28738",
+     "item": "GAP-1353",
+     "status": "Not applied",
+     "section": "",
+     "target": "",
+     "change": "",
+     "note": "Alert sections are not in the supplied story text and the sources give no numeric threshold. Needs platform administrator and solution architect before PROD."
+    },
+    {
+     "ruling": "R-28744",
+     "item": "GAP-2498",
+     "status": "Resolved",
+     "section": "16",
+     "target": "",
+     "change": "",
+     "note": "Section 16 now states the legacy System to Component and Access to Contract level mapping (R7.2). Tcs_legacy handling is in the Work Package, outside this story."
+    },
+    {
+     "ruling": "R-28746",
+     "item": "GAP-1349",
+     "status": "Not applied",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "Applied: case payment read via GET /proceeds, SCR-28 field list left to RWB-PLT-N001-CON, workflow matchPayments named. Four step activity names are not in any source and were not invented."
+    },
+    {
+     "ruling": "R-28747",
+     "item": "GAP-2496",
+     "status": "Resolved",
+     "section": "3",
+     "target": "",
+     "change": "",
+     "note": "Section 3 names all eight H rows and now the C rows RWB-P7-E1073-CON and RWB-P4-E1037-CON; header kept as WP fixes it. Sections 12.2, 12.8 and 13 not in supplied text."
+    },
+    {
+     "ruling": "R-31572",
+     "item": "NEWAC-RWB-P8-E2008-CON-AC10",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC10 added for duplicate delivery of a consumed event and TC-P8-E2008-CON-14 added; test data is Not specified in the source documents."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| DF-FIN-001 to DF-FIN-009 | `proceeds` (P8) | id, case_id, treatment_id, account_payment_id, source, amount, received_date, matched_to, posting_ref | Required, optional and nullable per TSD P8 T3.1; `source` from LOV-PROCEEDS-SRC and `matched_to` from LOV-MATCH |",
+     "new": "| DF-FIN-001 to DF-FIN-009 | `proceeds` (P8) | id, case_id, treatment_id, payment_code, source, amount, received_date, matched_to, posting_ref | Required, optional and nullable per TSD P8 T3.1; `payment_code` is the ACE payment_code, a varchar(255) business key with no foreign key (API Specification v4 Proceeds.paymentCode; REQ-CHO-009); `source` from LOV-PROCEEDS-SRC and `matched_to` from LOV-MATCH |"
+    },
+    {
+     "old": "- The four P3 contracts the plan names — RWB-P3-E1042-CON, RWB-P3-E1043-CON, RWB-P3-E2004-CON and RWB-P3-E2042-CON — are readable as drafts, so their response elements are declared from the published documents and the fakes are built from those declarations.",
+     "new": "- The four P3 contracts the plan names — RWB-P3-E1042-CON, RWB-P3-E1043-CON, RWB-P3-E2004-CON and RWB-P3-E2042-CON — are readable as drafts, so their response elements are declared from the published documents and the fakes are built from those declarations.\n- The consumed contracts the patterns add, RWB-P7-E1073-CON and RWB-P4-E1037-CON, are carried as the Work Package fixes them; the Depends on and Contract dependencies header rows are unchanged and step D1 decides their entry in the dependency map (GAP-2496)."
+    },
+    {
+     "old": "    Then the answer is 404 with the problem envelope of AC5",
+     "new": "    Then the answer is 404 with the problem envelope of AC5\n\n  Scenario: AC10 A consumed event delivered again is applied once (new, D-RCV-60)\n    Given a consumed event that the service has already applied\n    When the same event is delivered again\n    Then no record of \"proceeds\" changes and the event is not applied a second time"
+    },
+    {
+     "old": "SCR-28 Proceeds matching is the only screen this key serves. The baseline declares the read that fills it — `GET /proceeds` filtered by matched or unmatched — and the composite route the screen calls through the gateway-bff (DP-19). SCR-14, SCR-04 and SCR-44 are served by other services and read this service only through the same operations.",
+     "new": "SCR-28 Proceeds matching is the only screen this key serves. The baseline declares the read that fills it — `GET /proceeds` filtered by matched or unmatched — and the composite route the screen calls through the gateway-bff (DP-19). SCR-14, SCR-04 and SCR-44 are served by other services and read this service only through the same operations.\n\nThe case payment list is answered through `GET /proceeds` with the case scope applied; no further operation is published for it. The SCR-28 field list and the run view are not fixed here and stay with RWB-PLT-N001-CON. The workflow of JOB-07 is named `matchPayments` as the design choice of this story; its four step activities are Not specified in the source documents (GAP-1349)."
+    },
+    {
+     "old": "| TC-P8-E2008-CON-13 | AC12 | Contract | one allowed and one disallowed status change |",
+     "new": "| TC-P8-E2008-CON-13 | AC12 | Contract | one allowed and one disallowed status change |\n| TC-P8-E2008-CON-14 | AC10 | Contract | Not specified in the source documents (NEWAC-RWB-P8-E2008-CON-AC10) |"
+    },
+    {
+     "old": "The nine are new with D-RCV-60 and test the baseline only. Integration copies end in `-ITG` and belong to RWB-ITG-E2008-ITG; the legacy test cases of RWB-E2-008 stay with the criteria the APP story owns.",
+     "new": "The nine are new with D-RCV-60 and test the baseline only. Integration copies end in `-ITG` and belong to RWB-ITG-E2008-ITG; the legacy test cases of RWB-E2-008 stay with the criteria the APP story owns.\n\nLegacy level mapping (GAP-2498): the legacy System level maps to Component and the legacy Access level maps to Contract, per Template and Rules v1 R7.2; the legacy test cases are kept with the slices that own their criteria."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

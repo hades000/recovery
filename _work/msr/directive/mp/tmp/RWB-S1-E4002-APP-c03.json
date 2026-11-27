@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-13 Route decision | Loading; recommendation; overridden; submitted |",
+   "new": "| SCR-13 Route decision | Empty; loading; error; no access; recommendation; overridden; submitted |"
+  },
+  {
+   "old": "and this story fixes the service side of the answer only.",
+   "new": "and this story fixes the service side of the answer only. The empty, error and no-access states are not in Screen Specifications v1; their behaviour is Not specified in the source documents (CG-ALL-7959)."
+  },
+  {
+   "old": "| MSG-P1-001 | The valuation product is stale for the business date | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The valuation product is stale for the business date | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "    Then the service reads valuation_key, appraisal_no, appraisal_type, appraised_value, appraisal_date and the valuer from v_ace_valuation for the asset_key",
+   "new": "    Then the service reads valuation_key, appraisal_no, appraisal_type, appraised_value, appraisal_date and the valuer through the rwb-source-data contract from v_ace_valuation for the asset_key"
+  },
+  {
+   "old": "    Then the transaction never opens and no row is written",
+   "new": "    Then the transaction never opens and no row is written\n\n  Scenario: AC7 A repeated request with the same Idempotency-Key returns the first answer and writes nothing new (new, D-RCV-60)\n    Given a route assessment for the case was already accepted under an Idempotency-Key\n    When the same request is repeated with that Idempotency-Key\n    Then the first answer is returned\n    Then no second valuation_ext row, decision record or outbox row is written"
+  },
+  {
+   "old": "its test TC-E4-002-01 runs here (section 16)",
+   "new": "its test TC-E4-002-01 is run by Not specified in the source documents (CG-ALL-7956) (section 16)"
+  },
+  {
+   "old": "The one operation sits on base `/api/recovery/valuation/v1` (DP-13) and SCR-13 reaches it through the gateway-bff composite route (DP-19).",
+   "new": "The one operation sits on base `/api/recovery/valuation/v1` (DP-13) and SCR-13 reaches it through the gateway-bff composite route (DP-19). The data product code, the acceptance write operation, the choice among several appraisals of one asset, the gateway-bff composite route and the wave 3 harness pack are agreed at the wave 3 entry check, and the build runs against the contract fakes until then. The appraisal record has one writer, this service, through its valuation paths on `/api/recovery/valuation/v1`; rwb-asset reads the accepted appraisal through its contract for the floor price and the monthly re-appraisal, and the two asset valuation operations stay with the sibling valuation stories. The `valuation_ext` table is owned by this story in `rwb_valuation`, keyed on `valuation_key`; `stale_flag` and `age_days` are written at receipt and the acceptance fields `accepted`, `accepted_at` and `accepted_by` are left to FEAT-VAL-04. The receipt runs inside the route assessment on `POST /cases/{caseId}/route` with no schedule and no event, and the batch leg is the freshness gate read through the rwb-source-data contract from `v_ace_batch_status`. The contract v1 carries the appraisal elements as one flat group inside the Approval answer; the 404 and 409 messages are message ID slots with no text in this story, and the retention rule of a `valuation_ext` row is recorded as an open P3 item."
+  },
+  {
+   "old": "| TC-E4-002-01 | AC1 | End to end | Receive the appraisal value from SVAF |",
+   "new": "| TC-E4-002-01 | AC1 (run by Not specified in the source documents (CG-ALL-7956)) | End to end | Receive the appraisal value from SVAF |"
+  },
+  {
+   "old": "| TC-S1-E4002-APP-06 | AC6 | Component | A request missing a required field; MSG-GEN-001 naming the field; no transaction opened |",
+   "new": "| TC-S1-E4002-APP-06 | AC6 | Component | A request missing a required field; MSG-GEN-001 naming the field; no transaction opened |\n| TC-S1-E4002-APP-07 | AC7 | Component | Not specified in the source documents (NEWAC-RWB-S1-E4002-APP-AC10) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22776",
+   "item": "GAP-0430",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading now records that the open values are agreed at the wave 3 entry check and the build runs against the contract fakes until then."
+  },
+  {
+   "ruling": "R-22777",
+   "item": "GAP-1682",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading states one writer for the appraisal record (this service); rwb-asset reads through contract; asset valuation operations stay with sibling stories."
+  },
+  {
+   "ruling": "R-22778",
+   "item": "GAP-2594",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "S1 context pack (ownership rows for rwb-valuation); ACE view catalogue",
+   "change": "List valuation_ext as an S1-owned table in rwb_valuation keyed on valuation_key, and record the SELECT-only grant on recovery.v_ace_valuation for this service.",
+   "note": "Story side fixed in target reading: table ownership, receipt inside POST route with no schedule, and batch gate; S1 table row and view grant still needed."
+  },
+  {
+   "ruling": "R-26731",
+   "item": "CG-ALL-7954",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 English text copied from Error and Message Standard v4."
+  },
+  {
+   "ruling": "R-26732",
+   "item": "CG-ALL-7956",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E4-002-01 marked as run by an owner Not specified in the source documents; section 7 reference updated to match."
+  },
+  {
+   "ruling": "R-26733",
+   "item": "CG-ALL-7959",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-13 states now list empty, loading, error and no access; behaviour the screen specification lacks is marked Not specified."
+  },
+  {
+   "ruling": "R-28892",
+   "item": "GAP-2595",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-S1-E4002-CON (contract artefact, S1)",
+   "change": "Publish v1 with appraisal elements as one flat group inside Approval; valuation_ext types from TSD S1 T3.1; 404 and 409 wording as messageId slots; retention as open P3 item; publish via platform registry.",
+   "note": "Story target reading records the v1 contract choices; the contract artefact and its publication are in the contract document."
+  },
+  {
+   "ruling": "R-29671",
+   "item": "ACR-RWB-S1-E4002-APP-AC3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC3 Then line now reads the appraisal facts through the rwb-source-data contract; the Given already uses the contract fake."
+  },
+  {
+   "ruling": "R-29672",
+   "item": "ACR-RWB-S1-E4002-APP-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC4 Given already reads the rwb-source-data contract fake; no change needed."
+  },
+  {
+   "ruling": "R-31869",
+   "item": "NEWAC-RWB-S1-E4002-APP-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added as AC7 (next free number) for idempotent replay, with TC-S1-E4002-APP-07; the proposed test is Not specified in the source documents."
+  }
+ ]
+}

@@ -1,0 +1,196 @@
+{
+ "edits": [
+  {
+   "old": "`primary_person_key` is P3's and is never copied here.",
+   "new": "`primary_person_key` is P3's and is never copied here. The two fields that identify a user, `raised_by` (DF-CAS-040) and `handler_user_id` (DF-CAS-042), are read as user keys only and carry no name."
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the decision record cannot be written"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Access refused (X2)\n    Given the role does not hold the case record right U\n    When the user acts on the screen\n    Then the system answers 403 with MSG-P4-002 before any read or write\n    And nothing changes and no record is written\n\n  Scenario: AC4 Schema boundary (X8)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the build fails and nothing is released"
+  },
+  {
+   "old": "`the decision log cannot be written` all stand",
+   "new": "`the decision record cannot be written` all stand"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E7-008-03 |",
+   "new": "| MSG-P4-002 | AC3, TC-E7-008-03 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5, BR8 |",
+   "new": "| None (pipeline log) | AC4, TC-E7-008-06, BR5, BR8 |"
+  },
+  {
+   "old": "| R-DEV-09 | Deviations |",
+   "new": "| R-DEV-09 (BR11) | Deviations |"
+  },
+  {
+   "old": "| R-DEV-10 | Deviations |",
+   "new": "| R-DEV-10 (BR12) | Deviations |"
+  },
+  {
+   "old": "| R-DEV-22 | Deviations |",
+   "new": "| R-DEV-22 (BR13) | Deviations |"
+  },
+  {
+   "old": "| R-DEV-11 | Deviations |",
+   "new": "| R-DEV-11 (BR14) | Deviations |"
+  },
+  {
+   "old": "| BR10 | The same review twice writes one record and sends one answer; the operation declares no `Idempotency-Key`, so the repeat is matched on the deviation reference and the outcome | TSD S8 T-A.2; ASM-5203 |",
+   "new": "| BR10 | The same review twice writes one record and sends one answer; the operation declares no `Idempotency-Key`, so the repeat is matched on the deviation reference and the outcome | TSD S8 T-A.2; ASM-5203 |\n| BR11 | R-DEV-09 fires on `DEVIATION_RESOLVED` for codes X1 and X7: the outcome is recorded and the decision resumes at `DEV_RESOLVED` | Business Rules and Routing Logic v4, row R-DEV-09 |\n| BR12 | R-DEV-10 fires on `DEVIATION_RESOLVED` for code X2: the case routes to the restructure assessment at `DEV_REROUTE` | Business Rules and Routing Logic v4, row R-DEV-10 |\n| BR13 | R-DEV-22 fires on `DEVIATION_RESOLVED` when the outcome names no next step: the case returns to the route decision at `DEV_REROUTE`, with a timer of 2 working days | Business Rules and Routing Logic v4, row R-DEV-22 |\n| BR14 | R-DEV-11 is named and not fired here: its close on `INSURANCE_SETTLED` and `CASE_ENDED` belongs to the X3 path | Business Rules and Routing Logic v4, row R-DEV-11; TSD S8 T4 |\n\nCoverage of the rules above: BR1 AC1, TC-E7-008-01; BR2 AC1, AC2, TC-E7-008-02, TC-E7-008-04; BR3 AC1, TC-E7-008-01; BR4 AC1, TC-E7-008-01; BR5 AC4, TC-E7-008-06; BR6 AC1, TC-E7-008-01; BR7 AC1, TC-E7-008-01; BR8 TC-E7-008-06; BR9 TC-E7-008-06; BR10 TC-E7-008-07; BR11 AC1, TC-E7-008-01; BR12 AC1, TC-E7-008-01; BR13 AC1, TC-E7-008-01; BR14 AC1 (X6)."
+  },
+  {
+   "old": "DP-08 is not in this story's pattern set: the capability area and the right are declared per operation and the access guard is a service-template capability, so the check is stated and not built.",
+   "new": "DP-08 is not in this story's pattern set: the operation's authorise check against rwb-access declares the capability area Case record and right U before any read or write, and the access guard is a service-template capability, so the check is stated and not built."
+  },
+  {
+   "old": "7. The boundary test: no statement outside `rwb_deviation`, no `v_ace_*` read, no write to `rwb_case`, `rwb_decision` or any other schema, and no write to `cleared_at`, `contact_stop` or a timer (X8, BR5, BR9).",
+   "new": "7. The boundary test: no statement outside `rwb_deviation`, no `v_ace_*` read, no write to any schema but its own, and no write to `cleared_at`, `contact_stop` or a timer (X8, BR5, BR9)."
+  },
+  {
+   "old": "| TC-E7-008-03 | Access | Component | A role without the case record right U; 403 with MSG-P4-002 and no read |",
+   "new": "| TC-E7-008-03 | AC3 | Component | A role without the case record right U; 403 with MSG-P4-002 and no read |"
+  },
+  {
+   "old": "| TC-E7-008-04 | Principle 5 | Component | A forced decision log write failure inside the transaction; the deviation is unchanged and no record exists |",
+   "new": "| TC-E7-008-04 | Principle 5 | Component | A forced decision record write failure inside the transaction; the deviation is unchanged and no record exists |\n| TC-E7-008-05 | §12 operations, events and activities | Contract | The DeviationOutcome review branch, the events and the activity recordDeviationReview checked against their published contracts on the fakes; no field outside the contract |\n| TC-E7-008-06 | AC4, BR5, BR8, BR9, X8, §12.7 | Boundary | Each table of §12.7 and the grants of `rwb_deviation` checked on the build: no statement outside `rwb_deviation`, no `v_ace_*` read, no write to `cleared_at`, `contact_stop` or a timer |\n| TC-E7-008-07 | BR10, X7 | Component | The same review sent twice on the fakes; one record and one answer, and the repeat answers the record that exists |"
+  },
+  {
+   "old": "The four legacy cases are those of RWB-E7-008 in their legacy order, with the Level column added: every case is tested on the fakes, so every case is `Component`.",
+   "new": "The four legacy cases are those of RWB-E7-008 in their legacy order, with the Level column added: every legacy case is tested on the fakes, so each is `Component`. TC-E7-008-05 to TC-E7-008-07 are added by this story: a contract test of §12 (`Contract`), a boundary test of the §12.7 tables (`Boundary`, run on the build) and the repeat test of BR10 (`Component`)."
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Feature | L3 process | Story element | Test cases |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| No requirement row traces to FEAT-DVF-08 | The requirement this feature serves is Not specified in the source documents (GAP-3066; ASM-5210): TSD S8 T8 maps every REQ-DVH and REQ-S8 row to FEAT-DVH-01, FEAT-DVF-01 or a placeholder | The trace rests on the legacy key, the feature row and AC1 | TC-E7-008-01 |",
+   "new": "| No requirement row traces to FEAT-DVF-08 | The requirement this feature serves is Not specified in the source documents (GAP-3066; ASM-5210): TSD S8 T8 maps every REQ-DVH and REQ-S8 row to FEAT-DVH-01, FEAT-DVF-01 or a placeholder | FEAT-DVF-08 | Not specified in the source documents (DOR-RWB-S8-E7008-APP-2) | The trace rests on the legacy key, the feature row and AC1 | TC-E7-008-01 |"
+  },
+  {
+   "old": "| ADR-013 | 19 services inside ACE | rwb-deviation as the owner of the deviation stage | TC-E7-008-01 |",
+   "new": "| ADR-013 | 19 services inside ACE | FEAT-DVF-08 | Not specified in the source documents (DOR-RWB-S8-E7008-APP-2) | rwb-deviation as the owner of the deviation stage | TC-E7-008-01 |"
+  },
+  {
+   "old": "| ADR-014 | Schema and login per service | `rwb_deviation` and its own login | TC-E7-008-01 |",
+   "new": "| ADR-014 | Schema and login per service | FEAT-DVF-08 | Not specified in the source documents (DOR-RWB-S8-E7008-APP-2) | `rwb_deviation` and its own login | TC-E7-008-01 |"
+  },
+  {
+   "old": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The package read with its budget and breaker | TC-E7-008-01 |",
+   "new": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | FEAT-DVF-08 | Not specified in the source documents (DOR-RWB-S8-E7008-APP-2) | The package read with its budget and breaker | TC-E7-008-01 |"
+  },
+  {
+   "old": "| ADR-022 | Local decision record plus central ledger | The record written before the review is answered | TC-E7-008-02, TC-E7-008-04 |",
+   "new": "| ADR-022 | Local decision record plus central ledger | FEAT-DVF-08 | Not specified in the source documents (DOR-RWB-S8-E7008-APP-2) | The record written before the review is answered | TC-E7-008-02, TC-E7-008-04 |"
+  },
+  {
+   "old": "| Test cases | TC-E7-008-01 to TC-E7-008-04 |",
+   "new": "| Test cases | TC-E7-008-01 to TC-E7-008-07 |"
+  },
+  {
+   "old": "| Architecture decisions | ADR-013, ADR-014, ADR-020, ADR-022 |",
+   "new": "| Architecture decisions | ADR-013, ADR-014, ADR-020, ADR-022 |\n| Open decisions | DL22, closed on its recommended resolution under the programme directive of 26 November 2026; assumptions ASM-1162, ASM-1304, ASM-2217 and ASM-2569 confirmed |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21291",
+   "item": "DOR-RWB-S8-E7008-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "§11 names raised_by and handler_user_id as user keys with no name; primary_person_key stated as never copied."
+  },
+  {
+   "ruling": "R-21292",
+   "item": "DOR-RWB-S8-E7008-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Tab Story test cases: add rows TC-E7-008-01 to TC-E7-008-07 under the same IDs as section 16, including TC-E7-008-05 contract and TC-E7-008-06 boundary.",
+   "note": "§16 now has TC-05 contract and TC-06 boundary rows; workbook rows for all seven IDs still needed."
+  },
+  {
+   "ruling": "R-21293",
+   "item": "DOR-RWB-S8-E7008-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "DL22 closed on recommended resolution per directive; assumptions ASM-1162, ASM-1304, ASM-2217, ASM-2569 confirmed in trace table."
+  },
+  {
+   "ruling": "R-21294",
+   "item": "DOR-RWB-S8-E7008-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "§18 gains Feature and L3 process columns; L3 process not in sources, marked Not specified; the 14 rows kept."
+  },
+  {
+   "ruling": "R-21295",
+   "item": "DOR-RWB-S8-E7008-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Build step 7 no longer names rwb_case or rwb_decision; now any schema but its own."
+  },
+  {
+   "ruling": "R-21296",
+   "item": "DOR-RWB-S8-E7008-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC3 for X2 and AC4 for X8 added in Gherkin; X2 and X8 Covered by updated; TC-03 linked to AC3."
+  },
+  {
+   "ruling": "R-21297",
+   "item": "DOR-RWB-S8-E7008-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Rule rows tagged BR11 to BR14; coverage line added; TC-E7-008-07 covers BR10; BR1 to BR14 each mapped to a criterion or test."
+  },
+  {
+   "ruling": "R-21298",
+   "item": "DOR-RWB-S8-E7008-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD with case record right U as TSD S8 T6.1 gives it, so the §10 role resolves.",
+   "note": "§10 now states the rwb-access authorise check per operation; the role is absent from v5."
+  },
+  {
+   "ruling": "R-21299",
+   "item": "DOR-RWB-S8-E7008-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add or align the names decision_record and recovery_log with LDM v9 and Data Classification v5 entities; the story names the PLT library decision record of DP-03.",
+   "note": "Wording part handled by CG-ALL-11636. recovery_log is not in this chunk's text."
+  },
+  {
+   "ruling": "R-27864",
+   "item": "CG-ALL-11636",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Decision log wording changed to decision record in AC1, AC2, §7 note and TC-E7-008-04; no JOB-nn text in supplied §12.5."
+  }
+ ]
+}

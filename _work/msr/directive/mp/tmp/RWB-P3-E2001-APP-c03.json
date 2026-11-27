@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "    And the browser calls one composite route per screen and no owner service directly",
+   "new": "    And the browser calls one composite route per screen and no owner service directly\n\n  Scenario: AC11 Empty, error and no-access states on SCR-02 and SCR-04 (new, D-RCV-60)\n    Given the case owner holds the Case record right with scope \"Own\"\n    When the case owner opens SCR-02 Case list with no case in scope\n    Then the screen shows the empty state with text \"Not specified in the source documents (DOR-RWB-P3-E2001-APP-10)\"\n    When the gateway-bff composite route for SCR-04 cannot reach rwb-integration\n    Then the screen shows message MSG-GEN-006 with {system} \"rwb-integration\"\n    When \"U-5001\" holding RW-REFADM opens SCR-04 Case timeline\n    Then the screen shows message MSG-P4-002 and no timeline\n\n  Scenario: AC12 Case number format and no reuse (new, D-RCV-60)\n    Given the rwb-case sequence has issued \"RW-2026-000123\"\n    When the entry step creates the next case\n    Then the case number is RW-YYYY-NNNNNN taken from the rwb-case sequence\n    Then no case number already issued is assigned again\n\n  Scenario: AC13 Threshold, product map and action codes are parameters (new, D-RCV-60)\n    Given parameter \"case.entry.dpd_threshold\" is 90\n    When a new version of parameter \"case.entry.dpd_threshold\" is in effect and the entry step runs\n    Then the entry follows the parameter version in effect\n    Then no code change is needed for the threshold, the product map, the action codes or the cut-off\n\n  Scenario: AC14 rwb-case holds no foreign key into another schema (new, D-RCV-60)\n    Given the rwb_case schema is deployed\n    When the schema is checked\n    Then no foreign key references another schema\n    Then the case link is a business key of 255 characters\n\n  Scenario: AC15 CaseCreated is written in the case transaction (new, D-RCV-60)\n    Given the entry step creates a case for \"A-0001\"\n    When the transaction commits\n    Then the CaseCreated event is in the outbox row of that transaction\n    Then the event is relayed with the CloudEvents envelope"
+  },
+  {
+   "old": "AC1 to AC10 are new for the rwb-case slice (ASM-3720)",
+   "new": "AC1 to AC15 are new for the rwb-case slice (ASM-3720)"
+  },
+  {
+   "old": "| MSG-GEN-006 | rwb-integration or rwb-source-data unavailable | {system} is not available. Your request is queued and will be retried. |",
+   "new": "| MSG-GEN-006 | rwb-integration or rwb-source-data unavailable | {system} is not available. Your request is queued and will be retried. |\n| MSG-P4-001 | Not specified in the source documents (DOR-RWB-P3-E2001-APP-9) | Not specified in the source documents (DOR-RWB-P3-E2001-APP-9) |"
+  },
+  {
+   "old": "| TC-E2-001-11 | AC10 | Not specified in the source documents (DOR-RWB-P3-E2001-APP-12) | Not specified in the source documents (DOR-RWB-P3-E2001-APP-12) |",
+   "new": "| TC-E2-001-11 | AC10 | Contract | Case \"RW-2026-000123\" for \"A-0001\" with its 16 EFS entries, opened on SCR-02 and SCR-04 through the gateway-bff composite route |"
+  },
+  {
+   "old": "| TC-E2-001-12 | Not specified in the source documents (ASM-3438) | Not specified in the source documents (DOR-RWB-P3-E2001-APP-12) | Boundary test of the tables of section 12.7 (ASM-3438) |",
+   "new": "| TC-E2-001-12 | Not specified in the source documents (ASM-3438) | Not specified in the source documents (DOR-RWB-P3-E2001-APP-12) | Boundary test of the tables of section 12.7 (ASM-3438) |\n| TC-E2-001-13 | AC11 | Component | Case owner with scope \"Own\" opens SCR-02 and SCR-04; rwb-integration unreachable; RW-REFADM without the Case record right |\n| TC-E2-001-14 | AC12, BR9 | Component | Sequence issues the next case number after \"RW-2026-000123\" |\n| TC-E2-001-15 | AC13, BR10 | Component | New version of parameter \"case.entry.dpd_threshold\" applied to the entry step |\n| TC-E2-001-16 | AC14, BR11 | Contract | rwb_case schema checked for foreign keys into other schemas |\n| TC-E2-001-17 | AC15, BR12 | Component | Entry step creates the case for \"A-0001\"; outbox row read in the same transaction |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10359",
+   "item": "CG-ALL-3945",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity readEfsHistory to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity readEfsHistory is absent from the catalog Activities sheet; the change belongs to the catalog."
+  },
+  {
+   "ruling": "R-10360",
+   "item": "CG-ALL-3946",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity CreateOrLinkCase to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity CreateOrLinkCase is absent from the catalog Activities sheet; the change belongs to the catalog."
+  },
+  {
+   "ruling": "R-10361",
+   "item": "CG-ALL-3947",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity AppendEfsHistory to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity AppendEfsHistory is absent from the catalog Activities sheet; the change belongs to the catalog."
+  },
+  {
+   "ruling": "R-10362",
+   "item": "CG-ALL-3948",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity recordRunSummary to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity recordRunSummary is absent from the catalog Activities sheet; the change belongs to the catalog."
+  },
+  {
+   "ruling": "R-10363",
+   "item": "CG-ALL-3951",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "TC-E2-001-11 completed for AC10 with level Contract and its data",
+   "note": "AC10 already had TC-E2-001-11; its level and data were placeholders and are now filled from the story."
+  },
+  {
+   "ruling": "R-16066",
+   "item": "DOR-RWB-P3-E2001-APP-10",
+   "status": "Not applied",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 and TC-E2-001-13 added for SCR-02 and SCR-04. SCR-45 is not named in the story; its states need its source."
+  },
+  {
+   "ruling": "R-16067",
+   "item": "DOR-RWB-P3-E2001-APP-11",
+   "status": "Not applied",
+   "section": "not in story",
+   "target": "",
+   "change": "",
+   "note": "The story has no field list. Which P2 fields are personal data cannot be set without the P2 field classes."
+  },
+  {
+   "ruling": "R-16068",
+   "item": "DOR-RWB-P3-E2001-APP-18",
+   "status": "Not applied",
+   "section": "not in story",
+   "target": "",
+   "change": "",
+   "note": "Sources give no assumption for DL17 or DL29; adding one would invent a value."
+  },
+  {
+   "ruling": "R-16069",
+   "item": "DOR-RWB-P3-E2001-APP-4",
+   "status": "Resolved",
+   "section": "8, 7, 16",
+   "target": "",
+   "change": "AC12 to AC15 added for BR9 to BR12 with TC-E2-001-14 to TC-E2-001-17",
+   "note": "Each of BR9 to BR12 now has a criterion and a test case row."
+  },
+  {
+   "ruling": "R-16070",
+   "item": "DOR-RWB-P3-E2001-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P4-001 row added with placeholder text. MSG-P2-006 wording needs the Error and Message Standard v4 text, which is not in this chunk."
+  }
+ ]
+}

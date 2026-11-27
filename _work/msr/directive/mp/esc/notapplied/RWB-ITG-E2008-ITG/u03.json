@@ -1,0 +1,117 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E2008-ITG",
+ "unit": "u03",
+ "rulings": [
+  "R-22421",
+  "R-22422",
+  "R-22423",
+  "R-22424",
+  "R-22425",
+  "R-28738",
+  "R-28744",
+  "R-28745"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 3
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22421",
+     "item": "GAP-1643",
+     "status": "Resolved",
+     "section": "13",
+     "target": "NFR Spec (next version)",
+     "change": "State the receipts per business date from the receipt-to-installment ratio observed on ACE data for a busy month.",
+     "note": "Used draft EST-10 from 06 Data, Service Volume, Calls and Temporal Sizing v1 (P8 volume row) as the assumed population."
+    },
+    {
+     "ruling": "R-22422",
+     "item": "GAP-2493",
+     "status": "Resolved",
+     "section": "13",
+     "target": "",
+     "change": "",
+     "note": "Two-half record placement stated as the ruling recommends."
+    },
+    {
+     "ruling": "R-22423",
+     "item": "GAP-2494",
+     "status": "Resolved",
+     "section": "12.4",
+     "target": "",
+     "change": "",
+     "note": "One shape and consumer group, LOV-DECISION, opaque inputs_ref stated; unnamed values kept as placeholder."
+    },
+    {
+     "ruling": "R-22424",
+     "item": "GAP-2504",
+     "status": "Cross-document",
+     "section": "12",
+     "target": "RWB-P8-E2008-CON",
+     "change": "Publish v1 with placeholders and review rows; gate the tag on contract tests and schema lint; name correction is a patch, shape change a new version.",
+     "note": "Already carried in the CON story text (GAP-2504 line and X5); no ITG edit."
+    },
+    {
+     "ruling": "R-22425",
+     "item": "GAP-2505",
+     "status": "Cross-document",
+     "section": "13",
+     "target": "RWB-P8-E2008-OPS",
+     "change": "Carry the deployment slice; thresholds, counts and limits as environment values; review five runbook entries with the on-call rota before promotion.",
+     "note": "Already carried in the OPS story; the harness deploys nothing."
+    },
+    {
+     "ruling": "R-28738",
+     "item": "GAP-1353",
+     "status": "Cross-document",
+     "section": "13",
+     "target": "RWB-P8-E2008-OPS",
+     "change": "Hold outbox-lag, dead-letter and workflow-failure thresholds as data with no target-like default; Platform administrator closes before PROD.",
+     "note": "Already carried in the OPS story; the harness has no alert; no threshold invented."
+    },
+    {
+     "ruling": "R-28744",
+     "item": "GAP-2498",
+     "status": "Cross-document",
+     "section": "16",
+     "target": "RWB-P7-E2008-APP",
+     "change": "Keep the ten legacy TC IDs, map System to Component and Access to Contract, leave legacy criteria with their owning slices and the ITG story.",
+     "note": "Already carried in the P7 story (sections 7 and 16). ITG keeps its own journey criteria and level mapping."
+    },
+    {
+     "ruling": "R-28745",
+     "item": "GAP-1641",
+     "status": "Cross-document",
+     "section": "18",
+     "target": "Recovery Workbench Business Requirements Program v5",
+     "change": "Add section 5.11 (REQ-S4-010) to the section 11 note on where P8 requirements are carried.",
+     "note": "No ITG edit: enforcement proceeds (FEAT-PAY-04) are out of scope in section 19."
+    }
+   ],
+   "edits": [
+    {
+     "old": "The harness consumes with its own consumer group and never asserts a producer's outbox row directly; consumers dedupe through their own inbox.",
+     "new": "The harness consumes with its own consumer group and never asserts a producer's outbox row directly; consumers dedupe through their own inbox.\n\nThe harness asserts one `DecisionRecorded` shape, read by one ledger consumer group. Decision codes come from LOV-DECISION, with D5 for a match, and `inputs_ref` is read as an opaque reference to the payment facts of the business date. The input age limit is a parameter read through DP-06, and the decision-log read publishes its page default, so the harness never guesses it. The payload element names, the consumer group name, the dedupe key, the decision code of a missed payment, the parameter key and the page default value: Not specified in the source documents (GAP-2494)."
+    },
+    {
+     "old": "The platform H dependencies named by this table are delivered by the platform wave and are not repeated in the metadata H list. The blocking dependencies of this story are the eight I stories, which replace the fakes one at a time.",
+     "new": "The platform H dependencies named by this table are delivered by the platform wave and are not repeated in the metadata H list. The blocking dependencies of this story are the eight I stories, which replace the fakes one at a time.\n\nThe match record has two halves, and the harness asserts both. rwb-payment evaluates package PAYMENT_MATCH in its own worker, writes the local decision record of each match and each missed payment in its own transaction through the local library, and publishes it. rwb-decision holds the package, its rows and its test cases, collects the records, appends them to the central hash-chained ledger and runs JOB-14; it evaluates no payment, writes no proceeds row and moves no plan state."
+    },
+    {
+     "old": "- Reset: each run starts from the seeded state and the fixture of one business date, so a repeated run is deterministic and produces the same report.",
+     "new": "- Reset: each run starts from the seeded state and the fixture of one business date, so a repeated run is deterministic and produces the same report.\n- Volume: the volume test of the matching run, the receipt list and the posting run takes its population as an assumption until the receipt-to-installment ratio is observed on the ACE data for a busy month and stated in the next NFR version. The assumed population is the draft estimate EST-10 of Recovery Workbench Service Volume, Calls and Temporal Sizing v1: base 13,000 and high 187,000 receipts a month (about 8,500 a business day, high), to be confirmed by the Payments and posting owner."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

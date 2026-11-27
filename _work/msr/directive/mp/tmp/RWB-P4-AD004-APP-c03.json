@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "The story writes `masking_rule` and nothing else. `decision_log_entry` is P7's, written through the local library (DP-03). `lov_value`, `reference_row` and `reference_version` are P3's (DP-07). The field-to-view-and-column map is not a column of `masking_rule` — **Not specified in the source documents (GAP-2266; ASM-3738)**.",
+   "new": "The story writes `masking_rule` and nothing else. `decision_log_entry` is P7's, written through the local library (DP-03). `lov_value`, `reference_row` and `reference_version` are P3's (DP-07). The field-to-view-and-column map is not a column of `masking_rule` — **Not specified in the source documents (GAP-2266; ASM-3738)**.\n\nThe acceptance criteria and test data read the ACE views only through P1, never directly.\n\nThe masking-profile contract carries roleCode, fieldId, viewName, columnName, unmasked, maskingVersion, validFrom and validTo, and a page holds 50 rows by default and 200 at most. The unmask record names the case, the person key, the field, the view and column, the version, the role, the acting user reference and the time, with no clear value; the PII record itself is written through ACE Common logging.\n\nThe three masking-profile operations sit on /api/recovery/access/v1 with the Reference data R and C rights (TSD P4 v3 T6.1), and the unmasked rule is the unmask right. rwb_access holds no PII table and no view-name column."
+  },
+  {
+   "old": "| SCR-43 Roles and access | List; access log; masked by role | The `maskingVersion` and the field flags that the access-log row carries |",
+   "new": "| SCR-43 Roles and access | List; access log; masked by role; empty, loading, error and no access: Not specified in the source documents (CG-ALL-4581) | The `maskingVersion` and the field flags that the access-log row carries |"
+  },
+  {
+   "old": "| SCR-47 Personal data | Loading; list; masked; unmasked by the row's rule; refused | The profile rows of a role and a field with their version, and the unmask answer with its version |",
+   "new": "| SCR-47 Personal data | Loading; list; masked; unmasked by the row's rule; refused; empty, error and no access: Not specified in the source documents (CG-ALL-4582) | The profile rows of a role and a field with their version, and the unmask answer with its version |"
+  },
+  {
+   "old": "    Then responses use the new version and the access log carries the version in force",
+   "new": "    Then responses use the new version and the access log carries the version in force\n\n  Scenario: AC4 Each business rule in section 8 holds (new, D-RCV-60)\n    Given the rules BR1 to BR8 of section 8\n    When the profile is read, written, unmasked or refused\n    Then each rule answers as its row in section 8 states\n\n  Scenario: AC5 A call without a valid caller, without a right or to a missing resource answers 401, 403 or 404 (new, D-RCV-60)\n    Given a provided operation of the service\n    When the caller is not authenticated, lacks the right or names a missing resource\n    Then the call answers 401, 403 or 404 and nothing changes\n\n  Scenario: AC6 A replay of a write with the same idempotency key does not write twice (new, D-RCV-60)\n    Given a write accepted with an idempotency key\n    When the same write is sent again with that key\n    Then the replay is not written a second time\n\n  Scenario: AC7 A consumed call that fails or does not answer refuses the action and changes nothing (new, D-RCV-60)\n    Given a consumed service call for a version, a refusal or an unmask\n    When the call fails or does not answer\n    Then the action is refused and nothing changes"
+  },
+  {
+   "old": "| TC-AD-004-09 | §12.7 tables (ASM-3438) | Component | Boundary: `masking_rule` written only in `rwb_access`; `v_ace_customer` and `v_ace_contact` read only; no foreign key crosses a schema |",
+   "new": "| TC-AD-004-09 | §12.7 tables (ASM-3438) | Component | Boundary: `masking_rule` written only in `rwb_access`; `v_ace_customer` and `v_ace_contact` read only; no foreign key crosses a schema |\n| TC-AD-004-10 | AC4 | Component | Not specified in the source documents (NEWAC-RWB-P4-AD004-APP-AC4) |\n| TC-AD-004-11 | AC5 | Contract | Not specified in the source documents (NEWAC-RWB-P4-AD004-APP-AC5) |\n| TC-AD-004-12 | AC6 | Component | Not specified in the source documents (NEWAC-RWB-P4-AD004-APP-AC6) |\n| TC-AD-004-13 | AC7 | Component | Not specified in the source documents (NEWAC-RWB-P4-AD004-APP-AC7) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16384",
+   "item": "DOR-RWB-P4-AD004-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Added P1-only ACE read statement to section 11 for criteria and test data."
+  },
+  {
+   "ruling": "R-23001",
+   "item": "GAP-0794",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now lists profile fields, 50/200 page default and maximum, unmask record fields, and ACE Common PII logging."
+  },
+  {
+   "ruling": "R-23007",
+   "item": "GAP-2267",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "API specification and ownership map",
+   "change": "Add the three masking-profile operations at version 1 to the API specification index and add masking-profile rows to the ownership map.",
+   "note": "Operations and schemas are declared by the story; the other documents need the index and map rows."
+  },
+  {
+   "ruling": "R-23008",
+   "item": "GAP-0793",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "API specification; ownership map; TSD P4 v3 appendix T-A",
+   "change": "Add three masking-profile operations on /api/recovery/access/v1 with Reference data R and C rights, and the unmasked rule as the unmask right.",
+   "note": "Story side resolved in section 11: no PII table, no view-name column, unmask write via ACE Common logging."
+  },
+  {
+   "ruling": "R-25225",
+   "item": "CG-ALL-4581",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-43 states now include empty, loading, error and no access as Not specified in the source documents."
+  },
+  {
+   "ruling": "R-25226",
+   "item": "CG-ALL-4582",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-47 states now include empty, error and no access as Not specified in the source documents."
+  },
+  {
+   "ruling": "R-30771",
+   "item": "NEWAC-RWB-P4-AD004-APP-AC4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC4 covering section 8 rules BR1 to BR8 and test row TC-AD-004-10."
+  },
+  {
+   "ruling": "R-30772",
+   "item": "NEWAC-RWB-P4-AD004-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 for 401, 403 and 404 answers and test row TC-AD-004-11."
+  },
+  {
+   "ruling": "R-30773",
+   "item": "NEWAC-RWB-P4-AD004-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 for idempotent replay of writes and test row TC-AD-004-12."
+  },
+  {
+   "ruling": "R-30774",
+   "item": "NEWAC-RWB-P4-AD004-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 for failed or unanswered consumed calls and test row TC-AD-004-13."
+  }
+ ]
+}

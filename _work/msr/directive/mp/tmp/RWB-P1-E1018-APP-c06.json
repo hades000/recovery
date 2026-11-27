@@ -1,0 +1,81 @@
+{
+ "edits": [
+  {
+   "old": "    Then no case number is issued or formatted and no sequence is drawn by this service",
+   "new": "    Then the response returns no case number and the value of the case-number sequence is unchanged after the call"
+  },
+  {
+   "old": "    Then the response holds no partial page and nothing is cached",
+   "new": "    Then the response holds no partial page and nothing is cached\n\n  Scenario: AC8 The exclusion facts and case attributes are never copied into a table of this service (new, D-RCV-60)\n    Given the tables of schema rwb_source_data are listed after the migration\n    Then no table of rwb_source_data holds a column copied from v_ace_account, v_ace_customer or v_ace_ca_relation\n    Then no table of rwb_source_data holds a case column named case_number, status, stage, owner or queue\n    Then tdr_flag, deceased_flag and dispute_open are returned read from their owners and are stored in no table of this service\n\n  Scenario: AC9 A call without a credential, a caller other than the case service or an unknown path is refused with its status (new, D-RCV-60)\n    When a call to GET /api/recovery/source-data/v1/entry-candidates arrives without a credential\n    Then the call is refused with status 401\n    When a call arrives from a caller that is not the case service identity\n    Then the call is refused with status 403 and MSG-P4-002\n    When a call names a path that is not an operation of /api/recovery/source-data/v1\n    Then the call is refused with status 404\n\n  Scenario: AC10 A replayed write with the same body answers the same result and writes nothing new (new, D-RCV-60)\n    Given party_ext holds one row for \"P0000123\" with fraud_flag true\n    When the exclusion screen repeats PUT /api/recovery/source-data/v1/extension-facts/parties/P0000123 with fraudFlag true\n    Then the response repeats the first answer with fraudFlag true\n    Then party_ext still holds one row for \"P0000123\""
+  },
+  {
+   "old": "| TC-E1-018-19 | Boundary of the tables of 12.7 (`party_ext` and `account_ext`, 1:1 by business key, mandatory columns, no foreign key) (ASM-3438) | Component | The migration assertions of build step 1 in `rwb_source_data`, run twice |",
+   "new": "| TC-E1-018-19 | Boundary of the tables of 12.7 (`party_ext` and `account_ext`, 1:1 by business key, mandatory columns, no foreign key) (ASM-3438) | Component | The migration assertions of build step 1 in `rwb_source_data`, run twice |\n| TC-E1-018-20 | AC7 (X5: an ACE view error or a timeout answers 503 with no partial page) | Component | `v_ace_account` raises an error or the statement exceeds its 5 s timeout for 2026-12-01 |\n| TC-E1-018-21 | AC8, BR2, BR6 | Component | The tables of schema `rwb_source_data` after the migration, listed and checked for copied ACE columns and case columns |\n| TC-E1-018-22 | AC9 | Component | A call without a credential, a call from a caller other than the case service identity, a call to an unknown path |\n| TC-E1-018-23 | AC10 | Component | Key \"P0000123\" repeated with the same body |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28513",
+   "item": "GAP-2438",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-PLT-DB",
+   "change": "Name the per-service login of rwb-decision in the secret store, keeping the migration role and the application role apart",
+   "note": "The story names no rwb-decision login; the login name belongs to the platform DB story and the secret store, so no story edit."
+  },
+  {
+   "ruling": "R-29328",
+   "item": "ACR-RWB-P1-E1018-APP-AC3",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC3 already has TC-E1-018-17 in section 16 (Component, key P0000123 written twice); no edit needed."
+  },
+  {
+   "ruling": "R-29329",
+   "item": "ACR-RWB-P1-E1018-APP-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Then step of AC6 rewritten to name the values: returns no case number and the case-number sequence value is unchanged.",
+   "note": "Vague wording removed from the AC6 Then; the Then now names the response content and the sequence value."
+  },
+  {
+   "ruling": "R-30235",
+   "item": "NEWAC-RWB-P1-E1018-APP-AC16",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-018-20 covering AC7 (X5 error or timeout).",
+   "note": "X5 is covered by AC7 in section 7, which had no test row; TC-E1-018-20 added, so section 5 needs no change."
+  },
+  {
+   "ruling": "R-30236",
+   "item": "NEWAC-RWB-P1-E1018-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC8 (no copied ACE column, no case column) in section 7 and TC-E1-018-21 in section 16.",
+   "note": "BR2 and BR6 now have AC8 as an architecture guardrail with a Component test row."
+  },
+  {
+   "ruling": "R-30237",
+   "item": "NEWAC-RWB-P1-E1018-APP-AC18",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC9 (401, 403 with MSG-P4-002, 404) in section 7 and TC-E1-018-22 in section 16.",
+   "note": "Error status codes 401, 403 and 404 each have a criterion and a Component test row."
+  },
+  {
+   "ruling": "R-30238",
+   "item": "NEWAC-RWB-P1-E1018-APP-AC19",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC10 (repeated PUT with the same body) in section 7 and TC-E1-018-23 in section 16.",
+   "note": "Replay covered by repeating the PUT with the same body, as the story has no idempotency key header."
+  }
+ ]
+}

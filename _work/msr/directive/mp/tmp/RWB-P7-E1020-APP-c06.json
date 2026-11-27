@@ -1,0 +1,67 @@
+{
+ "edits": [
+  {
+   "old": "| X8 | A record carries a decision code of another point in a case's life, for example CASE_CREATED | Not this slice's mapping: the ledger's own ingest appends it (RWB-P7-E1027-APP) and this story adds no entry and no refusal | None | AC8 |",
+   "new": "| X8 | A record carries a decision code of another point in a case's life, for example CASE_CREATED | Not this slice's mapping: the ledger's own ingest appends it (RWB-P7-E1027-APP) and this story adds no entry and no refusal | None | AC8, AC15 |"
+  },
+  {
+   "old": "The eight criteria above are new and test only this deliverable",
+   "new": "The thirteen criteria above are new and test only this deliverable"
+  },
+  {
+   "old": "    Then the record is appended by the ledger's own ingest in RWB-P7-E1027-APP",
+   "new": "    Then the record is appended by the ledger's own ingest in RWB-P7-E1027-APP\n\n  Scenario: AC15 A decision code of another point in a case's life is neither refused nor appended by this story (new, D-RCV-60)\n    Given a record arrives for case \"RW-2026-000201\" with decision code \"CASE_CREATED\" and no rule ID\n    When this service receives the record for business date 2026-12-01\n    Then no MSG-P7-009 refusal is issued for the decision code\n    Then the record is left to the ledger's own ingest in RWB-P7-E1027-APP and the entry count for the case stays unchanged\n\n  Scenario: AC16 The ledger entry is append only and no rule is evaluated in rwb-decision (new, D-RCV-60)\n    Given one decision_log_entry exists for case \"RW-2026-000201\" and 2026-12-01\n    When an UPDATE or a DELETE is issued against that entry\n    Then the append-only trigger refuses it and the entry is unchanged\n    Then RuleModelService holds no evaluator, working memory or agenda, and the model read evaluates no rule\n\n  Scenario: AC17 The provided operations answer 401, 403 and 404 with no page (new, D-RCV-60)\n    Given a reader holding Decision log R and a valid credential\n    When a call to GET /api/recovery/decision/v1/decision-log carries no valid credential\n    Then the answer is 401 and no page is returned\n    When a role without Decision log R calls the same path\n    Then the answer is 403 with MSG-P4-002 and no page is returned\n    When a call asks for a path the contract does not provide\n    Then the answer is 404 and no page is returned\n\n  Scenario: AC18 A retried or timed-out append leaves one entry or none (new, D-RCV-60)\n    Given the record for case \"RW-2026-000201\" on 2026-12-01 was appended once and its entry id is known\n    When the producer retries the same record after no answer\n    Then exactly one decision_log_entry exists for case \"RW-2026-000201\" and 2026-12-01 and the first entry's id is answered\n    Given the ledger store does not answer within the append time limit (value not specified in the source documents, NEWAC-RWB-P7-E1020-APP-AC18)\n    When the record is sent for case \"RW-2026-000202\" on 2026-12-01\n    Then the append is refused, no decision_log_entry is written, and the record waits in the producer's outbox\n\n  Scenario: AC19 A consumed rwb-case call that fails or does not answer writes no queue value (new, D-RCV-60)\n    Given the rwb-case contract mock fails the call for case \"RW-2026-000201\"\n    When the ledger consumes the record for business date 2026-12-01\n    Then one decision_log_entry exists for case \"RW-2026-000201\" with the rule ID and rule version from the record\n    Then no queue value is written by this service and the failed call is logged with the case ID"
+  },
+  {
+   "old": "| TC-E1-020-20 | AC6: only a version in force with a matching SHA-256 is served, and JOB-20 is the only route in | Component | Version `ALLOC-2026.11` in force from 2026-11-30; `ALLOC-2026.12` APPROVED with valid-from 2026-12-15; JOB-20 run at 00:01 on 2026-12-15 |",
+   "new": "| TC-E1-020-20 | AC6: only a version in force with a matching SHA-256 is served, and JOB-20 is the only route in | Component | Version `ALLOC-2026.11` in force from 2026-11-30; `ALLOC-2026.12` APPROVED with valid-from 2026-12-15; JOB-20 run at 00:01 on 2026-12-15 |\n| TC-E1-020-21 | AC15: a record with decision code `CASE_CREATED` is neither refused nor appended by this story | Component | Case `RW-2026-000201` on 2026-12-01 with decision code `CASE_CREATED` and no rule ID; refusal log and entry count checked |\n| TC-E1-020-22 | AC16: an UPDATE or a DELETE on a decision_log_entry is refused, and no evaluator is held in rwb-decision | Component | One entry for `RW-2026-000201` on 2026-12-01; UPDATE and DELETE issued; `RuleModelService` checked for evaluator, working memory and agenda |\n| TC-E1-020-23 | AC17: calls without a valid credential, without Decision log R, or to an unprovided path answer 401, 403 and 404 | Component | No credential; role `RW-REFADM` without Decision log R; unprovided path under `/api/recovery/decision/v1` |\n| TC-E1-020-24 | AC18: a retried record leaves one entry, and a timed-out append leaves none and waits in the outbox | NFR | Record for `RW-2026-000201` retried on 2026-12-01; ledger store not answering within the append time limit for `RW-2026-000202` |\n| TC-E1-020-25 | AC19: a failed or unanswered rwb-case call writes no queue value and the entry is appended with the record's rule identity | Component | rwb-case contract mock fails the call for `RW-2026-000201`; business date 2026-12-01 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31426",
+   "item": "NEWAC-RWB-P7-E1020-APP-AC15",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for the CASE_CREATED exception path, linked X8 to AC15, and added TC-E1-020-21."
+  },
+  {
+   "ruling": "R-31427",
+   "item": "NEWAC-RWB-P7-E1020-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 covering BR4 append-only and BR9 no evaluator; added TC-E1-020-22 as a component test."
+  },
+  {
+   "ruling": "R-31428",
+   "item": "NEWAC-RWB-P7-E1020-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for 401, 403 (MSG-P4-002) and 404 answers; added TC-E1-020-23. No message codes for 401 or 404 are given."
+  },
+  {
+   "ruling": "R-31429",
+   "item": "NEWAC-RWB-P7-E1020-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 for retry and timeout; append time limit not specified in source documents, so stated as such. Added TC-E1-020-24."
+  },
+  {
+   "ruling": "R-31430",
+   "item": "NEWAC-RWB-P7-E1020-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC19 for a failed or unanswered rwb-case call writing no queue value; added TC-E1-020-25."
+  }
+ ]
+}

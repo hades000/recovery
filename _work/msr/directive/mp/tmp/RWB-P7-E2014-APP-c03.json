@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "| X7 | The decision record cannot be written | Nothing changes, the notice stays Generated, an incident is raised | MSG-P7-003 | TC-E2-014-12 |",
+   "new": "| X7 | The decision record cannot be written | Nothing changes, the notice stays Generated, an incident is raised | MSG-P7-003 | AC11 |"
+  },
+  {
+   "old": "The ten criteria above are the legacy criteria of RWB-E2-014",
+   "new": "AC11 is the criterion for exception X7 and carries no legacy origin tag. The ten criteria AC1 to AC10 above are the legacy criteria of RWB-E2-014"
+  },
+  {
+   "old": "    Then the screen state is \"Ready\"",
+   "new": "    Then the screen state is \"Ready\"\n\n  Scenario: AC11 A decision that cannot be recorded changes nothing (exception X7; BR8)\n    Given the decision-record library is stopped\n    Given notice \"N-0201\" is in state \"Generated\"\n    When \"U-9212\" opens \"A-0201\" and approves\n    Then the decision log is not written and notice \"N-0201\" stays in state \"Generated\"\n    Then the approval status is unchanged and an incident is raised\n    Then the system refuses the call with message MSG-P7-003"
+  },
+  {
+   "old": "| TC-E2-014-12 | Principle 5 | NFR | The decision log write forced to fail during an approval; the notice stays Generated |",
+   "new": "| TC-E2-014-12 | Principle 5 | NFR | The decision log write forced to fail during an approval; the notice stays Generated |\n| TC-E2-014-13 | BR9 | NFR | The approval, the inputs reference and the decision entry are written only to rwb_decision; no cross-schema read or join is made |\n| TC-E2-014-14 | BR10 | NFR | The outcome leaves as one local decision record through the decision-record library on rwb.decision-record.v1 and no new event of this service is emitted |\n| TC-E2-014-15 | BR11 | NFR | The age limits, override reasons, status values, product groups, role codes and template variants are read as parameters and reference data with the version in force |\n| TC-E2-014-16 | BR12 | NFR | The screen is served through the gateway-bff composite route, and the route masks the identifiers, codes and dates the service returns |\n| TC-E2-014-17 | BR13 | NFR | A cross-service call past its 2 s budget is answered as missing, never approves a notice and never shows a stale fact as current |\n| TC-E2-014-18 | BR14 | NFR | The escalation of an unanswered D7.1 approval runs as a durable timer in ApprovalWorkflow and not as a scheduled job |\n| TC-E2-014-19 | BR15 | NFR | A D7.1 notice carries no amount limit and the DoA table is not consulted for it |\n| TC-E2-014-20 | BR16 | NFR | No event, log, workflow input or test carries a name, an address, an account number or a notice body |"
+  },
+  {
+   "old": "and the addressee role and the masked address are the route's fields and not elements of the notice answer.",
+   "new": "and the addressee role and the masked address are the route's fields and not elements of the notice answer. The route serves the PDF through rwb-document, and takes the addressee role and the masked address from the rwb-source-data fields of the decision panel."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18089",
+   "item": "DOR-RWB-P7-E2014-APP-20",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Reference Data v5",
+   "change": "Add the list LOV-OVERRIDE-REASON to Reference Data v5, which BR6 and BR11 read",
+   "note": "LOV-OVERRIDE-REASON is cited in BR6 and BR11 but missing from Reference Data v5; no story edit."
+  },
+  {
+   "ruling": "R-18090",
+   "item": "DOR-RWB-P7-E2014-APP-3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC11 for exception X7 in section 7; X7 Covered by now AC11; TC-E2-014-12 kept as its test case",
+   "note": "X7 now has its own criterion AC11 and is mapped in section 5; its test case TC-E2-014-12 is in section 16."
+  },
+  {
+   "ruling": "R-18091",
+   "item": "DOR-RWB-P7-E2014-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC rows TC-E2-014-13 to TC-E2-014-20 for BR9 to BR16; BR8 covered by AC11 and TC-E2-014-12",
+   "note": "BR8 is covered by AC11 and TC-E2-014-12; BR9 to BR16 each now have one test case row in section 16."
+  },
+  {
+   "ruling": "R-18092",
+   "item": "DOR-RWB-P7-E2014-APP-7",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "The P3 wording to replace the legacy job and decision-log terms is not in the source documents; section 11 rows unchanged."
+  },
+  {
+   "ruling": "R-22046",
+   "item": "GAP-1623",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "rwb-case contract",
+   "change": "Record that the Waiting approval state and the approval task are a P3 reaction to ApprovalRequested; align FSD A2.15 and A2.16 to that choice",
+   "note": "This story writes no case state; the AC3 task raise stays a call on the rwb-case contract."
+  },
+  {
+   "ruling": "R-22476",
+   "item": "GAP-2093",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Ownership Map v1 and Architecture v5",
+   "change": "Hold the approval in P7 ApprovalWorkflow as child of NoticeDispatchWorkflow with the notice as source; keep S4 POST /notices/{noticeId}/approve as the litigation officer decision point; remove 'Decision: child: approval' from rwb-comms OUT",
+   "note": "Story already holds the approval in P7 via BR1 and source_type NOTICE; the S4 and rwb-comms references sit outside this story."
+  },
+  {
+   "ruling": "R-22477",
+   "item": "GAP-2216",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-P7-E2014-CON and RWB-P3-E1043-CON baseline reviews",
+   "change": "Fix the case-facts projection with inputAsOf on API-P3-002, the refusal and return events on rwb.decision.events.v1, the task code with its reference row, and the dated contact read on rwb-source-data",
+   "note": "Story carries the four shapes as stated until fixed; it renames nothing in behaviour if the published shapes differ."
+  },
+  {
+   "ruling": "R-22478",
+   "item": "GAP-0932",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Publish the authorise, me-permissions and masking-policies shapes and state whether the routed role or the holder is a request field",
+   "note": "This story does not call authorise; BR15 references only the DoA table. The P4 contract shapes are needed before the screen story is built."
+  },
+  {
+   "ruling": "R-22479",
+   "item": "GAP-1264",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-P6-E1052-CON",
+   "change": "Publish approve, regenerate and hold on the rwb-comms contract with states and error codes; correct the Ownership Map rows",
+   "note": "AC1 to AC3 mocks already name the three operations; they stay as written until the rwb-comms contract publishes them."
+  },
+  {
+   "ruling": "R-22480",
+   "item": "GAP-1268",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Section 7 now states the PDF is served through rwb-document and the addressee role and masked address come from rwb-source-data at the decision panel",
+   "note": "PDF is referenced by documentId and served through rwb-document; addressee and masked address come from rwb-source-data, as section 7 now states."
+  }
+ ]
+}

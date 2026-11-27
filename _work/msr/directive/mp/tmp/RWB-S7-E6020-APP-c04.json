@@ -1,0 +1,76 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The role does not hold the Write-off and posting right A | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC4, TC-E6-020-04 |",
+   "new": "| X2 | The role does not hold the Write-off and posting right A | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC4, TC-E6-020-04, TC-E6-020-08 |"
+  },
+  {
+   "old": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC5, Section 17, BR5, BR6 |",
+   "new": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC5, TC-E6-020-09, Section 17, BR5, BR6 |"
+  },
+  {
+   "old": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released",
+   "new": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC6 Each business rule of the deferral is held where section 8 places it (new, D-RCV-60)\n    Given the rules BR1 to BR9 of section 8 are in force for the deferral\n    When the deferral is run on the fakes\n    Then the deferral runs in WriteOffWorkflow on rwb-writeoff, the decision record is written before the move, the moves are answered and not written, and no name, address, contact value or identity number enters the record\n\n  Scenario: AC7 An error answer of the committee decision operation carries its contract status code (401, 403 or 404) (new, D-RCV-60)\n    Given the committee decision operation is called with a request the contract does not accept\n    When the operation answers\n    Then the answer carries the status code of the contract (401, 403 or 404) and the platform error envelope\n\n  Scenario: AC8 A timed-out consumed activity is retried on the workflow's schedule and writes nothing (new, D-RCV-60)\n    Given the rwb-case contract does not answer inside 2 s\n    When the activity runs\n    Then the step retries on the workflow's own schedule, nothing is written, no timer is set and no move is answered\n\n  Scenario: AC9 A consumed call that fails or does not answer leaves nothing changed (new, D-RCV-60)\n    Given a consumed contract fails, does not answer inside 2 s or its breaker is open\n    When the committee decision for the deferral is submitted\n    Then nothing is written, no timer is set and no move is answered, and the caller sees 503 with the platform error envelope"
+  },
+  {
+   "old": "| TC-E6-020-13 | BR3, BR9 | Component | A case not at `WITH_COMMITTEE` refused with 409; an absent review date refused under R-WO-18; no name, address, contact value or identity number in the record, the log or a workflow input |",
+   "new": "| TC-E6-020-13 | BR3, BR9 | Component | A case not at `WITH_COMMITTEE` refused with 409; an absent review date refused under R-WO-18; no name, address, contact value or identity number in the record, the log or a workflow input |\n| TC-E6-020-14 | AC6, BR1 to BR9 | Component | The deferral run on the fakes with BR1 to BR9 in force; each rule checked as section 8 states it |\n| TC-E6-020-15 | AC7 | Component | Each error answer of `POST /write-offs/{writeOffId}/committee-decision` on the fake checked at its contract status code (401, 403 or 404) with the platform error envelope |\n| TC-E6-020-16 | AC8 | Component | The rwb-case fake does not answer inside 2 s; the retry on the workflow's schedule asserted, with nothing written, no timer set and no move answered |\n| TC-E6-020-17 | AC9 | Component | The rwb-decision fake fails, or its breaker is forced open; nothing written, no timer set, no move answered and 503 with the platform error envelope asserted |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32954",
+   "item": "NEWAC-RWB-S7-E6020-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X2 Covered by now lists AC4, TC-E6-020-04 and TC-E6-020-08.",
+   "note": "AC4 exists in section 7 and is now traced in the section 5 row alongside its access test TC-E6-020-08."
+  },
+  {
+   "ruling": "R-32955",
+   "item": "NEWAC-RWB-S7-E6020-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X9 Covered by now lists AC5 and TC-E6-020-09 beside Section 17, BR5, BR6.",
+   "note": "AC5 exists in section 7 and its boundary test TC-E6-020-09 is now traced in the X9 row."
+  },
+  {
+   "ruling": "R-32956",
+   "item": "NEWAC-RWB-S7-E6020-APP-AC6",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added AC6 to section 7 covering BR1 to BR9, and TC-E6-020-14 to section 16 with Covers AC6, BR1 to BR9.",
+   "note": "Section 8 rules BR1 to BR9 now have a criterion and a component test row."
+  },
+  {
+   "ruling": "R-32957",
+   "item": "NEWAC-RWB-S7-E6020-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 (401, 403, 404 of the committee decision operation) to section 7 and TC-E6-020-15 to section 16.",
+   "note": "Error status codes of the provided operation now have a criterion and a test row; no meanings beyond the item are invented."
+  },
+  {
+   "ruling": "R-32958",
+   "item": "NEWAC-RWB-S7-E6020-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 (timed-out activity retried on the workflow's schedule, writes nothing) to section 7 and TC-E6-020-16 to section 16.",
+   "note": "Retry and 2 s timeout taken from section 5 X5; the retry covers a timed-out consumed activity."
+  },
+  {
+   "ruling": "R-32959",
+   "item": "NEWAC-RWB-S7-E6020-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 (failed or non-answering consumed call, 503 with envelope, nothing written) to section 7 and TC-E6-020-17 to section 16.",
+   "note": "Failed call and open breaker outcomes follow section 5 X5 and need no invented values."
+  }
+ ]
+}

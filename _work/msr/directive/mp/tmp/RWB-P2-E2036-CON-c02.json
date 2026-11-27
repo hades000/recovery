@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "1. Draft the provided operation: the path on the integration base, the required `Idempotency-Key`, the request body, the path parameter and the access expectation, and state that the Ownership Map keeps the same suffix on the case base with P3.",
+   "new": "1. Draft the provided operation `POST /api/recovery/integration/v1/queues/{queueId}/placements` with the path parameter, the required `Idempotency-Key`, the request body and the access expectation; it forwards to `POST /api/recovery/case/v1/queues/{queueId}/placements`, the case-base operation that the Ownership Map keeps with P3, and returns that operation's status and body unchanged."
+  },
+  {
+   "old": "| Item | Content |\n|---|---|",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Placement request | `caseId` (uuid), `reason` (text, 1 to 1,000 characters), `modelOrAgent` (a caller code in the approved list), `version` (1 to 40 characters); `Idempotency-Key` in the header |",
+   "new": "| Placement request | `caseId` (uuid), `reason` (text, 1 to 1,000 characters), `modelOrAgent` (a caller code in the approved list), `version` (1 to 40 characters); `Idempotency-Key` in the header | Not specified in the source documents (DOR-RWB-P2-E2036-CON-7) |"
+  },
+  {
+   "old": "| Placement response, 201 | The placement result as rwb-case returns it: the case, the queue, the owner and the assignment when an owner was chosen, or the overflow queue with no owner; the decision entry reference and the status after the placement |",
+   "new": "| Placement response, 201 | The placement result as rwb-case returns it: the case, the queue, the owner and the assignment when an owner was chosen, or the overflow queue with no owner; the decision entry reference and the status after the placement | Not specified in the source documents (DOR-RWB-P2-E2036-CON-7) |"
+  },
+  {
+   "old": "| Problem response | RFC 9457 problem details with the status, the message identifier and the field or the caller it names; no personal value |",
+   "new": "| Problem response | RFC 9457 problem details with the status, the message identifier and the field or the caller it names; no personal value | Not specified in the source documents (DOR-RWB-P2-E2036-CON-7) |"
+  },
+  {
+   "old": "| Admission record | Decision code D6, the caller identity and type, the caller code, the model or agent version, the reason, the target queue, the answer and the freshness of the list version used |",
+   "new": "| Admission record | Decision code D6, the caller identity and type, the caller code, the model or agent version, the reason, the target queue, the answer and the freshness of the list version used | Not specified in the source documents (DOR-RWB-P2-E2036-CON-7) |"
+  },
+  {
+   "old": "| Replay row | The endpoint, the `Idempotency-Key`, the request hash, the stored status and body, the created time and the expiry at 24 hours |",
+   "new": "| Replay row | The endpoint, the `Idempotency-Key`, the request hash, the stored status and body, the created time and the expiry at 24 hours | Not specified in the source documents (DOR-RWB-P2-E2036-CON-7) |"
+  },
+  {
+   "old": "| Approved callers row | The caller code, the caller type MODEL or AGENT, the service identity and the approval state, read through the rwb-case contract with the version in force |",
+   "new": "| Approved callers row | The caller code, the caller type MODEL or AGENT, the service identity and the approval state, read through the rwb-case contract with the version in force | Not specified in the source documents (DOR-RWB-P2-E2036-CON-7) |"
+  },
+  {
+   "old": "The `idempotency_key` column set is the one of TSD P2 v3 T3.1.",
+   "new": "The `idempotency_key` column set is the one of TSD P2 v3 T3.1. The 201 overflow answer carries the overflow queue with no assignment; the caller mapping (caller code, caller type and service identity) is held in this contract; the approved callers list is a parameter read from rwb-case; the database login name is held in the rwb-integration DB story, and the legacy acceptance criteria in RWB-ITG-E2036-ITG."
+  },
+  {
+   "old": "the further column names of `decision_record` are Not specified in the source documents (GAP-0671; ASM-1201).",
+   "new": "the further column names of `decision_record` are Not specified in the source documents (GAP-0671; ASM-1201). The 24-hour replay window is the platform rule (DP-09), and the database login name is left to the rwb-integration DB story."
+  },
+  {
+   "old": "| MSG-P7-003 | Admission record write failed | The action was not taken because the decision could not be recorded. Try again in a few minutes. |",
+   "new": "| MSG-P7-003 | Admission record write failed | The action was not taken because the decision could not be recorded. Try again in a few minutes. |\n| MSG-GEN-006 | A consumed service does not answer inside the 2 s budget | Platform catalogue text, not restated here (DOR-RWB-P2-E2036-CON-9) |"
+  },
+  {
+   "old": "A status that this service returns unchanged from rwb-case or rwb-access carries that service's text, and the contract test compares it, so the two never drift.",
+   "new": "A status that this service returns unchanged from rwb-case or rwb-access carries that service's text, and the contract test compares it, so the two never drift. The admission refusals map by reason code: RIGHT_NOT_HELD, CALLER_KIND and SCOPE_NOT_ALL answer 403 with MSG-P4-002; the other two reason codes are Not specified in the source documents (GAP-0958), and the adapter maps the code and restates no text."
+  },
+  {
+   "old": "| TC-P2-E2036-CON-06 | AC6 | Component | The four fakes compared with the document, and one deliberate drift that fails the contract test |",
+   "new": "| TC-P2-E2036-CON-06 | AC6 | Component | The four fakes compared with the document, and one deliberate drift that fails the contract test |\n| TC-P2-E2036-CON-07 | AC1 | Contract | Boundary of the section 12.7 tables: only the idempotency_key and decision_record library tables are named; no business table of recovery_case, queue or assignment is named or read |\n| TC-P2-E2036-CON-08 | BR1, BR2, BR9 | Contract | One REST base per service; the case placement is not provided here; the adapter writes no case, queue or assignment row and publishes no case event |\n| TC-P2-E2036-CON-09 | BR3, BR4, BR7, BR8 | Component | Every POST carries the key; the checks run in order and a failure writes only the stored refusal; the admission record is written before the forward; the rwb-case answer returns unchanged |\n| TC-P2-E2036-CON-10 | BR5, BR6, BR10 | Contract | The approved callers list read from the rwb-case row with no copy in rwb_integration; the access check applies to every caller type; no business value literal in the contract |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15736",
+   "item": "DOR-RWB-P2-E2036-CON-12",
+   "status": "Cross-document",
+   "section": "12.7, 16, 18",
+   "target": "Test Cases v8; RTM v7",
+   "change": "Register TC-P2-E2036-CON-01 to -10 in Test Cases v8 and align the section 18 test lists with RTM v7",
+   "note": "Boundary test TC-07 added in section 16; test registration and section 18 alignment sit in Test Cases v8 and RTM v7."
+  },
+  {
+   "ruling": "R-15737",
+   "item": "DOR-RWB-P2-E2036-CON-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "Added TC-08 to TC-10 in section 16 covering BR1 to BR10",
+   "note": "Each of BR1 to BR10 is now covered by a test case row in section 16."
+  },
+  {
+   "ruling": "R-15738",
+   "item": "DOR-RWB-P2-E2036-CON-7",
+   "status": "Cross-document",
+   "section": "11, 12.7",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Register decision_record as an entity of the decision-record library, or confirm its table name",
+   "note": "BR Field ID column added with placeholder; decision_record registration is needed in LDM v9 or Data Classification v5."
+  },
+  {
+   "ruling": "R-15739",
+   "item": "DOR-RWB-P2-E2036-CON-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Platform message catalogue",
+   "change": "Confirm the standard meaning of MSG-P4-001; the section 14 row keeps its current meaning until then",
+   "note": "MSG-GEN-006 row added to section 14; MSG-P4-001 meaning needs the platform catalogue."
+  },
+  {
+   "ruling": "R-22704",
+   "item": "GAP-0670",
+   "status": "Resolved",
+   "section": "4, 12, 13",
+   "target": "",
+   "change": "Step 1 of section 4 fixes the integration path and the forward to the case-base operation; section 12.7 leaves the login to the rwb-integration DB story",
+   "note": "Integration path, case-base forward with unchanged return, and login reference now stated in the story."
+  },
+  {
+   "ruling": "R-22705",
+   "item": "GAP-0671",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "Section 12.7 states the 24-hour replay window as the platform rule and the login left to the DB story; placeholders kept for unnamed consumed fields",
+   "note": "Replay window, login reference, idempotency column set and placeholders for consumed fields are stated in the story."
+  },
+  {
+   "ruling": "R-22706",
+   "item": "GAP-0957",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "RWB-P4-E1037-CON service contract document",
+   "change": "Carry the placement-admission request and answer elements of POST /authorise as baseline names; keep caller type as a value of the approved callers list and add no caller-type list to rwb_access",
+   "note": "Element names belong in the RWB-P4-E1037-CON service contract; reconfirm with the rwb-integration owner at contract review."
+  },
+  {
+   "ruling": "R-22707",
+   "item": "GAP-0419",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Wave 2 integration harness pack",
+   "change": "Fix the composite route path and merge order with the platform edge story, and the repository, SIT environment, seeded data, evidence format, retention and pass/fail gate with QA",
+   "note": "Harness values are held as data in the harness pack at the wave 2 entry check, not in this story."
+  },
+  {
+   "ruling": "R-22708",
+   "item": "GAP-0735",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 now states the overflow answer shape, the caller mapping held in this contract, the callers list as a parameter, the login in the DB story and the legacy criteria in RWB-ITG-E2036-ITG",
+   "note": "Overflow shape, caller mapping and the other held values are now placed in the story and named documents."
+  },
+  {
+   "ruling": "R-22709",
+   "item": "GAP-0958",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Service contract document of rwb-access (RWB-P4-E1037-CON)",
+   "change": "Fix the five reason codes with one status each: 403 for RIGHT_NOT_HELD, CALLER_KIND and SCOPE_NOT_ALL, all with MSG-P4-002; name the other two codes",
+   "note": "Section 14 states the three 403 mappings; the other two reason codes and their statuses are named in the service contract."
+  }
+ ]
+}

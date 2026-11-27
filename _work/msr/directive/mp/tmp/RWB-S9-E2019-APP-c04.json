@@ -1,0 +1,118 @@
+{
+ "edits": [
+  {
+   "old": "Given the rwb-partner base path is /api/recovery/partner/v1 and the schema is rwb_partner",
+   "new": "Given the rwb-partner base path is /api/recovery/partner/v1 for staff paths and /partner/v1/* for portal paths, and the schema is rwb_partner"
+  },
+  {
+   "old": "The eight criteria below are new",
+   "new": "The ten criteria below are new"
+  },
+  {
+   "old": "The eight criteria are new and test the S9 operations only.",
+   "new": "The ten criteria are new and test the S9 operations only."
+  },
+  {
+   "old": "Then a repository row, an answer, an event, a log line and a test file hold no personal name, national id number, e-mail address, phone number, token, session identifier or Entra group name such as \"RWB-UAT-PT-LAWFIRM\"",
+   "new": "Then a repository row, an answer, an event, a log line and a test file hold no personal name, national id number, e-mail address, phone number, token, session identifier or Entra group name such as \"RWB-UAT-PT-LAWFIRM\"\n\n  Scenario: AC10 The approvals, the partner route switch and the call rules hold in this service (new, D-RCV-60)\n    Given a partner_user load carries the role owner approval but not the security administrator approval\n    When the load is submitted\n    Then the load is refused and no partner_user row is written\n    Given the parameter \"rwb.access.partner-signin\" is off in PROD\n    When a partner call reaches this service in PROD\n    Then the call is not served and no partner route is open in PROD\n    When the authorise call is made inside a request\n    Then it is one hop with a 2 s timeout and a breaker, and no other service's table is read or second hop made\n    Then the staff paths use \"/api/recovery/partner/v1\", the portal paths use \"/partner/v1/*\" and events use \"rwb.partner.events.v1\" only\n\n  Scenario: AC11 A replayed write with the same idempotency key is not written twice (new, D-RCV-60)\n    Given a partner_user load is written with an idempotency key\n    When the same load is sent again with the same idempotency key\n    Then the second call writes no second partner_user row and returns the answer of the first call"
+  },
+  {
+   "old": "| BR11 | One base, one topic, one schema and one login per service: `/api/recovery/partner/v1`, `rwb.partner.events.v1`, `rwb_partner`, the per-service login | DP-02, DP-13, DP-14; Arch v5 slides 17 and 41 |",
+   "new": "| BR11 | One topic, one schema and one login per service, with two bases: `/api/recovery/partner/v1` for the staff paths behind gateway-bff and `/partner/v1/*` for the portal paths behind the partner gateway; `rwb.partner.events.v1`, `rwb_partner`, the per-service login | DP-02, DP-13, DP-14; Arch v5 slides 17 and 41; GAP-1849 |"
+  },
+  {
+   "old": "Calls only on `/api/recovery/partner/v1`; events only",
+   "new": "Calls only on `/api/recovery/partner/v1` and `/partner/v1/*`; events only"
+  },
+  {
+   "old": "PRT-02 to PRT-06 are Epics 4 to 6 and are out of scope.",
+   "new": "PRT-02 to PRT-06 are Epics 4 to 6 and are out of scope. Screen owners: PRT-01 is served by rwb-partner through the partner gateway on `/partner/v1/*`; SCR-34 is served through the gateway-bff composite route of RWB-PLT-N001-CON; the solution architect with the platform edge owner owns both routes."
+  },
+  {
+   "old": "| Partner sign-in page | Refused | Is sent back to the gateway's page with MSG-P4-008 or MSG-P4-001 and no data |",
+   "new": "| Partner sign-in page | Refused | Is sent back to the gateway's page with MSG-P4-008 or MSG-P4-001 and no data |\n| SCR-34 Partner list | Loading | Not specified in the source documents (CG-ALL-11761) |\n| SCR-34 Partner list | Empty | Not specified in the source documents (CG-ALL-11761) |\n| SCR-34 Partner list | Error | Not specified in the source documents (CG-ALL-11761) |\n| SCR-34 Partner list | No access | Not specified in the source documents (CG-ALL-11761) |"
+  },
+  {
+   "old": "| TC-E2-019-19 | BR13 | Contract | A served answer and a refusal carry references and codes only: no personal name, contact value, identity number, token or session identifier |",
+   "new": "| TC-E2-019-19 | BR13 | Contract | A served answer and a refusal carry references and codes only: no personal name, contact value, identity number, token or session identifier |\n| TC-E2-019-20 | AC10; BR7 to BR13 | Component | Not specified in the source documents (NEWAC-RWB-S9-E2019-APP-AC10) |\n| TC-E2-019-21 | AC11 | Component | Not specified in the source documents (NEWAC-RWB-S9-E2019-APP-AC11) |"
+  },
+  {
+   "old": "TC-E2-019-01 to TC-E2-019-19",
+   "new": "TC-E2-019-01 to TC-E2-019-21"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23649",
+   "item": "GAP-1848",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Owners and routes recorded: PRT-01 via partner gateway on /partner/v1/*, SCR-34 via gateway-bff composite route; SCR-34 states added."
+  },
+  {
+   "ruling": "R-23650",
+   "item": "GAP-1849",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Two bases recorded: /api/recovery/partner/v1 for staff paths and /partner/v1/* for portal paths; BR11, Background and TC-E2-019-17 aligned."
+  },
+  {
+   "ruling": "R-27903",
+   "item": "CG-ALL-11760",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align REQ-ACA-012 test list to section 18 (TC-E2-019-01 to TC-E2-019-21) in the next version, replacing the three IDs listed there.",
+   "note": "Story section 18 now lists TC-E2-019-01 to TC-E2-019-21; RTM must align in its next version."
+  },
+  {
+   "ruling": "R-27904",
+   "item": "CG-ALL-11761",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-34 rows for Loading, Empty, Error and No access added; actions not in Screen Specifications v1 marked Not specified."
+  },
+  {
+   "ruling": "R-28516",
+   "item": "GAP-1567",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Recovery Workbench TSD P4 technical specification",
+   "change": "Drop lov_value and partner_user from T3.1 (with the T3.3 relationship); keep lists of values in TSD P3 and partner identity in TSD S9; state in the rwb-access contract which list versions and identity attributes it reads and its refresh rate.",
+   "note": "Change belongs to TSD P4 and the rwb-access contract; story text unchanged for this item."
+  },
+  {
+   "ruling": "R-28791",
+   "item": "GAP-0786",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-PLT-N007-INF",
+   "change": "Extend the certificate profile and rotation window to the rwb-access hop; record the per-client limit and burst for the resolution route in the gateway configuration baseline; publish rwb-access namespace, service and port.",
+   "note": "Infrastructure values belong to RWB-PLT-N007-INF and the gateway baseline; nothing in this story blocks the build."
+  },
+  {
+   "ruling": "R-33209",
+   "item": "NEWAC-RWB-S9-E2019-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for BR7 to BR13 with TC-E2-019-20; section 7 count and section 18 range updated to match."
+  },
+  {
+   "ruling": "R-33210",
+   "item": "NEWAC-RWB-S9-E2019-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for replay with the same idempotency key with TC-E2-019-21; proposed test data Not specified in source documents."
+  }
+ ]
+}

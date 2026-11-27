@@ -1,0 +1,123 @@
+{
+ "edits": [
+  {
+   "old": "| BR1 | The live treatment records are S2 rwb-treatment's in `rwb_treatment` and the dated DP04 copies are P1's in `rwb_source_data`; P1 extracts and hands over and never loads another service's schema | Ownership Map ruling on `treatment`, `dp_treatment` and `dp_guarantee_claim`; ASM-0080; DP-01; Architecture v5 slide 41 |",
+   "new": "| BR1 | The live treatment records are S2 rwb-treatment's in `rwb_treatment` and the dated DP04 copies are P1's in `rwb_source_data`; P1 extracts and hands over and never loads another service's schema; the dated DP04 copies are built from events, not from the extract | Ownership Map ruling on `treatment`, `dp_treatment` and `dp_guarantee_claim`; ASM-0080; DP-01; Architecture v5 slide 41 |"
+  },
+  {
+   "old": "| BR3 | The plan of a treatment is read from `v_ace_plan` through its `plan_ref`; no plan record is copied and no plan is booked by the migration | Legacy RWB-DM-004 AC1; TSD P1 v3 T3.3 view 16; D-RCV-35; ADR-010 |",
+   "new": "| BR3 | The plan of a treatment is read from `v_ace_plan` through its `plan_ref`, which is carried as the plan link, read only; no plan record is copied and no plan is booked by the migration | Legacy RWB-DM-004 AC1; TSD P1 v3 T3.3 view 16; D-RCV-35; ADR-010; GAP-0524 |"
+  },
+  {
+   "old": "The read is a single pass; the dump is never re-read inside the same cutover business date (AC1).",
+   "new": "The read is a single pass; the dump is never re-read inside the same cutover business date (AC1). The extract's format and field list beyond the AC1 wording: Not specified in the source documents (GAP-0524)."
+  },
+  {
+   "old": "    Then the step is refused before any read of the dump or of the plan view, and nothing is written",
+   "new": "    Then the step is refused before any read of the dump or of the plan view, and nothing is written\n\n  Scenario: AC5 The migration stays inside the service's schema, login and content rules (new, D-RCV-60)\n    Given the rwb-source-data Flyway sequence is applied to an empty schema and then a second time\n    Given the service login and the cutover code and fixtures\n    When the sequence and the code are checked\n    Then the version creates no table, no column and no index for a treatment row or a plan row\n    And ACE is read only through recovery.v_ace_* views with SELECT only and no public table appears in any statement\n    And no value a business person may change is written in code, and no personal data appears in an extract, a log, a fixture or a prompt\n\n  Scenario: AC6 A sign-off below ten clean days is refused (new, D-RCV-60)\n    Given fewer than ten consecutive PASS reconciliation_result rows for the migrated records\n    When the data steward attempts the sign-off\n    Then the sign-off is refused, nothing is recorded in the cutover record, and the count is shown"
+  },
+  {
+   "old": "| TC-DM-004-05 | BR7, BR8, BR10 | Component | The rwb-source-data Flyway sequence applied to an empty schema and then a second time; the service login with SELECT only and a statement scan for any public table; a scan of the cutover code and fixtures for business-value literals and personal data |",
+   "new": "| TC-DM-004-05 | AC5; BR7, BR8, BR10 | Component | The rwb-source-data Flyway sequence applied to an empty schema and then a second time; the service login with SELECT only and a statement scan for any public table; a scan of the cutover code and fixtures for business-value literals and personal data |\n| TC-DM-004-06 | AC6; BR5, BR6 | End to end | Fewer than ten consecutive PASS `reconciliation_result` rows for the migrated records; the data steward's sign-off attempted; the cutover record read after the attempt |"
+  },
+  {
+   "old": "| MSG-P1-001 | Warning | The ACE batch the plan read depends on is late for the business date, so the plan facts cannot be carried as current | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | Warning | The ACE batch the plan read depends on is late for the business date, so the plan facts cannot be carried as current | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "| MSG-P1-012 | Warning | A reconciliation row for a migrated record is BREAK during the ten days, so the count resets | The case list for {date} does not reconcile to ACE for {product}: a difference of {variance} accounts, {pct} percent. |",
+   "new": "| MSG-P1-012 | Warning | A reconciliation row for a migrated record is BREAK during the ten days, so the count resets | The case list for {date} does not reconcile to ALS for {product}: a difference of {variance} accounts, {pct} percent. |"
+  },
+  {
+   "old": "No other message is raised by this story.",
+   "new": "No other message is raised by this story. The text of MSG-P1-001 and MSG-P1-012 is taken from Error and Message Standard v4 §4 (CG-ALL-1908, CG-ALL-1909)."
+  },
+  {
+   "old": "A cutover that has not reached ten clean days shows as a count and not as a pass, so a cutover with one break in it is visible as a reset rather than as a zero, and the sign-off cannot be recorded below ten (AC3).",
+   "new": "A cutover that has not reached ten clean days shows as a count and not as a pass, so a cutover with one break in it is visible as a reset rather than as a zero, and the sign-off cannot be recorded below ten (AC3).\n\nSCR-44 empty, loading, error and no access states: Not specified in the source documents (CG-ALL-1912). SCR-45 loading state is taken from Screen Specifications v1 section SCR-45; its empty, error and no access states: Not specified in the source documents (CG-ALL-1913)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21803",
+   "item": "GAP-0523",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR1 now states the DP04 copies are built from events, not from the extract; the S2 load and P1 extract split was already in section 4."
+  },
+  {
+   "ruling": "R-21804",
+   "item": "GAP-0524",
+   "status": "Resolved",
+   "section": "4; 8",
+   "target": "",
+   "change": "",
+   "note": "BR3 carries v_ace_plan.plan_ref as a read-only plan link; section 4 states the extract format is not specified (GAP-0524)."
+  },
+  {
+   "ruling": "R-24238",
+   "item": "CG-ALL-1908",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4; the story use is kept, no new message ID invented."
+  },
+  {
+   "ruling": "R-24239",
+   "item": "CG-ALL-1909",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-012 text copied from Error and Message Standard v4 with ALS; the story use is kept, no new message ID invented."
+  },
+  {
+   "ruling": "R-24240",
+   "item": "CG-ALL-1912",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-44 empty, loading, error and no access states recorded as not specified in the source documents (CG-ALL-1912)."
+  },
+  {
+   "ruling": "R-24241",
+   "item": "CG-ALL-1913",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-45 loading state referred to Screen Specifications v1; empty, error and no access recorded as not specified (CG-ALL-1913)."
+  },
+  {
+   "ruling": "R-30141",
+   "item": "NEWAC-RWB-P1-DM004-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X8 already cites AC4 and TC-DM-004-04; AC4 exists in section 7 with the new tag. No further edit."
+  },
+  {
+   "ruling": "R-30142",
+   "item": "NEWAC-RWB-P1-DM004-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC5 added for BR7, BR8, BR10; TC-DM-004-05 now covers AC5."
+  },
+  {
+   "ruling": "R-30143",
+   "item": "NEWAC-RWB-P1-DM004-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC6 added: a sign-off below ten clean days is refused; new test case TC-DM-004-06 added."
+  }
+ ]
+}

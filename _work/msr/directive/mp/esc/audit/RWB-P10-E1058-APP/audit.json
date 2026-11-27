@@ -1,0 +1,98 @@
+{
+ "stage": "audit",
+ "story": "RWB-P10-E1058-APP",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 11
+    }
+   ],
+   "applied": true,
+   "disposition": [],
+   "edits": [
+    {
+     "old": "    Given a call to GET /admin/agent-runs arrives without an identity\n    When the call is made\n    Then the system refuses the call with 401 and no agent run item is returned\n    Then RW-PLATADM calling an admin read for a run identifier that does not exist receives 404 and no item is returned",
+     "new": "    Given a call to GET /admin/agent-runs arrives with no session\n    When the call is made\n    Then the system refuses the call with 401 and MSG-P4-001, and no agent run item is returned\n    When a caller who holds the read right calls GET /cases/{caseId}/agent-outputs for a case that does not exist\n    Then the system answers 404 and no item is returned"
+    },
+    {
+     "old": "| TC-E1-058-26 | AC21, AC16 | Contract | Call to GET /admin/agent-runs without identity answers 401; admin read of a non-existent run identifier answers 404; both through the rwb-access contract fake where a right is checked |",
+     "new": "| TC-E1-058-26 | AC21 | Contract | Call to GET /admin/agent-runs with no session answers 401 with MSG-P4-001; GET /cases/{caseId}/agent-outputs for a case that does not exist answers 404; the right is checked through the rwb-access contract fake |"
+    },
+    {
+     "old": "| MSG-P4-001 | Not specified in the source documents (DOR-RWB-P10-E1058-APP-9) | Not specified in the source documents (DOR-RWB-P10-E1058-APP-9) |",
+     "new": "| MSG-P4-001 | No session | Not specified in the source documents (DOR-RWB-P10-E1058-APP-9) |"
+    },
+    {
+     "old": "The seven texts are copied unchanged from RWB-E1-058. MSG-P4-001 is used",
+     "new": "The seven texts other than MSG-P4-001 are copied unchanged from RWB-E1-058. MSG-P4-001 is used"
+    },
+    {
+     "old": "states of screen SCR-46 in P3 are Not specified",
+     "new": "states of screen SCR-46 are Not specified"
+    },
+    {
+     "old": "the operations in section 12.2 sit on the /v1 base",
+     "new": "the operations in section 12.1 sit on the /v1 base"
+    },
+    {
+     "old": "| TC-E1-058-19 | AC17, BR15 | Component | rwb-case contract fake answers outside the 2 s client budget |",
+     "new": "| TC-E1-058-19 | AC17, BR15 | Component | rwb-case contract fake answers outside the 2 s client budget; the tool result is empty, the guardrail records the failed read and the run ends with fallback true |"
+    },
+    {
+     "old": "| TC-E1-058-20 | AC18, BR11 | Component | Parameter key from rwb-case names a value the policy does not allow |",
+     "new": "| TC-E1-058-20 | AC18, BR11 | Component | Parameter key from rwb-case names a value the policy does not allow; the run is refused before the model call, the value is named on the run and no code default is used |"
+    },
+    {
+     "old": "| TC-E1-058-21 | AC19 | Component | Migration of the rwb-agent Flyway sequence fails |",
+     "new": "| TC-E1-058-21 | AC19 | Component | Migration of the rwb-agent Flyway sequence fails; the new version does not start, the version in force keeps serving and no run row or version row is written |"
+    },
+    {
+     "old": "| TC-E1-058-23 | BR14 | Component | Calling step submits agent ECHO for case RW-2026-000101 through the agent runtime client; queue rwb-agent |",
+     "new": "| TC-E1-058-23 | BR14 | Component | Calling step submits agent ECHO for case RW-2026-000101 through the agent runtime client; the run is reached only through that client and queue rwb-agent |"
+    },
+    {
+     "old": "| TC-E1-058-24 | BR17 | Component | Run of ECHO checked in the listing, the event, the workflow history and the application log for prompt text and model answer |",
+     "new": "| TC-E1-058-24 | BR17 | Component | Run of ECHO checked in the listing, the event, the workflow history and the application log; none holds prompt text or a model answer |"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-30324",
+     "kind": "invented",
+     "issue": "AC21 and TC-26 use an admin read by run identifier. No such operation is shown as provided; section 12.1 gives 404 for an unknown version, evaluation or case."
+    },
+    {
+     "ruling": "R-30324",
+     "kind": "wrong",
+     "issue": "AC21 401 omits MSG-P4-001 and TC-26 traces AC16 (the 403 case), although it tests only 401 and 404."
+    },
+    {
+     "ruling": "R-15277",
+     "kind": "wrong",
+     "issue": "'The seven texts' no longer fits the table after MSG-P4-001 was added. Its condition (no session, section 12.1) is known but shown as not specified."
+    },
+    {
+     "ruling": "R-15269",
+     "kind": "invented",
+     "issue": "Section 11 places SCR-46 'in P3'. Neither the story text shown nor the item supports this."
+    },
+    {
+     "ruling": "R-04560",
+     "kind": "wrong",
+     "issue": "Contract version row points to section 12.2 (consumed reads) for the /v1 operations. The provided operations are in section 12.1."
+    },
+    {
+     "ruling": "R-15275",
+     "kind": "incomplete",
+     "issue": "New test rows TC-19, 20, 21, 23 and 24 state only a setup or action, with no expected result."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 6
+}

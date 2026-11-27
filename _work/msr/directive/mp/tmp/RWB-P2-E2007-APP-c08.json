@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "Given v_ace_account at business date 2026-12-16 shows tdr_flag false for synthetic account \"A-0702\"",
+   "new": "Given the rwb-source-data contract reports tdr_flag false for synthetic account \"A-0702\" at business date 2026-12-16"
+  },
+  {
+   "old": "Given v_ace_account shows tdr_flag true, last TDR date 2026-12-16, principal 1,800,000.00 baht and rate 4.5000 percent for \"A-0703\"",
+   "new": "Given the rwb-source-data contract reports tdr_flag true, last TDR date 2026-12-16, principal 1,800,000.00 baht and rate 4.5000 percent for \"A-0703\""
+  },
+  {
+   "old": "Given only \"A-0704\" shows the booking in v_ace_account at business date 2026-12-16",
+   "new": "Given only \"A-0704\" shows the booking through the rwb-source-data contract at business date 2026-12-16"
+  },
+  {
+   "old": "| MSG-P4-002 | Cross-slice: RWB-P4-E2007-APP (TC-E2-007-10) |",
+   "new": "| MSG-P4-002 | AC10; Cross-slice: RWB-P4-E2007-APP (TC-E2-007-10) |"
+  },
+  {
+   "old": "| MSG-GEN-006 | AC1, in the OPS series |",
+   "new": "| MSG-GEN-006 | AC1, AC13, in the OPS series |"
+  },
+  {
+   "old": "Then the run ends as failed and alerts role \"RW-PLATADM\"",
+   "new": "Then the run ends as failed and alerts role \"RW-PLATADM\"\n\n  Scenario: AC10 Rerun refused without Platform administration U (X8)\n    Given role \"RW-CASEOWN\" does not hold Platform administration U\n    When role \"RW-CASEOWN\" calls POST /admin/jobs/{jobId}/rerun for JOB-08\n    Then the request is refused with MSG-P4-002 before the handler runs\n    Then nothing changes\n\n  Scenario: AC11 Architecture constraints of the match (BR12 to BR16)\n    Given the grants and objects of schema \"rwb_integration\" are inspected\n    When the schema and JOB-08 are inspected\n    Then \"rwb_integration\" holds no grant on \"recovery\" (BR12)\n    Then \"rwb_integration\" holds no copy of a treatment, a case, an account or a task, and no foreign key into another schema (BR13)\n    Then JOB-08 is started by \"AceDataReady\" and not by a Schedule (BR14)\n    Then one open booking or terms task per case, task code and treatment exists, and a repeated run raises and cancels none (BR15)\n    Then the REC-03 result is a row of the reconciliation answer and no data lake file is written (BR16)\n\n  Scenario: AC12 Error answers of the provided operations (401, 403, 404)\n    Given a request to a provided operation carries no valid credentials\n    When the request is made\n    Then the answer is 401\n    Given a request to a provided operation comes from a role without the permission the operation needs\n    When the request is made\n    Then the answer is 403\n    Given a request to a provided operation names a resource that does not exist\n    When the request is made\n    Then the answer is 404\n\n  Scenario: AC13 Activity retry and timeout of a cross-service contract (X10)\n    Given a cross-service contract (rwb-treatment, rwb-source-data, rwb-case or rwb-decision) does not answer inside the 2 s budget (DP-11)\n    When the match runs\n    Then the activity is retried by the kit policy\n    Then the treatment is not marked booked\n    Then the failure is counted on the run summary with message MSG-GEN-006\n    Then the next run for the business date picks the treatment up\n\n  Scenario: AC14 Status change the model does not allow is refused\n    Given a requested status change that the state model does not allow\n    When the status change is requested\n    Then the change is refused\n    Then nothing is written"
+  },
+  {
+   "old": "| TC-E2-007-10 | Access | Component |",
+   "new": "| TC-E2-007-10 | AC10, Access | Component |"
+  },
+  {
+   "old": "| TC-E2-007-13 | Boundary of the tables of section 12.7 (ASM-3438) | Component | Boundary test of each table of 12.7 with the stubs of 12.8 |",
+   "new": "| TC-E2-007-13 | Boundary of the tables of section 12.7 (ASM-3438) | Component | Boundary test of each table of 12.7 with the stubs of 12.8 |\n| TC-E2-007-14 | AC11, BR12, BR13, BR14, BR15, BR16 | Component | Not specified in the source documents (AC11) |\n| TC-E2-007-15 | AC12 | Contract | Not specified in the source documents (AC12) |\n| TC-E2-007-16 | AC13, X10 | NFR | Rwb-treatment contract silent beyond the 2 s budget (DP-11) |\n| TC-E2-007-17 | AC14 | Component | Not specified in the source documents (AC14) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28730",
+   "item": "GAP-2692",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Parameter and reference-data registers; event catalogue; rwb-case contract baseline",
+   "change": "Add booking.missing.grace_loads and treatment-type and outcome list codes; record TreatmentBooked ownership against rwb-payment; record the parent stage outcome contract in the rwb-case baseline.",
+   "note": "Split stays as section 1 states; no story edit. Registers, event catalogue and rwb-case baseline need the codes and ownership once RWB-P2-E2007-CON is published."
+  },
+  {
+   "ruling": "R-28731",
+   "item": "GAP-2488",
+   "status": "Resolved",
+   "section": "3, 12.2, 12.8, 13",
+   "target": "",
+   "change": "Metadata rows kept as the Work Package fixes them; Depends on (build) already carries the H rows; D1 decides the dependency map.",
+   "note": "Metadata rows kept as fixed. Pattern table and 12.8 fakes naming sits in sections outside this chunk; no edit here."
+  },
+  {
+   "ruling": "R-29345",
+   "item": "ACR-RWB-P2-E2007-APP-AC2",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Given line now reads tdr_flag through the rwb-source-data contract, not v_ace_account.",
+   "note": "Given rewritten to read through rwb-source-data contract (DP-01, DP-05). Legacy values unchanged."
+  },
+  {
+   "ruling": "R-29346",
+   "item": "ACR-RWB-P2-E2007-APP-AC3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Given line now reads the TDR facts through the rwb-source-data contract, not v_ace_account.",
+   "note": "Given rewritten to read through rwb-source-data contract (DP-01, DP-05). Legacy values unchanged."
+  },
+  {
+   "ruling": "R-29347",
+   "item": "ACR-RWB-P2-E2007-APP-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Given line now reads the booking through the rwb-source-data contract, not v_ace_account.",
+   "note": "Given rewritten to read through rwb-source-data contract (DP-01, DP-05). Legacy values unchanged."
+  },
+  {
+   "ruling": "R-30462",
+   "item": "NEWAC-RWB-P2-E2007-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "AC10 added to section 7 for X8; X8 covered-by names AC10; TC-E2-007-10 covers AC10; test data taken from TC-E2-007-10.",
+   "note": "AC10 added for X8 refusal; TC-E2-007-10 now covers AC10 in this story; X8 covered-by updated."
+  },
+  {
+   "ruling": "R-30463",
+   "item": "NEWAC-RWB-P2-E2007-APP-AC11",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "AC11 added to section 7 for BR12 to BR16; TC-E2-007-14 added to section 16.",
+   "note": "AC11 covers BR12 to BR16 as a boundary check; TC-E2-007-14 added. Test data not specified in source documents."
+  },
+  {
+   "ruling": "R-30464",
+   "item": "NEWAC-RWB-P2-E2007-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC12 added for 401, 403 and 404 answers; TC-E2-007-15 added to section 16.",
+   "note": "AC12 added for 401, 403 and 404; TC-E2-007-15 added. Test data not specified in source documents."
+  },
+  {
+   "ruling": "R-30465",
+   "item": "NEWAC-RWB-P2-E2007-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC13 added for retry and 2 s timeout of a cross-service contract (X10); X10 covered-by names AC13; TC-E2-007-16 added.",
+   "note": "AC13 covers retry and 2 s timeout per X10; TC-E2-007-16 added; X10 covered-by updated."
+  },
+  {
+   "ruling": "R-30466",
+   "item": "NEWAC-RWB-P2-E2007-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC14 added: a disallowed status change is refused; TC-E2-007-17 added to section 16.",
+   "note": "AC14 added for a refused disallowed status change; TC-E2-007-17 added. Test data not specified in source documents."
+  }
+ ]
+}

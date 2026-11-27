@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "    Given the case holds an approved treatment \"T-0001\" for account \"A-0001\" and v_ace_plan holds the plan at plan status APPROVED",
+   "new": "    Given the case holds an approved treatment \"T-0001\" for account \"A-0001\" and the rwb-source-data contract fake serves the plan at plan status APPROVED"
+  },
+  {
+   "old": "    Then it sends the agreed terms to NLEADS and ALS through the outbound interface",
+   "new": "    Then it sends the booking instruction through the Temporal Nexus operation into the ACE Common namespace ace-collection (operation name Not specified in the source documents (GAP-2667)), and NLEADS and ALS act on it through operations"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision log with the rule version\n\n  Scenario: AC5 Every outbound item is logged, retried and queued for a named owner after the retry limit (new, D-RCV-60)\n    Given an outbound booking instruction has been sent\n    When the instruction is not acknowledged by ALS or NLEADS\n    Then the item is logged and retried on the defined schedule, and after the retry limit it is placed in the exception queue with a task for a named owner\n    Then every read behind it goes through an owner's contract and no account or payment copy is held\n\n  Scenario: AC6 A redelivered TreatmentBooked event does not book the plan twice (new, D-RCV-60)\n    Given the TreatmentBooked event has been consumed once\n    When the same TreatmentBooked event is delivered again\n    Then the plan is not booked twice and no second schedule or decision record is written"
+  },
+  {
+   "old": "| BR1 | The agreed terms of an approved plan leave to NLEADS and ALS through the outbound interface, and each leaves as one outbound item keyed by the case and the treatment | Legacy RWB-E3-010 AC1; FEAT-TRT-10; R-RES-21 |",
+   "new": "| BR1 | The agreed terms of an approved plan leave the Workbench as one booking instruction keyed by the case and the treatment, sent through the one outbound path, a Temporal Nexus operation into the ACE Common namespace ace-collection (operation name Not specified in the source documents (GAP-2667)); the booking act stays with operations in ALS and NLEADS | Legacy RWB-E3-010 AC1; FEAT-TRT-10; R-RES-21 |"
+  },
+  {
+   "old": "| BR2 | At booking confirmed, the Workbench records the booking reference from the TreatmentBooked event on rwb.payment.events.v1 and the booking date read from `v_ace_plan`; rwb-payment owns the booking and sets the payment schedule from `v_ace_payment` | R-RES-22 |",
+   "new": "| BR2 | At booking confirmed, the Workbench consumes the TreatmentBooked event (EV-11) on rwb.payment.events.v1 through its inbox, records the booking reference and the booking date read from `v_ace_plan`, and writes the schedule columns on rwb-treatment from the schedule basis in `v_ace_payment`; the booking is one PlanBooking body with nleadsRef, alsBookingRef, bookedAt, firstDueDate, installmentCount, installmentAmount and installmentsPaid required and bookingDifference optional, and alsBookingRef is carried on the booking record and the decision record; rwb-payment owns the booking | R-RES-22 |"
+  },
+  {
+   "old": "| TC-E3-010-01-ITG | Legacy AC1 of RWB-E3-010: book the plan and set the schedule — the agreed terms to NLEADS and ALS, the booking facts, the schedule, the plan timers and the record with its rule version (BR1, BR2, BR4, BR7) | Integration | Treatment `T-0001` approved for account `A-0001`; `v_ace_plan` at plan status APPROVED, served by the rwb-source-data contract fake; one outbound item per interface |",
+   "new": "| TC-E3-010-01-ITG | Legacy AC1 of RWB-E3-010: book the plan and set the schedule — the booking instruction through the Nexus operation into ACE Common, the booking facts, the schedule, the plan timers and the record with its rule version (BR1, BR2, BR4, BR7) | Integration | Treatment `T-0001` approved for account `A-0001`; `v_ace_plan` at plan status APPROVED, served by the rwb-source-data contract fake; one booking instruction through the Nexus operation |"
+  },
+  {
+   "old": "| TC-E3-010-02-ITG | Legacy AC2 of RWB-E3-010, asserted as the R-RES-22 fact of the same loop: booking confirmed, the booking date from `v_ace_plan`, the schedule from `v_ace_payment` and the case at BOOKED_IN_ALS_NLEADS (BR2) | Integration | WITH_OPS_BOOKING; ALS and NLEADS both acknowledging |",
+   "new": "| TC-E3-010-02-ITG | Run by RWB-S2-E3010-APP: legacy AC2 of RWB-E3-010, asserted as the R-RES-22 fact of the same loop: booking confirmed, the booking date from `v_ace_plan`, the schedule from `v_ace_payment` and the case at BOOKED_IN_ALS_NLEADS (BR2) | Integration | WITH_OPS_BOOKING; ALS and NLEADS both acknowledging |"
+  },
+  {
+   "old": "| TC-E3-010-03-ITG | Legacy AC3 of RWB-E3-010, asserted as the R-RES-25 fact of the same loop: the schedule set, the plan timers started, the plan running and the case at PLAN_RUNNING (BR3, BR5) | Integration | BOOKED_IN_ALS_NLEADS; first_due_date set |",
+   "new": "| TC-E3-010-03-ITG | Run by RWB-S2-E3010-APP: legacy AC3 of RWB-E3-010, asserted as the R-RES-25 fact of the same loop: the schedule set, the plan timers started, the plan running and the case at PLAN_RUNNING (BR3, BR5) | Integration | BOOKED_IN_ALS_NLEADS; first_due_date set |"
+  },
+  {
+   "old": "| TC-E3-010-04-ITG | Legacy AC4 of RWB-E3-010: the decision log write forced to fail, nothing changes and MSG-P7-003 is returned (BR8) | Integration | Decision log stubbed unavailable; MSG-P7-003 |",
+   "new": "| TC-E3-010-04-ITG | Run by RWB-S2-E3010-APP: legacy AC4 of RWB-E3-010: the decision log write forced to fail, nothing changes and MSG-P7-003 is returned (BR8) | Integration | Decision log stubbed unavailable; MSG-P7-003 |"
+  },
+  {
+   "old": "| TC-E3-010-07-ITG | BR6: every outbound item is logged, retried on a defined schedule and placed in an exception queue with a task for a named owner after the retry limit | Integration | Outbound item not acknowledged by ALS or NLEADS; retry schedule and limit not specified in the source documents (DOR-RWB-ITG-E3010-ITG-4) |",
+   "new": "| TC-E3-010-07-ITG | BR6: every outbound item is logged, retried on a defined schedule and placed in an exception queue with a task for a named owner after the retry limit | Integration | Outbound item not acknowledged by ALS or NLEADS; retry schedule and limit not specified in the source documents (DOR-RWB-ITG-E3010-ITG-4) |\n| TC-E3-010-08-ITG | AC5 (new, D-RCV-60): every outbound item is logged, retried on the defined schedule and placed in an exception queue with a task for a named owner after the retry limit (BR6); every read goes through an owner's contract (BR9) | Integration | Outbound item not acknowledged by ALS or NLEADS; retry schedule and limit not specified in the source documents (DOR-RWB-ITG-E3010-ITG-4) |\n| TC-E3-010-09-ITG | AC6 (new, D-RCV-60): a redelivered TreatmentBooked event does not book the plan twice (BR2) | Integration | TreatmentBooked event delivered twice on rwb.payment.events.v1; the second delivery is a duplicate |"
+  },
+  {
+   "old": "| Broken | A later missed payment takes the plan out of running and into the cure path, which is RWB-E3-011 |",
+   "new": "| Broken | A later missed payment takes the plan out of running and into the cure path, which is RWB-E3-011 |\n| Empty | Not specified in the source documents (CG-ALL-826) |\n| Loading | Not specified in the source documents (CG-ALL-826) |\n| Error | Not specified in the source documents (CG-ALL-826) |\n| No access | Not specified in the source documents (CG-ALL-826); the refusal with MSG-P4-002 is tested in TC-E3-010-05-ITG |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22749",
+   "item": "GAP-0424",
+   "status": "Cross-document",
+   "section": "15",
+   "target": "Gap register (GAP-0424)",
+   "change": "Attach the agreed NLEADS and ALS interface, harness, seeding, evidence and pass or fail gate values to GAP-0424 before this story is reported Done",
+   "note": "Register values are outside this story; story keeps its GAP-0424 references in sections 15 and 16."
+  },
+  {
+   "ruling": "R-22750",
+   "item": "GAP-2665",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR2 consumes EV-11 through the inbox and writes schedule columns on rwb-treatment; BR5 already keeps durable timers",
+   "note": "Payload and timer cadence confirmation at wave 2 contract freeze remains a check with the P8 owner."
+  },
+  {
+   "ruling": "R-22751",
+   "item": "GAP-2666",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR2 publishes PlanBooking with eight properties; seven required, bookingDifference optional; alsBookingRef on booking and decision records",
+   "note": "Required set is stated in BR2 so no implementer invents an ALS reference column."
+  },
+  {
+   "ruling": "R-22752",
+   "item": "GAP-2667",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "AC1 Then, BR1 and TC-E3-010-01-ITG send one booking instruction through a Nexus operation; booking stays with operations",
+   "note": "Nexus operation name Not specified in the source documents (GAP-2667); confirm at wave 2 contract freeze."
+  },
+  {
+   "ruling": "R-24033",
+   "item": "CG-ALL-823",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "TC-E3-010-02-ITG, 03 and 04 marked Run by RWB-S2-E3010-APP",
+   "note": "Rows kept as ITG copies of the owner story criteria, now marked with the owning story."
+  },
+  {
+   "ruling": "R-24034",
+   "item": "CG-ALL-824",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists of the four requirements that differ from section 18 in its next version",
+   "note": "RTM v7 lists tests from other stories; section 18 is not changed until the RTM values are confirmed."
+  },
+  {
+   "ruling": "R-24035",
+   "item": "CG-ALL-826",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Empty, loading, error and no access states added to SCR-14; screen specification lacks them",
+   "note": "States the screen specification lacks are marked Not specified in the source documents (CG-ALL-826)."
+  },
+  {
+   "ruling": "R-29304",
+   "item": "ACR-RWB-ITG-E3010-ITG-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC1 Given reads the rwb-source-data contract fake instead of an ACE view",
+   "note": "Matches the contract read rule for DP-01 and DP-05."
+  },
+  {
+   "ruling": "R-29985",
+   "item": "NEWAC-RWB-ITG-E3010-ITG-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC5 added for BR6 and BR9; TC-E3-010-08-ITG added",
+   "note": "Retry schedule and limit remain Not specified in the source documents (DOR-RWB-ITG-E3010-ITG-4)."
+  },
+  {
+   "ruling": "R-29986",
+   "item": "NEWAC-RWB-ITG-E3010-ITG-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC6 added for a redelivered TreatmentBooked event; TC-E3-010-09-ITG added",
+   "note": "Covers duplicate delivery of a consumed event on rwb.payment.events.v1."
+  }
+ ]
+}

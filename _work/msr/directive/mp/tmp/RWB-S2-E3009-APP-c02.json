@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P7-009 | Section 12.8 |",
+   "new": "| MSG-P7-009 | AC5, Section 12.8 |"
+  },
+  {
+   "old": "| Section 12.4 |",
+   "new": "| AC6, Section 12.4 |"
+  },
+  {
+   "old": "| Section 4 |",
+   "new": "| AC7, Section 4 |"
+  },
+  {
+   "old": "| Section 12.5 |",
+   "new": "| AC8, Section 12.5 |"
+  },
+  {
+   "old": "| Section 9 |",
+   "new": "| AC9, Section 9 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 A record refused for a missing field writes nothing and raises MSG-P7-009 (new, D-RCV-60)\n    Given the decision record is refused for a missing field\n    When the action is taken\n    Then nothing is written, the field is named and the incident carries MSG-P7-009\n\n  Scenario: AC6 A RESTRUCTURE package not in force is refused without a retry (new, D-RCV-60)\n    Given the RESTRUCTURE rule package is not in force or its checksum does not match\n    When the stage evaluates the rules\n    Then EvaluateRules answers NoPackageInForce, the workflow does not retry and the stage does not call the adapter\n    Then the user sees MSG-GEN-006\n\n  Scenario: AC7 An offer inside validity with no decline and no signature waits (new, D-RCV-60)\n    Given the offer is inside its validity and the customer has neither declined nor signed\n    When the stage evaluates the rules\n    Then neither rule fires, the branch waits on the durable timer of RWB-S2-E3007-APP and writes nothing\n\n  Scenario: AC8 A repeated decline or expiry after the restore makes no second restore (new, D-RCV-60)\n    Given the case has been restored by this branch\n    When a second CUSTOMER_DECLINED or OFFER_EXPIRED signal arrives\n    Then the inbox dedupes by cloud event id and no second restore is made\n\n  Scenario: AC9 A counter-offer returns the case to the officer and this branch does not fire (new, D-RCV-60)\n    Given a case in state OFFER_WITH_CUSTOMER\n    When the customer counters before the offer lapses\n    Then R-RES-15 takes the case back to the officer and this branch writes nothing\n\n  Scenario: AC10 A prior status restored from RETURNED_TO_COLLINS re-opens the route decision (new, D-RCV-60)\n    Given a case in state RETURNED_TO_COLLINS\n    When PRIOR_STATUS_RESTORED arrives on any condition\n    Then the route decision re-opens at BACK_TO_ROUTE_DECISION and the status move stays with rwb-case\n\n  Scenario: AC11 A case answer without a prior status is not guessed (new, D-RCV-60)\n    Given the rwb-case contract mock returns case status OFFER_WITH_CUSTOMER and no prior status\n    When customer declined\n    Then the stage does not invent a prior status, reports the gap to the parent and keeps the case where it is\n    Then the user sees MSG-GEN-006"
+  },
+  {
+   "old": "| BR8 | A counter-offer takes the case back to the officer under R-RES-15 and this branch does not fire; the two branches are mutually exclusive on one state | R-RES-15 |",
+   "new": "| BR8 | A counter-offer takes the case back to the officer under R-RES-15 and this branch does not fire; the two branches are mutually exclusive on one state | R-RES-15 |\n\n**Covered by.** BR1 AC2; BR2 AC3; BR3 AC10; BR4 AC11; BR5 AC1; BR6 AC4; BR7 AC1; BR8 AC9. The test cases for these criteria are in section 16."
+  },
+  {
+   "old": "No table of another service is read and no foreign key crosses a schema (DP-01).",
+   "new": "No table of another service is read and no foreign key crosses a schema (DP-01). The reference data read here is the outcome list LOV-TRT-OUTCOME under the reference-data contract of DP-06, and the parameters are read under the parameter contract of DP-07; their keys are Not specified in the source documents (DOR-RWB-S2-E3009-APP-20)."
+  },
+  {
+   "old": "faked in every test (DP-16; ASM-4375).",
+   "new": "faked in every test (DP-16; ASM-4375). rwb-integration owns the COLLINS and EFS interface, its retries and its exception queue, so this service holds the prior status and never writes to COLLINS directly (GAP-1697)."
+  },
+  {
+   "old": "| MSG-GEN-001 | A required field of the branch is empty | Enter {field}. |",
+   "new": "| MSG-GEN-001 | A required field of the branch is empty | Enter {field}. |\n| MSG-P7-009 | A decision record is refused for a missing field | Not specified in the source documents (DOR-RWB-S2-E3009-APP-9) |"
+  },
+  {
+   "old": "and the platform message set, and this story adds no message ID and no text.",
+   "new": "and the platform message set. MSG-P7-009 is added for X3 with its text Not specified in the source documents (DOR-RWB-S2-E3009-APP-9)."
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, on assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863."
+  },
+  {
+   "old": "with the treatment states Draft, submitted, approved, booked and broken as the sibling stories maintain them.",
+   "new": "with the treatment states Draft, submitted, approved, booked and broken as the sibling stories maintain them. The empty, loading, error and no access states of SCR-14 are Not specified in the source documents (CG-ALL-8608)."
+  },
+  {
+   "old": "| TC-E3-009-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E3-009-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E3-009-07 | Contract (section 12) | Component | Operations, events and activities of section 12 match the contract |\n| TC-E3-009-08 | Boundary (section 12.7) | Component | Tables of section 12.7 are written only by this service and only in the caller's transaction |\n| TC-E3-009-09 | AC5 | Component | A record refused for a missing field writes nothing and carries MSG-P7-009 |\n| TC-E3-009-10 | AC6 | Component | A RESTRUCTURE package not in force is refused without a retry |\n| TC-E3-009-11 | AC7 | Component | An offer inside validity with no decline and no signature waits |\n| TC-E3-009-12 | AC8 | Component | A repeated decline or expiry after the restore makes no second restore |\n| TC-E3-009-13 | AC9 | Component | A counter-offer returns the case to the officer and this branch writes nothing |\n| TC-E3-009-14 | AC10 | Component | A prior status restored from RETURNED_TO_COLLINS re-opens the route decision |\n| TC-E3-009-15 | AC11 | Component | A case answer without a prior status is not guessed |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19364",
+   "item": "DOR-RWB-S2-E3009-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E3-009-07 (contract, section 12) and TC-E3-009-08 (boundary, section 12.7) rows.",
+   "note": "Contract and boundary test rows added. TC-E3-009-01 to -06 in Test Cases v8 is a separate document and is not edited here."
+  },
+  {
+   "ruling": "R-19365",
+   "item": "DOR-RWB-S2-E3009-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Section 14 now cites DL10 with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863.",
+   "note": "DL10 open decision now carries its four assumption IDs in the story."
+  },
+  {
+   "ruling": "R-19366",
+   "item": "DOR-RWB-S2-E3009-APP-20",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "Named DP-06 reference-data contract and DP-07 parameter contract, with parameter keys marked not specified.",
+   "note": "Reference data and parameter contracts named; keys are not in the source documents."
+  },
+  {
+   "ruling": "R-19367",
+   "item": "DOR-RWB-S2-E3009-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC5 to AC7 and AC9 to §7 for X3, X6, X7 and X9 with test rows; X8 added as AC8; Covered by columns updated.",
+   "note": "Criteria AC5 to AC9 added for exceptions X3, X6, X7, X8 and X9, with test cases TC-E3-009-09 to -13."
+  },
+  {
+   "ruling": "R-19368",
+   "item": "DOR-RWB-S2-E3009-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added AC10 (BR3) and AC11 (BR4), a Covered by line mapping BR1 to BR8 to criteria, and test rows TC-E3-009-14 and -15.",
+   "note": "All eight rules now map to a criterion and test case."
+  },
+  {
+   "ruling": "R-19369",
+   "item": "DOR-RWB-S2-E3009-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add entity decision_record and field offer_validity to the model, or align the story to the names those documents already use.",
+   "note": "decision_record and offer_validity are not in LDM v9 or Data Classification v5."
+  },
+  {
+   "ruling": "R-19370",
+   "item": "DOR-RWB-S2-E3009-APP-8",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity restorePriorStatus to the catalog.",
+   "note": "Activity restorePriorStatus is missing from Temporal Catalog v1; the story already names it in section 8 BR5."
+  },
+  {
+   "ruling": "R-19371",
+   "item": "DOR-RWB-S2-E3009-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Added MSG-P7-009 row to the §14 table with its text marked not specified; updated the paragraph on message texts.",
+   "note": "MSG-P7-009 now listed in section 14. Its text is not in the source documents."
+  },
+  {
+   "ruling": "R-23376",
+   "item": "GAP-1697",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Target reading now states rwb-integration owns the COLLINS and EFS interface, its retries and its exception queue, and this service never writes to COLLINS directly.",
+   "note": "Write-back ownership assigned to rwb-integration per Architecture v5. Prior-status hold location unchanged."
+  },
+  {
+   "ruling": "R-26931",
+   "item": "CG-ALL-8608",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Added that the empty, loading, error and no access states of SCR-14 are Not specified in the source documents.",
+   "note": "Missing SCR-14 states marked not specified, since Screen Specifications v1 lacks them."
+  }
+ ]
+}

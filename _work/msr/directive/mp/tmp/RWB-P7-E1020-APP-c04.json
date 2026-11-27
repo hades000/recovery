@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "- The `rwb_decision` baseline is in place from the service template: the schema, the six tables of this service, the outbox and inbox objects of DP-09, the base, the topic, the task queue and the chart.",
+   "new": "- The `rwb_decision` baseline is in place from the service template: the schema, the six tables of this service, the outbox and inbox objects of DP-09, the base, the topic, the task queue and the chart.\n- The database login of rwb-case is Not specified in the source documents (GAP-3207) and is published in RWB-PLT-DB; the queue cap of 150 stays data on the queue (`queue.capacity_cap` and `queue_member.capacity`), with its default delivered through the parameter contract of DP-06."
+  },
+  {
+   "old": "- The workflow kit, the namespace `rwb-recovery` and the task queue `rwb-decision` are provisioned, so JOB-20 can run as a Temporal Schedule (DP-10).",
+   "new": "- The workflow kit, the namespace `rwb-recovery` and the task queue `rwb-decision` are provisioned, so JOB-20 can run as a Temporal Schedule (DP-10): the event start on AceDataReady is the primary trigger, with one catch-up Schedule per business date and overlap policy SKIP; the cron expression is Not specified in the source documents (GAP-3208) and is fixed in RWB-P3-E1020-OPS, with 07:00 Asia/Bangkok as the deadline the alert measures."
+  },
+  {
+   "old": "How the business date travels in that envelope, and the field names of the queue and owner identifiers in the actions payload, are Not specified in the source documents (GAP-2441; ASM-4049).",
+   "new": "The business date travels in that envelope as a record attribute, and the queue and owner identifiers as named members of the actions payload; their field names are Not specified in the source documents and are fixed at the contract review of RWB-PLT-E1027-CON (GAP-2441; ASM-4049)."
+  },
+  {
+   "old": "| TC-E1-020-02 | AC1, BR2: the entry carries `ASSIGN-007` and `ASSIGN-2026.11` with the owner identifier | End to end | Owners `U-01`, `U-02`, `U-03` with 120, 95 and 140 open cases; `U-03` chosen; cap 150 |",
+   "new": "| TC-E1-020-02 | AC2, BR2: the entry carries `ASSIGN-007` and `ASSIGN-2026.11` with the owner identifier | End to end | Owners `U-01`, `U-02`, `U-03` with 120, 95 and 140 open cases; `U-03` chosen; cap 150 |"
+  },
+  {
+   "old": "| TC-E1-020-03 | AC2, BR1: a case that found no owner below the cap is still one entry of the date | End to end | Owners at the cap; overflow queue `MTG-BKK-OVF`; the entry names no owner |",
+   "new": "| TC-E1-020-03 | AC3, BR1: a case that found no owner below the cap is still one entry of the date | End to end | Owners at the cap; overflow queue `MTG-BKK-OVF`; the entry names no owner |"
+  },
+  {
+   "old": "| TC-E1-020-04 | AC2, BR1: an overflow case is recorded once with the queue identifier it went to | End to end | `U-01`, `U-02`, `U-03` each at 150 open cases; case `RW-2026-000203` |",
+   "new": "| TC-E1-020-04 | AC4, BR1: an overflow case is recorded once with the queue identifier it went to | End to end | `U-01`, `U-02`, `U-03` each at 150 open cases; case `RW-2026-000203` |"
+  },
+  {
+   "old": "| TC-E1-020-06 | AC1, AC4, BR2, BR5: one entry per allocation with both rule identities, and one page for the date | Contract | Synthetic set of 2026-12-01 against the envelope of RWB-PLT-E1027-CON and the page of the date |",
+   "new": "| TC-E1-020-06 | AC6, BR2, BR5: one entry per allocation with both rule identities, and one page for the date | Contract | Synthetic set of 2026-12-01 against the envelope of RWB-PLT-E1027-CON and the page of the date |"
+  },
+  {
+   "old": "| TC-E1-020-07 | AC2, BR1: a case diverted for a deviation is recorded with no owner and no rule gap; the diversion is rwb-deviation's | End to end | Case `RW-2026-000206`, deviation queue `DEV-HANDLER`, no owner, no rule ID |",
+   "new": "| TC-E1-020-07 | AC7, BR1: a case diverted for a deviation is recorded with no owner and no rule gap; the diversion is rwb-deviation's | End to end | Case `RW-2026-000206`, deviation queue `DEV-HANDLER`, no owner, no rule ID |"
+  },
+  {
+   "old": "| TC-E1-020-08 | AC3, BR7: the same run repeated for 2026-12-01 writes no second entry | End to end | Case `RW-2026-000201` allocated on 2026-12-01, then the run repeated for the same date |",
+   "new": "| TC-E1-020-08 | AC8, BR7: the same run repeated for 2026-12-01 writes no second entry | End to end | Case `RW-2026-000201` allocated on 2026-12-01, then the run repeated for the same date |"
+  },
+  {
+   "old": "| TC-E1-020-10 | AC3, BR7: a date whose case creation did not run holds no entry, and a late record is appended once | End to end | ALS batch for 2026-12-01 not `COMPLETED`; MSG-P1-001; no record on the ledger |",
+   "new": "| TC-E1-020-10 | AC10, BR7: a date whose case creation did not run holds no entry, and a late record is appended once | End to end | ALS batch for 2026-12-01 not `COMPLETED`; MSG-P1-001; no record on the ledger |"
+  },
+  {
+   "old": "| TC-E1-020-11 | AC3, BR7: two deliveries of the same decision give one entry | End to end | The same record delivered twice at the same time; repeats counted per R-UNI-40 |",
+   "new": "| TC-E1-020-11 | AC11, BR7: two deliveries of the same decision give one entry | End to end | The same record delivered twice at the same time; repeats counted per R-UNI-40 |"
+  },
+  {
+   "old": "No new screen. The allocation view of SCR-38 Decision log query shows, for one case or one business date, the rule ID and version, the final call, the assignment rule ID and version, the queue, the owner, the decided time and the chain result; the case number and queue code beside them are read from the rwb-case contract at display time. Its states are Loading, Results, Empty (\"No decisions match this search.\") and Error with MSG-P7-003; a broken link puts a warning at the top and leaves the entry in place. The screen itself, its filters beyond the four query parameters, its paging and its export are legacy RWB-E2-005's, served by the gateway-bff composite route (DP-19), which calls this service for the entries and rwb-case for the case header.",
+   "new": "No new screen. The allocation view of SCR-38 Decision log query shows, for one case or one business date, the rule ID and version, the final call, the assignment rule ID and version, the queue, the owner, the decided time and the chain result; the case number and queue code beside them are read from the rwb-case contract at display time. Its states are Loading, Results, Empty, Error and No access; the Empty, Error and No access states, their wording and MSG-P7-003 are Not specified in the source documents (CG-ALL-6904), and a broken link puts a warning at the top and leaves the entry in place. The screen itself, its filters beyond the four query parameters, its paging and its export are legacy RWB-E2-005's, served by the gateway-bff composite route (DP-19), which calls this service for the entries and rwb-case for the case header."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22005",
+   "item": "GAP-3207",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-PLT-DB",
+   "change": "Publish the per-service database login name of rwb-case in RWB-PLT-DB and the rwb-case DB story.",
+   "note": "Story keeps login as a placeholder; cap kept as queue data with default via parameter contract (DP-06)."
+  },
+  {
+   "ruling": "R-22006",
+   "item": "GAP-3208",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-P3-E1020-OPS",
+   "change": "Fix the Temporal cron expression of the DailyCaseRun schedule where the deployment is described.",
+   "note": "Story states event start on AceDataReady, one catch-up Schedule per date with SKIP, and 07:00 Asia/Bangkok deadline."
+  },
+  {
+   "ruling": "R-22007",
+   "item": "GAP-2441",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-PLT-E1027-CON",
+   "change": "Fix business date as a record attribute and queue and owner identifiers as named actions payload members at contract review.",
+   "note": "Story bullet updated to the accepted approach; field names remain Not specified until the contract review."
+  },
+  {
+   "ruling": "R-22008",
+   "item": "GAP-2439",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary",
+   "change": "Publish the rule_package_version columns (state, valid-from, approver, DRL, checksum) and confirm the artifact payload with RWB-PLT-E1072-CON.",
+   "note": "No story text edit; section 11 already flags the shapes as assumed."
+  },
+  {
+   "ruling": "R-22338",
+   "item": "GAP-1336",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-P7-E1073-CON",
+   "change": "Fix the model answer, inputs snapshot and announcement payload in the registry contract; name plan-status section with gateway-bff route owner; publish per-service login.",
+   "note": "Also needs RWB-PLT-E1027-CON record envelope and RWB-PLT-DB login before wave 2 build."
+  },
+  {
+   "ruling": "R-26207",
+   "item": "CG-ALL-6899",
+   "status": "Not applied",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Rows 02, 03, 04, 06, 07, 08, 10, 11 aligned to v8. TC-12 and one further row lack v8 AC in the evidence; not invented."
+  },
+  {
+   "ruling": "R-26208",
+   "item": "CG-ALL-6901",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test-case lists of the four requirements in RTM v7 with section 18 of RWB-P7-E1020-APP in the next RTM version.",
+   "note": "Story lists are not changed here; the full RTM v7 lists are not in the evidence."
+  },
+  {
+   "ruling": "R-26209",
+   "item": "CG-ALL-6903",
+   "status": "Not applied",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Next number of the rwb_decision Flyway sequence is not in the sources; migration name left unchanged."
+  },
+  {
+   "ruling": "R-26210",
+   "item": "CG-ALL-6904",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, Error and No access states and their wording marked Not specified, as Screen Specifications v1 lacks them."
+  },
+  {
+   "ruling": "R-28506",
+   "item": "GAP-3206",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "WP C-WEX work package index",
+   "change": "Correct the heading E1-018 to RWB-E1-020 at the next run; the story keeps RWB-E1-020 as its subject.",
+   "note": "Read the E1-018 label as a scheduling label; the story source and identifiers belong to RWB-E1-020."
+  }
+ ]
+}

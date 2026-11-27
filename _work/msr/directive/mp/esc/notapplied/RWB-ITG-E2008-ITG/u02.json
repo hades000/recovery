@@ -1,0 +1,125 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E2008-ITG",
+ "unit": "u02",
+ "rulings": [
+  "R-22349",
+  "R-22403",
+  "R-22410",
+  "R-22412",
+  "R-22413",
+  "R-22417",
+  "R-22418",
+  "R-22420"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 5
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22349",
+     "item": "GAP-1346",
+     "status": "Resolved",
+     "section": "12.2",
+     "target": "RWB-P8-E2008-APP",
+     "change": "§12.2: use the source-data paths published in RWB-P1-E2008-APP §12.1 in place of the placeholder names.",
+     "note": "Seven calls named in 12.2; two paths from RWB-P1-E2008-APP §12.1, unpublished names carry the placeholder."
+    },
+    {
+     "ruling": "R-22403",
+     "item": "GAP-0599",
+     "status": "Resolved",
+     "section": "12.2, 12.8",
+     "target": "API Specification",
+     "change": "Next version: record the payments and installment-facts reads, businessDate, element names and error statuses as in RWB-P1-E2008-APP §12.1.",
+     "note": "Found in RWB-P1-E2008-APP flow and §12.1; MSG-P2-007 rendering is in its §14."
+    },
+    {
+     "ruling": "R-22410",
+     "item": "GAP-1352",
+     "status": "Cross-document",
+     "section": "19",
+     "target": "RWB-P8-E2008-OPS",
+     "change": "Pinned chart; two api replicas; worker floor, ceiling and sizes as values; three topics with platform defaults; gate every environment; canary or blue/green for PROD; down script per migration.",
+     "note": "Deployment of rwb-payment is outside this test-only story."
+    },
+    {
+     "ruling": "R-22412",
+     "item": "GAP-1627",
+     "status": "Resolved",
+     "section": "4",
+     "target": "FSD P8 v3",
+     "change": "AC-EXC-P8-001-02 and AC-EXC-P8-002-02: report the orphan as a reconciliation break row of rwb-source-data, check 'References'; no exception table.",
+     "note": "Flow step 7 now asserts the break row."
+    },
+    {
+     "ruling": "R-22413",
+     "item": "GAP-1629",
+     "status": "Cross-document",
+     "section": "",
+     "target": "FSD P8 v3",
+     "change": "Feature overview FEAT-PAY-06: build the settlement booking confirmation in wave 2 with EP03 (first in E3); proceeds features stay in wave 3. Align Epics 3 to 8 BRD DEP-005.",
+     "note": "This story neither builds nor tests the booking confirmation; no date changed."
+    },
+    {
+     "ruling": "R-22417",
+     "item": "GAP-1634",
+     "status": "Resolved",
+     "section": "11",
+     "target": "TSD P8 v2",
+     "change": "T3.1 and T3.3: replace DF-FIN-004 account_payment_id uuid cross-reference with business key payment_code varchar(255), no foreign key.",
+     "note": "Type and rule from the item evidence (API Specification Proceeds.paymentCode)."
+    },
+    {
+     "ruling": "R-22418",
+     "item": "GAP-1635",
+     "status": "Cross-document",
+     "section": "",
+     "target": "FSD P8 v3",
+     "change": "FEAT-PAY-11: reconcile to ACE payment and account position and to the delivered posting file confirmed by rwb-integration; ledger return only if published, else open question.",
+     "note": "This story has no ledger reconciliation text; BR8 covers REC-04 payments to proceeds only."
+    },
+    {
+     "ruling": "R-22420",
+     "item": "GAP-1640",
+     "status": "Resolved",
+     "section": "19",
+     "target": "",
+     "change": "",
+     "note": "One run per business date kept; same-day trigger recorded as an open question in section 19."
+    }
+   ],
+   "edits": [
+    {
+     "old": "7. Harness: asserts the REC-05 business-key break: no proceeds row exists for \"PAY-90003\" on account \"A-0999\", and \"PAY-90003\" is on the P1 data-quality exception list with check \"References\" for the data steward.",
+     "new": "7. Harness: asserts the REC-05 business-key break: no proceeds row exists for \"PAY-90003\" on account \"A-0999\", and \"PAY-90003\" is a break row on the reconciliation break list of rwb-source-data with check name \"References\" for the data steward; no exception table is written in `rwb_payment`."
+    },
+    {
+     "old": "| DF-FIN-004 | proceeds | account_payment_id (payment_code location confirmed by the data owner) | Read through the P8 proceeds operation |",
+     "new": "| DF-FIN-004 | proceeds | payment_code: one business-key column, varchar(255), holding the ACE payment_code, with no foreign key and no uuid cross-reference to account_payment | Read through the P8 proceeds operation |"
+    },
+    {
+     "old": "The composite screen route itself is gateway-bff (DP-19), owned by the platform edge story RWB-PLT-N001-CON. Its path and merge order are Not specified in the source documents (GAP-0393; ASM-0568).",
+     "new": "The composite screen route itself is gateway-bff (DP-19), owned by the platform edge story RWB-PLT-N001-CON. Its path and merge order are Not specified in the source documents (GAP-0393; ASM-0568).\n\nThe journey also exercises seven calls that rwb-payment consumes; the harness does not call them and they are not rows of the table above. Each is a one-hop REST contract of its owner (DP-11), except that rule evaluation runs on the embedded kit (DP-04):\n\n- `RecoveryDataApi.paymentsLoaded`: `GET /api/recovery/source-data/v1/payments?businessDate=D`, answering `PaymentsAnswer` (RWB-P1-E2008-APP §12.1).\n- `RecoveryDataApi.nextInstallmentDate`: `GET /api/recovery/source-data/v1/accounts/{accountKey}/installment-facts?businessDate=D` (RWB-P1-E2008-APP §12.1).\n- `BatchStatusQuery.forSource`: the batch status is carried in `PaymentsAnswer`; a separate operation name and payload: Not specified in the source documents (GAP-1346).\n- `RuleEvaluator.evaluate`, `CaseWorkflowApi.openCaseForAccount`, `TreatmentApi.runningPlans` and `TreatmentApi.recordInstallmentPaid`: published operation name and payload Not specified in the source documents (GAP-1346); the build uses their fakes on Day 1 until each owner publishes.\n\nThe two source-data reads take their element names and error answers from RWB-P1-E2008-APP, including 409 with MSG-P1-001 and MSG-P2-007 for a held run. The contract dependency and integration dependency rows of this story stay as given; the solution architect confirms the scope of RWB-P3-E2004-CON, RWB-P3-E2042-CON and RWB-P7-E1073-CON."
+    },
+    {
+     "old": "| The rwb-source-data payments contract, not in this workspace |",
+     "new": "| The rwb-source-data payments contract: `GET /api/recovery/source-data/v1/payments?businessDate=D` of RWB-P1-E2008-APP §12.1 |"
+    },
+    {
+     "old": "- Manual matching of an unmatched receipt and the reconciliation agent that works the exception list (Epic 4).",
+     "new": "- Manual matching of an unmatched receipt and the reconciliation agent that works the exception list (Epic 4).\n- A same-day or intraday matching run on payment received (DL06): wave 2 keeps one run per business date. Open question for the solution architect: the same-day trigger; an intraday run is added only when an interface that carries a payment during the day is named."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

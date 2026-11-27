@@ -1,0 +1,43 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P10-E1058-OPS",
+ "unit": "u02",
+ "rulings": [
+  "R-30327"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 2
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-30327",
+     "item": "NEWAC-RWB-P10-E1058-OPS-AC10",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "Added AC10 (BR1, BR8 boundary test) to section 7 and test case row TC-P10-E1058-OPS-11 to section 16",
+     "note": "BR1 (rwb-agent login, DP-02) and BR8 (schema rwb_agent, contract-only reads, 2 s budget) from section 8 rows of the story itself; no invented values, the item's proposed test is not in the sources."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then the admin traffic moves only after the check passes, the old colour keeps serving until it does, and a failed check leaves the old colour in place and marks the release failed",
+     "new": "    Then the admin traffic moves only after the check passes, the old colour keeps serving until it does, and a failed check leaves the old colour in place and marks the release failed\n\n  Scenario: AC10 The release keeps one schema, one login and contract-only reads (new, D-RCV-60)\n    Given the rwb-agent login (DP-02) reference, the rendered chart and the grants of schema `rwb_agent`\n    When the release is deployed to SIT and the boundary scan runs\n    Then the api, the worker and the pre-deploy migration job use the rwb-agent login (DP-02) reference and no other service's credential appears in the chart, the values or the rendered manifests\n    Then the migration job and the service write only schema `rwb_agent`, and the scan fails the release when a grant of `rwb_agent` on the recovery schema or on another service schema, or a foreign key across schemas, is added\n    Then case facts are read only through the rwb-source-data tool contract and extracted document fields only through the rwb-document tool contract, one hop with the 2 second client budget\n    Then every neighbour of the service is reached only through its published contract"
+    },
+    {
+     "old": "| TC-P10-E1058-OPS-10 | ASM-3438, BR1, BR8 | NFR | The pre-deploy job run on an empty `rwb_agent` schema; each table of section 12.7 checked for its owner and schema; a table of another schema in the sequence refused; the rwb-agent login used and no other credential |",
+     "new": "| TC-P10-E1058-OPS-10 | ASM-3438, BR1, BR8 | NFR | The pre-deploy job run on an empty `rwb_agent` schema; each table of section 12.7 checked for its owner and schema; a table of another schema in the sequence refused; the rwb-agent login used and no other credential |\n| TC-P10-E1058-OPS-11 | AC10, BR1, BR8 | NFR | The chart and the values scanned for a second service credential; the api, the worker and the migration job checked against the rwb-agent login (DP-02); a grant of `rwb_agent` on the recovery schema, a grant on another service schema and a cross-schema foreign key refused; the case and document reads through the rwb-source-data and rwb-document tool contracts, one hop with the 2 second client budget |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

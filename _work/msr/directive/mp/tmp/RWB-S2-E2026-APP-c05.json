@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-14 Treatment record | Loading | The placeholder while the composite route answers |",
+   "new": "| SCR-14 Treatment record | Loading | The placeholder while the composite route answers |\n| SCR-14 Treatment record | Empty | Not specified in the source documents (CG-ALL-8420) |\n| SCR-14 Treatment record | Error | Not specified in the source documents (CG-ALL-8420) |\n| SCR-14 Treatment record | No access | Not specified in the source documents (CG-ALL-8420) |"
+  },
+  {
+   "old": "| SCR-15 Settlement offer | Draft; below floor; approved; sent; accepted | The treatment the offer is built on and its document reference, read only here; the offer itself is RWB-S2-E3002-APP's |",
+   "new": "| SCR-15 Settlement offer | Draft; below floor; approved; sent; accepted | The treatment the offer is built on and its document reference, read only here; the offer itself is RWB-S2-E3002-APP's |\n| SCR-15 Settlement offer | Loading | Not specified in the source documents (CG-ALL-8421) |\n| SCR-15 Settlement offer | Empty | Not specified in the source documents (CG-ALL-8421) |\n| SCR-15 Settlement offer | Error | Not specified in the source documents (CG-ALL-8421) |\n| SCR-15 Settlement offer | No access | Not specified in the source documents (CG-ALL-8421) |"
+  },
+  {
+   "old": "| X10 | A component, a statement or a test reaches a `rwb_document`, `rwb_comms` or `rwb_case` table, a template row or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC9, BR1 |",
+   "new": "| X10 | A component, a statement or a test reaches a `rwb_document`, `rwb_comms` or `rwb_case` table, a template row or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC9, AC10, BR1 |"
+  },
+  {
+   "old": "    Then no row of the other schema is read or written and the treatment row is unchanged",
+   "new": "    Then no row of the other schema is read or written and the treatment row is unchanged\n\n  Scenario: AC10 A statement that reaches a template row or a v_ace_* view is refused by the grant and fails the build (new, D-RCV-60)\n    Given the rwb_treatment login holds the grants of section 12.7 only\n    When a component or a test issues a statement against a template row or a v_ace_* view\n    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n    Then no template row and no view row is returned to the caller\n\n  Scenario: AC11 Every business rule of section 8 is named by a criterion or a test case (new, D-RCV-60)\n    Given the rules BR1 to BR12 of section 8 and the test cases of section 16\n    When the traceability check reads sections 7 and 16\n    Then each rule BR1 to BR12 is named by at least one criterion or test case, and a rule with none fails the build\n\n  Scenario: AC12 A request without a valid credential, without Documents C or outside scope is refused and writes nothing (new, D-RCV-60)\n    Given a request to POST /cases/{caseId}/generated-documents for treatment \"TRT-0301\" with no valid credential\n    When generateContractDocument runs for treatment \"TRT-0301\"\n    Then the answer is 401 with the problem body, message Not specified in the source documents (NEWAC-RWB-S2-E2026-APP-AC17)\n    Then a caller without Documents C gets 403 and a case outside the caller's scope gets 404, each with MSG-P4-002 or MSG-P4-003 as the guard answered\n    Then nothing is read further and nothing is written\n\n  Scenario: AC13 A generate call that does not answer inside 2 s is retried on the platform policy and writes nothing (new, D-RCV-60)\n    Given the rwb-document contract mock does not answer for treatment \"TRT-0301\" within 2 s\n    When generateContractDocument runs for treatment \"TRT-0301\" and template \"DIL-CONTRACT\"\n    Then nothing is stored, and the activity retries on the platform policy with a 1 s initial interval, back-off 2 and 10 attempts\n    Then no document reference, no template version and no decision record is written on any attempt, and the treatment keeps the columns it had"
+  },
+  {
+   "old": "Three readings of the sources are stated here rather than hidden in the code.",
+   "new": "The document set and the signature sit with P5 rwb-document and P6 rwb-comms in the target: this story requests generation through the P5 contract, holds the document reference on the treatment, keeps no document content in `rwb_treatment`, and makes no review or signature request, which reach P5 and P6 only through their contracts (GAP-1704). The generation contract baseline fixes the path as POST /cases/{caseId}/generated-documents, names POST /documents/generate as the losing reading (ASM-115), publishes its event with five payload fields and no personal data or file byte, and treats the reads of other services as consumed and faked (GAP-1024). Three readings of the sources are stated here rather than hidden in the code."
+  },
+  {
+   "old": "The nine criteria are new under D-RCV-60 and test only the S2 deliverable of this story:",
+   "new": "The thirteen criteria are new under D-RCV-60 and test only the S2 deliverable of this story:"
+  },
+  {
+   "old": "the personal-data boundary (ASM-3079) and the table boundary of X10.",
+   "new": "the personal-data boundary (ASM-3079), the table boundary of X10, the traceability of section 8, the error answers and the retry and timeout."
+  },
+  {
+   "old": "The six added cases are this story's and test only the S2 deliverable;",
+   "new": "The ten added cases are this story's and test only the S2 deliverable;"
+  },
+  {
+   "old": "| TC-S2-E2026-APP-06 | AC9; BR1, BR9 | Component | A statement from the rwb_treatment login against rwb_document, rwb_comms, rwb_case or a v_ace_* view; the grant refuses it, the boundary test fails the build, and each table of section 12.7 is checked |",
+   "new": "| TC-S2-E2026-APP-06 | AC9; BR1, BR9 | Component | A statement from the rwb_treatment login against rwb_document, rwb_comms, rwb_case or a v_ace_* view; the grant refuses it, the boundary test fails the build, and each table of section 12.7 is checked |\n| TC-S2-E2026-APP-07 | AC10 (X10) | Component | A synthetic statement from the rwb_treatment login against a template row and a v_ace_* view; the grant refuses it and the boundary test fails the build |\n| TC-S2-E2026-APP-08 | AC11; BR1 to BR12 | Component | Traceability check: every rule BR1 to BR12 of section 8 is named by a criterion or a test case of sections 7 and 16 |\n| TC-S2-E2026-APP-09 | AC12 | Contract | A call to POST /cases/{caseId}/generated-documents without a credential, without Documents C and outside scope; 401, 403 or 404 with the problem body and nothing written |\n| TC-S2-E2026-APP-10 | AC13 | Component | The document service does not answer inside 2 s for treatment \"TRT-0301\"; the activity retries on the platform policy and nothing is stored |"
+  },
+  {
+   "old": "| DP-19 | Screen, ace-web | gateway-bff composite route | H RWB-PLT-N001-CON |",
+   "new": "| DP-19 | Screen, ace-web | gateway-bff composite route | H RWB-PLT-N001-CON |\n| DP-added (GAP-1288) | Store baseline; rwb-access authorise contract | Carried here; the metadata rows are corrected at the next version of the story set | H RWB-PLT-E1027-CON; H RWB-PLT-E1042-CON; C RWB-P3-E1042-CON; H RWB-PLT-E1043-CON; C RWB-P3-E1043-CON; H RWB-PLT-TE006-CON; H RWB-PLT-E1044-CON; H RWB-PLT-N001-CON |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-26859",
+   "item": "CG-ALL-8420",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added Empty, Error and No access rows for SCR-14; the specification lacks them, so they are Not specified in the source documents."
+  },
+  {
+   "ruling": "R-26860",
+   "item": "CG-ALL-8421",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added Loading, Empty, Error and No access rows for SCR-15; the specification lacks them, so they are Not specified in the source documents."
+  },
+  {
+   "ruling": "R-28784",
+   "item": "GAP-1704",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Story states generation via the P5 contract, holds the reference on the treatment, keeps no document content, and routes review and signature through P5 and P6 contracts."
+  },
+  {
+   "ruling": "R-28819",
+   "item": "GAP-1024",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Story fixes the path, records slide 16 name as the loser (ASM-115), and states the five-field event with no personal data or file byte."
+  },
+  {
+   "ruling": "R-28821",
+   "item": "GAP-2394",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "P6 API specification (rwb-comms)",
+   "change": "Allocate the next free API-P6-nnn ID at D1 and add POST /api/recovery/comms/v1/cases/{caseId}/generated-documents to the P6 API specification with the gateway-bff route.",
+   "note": "This story calls the P5 path on /api/recovery/document/v1; the comms path is not in its text, so no story edit."
+  },
+  {
+   "ruling": "R-28822",
+   "item": "GAP-1288",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Added DP-added row carrying the six platform H and two rwb-case C dependencies; Ready to start stays Day 1; metadata rows corrected at next version."
+  },
+  {
+   "ruling": "R-32078",
+   "item": "NEWAC-RWB-S2-E2026-APP-AC15",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for template row and v_ace view boundary with TC-S2-E2026-APP-07; X10 now covered by AC9, AC10, BR1."
+  },
+  {
+   "ruling": "R-32079",
+   "item": "NEWAC-RWB-S2-E2026-APP-AC16",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 traceability criterion for BR1 to BR12 with TC-S2-E2026-APP-08."
+  },
+  {
+   "ruling": "R-32080",
+   "item": "NEWAC-RWB-S2-E2026-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for 401, 403 and 404 answers with TC-S2-E2026-APP-09; the 401 message is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-32081",
+   "item": "NEWAC-RWB-S2-E2026-APP-AC18",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 for the 2 s timeout and platform retry with TC-S2-E2026-APP-10."
+  }
+ ]
+}

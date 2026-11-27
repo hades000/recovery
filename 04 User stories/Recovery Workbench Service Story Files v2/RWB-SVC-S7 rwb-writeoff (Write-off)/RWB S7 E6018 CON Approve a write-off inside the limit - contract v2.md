@@ -1,0 +1,441 @@
+# RWB-S7-E6018-CON Approve a write-off inside the limit - contract
+
+SCB Collections and Recovery. Henka Group, 22 November 2026.
+(C) Siam Commercial Bank and Henka Pte Ltd
+
+| Item | Value |
+|---|---|
+| Story key | RWB-S7-E6018-CON |
+| Work type | CON (Contract) |
+| Suggested owner | TechX (suggested; any team may pick up this story) |
+| Service | rwb-writeoff |
+| Service epic | RWB-SVC-S7 |
+| Wave | 4 |
+| Business epic | EP06 |
+| Release | 30 April 2027 (tentative) |
+| Legacy key | RWB-E6-018 |
+| Legacy disposition | Split (rework) |
+| Build status | Not started |
+| Patterns applied | DP03, DP13, DP19 |
+| Parallel lane | CG-W4 |
+| Ready to start | Day 1 |
+| Contract version | v1 (base /api/recovery/writeoff/v1 and topic rwb.writeoff.events.v1) |
+| Size | Not specified in the source documents (DOR-RWB-S7-E6018-CON-16) |
+| Depends on (build) | None |
+| Contract dependencies | None |
+| Integration dependencies | None |
+| External dependencies | None |
+| PRD reference | 03 Requirements and specifications/PRD/Recovery Workbench PRD S7 rwb-writeoff v1.md (no FR mapped to no REQ IDs) |
+| Status | Draft (directive resolutions) |
+
+**Change log.** D-RCV-60, 22 November 2026: contract baseline of the committee approval of rwb-writeoff, split from RWB-E6-018. It fixes `POST /write-offs/{writeOffId}/committee-decision` (API-S7-002) on `/api/recovery/writeoff/v1` (DP-13) with the `CommitteeDecision` request and the decision-record answer, the `write_off` element over the fields DF-FIN-010 to DF-FIN-020, the approver and the limit applied as record properties with no `write_off` column, the delegation element of DF-REF-016 to DF-REF-026, the five consumed rows with their placeholders, the decision-record element of DP-03, the `WriteOffApproved` event element on `rwb.writeoff.events.v1`, the rights of TSD S7 T6.1, the fakes and the absence tests. DP-06, DP-07, DP-08 and DP-09 are not in the plan's pattern set although the step reads reference data, a package, an authorise answer and publishes an event, and the five consumed rows are absent from the plan's None C row. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+
+**Change log.** D-RCV-60, 26 November 2026: fixes from the rulings workbook (X20 RWB-S7-E6018-CON). Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+
+**Change log.** D-RCV-60, 26 November 2026: directive resolutions under the programme directive (12 resolved, 15 cross-document, 1 not applied). Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+
+### 1. Story
+
+As a **tech lead**, I want **the published contract baseline of the committee approval of rwb-writeoff — the committee-decision operation on `/api/recovery/writeoff/v1`, the `CommitteeDecision` request and the decision-record answer, the write-off element, the approver and the limit applied, the delegation element, the five consumed rows, the decision-record element, the `WriteOffApproved` event element, the rights, the error envelope and the fakes**, so that **the app story, SCR-27 and the wave 4 harness build against one fixed, testable contract on Day 1, and a field, a limit, a consumed row or an event shape can never drift between rwb-writeoff, rwb-case, rwb-decision, rwb-access and rwb-payment without a failing build**.
+
+### 2. Business rationale
+
+Contract-first REST with one hop and a 2 s timeout is the decoupling decision (DP-11, ADR-020). The legacy approval of RWB-E6-018 crossed four boundaries at once: the case of record, the delegation table, the rule version and a screen, and its Endpoints table named the scan and the committee decision with the monolith base and no element of its own. The target splits them: rwb-case owns the case, its route states and the reference data, rwb-decision owns the WO package and the ledger, rwb-access owns the capability area and the right, rwb-payment consumes the approval event, and rwb-writeoff owns the write-off stage, its record and the committee act. Each boundary is a contract another team builds against, so each is fixed before the app story starts.
+
+The baseline also fixes the naming the checks require: schema and login `rwb_writeoff`, base `/api/recovery/writeoff/v1`, topic `rwb.writeoff.events.v1` with its retry and `.dlt` topics, event name `rwb.writeoff.WriteOffApproved.v1`, task queue `rwb-writeoff` in namespace `rwb-recovery` and Java package `th.co.scb.ace.workbench.recovery.writeoff` (Template and Rules §R4; context pack). It records that this service holds no `v_ace_*` grant and no grant on `rwb_case`, so DP-05 is declared as a prohibition.
+
+Five points are carried as gaps and assumptions rather than decided quietly: the answer element is named `DecisionLogEntry` by the TSD while the record is the local one (ASM-5042, ASM-5049); the delegation table and its owner are unstated and read as reference data (ASM-5043); the approver and the limit applied have no `write_off` column (ASM-5046); the case move is a workflow boundary with no published operation (ASM-5047); and the credit committee's own outcome is claimed by no story (ASM-5044).
+
+### 3. Preconditions
+
+- The service template and the naming library are available (RWB-PLT-TPL and RWB-PLT-E1047-CON), so the base, the topic, the queue and the event names follow the platform rule rather than a local choice.
+- The platform error envelope, the pagination and filter convention and the `Idempotency-Key` rule are the platform baseline; where this document narrows them it says so.
+- Ownership is taken from the context pack and the Ownership Map only: `recovery_case` is P3's, `write_off` is S7's, `decision_log_entry` and `rule_row` are P7's, every `v_ace_*` view is P1's, `document` is P5's, `notice` is P6's and `proceeds` is P8's. `delegation_limit` carries reference-data field IDs (DF-REF-016 to DF-REF-026) and no source this story may read names its owner, so it is declared as reference data consumed on the rwb-case reference-data contract under the default ruling (ASM-5043).
+- The rwb-case case state and case-move answers, the delegation row, the rwb-decision package row and the rwb-access authorise answer are published with their fakes, so every consumed row names a real owner document; they are not in this story's contract-dependency row, which is None, and the absence is recorded (GAP-3028; ASM-5043, ASM-5047, ASM-5048).
+- The committee-decision operation is published by the TSD as API-S7-002 with the request and answer element names and its error codes, so no operation is invented here; the app story's behaviour behind it is RWB-S7-E6018-APP's.
+- The WO package and its rows R-WO-12 and R-WO-15 are governed in rwb-decision (P7); this baseline names them and declares none of them.
+- The `write_off` table arrives with the DB story of this service; this baseline declares shapes and creates no table, no column and no migration.
+- No build dependency: this story is Day 1 and sits in contract group `CG-W4` by rule (Template and Rules §R5.7).
+
+### 4. Flow
+
+1. Draft the OpenAPI 3.1 document of rwb-writeoff for this step: the committee-decision operation with its request and answer elements, the rights, the `Idempotency-Key` and the error responses.
+2. Fix the `CommitteeDecision` request element and the decision-record answer over the write-off columns of DF-FIN-010 to DF-FIN-020, adding the approver, the limit applied, the rule ID with its version and the states.
+3. Fix the delegation element of the `delegation_limit` row of DF-REF-016 to DF-REF-026 and its use as the limit applied, with no value as a schema default.
+4. Fix the five consumed rows: the case state read, the case-move answer, the delegation read, the package read and the authorise check, marking with the placeholder what the sources do not give.
+5. Fix the event element of `WriteOffApproved` (`EV-24`) on `rwb.writeoff.events.v1`, its CloudEvents envelope and its no-personal-data rule, and record the outbox row of DP-09 as a missing H row.
+6. Record the decision-record element of DP-03, written before the case moves and before the event is published, and the rights of the capability area.
+7. Publish the contract tables of section 12 and the fakes of 12.8.
+8. Add the contract tests: schema validation, the additive rule, the shapes, the `Idempotency-Key` rule, the error envelope, the absence of a `v_ace_*` read and of a `recovery_case` write, the drift between a fake and the document, and the absence of a consumed event and of a Schedule.
+9. Tag the baseline and hand it to RWB-S7-E6018-APP, SCR-27 and the wave 4 harness.
+
+### 5. Exception paths
+
+| ID | Trigger | What happens | Message | Covered by |
+|---|---|---|---|---|
+| X1 | A response or request body fails schema validation | The build fails on the schema lint; a deployed service answers 400 or 500 with the error envelope | MSG-GEN-001 | AC1, AC2, AC6 |
+| X2 | A field is renamed or removed within major version 1 | The contract test fails; the change needs a new major version | None | AC1, AC2 |
+| X3 | A contract fake drifts from the document | The drift test fails the build and the merge is blocked | None | AC6 |
+| X4 | A consumed row has a field list the sources do not give | The row carries the placeholder and the fake is derived from the published document | None | AC3, AC4 |
+| X5 | The approver or the limit applied is declared as a `write_off` column | The element test fails the build: no such column exists in TSD S7 T3.1 and both are record properties | None | AC2 |
+| X6 | The document declares another service's operation as provided, a `v_ace_*` view, a `recovery_case` row or a rule row | The review fails the baseline and the boundary test fails the build | None | AC3, AC7 |
+| X7 | The document declares a consumed event, a second topic, a schedule or a second event on the topic | The absence test fails the build | None | AC7 |
+| X8 | The rights of the operation are not the ones TSD S7 T6.1 gives the capability area for the act | The access test fails the build | MSG-P4-002 | AC4 |
+
+### 6. INVEST check
+
+| Test | Result |
+|---|---|
+| Independent | No build dependency; reads the platform envelopes, the context pack, the FSD and TSD S7 appendices and the published owner contracts of rwb-case, rwb-decision and rwb-access only |
+| Negotiable | The element names beyond the ones the sources give, the example values and the fake fixtures are settled in the baseline review; the base, the rights, the topic, the queue, the schema and the state values are fixed by the architecture and the rule package |
+| Valuable | Unblocks RWB-S7-E6018-APP, SCR-27, rwb-payment's consumer and the wave 4 harness on Day 1, and the rwb-case, rwb-decision and rwb-access teams on the same day |
+| Estimable | One OpenAPI document, nine contract tables, six fakes and eleven contract tests |
+| Small | Fits one sprint with the contract tests |
+| Testable | Every criterion is tested against the artefact, not against a business outcome |
+
+### 7. Acceptance criteria
+
+```gherkin
+Feature: Contract baseline of the committee approval of rwb-writeoff
+
+  Background:
+    Given the service naming rule of the platform library is in force
+    Given the ownership of write_off is S7, of recovery_case is P3, of every v_ace_* view is P1 and of decision_log_entry and rule_row is P7
+    Given every consumed contract is the published contract of its owner and is answered by its fake
+
+  Scenario: AC1 The committee-decision operation is declared on the write-off base with its shape and its errors (new, D-RCV-60)
+    Given the OpenAPI 3.1 document of rwb-writeoff is published with this change
+    When it is validated against the OpenAPI 3.1 schema
+    Then it validates with no error
+    Then it declares POST /write-offs/{writeOffId}/committee-decision as API-S7-002 with a CommitteeDecision body in and a decision record of status 200 out, under the base /api/recovery/writeoff/v1 and owned by rwb-writeoff
+    Then the operation declares the path parameter writeOffId, the Idempotency-Key header and the repeated key answering the record it created
+    Then the answers 401, 403, 404, 409, 422 and 503 are declared with one envelope and one message ID per condition
+    Then no operation of the scan is declared by this document, and the reject and the defer outcomes of the same operation are declared as RWB-S7-E6019-APP's and RWB-S7-E6020-APP's
+
+  Scenario: AC2 The write-off, the request, the answer and the delegation elements are fixed (new, D-RCV-60)
+    Given the element section of the baseline
+    When it is compared with TSD S7 T3.1 and the write_off field catalog of FSD S7 A2.6.3.2
+    Then the write-off element declares the properties of DF-FIN-010 to DF-FIN-020: id, case_id, decision_log_id, amount, tax_criteria_met, committee_date, posted_date, responsibility_center, cost_center, gl_product and recovered_after
+    Then the CommitteeDecision element declares the write-off reference, the decision as approve, the rule ID R-WO-15 or R-WO-12 with its rule version and the request reference as required
+    Then the decision-record answer declares the approver, the limit applied, the matched delegation row, the from state, the to state APPROVED or ESCALATED_TO_CREDIT_COMMITTEE, the decided-at time and the record identifier
+    Then the delegation element declares the properties of DF-REF-016 to DF-REF-026 by decision code, approval level and product group, with the principal limit, the loss percentage limit and the version
+    Then the approver and the limit applied are declared as record properties only, with no write_off property and no schema default
+    Then no property is added for an ACE extract, a ledger row, a queue item or a credit committee outcome
+
+  Scenario: AC3 The five consumed rows are declared and the facts stay with their owners (new, D-RCV-60)
+    Given the consumed rows of the baseline
+    When they are compared with the ownership of the context pack
+    Then the case state read is declared as consumed from P3 rwb-case, with the case reference, the case number, the product group, the stage and the case state
+    Then the case-move answer is declared as consumed from P3 rwb-case, with the move APPROVED or ESCALATED_TO_CREDIT_COMMITTEE carrying the rule ID and its version
+    Then the delegation read is declared as consumed from the reference-data contract of P3 rwb-case, with the delegation_limit row and its version
+    Then the package read is declared as consumed from P7 rwb-decision, with the WO package, its version and its 51 rules over 27 states
+    Then the authorise check is declared as consumed from P4 rwb-access, with the capability area Write-off and posting and the right A
+    Then the operation names of the five rows are Not specified in the source documents (GAP-3028; ASM-5043, ASM-5047, ASM-5048) and the rows carry the placeholder
+    Then the document declares no v_ace_* path, no v_ace_* property, no recovery_case property, no rule_row property and no grant on any rwb_* schema of another owner
+    Then each row is one hop with a 2 s budget, a breaker and no retry of its own (DP-11, ADR-020)
+
+  Scenario: AC4 The rights and the error envelope are fixed (new, D-RCV-60)
+    Given the access section of the baseline
+    When it is compared with TSD S7 T-A.1, T6.1 and the legacy permission table
+    Then the committee decision declares Write-off and posting right A with the scope applied
+    Then RW-CREDITAD holds CRUA, and RW-PRODHEAD, RW-WOCOMM and RW-FINANCE hold RA on the capability area, and they are the four roles the right A names
+    Then RW-WRITEOFF holds CRU and reads the pack and the outcome without the right A
+    Then every other role and every SY-* service identity of TSD S7 T6.1 holds R or U as the matrix gives it
+    Then a role without the right is described as refused with MSG-P4-002, and the error envelope carries one message ID per condition
+
+  Scenario: AC5 The decision-record element and the approval event element are declared (new, D-RCV-60)
+    Given the decision and event sections of the baseline
+    When they are compared with the library schema, TSD S7 T2 and T5.3, and the topic naming rule
+    Then one decision record is declared per rule outcome with the case reference, the rule ID, the package version in force, the approver, the limit applied, the from state, the to state and the decided-at time
+    Then the record is declared as written through the local library on the shared rwb.decision-record.v1 before the write-off row changes, and a failed write leaves everything unchanged with MSG-P7-003
+    Then the WriteOffApproved element of EV-24 is declared on the topic rwb.writeoff.events.v1 as rwb.writeoff.WriteOffApproved.v1, with writeOffId, caseId, amount, the rule ID with its version and the decided-at time, in a CloudEvents envelope
+    Then the event is declared as written to the outbox in the same transaction and published only on the approved path, with no personal data
+    Then the record and the event carry no rule row, no state threshold as a literal and no person name
+
+  Scenario: AC6 The six fakes answer the document and the drift test fails a build (new, D-RCV-60)
+    Given the fakes of the baseline
+    When each is compared with the operation or the element it serves
+    Then the rwb-case state fake answers the states WITH_COMMITTEE and PACK_PREPARED, a case that has already moved and a case that is not found
+    Then the rwb-case case-move fake answers APPROVED and ESCALATED_TO_CREDIT_COMMITTEE accepted and refused, and the delegation fake answers a row above and below the amount and no row
+    Then the rwb-decision fake answers the WO package at its version with R-WO-12 and R-WO-15, and the rwb-access fake answers the right A granted and not granted
+    Then the decision-record stub answers a healthy chain and a stopped chain, and the gateway-bff fake answers the merged SCR-27 answer in its in-committee and approved states
+    Then the drift test compares every fake with the document and fails the build on any difference
+
+  Scenario: AC7 The naming baseline and the boundary are fixed, and no consumed event and no schedule are declared (new, D-RCV-60)
+    Given the naming and data sections of the baseline
+    When the nine sub-tables are reviewed
+    Then each of 12.1 to 12.9 is present and names its owner, with None where the element is empty
+    Then the schema is rwb_writeoff, the login is rwb_writeoff, the base is /api/recovery/writeoff/v1, the topic is rwb.writeoff.events.v1 with its retry and .dlt topics, the queue is rwb-writeoff in namespace rwb-recovery and the Java package is th.co.scb.ace.workbench.recovery.writeoff
+    Then the tables named as owned are write_off and the library objects decision_record, idempotency_key and outbox_event, and recovery_case, delegation_limit, every v_ace_* view, decision_log_entry and rule_row are named as other owners' and consumed only through their contracts
+    Then the document declares no consumed event, no second topic and no Schedule, and it names JOB-16 as RWB-S7-E6013-APP's
+    Then the absence test fails a build that adds a consumed event, a second topic, a Schedule, a v_ace_* read or a second event on the topic (ASM-5045)
+```
+
+These seven criteria are new for the contract baseline and test the artefact only. They restate no business outcome owned by RWB-S7-E6018-APP and copy no criterion of the legacy story, whose four criteria stay with the app story word for word. The baseline declares the approve and the escalation outcomes of the operation; the reject and the defer of the same operation are declared as other stories' (ASM-5044).
+
+Scenario: AC8 SCR-27 shows its empty, loading, error and no-access states, which are Not specified in the source documents (CG-ALL-10998) (new, D-RCV-60)
+
+Scenario: AC9 Each rule BR1 to BR14 of section 8 is covered by a criterion and a test row (new, D-RCV-60)
+
+### 8. Business rules
+
+| ID | Rule | Source | Covered by |
+|---|---|---|---|
+| BR1 | The committee act is rwb-writeoff's, and the contract declares the fields and the required flags on the `CommitteeDecision` element, the decision-record answer and the `write_off` element only | TSD S7 T3.1, T-A.1 and T-A.2; context pack ownership row `write_off` | AC2; TC-S7-E6018-CON-02 |
+| BR2 | The decision record is declared as an element written before the write-off row changes, through the local library on the shared topic; a failed write changes nothing | DP-03; TSD S7 T2; legacy AC1, AC2 and AC4 | AC5; TC-E6-018-04 |
+| BR3 | The case stays with rwb-case: the contract declares the case state read and the case-move answer as consumed, declares no `recovery_case` property and describes no case row write | ASM-5047; TSD S7 T4 | AC3; TC-S7-E6018-CON-03 |
+| BR4 | The delegation stays with reference data: the contract declares the `delegation_limit` row as consumed with its version and declares no limit, no approval level and no product group as a property of `write_off` | DF-REF-016 to DF-REF-026; ASM-5043 | AC2; TC-E6-018-03 |
+| BR5 | The package and the ledger are rwb-decision's: the contract declares the package read as consumed and declares no rule row, no threshold and no rule version as a property of its own | DP-05 as a prohibition for ACE data; ASM-5049 | AC3; TC-S7-E6018-CON-03 |
+| BR6 | The approval event is declared once: `WriteOffApproved` (`EV-24`) on `rwb.writeoff.events.v1` as `rwb.writeoff.WriteOffApproved.v1`, written to the outbox in the same transaction, with the missing DP-09 H row recorded | TSD S7 T5.3; DP-14; ASM-5045 | AC5; TC-S7-E6018-CON-04 |
+| BR7 | A POST declares the `Idempotency-Key` and stores its answer | TSD S7 T-A.2 | AC1; TC-S7-E6018-CON-01 |
+| BR8 | No personal data in a schema, an example, an event or a fake: identifiers, amounts, dates, a rule version and an approval identity only, and every example is synthetic | Template and Rules v1 §R7.2 (s17); TSD S7 T6.2 | AC6; TC-S7-E6018-CON-04 |
+| BR9 | One REST base, one topic, one queue, one schema and one login per service; the document never declares another service's base or topic as its own | DP-13, DP-14; Template and Rules §R4 | AC7; TC-S7-E6018-CON-05 |
+| BR10 | A schema change is additive within major version 1; a breaking change is a new major version | Platform API rule (ADR-020) | AC7; TC-S7-E6018-CON-05 |
+| BR11 | The document lists only operations owned by rwb-writeoff; a consumed operation is described as consumed and faked, never as provided | DP-01, DP-11 | AC3; TC-S7-E6018-CON-03 |
+| BR12 | The rights of the operation are the capability area's act right A, held per TSD S7 T6.1 and the legacy permission table, and not the C of the scan | TSD S7 T6.1; legacy permission table of RWB-E6-018 | AC4; TC-S7-E6018-CON-03, TC-E6-018-06 |
+| BR13 | The approver and the limit applied are record properties, not `write_off` columns: no source gives them a field ID and TSD S7 T3.1 lists none | ASM-5046; TSD S7 T3.1 | AC2; TC-S7-E6018-CON-02 |
+| BR14 | The states `WITH_COMMITTEE`, `PACK_PREPARED`, `APPROVED` and `ESCALATED_TO_CREDIT_COMMITTEE` are declared as the vocabulary of the answer and of the machine, and the credit committee's own outcome is declared as unclaimed | ASM-5044; TSD S7 T4; Business Rules and Routing Logic v4 rows R-WO-12 and R-WO-15 | AC2, AC3; TC-E6-018-02 |
+
+### 9. State transitions
+
+The lifecycle of this document, not of a case:
+
+| From | Event | Condition | To |
+|---|---|---|---|
+| Draft | Review opened | The operation, the elements, the delegation rule, the consumed rows, the decision element, the event element and the fakes are described | In review |
+| In review | Consumer sign-off | The app story, SCR-27, the wave 4 harness, rwb-payment's consumer and the owners of rwb-case, rwb-decision and rwb-access accept the document and the fakes | Baselined |
+| Baselined | Additive change | A property is added within major version 1, for example an optional reference or a new filter | Baselined |
+| Baselined | Breaking change | A property is removed, renamed or retyped, or a limit becomes a schema default | New major version drafted |
+| Baselined | Drift in a fake | A contract test fails | In review |
+| Baselined | A forbidden element appears | The absence tests of AC3 and AC7 fail: a `v_ace_*` view, a `recovery_case` property, a consumed event, a second topic or a Schedule | In review |
+
+The state machine the document describes is the app story's: `WITH_COMMITTEE` and `PACK_PREPARED` are the from states of R-WO-15 and R-WO-12, `APPROVED` and `ESCALATED_TO_CREDIT_COMMITTEE` their to states, and `RETURNED_TO_PURSUE` and `POSTED` follow from steps this baseline does not declare (TSD S7 T4). This document fixes the vocabulary and the answer shape and moves no case.
+
+### 10. Authority
+
+| Who | What they may do in this story |
+|---|---|
+| Tech lead of rwb-writeoff | Owns the OpenAPI document and the contract tables; tags the baseline |
+| Solution architect | Approves a breaking change, a new major version, and the correction of the plan rows the baseline consumes, including the five consumed rows and the absent DP-06, DP-07, DP-08 and DP-09 rows |
+| Consuming teams (the app story, SCR-27, the wave 4 harness, rwb-payment's consumer and the owners of rwb-case, rwb-decision and rwb-access) | Review and sign off the parts they consume |
+| Platform library owner | Owns the error envelope, the `Idempotency-Key` rule, the naming rule, the decision-record library and the outbox and inbox library this document reuses |
+| Data steward | Confirms that no personal data field is declared in a request, an answer, an element, an event or a fake |
+
+The per-service login behind the security scheme is named "the rwb-writeoff login (DP-02)" and is not part of this baseline.
+
+### 11. Data
+
+The contract baseline declares shapes, not business values.
+
+| Item | BR Field ID | Content |
+|---|---|---|
+| Write-off element | DF-FIN-010 to DF-FIN-020 | The columns of DF-FIN-010 to DF-FIN-020: `id`, `case_id`, `decision_log_id`, `amount`, `tax_criteria_met`, `committee_date`, `posted_date`, `responsibility_center`, `cost_center`, `gl_product` and `recovered_after` |
+| Request element | Not specified in the source documents (DOR-RWB-S7-E6018-CON-7) | The write-off reference, the decision as approve, the rule ID `R-WO-15` or `R-WO-12` with its version, and the request reference |
+| Answer element | Not specified in the source documents (DOR-RWB-S7-E6018-CON-7) | The record identifier, the approver, the limit applied, the matched delegation row, the from state, the to state `APPROVED` or `ESCALATED_TO_CREDIT_COMMITTEE` and the decided-at time |
+| Delegation element | DF-REF-016 to DF-REF-026 | The `delegation_limit` properties of DF-REF-016 to DF-REF-026: decision code, approval level, product group, principal limit, loss percentage limit, the remaining five and the version |
+| Required flags | Not specified in the source documents (DOR-RWB-S7-E6018-CON-7) | The write-off reference, the decision and the rule ID required on the request; `id`, `case_id`, `amount` and `tax_criteria_met` required on the write-off element; the other properties optional; the approver and the limit applied required on the answer |
+| Lists | Not specified in the source documents (DOR-RWB-S7-E6018-CON-7) | None: TSD S7 T3.2 publishes no list of values, so the baseline declares no enumeration beyond the state vocabulary of the answer |
+| Event data | Not specified in the source documents (DOR-RWB-S7-E6018-CON-7) | `writeOffId`, `caseId`, `amount`, the rule ID with its version and the decided-at time on `rwb.writeoff.events.v1`, in a CloudEvents envelope, with no personal data |
+| Decision record | DF-DEC-001 to DF-DEC-018 | DF-DEC-001 to DF-DEC-018 through the local library, written before the row changes (DP-03) |
+| Case, delegation and rule facts | DF-CAS-001 to DF-CAS-023; DF-REF-016 to DF-REF-026; DF-REF-001 to DF-REF-015 | DF-CAS-001 to DF-CAS-023 of `recovery_case` in P3, DF-REF-016 to DF-REF-026 of `delegation_limit` in reference data and DF-REF-001 to DF-REF-015 of `rule_row` in P7, read only through the owners' rows and never written, copied or joined here |
+| Not declared here | None: no field is declared here | `recovery_case` and `queue` (P3), every `v_ace_*` view (P1), `decision_log_entry` and `rule_row` (P7), `document` (P5), `notice` (P6), `proceeds` (P8) |
+| Consumed fields with no source | Not specified in the source documents (DOR-RWB-S7-E6018-CON-7) | The operation names of the five consumed rows and the owner of `delegation_limit`: Not specified in the source documents (GAP-3028; ASM-5043, ASM-5047, ASM-5048) |
+
+The field-level types, lengths and required flags of the added elements are settled in the baseline review; this story fixes the element names, the property rule of AC2 and the optionality rule of BR10. **No new table, no new column and no migration** is declared by this story.
+
+### 12. Contract
+
+#### 12.1 REST operations provided
+
+Owner rwb-writeoff (S7); base `/api/recovery/writeoff/v1` (DP-13).
+
+| Method | Path | Documented shape | Access | Idempotency |
+|---|---|---|---|---|
+| POST | `/write-offs/{writeOffId}/committee-decision` (API-S7-002) | `CommitteeDecision` in; the decision record of status 200 out, carrying the record identifier, the approver, the limit applied, the rule `R-WO-15` or `R-WO-12` with its version and the state `APPROVED` or `ESCALATED_TO_CREDIT_COMMITTEE` | Write-off and posting, right A, scope applied | `Idempotency-Key` header |
+
+The operation answers 401, 403 with MSG-P4-002, 404 for a write-off that is not found, 409 for a write-off that has left the state the rule expects, 422 with MSG-GEN-001 and 503, each with the error envelope and one message ID of section 14 (TSD S7 T-A.2). The element names are the ones the TSD publishes; the answer is the local decision record of DP-03, which is why the record element and the ledger element are declared separately (ASM-5042, ASM-5049). The module's other published operation, `POST /write-off-scans` (API-S7-001, right C), belongs to RWB-S7-E6013-APP and is not declared here.
+
+#### 12.2 REST operations consumed
+
+| Method | Path | Owner | Use in the baseline |
+|---|---|---|---|
+| The case state read (operation name Not specified in the source documents (GAP-3028; ASM-5047)) | `/api/recovery/case/v1` | P3 rwb-case | The case reference, case number, product group, stage and state of the write-off's case; faked |
+| The case-move answer (operation name Not specified in the source documents (GAP-3028; ASM-5047)) | rwb-case (P3) | P3 rwb-case | The move `APPROVED` or `ESCALATED_TO_CREDIT_COMMITTEE` with the rule ID and its version; on the workflow boundary it is the stage outcome the parent `CaseWorkflow` applies; faked |
+| The delegation-limit read (operation name Not specified in the source documents (GAP-3028; ASM-5043)) | `/api/recovery/case/v1` | P3 rwb-case | The `delegation_limit` row by decision code, approval level and product group, with its limits and its version; faked |
+| The rule-package read in force (operation name Not specified in the source documents (GAP-3028; ASM-5049)) | `/api/recovery/decision/v1` | P7 rwb-decision | The WO package at its version, with R-WO-12 and R-WO-15 among its 51 rules over 27 states; faked |
+| The authorise check (operation name Not specified in the source documents (GAP-3028; ASM-5048)) | `/api/recovery/access/v1` | P4 rwb-access | The capability area "Write-off and posting" and the right A, with the scope; faked |
+
+Every row is one hop with a 2 s timeout, a GET retried once with jitter and a breaker per downstream (ADR-020). The five rows are contract dependencies of class C that the plan's C row does not carry, and the absence is recorded (GAP-3028; ASM-5043, ASM-5047, ASM-5048).
+
+#### 12.3 Events published
+
+| Event | Name | Topic | Payload element | Consumer |
+|---|---|---|---|---|
+| `WriteOffApproved` (`EV-24`) | `rwb.writeoff.WriteOffApproved.v1` | `rwb.writeoff.events.v1`, with its retry and `.dlt` topics | `writeOffId`, `caseId`, `amount`, the rule ID with its version and the decided-at time, in a CloudEvents envelope | rwb-payment (P8) and rwb-reporting (P9) |
+
+The event is declared as written to the outbox in the same `rwb_writeoff` transaction as the state change and published only on the approved path; the escalation approves nothing and publishes nothing. The outbox and inbox library `RWB-PLT-TE006-CON` is the platform object behind the declaration and is absent from the plan's H row (ASM-5045).
+
+#### 12.4 Events consumed
+
+None. The service listens to the rwb-source-data and rwb-payment events in its scan and recovery steps (context pack connection matrix, row S7), not in the committee act: the act is a request on API-S7-002. This baseline therefore declares no consumer group, no subscription, no inbox of its own and no Kafka call from this step, and the absence test of AC7 fails a build that adds one.
+
+#### 12.5 Workflows and activities
+
+| Name | Type | Task queue | Contract element |
+|---|---|---|---|
+| `WriteOffWorkflow` | Workflow, one execution per case at the write-off stage, the child of `CaseWorkflow`, continues-as-new at each stage end | `rwb-writeoff` | The stage that hosts the committee branch; its signals and its outcome for the parent are declared, not built. Workflow ID form: Not specified in the source documents (CG-ALL-10992). Duplicate-start policy: Not specified in the source documents (CG-ALL-10992) |
+| `approveWriteOffInLimit` | Activity, the one approval step | `rwb-writeoff` | The case, the write-off, the delegation row and the package version in; the rule ID with its version, the approver, the limit applied and the case move out |
+| The `ApprovalWorkflow` of the workflow kit (not in Temporal Catalog v1, CG-ALL-10994) | Workflow, the committee's approval chain | `rwb-decision` (P7) | Declared as another service's and consumed as the approval chain, not registered here |
+
+No child workflow for the case and none for the money exists in this service. The activity name is a target design choice, and the step runs from the committee's request. No activity is registered by this story.
+
+#### 12.6 Schedules
+
+None. The act is committee-driven on API-S7-002; this baseline declares no Temporal Schedule, no Quartz row, no shared job table and no batch table. `JOB-16`, the write-off scan on the third working day, becomes the Temporal Schedule of R-WO-01 in RWB-S7-E6013-APP and is named here only as another story's. The monthly committee meeting booked at RWB-S7-E6017-APP has no published calendar and no `write_off` column (ASM-5051).
+
+#### 12.7 Tables owned
+
+| Table | Owner | Contracted use |
+|---|---|---|
+| write_off | S7 (`rwb_writeoff`) | The write-off of the balance on a case, its fields and its dates; the table the element is drawn from |
+| decision_record | PLT library, created in `rwb_writeoff` | The local hash-linked decision record of the final call, the approver and the limit applied (DP-03) |
+| idempotency_key | PLT library, created in `rwb_writeoff` | The key of the repeated request and the record it holds |
+| outbox_event | PLT library, created in `rwb_writeoff` | The row of `WriteOffApproved` on the approved path (12.3) |
+
+`recovery_case` and `queue` (P3), `delegation_limit` (reference data), `decision_log_entry` and `rule_row` (P7), every `v_ace_*` view (P1), `document` (P5), `notice` (P6) and `proceeds` (P8) are not owned by this baseline; it names them only as answers, rule versions or another story's data, and no foreign key leaves the schema (DP-01).
+
+#### 12.8 Contract fakes
+
+| Fake | Documented answer | Used by |
+|---|---|---|
+| rwb-case state fake | The states `WITH_COMMITTEE` and `PACK_PREPARED` of case `RC-2027-000712`; a case that has already moved; a case that is not found | AC1, AC3, AC6 |
+| rwb-case case-move fake | The moves `APPROVED` and `ESCALATED_TO_CREDIT_COMMITTEE` accepted with the rule version, and a move refused | AC3, AC6 |
+| rwb-case delegation fake | A `delegation_limit` row above and below the amount, with its version, and no row for the decision code | AC2, AC3, AC6 |
+| rwb-decision rule-package fake | The WO package at its version in force with R-WO-12 and R-WO-15 among its 51 rules over 27 states | AC2, AC3, AC6 |
+| rwb-access authorise fake | The capability area "Write-off and posting" with right A granted, and a role that does not hold it | AC4, AC6 |
+| Local decision-record library stub (`RWB-PLT-E1027-CON`) | A healthy chain and outbox, and a stopped chain | AC5, AC6 |
+| gateway-bff composite route fake | The merged SCR-27 answer for write-off `WO-2027-000318`, in its in-committee and approved states | AC6 |
+
+The fakes are test-only and are replaced by the real services in SIT. The operation names of the five consumed rows carry the placeholder until their owners confirm them (GAP-3028; ASM-5043, ASM-5047, ASM-5048).
+
+#### 12.9 Call-type summary
+
+| Call type | Count | Detail |
+|---|---|---|
+| REST | 1 provided, 5 consumed | The committee decision on `/api/recovery/writeoff/v1`; the case state read, the case-move answer, the delegation read, the package read and the authorise check; one hop, 2 s |
+| Kafka | 1 published, 0 consumed | `rwb.writeoff.WriteOffApproved.v1` (`EV-24`) on `rwb.writeoff.events.v1` through the outbox; the decision record is the library's on `rwb.decision-record.v1` and not an event of this service |
+| Temporal | 2 workflows and 1 activity declared, 0 registered | `WriteOffWorkflow` and `approveWriteOffInLimit` on `rwb-writeoff`, and the kit's `ApprovalWorkflow` on the P7 queue as another service's; no Schedule |
+| File | None | No file is read, built or delivered here |
+
+### 13. Solution plan
+
+**The CON declares shapes and moves nothing.** It writes no code, no migration and no table, and changes no case, no amount and no rule package. What it publishes is one OpenAPI 3.1 document, nine contract tables and seven fakes.
+
+**Pattern application**
+
+| DP | Legacy marker | Microservice pattern | Dependency added |
+|---|---|---|---|
+| DP-03 | DecisionLogWriter, decision log | Local decision-record library and topic `rwb.decision-record.v1` | H RWB-PLT-E1027-CON |
+| DP-13 | `/api/recovery/v1` | `/api/recovery/<short>/v1` | none |
+| DP-19 | Screen, ace-web | gateway-bff composite route | H RWB-PLT-N001-CON |
+
+DP-03 is declared as the element of the decision record written before the row changes and before the event. DP-13 moves the base of the legacy paths and gives API-S7-002 its home. DP-19 sits behind SCR-27, whose screen model is the edge contract's. DP-04, DP-05, DP-06, DP-07, DP-08 and DP-09 are not in the pattern set: the package is declared as a consumed row rather than an embedded kit, the ACE data as another service's data and never a view, the reference data and the authorise answer as consumed rows rather than kits, and the outbox as a library object behind the declared event (GAP-3028; ASM-5043, ASM-5045, ASM-5048).
+
+**Dependencies the table adds and the plan does not hold.** The pattern table adds two H rows, `RWB-PLT-E1027-CON` for DP-03 and `RWB-PLT-N001-CON` for DP-19, which the plan carries; it leaves out the outbox and inbox library `RWB-PLT-TE006-CON` that the declared event needs, and the Drools kit rows that an embedded evaluation would add. The five consumed rows are C dependencies in fact and not in the metadata row.
+
+**Deliverables and build steps**
+
+1. Write the committee-decision operation, its error answers and the `Idempotency-Key` rule, and validate the additive rule of AC1 in the pipeline.
+2. Write the `CommitteeDecision` element, the decision-record answer, the write-off element and the delegation element of AC2, with the placeholder where a type or a length is unstated.
+3. Record the case state row, the case-move row, the delegation row, the package row and the authorise row of AC3 with their owner, their budget and their placeholders.
+4. Record the rights and the error envelope of AC4.
+5. Record the decision-record element and the `WriteOffApproved` element of AC5, and validate both against the library schema and the topic catalogue.
+6. Publish the seven fakes of AC6 and the drift test.
+7. Record the naming baseline and the boundary of AC7, then tag the baseline and collect the consumer sign-off.
+
+The deliverables are `openapi/rwb-writeoff-v1.yaml`, the four elements, the contract README rows for the five consumed rows and their placeholders, the event entry of the Kafka Topic and Event Catalog, and the seven fakes of 12.8.
+
+**Done when.** The OpenAPI document validates in the pipeline, the eleven contract tests pass, the fakes answer every consumed path and the drift test is green, and the app story, SCR-27, the wave 4 harness and the rwb-payment consumer have accepted the baseline.
+
+### 14. Validation and messages
+
+| ID | When | Message |
+|---|---|---|
+| MSG-S7-001 | The contract describes the held-scan state from which no case can be approved (R-WO-03), raised by RWB-S7-E6013-APP and not by this operation (ASM-5050) | The scan is on hold until Finance publishes the tax criteria. |
+| MSG-GEN-001 | A required field of a request is absent or invalid, or a body fails schema validation | Enter {field}. |
+| MSG-P4-002 | The role lacks the Write-off and posting right A the operation declares | You cannot {action} here. Your role does not include it. |
+| MSG-P7-003 | The decision record cannot be written before the write-off row changes | The action was not taken because the decision could not be recorded. Try again in a few minutes. |
+
+The four IDs are contract elements and the text is the legacy and FSD wording, copied unchanged; no message is reworded and no new one is added.
+
+### 15. Screens and states
+
+The contract serves SCR-27 Write-off proposal in its in-committee and approved states through the gateway-bff composite route (DP-19). The route calls rwb-writeoff for the write-off, its state and its limit applied, rwb-case for the case and its route state, and rwb-decision for the decision records; this baseline fixes the rwb-writeoff answers only, and the composite route specification and the screen field list belong to RWB-PLT-N001-CON (ASM-5048). The legacy screen table gives the states "Scan; proposed; in committee; approved": the in-committee and approved states are this step's, the scan state belongs to RWB-S7-E6013-APP, the proposed state to RWB-S7-E6015-APP and the removed state to RWB-S7-E6016-APP. The refusal, invalid-request and not-recorded states read the messages of section 14 on the same route, and the escalated state shows the credit approval committee as the next owner. The empty, loading, error and no-access states of SCR-27 are Not specified in the source documents (CG-ALL-10998).
+
+### 16. Test cases
+
+| TC ID | Covers | Level | Data |
+|---|---|---|---|
+| TC-E6-018-01 | AC1, AC2 | Contract | `WO-2027-000318` of case `RC-2027-000712`; the contract half answers the operation, the four elements and the delegation row |
+| TC-E6-018-02 | AC2, AC3, AC5 | Contract | The limit above and below the amount; the contract half answers the two states, the record element, the outbox row and the event element |
+| TC-E6-018-03 | AC2, AC3 | Contract | The delegation limit below the amount; the contract half answers the escalated answer shape and the credit committee as the next owner |
+| TC-E6-018-04 | AC2, AC5 | Contract | The decision-record stub stopped; the contract half answers the MSG-P7-003 path and the absence of a published event |
+| TC-E6-018-05 | AC4 | Contract | A role without the right A and a malformed request; the contract half answers the 403 with MSG-P4-002 and the 422 of the envelope |
+| TC-E6-018-06 | AC4, AC5 | Contract | RW-CREDITAD holds CRUA and RW-WOCOMM holds RA; the contract half answers the rights and the record element |
+| TC-S7-E6018-CON-01 | AC1 | Contract | The document validates; the operation, the base, the `Idempotency-Key` and the six error answers are present |
+| TC-S7-E6018-CON-02 | AC2 | Contract | The four elements validate with their eleven write-off properties, the request and answer properties, the delegation properties and the required flags |
+| TC-S7-E6018-CON-03 | AC3, AC4 | Contract | The five consumed rows and their placeholders; the no-`v_ace_*`, no-`recovery_case` and no-rule-row boundary; the rights |
+| TC-S7-E6018-CON-04 | AC5, AC6 | Contract | The record element and the event element match their schemas; the seven fakes match the document and a drifted fake fails the build |
+| TC-S7-E6018-CON-05 | AC7 | Contract | The naming baseline, the tables owned and the absence of a consumed event, a second topic and a Schedule |
+| TC-S7-E6018-CON-06 | AC7 | Contract | Boundary of the tables of 12.7: the four tables only, with no write to a table of another owner |
+| TC-S7-E6018-CON-07 | AC8 | Contract | Not specified in the source documents (CG-ALL-10998): the empty, loading, error and no-access states of SCR-27 |
+| TC-S7-E6018-CON-08 | AC9 | Contract | Not specified in the source documents (NEWAC-RWB-S7-E6018-CON-AC8) |
+
+The six legacy cases are those of RWB-E6-018 in their legacy order, carried as the contract half: their Covers column names the criteria of this story that fix the surface each one exercises, their Data keeps the legacy intent, and the business outcome of each is proved by RWB-S7-E6018-APP. The legacy level maps to `Contract` here because the artefact under test is the contract. The five cases `TC-S7-E6018-CON-01` to `-05` are new. The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same ID; no `-ITG` copy is written by this story, and the cross-service journey belongs to the wave 4 harness.
+
+### 17. Guardrails
+
+- No business value in the contract: the write-off committee limit, the delegation limits and the approval levels, R-WO-12, R-WO-15, their states and the package version stay rule rows and reference data, never a schema default, an enumeration member or a constant of the code.
+- No personal data in a schema, an example, an event or a fake: identifiers, amounts, dates, a rule version and an approval identity only, and every example is synthetic.
+- The case stays with rwb-case: the document declares no `recovery_case` property, no case row write and no case state write (BR3).
+- The delegation stays with reference data: the document declares the row as consumed and no limit or approval level as a property of `write_off` (BR4).
+- ACE data stays with rwb-source-data: the document declares no `v_ace_*` path, no `v_ace_*` property and no ACE table read.
+- The money stays with rwb-payment and the ledger with rwb-decision: the document declares no posting, no proceeds and no rule row.
+- One base, one topic, one queue, one schema and one login per service; a document that names another service's base or topic as its own fails the review (DP-13, DP-14).
+- The document lists only operations owned by rwb-writeoff; a consumed operation is described as consumed and faked, never as provided (DP-01, DP-11).
+- No retired element is reintroduced: the absence tests fail a build that declares a consumed event, a second topic, a Schedule, a Quartz row or a second event on the topic.
+- The error envelope, the `Idempotency-Key` rule, the naming rule, the decision-record library and the outbox library come from the platform; this story narrows them but never redefines them.
+
+### 18. Traceability
+
+| Requirement ID | Requirement (short) | Contract element | Test cases |
+|---|---|---|---|
+| REQ-S7-003 | The committee decision to approve, reject or defer is recorded against each account (Must, E6); the baseline declares the approve and the escalation outcomes and the record of each | The committee-decision operation, the request element, the decision-record answer and the element | TC-E6-018-01, TC-E6-018-02, TC-S7-E6018-CON-01, TC-S7-E6018-CON-02 |
+| ADR-014 | Schema and login per service | `rwb_writeoff` and its own login | TC-S7-E6018-CON-05 |
+| ADR-015 | Kafka with outbox, inbox and CloudEvents | The `WriteOffApproved` element and the outbox library | TC-E6-018-02, TC-S7-E6018-CON-04 |
+| ADR-020 | Contract-first REST, one hop, 2 s timeout | The five consumed rows with their budget and breaker | TC-S7-E6018-CON-03 |
+| ADR-022 | Local decision record plus central ledger | The decision-record element and the record identifier of the answer | TC-E6-018-06, TC-S7-E6018-CON-04 |
+
+| Trace item | Value |
+|---|---|
+| Legacy key | RWB-E6-018, disposition Split (rework); feature FEAT-WOF-06 |
+| Legacy criteria | AC1 to AC4 of the legacy story, owned word for word by RWB-S7-E6018-APP; this baseline copies none of them |
+| Source text | Legacy RWB-E6-018; FSD S7 Write-off and recovery v3 A2.6, A2.6.2, A2.6.3 and Screens; TSD S7 Write-off and recovery v2 T2, T3.1, T3.2, T4, T5.3, T6.1, T-A.1 and T-A.2; Business Rules and Routing Logic v4 rows R-WO-12 and R-WO-15 |
+| Test cases | The six legacy cases as the contract half, and the five new contract cases TC-S7-E6018-CON-01 to -05 |
+| Feature and screens | FEAT-WOF-06, SCR-27 Write-off proposal |
+| Rules | R-WO-12 and R-WO-15, governed in rwb-decision; R-WO-13 and R-WO-14 named as the unclaimed exit of the escalated state |
+| Decoupling patterns | DP03, DP13, DP19 |
+| Architecture decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022 |
+
+### 19. Out of scope
+
+- The behaviour behind the operation, the evaluation of R-WO-15 and R-WO-12, the decision record, the event publication and the case-move answer: RWB-S7-E6018-APP.
+- The case of record, its route states and the parent `CaseWorkflow`: rwb-case (P3), whose rows this baseline declares as consumed and faked (ASM-5047).
+- The `delegation_limit` table, its owner, its versions and its reference-data contract: carried as consumed with the placeholder (GAP-3028; ASM-5043).
+- The authoring, testing, approval and versioning of the WO package, the approval chain and the ledger: rwb-decision (P7) (ASM-5049).
+- The capability area, its rights and the guard: rwb-access (P4) (ASM-5048).
+- The credit committee's own approve and reject out of `ESCALATED_TO_CREDIT_COMMITTEE`, R-WO-13 and R-WO-14: claimed by no story of this key (ASM-5044).
+- The monthly scan, the tax criteria, the pack, the removal and the routing: RWB-S7-E6013-APP to RWB-S7-E6017-APP. The reject and the defer: RWB-S7-E6019-APP and RWB-S7-E6020-APP.
+- The posting to ALS and the general ledger, the provision release and the settlement of the escalated pack: RWB-S7-E6021-APP and the posting stories of this key.
+- The gateway-bff composite route and the screen field list of SCR-27: RWB-PLT-N001-CON and the edge stories (ASM-5048).
+- The deployment of this capability, its flag, its dashboards, its alerts and its runbook: the operations story of this legacy key.

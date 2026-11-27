@@ -1,0 +1,77 @@
+{
+ "edits": [
+  {
+   "old": "    Then no position, file name or bill value appears in any log line",
+   "new": "    Then no position, file name or bill value appears in any log line\n\n  Scenario: AC19 A sync without valid credentials (401 of the provided operations)\n    Given the capture client mock sends one photo for case \"RW-2026-000501\" without valid credentials\n    When the officer syncs\n    Then the response is 401\n    Then no file or document is stored\n\n  Scenario: AC20 A case read times out and the sync is repeated (activity timeout and retry)\n    Given the rwb-case read for case \"RW-2026-000501\" does not answer within 2 s\n    When the officer syncs\n    Then the response is 503 with MSG-GEN-006 naming \"Case service\"\n    When the officer repeats the sync with the same Idempotency-Key\n    Then the case has one set of documents from this sync\n\n  Scenario: AC21 The document scan does not answer (a consumed call fails)\n    Given a photo for case \"RW-2026-000501\"\n    Given the scan contract mock does not answer for that file\n    When the officer syncs\n    Then the system refuses the item with MSG-GEN-006 naming \"Document scan\"\n    Then no file or document is stored for it"
+  },
+  {
+   "old": "| TC-E2-024-19 | Section 12.7 tables | Boundary | Each table of section 12.7 read or written only through its owner (ASM-3438) |",
+   "new": "| TC-E2-024-19 | Section 12.7 tables | Boundary | Each table of section 12.7 read or written only through its owner (ASM-3438) |\n| TC-E2-024-21 | AC19 | Component | Sync request with no valid credentials; refused with 401; no file or document stored |\n| TC-E2-024-22 | AC20 | NFR | rwb-case read times out at 2 s; sync refused with 503 and MSG-GEN-006 naming \"Case service\"; repeat with the same Idempotency-Key leaves one set of documents |\n| TC-E2-024-23 | AC21, Resilience | NFR | Document scan does not answer; item refused with MSG-GEN-006 naming \"Document scan\"; nothing stored for it |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28813",
+   "item": "GAP-1282",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "None; the header metadata and the DP table rows already carry the six platform H and two published C dependencies.",
+   "note": "Header Depends on and Contract dependencies, and DP rows at L486-L492, already list the H and C dependencies. No edit needed."
+  },
+  {
+   "ruling": "R-31208",
+   "item": "NEWAC-RWB-P5-E2024-APP-AC16",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "None; AC16 already exists in section 7 and the X11 row is covered by AC16.",
+   "note": "AC16 exists in section 7 and is covered by TC-E2-024-18. X11 row Covered by already reads AC16."
+  },
+  {
+   "ruling": "R-31209",
+   "item": "NEWAC-RWB-P5-E2024-APP-AC17",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "None; AC17 already exists in section 7 and the X12 row is covered by AC17.",
+   "note": "AC17 exists in section 7 and is covered by TC-E2-024-19. X12 row Covered by already reads AC17."
+  },
+  {
+   "ruling": "R-31210",
+   "item": "NEWAC-RWB-P5-E2024-APP-AC18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "None; AC18 covers BR9 and AC17 covers BR10 in section 7.",
+   "note": "BR9 is covered by AC18 and TC-E2-024-20; BR10 is covered by AC17 and TC-E2-024-19. No edit needed."
+  },
+  {
+   "ruling": "R-31211",
+   "item": "NEWAC-RWB-P5-E2024-APP-AC19",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added Scenario AC19 (401 of the provided operations) to section 7 and TC-E2-024-21 to section 16. 403 is covered by AC16.",
+   "note": "Added AC19 for 401 with TC-E2-024-21. 403 is already in AC16. No message code for 401 in source; none invented."
+  },
+  {
+   "ruling": "R-31212",
+   "item": "NEWAC-RWB-P5-E2024-APP-AC20",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added Scenario AC20 (rwb-case read timeout at 2 s, 503 with MSG-GEN-006, repeat with same Idempotency-Key) and TC-E2-024-22.",
+   "note": "AC20 takes the 2 s timeout, 503, MSG-GEN-006 and Idempotency-Key from the section 5 target-service notes (ASM-1883)."
+  },
+  {
+   "ruling": "R-31213",
+   "item": "NEWAC-RWB-P5-E2024-APP-AC21",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added Scenario AC21 (document scan does not answer; item refused with MSG-GEN-006 naming Document scan) and TC-E2-024-23.",
+   "note": "AC21 takes the refusal rule and MSG-GEN-006 from the section 5 scan note (ASM-1884). Nothing stored for the item."
+  }
+ ]
+}

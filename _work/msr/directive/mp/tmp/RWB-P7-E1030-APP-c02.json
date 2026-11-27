@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "| BR5 | A queue with no cap moves no case, and a non-move records nothing: the ledger holds decisions, not intentions | Legacy AC5, BR4; DL23 |",
+   "new": "| BR5 | A queue with no cap moves no case, and a non-move records nothing: the ledger holds decisions, not intentions | Legacy AC5, BR4; DL23 (ASM-1232, ASM-1237, ASM-1259, ASM-1560 confirmed by the directive of 26 November 2026) |"
+  },
+  {
+   "old": "| BR7 | The count of the entries of the business date reconciles to the moves the run reports with zero difference. A difference holds the reconciliation and lists the case for the data steward; it is never rounded, ignored or published as a note | Legacy BR6; DL25; REC-01; REQ-RDF-012 |",
+   "new": "| BR7 | The count of the entries of the business date reconciles to the moves the run reports with zero difference. A difference holds the reconciliation and lists the case for the data steward; it is never rounded, ignored or published as a note | Legacy BR6; DL25 (ASM-0728, ASM-0735, ASM-0743, ASM-2602 confirmed by the directive of 26 November 2026); REC-01; REQ-RDF-012 |"
+  },
+  {
+   "old": "The seven criteria above are new and test only this deliverable:",
+   "new": "The ten criteria above are new and test only this deliverable:"
+  },
+  {
+   "old": "Then the read answers 503 with MSG-P7-003 and releases no count and no zero",
+   "new": "Then the read answers 503 with MSG-P7-003 and releases no count and no zero\n\n  Scenario: AC8 A run record that does not answer inside 2 s holds the reconciliation and releases no count (new, D-RCV-60)\n    Given the rwb-case contract mock does not answer the run for 2026-12-02 inside 2 s\n    Given 12 entries exist for business date 2026-12-02\n    When the reader calls GET /api/recovery/decision/v1/decision-log with from and to of 2026-12-02\n    Then the reconciliation for 2026-12-02 is held, no count is released from the partial answer and the read answers 503 with MSG-P7-003\n\n  Scenario: AC9 A caller without Decision log R is refused and reads no entry, count or case ID (new, D-RCV-60)\n    Given the caller holds role \"RW-CASEOWN\", which holds no Decision log R\n    When the caller reads GET /api/recovery/decision/v1/decision-log and GET /api/recovery/decision/v1/decision-log/{entryId}\n    Then the read answers 403 with MSG-P4-002\n    Then no entry, no count and no case ID is returned\n\n  Scenario: AC10 No lake copy, file or outbound batch is written by this service (new, D-RCV-60)\n    Given the rwb-decision service is deployed with its rebalance mapping and reconciliation reader\n    When the rebalance of 2026-12-02 is recorded and the count is read\n    Then no file is written, no object is put to a data lake and no INT-19 or INT-20 batch is sent\n    Then the measures are not copied out of rwb_decision by this service"
+  },
+  {
+   "old": "| X6 | The rwb-case run record does not answer inside the 2 s budget | One hop, 2 s (DP-11); the reconciliation is held for the business date and no count is released from a partial answer | MSG-P7-003 | TC-E1-030-12 |",
+   "new": "| X6 | The rwb-case run record does not answer inside the 2 s budget | One hop, 2 s (DP-11); the reconciliation is held for the business date and no count is released from a partial answer | MSG-P7-003 | AC8 |"
+  },
+  {
+   "old": "| X7 | The caller's role holds no Decision log R | 403; no entry, no count and no case ID is returned | MSG-P4-002 | TC-E1-030-11 |",
+   "new": "| X7 | The caller's role holds no Decision log R | 403; no entry, no count and no case ID is returned | MSG-P4-002 | AC9 |"
+  },
+  {
+   "old": "The authorisation decision is the cached permission decision from rwb-access that the service template's guard already holds;",
+   "new": "Every REST operation of this service (GET /api/recovery/decision/v1/decision-log and GET /api/recovery/decision/v1/decision-log/{entryId}) runs the authorise check of rwb-access for Decision log R before it answers; the authorisation decision is the cached permission decision from rwb-access that the service template's guard already holds;"
+  },
+  {
+   "old": "| TC-E1-030-02 | AC5, BR7: the count of the business date equals the moves the run reports, with the snapshot at 06:52 as the run's own time | Integration | Snapshot at 2026-12-02 06:52; count 12 against 12 moves; depth 296 and 0 unassigned in `TDR-BKK-CO` are rwb-case's |",
+   "new": "| TC-E1-030-02 | AC2, BR7: the count of the business date equals the moves the run reports, with the snapshot at 06:52 as the run's own time | Integration | Snapshot at 2026-12-02 06:52; count 12 against 12 moves; depth 296 and 0 unassigned in `TDR-BKK-CO` are rwb-case's |"
+  },
+  {
+   "old": "| TC-E1-030-04 | AC2, BR1: no member has capacity, so the run moves nothing and the ledger records nothing; MSG-P3-011 is rwb-case's | End to end | Every member of `TDR-BKK-CO` at 150 and 5 cases with no owner; 0 entries for the queue on 2026-12-02 |",
+   "new": "| TC-E1-030-04 | AC4, BR1: no member has capacity, so the run moves nothing and the ledger records nothing; MSG-P3-011 is rwb-case's | End to end | Every member of `TDR-BKK-CO` at 150 and 5 cases with no owner; 0 entries for the queue on 2026-12-02 |"
+  },
+  {
+   "old": "| TC-E1-030-05 | AC4, BR5: a queue with no cap moves no case and therefore records nothing | Component | Queue `WO-BKK-CO` with no capacity cap; run for 2026-12-02; 0 entries and 0 moves |",
+   "new": "| TC-E1-030-05 | AC5, BR5: a queue with no cap moves no case and therefore records nothing | Component | Queue `WO-BKK-CO` with no capacity cap; run for 2026-12-02; 0 entries and 0 moves |"
+  },
+  {
+   "old": "| TC-E1-030-06 | AC2, AC7, BR8: the move whose record fails is not in the ledger and the run lists it; the ledger records 2 of 3 | End to end | Owner `U-63` at 153; the second of the 3 newest fails; 2 entries `CASE_TRANSFERRED`, 1 case stays with MSG-P7-003 on the run record |",
+   "new": "| TC-E1-030-06 | AC6, BR8: the move whose record fails is not in the ledger and the run lists it; the ledger records 2 of 3 | End to end | Owner `U-63` at 153; the second of the 3 newest fails; 2 entries `CASE_TRANSFERRED`, 1 case stays with MSG-P7-003 on the run record |"
+  },
+  {
+   "old": "| TC-E1-030-07 | AC3, BR4: a repeated run adds no second entry and answers the first entry ID | Integration | JOB-06 twice on 2026-12-02; one entry per case and business date; repeat count 12 |",
+   "new": "| TC-E1-030-07 | AC7, BR4: a repeated run adds no second entry and answers the first entry ID | Integration | JOB-06 twice on 2026-12-02; one entry per case and business date; repeat count 12 |"
+  },
+  {
+   "old": "| TC-E1-030-08 | AC2, BR1: a held case produces no move and no entry; the hold checks are rwb-case's | Unit | Owner `U-64` at 152 with the 2 newest held (`deviation_open` true); 2 entries for the next 2 newest and none for the held pair |",
+   "new": "| TC-E1-030-08 | AC8, BR1: a held case produces no move and no entry; the hold checks are rwb-case's | Unit | Owner `U-64` at 152 with the 2 newest held (`deviation_open` true); 2 entries for the next 2 newest and none for the held pair |"
+  },
+  {
+   "old": "| TC-E1-030-09 | AC6, BR7: a difference of one holds the reconciliation and lists the case; the queue depth check is rwb-case's | Component | Depth 88 against count 87 in `DIL-BKK-CO`; 12 moves against 11 entries; case `RW-2026-000501` listed |",
+   "new": "| TC-E1-030-09 | AC9, BR7: a difference of one holds the reconciliation and lists the case; the queue depth check is rwb-case's | Component | Depth 88 against count 87 in `DIL-BKK-CO`; 12 moves against 11 entries; case `RW-2026-000501` listed |"
+  },
+  {
+   "old": "| TC-E1-030-11 | AC7, BR6: a role without Decision log R reads neither the count nor an entry; the rerun itself is rwb-case's and refuses the same role with MSG-P4-002 | Component | Role `RW-CASEOWN` reads `GET /decision-log` and `GET /decision-log/{entryId}` and is refused with MSG-P4-002; the rerun of JOB-06 is refused with MSG-P4-002 |",
+   "new": "| TC-E1-030-11 | AC7, AC9, BR6: a role without Decision log R reads neither the count nor an entry; the rerun itself is rwb-case's and refuses the same role with MSG-P4-002 | Component | Role `RW-CASEOWN` reads `GET /decision-log` and `GET /decision-log/{entryId}` and is refused with MSG-P4-002; the rerun of JOB-06 is refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E1-030-12 | AC7, BR6, BR8, NFR-035: the ledger write is forced to fail for every move in the run, and the store is forced to be unreadable for the count | NFR | Store closed for the whole run and for the count; no entry appended without a record, 503 with MSG-P7-003, no count released, one incident per break |",
+   "new": "| TC-E1-030-12 | AC7, BR6, BR8, NFR-035: the ledger write is forced to fail for every move in the run, and the store is forced to be unreadable for the count | NFR | Store closed for the whole run and for the count; no entry appended without a record, 503 with MSG-P7-003, no count released, one incident per break |\n| TC-E1-030-13 | AC8, BR8: the run record does not answer inside the 2 s budget; the reconciliation is held and no count is released from the partial answer | Integration | Run record not answering inside 2 s for 2026-12-02; 12 entries present; 503 with MSG-P7-003; no count released |\n| TC-E1-030-14 | BR4, BR6: boundary of the tables of section 12.7; first and last entry of the business date in `decision_log_entry` and the repeated key in `processed_event` and `idempotency_key` | Component | Entries at the first and last `chain_seq` of 2026-12-02; repeated key at the inbox boundary; boundary values Not specified in the source documents (ASM-3438) |\n| TC-E1-030-15 | AC10, BR9: no lake copy, file or outbound batch is written, and the count and the rebalance are read without one | Component | Run for 2026-12-02 recorded and counted; no file writer, lake client or INT-19 or INT-20 batch in the deployed service |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17948",
+   "item": "DOR-RWB-P7-E1030-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-030-14 for the section 12.7 table boundaries; boundary values Not specified in the source documents (ASM-3438).",
+   "note": "Boundary test TC-E1-030-14 added for section 12.7 tables. RTM alignment is tracked under CG-ALL-6944."
+  },
+  {
+   "ruling": "R-17949",
+   "item": "DOR-RWB-P7-E1030-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "DL23 assumptions ASM-1232, ASM-1237, ASM-1259, ASM-1560 and DL25 assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602 confirmed in BR5 and BR7 sources.",
+   "note": "Assumptions of DL23 and DL25 confirmed by the directive and stated in the BR5 and BR7 sources."
+  },
+  {
+   "ruling": "R-17950",
+   "item": "DOR-RWB-P7-E1030-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC8 (X6) and AC9 (X7) with TC-E1-030-13 and TC-E1-030-11; section 5 Covered by points to the criteria.",
+   "note": "AC8 for X6 and AC9 for X7 added; section 7 now holds ten criteria, each with a test row in section 16."
+  },
+  {
+   "ruling": "R-17951",
+   "item": "DOR-RWB-P7-E1030-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 (BR9: no lake copy, file or batch) and TC-E1-030-15 covering AC10 and BR9.",
+   "note": "BR9 now covered by AC10 and TC-E1-030-15."
+  },
+  {
+   "ruling": "R-17952",
+   "item": "DOR-RWB-P7-E1030-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Section 10 names the rwb-access authorise check for Decision log R on each REST operation of this service.",
+   "note": "Section 10 now names the rwb-access authorise check on each REST operation (DP-08)."
+  },
+  {
+   "ruling": "R-22050",
+   "item": "GAP-0354",
+   "status": "Cross-document",
+   "section": "10, 16",
+   "target": "RWB-P3-E1030-APP",
+   "change": "Register JOB-06 as a Schedule in rwb-case, name its identifier, overlap policy and catch-up window at integration pack review; keep the P1 job catalogue as the operations facade for the run record and rerun; fix rwb.reporting.ReportPublished.v1 as the publish marker and the five-minute ledger target as the collection measure.",
+   "note": "Schedule registration and facade decisions belong to the rwb-case story and the integration pack review; no story-side edit."
+  },
+  {
+   "ruling": "R-22051",
+   "item": "GAP-1652",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "FSD P9 (FEAT-RPT-02; AC-P9-002-01, AC-ALT-P9-002-01, AC-ALT-P9-002-02)",
+   "change": "P3 computes the queue measures on the business date and P9 publishes them, reading the case list count for the reconciliation; remove P9 computation of queue depth and ageing.",
+   "note": "Single owner for queue_measure is P3; P9 FEAT-RPT-02 must publish, not compute."
+  },
+  {
+   "ruling": "R-22052",
+   "item": "GAP-2205",
+   "status": "Cross-document",
+   "section": "12.6, 14",
+   "target": "Ownership Map",
+   "change": "Name the reporting feed and its fields in the P9 contract before wave 1 closes; name the delivery service for MSG-P3-028, MSG-P3-011 and MSG-P3-029; state whether the run record and rerun surface are a workflow read plus Schedule trigger or a published operation; add the agreed rows.",
+   "note": "Feed, delivery service and run-record surface are not named in any source; ownership map rows needed."
+  },
+  {
+   "ruling": "R-26228",
+   "item": "CG-ALL-6943",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Section 16 Covers for TC-E1-030-02, -04, -05, -06, -07, -08 and -09 aligned to the Test Cases v8 AC numbers.",
+   "note": "Covers aligned to v8 numbers; v8 AC9 now shares its ID with story AC9 (X7), so QA should confirm the numbering."
+  },
+  {
+   "ruling": "R-26229",
+   "item": "CG-ALL-6944",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the REQ-CWC-015 and REQ-RDF-012 test lists in RTM v7 with RWB-P7-E1030-APP section 18 in the next RTM version.",
+   "note": "The RTM v7 trace must be aligned with the section 18 test lists in its next version."
+  }
+ ]
+}

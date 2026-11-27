@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "    Given ACE has ingested the SVAF appraisal \"AP-0001\" for asset \"AST-0001\" at appraisal date 2026-11-02 and v_ace_valuation holds appraised value 4250000",
+   "new": "    Given the rwb-source-data contract serves the SVAF appraisal \"AP-0001\" for asset \"AST-0001\" at appraisal date 2026-11-02 with appraised value 4250000"
+  },
+  {
+   "old": "    When the case owner assesses the route",
+   "new": "    When the case owner assesses the route (POST /cases/{caseId}/route)"
+  },
+  {
+   "old": "    Then the Workbench reads the appraisal number, value, type and date from v_ace_valuation for the asset_key",
+   "new": "    Then the Workbench reads the appraisal number, value, type and date for the asset_key through the rwb-source-data contract, SELECT-only from recovery.v_ace_valuation, and copies none of them; v_ace_batch_status is the freshness gate"
+  },
+  {
+   "old": "    Then it sets accepted, stale_flag and age_days in valuation_ext against the valuation_key",
+   "new": "    Then it sets stale_flag and age_days in valuation_ext against the valuation_key; the acceptance fields are written by FEAT-VAL-04 and are not set here"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision log with the rule version\n\n  Scenario: AC3 An appraisal older than the 12-month limit is flagged stale and no value is accepted by the harness or by a system step (new, D-RCV-60)\n    Given the SVAF appraisal for the asset is older than the 12-month policy limit\n    When the case owner assesses the route\n    Then the stale flag is set on valuation_ext against the valuation_key\n    Then a new valuation order is raised without a person asking for it\n    Then no value is accepted by the harness or by a system step"
+  },
+  {
+   "old": "    Then no value is accepted by the harness or by a system step",
+   "new": "    Then no value is accepted by the harness or by a system step\n\n  Scenario: AC4 A consumed call fails or does not answer and nothing is written (new, D-RCV-60)\n    Given a consumed contract call for the assessment fails or does not answer\n    When the case owner assesses the route\n    Then no stale flag, age or decision is written\n    Then the failure response is Not specified in the source documents (NEWAC-RWB-ITG-E4002-ITG-AC4)"
+  },
+  {
+   "old": "| BR2 | The acceptance, the stale flag and the age are the Workbench's own and are held in `valuation_ext` against the `valuation_key` | REQ-RDF-004; legacy RWB-E4-002 |",
+   "new": "| BR2 | The stale flag and the age are the Workbench's own and are written to `valuation_ext` against the `valuation_key` at receipt; the acceptance fields are written by FEAT-VAL-04 | REQ-RDF-004; legacy RWB-E4-002 |"
+  },
+  {
+   "old": "| BR4 | Every decision records the freshness of the data it used | REQ-RDF-009 |",
+   "new": "| BR4 | Every decision records the freshness of the data it used; the freshness gate is the batch status in `v_ace_batch_status` | REQ-RDF-009 |"
+  },
+  {
+   "old": "| submitted | The assessment is submitted; the acceptance and the record exist |",
+   "new": "| submitted | The assessment is submitted; the acceptance and the record exist |\n| Empty | Not specified in the source documents (CG-ALL-873) |\n| Error | Not specified in the source documents (CG-ALL-873) |\n| No access | Not specified in the source documents (CG-ALL-873) |"
+  },
+  {
+   "old": "Not specified in the source documents (GAP-0430; ASM-0606): the gateway-bff composite route that serves SCR-13.",
+   "new": "The gateway-bff composite route that serves SCR-13 is agreed with the integration, data product and QA owners at the wave 3 entry check; until then the harness runs against the section 12.8 fakes (GAP-0430; ASM-0606)."
+  },
+  {
+   "old": "What the wave entry check looks at instead is the evidence report. Not specified in the source documents (GAP-0430; ASM-0606): its format and retention.",
+   "new": "What the wave entry check looks at instead is the evidence report, whose format and retention are agreed at that check (GAP-0430; ASM-0606)."
+  },
+  {
+   "old": "| TC-E4-002-02-ITG | BR6 | Integration | Decision log forced to fail; MSG-P7-003 |",
+   "new": "| TC-E4-002-02-ITG | BR6 | Run by RWB-S1-E4002-APP | Decision log forced to fail; MSG-P7-003 |"
+  },
+  {
+   "old": "TC-E4-002-02-ITG is kept as the copy of AC2 and is exercised through the owning app story, because AC2 belongs to RWB-S1-E4002-APP.",
+   "new": "TC-E4-002-02-ITG is kept as the copy of AC2 and is run by RWB-S1-E4002-APP, which owns AC2; this story does not run it."
+  },
+  {
+   "old": "| TC-E4-002-04-ITG | Principle 5 | NFR | Forced decision-log write failure; nothing moves |",
+   "new": "| TC-E4-002-04-ITG | Principle 5 | NFR | Forced decision-log write failure; nothing moves |\n| TC-E4-002-05-ITG | AC3, BR3, BR7 | Not specified in the source documents (NEWAC-RWB-ITG-E4002-ITG-AC3) | Not specified in the source documents (NEWAC-RWB-ITG-E4002-ITG-AC3) |\n| TC-E4-002-06-ITG | AC4 | Not specified in the source documents (NEWAC-RWB-ITG-E4002-ITG-AC4) | Not specified in the source documents (NEWAC-RWB-ITG-E4002-ITG-AC4) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22776",
+   "item": "GAP-0430",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Gateway-bff route and evidence format set to wave 3 entry check; harness builds on section 12.8 fakes until then."
+  },
+  {
+   "ruling": "R-22777",
+   "item": "GAP-1682",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Ownership Map",
+   "change": "Keep POST /assets/{assetId}/valuations and POST /assets/{assetKey}/valuations with the service that writes the appraisal, so the appraisal record has one writer; rwb-asset reads the accepted appraisal through the contract for the floor price and monthly re-appraisal.",
+   "note": "Ownership ruling for the two asset valuation paths is outside this story; story has no such paths to change."
+  },
+  {
+   "ruling": "R-22778",
+   "item": "GAP-2594",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "",
+   "note": "AC1 and BR2/BR4 now follow the split: SELECT-only view read, FEAT-VAL-04 acceptance, freshness gate. S1 table row and view grant still to confirm before wave 3."
+  },
+  {
+   "ruling": "R-24055",
+   "item": "CG-ALL-870",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E4-002-02-ITG now marked as run by RWB-S1-E4002-APP, which owns AC2."
+  },
+  {
+   "ruling": "R-24056",
+   "item": "CG-ALL-871",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists for REQ-RDF-004, REQ-RDF-009 and REQ-DRI-001 with section 18 of RWB-ITG-E4002-ITG in its next version.",
+   "note": "Alignment happens in the next RTM version; section 18 of this story is unchanged."
+  },
+  {
+   "ruling": "R-24057",
+   "item": "CG-ALL-873",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, error and no access rows added; spec lacks them, so marked Not specified. Loading already present."
+  },
+  {
+   "ruling": "R-28892",
+   "item": "GAP-2595",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-ITG-E4002-CON",
+   "change": "Publish v1 with the appraisal elements as one flat group inside Approval; take valuation_ext column types from TSD S1 T3.1; leave 404 and 409 wording as messageId slots; record retention as an open P3 item; publish via the platform registry.",
+   "note": "Contract artefact sits in the contract document, not this story."
+  },
+  {
+   "ruling": "R-29305",
+   "item": "ACR-RWB-ITG-E4002-ITG-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 Given now runs through the rwb-source-data contract (DP-01, DP-05) instead of reading an ACE view."
+  },
+  {
+   "ruling": "R-30003",
+   "item": "NEWAC-RWB-ITG-E4002-ITG-AC3",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC3 added for BR3 and BR7 with TC-E4-002-05-ITG; proposed test not specified in the sources, kept as placeholder."
+  },
+  {
+   "ruling": "R-30004",
+   "item": "NEWAC-RWB-ITG-E4002-ITG-AC4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC4 added for a failed or silent consumed call with TC-E4-002-06-ITG; expected failure response kept as placeholder."
+  }
+ ]
+}

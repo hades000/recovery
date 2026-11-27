@@ -1,0 +1,224 @@
+{
+ "edits": [
+  {
+   "old": "| DF-CAS-001 to DF-CAS-023 | recovery_case (P3) | id, case_no, product_group, primary_person_key, status, stage_code and 17 more | Not read as a table and not written: the state arrives on the contract and the move returns on its answer |",
+   "new": "| DF-CAS-001 to DF-CAS-023 | recovery_case (P3) | id, case_no, product_group, status, stage_code, one personal-data field not carried, and 17 more | Not read as a table and not written: the state arrives on the contract and the move returns on its answer |"
+  },
+  {
+   "old": "`primary_person_key` is P3's and is never copied here",
+   "new": "the case's personal-data field is P3's and is never copied here"
+  },
+  {
+   "old": "| Rule | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer |\n|---|---|---|---|---|---|---|---|---|---|---|",
+   "new": "| Rule | BR ID | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer |\n|---|---|---|---|---|---|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| R-WO-36 | Write-off | D9 | PLACED_WITH_AGENCY | PLACEMENT_TERM_EXPIRED | ends_at passed and recovered_amount = 0 | Close the placement and start the retention timer | RETENTION_RUNNING | Workbench | Partner Portal, Workbench scheduler | None |",
+   "new": "| R-WO-36 | BR10 | Write-off | D9 | PLACED_WITH_AGENCY | PLACEMENT_TERM_EXPIRED | ends_at passed and recovered_amount = 0 | Close the placement and start the retention timer | RETENTION_RUNNING | Workbench | Partner Portal, Workbench scheduler | None |"
+  },
+  {
+   "old": "| R-WO-47 | Write-off | D9 | RETENTION_RUNNING | RETENTION_TIMER_EXPIRED | no open placement, no open sale, no open exception, and a retention class on every document | Close the case, stop every timer and write the closing entry with cash recovered and loss | CASE_CLOSED | Workbench | Workbench scheduler, Document Hub, Decision Log | on expiry |",
+   "new": "| R-WO-47 | BR11 | Write-off | D9 | RETENTION_RUNNING | RETENTION_TIMER_EXPIRED | no open placement, no open sale, no open exception, and a retention class on every document | Close the case, stop every timer and write the closing entry with cash recovered and loss | CASE_CLOSED | Workbench | Workbench scheduler, Document Hub, Decision Log | on expiry |"
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| BR1 | The closure is the last transition of the write-off stage: it runs in `WriteOffWorkflow` on `rwb-writeoff` and writes `write_off.state` only | TSD S7 T3.1, T4; context pack ownership rows (table and workflow); FSD S7 A2.13.2 |",
+   "new": "| BR1 | The closure is the last transition of the write-off stage: it runs in `WriteOffWorkflow` on `rwb-writeoff` and writes `write_off.state` only | TSD S7 T3.1, T4; context pack ownership rows (table and workflow); FSD S7 A2.13.2 | AC3, TC-E6-025-03 |"
+  },
+  {
+   "old": "| BR2 | The closing entry is recorded before the case moves, with the rule ID, the package version, cash recovered, loss and the two states; a failed write changes nothing and the caller sees MSG-P7-003 | DP-03; TSD S7 T2 (\"writes the decision log entry before any change\"); legacy AC1 and AC4 |",
+   "new": "| BR2 | The closing entry is recorded before the case moves, with the rule ID, the package version, cash recovered, loss and the two states; a failed write changes nothing and the caller sees MSG-P7-003 | DP-03; TSD S7 T2 (\"writes the decision log entry before any change\"); legacy AC1 and AC4 | AC1, AC4, TC-E6-025-01, TC-E6-025-04, TC-E6-025-06 |"
+  },
+  {
+   "old": "| BR3 | Two rules close a stage and one holds it: R-WO-36 from `PLACED_WITH_AGENCY` on an expired placement term with nothing recovered, R-WO-47 from `RETENTION_RUNNING` on the expiry where nothing is open and every document has a retention class, R-WO-48 as the hold | Business Rules and Routing Logic v4 rows R-WO-36, R-WO-47 and R-WO-48; FSD S7 A2.13.3.1 |",
+   "new": "| BR3 | Two rules close a stage and one holds it: R-WO-36 from `PLACED_WITH_AGENCY` on an expired placement term with nothing recovered, R-WO-47 from `RETENTION_RUNNING` on the expiry where nothing is open and every document has a retention class, R-WO-48 as the hold | Business Rules and Routing Logic v4 rows R-WO-36, R-WO-47 and R-WO-48; FSD S7 A2.13.3.1 | AC2, AC3, TC-E6-025-02, TC-E6-025-03 |"
+  },
+  {
+   "old": "| BR4 | The move is answered, not written: `recovery_case`, its route states and the `timer` rows are rwb-case's, and this service answers `RETENTION_RUNNING` and `CASE_CLOSED` with the rule and its version and asks for the timer stop | ASM-5098, ASM-5035; TSD S7 T3.3 |",
+   "new": "| BR4 | The move is answered, not written: `recovery_case`, its route states and the `timer` rows are rwb-case's, and this service answers `RETENTION_RUNNING` and `CASE_CLOSED` with the rule and its version and asks for the timer stop | ASM-5098, ASM-5035; TSD S7 T3.3 | AC2, AC3, TC-E6-025-02, TC-E6-025-03 |"
+  },
+  {
+   "old": "| BR5 | No cross-schema join and no foreign key leaves `rwb_writeoff`; `case_id` and `decision_log_id` are identifiers of another service's fact | DP-01; TSD S7 T3.3 |",
+   "new": "| BR5 | No cross-schema join and no foreign key leaves `rwb_writeoff`; `case_id` and `decision_log_id` are identifiers of another service's fact | DP-01; TSD S7 T3.3 | AC6, TC-E6-025-08 |"
+  },
+  {
+   "old": "| BR6 | ACE data only through the owner's contract: this service holds no `v_ace_*` grant and reads no ACE table, and the balance and the recovered amounts reach it on the case and the write-off of their owners | DP-05 as a prohibition; FSD S7 A1.1; TSD S7 T1 |",
+   "new": "| BR6 | ACE data only through the owner's contract: this service holds no `v_ace_*` grant and reads no ACE table, and the balance and the recovered amounts reach it on the case and the write-off of their owners | DP-05 as a prohibition; FSD S7 A1.1; TSD S7 T1 | AC6, TC-E6-025-08 |"
+  },
+  {
+   "old": "| BR7 | Every value a business person may change is a rule row or reference data read with its version: the two rules, the states, the retention period, the retention classes and the package version | FSD S7 BR-S7-013; legacy Guardrails |",
+   "new": "| BR7 | Every value a business person may change is a rule row or reference data read with its version: the two rules, the states, the retention period, the retention classes and the package version | FSD S7 BR-S7-013; legacy Guardrails | AC1, AC3, TC-E6-025-01, TC-E6-025-03 |"
+  },
+  {
+   "old": "| BR8 | The expiry is idempotent: one entry, one move answer and one timer close per case, and a case that has left `RETENTION_RUNNING` is refused with 409 | TSD S7 T-A.2; platform delivery rule (at least once, consumers idempotent) |",
+   "new": "| BR8 | The expiry is idempotent: one entry, one move answer and one timer close per case, and a case that has left `RETENTION_RUNNING` is refused with 409 | TSD S7 T-A.2; platform delivery rule (at least once, consumers idempotent) | AC1, AC3, TC-E6-025-01, TC-E6-025-03 |"
+  },
+  {
+   "old": "| BR9 | No person name, address, contact value or identity number enters `rwb_writeoff`, the closing entry, a log or a workflow input; the case reference is a number and not an identity | Template and Rules §R7.2 (s17); TSD S7 T6.2 |",
+   "new": "| BR9 | No person name, address, contact value or identity number enters `rwb_writeoff`, the closing entry, a log or a workflow input; the case reference is a number and not an identity | Template and Rules §R7.2 (s17); TSD S7 T6.2 | AC6, TC-E6-025-08 |\n| BR10 | R-WO-36 from `PLACED_WITH_AGENCY`: the placement is closed and the retention timer starts, as the rule row of the WO package says | Business Rules and Routing Logic v4 row R-WO-36; FSD S7 A2.13.3.1 | AC2, TC-E6-025-02 |\n| BR11 | R-WO-47 from `RETENTION_RUNNING`: the case is closed, its timers stopped and its entry written, with R-WO-48 as the hold | Business Rules and Routing Logic v4 row R-WO-47; FSD S7 A2.13.3.1 | AC3, TC-E6-025-03 |"
+  },
+  {
+   "old": "| 403 before any read or write; the unattended step runs under the service identity with the same check | MSG-P4-002 | TC-E6-025-05 |",
+   "new": "| 403 before any read or write; the unattended step runs under the service identity with the same check | MSG-P4-002 | AC5, TC-E6-025-05 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5, BR6 |",
+   "new": "| None (pipeline log) | AC6, TC-E6-025-08 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Access without the Write-off and posting right (X2)\n    Given the caller does not hold the Write-off and posting right\n    When the closure is requested by that caller\n    Then the caller sees 403 with MSG-P4-002 before any read or write\n\n  Scenario: AC6 Schema and ACE boundary (X8)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case row, a timer row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the build fails and nothing is released"
+  },
+  {
+   "old": "The four criteria are the legacy criteria of RWB-E6-025 word for word, with their origin tag added and nothing else changed:",
+   "new": "The four criteria AC1 to AC4 are the legacy criteria of RWB-E6-025 word for word, with their origin tag added and nothing else changed (AC5 and AC6 are this story's own, for X2 and X8):"
+  },
+  {
+   "old": "- The retention period of the timer and the retention classes of the documents: reference data with their version; no source sets a period (ASM-5102).",
+   "new": "- The retention period of the timer and the retention classes of the documents: reference data with their version; no source sets a period (ASM-5102). Open decision DL26 holds the period; its assumptions are ASM-0247, ASM-0264, ASM-0275 and ASM-0355."
+  },
+  {
+   "old": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020.",
+   "new": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020.\n- Parameters and reference data: the retention period and the retention classes are read through the reference-data contract as parameters (DP-06, DP-07); the parameter key is Not specified in the source documents (DOR-RWB-S7-E6025-APP-20)."
+  },
+  {
+   "old": "8. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to `rwb_case`, `recovery_case`, `timer` or any other schema (X8, BR4, BR5, BR6).",
+   "new": "8. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to the case or timer tables of rwb-case or to any other service's schema (X8, BR4, BR5, BR6)."
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Story element | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-S7-008 | A case closes after its retention period, and reopening a closed case needs a written rule, a reason and an approver (Must, E6; FSD S7 Requirements served) | The closure of R-WO-36 and R-WO-47, the closing entry, the state and the two moves | TC-E6-025-01, TC-E6-025-02, TC-E6-025-03 |",
+   "new": "| REQ-S7-008 | A case closes after its retention period, and reopening a closed case needs a written rule, a reason and an approver (Must, E6; FSD S7 Requirements served) | The closure of R-WO-36 and R-WO-47, the closing entry, the state and the two moves | TC-E6-025-01, TC-E6-025-02, TC-E6-025-03 | FEAT-WOF-13 | Not specified in the source documents (DOR-RWB-S7-E6025-APP-2) |"
+  },
+  {
+   "old": "| NFR-031 | Case records carry a retention and archive rule by record class, and a case closes after its retention period (Open, DL26) | The retention class condition of R-WO-47 and the period of the timer | TC-E6-025-03 |",
+   "new": "| NFR-031 | Case records carry a retention and archive rule by record class, and a case closes after its retention period (Open, DL26) | The retention class condition of R-WO-47 and the period of the timer | TC-E6-025-03 | FEAT-WOF-13 | Not specified in the source documents (DOR-RWB-S7-E6025-APP-2) |"
+  },
+  {
+   "old": "| ADR-013 | 19 services inside ACE | rwb-writeoff as the owner of the write-off stage | TC-E6-025-01 |",
+   "new": "| ADR-013 | 19 services inside ACE | rwb-writeoff as the owner of the write-off stage | TC-E6-025-01 | FEAT-WOF-13 | Not specified in the source documents (DOR-RWB-S7-E6025-APP-2) |"
+  },
+  {
+   "old": "| ADR-014 | Schema and login per service | `rwb_writeoff` and its own login | TC-E6-025-01 |",
+   "new": "| ADR-014 | Schema and login per service | `rwb_writeoff` and its own login | TC-E6-025-01 | FEAT-WOF-13 | Not specified in the source documents (DOR-RWB-S7-E6025-APP-2) |"
+  },
+  {
+   "old": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The five consumed rows with their budget and breaker | TC-E6-025-01 |",
+   "new": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The five consumed rows with their budget and breaker | TC-E6-025-01 | FEAT-WOF-13 | Not specified in the source documents (DOR-RWB-S7-E6025-APP-2) |"
+  },
+  {
+   "old": "| ADR-022 | Local decision record plus central ledger | The closing entry written before the case moves | TC-E6-025-04, TC-E6-025-06 |",
+   "new": "| ADR-022 | Local decision record plus central ledger | The closing entry written before the case moves | TC-E6-025-04, TC-E6-025-06 | FEAT-WOF-13 | Not specified in the source documents (DOR-RWB-S7-E6025-APP-2) |"
+  },
+  {
+   "old": "| TC-E6-025-05 | Access | Component | A role without the Write-off and posting right; 403 with MSG-P4-002 and no read |",
+   "new": "| TC-E6-025-05 | AC5 | Component | A role without the Write-off and posting right; 403 with MSG-P4-002 and no read |"
+  },
+  {
+   "old": "| TC-E6-025-06 | Principle 5 | Component | A forced decision log write failure inside the transaction; the case stays at `RETENTION_RUNNING` and no entry exists |",
+   "new": "| TC-E6-025-06 | Principle 5 | Component | A forced decision log write failure inside the transaction; the case stays at `RETENTION_RUNNING` and no entry exists |\n| TC-E6-025-07 | Contract (§12 operations, events and activities) | Component | The rwb-case, rwb-decision and rwb-writeoff operations, events and activities of section 12 on their published contracts, each answered by its fake; every status and field asserted |\n| TC-E6-025-08 | AC6, BR5, BR6, BR9, X8 (§12.7 tables, ASM-3438) | Component | The boundary test over the tables of section 12.7 and the build: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to `recovery_case` or `timer`, no personal data field; any hit fails the build |"
+  },
+  {
+   "old": "no new test ID is invented here because the criteria of this story are the legacy ones.",
+   "new": "; TC-E6-025-07 and TC-E6-025-08 are added for the contract and the boundary tests, and AC5 and AC6 cover X2 and X8."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21004",
+   "item": "DOR-RWB-S7-E6025-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Named personal-data field removed from the §11 case row and the no-personal-data paragraph; the story carries none."
+  },
+  {
+   "ruling": "R-21005",
+   "item": "DOR-RWB-S7-E6025-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add Story test case rows TC-E6-025-01 to TC-E6-025-08 under the same IDs, including the new contract (07) and boundary (08) rows.",
+   "note": "§16 now has 8 test cases, with contract (TC-07) and §12.7 boundary (TC-08) rows added in the story."
+  },
+  {
+   "ruling": "R-21006",
+   "item": "DOR-RWB-S7-E6025-APP-18",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "DL26 named as open with its assumptions ASM-0247, ASM-0264, ASM-0275 and ASM-0355 against the retention period in §13."
+  },
+  {
+   "ruling": "R-21007",
+   "item": "DOR-RWB-S7-E6025-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature (FEAT-WOF-13) and L3 process columns added to §18; the L3 value is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-21008",
+   "item": "DOR-RWB-S7-E6025-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Parameters and reference-data contract (DP-06, DP-07) named in §13; the parameter key is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-21009",
+   "item": "DOR-RWB-S7-E6025-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Named other schema rwb_case removed from §13 build step 8; the boundary is stated without naming other schemas."
+  },
+  {
+   "ruling": "R-21010",
+   "item": "DOR-RWB-S7-E6025-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC5 (X2) and AC6 (X8) added to §7 with test rows mapped in §5 and §16; §7 and §16 updated."
+  },
+  {
+   "ruling": "R-21011",
+   "item": "DOR-RWB-S7-E6025-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR ID column added: BR10 and BR11 for R-WO-36 and R-WO-47; Covered by column added to BR1 to BR11."
+  },
+  {
+   "ruling": "R-21012",
+   "item": "DOR-RWB-S7-E6025-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD to the role list, or confirm it is held there as a service identity with the write-off and posting rights in §10.",
+   "note": "SY-DATALOAD is not in UR&P v5; no story edit made."
+  },
+  {
+   "ruling": "R-21013",
+   "item": "DOR-RWB-S7-E6025-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add ends_at, decision_record, recovered_amount and recovery_log as fields or entities, or confirm the library and rule names they map to.",
+   "note": "Four flagged names plus one more are not in LDM v9 or Data Classification v5; no story edit made."
+  }
+ ]
+}

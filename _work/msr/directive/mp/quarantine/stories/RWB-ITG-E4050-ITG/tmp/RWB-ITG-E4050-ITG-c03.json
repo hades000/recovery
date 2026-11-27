@@ -1,0 +1,131 @@
+{
+ "edits": [
+  {
+   "old": "| BR5 | The outcome is written to `reconciliation_result` by `rec_code` and business date, and the table is P1 rwb-source-data's | Legacy RWB-E4-050 AC1; Ownership Map `reconciliation_result` owner P1 |",
+   "new": "| BR5 | The outcome is written to `reconciliation_result` by `rec_code` and business date, and the table is P1 rwb-source-data's and is read only through its contract | Legacy RWB-E4-050 AC1; Ownership Map `reconciliation_result` owner P1 |"
+  },
+  {
+   "old": "| TC-E4-050-02-ITG | BR8 (AC2 path owned by RWB-P8-E4050-APP) | Integration | Decision log forced to fail; MSG-P7-003 |",
+   "new": "| TC-E4-050-02-ITG | BR8 (AC2 path run by RWB-P8-E4050-APP) | Integration | Decision log forced to fail; MSG-P7-003 |"
+  },
+  {
+   "old": "| unmatched | A payment, a posting or a key does not resolve, and an officer or the data steward has to resolve it on the break list |",
+   "new": "| unmatched | A payment, a posting or a key does not resolve, and an officer or the data steward has to resolve it on the break list |\n| Empty | Not specified in the source documents (CG-ALL-911) |\n| Error | Not specified in the source documents (CG-ALL-911) |\n| No access | Not specified in the source documents (CG-ALL-911) |"
+  },
+  {
+   "old": "Given the rwb-source-data fake of section 12.8 returns three payments for account \"A-0001\" and one posting for it at the ACE batch date 2026-12-14",
+   "new": "Given the rwb-source-data contract fake of section 12.8 returns three payments for account \"A-0001\" and one posting for it at the ACE batch date 2026-12-14, read through the published rwb-source-data contract"
+  },
+  {
+   "old": "| TC-E4-050-03-ITG | AC5, Access | Component | A role without the right; MSG-P4-002 |",
+   "new": "| TC-E4-050-03-ITG | AC5, Access, §5 X14 | Component | A role without the right; MSG-P4-002 |"
+  },
+  {
+   "old": "Then the call is refused with MSG-P4-002 and the report names the operation",
+   "new": "Then the call is refused with MSG-P4-002 and the report names the operation\n\n  Scenario: AC6 A repeated event is ignored and an unmatched payment is listed (new, D-RCV-60)\n    Given the reconciliation for the business date 2026-12-14 has completed and one record exists for the step\n    When the same event arrives again with the same key\n    Then the second arrival is ignored, the idempotency hit is recorded and no second result row appears\n    And a payment that does not match a plan, settlement or fee by its ACE payment_code is listed on the exception list"
+  },
+  {
+   "old": "| TC-E4-050-04-ITG | Principle 5 | NFR | Forced decision-log write failure; nothing moves |",
+   "new": "| TC-E4-050-04-ITG | Principle 5 | NFR | Forced decision-log write failure; nothing moves |\n| TC-E4-050-05-ITG | AC6, BR7, BR9 | Integration | Account `A-0001` with three payments and one posting from the rwb-source-data fake of section 12.8 at the ACE batch date 2026-12-14; the same event sent twice |"
+  },
+  {
+   "old": "And a payment that does not match a plan, settlement or fee by its ACE payment_code is listed on the exception list",
+   "new": "And a payment that does not match a plan, settlement or fee by its ACE payment_code is listed on the exception list\n\n  Scenario: AC7 A consumed call fails or does not answer, and the run stops (new, D-RCV-60)\n    Given the rwb-source-data fake of section 12.8 is set to fail or not answer the read for the ACE batch date 2026-12-14\n    When the daily reconciliation runs\n    Then the run fails at that hop, no result row is written and the report names the service, the operation and the contract version"
+  },
+  {
+   "old": "| TC-E4-050-05-ITG | AC6, BR7, BR9 | Integration | Account `A-0001` with three payments and one posting from the rwb-source-data fake of section 12.8 at the ACE batch date 2026-12-14; the same event sent twice |",
+   "new": "| TC-E4-050-05-ITG | AC6, BR7, BR9 | Integration | Account `A-0001` with three payments and one posting from the rwb-source-data fake of section 12.8 at the ACE batch date 2026-12-14; the same event sent twice |\n| TC-E4-050-06-ITG | AC7 | Integration | rwb-source-data fake of section 12.8 set to fail or not answer the ACE batch read for 2026-12-14 |"
+  },
+  {
+   "old": "Then the run fails at that hop, no result row is written and the report names the service, the operation and the contract version",
+   "new": "Then the run fails at that hop, no result row is written and the report names the service, the operation and the contract version\n\n  Scenario: AC8 A status change the model does not allow is refused (new, D-RCV-60)\n    Given a case whose status does not allow the reconciliation outcome to be recorded\n    When the daily reconciliation tries to record the outcome\n    Then the change is refused, nothing is written to the decision log and the report names the status and the change refused"
+  },
+  {
+   "old": "| TC-E4-050-06-ITG | AC7 | Integration | rwb-source-data fake of section 12.8 set to fail or not answer the ACE batch read for 2026-12-14 |",
+   "new": "| TC-E4-050-06-ITG | AC7 | Integration | rwb-source-data fake of section 12.8 set to fail or not answer the ACE batch read for 2026-12-14 |\n| TC-E4-050-07-ITG | AC8 | Integration | Case whose status does not allow the reconciliation outcome to be recorded |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22795",
+   "item": "GAP-0434",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Ownership set to P1 rwb-source-data, read only via its contract (BR5). Read operation, codes, product code, JOB-04 ID, rule IDs, harness pack not in sources."
+  },
+  {
+   "ruling": "R-24071",
+   "item": "CG-ALL-908",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E4-050-02-ITG row now reads 'run by RWB-P8-E4050-APP' for the AC2 path, so this story does not own AC2."
+  },
+  {
+   "ruling": "R-24072",
+   "item": "CG-ALL-909",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists for the four requirements in RWB-ITG-E4050-ITG section 18 with the RTM traces in its next version.",
+   "note": "Alignment is an RTM-side change in its next version; story §18 is not edited here."
+  },
+  {
+   "ruling": "R-24073",
+   "item": "CG-ALL-911",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added Empty, Error and No access rows to SCR-28; each is Not specified in the source documents (CG-ALL-911)."
+  },
+  {
+   "ruling": "R-29306",
+   "item": "ACR-RWB-ITG-E4050-ITG-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 Given now states the data is read through the published rwb-source-data contract."
+  },
+  {
+   "ruling": "R-30020",
+   "item": "NEWAC-RWB-ITG-E4050-ITG-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC5 already refuses both a role without the right and an out-of-scope caller; §16 TC-03 row now names §5 X14."
+  },
+  {
+   "ruling": "R-30021",
+   "item": "NEWAC-RWB-ITG-E4050-ITG-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 for BR7 and BR9 with TC-E4-050-05-ITG in section 16."
+  },
+  {
+   "ruling": "R-30022",
+   "item": "NEWAC-RWB-ITG-E4050-ITG-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 for a failed or unanswered consumed call with TC-E4-050-06-ITG in section 16."
+  },
+  {
+   "ruling": "R-30023",
+   "item": "NEWAC-RWB-ITG-E4050-ITG-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 for a disallowed status change with TC-E4-050-07-ITG in section 16."
+  }
+ ]
+}

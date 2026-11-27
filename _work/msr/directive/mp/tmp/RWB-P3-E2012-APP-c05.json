@@ -1,0 +1,123 @@
+{
+ "edits": [
+  {
+   "old": "| Depends on (build) | RWB-P3-E2012-CON, RWB-PLT-E1027-CON, RWB-PLT-E1072-CON, RWB-PLT-E1043-CON, RWB-P3-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-E1047-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON, RWB-P3-E1021-CON, RWB-P3-E2011-CON |",
+   "new": "| Depends on (build) | None |"
+  },
+  {
+   "old": "both are written to the outbox in the transaction that changes the case",
+   "new": "both are written to the outbox in the transaction that changes the case; the case status and legal-hold change events read from rwb-case are bound to a consumer group on a placeholder name and faked with the platform inbox stub until the rwb-case event catalogue fixes them"
+  },
+  {
+   "old": "every case, queue, owner, cap and count is a row of `rwb_case`.",
+   "new": "every case, queue, owner, cap and count is a row of `rwb_case`. The operation names and shapes of the consumed contracts other than RWB-P3-E2012-CON are taken from the CON story of each owner as published, called through the generated client, within the 2 s budget and the breaker of DP-11."
+  },
+  {
+   "old": "and are the only stubs in the story:",
+   "new": "and are the only contract fakes in the story:"
+  },
+  {
+   "old": "The thirteen criteria above are owned by this story, and every Given, When and Then line and every value is the legacy line unchanged;",
+   "new": "The seventeen criteria above are owned by this story; AC14 to AC17 are added in this realignment, and in AC1 to AC13 every Given, When and Then line and every value is the legacy line unchanged;"
+  },
+  {
+   "old": "agreed at the wave 2 entry check by the integration lead.",
+   "new": "agreed at the wave 2 entry check by the integration lead. In the assembled Test Cases master each legacy ID keeps one row, with the RWB-S8-E2012-APP slice and this slice both recorded against it; the End to end level comes from the P3 slice and the Component level from this file."
+  },
+  {
+   "old": "TC-E2-012-16 and TC-E2-012-17 are added in this key",
+   "new": "TC-E2-012-16 to TC-E2-012-21 are added in this key"
+  },
+  {
+   "old": "    Then the system refuses the transfer with MSG-P3-027 for the package in force check\n    Then the case, its assignment and the decision log are unchanged",
+   "new": "    Then the system refuses the transfer with MSG-P3-027 for the package in force check\n    Then the case, its assignment and the decision log are unchanged\n\n  Scenario: AC14 Architecture rules of the move (BR13, BR14, BR15, BR16)\n    Given case \"RW-2026-000401\" in a queue of team \"MTG-BKK\"\n    When \"U-TM-01\" transfers \"RW-2026-000401\" to queue \"LIT-BKK-01\" with reason \"R02\"\n    Then the move reads and writes only rwb_case rows and no table of another service\n    Then the right and the deviation flag are each read in one call to a contract, with a 2 s budget and a breaker\n    Then RuleEvaluator.evaluate(\"TRANSFER\", facts, 2026-12-15) runs only inside the EvaluateRules activity\n    Then the outbox holds rwb.case.CaseTransferred.v1 on rwb.case.events.v1 and rwb.decision.DecisionRecorded.v1 on rwb.decision-record.v1, written in the transaction that changes the case\n\n  Scenario: AC15 Operation answers 404 for an unknown case\n    Given the case ID is not a row of rwb_case\n    When \"U-TM-01\" calls the transfer operation of rwb-case for that case ID\n    Then the response is 404\n\n  Scenario: AC16 Activity retried and timed out under the retry policy\n    Given the EvaluateRules activity fails with a retryable error on its first attempt\n    When the activity is retried\n    Then it is retried with a 1 s initial interval, back-off 2, up to 10 attempts\n    Then a NoPackageInForce result is not retried\n    Then the activity timeouts are the values confirmed by the service owner for the deployment (GAP-0713)\n\n  Scenario: AC17 Disallowed status change is refused (BR7)\n    Given a case with status \"CLOSED\" in queue \"MTG-BKK-CO\"\n    When \"U-TM-01\" transfers it to queue \"LIT-BKK-01\" with reason \"R02\"\n    Then the system refuses the transfer with a message Not specified in the source documents (NEWAC-RWB-P3-E2012-APP-AC17)\n    Then the case, its assignment and the decision log are unchanged"
+  },
+  {
+   "old": "| TC-E2-012-17 | BR13; tables of §12.7 (ASM-3438) | Component | Boundary test: the move reads and writes only the §12.7 tables and no table of another schema |",
+   "new": "| TC-E2-012-17 | BR13; tables of §12.7 (ASM-3438) | Component | Boundary test: the move reads and writes only the §12.7 tables and no table of another schema |\n| TC-E2-012-18 | AC14, BR13, BR14, BR15, BR16 | Component | Boundary and contract check: rwb_case rows only, one contract hop each, EvaluateRules only, outbox event names |\n| TC-E2-012-19 | AC15 | Component | Case ID not in rwb_case on the transfer operation; 404 answered |\n| TC-E2-012-20 | AC16 | NFR | EvaluateRules fails once and is retried; NoPackageInForce not retried; activity timeouts as confirmed (GAP-0713) |\n| TC-E2-012-21 | AC17, BR7 | Component | Closed case; transfer refused; message Not specified in the source documents (NEWAC-RWB-P3-E2012-APP-AC17) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28759",
+   "item": "GAP-0713",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "rwb-case deployment values files",
+   "change": "Record the confirmed start-to-close and schedule-to-close values of EvaluateRules and RecordAndApply and the five alert thresholds, confirmed by the service owner, not defaults.",
+   "note": "Timeout and alert values are not in the story; they belong in the values files once the service owner confirms them."
+  },
+  {
+   "ruling": "R-28760",
+   "item": "GAP-3092",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Note in section 7 states consumed operations are taken from each owner's CON story as published, called via generated client, with 2 s budget and DP-11 breaker."
+  },
+  {
+   "ruling": "R-28762",
+   "item": "GAP-3095",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR16 states the case status and legal-hold events are bound to a placeholder consumer group, faked with the inbox stub until the catalogue fixes names."
+  },
+  {
+   "ruling": "R-28764",
+   "item": "GAP-3098",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Section 16 now says one row per legacy ID in the assembled master, both slices recorded, End to end from P3 slice and Component from this file."
+  },
+  {
+   "ruling": "R-28765",
+   "item": "GAP-3091",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Depends on (build) set to None per the split plan. The eight platform H rows for section 13 are not added: section 13 text is outside this chunk."
+  },
+  {
+   "ruling": "R-30672",
+   "item": "NEWAC-RWB-P3-E2012-APP-AC14",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC14 added for BR13 to BR16 with TC-E2-012-18 in section 16; the boundary test covers the architecture constraints."
+  },
+  {
+   "ruling": "R-30673",
+   "item": "NEWAC-RWB-P3-E2012-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC15 added: unknown case ID on the transfer operation answers 404; TC-E2-012-19 added in section 16."
+  },
+  {
+   "ruling": "R-30674",
+   "item": "NEWAC-RWB-P3-E2012-APP-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC16 added for retry under the 1 s, back-off 2, 10 attempts policy with NoPackageInForce non-retryable; TC-E2-012-20 added."
+  },
+  {
+   "ruling": "R-30675",
+   "item": "NEWAC-RWB-P3-E2012-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC17 added: transfer of a CLOSED case is refused per BR7, with the message left as not specified; TC-E2-012-21 added."
+  }
+ ]
+}

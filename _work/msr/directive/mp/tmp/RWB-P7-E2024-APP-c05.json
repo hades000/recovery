@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "The empty, loading, error and no access states of SCR-11, SCR-30 and SCR-31 are not written here and are Not specified in the source documents (DOR-RWB-P7-E2024-APP-10).",
+   "new": "The empty, loading, error and no access states of SCR-11 are not written here and are Not specified in the source documents (DOR-RWB-P7-E2024-APP-10); the states of SCR-30 and SCR-31 are in the table below (CG-ALL-7287; CG-ALL-7288)."
+  },
+  {
+   "old": "| The read | 403, or 404 | MSG-P4-002 for a role without the right, MSG-P4-003 for a case out of scope; no row is returned |",
+   "new": "| The read | 403, or 404 | MSG-P4-002 for a role without the right, MSG-P4-003 for a case out of scope; no row is returned |\n| SCR-30 Case documents | Loading | The loading state of SCR-30 as given in Screen Specifications v1, section SCR-30 (CG-ALL-7287) |\n| SCR-30 Case documents | Empty, error, no access | Not specified in the source documents (CG-ALL-7287) |\n| SCR-31 Document review queue | Loading | The loading state of SCR-31 as given in Screen Specifications v1, section SCR-31 (CG-ALL-7288) |\n| SCR-31 Document review queue | Empty, error, no access | Not specified in the source documents (CG-ALL-7288) |"
+  },
+  {
+   "old": "They are the dependencies the DP table adds and they are recorded in GAP-1282 and ASM-2274.",
+   "new": "They are the dependencies the DP table adds (DP-added) and they are recorded in GAP-1282 and ASM-2274; Ready to start stays Day 1, and the metadata rows are corrected at the next version of the story set."
+  },
+  {
+   "old": "    Then the story writes no row of rwb_document, rwb_case or rwb_access and reads no table of another service",
+   "new": "    Then the story writes no row of rwb_document, rwb_case or rwb_access and reads no table of another service\n\n  Scenario: AC11 The rules without a criterion of their own hold on the record path (new, D-RCV-60; covers BR1, BR2, BR5, BR8, BR10, BR12, BR13, BR14)\n    Given the ten entries of AC1 exist for case \"RW-2026-000501\" and the rwb-case reference-data contract mock returns the decision code list in force\n    When the same DecisionRecorded fact of one of the ten is delivered again and the rwb-document contract mock lists one document of case \"RW-2026-000501\" with no DOCATT entry\n    Then each entry is appended on rwb.decision-record.v1 with the rule and version in force, and its entry, chain position and outbox row commit together (BR1, BR2, BR13)\n    Then the repeat adds no entry and adds 1 to the repeat count for R-UNI-40 (BR14)\n    Then the document with no entry is reported as a gap and alerted, and no entry is written for it (BR12)\n    Then the decision code is read from the reference list in force, and each entry is append only with its entryHash equal to the SHA-256 of its canonical form (BR8, BR5)\n    Then the story writes no row of rwb_document, rwb_case or rwb_access and reads no table of another service (BR10)\n\n  Scenario: AC12 A call with no authenticated session is refused with 401 (new, D-RCV-60)\n    Given no authenticated session is presented to the two provided operations of section 12.1\n    When GET /api/recovery/decision/v1/decision-log is called with no session\n    Then the call returns 401 with \"Not specified in the source documents (NEWAC-RWB-P7-E2024-APP-AC11)\" and nothing is returned\n    Then the rwb-access contract mock is never called\n    Then the 403 and 404 answers of the same operations are those of AC8"
+  },
+  {
+   "old": "| TC-E2-024-16 | Access, BR15 | Component |",
+   "new": "| TC-E2-024-16 | AC8, Access, BR15 | Component |"
+  },
+  {
+   "old": "| TC-E2-024-23 | AC6, BR9 | Contract | The ten entries of AC1 and their ten DecisionRecorded payloads; no latitude `13.7563`, no longitude `100.5018`, no file name and no bill value `1,284.50` appears in any of them or in the log lines |",
+   "new": "| TC-E2-024-23 | AC6, BR9 | Contract | The ten entries of AC1 and their ten DecisionRecorded payloads; no latitude `13.7563`, no longitude `100.5018`, no file name and no bill value `1,284.50` appears in any of them or in the log lines |\n| TC-E2-024-24 | AC11, BR1, BR2, BR5, BR8, BR10, BR12, BR13, BR14 | Component | The ten DOCATT records of AC1 with the decision-record library fake, one repeated fact of one of them, and one completeness run over a document with no entry; every assertion of AC11 holds |\n| TC-E2-024-25 | AC12 | Contract | A call to each of the two read operations of section 12.1 with no session; 401 with the message Not specified in the source documents (NEWAC-RWB-P7-E2024-APP-AC11), and nothing is returned |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-26376",
+   "item": "CG-ALL-7287",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Added SCR-30 loading row and empty, error, no access row to the section 15 table; the unspecified states are marked Not specified.",
+   "note": "SCR-30 states added to section 15; empty, error and no access marked Not specified (CG-ALL-7287)."
+  },
+  {
+   "ruling": "R-26377",
+   "item": "CG-ALL-7288",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Added SCR-31 loading row and empty, error, no access row to the section 15 table; the unspecified states are marked Not specified.",
+   "note": "SCR-31 states added to section 15; empty, error and no access marked Not specified (CG-ALL-7288)."
+  },
+  {
+   "ruling": "R-28812",
+   "item": "GAP-0951",
+   "status": "Cross-document",
+   "section": "15",
+   "target": "RWB-PLT-N001-CON",
+   "change": "State the field app route: the capture sync as a composed call beside the rwb-document call and the SCR-30 panel as a parallel read, reached through the gateway-bff composite route, with rwb-access not called directly.",
+   "note": "Route of the field app belongs to the gateway-bff contract story; no story edit made."
+  },
+  {
+   "ruling": "R-28813",
+   "item": "GAP-1282",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Paragraph after the DP table now states the platform H and published C dependencies are DP-added, Ready to start stays Day 1, and metadata rows are corrected at the next version.",
+   "note": "DP-added dependencies stated in section 13; Ready to start Day 1 kept; metadata rows to be corrected next version."
+  },
+  {
+   "ruling": "R-29641",
+   "item": "ACR-RWB-P7-E2024-APP-AC4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "none",
+   "note": "AC4 already has TC-E2-024-18 and TC-E2-024-21 in section 16; no row added."
+  },
+  {
+   "ruling": "R-29642",
+   "item": "ACR-RWB-P7-E2024-APP-AC5",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "none",
+   "note": "AC5 already has TC-E2-024-17 and TC-E2-024-22 in section 16; no row added."
+  },
+  {
+   "ruling": "R-29643",
+   "item": "ACR-RWB-P7-E2024-APP-AC6",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "none",
+   "note": "AC6 already has TC-E2-024-19 and TC-E2-024-23 in section 16; no row added."
+  },
+  {
+   "ruling": "R-31516",
+   "item": "NEWAC-RWB-P7-E2024-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 scenario in section 7 and TC-E2-024-24 in section 16 covering BR1, BR2, BR5, BR8, BR10, BR12, BR13 and BR14. The ID AC11 is the next free number.",
+   "note": "AC11 added for BR1, BR2, BR5, BR8, BR10, BR12, BR13, BR14 with TC-E2-024-24; the existing AC10 is unchanged."
+  },
+  {
+   "ruling": "R-31517",
+   "item": "NEWAC-RWB-P7-E2024-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 scenario for the 401 answer in section 7 and TC-E2-024-25 in section 16; 403 and 404 point to AC8. The ID AC12 is the next free number.",
+   "note": "AC12 added for 401; its message is Not specified; 403 and 404 are covered by AC8."
+  },
+  {
+   "ruling": "R-31518",
+   "item": "NEWAC-RWB-P7-E2024-APP-AC8",
+   "status": "Resolved",
+   "section": "5, 16",
+   "target": "",
+   "change": "TC-E2-024-16 covers column now names AC8, linking the X10 refusal to the existing AC8 criterion. No new criterion needed.",
+   "note": "AC8 already exists in section 7; TC-E2-024-16 now lists AC8 in its Covers column."
+  }
+ ]
+}

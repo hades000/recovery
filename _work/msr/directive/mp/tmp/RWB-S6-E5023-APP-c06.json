@@ -1,0 +1,86 @@
+{
+ "edits": [
+  {
+   "old": "    Then the grant refuses the statement and the build fails",
+   "new": "    Then the grant refuses the statement and the build fails\n\n  Scenario: AC6 Business rule guardrails (BR1 to BR10)\n    Given the rwb-debtsale service and its schema are built\n    When the guardrail and boundary checks run\n    Then each of BR1 to BR10 holds and the build fails when one does not\n\n  Scenario: AC7 Error answers of the provided operations\n    Given a call to API-S6-001 or API-S6-002 without a valid token, without the right, or to a path that does not exist\n    When the call is answered\n    Then the caller sees 401, 403 or 404 with the platform error envelope and nothing is read or written\n\n  Scenario: AC8 Replay of a write with the same idempotency key\n    Given a write with an Idempotency-Key has already been answered for the cycle and case-list version\n    When the same Idempotency-Key is sent again\n    Then one lot, one set of account rows, one record and one answer per case exist and the key answers the lot that exists\n\n  Scenario: AC9 Activity retry and timeout\n    Given a consumed call takes longer than 2 s\n    When the workflow activity times out and is retried on its own schedule\n    Then nothing is written on the timed-out attempt and the retry writes one set of rows\n\n  Scenario: AC10 Failed consumed call\n    Given a consumed contract fails or does not answer inside 2 s or its breaker is open\n    When the step runs\n    Then it holds, nothing is written, no move is answered and the caller sees 503 with the platform error envelope\n\n  Scenario: AC11 Disallowed status change\n    Given a status change is requested that no row of section 8 allows\n    When the change is requested\n    Then the change is refused, nothing is written and no move is answered"
+  },
+  {
+   "old": "| TC-E5-023-08 | AC4 | Component | A role without the Debt sale right; 403 with MSG-P4-002, no read and no write |",
+   "new": "| TC-E5-023-08 | AC4 | Component | A role without the Debt sale right; 403 with MSG-P4-002, no read and no write |\n| TC-E5-023-09 | AC6 | Component | Each of BR1 to BR10 checked against the package, the schema and the contract: owner, write path, reference-data read and the closed `LOV-LOT-STATUS` vocabulary asserted |\n| TC-E5-023-10 | AC7 | Contract | A call to API-S6-001 and API-S6-002 without a valid token, without the right, and to a path that does not exist; 401, 403 and 404 with the platform error envelope and no read or write |\n| TC-E5-023-11 | AC8 | Component | The same `Idempotency-Key` sent twice for one cycle and case-list version; one lot, one set of account rows, one record and one answer per case |\n| TC-E5-023-12 | AC9 | Component | An activity that times out past 2 s and is retried on the workflow schedule; nothing written on the timed-out attempt and one set of rows after the retry |\n| TC-E5-023-13 | AC10 | Component | A consumed call that fails or does not answer inside 2 s; the step holds, nothing is written, no move is answered and 503 with the platform error envelope is returned |\n| TC-E5-023-14 | AC11 | Component | A requested status change that no row of section 8 allows; the change is refused, nothing is written and no move is answered |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32778",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 (failed consumed call) to section 7 and TC-E5-023-13 to section 16",
+   "note": "AC10 scenario added for a failed or silent consumed call, with 503 and no write; TC-E5-023-13 covers it."
+  },
+  {
+   "ruling": "R-32779",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 (disallowed status change) to section 7 and TC-E5-023-14 to section 16",
+   "note": "AC11 scenario added for a status change no section 8 row allows; refused with no write. TC-E5-023-14 covers it."
+  },
+  {
+   "ruling": "R-32780",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X2 Covered by already lists AC4, TC-E5-023-04 and TC-E5-023-08; no edit needed."
+  },
+  {
+   "ruling": "R-32781",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X8 Covered by already lists AC5, TC-E5-023-07, Section 17, BR3 and BR5; no edit needed."
+  },
+  {
+   "ruling": "R-32782",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC6 (business rule guardrails BR1 to BR10) to section 7 and TC-E5-023-09 to section 16",
+   "note": "AC6 guardrail scenario covers BR1 to BR10 as a boundary check; TC-E5-023-09 at Component level covers it."
+  },
+  {
+   "ruling": "R-32783",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 (401, 403, 404 error answers) to section 7 and TC-E5-023-10 to section 16",
+   "note": "AC7 scenario names the 401, 403 and 404 answers of API-S6-001 and API-S6-002; TC-E5-023-10 covers it."
+  },
+  {
+   "ruling": "R-32784",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 (idempotent replay) to section 7 and TC-E5-023-11 to section 16",
+   "note": "AC8 scenario covers a replay with the same Idempotency-Key; TC-E5-023-11 covers it."
+  },
+  {
+   "ruling": "R-32785",
+   "item": "NEWAC-RWB-S6-E5023-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 (activity retry and timeout) to section 7 and TC-E5-023-12 to section 16",
+   "note": "AC9 scenario covers a timed-out, retried activity with one set of rows; TC-E5-023-12 covers it."
+  }
+ ]
+}

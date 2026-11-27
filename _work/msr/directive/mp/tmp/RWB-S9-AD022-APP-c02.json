@@ -1,0 +1,180 @@
+{
+ "edits": [
+  {
+   "old": "`CaseWorkflow` stays with rwb-case.",
+   "new": "`CaseWorkflow` stays with rwb-case.\n\nWorkflow ID form and start rule of `InstructionWorkflow`: Not specified in the source documents (CG-ALL-11712); the catalogue row gives neither."
+  },
+  {
+   "old": "**Database and migrations.**",
+   "new": "**Parameters and reference data.** Parameters named in the story: the panel and instruction states, the partner types, the \"Partner portal\" capability area and its rights, the 00:05 clock, the overlap rule and the catch-up rule. Their parameter-catalogue keys and the reference-data contract (DP-06, DP-07): Not specified in the source documents (DOR-RWB-S9-AD022-APP-20).\n\n**Database and migrations.**"
+  },
+  {
+   "old": "**Feature flag.**",
+   "new": "**Screen states of SCR-34.** Empty: Not specified in the source documents (DOR-RWB-S9-AD022-APP-10). Error: the 503 of X6 is returned to the caller. No access: the 403 with MSG-P4-002 of X2 is returned before any read.\n\n**Feature flag.**"
+  },
+  {
+   "old": "- No personal data in a row, a workflow input or a log: a firm, codes, dates, a list value and an `identity_ref` only, and every fixture is synthetic.",
+   "new": "- No personal data in a row, a workflow input or a log: a firm, codes, dates, a list value and an `identity_ref` only, and every fixture is synthetic.\n- Fields classed as personal data: none is carried by this story; the classification of each field is Not specified in the source documents (DOR-RWB-S9-AD022-APP-11)."
+  },
+  {
+   "old": "| TC-S9-AD022-APP-03 | X3 | Component | An unknown account and an account whose `valid_to` has passed; 403 with MSG-P4-002 and no data |",
+   "new": "| TC-S9-AD022-APP-03 | X3 | Component | An unknown account and an account whose `valid_to` has passed; 403 with MSG-P4-002 and no data |\n| TC-S9-AD022-APP-04 | Section 12 operations, events and activities | Component | Every operation, event and activity of section 12 checked against its contract entry; no other element exists |\n| TC-S9-AD022-APP-05 | Section 12.7 tables (ASM-3438) | Component | The tables of section 12.7 read back in rwb_partner; a statement against any table outside them is refused |\n| TC-S9-AD022-APP-06 | AC3, X2 | Component | A caller without the partner-portal right and a valid account; 403 with MSG-P4-002 before any read or write |\n| TC-S9-AD022-APP-07 | AC4, X3 | Component | An unknown account and an account whose `valid_to` has passed; 403 with MSG-P4-002 and no firm, instruction or fee returned |\n| TC-S9-AD022-APP-08 | AC5, X4 | Component | A caller of one firm asking for an instruction of another firm; 404 and the scope taken from the user's row only |\n| TC-S9-AD022-APP-09 | AC6, X6 | Component | The rwb-access read stalled past 2 s; the account rows stay as committed and the caller sees 503 |\n| TC-S9-AD022-APP-10 | AC7, X8 | Component | A statement against a v_ace_* view, a recovery_case row and another schema; the grant refuses each and the build fails |"
+  },
+  {
+   "old": "| X2 | The caller does not hold the partner-portal right of the operation | 403 before any read or write | MSG-P4-002 | TC-AD-022-03 |",
+   "new": "| X2 | The caller does not hold the partner-portal right of the operation | 403 before any read or write | MSG-P4-002 | AC3, TC-AD-022-03 |"
+  },
+  {
+   "old": "| X3 | The partner account is unknown, or its `valid_to` has passed | 403; no firm, instruction or fee is returned | MSG-P4-002 | TC-S9-AD022-APP-03 |",
+   "new": "| X3 | The partner account is unknown, or its `valid_to` has passed | 403; no firm, instruction or fee is returned | MSG-P4-002 | AC4, TC-S9-AD022-APP-03 |"
+  },
+  {
+   "old": "| X4 | An instruction is asked for by a caller of another firm | 404; the scope comes from the user's row, never from a parameter | None | §17, BR7 |",
+   "new": "| X4 | An instruction is asked for by a caller of another firm | 404; the scope comes from the user's row, never from a parameter | None | AC5, §17, BR7 |"
+  },
+  {
+   "old": "| X6 | The rwb-access read or the command to the exit branch does not answer inside 2 s | The account rows stand as committed, the command is retried on the workflow's own schedule, and the caller sees 503 | None | §13 |",
+   "new": "| X6 | The rwb-access read or the command to the exit branch does not answer inside 2 s | The account rows stand as committed, the command is retried on the workflow's own schedule, and the caller sees 503 | None | AC6, §13 |"
+  },
+  {
+   "old": "| X8 | A statement reaches a `v_ace_*` view, a `recovery_case` row or another schema | The grant refuses it and the boundary test fails the build | None (pipeline log) | §17, BR9 |",
+   "new": "| X8 | A statement reaches a `v_ace_*` view, a `recovery_case` row or another schema | The grant refuses it and the boundary test fails the build | None (pipeline log) | AC7, §17, BR9 |"
+  },
+  {
+   "old": "    Then the system disables its user accounts and open instructions are recalled\n```",
+   "new": "    Then the system disables its user accounts and open instructions are recalled\n\n  Scenario: AC3 A caller without the partner-portal right is refused before any read or write (new, D-RCV-60)\n    Given a caller that does not hold the partner-portal right of the operation\n    When the caller asks for a partner read\n    Then the system returns 403 with MSG-P4-002 before any read or write\n\n  Scenario: AC4 A partner account that is unknown or whose validity has passed is refused (new, D-RCV-60)\n    Given a partner account that is unknown, or whose valid_to has passed\n    When the caller asks for a partner read\n    Then the system returns 403 with MSG-P4-002 and no firm, instruction or fee\n\n  Scenario: AC5 An instruction of another firm is refused (new, D-RCV-60)\n    Given a caller of one firm\n    When the caller asks for an instruction of another firm\n    Then the system returns 404 and takes the scope from the user's row\n\n  Scenario: AC6 A stalled rwb-access read returns 503 (new, D-RCV-60)\n    Given the rwb-access read does not answer inside 2 s\n    When the partner read runs\n    Then the caller sees 503\n\n  Scenario: AC7 A statement outside rwb_partner is refused by the build (new, D-RCV-60)\n    Given a statement reaches a v_ace_* view, a recovery_case row or another schema\n    When the boundary test runs\n    Then the grant refuses it and the build fails\n```"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Story element | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-S9-006 | A panel exit, a conflict of interest, insolvency or an upheld conduct breach recalls every open case held by that partner | The dated pass, the account effect and the command to the exit branch | TC-AD-022-02, TC-S9-AD022-APP-01 |",
+   "new": "| REQ-S9-006 | A panel exit, a conflict of interest, insolvency or an upheld conduct breach recalls every open case held by that partner | The dated pass, the account effect and the command to the exit branch | TC-AD-022-02, TC-S9-AD022-APP-01 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| REQ-S9-001 | Every partner type is managed on the same six points, notice and exit among them | The firm, its users and the exit | TC-AD-022-01 |",
+   "new": "| REQ-S9-001 | Every partner type is managed on the same six points, notice and exit among them | The firm, its users and the exit | TC-AD-022-01 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| REQ-S9-002 | Each partner type has one named owner | The firm record and its users on SCR-34 | TC-AD-022-01 |",
+   "new": "| REQ-S9-002 | Each partner type has one named owner | The firm record and its users on SCR-34 | TC-AD-022-01 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| REQ-S9-008 | Partners exchange data through the portal and the external gateway, not by email | The two reads through the composite route and the partner gateway | TC-AD-022-03 |",
+   "new": "| REQ-S9-008 | Partners exchange data through the portal and the external gateway, not by email | The two reads through the composite route and the partner gateway | TC-AD-022-03 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| ADR-013 | 19 services inside ACE | rwb-partner as the owner of the firm, its users and its instructions | TC-AD-022-01 |",
+   "new": "| ADR-013 | 19 services inside ACE | rwb-partner as the owner of the firm, its users and its instructions | TC-AD-022-01 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| ADR-014 | Schema and login per service | `rwb_partner` and its own login | TC-AD-022-02 |",
+   "new": "| ADR-014 | Schema and login per service | `rwb_partner` and its own login | TC-AD-022-02 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| ADR-016 | Reusable Temporal layer; Schedules replace Quartz | The dated pass as a Temporal Schedule | TC-S9-AD022-APP-01 |",
+   "new": "| ADR-016 | Reusable Temporal layer; Schedules replace Quartz | The dated pass as a Temporal Schedule | TC-S9-AD022-APP-01 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The rwb-access read with its budget and breaker | TC-AD-022-03 |",
+   "new": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The rwb-access read with its budget and breaker | TC-AD-022-03 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  },
+  {
+   "old": "| ADR-022 | Local decision record plus central ledger | The record written before the validity changes | TC-S9-AD022-APP-02 |",
+   "new": "| ADR-022 | Local decision record plus central ledger | The record written before the validity changes | TC-S9-AD022-APP-02 | FEAT-PRM-02 and FEAT-PRM-12 (closest published) | Not specified in the source documents (DOR-RWB-S9-AD022-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13502",
+   "item": "CG-ALL-11710",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add an Activities row for sweepContractEnd: task queue rwb-partner, the business date in, the firms with their users and contract end out.",
+   "note": "Activity is named in 12.5 but missing from the catalogue Activities sheet. No story edit needed."
+  },
+  {
+   "ruling": "R-13503",
+   "item": "CG-ALL-11711",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add an Activities row for endAccountValidity: task queue rwb-partner, the firm, users and end date in, record reference and count out, record first.",
+   "note": "Activity is named in 12.5 but missing from the catalogue Activities sheet. No story edit needed."
+  },
+  {
+   "ruling": "R-13504",
+   "item": "CG-ALL-11712",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Added: workflow ID form and start rule of InstructionWorkflow are Not specified in the source documents (CG-ALL-11712).",
+   "note": "The catalogue row gives neither a workflow ID form nor a start rule, so the story states that gap."
+  },
+  {
+   "ruling": "R-13505",
+   "item": "CG-ALL-11713",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8",
+   "change": "Add rows TC-S9-AD022-APP-01 to -10 to Story test cases, with Given, When and Then copied from section 7 and the section 16 rows.",
+   "note": "The story rows exist in section 16; the Test Cases v8 workbook has no rows for them."
+  },
+  {
+   "ruling": "R-21341",
+   "item": "DOR-RWB-S9-AD022-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added SCR-34 screen states: empty (Not specified), error (503 of X6), no access (403 MSG-P4-002 of X2).",
+   "note": "Empty state has no source, so it is recorded as Not specified in the source documents."
+  },
+  {
+   "ruling": "R-21342",
+   "item": "DOR-RWB-S9-AD022-APP-11",
+   "status": "Resolved",
+   "section": "17",
+   "target": "",
+   "change": "Added a guardrail line: no field is classed as personal data by this story; the per-field classification is Not specified.",
+   "note": "Field classification is not given by the source, so it is recorded as Not specified."
+  },
+  {
+   "ruling": "R-21343",
+   "item": "DOR-RWB-S9-AD022-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-S9-AD022-APP-04 (contract test of section 12) and TC-S9-AD022-APP-05 (boundary test of section 12.7 tables, ASM-3438) to section 16.",
+   "note": "Test Cases v8 gap for TC-S9-AD022-APP-01 to -03 is tracked as CG-ALL-11713."
+  },
+  {
+   "ruling": "R-21344",
+   "item": "DOR-RWB-S9-AD022-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added Feature and L3 process columns to the section 18 table; feature is FEAT-PRM-02 and FEAT-PRM-12, L3 process Not specified.",
+   "note": "Feature taken from the trace item's closest published features; L3 process not in the sources."
+  },
+  {
+   "ruling": "R-21345",
+   "item": "DOR-RWB-S9-AD022-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added a parameters and reference-data paragraph naming the parameters; catalogue keys and the DP-06/DP-07 contract are Not specified.",
+   "note": "Parameter keys and the reference-data contract are not in the source documents."
+  },
+  {
+   "ruling": "R-21346",
+   "item": "DOR-RWB-S9-AD022-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added criteria AC3 to AC7 for X2, X3, X4, X6, X8 with test rows TC-S9-AD022-APP-06 to -10; section 5 Covered by now names them.",
+   "note": "Each exception now has its own criterion and test case row."
+  }
+ ]
+}

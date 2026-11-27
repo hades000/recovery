@@ -1,0 +1,45 @@
+{
+ "edits": [
+  {
+   "old": "Then \"U-7304\", who holds the A letter, may make the same call and it is accepted",
+   "new": "Then \"U-7304\", who holds the A letter, makes the same call and the response is 201 with state \"ROLLED_BACK\""
+  },
+  {
+   "old": "Then GET /api/recovery/access/v1/admin/version-rollbacks/{rollbackId} answers the same seven fields and the statement that decisions taken from 15 December 2026 use version \"ENTRY-2026.11\"",
+   "new": "Then GET /api/recovery/access/v1/admin/version-rollbacks/{rollbackId} answers the same seven fields and the statement that decisions taken from 15 December 2026 use version \"ENTRY-2026.11\"\n\n  Scenario: AC7 The reason is read as 20 to 1000 characters and the answer state is ROLLED_BACK (new, D-RCV-60)\n    Given \"U-7301\" rolls back \"ENTRY-2026.12\" to \"ENTRY-2026.11\" with an immediate date\n    When the call is made with a reason of 1001 characters\n    Then the response is 422 with message MSG-GEN-001 and its detail names \"reason\", and the rwb-decision contract fake records no call\n    When the call is made with a reason of 1000 characters\n    Then the response is 201 with state \"ROLLED_BACK\", the reason reaches the rwb-decision contract fake unchanged, and \"rwb.access.events.v1\" holds no message for the rollback\n\n  Scenario: AC8 A call without caller credentials is answered 401 and an unknown rollback id is answered 404 (new, D-RCV-60)\n    Given no caller credentials are sent\n    When a call is made to POST /api/recovery/access/v1/admin/version-rollbacks with targetKind \"RULE\", targetId \"ENTRY-2026.12\", previousVersionId \"ENTRY-2026.11\" and effectiveDate 15 December 2026\n    Then the response is 401 and the rwb-decision contract fake records no call\n    When \"U-7301\" calls GET /api/recovery/access/v1/admin/version-rollbacks/{rollbackId} with a rollbackId that does not exist\n    Then the response is 404"
+  },
+  {
+   "old": "| TC-AD-013-12 | BR15 | Component | After a rollback, `rwb.access.events.v1` holds no message for it |",
+   "new": "| TC-AD-013-12 | BR15 | Component | After a rollback, `rwb.access.events.v1` holds no message for it |\n| TC-AD-013-13 | AC7, BR1, BR8, BR13, BR15 | Component | A reason of 1001 characters refused with MSG-GEN-001 naming `reason`; a reason of 1000 characters accepted with state `ROLLED_BACK` and no message on `rwb.access.events.v1` |\n| TC-AD-013-14 | AC8 | Component | A call with no caller credentials to POST `/api/recovery/access/v1/admin/version-rollbacks`: 401; a GET on an unknown `rollbackId`: 404 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29436",
+   "item": "ACR-RWB-P4-AD013-APP-AC3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Replaced 'may make the same call and it is accepted' with a Then that names the 201 response and state ROLLED_BACK.",
+   "note": "AC3 final Then now names the value 201 and state ROLLED_BACK; vague 'may' and 'accepted' removed."
+  },
+  {
+   "ruling": "R-30816",
+   "item": "NEWAC-RWB-P4-AD013-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 scenario (reason 20-1000 characters, state ROLLED_BACK, no event) and test row TC-AD-013-13 covering BR1, BR8, BR13, BR15.",
+   "note": "AC7 added to section 7 covering BR1, BR8, BR13, BR15 with test row TC-AD-013-13 in section 16."
+  },
+  {
+   "ruling": "R-30817",
+   "item": "NEWAC-RWB-P4-AD013-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 scenario (401 without credentials on POST; 404 on unknown rollbackId on GET) and test row TC-AD-013-14.",
+   "note": "AC8 added to section 7 for 401 and 404 on the provided operations, with test row TC-AD-013-14 in section 16."
+  }
+ ]
+}

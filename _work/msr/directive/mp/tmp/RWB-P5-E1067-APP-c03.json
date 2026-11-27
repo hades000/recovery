@@ -1,0 +1,107 @@
+{
+ "edits": [
+  {
+   "old": "Screen states on SCR-04 follow Screen Specifications v1 section SCR-04: loading as specified there; empty, error and no access: Not specified in the source documents (CG-ALL-6135).",
+   "new": "Screen states on SCR-04 follow Screen Specifications v1 section SCR-04: loading as specified there; empty, error and no access: Not specified in the source documents (CG-ALL-6135).\n\nScreen states on SCR-09 Exception queue follow Screen Specifications v1 section SCR-09: loading as specified there; empty, error and no access: Not specified in the source documents (CG-ALL-6136).\n\nScreen states on SCR-30 Case documents follow Screen Specifications v1 section SCR-30: loading as specified there; empty, error and no access: Not specified in the source documents (CG-ALL-6137)."
+  },
+  {
+   "old": "    And the retry limit of the relay is read as a parameter, not written in code",
+   "new": "    And the retry limit of the relay is read as a parameter from the platform relay configuration, with no value fixed in code, and the test covers the pending-to-published loop rather than the count"
+  },
+  {
+   "old": "    And the contract states the BACKWARD compatibility rule of the registry subject",
+   "new": "    And the contract states the BACKWARD compatibility rule of the registry subject\n    And the subject name and the AsyncAPI document location of the type are read from configuration, not written in code"
+  },
+  {
+   "old": "    And a failed publish leaves the event in the outbox, never lost, and the incident is the relay's, not a message to the user",
+   "new": "    And a failed publish leaves the event in the outbox, never lost, and the incident is the relay's, not a message to the user\n\n  Scenario: AC9 BR7, BR8 and BR9 hold on the store path (new, D-RCV-60)\n    Given a document row for case \"RW-2026-000301\" is stored with a personal-data pattern in one of its four columns\n    When the store transaction commits and the relay runs\n    Then the payload and the header carry only the four references and codes of BR7, and the build test refuses the personal-data pattern\n    And the outbox row commits in the same transaction as the row, and the relay publishes it every minute\n    And no interaction row is written and no ledger writer is called\n\n  Scenario: AC10 An error answer of a provided operation is 401, 403 or 404 as the contract states (new, D-RCV-60)\n    Given a caller of a provided operation of this service\n    When the caller has no valid credential, lacks the right, or names an unknown resource\n    Then the answer is 401, 403 or 404 respectively, and no document row or outbox row is written\n\n  Scenario: AC11 A consumed call that fails or does not answer leaves the event pending (new, D-RCV-60)\n    Given the store commits a document row for case \"RW-2026-000301\" while a consumed call is unavailable or gives no answer\n    When the store transaction commits\n    Then the document row and its outbox row are kept, the event stays pending, and the relay retries it on the next run\n    And no success answer is returned to the user for the failed call"
+  },
+  {
+   "old": "| TC-E1-067-14 | AC7, BR9 | Component | Call-graph assertion: no interaction row, no ledger table, no ledger writer call and no read of another service's schema |",
+   "new": "| TC-E1-067-14 | AC7, BR9 | Component | Call-graph assertion: no interaction row, no ledger table, no ledger writer call and no read of another service's schema |\n| TC-E1-067-15 | AC9, BR7, BR8, BR9 | Component | Not specified in the source documents (NEWAC-RWB-P5-E1067-APP-AC9) |\n| TC-E1-067-16 | AC10 | Contract | Not specified in the source documents (NEWAC-RWB-P5-E1067-APP-AC10) |\n| TC-E1-067-17 | AC11 | Component | Not specified in the source documents (NEWAC-RWB-P5-E1067-APP-AC11) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25880",
+   "item": "CG-ALL-6136",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added SCR-09 state line in section 15; empty, error and no access stay Not specified per Screen Specifications v1."
+  },
+  {
+   "ruling": "R-25881",
+   "item": "CG-ALL-6137",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added SCR-30 state line in section 15; empty, error and no access stay Not specified per Screen Specifications v1."
+  },
+  {
+   "ruling": "R-28664",
+   "item": "GAP-2072",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "TSD P3 v3; API Specification v4; ownership.json",
+   "change": "Correct the interaction table and the two interaction endpoints to rwb-source-data P1, with rwb-case reading through the P1 contract, as the plan ruling states.",
+   "note": "Story already states the ledger is rwb-source-data's (BR9, AC7); module specifications need correcting."
+  },
+  {
+   "ruling": "R-28668",
+   "item": "GAP-0508",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "contract/ledger-intake-map-v1.yaml (listener map of RWB-P1-E1067-APP)",
+   "change": "Publish the intake map with one row per consumed event type, a version label field, and the six rows of contract section 12.4.",
+   "note": "Intake map belongs to the listener story, not this producer story; no edit here."
+  },
+  {
+   "ruling": "R-28669",
+   "item": "GAP-1057",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC3 now reads the relay limit from platform relay configuration with no value in code and tests the loop, not the count."
+  },
+  {
+   "ruling": "R-28670",
+   "item": "GAP-1058",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC6 now reads the registry subject name and AsyncAPI location from configuration; no name is written in code."
+  },
+  {
+   "ruling": "R-31194",
+   "item": "NEWAC-RWB-P5-E1067-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for 401, 403, 404 on provided operations and test row TC-E1-067-16; test data Not specified."
+  },
+  {
+   "ruling": "R-31195",
+   "item": "NEWAC-RWB-P5-E1067-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for a failed or silent consumed call and test row TC-E1-067-17; test data Not specified."
+  },
+  {
+   "ruling": "R-31196",
+   "item": "NEWAC-RWB-P5-E1067-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 covering BR7, BR8, BR9 and test row TC-E1-067-15; test data Not specified."
+  }
+ ]
+}

@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "| BR1 | A data subject request is one register held as decisions of this service's own chain: one entry per step, written with the record code of a data subject request, and no new table for the register | RWB-E8-016 AC1; DP-03; ADR-022 |",
+   "new": "| BR1 | A data subject request is one register held as decisions of this service's own chain: one entry per step, a receipt entry on the open and an outcome entry on the answer, written with the record code of a data subject request, and no new table for the register | RWB-E8-016 AC1; DP-03; ADR-022; GAP-2298 |"
+  },
+  {
+   "old": "| BR3 | The open needs Rules and parameters C, the decision and the answer need A, and the read needs R; a caller without the letter is refused with 403 and MSG-P4-002 and nothing is recorded | TSD P4 v3 T6.1; legacy RWB-E8-016 permission checks; ASM-1592 |",
+   "new": "| BR3 | A data subject request is read as the capability area PLATFORM_ADMINISTRATION: the writes (open, decision and answer) need U, and the read needs R; a caller without the letter is refused with 403 and MSG-P4-002 and nothing is recorded; the Rules and parameters letters of RW-COE and RW-RISK do not apply to this capability | TSD P4 v3 T6.1; legacy RWB-E8-016 permission checks; FSD P4 v3 A2.27.3.3; GAP-2300; ASM-1592 |"
+  },
+  {
+   "old": "| BR6 | The state path is `OPEN`, `IN_PROGRESS`, `ANSWERED` and `REFUSED`; `OPEN` on the open, `IN_PROGRESS` on the first correction or erasure decision, `ANSWERED` or `REFUSED` on the answer, and both terminal | FSD P4 v3 A2.27.4.1; RWB-E8-016 AC1; ASM-1589 |",
+   "new": "| BR6 | The state set is `RECEIVED`, `ANSWERED` and `REFUSED`; `RECEIVED` on the receipt entry of the open, `ANSWERED` or `REFUSED` on the outcome entry, and `ANSWERED` and `REFUSED` terminal; `late` is a flag derived from the due date and the answer time and is not a state | FSD P4 v3 A2.27.4.1; RWB-E8-016 AC1; ASM-1589; GAP-2298 |"
+  },
+  {
+   "old": "| BR7 | An erasure writes one `masking_rule` row for every role in force with `unmasked` false from its `valid_from`, moves `masking_version` on by one, and appends the decision in the same transaction; a failure writes no row and appends no entry | TSD P4 v3 T3.1 DF-REF-198 to DF-REF-204; FSD P4 v3 A2.5; ASM-1591 |",
+   "new": "| BR7 | An erasure writes one `masking_rule` row for every role in force with `unmasked` false from its `valid_from`, moves `masking_version` on by one, and appends the decision in the same transaction; a failure writes no row and appends no entry; the field ids of the request are the only fields covered, with no default set; the removal of a field value is done by its owning service, and a masking row does not override a retention class of P5 or the case hold of R-UNI-11, both of which stay in force | TSD P4 v3 T3.1 DF-REF-198 to DF-REF-204; FSD P4 v3 A2.5; ASM-1591; GAP-0876 |"
+  },
+  {
+   "old": "| BR8 | A correction records the field ids corrected and no value; the corrected value is neither read nor written here | FSD P4 v3 A2.27; NFR-040; GAP-0876 |",
+   "new": "| BR8 | A correction records the field ids corrected and no value; the corrected value is neither read nor written here, and it is applied by the owning service (`rwb-source-data` or `rwb-case`) | FSD P4 v3 A2.27; NFR-040; GAP-0876 |"
+  },
+  {
+   "old": "| BR9 | The statutory due date is read from the parameter row in force through DP-06 and computed from the received date; no period and no working-day rule is a constant in code | NFR-043; DP-06; BR-P4-027; ASM-1590 |",
+   "new": "| BR9 | The statutory due date is read from the parameter row in force through DP-06 and computed from the received date, and the version label of that row is recorded as the rule version of the request; no period and no working-day rule is a constant in code | NFR-043; DP-06; BR-P4-027; ASM-1590; GAP-2298 |"
+  },
+  {
+   "old": "| BR10 | The access evidence of an access request is answered from this service's own access entries for the case ids of the request, read through the access-log operation of its owner, and never from another service's table or from the central ledger | FSD P4 v3 A2.7; NFR-042; GAP-0877 |",
+   "new": "| BR10 | The access evidence of an access request is answered from this service's own access entries for the case ids of the request, read through the access-log operation of its owner with a case-id filter that the contract fixes; this story never reads another service's table or the central ledger, and a workbench-wide answer is the central ledger query of P7, joined to this answer by case id with no personal value copied | FSD P4 v3 A2.7; NFR-042; GAP-0877 |"
+  },
+  {
+   "old": "| BR13 | A request neither holds nor releases a case: the hold of R-UNI-11 and the case state are `rwb-case`'s and `rwb-deviation`'s, and this story writes no case row and no case state | R-UNI-11; REQ-S8-007; DP-01 |",
+   "new": "| BR13 | A request neither holds nor releases a case: the hold of R-UNI-11 and the case state are `rwb-case`'s and `rwb-deviation`'s, and this story writes no case row and no case state; the link from a recorded request to the case hold is left to `rwb-case` and raised as a dependency for D1 | R-UNI-11; REQ-S8-007; DP-01; GAP-2298 |"
+  },
+  {
+   "old": "| BR14 | No answer, entry, event or test carries a personal value: the register names the person by a reference, the case ids, the field ids, the decision code, the role code and the times, and nothing else | NFR-040; NFR-043; Principle 5 |",
+   "new": "| BR14 | No answer, entry, event or test carries a personal value: the register names the person by a reference only (`subjectRef`), the cases by the case ids (`caseRef`), the field ids, the decision code, the role code and the times, and nothing else | NFR-040; NFR-043; Principle 5; GAP-2298 |"
+  },
+  {
+   "old": "the exact field set of a step and the way the access-log read is filtered by case id are Not specified in the source documents (GAP-0874; ASM-1589) and (GAP-0875; ASM-1590) and (GAP-0877; ASM-1592); the schema of RWB-P4-E8016-CON fixes them",
+   "new": "the exact field set of a step are Not specified in the source documents (GAP-0874; ASM-1589) and (GAP-0875; ASM-1590); the schema of RWB-P4-E8016-CON fixes them, and the access-log read is filtered by case id as that contract fixes it (GAP-0877)"
+  },
+  {
+   "old": "| DF-REF-040 to DF-REF-044 | `permission` | id, role_id, capability_area, letters, matrix_version | Read: the Rules and parameters C, A and R letters the step needs |",
+   "new": "| DF-REF-040 to DF-REF-044 | `permission` | id, role_id, capability_area, letters, matrix_version | Read: the PLATFORM_ADMINISTRATION U and R letters the step needs |"
+  },
+  {
+   "old": "| `permission` | P4 (`rwb_access`) | Read only: the Rules and parameters C, A and R letters |",
+   "new": "| `permission` | P4 (`rwb_access`) | Read only: the PLATFORM_ADMINISTRATION U and R letters |"
+  },
+  {
+   "old": "| TC-E8-016-01 | AC1, BR1, BR2, BR6 | Component | A request of type \"ERASURE\" opened on 2027-01-04 by RW-COE and answered on 2027-02-10 by RW-RISK: 201, then 200 `IN_PROGRESS`, then 200 `ANSWERED`, three entries in order and one `rwb.decision.DecisionRecorded.v1` per entry |",
+   "new": "| TC-E8-016-01 | AC1, BR1, BR2, BR6 | Component | A request of type \"ERASURE\" opened on 2027-01-04 by RW-COMPLY and answered on 2027-02-10 by RW-COMPLY: 201 `RECEIVED`, then 200 `ANSWERED`, two entries in order (receipt and outcome) and one `rwb.decision.DecisionRecorded.v1` per entry |"
+  },
+  {
+   "old": "| TC-E8-016-10 | AC8, BR14 | NFR | A scan of both read answers, the chain entries, the event payload and the fixtures for a name, an e-mail address, a national identity number, a phone number, an address and a date of birth: no match, and the person appears as \"DS-REF-2027-000118\" only |",
+   "new": "| TC-E8-016-10 | AC8, BR14 | NFR | A scan of both read answers, the chain entries, the event payload and the fixtures for a name, an e-mail address, a national identity number, a phone number, an address and a date of birth: no match, and the person appears as \"DS-REF-2027-000118\" only |\n| TC-E8-016-11 | BR2, BR4 | Contract | Each operation, event and activity of section 12 checked against the schema of RWB-P4-E8016-CON: a request and a response matching the published shape, every error code of the operation and every event name as published; an off-schema call is refused with 422 and MSG-GEN-001 |\n| TC-E8-016-12 | BR7, BR10 | Component | Boundary test of each table of section 12.7 that the story reads or writes (ASM-3438): the role set with one role and with every role in force, the permission row with the U and R letters and with no row (403), the masking_rule set before and after one erasure, and the access entries with none and with the page bound read from the parameter row in force |\n| TC-E8-016-13 | BR4 | Component | A request whose type is not \"ACCESS\", \"CORRECTION\" or \"ERASURE\", and a request with no case id: 422 with MSG-GEN-001 both times, no entry and no masking row |\n| TC-E8-016-14 | BR8 | Component | A correction whose decision body carries a corrected value: 422 from the contract, no value read or written, and the entry holds the field ids and no value |\n| TC-E8-016-15 | BR13 | Component | An open and an answer on \"RW-2026-000123\": no row written in the case table of rwb_case, no case state changed, and the case hold of R-UNI-11 unchanged |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17015",
+   "item": "DOR-RWB-P4-E8016-APP-10",
+   "status": "Not applied",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "Section 9 text is not in this chunk, so the empty, loading, error and no-access states of SCR-39 and SCR-47 cannot be anchored for an edit."
+  },
+  {
+   "ruling": "R-17016",
+   "item": "DOR-RWB-P4-E8016-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases (Story test cases tab, next version)",
+   "change": "Add TC-E8-016-01 to TC-E8-016-15 under the same IDs with the Given, When and Then of each row.",
+   "note": "Contract test TC-11 and boundary test TC-12 added in section 16, with TC-13 to TC-15 for BR4, BR8 and BR13."
+  },
+  {
+   "ruling": "R-17017",
+   "item": "DOR-RWB-P4-E8016-APP-18",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Section 18 text is not in this chunk, so the DL26 open decision and its assumptions ASM-0247, ASM-0264, ASM-0275, ASM-0355 cannot be anchored."
+  },
+  {
+   "ruling": "R-17018",
+   "item": "DOR-RWB-P4-E8016-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "BR4, BR8 and BR13 now have test rows TC-E8-016-13 to -15 in section 16. No AC added: section 7 text is not in this chunk."
+  },
+  {
+   "ruling": "R-17019",
+   "item": "DOR-RWB-P4-E8016-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Confirm DF-PTY-007, DF-PTY-016 and DF-REF-039 as LDM v9 field IDs; register data_subject_request as a field or entity in LDM v9 and Data Classification v5.",
+   "note": "No story edit: the field IDs and the data_subject_request name are missing from the LDM and Data Classification, which the story cannot fix."
+  },
+  {
+   "ruling": "R-23041",
+   "item": "GAP-0876",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR7 fixes the erasure to the request's field ids with no default set and states masking rows do not override P5 retention or the R-UNI-11 hold; BR8 assigns correction to its owners."
+  },
+  {
+   "ruling": "R-23042",
+   "item": "GAP-2300",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Matrix of RWB-P4-E1037-APP (matrix load)",
+   "change": "Grant RW-COMPLY the U letter in PLATFORM_ADMINISTRATION at the matrix load; carry the RW-COE and RW-RISK Rules and parameters letters as not applicable to this capability.",
+   "note": "BR3, section 11, section 12.7 and TC-01 now read PLATFORM_ADMINISTRATION U and R; the matrix grant sits in RWB-P4-E1037-APP."
+  },
+  {
+   "ruling": "R-23046",
+   "item": "GAP-2298",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR1, BR6, BR9, BR13, BR14 and TC-01 now give receipt and outcome entries, RECEIVED/ANSWERED/REFUSED with late derived, rule-version label, references only, and the D1 dependency."
+  },
+  {
+   "ruling": "R-23052",
+   "item": "GAP-0877",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR10 names the contract's case-id filter and leaves the workbench-wide answer to the P7 ledger query joined by case id with no value copied; section 11 updated."
+  },
+  {
+   "ruling": "R-23053",
+   "item": "GAP-2299",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "TSD P4 v3 appendix T-A.1 and RWB-P4-E8016-CON",
+   "change": "Declare the four paths under /api/recovery/access/v1/personal-data/requests, four schemas, error set 401, 403, 404, 409, 422 and 503 with message IDs and MSG-P4-004 as warning, states RECEIVED, ANSWERED and REFUSED with late derived, consumed authorise and parameters operations with owners, and parameter rows for the period, sets, subject-reference shape and page bounds.",
+   "note": "Contract surface sits in section 12 and the TSD appendix, which this chunk does not hold; the period and sets stay as parameter rows."
+  }
+ ]
+}

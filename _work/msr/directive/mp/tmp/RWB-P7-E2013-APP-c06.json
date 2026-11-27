@@ -1,0 +1,85 @@
+{
+ "edits": [
+  {
+   "old": "| BR18 | The case status, the case queue and the preparer task are rwb-case's; this service sends the facts and reads the answers, and moves no case state itself | R-PREC default ruling; TSD P7 T4 |",
+   "new": "| BR18 | The case status, the case queue and the preparer task are rwb-case's; this service sends the facts and reads the answers, and moves no case state itself | R-PREC default ruling; TSD P7 T4 |\n| BR19 | The approval outcome leaves this service only as DecisionRecorded on rwb.decision-record.v1; no data lake copy, lake partition, manifest or watermark is written (INT-19 and INT-20 are retired) | Architecture v5 slide 37; DP-17; ADR-018 |"
+  },
+  {
+   "old": "    Then the system raises an incident to RW-RISK with message MSG-P7-010",
+   "new": "    Then the system raises an incident to RW-RISK with message MSG-P7-010\n\n  Scenario: AC15 Architecture rules BR12 to BR19 hold on every approval (added by this story, D-RCV-60)\n    Given the approval of AC4 is WAITING\n    Given the decision log write is forced to fail during an approval\n    When \"U-9201\" approves the approval of AC4\n    Then the approval does not take effect, its status stays \"WAITING\" and no DecisionRecorded event is published (BR12)\n    Then the outcome entry is written in the same transaction as the status change and relayed on rwb.decision-record.v1 (BR15, BR19)\n    Then the delegation table is read only through the rwb-access contract with no join across schemas (BR13)\n    Then the approval clock is a durable timer in ApprovalWorkflow on task queue \"rwb-decision\" (BR14)\n    Then every cross-service call is one hop with a 2 s budget (BR16)\n    Then the route parameters and reference data are read with the version in force (BR17)\n    Then the case status and the preparer task move only through the rwb-case contract (BR18)\n\n  Scenario: AC16 Errors answer 401, 403 and 404 of the provided operations (added by this story, D-RCV-60)\n    Given a call to a provided operation carries no credential\n    When the call is made\n    Then the system refuses it with status 401 and message Not specified in the source documents (NEWAC-RWB-P7-E2013-APP-AC16)\n    When \"U-9210\", who holds RW-RESTRUCT only, approves the approval of AC4\n    Then the system refuses it with status 403 and message MSG-P4-002\n    When \"U-9201\" approves an approval id that does not exist\n    Then the system refuses it with status 404 and message Not specified in the source documents (NEWAC-RWB-P7-E2013-APP-AC16)\n\n  Scenario: AC17 A redelivered event is applied once (added by this story, D-RCV-60)\n    Given the approval of AC4 is WAITING\n    Given the consumed event is delivered once and applied\n    When the same event is delivered again\n    Then the second delivery is acknowledged and no second entry or status change is written\n\n  Scenario: AC18 A retried or timed-out activity leaves the approval unchanged (added by this story, D-RCV-60)\n    Given the approval of AC4 is WAITING\n    When an activity of ApprovalWorkflow fails with a retryable error\n    Then the activity is retried under its retry policy Not specified in the source documents (NEWAC-RWB-P7-E2013-APP-AC18)\n    When the activity exceeds its timeout of Not specified in the source documents (NEWAC-RWB-P7-E2013-APP-AC18)\n    Then the approval stays \"WAITING\" and no entry is written until the activity succeeds\n\n  Scenario: AC19 A consumed call that fails or does not answer produces no approval (added by this story, D-RCV-60)\n    Given the rwb-access contract mock fails or does not answer within 2 s\n    When the router runs for decision D6.4 item 2.1.1, MORTGAGE, principal 2,400,000.00\n    Then no approval is produced and the case does not move"
+  },
+  {
+   "old": "| TC-E2-013-24 | BR18 | Contract | Case status and preparer task moved only through the rwb-case contract |",
+   "new": "| TC-E2-013-24 | BR18 | Contract | Case status and preparer task moved only through the rwb-case contract |\n| TC-E2-013-25 | AC15, BR12 to BR19 | Contract | Approval with the decision log write forced to fail; rules checked against the fakes of section 12.8 |\n| TC-E2-013-26 | AC16 | Contract | Call with no credential; call without the right; approval id that does not exist |\n| TC-E2-013-27 | AC17 | Component | Consumed event delivered twice |\n| TC-E2-013-28 | AC18 | Component | Activity with a retryable failure and an activity that times out |\n| TC-E2-013-29 | AC19, BR16 | Contract | rwb-access call that fails or does not answer within 2 s |"
+  },
+  {
+   "old": "TC-E2-013-17 to TC-E2-013-24 are added by this story for the contract and boundary tests and for rules BR13 to BR18;",
+   "new": "TC-E2-013-17 to TC-E2-013-29 are added by this story for the contract and boundary tests and for rules BR13 to BR19;"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28767",
+   "item": "GAP-1621",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Edge and gateway design (gateway-bff)",
+   "change": "Decide which of SCR-10, SCR-11, SCR-12 and SCR-38 gateway-bff composes from this service's operations, and record the four screen contracts there, not in the P7 PRD.",
+   "note": "No story edit; the screen split belongs to the edge and gateway design."
+  },
+  {
+   "ruling": "R-28768",
+   "item": "GAP-1254",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR19 added: outcome leaves only as DecisionRecorded on rwb.decision-record.v1; INT-19, INT-20 and lake elements retired. TSD P7 and event catalogue are separate."
+  },
+  {
+   "ruling": "R-31490",
+   "item": "NEWAC-RWB-P7-E2013-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC15 added covering BR12 to BR19; test row TC-E2-013-25 added in section 16."
+  },
+  {
+   "ruling": "R-31491",
+   "item": "NEWAC-RWB-P7-E2013-APP-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC16 added for 401, 403, 404; TC-E2-013-26 added. Message for 401 and 404 is not specified in the source."
+  },
+  {
+   "ruling": "R-31492",
+   "item": "NEWAC-RWB-P7-E2013-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC17 added for redelivered consumed event; TC-E2-013-27 added."
+  },
+  {
+   "ruling": "R-31493",
+   "item": "NEWAC-RWB-P7-E2013-APP-AC18",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC18 added for retry and timeout; TC-E2-013-28 added. Retry policy and timeout values are not specified in the source."
+  },
+  {
+   "ruling": "R-31494",
+   "item": "NEWAC-RWB-P7-E2013-APP-AC19",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC19 added for failed or unanswered consumed call within 2 s; TC-E2-013-29 added."
+  }
+ ]
+}

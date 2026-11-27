@@ -1,0 +1,99 @@
+{
+ "edits": [
+  {
+   "old": "The sandbox is DEV only and is never deployed to SIT, UAT or PROD.",
+   "new": "The sandbox is DEV only and is never deployed to SIT, UAT or PROD. Each service release builds one DEV database `rwb_sandbox`, built in `rwb_sandbox_next` and swapped in (AC5), and the read-only role `rwb_sandbox_read` is granted SELECT only. The content of each seeded document is derived from the seed value, the case ID and the document type, so its hash is stable across rebuilds (AC5). Across the 19 services each schema runs its own Flyway sequence (DP-15); this build applies the baseline of this service and the two view migrations, and the seeding order per schema is schema `public` first, then the baseline in schema `rwb_source_data`, then the two view migrations in schema `recovery`."
+  },
+  {
+   "old": "    Then the sandbox after both holds the data for commit \"e4f5a6b\"",
+   "new": "    Then the sandbox after both holds the data for commit \"e4f5a6b\"\n\n  Scenario: AC10 Every role has a named test user and the ACE-shaped tables stay DEV only (BR6, BR7)\n    Given the seed loads the roles of the permission matrix\n    When the sandbox build checks the seed against the test users\n    Then every role has a named test user\n    Then the deployment gate refuses any target other than DEV\n    Then no service table is loaded from the ACE-shaped tables by a batch job\n\n  Scenario: AC11 A consumed reference-data call fails or does not answer\n    Given the lists of values are read through the rwb-case reference-data contract on base `/api/recovery/case/v1`\n    When that call fails or does not answer\n    Then the sandbox build fails naming the call\n    Then the previous sandbox stays in use\n\n  Scenario: AC12 A status change the model does not allow is refused\n    Given the seed holds a case status change that the case status model does not allow\n    When the sandbox build runs\n    Then the build fails naming the table and the column\n    Then the previous sandbox stays in use"
+  },
+  {
+   "old": "| TC-E1-065-11 | BR2, BR8; section 12.7 | End to end | Each object of section 12.7 checked in its owner's schema: the 30 `v_ace_*` views and the three helper functions in schema `recovery`, the ACE-shaped tables in schema `public`, and the 13 P1 tables in schema `rwb_source_data`; boundary row counts per table |",
+   "new": "| TC-E1-065-11 | BR2, BR8; section 12.7 | End to end | Each object of section 12.7 checked in its owner's schema: the 30 `v_ace_*` views and the three helper functions in schema `recovery`, the ACE-shaped tables in schema `public`, and the 13 P1 tables in schema `rwb_source_data`; boundary row counts per table |\n| TC-E1-065-12 | AC10, BR6, BR7 | End to end | Seed role list checked against the named test users; deployment gate tried with a non-DEV target |\n| TC-E1-065-13 | AC11 | End to end | Reference-data fake of section 12.8 set to fail and to not answer |\n| TC-E1-065-14 | AC12 | End to end | Seed with one case status change the status model does not allow |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28658",
+   "item": "GAP-0503",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading now states one DEV database rwb_sandbox per service release, build in rwb_sandbox_next, read-only role rwb_sandbox_read with SELECT only."
+  },
+  {
+   "ruling": "R-28659",
+   "item": "GAP-0897",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Template Specification; RWB-PLT platform DB story (rwb-access login)",
+   "change": "Publish DEV-only read-only role rwb_sandbox_read with grants SELECT on role and permission only, no access-entry read; fix rwb-access login; record retirement of single-schema grant with DP-15.",
+   "note": "Platform DB and template side; this story names the role but holds no login or grant list."
+  },
+  {
+   "ruling": "R-28660",
+   "item": "GAP-0899",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Contract Catalog; TSD P4 T6.1",
+   "change": "Publish the 54-role list with administration and non-human roles marked; reconcile with the 42 rows of T6.1; fix the DEV seed role count.",
+   "note": "Role count is not asserted in this story; the catalogue and matrix must agree first."
+  },
+  {
+   "ruling": "R-28661",
+   "item": "GAP-1052",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Service Template Specification",
+   "change": "Fix the synthetic file naming pattern next to the sandbox file properties; content derived from seed value, case ID and document type.",
+   "note": "Story now states content is derived from seed, case ID and type so hash is stable (AC5). Pattern itself is not in sources."
+  },
+  {
+   "ruling": "R-28662",
+   "item": "GAP-3168",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading states this build applies the service baseline and two view migrations, with seeding order per schema; 19-sequence scope is DP-15."
+  },
+  {
+   "ruling": "R-28663",
+   "item": "GAP-1053",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Template Specification; Service Catalog",
+   "change": "Record DEV storage account and container names, the rwb-document login and the DEV read-only role; publish SCR-30 and SCR-31 composite route with RWB-PLT-N001-CON.",
+   "note": "Container, login and route values are not in this story and no value is invented here."
+  },
+  {
+   "ruling": "R-30248",
+   "item": "NEWAC-RWB-P1-E1065-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for BR6 and BR7; TC-E1-065-12 added. Deployment gate is a check of RWB-P1-E1065-DB."
+  },
+  {
+   "ruling": "R-30249",
+   "item": "NEWAC-RWB-P1-E1065-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for a failed or unanswered reference-data call; TC-E1-065-13 runs on the section 12.8 fake."
+  },
+  {
+   "ruling": "R-30250",
+   "item": "NEWAC-RWB-P1-E1065-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for a disallowed status change; TC-E1-065-14 added with a seed fixture of that change."
+  }
+ ]
+}

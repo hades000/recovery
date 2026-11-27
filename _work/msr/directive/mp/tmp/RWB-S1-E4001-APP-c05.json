@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "so the step is started by the route command inside `RouteDecisionWorkflow` and subscribes to nothing",
+   "new": "so the step is started by the route command inside `RouteDecisionWorkflow`, at the decision start, at its reopening and when an appraisal arrives, and subscribes to nothing"
+  },
+  {
+   "old": "| X9 | The same assessment is submitted twice with the same `Idempotency-Key` | One record, one order, and the stored answer is returned; the repeat is counted | None | AC10, TC-E4-001-01 |",
+   "new": "| X9 | The same assessment is submitted twice with the same `Idempotency-Key` | One record, one order, and the stored answer is returned; the repeat is counted | None | AC10, TC-E4-001-01, TC-S1-E4001-APP-11 |"
+  },
+  {
+   "old": "| X10 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC11, s17, BR4, BR8 |",
+   "new": "| X10 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC11, TC-S1-E4001-APP-12, s17, BR4, BR8 |"
+  },
+  {
+   "old": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released",
+   "new": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC12 Business rules BR1 to BR10 hold\n    Given the appraisal step runs for a case and its appraisal\n    When the step reads, decides, orders and records\n    Then no v_ace_* view is read, the limit is read from reference data with its version, the order leaves only through rwb-integration, no person data is stored or passed, no foreign key leaves rwb_valuation and no event is published\n\n  Scenario: AC13 Error answers of the route operation\n    Given the caller presents no valid identity, or the case of the route is not found\n    When the route operation is called\n    Then the answer is 401 for no valid identity or 404 for an unknown case, with the platform envelope, and no read or write is made\n\n  Scenario: AC14 Activity retried or timed out\n    Given an activity of the route workflow fails or does not finish inside its timeout\n    When the workflow retries it\n    Then the activity is retried on the workflow's schedule, and after the retry limit the case stays at the route decision with the failure recorded"
+  },
+  {
+   "old": "| TC-S1-E4001-APP-12 | AC11: a statement reaches a v_ace_* view, a recovery_case row or another service's schema | Component | The build scan of step 10 with a forced statement; the grant refuses it, the build fails and nothing is released |",
+   "new": "| TC-S1-E4001-APP-12 | AC11: a statement reaches a v_ace_* view, a recovery_case row or another service's schema | Component | The build scan of step 10 with a forced statement; the grant refuses it, the build fails and nothing is released |\n| TC-S1-E4001-APP-13 | AC12: BR1 to BR10 hold on the step and its record | Component | The build scan, the limit and rule fakes at their version in force, and the outbox that must stay empty |\n| TC-S1-E4001-APP-14 | AC13: error answers 401 and 404 of the route operation, with 403 of AC3 | Component | No valid identity; an unknown case; 401 or 404 with the platform envelope and no read or write |\n| TC-S1-E4001-APP-15 | AC14: activity retry and timeout | Component | The activity fake failing and timing out; retried on the workflow schedule, and the case stays at the route decision after the retry limit |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28886",
+   "item": "GAP-1686",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Appraisal-age check runs as a step of RouteDecisionWorkflow at decision start, reopening and appraisal arrival; no Temporal Schedule added."
+  },
+  {
+   "ruling": "R-28887",
+   "item": "GAP-2588",
+   "status": "Cross-document",
+   "section": "12.4",
+   "target": "Ownership Map",
+   "change": "Mark POST /assets/{assetId}/valuations as superseded by POST /assets/{assetKey}/valuations (business-key form, current per the baseline) for S1.",
+   "note": "Story names no valuation path; the business-key path is the current form per the baseline, and the id path needs retiring in the map."
+  },
+  {
+   "ruling": "R-28888",
+   "item": "GAP-2593",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Story already runs the check inside the route decision only, with no timer, schedule or subscription; no further edit needed."
+  },
+  {
+   "ruling": "R-28889",
+   "item": "GAP-1690",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Story serves only MSG-P1-001, MSG-P4-002, MSG-P7-003 and MSG-GEN-001 from owning services and adds no message of its own."
+  },
+  {
+   "ruling": "R-28891",
+   "item": "GAP-1695",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Functional Specification S1 (FSD S1)",
+   "change": "Carry version 3 in full and mark versions 1 and 2 as Not specified in the source documents; supply both change notes at the next FSD version.",
+   "note": "Version history is held in the FSD document control, not in this story."
+  },
+  {
+   "ruling": "R-31852",
+   "item": "NEWAC-RWB-S1-E4001-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 Covered by now names TC-S1-E4001-APP-11, which tests AC10 in section 16."
+  },
+  {
+   "ruling": "R-31853",
+   "item": "NEWAC-RWB-S1-E4001-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X10 Covered by now names AC11 and TC-S1-E4001-APP-12, which tests AC11 in section 16."
+  },
+  {
+   "ruling": "R-31854",
+   "item": "NEWAC-RWB-S1-E4001-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 scenario covering BR1 to BR10 and test row TC-S1-E4001-APP-13."
+  },
+  {
+   "ruling": "R-31855",
+   "item": "NEWAC-RWB-S1-E4001-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 scenario for 401 and 404 error answers and test row TC-S1-E4001-APP-14; 403 stays under AC3."
+  },
+  {
+   "ruling": "R-31856",
+   "item": "NEWAC-RWB-S1-E4001-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 scenario for activity retry and timeout and test row TC-S1-E4001-APP-15."
+  }
+ ]
+}

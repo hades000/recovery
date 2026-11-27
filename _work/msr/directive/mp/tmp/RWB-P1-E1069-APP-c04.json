@@ -1,0 +1,104 @@
+{
+ "edits": [
+  {
+   "old": "- The roles `ace_view_owner` and the login `rwb_source_data` exist in DEV and SIT, with the grant block delivered by RWB-P1-E1069-DB (DP-02; Architecture v5 slides 11 and 29).",
+   "new": "- The roles `ace_view_owner` and the login `rwb_source_data` exist in DEV and SIT, with the grant block delivered by RWB-P1-E1069-DB as a commented template (its placeholders :recovery_role and :ace_view_owner are not role names, and the template creates no logins); the 19 schemas and logins come from RWB-PLT-NF06 and the migrator roles from RWB-PLT-N011 (DP-02; Architecture v5 slides 11 and 29)."
+  },
+  {
+   "old": "- The split of this legacy key across three stories, and the position of the two view migrations on the service sequence, are Not specified in the source documents (GAP-0566; ASM-0807); the maker of every view definition and its checksum come from `recovery_views.sql`.",
+   "new": "- The split of this legacy key across three stories, and the position of the two view migrations on the service sequence, are Not specified in the source documents (GAP-0566; ASM-0807); the maker of every view definition and its checksum come from `recovery_views.sql`.\n- The appraisal age rule is held as data: an appraisal more than 365 days old at the business date is stale. Until the owning function is assigned, this story writes `valuation_ext.stale_flag` (DF-EXT-041) and `valuation_ext.age_days` (DF-EXT-042) as the only writer (FSD P1 OQ-P1-05 and A2.6; ASM-A6-tables-15).\n- The account and arrears read is the four views keyed by `account_key` at the ACE business date, answered in the field order of the field IDs; a late case is answered from `v_ace_batch_status` and MSG-P1-001 with no parameter read. The per-source cut-off is revisited only when it is agreed as a rwb-case parameter."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22276",
+   "item": "GAP-0567",
+   "status": "Cross-document",
+   "section": "",
+   "target": "TSD P1 v3",
+   "change": "Carry the Architecture v5 REST contract (base /api/recovery/source-data/v1, 2 s client budget, slides 15 and 41) into T2 and T5.2; keep AceSourceReadRepository internal; add change note.",
+   "note": "Read contract wording belongs to TSD P1; story has no conflicting text."
+  },
+  {
+   "ruling": "R-22277",
+   "item": "GAP-0569",
+   "status": "Cross-document",
+   "section": "",
+   "target": "TSD P1 v3 (and FSD P1 v3)",
+   "change": "Rename service role to rwb_source_data; state per-service schema and USAGE on schema recovery in Service Template Specification row; record rename in Change Register against DP-02.",
+   "note": "Story already uses the rwb_source_data login in section 3."
+  },
+  {
+   "ruling": "R-22279",
+   "item": "GAP-0903",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-access ACE masking pack",
+   "change": "Publish, for each personal field ID, the roles that see it unmasked as masking_rule rows, approved by the Compliance and PDPA officer and the security administrator.",
+   "note": "Roster is a pack decision; no roster exists in the story text."
+  },
+  {
+   "ruling": "R-22280",
+   "item": "GAP-1509",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 now holds the 365-day rule and names this story as sole writer of valuation_ext.stale_flag and age_days until owner assigned."
+  },
+  {
+   "ruling": "R-22281",
+   "item": "GAP-0568",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Template Specification",
+   "change": "Publish login creation and credential policy, exact grant and revoke list, and order of the three migrations relative to the two view migrations; RWB-PLT-E1044-CON already in header dependencies.",
+   "note": "Login and grant policy is not in the story and belongs to the template."
+  },
+  {
+   "ruling": "R-22282",
+   "item": "GAP-0111",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 now states the grants block is a commented template and points to RWB-PLT-NF06 and RWB-PLT-N011; no role names invented."
+  },
+  {
+   "ruling": "R-22384",
+   "item": "GAP-0596",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P2-E2007-CON",
+   "change": "Answer the three Section B fields as fieldState AVAILABLE or NOT_AVAILABLE with no value on NOT_AVAILABLE; name flag rwb.dataengine.booking-facts, kept off until the Section B migration is applied; record in next TSD P1.",
+   "note": "Per-field answer and flag belong to the data-engine contract; no story text change needed."
+  },
+  {
+   "ruling": "R-22951",
+   "item": "GAP-0547",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 fixes the read as four views keyed by account_key at ACE business date, with late case from v_ace_batch_status and MSG-P1-001."
+  },
+  {
+   "ruling": "R-22952",
+   "item": "GAP-0549",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P1-E1069-CON",
+   "change": "Add GET /accounts/{id} on /api/recovery/source-data/v1 (one hop, 2 s) and its answer schema; add the operation to TSD P1 v3 Appendix T-A.1 in the next version.",
+   "note": "Operation and answer schema belong in the contract and TSD, not the story text."
+  },
+  {
+   "ruling": "R-22953",
+   "item": "GAP-0553",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P1-E1069-CON",
+   "change": "Fix the read-path answer: customer fields of v_ace_customer, one row per contact_key of v_ace_contact, one row per account of v_ace_ca_relation, four party_ext flags as optional object, absent not defaulted.",
+   "note": "Answer shape is a contract decision; field names stay in the schema and dictionary."
+  }
+ ]
+}

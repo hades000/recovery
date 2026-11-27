@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "| State of the notice or the intent | What the customer sees |",
+   "new": "| State of the notice or the intent | What the customer sees |"
+  },
+  {
+   "old": "| Notice of a case outside the caller's scope | Nothing: the answer is 404 and no screen data is returned |",
+   "new": "| Notice of a case outside the caller's scope | Nothing: the answer is 404 and no screen data is returned |\n| Empty, no notice of the case | Not specified in the source documents (CG-ALL-6691) |\n| Loading | Not specified in the source documents (CG-ALL-6691) |\n| Error | Not specified in the source documents (CG-ALL-6691) |\n| No access | Not specified in the source documents (CG-ALL-6691) |"
+  },
+  {
+   "old": "    Then the answer is 403 with MSG-P4-002 and nothing changes",
+   "new": "    Then the answer is 403 with MSG-P4-002 and nothing changes\n\n  Scenario: AC5 Business rules (BR1, BR8 to BR15 of section 8)\n    Given the notice \"N-0101\" of case \"RC-2026-000321\" is \"APPROVED\"\n    When the customer acts on the notice \"N-0101\"\n    Then no money row is written, no business value is in code, and the act publishes no event other than the library's DecisionRecorded\n\n  Scenario: AC6 Error answers of the provided operations (exceptions X1, X2 and X10 of section 5)\n    Given the caller has no credential\n    When the caller acts on the notice \"N-0101\"\n    Then the answer is 401, or 403 for a role without the right, or 404 for a notice outside the caller's scope, and nothing changes\n\n  Scenario: AC7 Replay of a write with the same Idempotency-Key (exception X11 of section 5)\n    Given the POST with an Idempotency-Key has been answered with payment intent \"PI-0101\"\n    When the same POST is repeated with the same Idempotency-Key\n    Then the first answer is returned with status 201 and no second intent is written\n\n  Scenario: AC8 Consumed call fails or does not answer (exceptions X7 and X8 of section 5)\n    Given the rwb-payment contract mock does not answer\n    When the customer acts on the notice \"N-0101\"\n    Then nothing is written, no intent is returned as taken, and the answer is 503"
+  },
+  {
+   "old": "| TC-E4-037-12 | BR14, BR15 | Component | A missing owner answer takes no intent and returns none as taken; a legal hold does not refuse the act and sends nothing outbound |",
+   "new": "| TC-E4-037-12 | BR14, BR15 | Component | A missing owner answer takes no intent and returns none as taken; a legal hold does not refuse the act and sends nothing outbound |\n| TC-E4-037-13 | AC5, BR1, BR8, BR9, BR10, BR11, BR12, BR13, BR14, BR15 | Component | Case `RC-2026-000321`, notice `N-0101` in `APPROVED`; the checks run against the code, the data and the event catalogue; no money row is written and no event other than DecisionRecorded is published |\n| TC-E4-037-14 | AC6 | Component | A caller with no credential answers 401; a role without the right answers 403 with MSG-P4-002; a notice outside the caller's scope answers 404; nothing changes in any run |\n| TC-E4-037-15 | AC7, BR13 | Component | A repeated POST with the same Idempotency-Key answers 201 with the first intent; no second `payment_intent` row is written |\n| TC-E4-037-16 | AC8, BR2, BR14 | Component | The rwb-payment contract mock does not answer within its 2 s budget; nothing is written, no intent is returned as taken and the answer is 503 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23093",
+   "item": "GAP-2372",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Operations, consumed and faked P8 and P1 rows, empty C row and placeholders are already declared in section 3; no edit needed."
+  },
+  {
+   "ruling": "R-23094",
+   "item": "GAP-2373",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Baseline of the two operations, the Case record right and the placeholders is already stated in section 3; no edit needed."
+  },
+  {
+   "ruling": "R-26130",
+   "item": "CG-ALL-6690",
+   "status": "Not applied",
+   "section": "3, 3.1",
+   "target": "",
+   "change": "",
+   "note": "The migration name sits outside the supplied story text, and no source gives the next Vnnnn number of the rwb-comms sequence; not invented."
+  },
+  {
+   "ruling": "R-26131",
+   "item": "CG-ALL-6691",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access states added to section 15, each marked Not specified in the source documents as the screen specification lacks them."
+  },
+  {
+   "ruling": "R-31346",
+   "item": "NEWAC-RWB-P6-E4037-APP-AC3",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC3 exists in section 7 and TC-E4-037-07 already covers it; no edit needed."
+  },
+  {
+   "ruling": "R-31347",
+   "item": "NEWAC-RWB-P6-E4037-APP-AC4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC4 exists in section 7 and TC-E4-037-08 already covers it; no edit needed."
+  },
+  {
+   "ruling": "R-31348",
+   "item": "NEWAC-RWB-P6-E4037-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 scenario in section 7 for BR1 and BR8 to BR15, with test row TC-E4-037-13 in section 16."
+  },
+  {
+   "ruling": "R-31349",
+   "item": "NEWAC-RWB-P6-E4037-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 scenario naming 401, 403 and 404 with test row TC-E4-037-14 in section 16."
+  },
+  {
+   "ruling": "R-31350",
+   "item": "NEWAC-RWB-P6-E4037-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 scenario for replay with the same Idempotency-Key (X11) with test row TC-E4-037-15 in section 16."
+  },
+  {
+   "ruling": "R-31351",
+   "item": "NEWAC-RWB-P6-E4037-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 scenario for a failed or silent consumed call (X7, X8) with test row TC-E4-037-16 in section 16."
+  }
+ ]
+}

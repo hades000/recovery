@@ -1,0 +1,63 @@
+{
+ "edits": [
+  {
+   "old": "| X10 | The document store returns a failure after the record write | The notice row and the outbox row roll back; a correcting decision record follows under R-UNI-24; no orphan document is left | MSG-P7-003 for the incident path only | AC10, TC-E1-052-10 |",
+   "new": "| X10 | The document store returns a failure after the record write | The notice row and the outbox row roll back; a correcting decision record follows under R-UNI-24; no orphan document is left | MSG-P7-003 for the incident path only | AC10, TC-E1-052-14 |"
+  },
+  {
+   "old": "    Then the system returns the message MSG-P1-001",
+   "new": "    Then the system returns the message MSG-P1-001\n\n  Scenario: AC12 Rules without a criterion of their own (BR10, BR12, BR13, BR14, BR15)\n    When NoticeApi.generate is called for case \"RW-2026-000123\", notice type \"DEMAND\" and person_key \"P-0001\"\n    Then the merge snapshot holds the merge code, the source column, the business key and the field ID of each value used, never the value\n    Then \"identification_number\" is not a merge source; \"id_no_masked\" and \"id_no_last4\" are the only personal identifiers that resolve\n    Then the notice request evaluates no route rule and R-LIT-03 and R-LIT-04 are read from rwb-decision\n    Then a document store failure after the record write rolls the notice back and a correcting decision record follows under R-UNI-24, as in AC10\n\n  Scenario: AC13 Error answers of the provided operations\n    Given the caller presents no credentials\n    When NoticeApi.generate is called for case \"RW-2026-000123\", notice type \"DEMAND\" and person_key \"P-0001\"\n    Then the provided operation answers 401\n    Then a service identity without Litigation R is answered 403 with MSG-P4-002\n    Then GET /api/recovery/comms/v1/notices/{noticeId} for a notice that does not exist answers 404\n\n  Scenario: AC14 Replay of a write with the same Idempotency-Key (exception X5)\n    Given a notice for case \"RW-2026-000123\", notice type \"DEMAND\" and person_key \"P-0001\" was generated with an Idempotency-Key on 2026-11-25\n    When NoticeApi.generate is called again with the same Idempotency-Key on 2026-11-25\n    Then the system returns the first notice\n    Then the case still has one DEMAND notice and one generated document"
+  },
+  {
+   "old": "| TC-E1-052-16 | BR13, BR15 | Component | Notice request with no route rule evaluated; rule set R-LIT-03 and R-LIT-04 read from rwb-decision |",
+   "new": "| TC-E1-052-16 | BR13, BR15 | Component | Notice request with no route rule evaluated; rule set R-LIT-03 and R-LIT-04 read from rwb-decision |\n| TC-E1-052-17 | AC12, BR10, BR12, BR13, BR14, BR15 | Component | DEMAND-MTG TH v2 with merge codes CASE_NO, CUSTOMER_NAME, POSTAL_ADDRESS and TOTAL_OUTSTANDING; identification_number not a merge source; rwb-document fake fails the write for the rollback check |\n| TC-E1-052-18 | AC13 | Component | Call with no credentials; service identity without Litigation R; noticeId not in the store |\n| TC-E1-052-19 | AC14 | End to end | Same request replayed with the same Idempotency-Key on 2026-11-25 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31271",
+   "item": "NEWAC-RWB-P6-E1052-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X10 Covered by changed to AC10, TC-E1-052-14; AC10 already covers the X10 failure path.",
+   "note": "AC10 already proves X10; the row named TC-E1-052-10, which tests Principle 5. Cover now points to AC10 and TC-E1-052-14. No new AC added."
+  },
+  {
+   "ruling": "R-31272",
+   "item": "NEWAC-RWB-P6-E1052-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 to section 7 covering BR10, BR12, BR13, BR14, BR15; added TC-E1-052-17 to section 16.",
+   "note": "AC12 added for the rules without a criterion; TC-E1-052-17 is its component test row. BR14 rollback restated and proved as in AC10."
+  },
+  {
+   "ruling": "R-31273",
+   "item": "NEWAC-RWB-P6-E1052-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC13 to section 7 for 401, 403 and 404 answers; added TC-E1-052-18 to section 16.",
+   "note": "AC13 names 401, 403 and 404 answers; 403 uses MSG-P4-002 as in TC-E1-052-09. TC-E1-052-18 added as its component test."
+  },
+  {
+   "ruling": "R-31274",
+   "item": "NEWAC-RWB-P6-E1052-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 to section 7 for replay with the same Idempotency-Key; added TC-E1-052-19 to section 16.",
+   "note": "AC14 covers replay under X5 and returns the first notice. TC-E1-052-19 added as its end-to-end test row."
+  },
+  {
+   "ruling": "R-31275",
+   "item": "NEWAC-RWB-P6-E1052-APP-AC15",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Allowed notice status transitions are not specified in the source documents; a refusal criterion would need an invented transition model."
+  }
+ ]
+}

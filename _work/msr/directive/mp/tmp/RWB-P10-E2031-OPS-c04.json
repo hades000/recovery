@@ -1,0 +1,102 @@
+{
+ "edits": [
+  {
+   "old": "Then no replica count, resource size, probe timing, cadence or list value is hard-coded in the template",
+   "new": "Then no replica count, resource size, probe timing, cadence, alert threshold, window, percentile or list value is hard-coded in the template, and each such value is a named chart value"
+  },
+  {
+   "old": "Given the Schedule registration step",
+   "new": "Given the Schedule registration step, which updates AgentRunDailyRollup in place when it already exists"
+  },
+  {
+   "old": "Given the rwb_agent schema and the per-service login",
+   "new": "Given the rwb_agent schema and the rwb-agent login (DP-02) held as a secret reference"
+  },
+  {
+   "old": "Then the route path, the deployment topology, the host, the SKU and the budget are Not specified in the source documents (GAP-0631; ASM-0967; ASM-0969)",
+   "new": "Then the route is registered under RWB-PLT-N001-CON with its path fixed by the edge story, and the deployment topology, host, SKU and budget are values files reviewed at release (GAP-2200; GAP-0631; ASM-0967; ASM-0969)\n\n  Scenario: AC9 The release writes only schema rwb_agent and reads other services only through their contracts (new, D-RCV-60)\n    Given the migration job, the values files and the egress declaration of the release\n    When the release is rendered, migrated and started\n    Then every write lands in schema rwb_agent and no other schema is written by any step of the release\n    Then every read of another service goes through its published contract, and no direct table or schema read of another service is declared\n\n  Scenario: AC10 The provided operations answer 401, 403 and 404 as the contract states (new, D-RCV-60)\n    Given the route in front of the three reads and the provided operations of rwb-agent\n    When a read is called without a credential, without the right of the read, or for an unknown resource\n    Then the route answers 401, 403 or 404 as the contract states and passes the refusal through unchanged\n    Then a refused read is counted on the dashboard and does not page the on-call rota\n\n  Scenario: AC11 A consumed call that fails or does not answer is recorded and never reported as an answer (new, D-RCV-60)\n    Given a consumed contract of another service that fails or does not answer during a run\n    When the daily rollup reaches that step\n    Then the run record carries the state FAILED and the failed call is shown on the dashboard\n    Then no step is marked complete on the answer of a call that did not answer"
+  },
+  {
+   "old": "| TC-P10-E2031-OPS-10 | BR2, BR9 | NFR | Boundary check of the §12.7 tables (ASM-3438): the unique key of `agent_alert`, the two indexes added with no column, the library tables in `rwb_agent` only and no other table created |",
+   "new": "| TC-P10-E2031-OPS-10 | BR2, BR9 | NFR | Boundary check of the §12.7 tables (ASM-3438): the unique key of `agent_alert`, the two indexes added with no column, the library tables in `rwb_agent` only and no other table created |\n| TC-P10-E2031-OPS-11 | AC9, BR8 | NFR | Not specified in the source documents (NEWAC-RWB-P10-E2031-OPS-AC9) |\n| TC-P10-E2031-OPS-12 | AC10 | End to end | Not specified in the source documents (NEWAC-RWB-P10-E2031-OPS-AC10) |\n| TC-P10-E2031-OPS-13 | AC11 | End to end | Not specified in the source documents (NEWAC-RWB-P10-E2031-OPS-AC11) |"
+  },
+  {
+   "old": "The ten test cases are this story's own",
+   "new": "The thirteen test cases are this story's own"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28836",
+   "item": "GAP-2200",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC8 route line now names RWB-PLT-N001-CON with the path left to the edge story; login reference and topology/budget as values files reviewed at release.",
+   "note": "Defaults accepted: route path with edge story, login by secret reference, topology and budget in values files, egress declared once."
+  },
+  {
+   "ruling": "R-28837",
+   "item": "GAP-2201",
+   "status": "Resolved",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "This story cites no ASM-B-P10-02 id and shares no output path; the fanout and check fix sits in the plan, not in this story."
+  },
+  {
+   "ruling": "R-28838",
+   "item": "GAP-2319",
+   "status": "Resolved",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Boundary belongs to the secondary slice RWB-P4-E2031-APP. This story already keeps TC-E2-031 ids out of section 16. No legacy master change."
+  },
+  {
+   "ruling": "R-28839",
+   "item": "GAP-2199",
+   "status": "Resolved",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Decision-log, comms and read-right items belong to the contract story. This deployment story reads no decision-log query; nothing changed here."
+  },
+  {
+   "ruling": "R-28840",
+   "item": "GAP-0631",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC1 makes thresholds and topology named chart values; AC3 updates the Schedule in place on one workflow identity; AC8 registers the route under RWB-PLT-N001-CON; AC5 names the rwb-agent login (DP-02); AC4 verifies rwb-reporting consume without a group.",
+   "note": "Login, route, thresholds, topology, Schedule update and consumer group ownership now resolved in the story text."
+  },
+  {
+   "ruling": "R-30394",
+   "item": "NEWAC-RWB-P10-E2031-OPS-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 scenario (401, 403, 404 passed through by the route) and TC-P10-E2031-OPS-12.",
+   "note": "Criterion added with its test case row; test data not specified in the source documents."
+  },
+  {
+   "ruling": "R-30395",
+   "item": "NEWAC-RWB-P10-E2031-OPS-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 scenario (failed or unanswered consumed call gives run state FAILED) and TC-P10-E2031-OPS-13.",
+   "note": "Criterion added with its test case row; test data not specified in the source documents."
+  },
+  {
+   "ruling": "R-30396",
+   "item": "NEWAC-RWB-P10-E2031-OPS-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 scenario covering BR8 (writes only rwb_agent, reads only through contracts) and TC-P10-E2031-OPS-11.",
+   "note": "Criterion added for BR8 with its test case row; test data not specified in the source documents."
+  }
+ ]
+}

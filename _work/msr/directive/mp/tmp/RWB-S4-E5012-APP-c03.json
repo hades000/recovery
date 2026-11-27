@@ -1,0 +1,156 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E5-012-06 | Principle 5 | NFR | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E5-012-06 | Principle 5 | NFR | A forced decision record write failure stops the action with MSG-P7-003 |\n| TC-E5-012-07 | Section 12 | Contract | The operations, events and activities of section 12 against their published contracts |\n| TC-E5-012-08 | AC6, Section 12.7 | Boundary | No statement reaches a notice row, a recovery_case row, a task row, a rule_row or another service's schema |\n| TC-E5-012-09 | AC7 | Component | A repeated signal writes once, answers once and counts the repeat |\n| TC-E5-012-10 | AC8 | Component | No person data in the decision record, a log or a workflow input |\n| TC-E5-012-11 | AC9 | End to end | Rule R-LIT-36 |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E5-012-05 |",
+   "new": "| MSG-P4-002 | AC5, TC-E5-012-05 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR7 |",
+   "new": "| None (pipeline log) | AC6, TC-E5-012-08, Section 17, BR7 |"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the decision record cannot be written"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Role without the Litigation right\n    Given a role without the Litigation right opens the proposal or decides it\n    When the read or the decision is requested\n    Then the request is refused at the edge before any service call\n    Then nothing changes and the user sees MSG-P4-002\n\n  Scenario: AC6 No other schema is reached\n    Given the step runs under the service identity of rwb-litigation\n    When a component, a statement or a test reaches a notice row, a recovery_case row, a task row, a rule_row or another service's schema\n    Then the grant refuses the statement and the boundary test fails the build\n    Then nothing is released\n\n  Scenario: AC7 Repeated signal (BR8)\n    Given a case in state PACK_ASSEMBLY\n    When the same pack complete signal arrives twice with the same state and payload\n    Then one record, one move and one task are written\n    Then the repeat is counted\n\n  Scenario: AC8 No personal data (BR9)\n    Given the rwb-case contract mock returns the case \"RC-2026-001212\" in state PACK_ASSEMBLY\n    When the step runs\n    Then the decision record, the log and the workflow input carry case references, codes, dates, a rule version and step names only\n\n  Scenario: AC9 Rule R-LIT-36 (BR12)\n    Given a case in state IN_HEARING\n    Given the rwb-agent contract mock returns the cost and the effect of the proposed step\n    When the customer or the firm proposes a settlement before judgment\n    Then the agent proposes the step with its cost and effect and routes it to the approver at D7.4\n    Then the move to SETTLEMENT_OFFERED_AT_COURT is answered to rwb-case when the approver decides"
+  },
+  {
+   "old": "The four criteria are the legacy criteria of RWB-E5-012 word for word, with their origin tag added and nothing else changed: the repetition of `Then`, the legacy wording of `the action is taken`, `the decision log cannot be written`, `its trigger arrives`, `template withdrawn` and `pack complete` all stand.",
+   "new": "The four criteria are the legacy criteria of RWB-E5-012 with their origin tag added; the only wording change is decision log to decision record in AC1 and AC4 (P3 readiness item). The repetition of `Then`, the legacy wording of `the action is taken`, `its trigger arrives`, `template withdrawn` and `pack complete` all stand."
+  },
+  {
+   "old": "| BR9 | No person name, address, contact value or identity number enters `rwb_litigation`, the decision record, a log or a workflow input: the step carries case references, codes, dates, a rule version and a proposal of step names | Template and Rules v1 §R7.2 (s17); FSD S4 A2.12 field catalogue |",
+   "new": "| BR9 | No person name, address, contact value or identity number enters `rwb_litigation`, the decision record, a log or a workflow input: the step carries case references, codes, dates, a rule version and a proposal of step names | Template and Rules v1 §R7.2 (s17); FSD S4 A2.12 field catalogue |\n| BR10 | R-LIT-04: on TEMPLATE_WITHDRAWN at NOTICE_GENERATED with template_status = withdrawn, hold generation and raise a task to the litigation officer; the case moves to NOTICE_BLOCKED | Business Rules and Routing Logic v4 R-LIT-04 |\n| BR11 | R-LIT-16: on PACK_COMPLETE at PACK_ASSEMBLY with every defect list item present, present the pack to the litigation officer for verification; the case moves to PACK_VERIFIED | Business Rules and Routing Logic v4 R-LIT-16 |\n| BR12 | R-LIT-36: on SETTLEMENT_PROPOSED at IN_HEARING, the agent proposes the step with its cost and effect and routes it to the approver at D7.4; the case moves to SETTLEMENT_OFFERED_AT_COURT | Business Rules and Routing Logic v4 R-LIT-36 |"
+  },
+  {
+   "old": "**Where each rule lives in the target.**",
+   "new": "Coverage of the twelve rules by criteria and test cases: BR1 AC1; BR2 AC1 and AC4; BR3 AC2 and AC3; BR4 AC2; BR5 AC3; BR6 AC1; BR7 AC6; BR8 AC7; BR9 AC8; BR10 (R-LIT-04) AC2; BR11 (R-LIT-16) AC3; BR12 (R-LIT-36) AC9. The test cases of these criteria are in section 16.\n\n**Where each rule lives in the target.**"
+  },
+  {
+   "old": "is read as the workflow signals of this service's own pack and hearing steps (GAP-2794; ASM-4632).",
+   "new": "is read as the pack-complete and template-withdrawn signals raised by this service's own pack and defect-list steps and delivered to its workflow; no Kafka topic, consumer group or inbox is declared (GAP-2794; ASM-4632)."
+  },
+  {
+   "old": "**Database and migrations.** No Flyway file.",
+   "new": "**Database and migrations.** Schema ownership: `rwb_litigation` is this service's; `rwb_case` (P3), `rwb_comms` (P6), `rwb_document` (P5) and `rwb_decision` (P7) are owned by those services and are named here only as the boundary of build step 8. No Flyway file."
+  },
+  {
+   "old": "- The LITIGATION package and its version, authored, tested and approved in rwb-decision (P7) and loaded on `RulePackageInForce` (GAP-2797).",
+   "new": "- The LITIGATION package and its version, authored, tested and approved in rwb-decision (P7) and loaded on `RulePackageInForce` (GAP-2797). It is consumed from rwb-decision as a non-blocking contract with its fake at the version in force; the embedded runtime is a service-template capability (DP-04), and this story declares no rule row, package or rule version of its own."
+  },
+  {
+   "old": "- The agent threshold that decides whether the agent's cost and effect is used, read as a parameter of the platform library, with the rule as fallback.",
+   "new": "- The agent threshold that decides whether the agent's cost and effect is used, read as a parameter of the platform library, with the rule as fallback.\n- The reference-data contract that serves the step vocabulary is Not specified in the source documents (DOR-RWB-S4-E5012-APP-20); the parameter keys of the agent threshold and of the flag are Not specified in the source documents (DOR-RWB-S4-E5012-APP-20), and their reads follow DP-06 and DP-07."
+  },
+  {
+   "old": "| `CaseAnswer` | Client and signal reporter | The case read and the case-stage answer to rwb-case, with the move, the timer and the officer task |",
+   "new": "| `CaseAnswer` | Client and signal reporter | The case read and the case-stage answer to rwb-case, with the move, the timer and the officer task in one stage outcome |"
+  },
+  {
+   "old": "| `NoticeHoldClient` | Client | The hold on generation to rwb-comms under R-LIT-04 and the notice read of the same call |",
+   "new": "| `NoticeHoldClient` | Client | The hold on generation to rwb-comms under R-LIT-04, with the rule and its version, and the notice read of the same call |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19903",
+   "item": "DOR-RWB-S4-E5012-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add rows TC-E5-012-01 to TC-E5-012-11 on tab Story test cases",
+   "note": "Story side done: TC-07 contract and TC-08 boundary added in section 16. Workbench lacks TC-01 to TC-06 rows."
+  },
+  {
+   "ruling": "R-19904",
+   "item": "DOR-RWB-S4-E5012-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Config bullets name the DP-06 and DP-07 reads; reference-data contract and parameter keys marked Not specified."
+  },
+  {
+   "ruling": "R-19905",
+   "item": "DOR-RWB-S4-E5012-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Database paragraph states schema ownership; the other schemas are named only as the boundary of build step 8."
+  },
+  {
+   "ruling": "R-19906",
+   "item": "DOR-RWB-S4-E5012-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 and AC6 for X2 and X10 with TC-05 and TC-08; X2 and X10 Covered by now name criteria; AC7 to AC9 added."
+  },
+  {
+   "ruling": "R-19907",
+   "item": "DOR-RWB-S4-E5012-APP-4",
+   "status": "Resolved",
+   "section": "8, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR10 to BR12 added for R-LIT-04, -16, -36; coverage line maps all twelve rules to AC and TC rows."
+  },
+  {
+   "ruling": "R-19908",
+   "item": "DOR-RWB-S4-E5012-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD as used in section 10 of this story",
+   "note": "Role SY-DATALOAD is absent from Users Roles and Permissions v5; no story edit needed."
+  },
+  {
+   "ruling": "R-19909",
+   "item": "DOR-RWB-S4-E5012-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add decision_record as a platform library object created in rwb_litigation (DP-03)",
+   "note": "Criteria and TC-06 now say decision record in place of decision log. The entity name needs the LDM and Data Classification entries."
+  },
+  {
+   "ruling": "R-19910",
+   "item": "DOR-RWB-S4-E5012-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text for MSG-P1-001 is not in this chunk; legacy wording kept, no wording invented."
+  },
+  {
+   "ruling": "R-23242",
+   "item": "GAP-2797",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Configuration bullet now states the non-blocking consumed contract, fake at version in force, and no rule row or package of its own."
+  },
+  {
+   "ruling": "R-23442",
+   "item": "GAP-2794",
+   "status": "Resolved",
+   "section": "2, 13",
+   "target": "",
+   "change": "",
+   "note": "Trigger read as pack-complete and template-withdrawn signals with no topic or consumer group; case stage outcome and hold with rule version."
+  }
+ ]
+}

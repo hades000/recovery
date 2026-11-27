@@ -1,0 +1,180 @@
+{
+ "edits": [
+  {
+   "old": "| Ready to start | After RWB-P2-E1007-APP |",
+   "new": "| Ready to start | After RWB-P2-E1007-APP (not done yet) and RWB-P2-E2001-OPS (not done yet) |"
+  },
+  {
+   "old": "AC3 (driven; owned by RWB-P1-E2001-APP)",
+   "new": "AC3 (owned by RWB-P1-E2001-APP; driven here)"
+  },
+  {
+   "old": "AC5 (driven; owned by RWB-P1-E2001-APP)",
+   "new": "AC5 (owned by RWB-P1-E2001-APP; driven here)"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E2-001-09 |",
+   "new": "| MSG-P4-002 | AC9 (TC-E2-001-09) |"
+  },
+  {
+   "old": "| MSG-GEN-006 | TC-E2-001-10, the CON contract tests |",
+   "new": "| MSG-GEN-006 | AC10 (TC-E2-001-11, the CON contract tests) |"
+  },
+  {
+   "old": "| MSG-P7-003 | TC-E2-001-10 |",
+   "new": "| MSG-P7-003 | AC11 (TC-E2-001-10) |"
+  },
+  {
+   "old": "| None | RWB-P2-E2001-OPS |",
+   "new": "| None | AC12 (TC-E2-001-12; RWB-P2-E2001-OPS deploys the flag) |"
+  },
+  {
+   "old": "    Then the response is 409 with message MSG-P2-006",
+   "new": "    Then the response is 409 with message MSG-P2-006\n\n  Scenario: AC9 Rerun refused for a role without the right (exception X7)\n    Given the rwb-source-data contract mock refuses the administrative rerun for a role without Platform administration\n    When a role without Platform administration requests a rerun of JOB-02\n    Then the request is refused with message MSG-P4-002\n    Then no step starts and nothing changes\n\n  Scenario: AC10 Source does not answer inside the budget (exception X8)\n    Given the rwb-case contract mock does not answer inside the 2 s budget for the account group of the run\n    When case creation runs for business date 2026-12-14\n    Then the call is made once, with no retry on a 4xx answer and a retry with jitter on a 5xx answer\n    Then the run ends as PARTIAL with the unanswered call named and message MSG-GEN-006\n    Then the accounts it covered are tried in the next run\n\n  Scenario: AC11 Run decision record cannot be written (exception X9)\n    Given the run decision record cannot be written\n    When the run writes its summary\n    Then the run summary and the record roll back together\n    Then the run ends as failed with an incident and no DecisionRecorded event is published\n    Then the next delivery starts a fresh run\n\n  Scenario: AC12 Feature flag off (exception X10)\n    Given the feature flag rwb.integration.efs-handover is off\n    When AceDataReady is delivered for ALS with business date 2026-12-14\n    Then no listener is deployed and no step starts\n    Then no case, account link or EFS entry is written"
+  },
+  {
+   "old": "The four criteria are the legacy criteria this slice owns, copied word for word with the origin tag on the scenario line and the legacy Background unchanged.",
+   "new": "AC2, AC4, AC7 and AC8 are the legacy criteria this slice owns, copied word for word with the origin tag on the scenario line and the legacy Background unchanged. AC9 to AC12 cover the exception paths X7 to X10 of section 5 and carry no origin tag, since they are not legacy criteria."
+  },
+  {
+   "old": "| BR1 | A case enters at 90 days past due | DL16; parameter case.entry.dpd_threshold |",
+   "new": "| BR1 | A case enters at 90 days past due | DL16 (ASM-1094, ASM-5264); parameter case.entry.dpd_threshold |"
+  },
+  {
+   "old": "| BR2 | One case per customer per product group; a further account of the same customer and product group is linked to the open case | DL17; REQ-CHO-005 |",
+   "new": "| BR2 | One case per customer per product group; a further account of the same customer and product group is linked to the open case | DL17 (no assumption: Not specified in the source documents (DOR-RWB-P2-E2001-APP-18)); REQ-CHO-005 |"
+  },
+  {
+   "old": "| BR5 | The EFS contact and promise history of the collection period is appended to the interaction ledger with source system EFS, one entry per `efs_record_key` | DL29; LOV-SOURCE; REQ-CHO-001; R-UNI-40 |",
+   "new": "| BR5 | The EFS contact and promise history of the collection period is appended to the interaction ledger with source system EFS, one entry per `efs_record_key` | DL29 (no assumption: Not specified in the source documents (DOR-RWB-P2-E2001-APP-18)); LOV-SOURCE; REQ-CHO-001; R-UNI-40 |"
+  },
+  {
+   "old": "The only rows this story writes are the inbox, the run lock and stored keys, the run's own outbox rows through the library, and the run decision record.",
+   "new": "The only rows this story writes are the inbox, the run lock and stored keys, the run's own outbox rows through the library, and the run decision record.\n\n**Personal data.** Personal-data fields carried by this story are `person_key` (DF-ACE-056) and `account_key` (DF-ACE-001), and the groups of the run summary, which carry `person_key` by person and product group. The alert and the run record carry counts, business dates, data product codes and message ids only (section 14). `decision_record` is a library table of the platform library (section 12.7), not an entity of the Logical Data Model v9 or Data Classification v5; it carries the counts, the outcome and the freshness answers of the run (DF-DEC-001 to DF-DEC-018)."
+  },
+  {
+   "old": "**Run summary element.** One object per run, and no table of its own (ASM-1091):",
+   "new": "**Run summary element.** One object per run, and no table of its own (ASM-1091). Its elements are the activity result of the run, not stored fields, so they carry no BR Field ID (BR12):"
+  },
+  {
+   "old": "rows of `efs_ledger_outcome` in `rwb_source_data`, applied by rwb-source-data inside its append",
+   "new": "rows of `efs_ledger_outcome` in rwb-source-data's schema, applied by rwb-source-data inside its append"
+  },
+  {
+   "old": "| TC-E2-001-01 | AC1, BR1, BR3, BR5 | End to end | Synthetic account A-0001 with 14 contact rows and 2 promise rows in v_ace_efs_action |",
+   "new": "| TC-E2-001-01 | Cited (owned by RWB-P3-E2001-APP and RWB-P1-E2001-APP); BR1, BR3, BR5 | End to end | Synthetic account A-0001 with 14 contact rows and 2 promise rows of the EFS history served by the rwb-source-data contract |"
+  },
+  {
+   "old": "| TC-E2-001-03 | AC3, BR4 | End to end | ACE batch for ALS of 2026-12-15 not COMPLETE |",
+   "new": "| TC-E2-001-03 | Cited (owned by RWB-P1-E2001-APP); BR4 | End to end | ACE batch for ALS of 2026-12-15 not COMPLETE |"
+  },
+  {
+   "old": "| TC-E2-001-05 | AC5, BR8 | End to end | Account A-0003 with no row in v_ace_customer |",
+   "new": "| TC-E2-001-05 | Cited (owned by RWB-P1-E2001-APP); BR8 | End to end | Account A-0003 with no customer row in the ACE customer data |"
+  },
+  {
+   "old": "| TC-E2-001-06 | AC6, BR4 | End to end | Good batch on 2026-12-17 after a missed day |",
+   "new": "| TC-E2-001-06 | Cited (owned by RWB-P1-E2001-APP and RWB-P3-E2001-APP); BR4 | End to end | Good batch on 2026-12-17 after a missed day |"
+  },
+  {
+   "old": "| TC-E2-001-09 | Access | Component |",
+   "new": "| TC-E2-001-09 | Access, AC9 | Component |"
+  },
+  {
+   "old": "| TC-E2-001-10 | Principle 5 | NFR | Decision log write forced to fail during a run of 50 synthetic accounts; no case is created without its entry |",
+   "new": "| TC-E2-001-10 | Principle 5, AC11 | NFR | Decision record write forced to fail during a run of 50 synthetic accounts; no case is created without its entry |\n| TC-E2-001-11 | AC10, BR9; the operations, events and activities of section 12 | Contract | rwb-case contract mock does not answer inside the 2 s budget; one hop, no retry on a 4xx answer, retry with jitter on a 5xx answer; the run ends PARTIAL with MSG-GEN-006 |\n| TC-E2-001-12 | AC12, BR10 | Component | Feature flag rwb.integration.efs-handover off; no listener is deployed, so no case, link or entry is written |\n| TC-E2-001-13 | BR11; the tables of section 12.7 | Component | Boundary values of each table of section 12.7: processed_event, idempotency_key, decision_record, outbox_event and outbox_delivery (ASM-3438) |\n| TC-E2-001-14 | BR12 | Component | The run summary has no table of its own; one decision record with decision code \"D6 entry\" and the REC-01 row through the rwb-source-data contract |\n| TC-E2-001-15 | BR13 | Component | A browser call to the step is refused; the step is reached only through gateway-bff composite routes for SCR-02, SCR-04 and SCR-45 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15584",
+   "item": "DOR-RWB-P2-E2001-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now names the personal-data fields carried (person_key, account_key, run summary groups) and states decision_record is a library table."
+  },
+  {
+   "ruling": "R-15585",
+   "item": "DOR-RWB-P2-E2001-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-11 contract, TC-13 boundary for 12.7 tables (ASM-3438); §16 now 15 rows. §18 vs RTM v7 lists remain for RTM sync."
+  },
+  {
+   "ruling": "R-15586",
+   "item": "DOR-RWB-P2-E2001-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Ready to start row now states RWB-P2-E1007-APP and RWB-P2-E2001-OPS are not done yet."
+  },
+  {
+   "ruling": "R-15587",
+   "item": "DOR-RWB-P2-E2001-APP-18",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "DL16, DL17, DL29 assumptions placed in §8; DL17 and DL29 flagged as not specified. DL06 is not in this chunk's text, so not applied here."
+  },
+  {
+   "ruling": "R-15588",
+   "item": "DOR-RWB-P2-E2001-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Replaced the rwb_source_data schema name with rwb-source-data's schema in the efs_ledger_outcome bullet."
+  },
+  {
+   "ruling": "R-15589",
+   "item": "DOR-RWB-P2-E2001-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X2/X3 owner named; X7-X10 mapped to new AC9-AC12 in §7 with TC-09, TC-11, TC-10, TC-12; cited TCs marked as not owned."
+  },
+  {
+   "ruling": "R-15590",
+   "item": "DOR-RWB-P2-E2001-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-11 (BR9), TC-12 (BR10), TC-13 (BR11), TC-14 (BR12), TC-15 (BR13) so every rule has a test case."
+  },
+  {
+   "ruling": "R-15591",
+   "item": "DOR-RWB-P2-E2001-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Run summary states it carries no BR Field ID (BR12); TC-01 data now uses the rwb-source-data contract. Legacy JOB-02 wording kept in copied AC2-AC8."
+  },
+  {
+   "ruling": "R-15592",
+   "item": "DOR-RWB-P2-E2001-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Confirm the standard v4 text of MSG-P1-001 and MSG-P2-006 and the standard's meaning of MSG-GEN-006 so §14 can be aligned.",
+   "note": "Story §14 keeps FSD wording for MSG-P1-001 (GAP-0651); the standard text is needed to align it."
+  },
+  {
+   "ruling": "R-22303",
+   "item": "GAP-3175",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Event and Messaging next version; Kafka Topic and Event Catalog v1",
+   "change": "Add LoadCompleted as the legacy alias of AceDataReady (EV-26), producer rwb-source-data, on rwb.source-data.events.v1.",
+   "note": "Story already uses AceDataReady (EV-26); the legacy name is recorded in the catalogues."
+  }
+ ]
+}

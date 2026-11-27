@@ -1,0 +1,59 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P10-E2028-OPS",
+ "unit": "u01",
+ "rulings": [
+  "R-24580"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 6
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-24580",
+     "item": "CG-ALL-2711",
+     "status": "Resolved",
+     "section": "4, 5, 7, 12.7, 13, 16",
+     "target": "",
+     "change": "",
+     "note": "Body references now use the next free number of the service's own Flyway sequence (V0001 to Vnnnn) per Service Template Spec v1 §3.1; exact number Not specified in the source documents (CG-ALL-2711); change log not edited."
+    }
+   ],
+   "edits": [
+    {
+     "old": "2. The chart deploys the api deployment and the worker deployment with the `rwb_agent` login reference and the platform secret references, and the pre-deploy migration job that runs the per-service Flyway sequence and applies `V10_008__agent_feedback.sql` before the rollout is marked ready (DP-15; AC1, AC2).",
+     "new": "2. The chart deploys the api deployment and the worker deployment with the `rwb_agent` login reference and the platform secret references, and the pre-deploy migration job that runs the per-service Flyway sequence and applies the `agent_feedback` migration at the next free number of that sequence (V0001 to Vnnnn) with the number Not specified in the source documents (CG-ALL-2711) before the rollout is marked ready (DP-15; AC1, AC2)."
+    },
+    {
+     "old": "| X1 | The migration job of `V10_008__agent_feedback.sql` fails | The deployment stays unready and the pipeline stops; no traffic to the new version | None | AC2 |",
+     "new": "| X1 | The migration job of the `agent_feedback` migration fails | The deployment stays unready and the pipeline stops; no traffic to the new version | None | AC2 |"
+    },
+    {
+     "old": "    Then it applies V10_008__agent_feedback.sql in the per-service Flyway sequence and reports the schema at the expected version before the rollout is marked ready",
+     "new": "    Then it applies the agent_feedback migration at the next free number of the per-service Flyway sequence (V0001 to Vnnnn) and reports the schema at the expected version before the rollout is marked ready"
+    },
+    {
+     "old": "| agent_feedback | P10 (`rwb_agent`) | Created by `V10_008__agent_feedback.sql` in the migration job, with unique (agent_run_id, item_key) and the verdict check |",
+     "new": "| agent_feedback | P10 (`rwb_agent`) | Created by the `agent_feedback` migration at the next free number of the service's own Flyway sequence in the migration job, with unique (agent_run_id, item_key) and the verdict check |"
+    },
+    {
+     "old": "**Migration job.** Runs the per-service Flyway sequence for schema `rwb_agent` with the service login as a pre-deploy job with a backoff limit; `V10_008__agent_feedback.sql` applies in order with the earlier P10 migrations, a failed job blocks the rollout and the release, and the sequence is forward only (DP-15; GAP-0624; ASM-0921).",
+     "new": "**Migration job.** Runs the per-service Flyway sequence for schema `rwb_agent` with the service login as a pre-deploy job with a backoff limit; the `agent_feedback` migration takes the next free number of the sequence (V0001 to Vnnnn) with the number Not specified in the source documents (CG-ALL-2711) and applies in order with the earlier P10 migrations, a failed job blocks the rollout and the release, and the sequence is forward only (DP-15; GAP-0624; ASM-0921)."
+    },
+    {
+     "old": "| TC-P10-E2028-OPS-02 | AC2, BR1, BR2 | NFR | The migration job applies `V10_008__agent_feedback.sql`, the schema reaches the expected version, the unique key and the check exist, and the login holds no other grant |",
+     "new": "| TC-P10-E2028-OPS-02 | AC2, BR1, BR2 | NFR | The migration job applies the `agent_feedback` migration at the next free number of the service's own Flyway sequence, the schema reaches the expected version, the unique key and the check exist, and the login holds no other grant |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

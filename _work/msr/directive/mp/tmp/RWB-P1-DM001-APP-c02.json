@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| X5 | The request carries no `account_key` | The answer is refused and names the field; no view is read | MSG-GEN-001 | Component test |",
+   "new": "| X5 | The request carries no `account_key` | The answer is refused and names the field; no view is read | MSG-GEN-001 | AC7, component test |"
+  },
+  {
+   "old": "| X6 | The read would need a column that `v_ace_account` does not carry | The field is absent from the answer and the column is raised once in RWB-ACE-001; no value is invented and no copy is created | None | Not a legacy AC; the legacy \"Later home\" row |",
+   "new": "| X6 | The read would need a column that `v_ace_account` does not carry | The field is absent from the answer and the column is raised once in RWB-ACE-001; no value is invented and no copy is created | None | AC8 |"
+  },
+  {
+   "old": "The six criteria above are new",
+   "new": "The eight criteria above are new"
+  },
+  {
+   "old": "AC1 and AC3 are the removal in the schema and in the build; AC2, AC4 and AC5 are the read; AC6 is the refusal.",
+   "new": "AC1 and AC3 are the removal in the schema and in the build; AC2, AC4 and AC5 are the read; AC6 is the refusal; AC7 is the refusal of a request without account_key; AC8 is the column the view does not carry."
+  },
+  {
+   "old": "    And the read path runs no query on \"v_ace_account\", \"v_ace_bucket_log\", \"v_ace_product\" or \"v_ace_branch\"\n    And no row is written to any table of schema \"rwb_source_data\"",
+   "new": "    And the read path runs no query on \"v_ace_account\", \"v_ace_bucket_log\", \"v_ace_product\" or \"v_ace_branch\"\n    And no row is written to any table of schema \"rwb_source_data\"\n\n  Scenario: AC7 A request without account_key is refused and names the field before any view is read (new, D-RCV-60)\n    Given a caller whose Case record right R is present\n    When the caller asks the read path with no account_key\n    Then the answer is refused and names the field \"account_key\" with message MSG-GEN-001\n    And the read path runs no query on \"v_ace_account\", \"v_ace_bucket_log\", \"v_ace_product\" or \"v_ace_branch\"\n\n  Scenario: AC8 A column the view does not carry is absent from the answer and is raised once, with no value invented (new, D-RCV-60)\n    Given the read would need a column that \"v_ace_account\" does not carry\n    When the read path is asked for account_key \"ACC0000017\"\n    Then the field is absent from the answer and no value is invented for it\n    And no copy of the column is created in schema \"rwb_source_data\"\n    And the column is raised once in RWB-ACE-001"
+  },
+  {
+   "old": "| TC-DM-001-04 | AC6; BR4 | Component | A caller whose Case record right R is absent in the authorise fake, asking for \"ACC0000017\"; a second call with the right present for the contrast |",
+   "new": "| TC-DM-001-04 | AC6; BR4 | Component | A caller whose Case record right R is absent in the authorise fake, asking for \"ACC0000017\"; a second call with the right present for the contrast |\n| TC-DM-001-05 | AC7, AC8; BR3, BR5, BR10 | Component | A request with no `account_key`; a read that would need a column `v_ace_account` does not carry; a constraint check of schema `recovery` showing `account_key` with no foreign key; `account_ext` checked for ACE columns; a dirty text date and Y/N flag through `recovery.ace_to_date` and `recovery.ace_to_boolean` returning NULL |"
+  },
+  {
+   "old": "| DP-15 | Template and Rules §R5.5 | The version on the per-service sequence, with the history row that records the removal (section 13, AC1) |",
+   "new": "| DP-15 | Template and Rules §R5.5 | The version on the per-service sequence, with the history row that records the removal (section 13, AC1) |\n| DP-06 | Template and Rules | Reference-data contract for the product and branch lists read through `v_ace_product` and `v_ace_branch` (sections 4 and 13) |\n| DP-07 | Template and Rules | Parameters read by this story: Not specified in the source documents (DOR-RWB-P1-DM001-APP-20) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09595",
+   "item": "CG-ALL-1885",
+   "status": "Resolved",
+   "section": "11, 12",
+   "target": "",
+   "change": "",
+   "note": "flyway_schema_history is recorded as the framework table at L239 ('None: framework table'); it is a Flyway object, not an LDM field."
+  },
+  {
+   "ruling": "R-09596",
+   "item": "CG-ALL-1886",
+   "status": "Cross-document",
+   "section": "17",
+   "target": "Logical Data Model v9 (Fields) / Data Classification v5 (Fields)",
+   "change": "Record recovery.ace_to_date as a helper function object defined in TSD P1 v3 T3.2, not a field, or add the function to the dictionary with its owner.",
+   "note": "ace_to_date is a helper function named in BR10 and TSD P1 v3 T3.2; it is not a dictionary field."
+  },
+  {
+   "ruling": "R-09597",
+   "item": "CG-ALL-1887",
+   "status": "Cross-document",
+   "section": "17",
+   "target": "Logical Data Model v9 (Fields) / Data Classification v5 (Fields)",
+   "change": "Record recovery.ace_to_boolean as a helper function object defined in TSD P1 v3 T3.2, not a field, or add the function to the dictionary with its owner.",
+   "note": "ace_to_boolean is a helper function named in BR10 and TSD P1 v3 T3.2; it is not a dictionary field."
+  },
+  {
+   "ruling": "R-09598",
+   "item": "CG-ALL-1889",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows TC-DM-001-01 and TC-DM-001-04 with Given, When and Then from AC1 to AC6, and TC-DM-001-05 from AC7 and AC8 (section 16 of this story).",
+   "note": "Section 16 lists the test cases; the v8 workbook has no rows for them yet."
+  },
+  {
+   "ruling": "R-14802",
+   "item": "DOR-RWB-P1-DM001-APP-11",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "The guardrail statement on personal data sits outside the supplied story parts; no wording can be set without that text."
+  },
+  {
+   "ruling": "R-14803",
+   "item": "DOR-RWB-P1-DM001-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows TC-DM-001-01 and TC-DM-001-04 with Given, When and Then copied from their criteria, and TC-DM-001-05 from AC7 and AC8 (section 16).",
+   "note": "Section 16 is complete for this story; the v8 test rows are missing."
+  },
+  {
+   "ruling": "R-14804",
+   "item": "DOR-RWB-P1-DM001-APP-2",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process values are not in the source documents; adding those columns would need invented values."
+  },
+  {
+   "ruling": "R-14805",
+   "item": "DOR-RWB-P1-DM001-APP-20",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Added DP-06 and DP-07 rows to the pattern table; product and branch lists named; parameters marked not specified."
+  },
+  {
+   "ruling": "R-14806",
+   "item": "DOR-RWB-P1-DM001-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 (X5) and AC8 (X6), set their Covered by in section 5, and added TC-DM-001-05 in section 16."
+  },
+  {
+   "ruling": "R-14807",
+   "item": "DOR-RWB-P1-DM001-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "",
+   "note": "TC-DM-001-05 now covers BR3, BR5 and BR10, so no business rule lacks a test case."
+  }
+ ]
+}

@@ -1,0 +1,119 @@
+{
+ "edits": [
+  {
+   "old": "\n\nScenario: AC6 The console ingest is answered on the access path reconciled under GAP-0811, and the call to rwb-case names the list as table (new, D-RCV-60)\nScenario: AC7 The file-size and row caps and the enabled lists are read from parameter rows and no business value is set in code (new, D-RCV-60)",
+   "new": ""
+  },
+  {
+   "old": "    Then one idempotency hit is recorded and no second REF-LOAD entry is written",
+   "new": "    Then one idempotency hit is recorded and no second REF-LOAD entry is written\n\n  Scenario: AC6 The console ingest is answered on the access path reconciled under GAP-0811, and the call to rwb-case names the list as table (new, D-RCV-60)\n    Given the rwb-case contract mock returns load \"RL-2026-014\" in state \"LOADED\"\n    When a valid file for LOV-ROUTE is posted to POST /api/recovery/access/v1/admin/lov-loads with lovCode \"LOV-ROUTE\"\n    Then the rwb-case reference-load operation is called with the list named as table and the answer is returned by this service\n\n  Scenario: AC7 The file-size and row caps and the enabled lists are read from parameter rows and no business value is set in code (new, D-RCV-60)\n    Given the parameters fake holds the file-size and row caps and the enabled lists\n    When a valid file for LOV-ROUTE is posted\n    Then the caps and the enabled lists are read through DP-06 and DP-07 and no business value is set in code\n\n  Scenario: AC8 A request without a session is answered 401 and a request to a path this service does not provide is answered 404 (new, D-RCV-60)\n    Given test user \"U-9410\" sends a valid file for LOV-ROUTE without a session\n    When the file is posted to POST /api/recovery/access/v1/admin/lov-loads\n    Then the response is 401 and the file is not parsed\n    Given a request is sent to a path that this service does not provide\n    When the request is sent\n    Then the response is 404\n\n  Scenario: AC9 A consumed rwb-case call that fails or does not answer is refused and stores no version (new, D-RCV-60)\n    Given the rwb-case contract mock does not answer the reference-load operation\n    Given a valid file for LOV-ROUTE\n    When it is posted to POST /api/recovery/access/v1/admin/lov-loads with lovCode \"LOV-ROUTE\", validFrom \"2027-01-01\" and an Idempotency-Key\n    Then the response is 503 as in section 4 step 13 and no version is stored"
+  },
+  {
+   "old": "**SCR-39** is the rule-version screen, moved to RWB-P4-AD011-APP; its states are not part of this story.",
+   "new": "**SCR-39** is the rule-version screen, moved to RWB-P4-AD011-APP; its states are not part of this story. **Screen states of SCR-39 (Rules and parameters).** Empty: Not specified in the source documents (CG-ALL-4702). Loading: Not specified in the source documents (CG-ALL-4702). Error: Not specified in the source documents (CG-ALL-4702). No access: Not specified in the source documents (CG-ALL-4702)."
+  },
+  {
+   "old": "**Screen states of SCR-40 (Reference data).** Empty: Not specified in the source documents (DOR-RWB-P4-AD009-APP-10). Loading: Not specified in the source documents (DOR-RWB-P4-AD009-APP-10). Error: the 503 of section 4 step 13 is shown; MSG-P7-003 names a record that cannot be written. No access: the 403 of section 4 step 3 with MSG-P4-002 is shown.",
+   "new": "**Screen states of SCR-40 (Reference data).** Empty: Not specified in the source documents (DOR-RWB-P4-AD009-APP-10; CG-ALL-4703). Loading: Not specified in the source documents (DOR-RWB-P4-AD009-APP-10; CG-ALL-4703). Error: Not specified in the source documents (CG-ALL-4703). No access: Not specified in the source documents (CG-ALL-4703)."
+  },
+  {
+   "old": "| BR3 | The file is a CSV or XLSX with a header row and the columns `value_code`, `label_en`, `label_th`, `sort_order` and `valid_from`, which are the columns of `lov_value` | TSD P4 v3 T3.1, DF-REF-027 to DF-REF-033; ASM-1513 |",
+   "new": "| BR3 | The file is a CSV or XLSX with a header row and the columns `value_code`, `label_en`, `label_th`, `sort_order` and `valid_from`, which are the columns of `lov_value` | TSD P4 v3 T3.1, DF-REF-027 to DF-REF-033; ASM-1513; GAP-0812 |"
+  },
+  {
+   "old": "| BR4 | `label_en` is required on every row, `value_code` is unique within the file and against the list in force, the list code is known and `valid_from` is present; the Thai label is optional | Legacy AC1; ASM-1515 |",
+   "new": "| BR4 | The checks are: the file parses, the required columns are present, `label_en` is required on every row, `value_code` is unique within the file and against the list in force, the list code is known and `valid_from` is present; the Thai label is optional; a failure is 422 naming the field and the row | Legacy AC1; ASM-1515; GAP-0814 |"
+  },
+  {
+   "old": "| BR6 | The file-size and row caps are parameter rows read through DP-06 and are not constants in code | REQ-DRI-010; ASM-1516 |",
+   "new": "| BR6 | The file-size and row caps are parameter rows read through DP-06 and are not constants in code: 5 MB and 5,000 rows, and a file above either is answered with 422; the parameter keys are fixed at contract review | REQ-DRI-010; ASM-1516; GAP-0815 |"
+  },
+  {
+   "old": "| TC-AD-009-09 | AC6, AC7, BR2, BR10 | Component | The console load posted on the access path, against the rwb-case fake answering RL-2026-014 in LOADED; the caps and the enabled lists served from the parameters fake |",
+   "new": "| TC-AD-009-09 | AC6, AC7, BR2, BR10 | Component | The console load posted on the access path, against the rwb-case fake answering RL-2026-014 in LOADED; the caps and the enabled lists served from the parameters fake |\n| TC-AD-009-10 | AC8, BR2 | Component | A post without a session answers 401; a post to a path this service does not provide answers 404; no file is parsed |\n| TC-AD-009-11 | AC9, BR1 | Component | The rwb-case reference-load fake does not answer during a valid load; 503 and no version is stored |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25260",
+   "item": "CG-ALL-4702",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-39 states added to section 15 as Not specified, since Screen Specifications v1 lists no states."
+  },
+  {
+   "ruling": "R-25261",
+   "item": "CG-ALL-4703",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-40 empty, loading, error and no access states set to Not specified, since Screen Specifications v1 lists none."
+  },
+  {
+   "ruling": "R-28516",
+   "item": "GAP-1567",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Technical Specification P4 v3 T3.1; rwb-access contract",
+   "change": "Drop lov_value and partner_user from TSD P4 T3.1; keep the lists of values in TSD P3 and the partner identity in TSD S9; the rwb-access contract states which list-of-values versions and partner identity attributes it reads and how often it refreshes them.",
+   "note": "Ownership conflict sits in TSD P4 T3.1 and the rwb-access contract; this story text already assigns lov_value to rwb-case."
+  },
+  {
+   "ruling": "R-28962",
+   "item": "GAP-0812",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR3 already gives CSV or XLSX with the header row and the five lov_value columns; GAP-0812 added to its source."
+  },
+  {
+   "ruling": "R-28963",
+   "item": "GAP-0814",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR4 now lists parse, required columns, duplicate checks, unknown list code, valid-from, and 422 naming field and row."
+  },
+  {
+   "ruling": "R-28964",
+   "item": "GAP-0815",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR6 now states 5 MB and 5,000 rows read through DP-06, 422 above either, and parameter keys fixed at contract review."
+  },
+  {
+   "ruling": "R-30801",
+   "item": "NEWAC-RWB-P4-AD009-APP-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC6 existed only as a line outside the Gherkin block; moved into the Feature with steps. TC-AD-009-09 already covers AC6, BR2, BR10."
+  },
+  {
+   "ruling": "R-30802",
+   "item": "NEWAC-RWB-P4-AD009-APP-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC7 number was taken; added as AC8 (next free) for 401 and 404 answers, with test row TC-AD-009-10 in section 16."
+  },
+  {
+   "ruling": "R-30803",
+   "item": "NEWAC-RWB-P4-AD009-APP-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 (next free) for a failed or unanswered rwb-case call with 503 and no version; test row TC-AD-009-11 in section 16."
+  }
+ ]
+}

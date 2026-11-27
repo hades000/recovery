@@ -1,0 +1,111 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E1028-CON",
+ "unit": "u01",
+ "rulings": [
+  "R-00731",
+  "R-00732",
+  "R-00734",
+  "R-05024",
+  "R-05025",
+  "R-15897",
+  "R-30568"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 4
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-00731",
+     "item": "CG-ALL-3625",
+     "status": "Resolved",
+     "section": "7, 12.1",
+     "target": "",
+     "change": "",
+     "note": "LOV-TIMER is a Closed list of 9 values (Reference Data and Lists of Values v5: Lists row 19, Values rows 84-92); AC1 and 12.1 now fix timerType as that closed list."
+    },
+    {
+     "ruling": "R-00732",
+     "item": "CG-ALL-3626",
+     "status": "Resolved",
+     "section": "7, 12.1",
+     "target": "",
+     "change": "",
+     "note": "LOV-TIMER-STATUS is a Closed list of 4 values (Reference Data and Lists of Values v5: Lists row 20, Values rows 93-96); AC1 and 12.1 now fix status as that closed list."
+    },
+    {
+     "ruling": "R-00734",
+     "item": "CG-ALL-3637",
+     "status": "Cross-document",
+     "section": "2",
+     "target": "Recovery Workbench Service Template Specification v1",
+     "change": "Rule a Java package segment for rwb-case that is not the Java reserved word 'case' and update the package row (row 371, currently th.co.scb.ace.workbench.recovery.case); the story then copies the ruled name.",
+     "note": "Service Template Specification v1 row 371 gives only the package with the reserved segment; no alternative segment is stated in any source, so none is written here."
+    },
+    {
+     "ruling": "R-05024",
+     "item": "DOR-RWB-P3-E1028-CON-14",
+     "status": "Not applied",
+     "section": "3",
+     "target": "",
+     "change": "",
+     "note": "Looked for a signed epic design record in the story and the source documents; none is available, so the sign-off cannot be recorded (DOR-RWB-P3-E1028-CON-14)."
+    },
+    {
+     "ruling": "R-05025",
+     "item": "DOR-RWB-P3-E1028-CON-16",
+     "status": "Not applied",
+     "section": "6",
+     "target": "",
+     "change": "",
+     "note": "The story carries no size and the source documents give none; the squad sizes it at refinement, so no size value can be written (DOR-RWB-P3-E1028-CON-16)."
+    },
+    {
+     "ruling": "R-15897",
+     "item": "DOR-RWB-P3-E1028-CON-10",
+     "status": "Cross-document",
+     "section": "15",
+     "target": "RWB-P3-E2015-APP and RWB-P3-E1035-CON",
+     "change": "Define the empty, loading, error and no access states of SCR-03 and SCR-09 and their message text; section 15 records them as Not specified in the source documents (CG-ALL-3639, CG-ALL-3640).",
+     "note": "Section 15 already lists the Loading states and records the empty, error and no access states as Not specified (CG-ALL-3639, CG-ALL-3640); no message text exists in the sources."
+    },
+    {
+     "ruling": "R-30568",
+     "item": "NEWAC-RWB-P3-E1028-CON-AC7",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Added AC7 for BR1 to BR10 as guardrail and boundary checks in section 7, with its test case TC-P3-E1028-CON-09 in section 16."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then timerType is a LOV-TIMER code, status is a LOV-TIMER-STATUS code and escalatedToRole is a role code and not a display name",
+     "new": "    Then timerType is a closed LOV-TIMER code (nine values), status is a closed LOV-TIMER-STATUS code (four values) and escalatedToRole is a role code and not a display name"
+    },
+    {
+     "old": "The three fields `nextStepOwnerRole`, `nextEscalationRole` and `inWarning` are added to the same `Timer` resource by RWB-P3-E2015-CON and are not declared here.",
+     "new": "The three fields `nextStepOwnerRole`, `nextEscalationRole` and `inWarning` are added to the same `Timer` resource by RWB-P3-E2015-CON and are not declared here.\n\nThe `timerType` and `status` properties are closed lists — LOV-TIMER with nine values and LOV-TIMER-STATUS with four — read through the reference-data contract of rwb-case (RWB-P3-E1043-CON, DP-07). The document fixes the enum of each list, so a value outside it fails schema validation and a new list value is a change to this baseline."
+    },
+    {
+     "old": "    Then the escalation columns escalatedToRole and escalatedAt carry their placeholder until the field-level detail is settled (GAP-2203; ASM-3618)",
+     "new": "    Then the escalation columns escalatedToRole and escalatedAt carry their placeholder until the field-level detail is settled (GAP-2203; ASM-3618)\n\n  Scenario: AC7 The ten business rules are proved by the guardrail and boundary checks (new, D-RCV-60)\n    Given the ten business rules BR1 to BR10 of section 8 and the guardrails of section 17\n    When the guardrail and boundary checks run against the two artefacts and the four fakes\n    Then BR1 and BR7 hold: only the base /api/recovery/case/v1 and only operations owned by rwb-case are declared as provided\n    Then BR2 and BR3 hold: every event name is rwb.case.<Event>.v1 on rwb.case.events.v1, keyed by caseId, with the CloudEvents 1.0 envelope and no personal data\n    Then BR4 holds: no read declares an Idempotency-Key\n    Then BR5 holds: one error envelope and one message ID per condition, with the business texts copied unchanged from the legacy story\n    Then BR6 holds: every schema change is additive within major version 1 and a breaking change is a new major version\n    Then BR8 holds: the durable timer inside CaseWorkflow is authoritative and the contract fixes what the workflow writes, never the mechanism\n    Then BR9 holds: no TimerDue event, no timer-check job and no Schedule is declared\n    Then BR10 holds: no level, warning percentage, escalation role, legal period, warning day or timeout is fixed in the contract"
+    },
+    {
+     "old": "| TC-P3-E1028-CON-08 | BR2 to BR6; BR8 to BR10 | Contract | Event names and envelope; no Idempotency-Key on a read; one error envelope; additive schema change; workflow timer; no TimerDue, timer-check job or Schedule; no business value fixed |",
+     "new": "| TC-P3-E1028-CON-08 | BR2 to BR6; BR8 to BR10 | Contract | Event names and envelope; no Idempotency-Key on a read; one error envelope; additive schema change; workflow timer; no TimerDue, timer-check job or Schedule; no business value fixed |\n| TC-P3-E1028-CON-09 | AC7; BR1 to BR10 | Contract | Guardrail and boundary checks: one base and one topic per service, owned operations only, closed list values, one error envelope per condition, additive schema change, durable workflow timer, no retired element, no business value fixed |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

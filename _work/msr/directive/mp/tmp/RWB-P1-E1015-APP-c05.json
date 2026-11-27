@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "The criteria AC1, AC2, AC4 to AC7 and AC9 to AC11 sit with the other slices of RWB-E1-015 and are not in this story's gherkin.",
+   "new": "The criteria AC1, AC2, AC4 to AC7 and AC9 to AC11 sit with the other slices of RWB-E1-015 and are not in this story's gherkin; their rows are run by the owning slice, whose story ID is Not specified in the source documents (CG-ALL-2116). TC-E1-015-18 to TC-E1-015-21 prove AC15 to AC18, the exception paths X1 to X4 of section 5."
+  },
+  {
+   "old": "| MSG-P1-001 | AC2 (other slice) |",
+   "new": "| MSG-P1-001 | AC15 |"
+  },
+  {
+   "old": "| MSG-P1-001 | AC4 (other slice) |",
+   "new": "| MSG-P1-001 | AC16 |"
+  },
+  {
+   "old": "| None | AC5 (other slice) |",
+   "new": "| None | AC17 |"
+  },
+  {
+   "old": "| None | AC6 (other slice) |",
+   "new": "| None | AC18 |"
+  },
+  {
+   "old": "    Then a redelivered batch row starts no second workflow run",
+   "new": "    Then a redelivered batch row starts no second workflow run\n\n  Scenario: AC15 No COMPLETED batch by the expected-by time (BR2; legacy RWB-E1-015 AC2)\n    Given DP01 has no COMPLETED batch for business date 2026-11-30 at 08:00\n    When the freshness step runs at 08:00\n    Then DP01 is flagged stale\n    Then AceDataLate is published for DP01\n\n  Scenario: AC16 The batch row is FAILED (BR3; legacy RWB-E1-015 AC4)\n    Given the batch row for DP01 for business date 2026-11-30 reads FAILED at 05:20\n    When the freshness step runs\n    Then DP01 is flagged stale at once\n    Then the previous stamp stays in use\n    Then no daily job starts\n\n  Scenario: AC17 The same COMPLETED batch row is read twice (BR6; legacy RWB-E1-015 AC5)\n    Given the batch row for DP01 for business date 2026-11-30 is COMPLETED\n    When the same batch row is read twice\n    Then one data_product_load row exists for DP01 for 2026-11-30\n    Then the repeat is counted in duplicate_count\n    Then no second AceDataReady event is published\n\n  Scenario: AC18 A late batch arrives after the stale flag (legacy RWB-E1-015 AC6)\n    Given DP01 is STALE for business date 2026-11-30\n    When the batch row for DP01 for 2026-11-30 completes at 08:40\n    Then DP01 is LOADED with the new loaded_at\n    Then the daily jobs start for business date 2026-11-30"
+  },
+  {
+   "old": "| TC-E1-015-17 | AC14, BR11 | End to end | DP01 fed by one source, expected-by 08:00 Asia/Bangkok; redelivered batch row |",
+   "new": "| TC-E1-015-17 | AC14, BR11 | End to end | DP01 fed by one source, expected-by 08:00 Asia/Bangkok; redelivered batch row |\n| TC-E1-015-18 | AC15, BR2 | End to end | DP01 with no COMPLETED batch at 08:00; test clock |\n| TC-E1-015-19 | AC16, BR3 | End to end | Batch row for DP01 FAILED at 05:20 |\n| TC-E1-015-20 | AC17, BR6 | End to end | Same COMPLETED batch row read twice |\n| TC-E1-015-21 | AC18 | End to end | Late batch for DP01 at 08:40 after the stale flag |"
+  },
+  {
+   "old": "State Loading: skeleton rows.",
+   "new": "State Loading: skeleton rows. State Empty: Not specified in the source documents (CG-ALL-2119). State Error: Not specified in the source documents (CG-ALL-2119). State No access: Not specified in the source documents (CG-ALL-2119)."
+  },
+  {
+   "old": "this story fixes the service side only.",
+   "new": "this story fixes the service side only. SCR-45 states: empty, loading, error and no access are Not specified in the source documents (CG-ALL-2120)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-24330",
+   "item": "CG-ALL-2116",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "§16 now marks the rows for AC1, AC2, AC4 to AC7 and AC9 to AC11 as run by the owning slice; that slice's story ID is not in the sources."
+  },
+  {
+   "ruling": "R-24331",
+   "item": "CG-ALL-2117",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the REQ-RDF-009 test list with RWB-P1-E1015-APP §18 (TC-E1-015-03, TC-E1-015-08 and the §16 rows) in the next RTM version; TC-E1-023-02, TC-E1-023-04 and TC-E1-069-03 belong to other stories.",
+   "note": "Story §18 is correct for its own rows; the RTM carries other stories' tests and must be aligned in its next version."
+  },
+  {
+   "ruling": "R-24332",
+   "item": "CG-ALL-2119",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-03 §15 now lists empty, loading, error and no access; empty, error and no access are Not specified in the source documents."
+  },
+  {
+   "ruling": "R-24333",
+   "item": "CG-ALL-2120",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-45 §15 now states empty, loading, error and no access as Not specified in the source documents, since the screen spec lacks them."
+  },
+  {
+   "ruling": "R-28492",
+   "item": "GAP-0494",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-P1-E1015-OPS",
+   "change": "Carry the Schedule name pattern, the catch-up window and the deployment capacity as values; extend the catalog with the remaining products' expected_by values once the data steward confirms them.",
+   "note": "data_product.expected_by stays the only cut-off source; the story already uses it, so only the operations values remain open."
+  },
+  {
+   "ruling": "R-28918",
+   "item": "GAP-3233",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Legacy dependency trace sheet",
+   "change": "Keep the five version 4 dependencies as Not carried rows; add an X row later only if the run books or the harness wait for the named story.",
+   "note": "The five dependencies are team-type work outside the application lane; this story has no row to change."
+  },
+  {
+   "ruling": "R-30197",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC12",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added as AC15 (X1) with TC-E1-015-18; AC12 to AC14 are taken by BR9 to BR11, so the next free numbers were used."
+  },
+  {
+   "ruling": "R-30198",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC13",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added as AC16 (X2) with TC-E1-015-19; section 5 Covered by now points to AC16."
+  },
+  {
+   "ruling": "R-30199",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC14",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added as AC17 (X3) with TC-E1-015-20; section 5 Covered by now points to AC17."
+  },
+  {
+   "ruling": "R-30200",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC15",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added as AC18 (X4) with TC-E1-015-21; section 5 Covered by now points to AC18."
+  }
+ ]
+}

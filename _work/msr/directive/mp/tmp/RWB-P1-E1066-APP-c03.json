@@ -1,0 +1,104 @@
+{
+ "edits": [
+  {
+   "old": "and rwb-comms writes only the dispatch entry (GAP-0578).",
+   "new": "and rwb-comms writes only the dispatch entry (GAP-0578). A repeat of a proof-of-delivery read writes no second entry: it adds 1 to the duplicate_count of the DP07 freshness stamp of the business date and writes nothing else (GAP-0580). The append is called as POST /api/recovery/source-data/v1/interactions with an Idempotency-Key and answers 201 with the entry ID and case_seq; a repeated key with the same body answers 200 with the first entry; a reused key with a different body answers 409; an invalid field answers 422 with MSG-GEN-001; a caller without Case record C answers 403; an unknown or out-of-scope case answers 404 with MSG-P4-003; a failed write answers 503 with MSG-P1-022; the caller is a saga step that treats any non-2xx as a failed action and never keeps an action without its entry (GAP-0375, GAP-0504). The case-side link table interaction_link in rwb_case holds one row per case action that names its ledger entry, with the states PENDING, COMMITTED and REFUSED; one idempotency key is derived per action reference and the append runs before the local commit; the Flyway version is assigned by the sequence owner (GAP-2255). The path is /interactions on the service base /api/recovery/source-data/v1, the login is the rwb_source_data login, the property names are those of the API Specification and the required flags are settled at the baseline review (GAP-0505). An EFS history entry is keyed EFS:<efs_record_key>; this service counts the view rows it folds into one entry, and the ledger writer counts the hits of a repeated append in its idempotency store (GAP-0590)."
+  },
+  {
+   "old": "they run again in RWB-ITG-E1066-ITG against the live contracts.",
+   "new": "they run again in RWB-ITG-E1066-ITG against the live contracts. TC-E1-066-01 to TC-E1-066-04 and TC-E1-066-08 are run by the owning slices of AC1 to AC4 and AC8 (the rwb-case and rwb-integration slices and the migration trigger of this key), not by this story."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22179",
+   "item": "GAP-0580",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Repeat counted as one increment on the DP07 duplicate_count of the business date; no ledger row and no log-only hit."
+  },
+  {
+   "ruling": "R-22258",
+   "item": "GAP-1612",
+   "status": "Cross-document",
+   "section": "",
+   "target": "P7 functional specification (RWB P7 FSD)",
+   "change": "Re-issue without FEAT-ILG-01 to FEAT-ILG-10 and A2.26 to A2.35; keep REQ-ILG-001 to REQ-ILG-014 traced to CAP-P1-012.",
+   "note": "Ledger ownership stays with rwb-source-data; the P7 re-issue is a cross-document change."
+  },
+  {
+   "ruling": "R-22259",
+   "item": "GAP-1511",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-case and rwb-integration module specifications",
+   "change": "Remove their ledger table definitions; rwb-case reads the timeline and rwb-integration writes intake outcomes through this service's contract.",
+   "note": "This service owns the ledger tables and the single write path; the other two specifications must drop their table definitions."
+  },
+  {
+   "ruling": "R-22260",
+   "item": "GAP-0375",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Append contract, Idempotency-Key rule, status codes and saga failure handling now stated in the story."
+  },
+  {
+   "ruling": "R-22261",
+   "item": "GAP-0504",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Story states the append path, 403 without Case record C, 404 with MSG-P4-003 and 409 for a reused key; CON publication still to follow."
+  },
+  {
+   "ruling": "R-22262",
+   "item": "GAP-0505",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Path set to /interactions on the service base and login named; required flags remain for the baseline review as proposed."
+  },
+  {
+   "ruling": "R-22264",
+   "item": "GAP-2255",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Link table interaction_link, three states, one key per action and append-before-commit order stated; Flyway version left to sequence owner."
+  },
+  {
+   "ruling": "R-22265",
+   "item": "GAP-2256",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-case API specification (TSD P3 v3 T-A.1)",
+   "change": "Retire API-P3-014 and API-P3-015; keep the ledger operations in the rwb-source-data document.",
+   "note": "Ledger operations and the case-scoped read stay on the rwb-source-data base; rwb-case provides no counterpart."
+  },
+  {
+   "ruling": "R-22305",
+   "item": "GAP-0590",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Key format EFS:<efs_record_key> and the two counts stated; RWB-P2-E2001-CON still needs to publish the format."
+  },
+  {
+   "ruling": "R-24415",
+   "item": "CG-ALL-2291",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-01 to TC-04 and TC-08 marked as run by the owning slices of AC1 to AC4 and AC8, not by this story."
+  }
+ ]
+}

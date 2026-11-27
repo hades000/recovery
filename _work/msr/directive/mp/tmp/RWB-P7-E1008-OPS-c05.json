@@ -1,0 +1,62 @@
+{
+ "edits": [
+  {
+   "old": "    Then no entry instructs an update or a delete on decision_log_entry, and every entry that needs one escalates to the DB story instead",
+   "new": "    Then no entry instructs an update or a delete on decision_log_entry, and every entry that needs one escalates to the DB story instead\n\n  Scenario: AC9 The two reads are reached through gateway-bff and no job deletes a ledger row (new, D-RCV-60)\n    Given the two reads of the ledger and the retention of the ledger and of the seal files\n    When a smoke test calls each read through gateway-bff and the retention of each class is checked against the bank schedule\n    Then each read answers through gateway-bff and no pod is reached directly\n    Then no job of this story deletes a row of decision_log_entry\n\n  Scenario: AC10 A consumed call that fails or does not answer leaves no partial entry (new, D-RCV-60)\n    Given the ingest of rwb.decision-record.v1 with its retry topic and its .dlt\n    When a consumed call fails or does not answer\n    Then the envelope is retried on the retry topic and then dead-lettered to the .dlt\n    Then no partial row is written to decision_log_entry and the alert of AC4 names the ce_id and the reason\n\n  Scenario: AC11 A seal for a business date that did not verify is refused (new, D-RCV-60)\n    Given a business date for which the chain check of AC5 found a break\n    When a seal is requested for that business date\n    Then the request is refused, no seal file is written and the missing seal is itself an alert"
+  },
+  {
+   "old": "| BR9 | The two reads are reached through gateway-bff and never from a pod, so a smoke test proves the route and not only the container | DP-19; Template and Rules §R4 | Not specified in the source documents (DOR-RWB-P7-E1008-OPS-4) |",
+   "new": "| BR9 | The two reads are reached through gateway-bff and never from a pod, so a smoke test proves the route and not only the container | DP-19; Template and Rules §R4 | AC9; TC-P7-E1008-OPS-10 |"
+  },
+  {
+   "old": "| BR10 | Retention follows the bank schedule for the ledger and its own class for the seal files; no job of this story deletes a ledger row | DL26; the DB story's BR9 | Not specified in the source documents (DOR-RWB-P7-E1008-OPS-4) |",
+   "new": "| BR10 | Retention follows the bank schedule for the ledger and its own class for the seal files; no job of this story deletes a ledger row | DL26; the DB story's BR9 | AC9; TC-P7-E1008-OPS-10 |"
+  },
+  {
+   "old": "| TC-P7-E1008-OPS-09 | AC4 | Contract | The DecisionRecorded.v1 subscription on rwb.decision-record.v1 read against its event contract; the lag and dead-letter reads of that subscription |",
+   "new": "| TC-P7-E1008-OPS-09 | AC4 | Contract | The DecisionRecorded.v1 subscription on rwb.decision-record.v1 read against its event contract; the lag and dead-letter reads of that subscription |\n| TC-P7-E1008-OPS-10 | AC9 | End to end | A smoke test of each read through gateway-bff with no direct pod call; a retention check of the ledger and the seal files; a job scan for deletes on decision_log_entry |\n| TC-P7-E1008-OPS-11 | AC10 | Component | A consumed call of rwb.decision-record.v1 that fails and one that does not answer; the retry topic, the .dlt, the alert, and no partial row in decision_log_entry |\n| TC-P7-E1008-OPS-12 | AC11 | Component | A business date with a chain break; a seal requested for it; the refusal, no seal file, and the missing-seal alert |"
+  },
+  {
+   "old": "The legacy test cases of RWB-E1-008 are executed by RWB-P7-E1008-APP and RWB-ITG-E1008-ITG; these eight are the deployment's own and no legacy identifier is renumbered.",
+   "new": "The legacy test cases of RWB-E1-008 are executed by RWB-P7-E1008-APP and RWB-ITG-E1008-ITG; these twelve are the deployment's own and no legacy identifier is renumbered."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28467",
+   "item": "GAP-1232",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-PLT-TE006-CON; platform DB work",
+   "change": "Publish the login convention rwb-<short>_app with a schema owner role and a separate migration account; name the template version and column set of the three PLT library objects.",
+   "note": "Login names and library column set are defined in the platform DB work and RWB-PLT-TE006-CON, not in this story."
+  },
+  {
+   "ruling": "R-31417",
+   "item": "NEWAC-RWB-P7-E1008-OPS-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for a consumed call that fails or does not answer, and TC-P7-E1008-OPS-11."
+  },
+  {
+   "ruling": "R-31418",
+   "item": "NEWAC-RWB-P7-E1008-OPS-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for refusing a seal on a date that did not verify, and TC-P7-E1008-OPS-12."
+  },
+  {
+   "ruling": "R-31419",
+   "item": "NEWAC-RWB-P7-E1008-OPS-AC9",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 covering BR9 and BR10, linked both rows in section 8, and added TC-P7-E1008-OPS-10."
+  }
+ ]
+}

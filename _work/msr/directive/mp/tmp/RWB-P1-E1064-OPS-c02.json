@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| Item | Content |\n|---|---|\n| Deployment values | Image digest, chart version, replica counts, resource requests and limits, probe paths and timings, log level, namespace, build ID, flag value, alert thresholds, windows and route (GAP-0500; ASM-0692) |",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|\n| Deployment values | Image digest, chart version, replica counts, resource requests and limits, probe paths and timings, log level, namespace, build ID, flag value, alert thresholds, windows and route (GAP-0500; ASM-0692) | BR5 |"
+  },
+  {
+   "old": "| Schema | `rwb_source_data`, migrated by its own per-service Flyway sequence; this release applies the dictionary version |",
+   "new": "| Schema | `rwb_source_data`, migrated by its own per-service Flyway sequence; this release applies the dictionary version | BR1 |"
+  },
+  {
+   "old": "| Objects verified after the migration | `sys_objects` (122 rows), `sys_fields` (1,366 rows), `sys_field_version`, `data_product` and `data_contract`, all in `rwb_source_data` |",
+   "new": "| Objects verified after the migration | `sys_objects` (122 rows), `sys_fields` (1,366 rows), `sys_field_version`, `data_product` and `data_contract`, all in `rwb_source_data` | BR2 |"
+  },
+  {
+   "old": "| Objects not created here | The 30 `recovery.v_ace_*` views in schema `recovery`, created by RWB-P1-E1069-APP and reached by this service's own read path (DP-05) |",
+   "new": "| Objects not created here | The 30 `recovery.v_ace_*` views in schema `recovery`, created by RWB-P1-E1069-APP and reached by this service's own read path (DP-05) | BR7 |"
+  },
+  {
+   "old": "| Platform library objects | `processed_event`, `idempotency_key` and `outbox_event`, created in `rwb_source_data` by the library (DP-09, not in this story's pattern set) |",
+   "new": "| Platform library objects | `processed_event`, `idempotency_key` and `outbox_event`, created in `rwb_source_data` by the library (DP-09, not in this story's pattern set) | Not specified in the source documents (DOR-RWB-P1-E1064-OPS-7) |"
+  },
+  {
+   "old": "| Series | Field-read rate, field-read failures by status, field-change rate, contract read rate, publish attempts by result; dimensions environment, release, build ID |",
+   "new": "| Series | Field-read rate, field-read failures by status, field-change rate, contract read rate, publish attempts by result; dimensions environment, release, build ID | BR6 |"
+  },
+  {
+   "old": "| Alerts | The publish refusal with MSG-P1-021; the field-change conflict with MSG-GEN-004 |",
+   "new": "| Alerts | The publish refusal with MSG-P1-021; the field-change conflict with MSG-GEN-004 | BR3, BR4 |"
+  },
+  {
+   "old": "| Runbook entries | Failed migration, refused publish, field-change conflict; each with the check, the owner role and the recovery step |",
+   "new": "| Runbook entries | Failed migration, refused publish, field-change conflict; each with the check, the owner role and the recovery step | BR4 |"
+  },
+  {
+   "old": "| Secrets | The `rwb_source_data` credential, from the platform secret store; no other credential is carried |",
+   "new": "| Secrets | The `rwb_source_data` login (DP-02), from the platform secret store; no other credential is carried | BR1 |"
+  },
+  {
+   "old": "| Test data | Synthetic fields and one synthetic contract from the fixtures of RWB-P1-E1064-CON, read and refused in DEV and SIT; no production payload and no real document reference is used |",
+   "new": "| Test data | Synthetic fields and one synthetic contract from the fixtures of RWB-P1-E1064-CON, read and refused in DEV and SIT; no production payload and no real document reference is used | BR7 |"
+  },
+  {
+   "old": "The deployment topology (cluster names, node pools, replica counts, resource sizes, zone spread, ingress class and the exact probe timings) belongs to each environment and is set by the platform team in its values file; the chart exposes every one of them as a value and this story fixes only their names and the rule that they are never hard-coded (GAP-0500; ASM-0692).",
+   "new": "The deployment topology (cluster names, node pools, replica counts, resource sizes, zone spread, ingress class and the exact probe timings) belongs to each environment and is set by the platform team in its values file; the chart exposes every one of them as a value and this story fixes only their names and the rule that they are never hard-coded (GAP-0500; ASM-0692).\n\n**Reference load and ACE read.** The governance rows for `sys_fields` are loaded through the P3 rwb-case reference-load contract (POST /admin/reference-loads) and applied and read back through the P1 dictionary contract; the `days_past_due` value is read by P1 from the 30 `recovery.v_ace_*` views; the ACE team lead confirmation is recorded as a role, a date and a stored document reference (ASM-B-ITG-W1-08-E1064-1 to -6).\n\n**Reference-table read.** Every list of values, including LOV-ROLE and the refresh-cycle list, is read through GET /api/recovery/case/v1/reference-data/{tableCode} on the rwb-case base, with its fake, one hop and a 2 s timeout; no list is written as a constant in code.\n\n**Approved governance load.** An approved governance load is applied by the service's own load path in the transaction of its approval; the state of the load is carried on the load record, and an applied migration is never edited."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15108",
+   "item": "DOR-RWB-P1-E1064-OPS-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR8 needs a criterion in section 7 and a test case in section 16; that text is not in this chunk, so it cannot be added here."
+  },
+  {
+   "ruling": "R-15109",
+   "item": "DOR-RWB-P1-E1064-OPS-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add v_data_dictionary as a field or entity, or confirm it is a view outside the LDM; the story names it at lines 396 and 405.",
+   "note": "BR Field ID column added to section 11 for all 10 rows; the v_data_dictionary name is not in the story-side fix."
+  },
+  {
+   "ruling": "R-15110",
+   "item": "DOR-RWB-P1-E1064-OPS-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Confirm the MSG-P1-021 text so that it matches the story text in section 14.",
+   "note": "Standard text is not in this chunk; the story keeps the legacy copy unchanged."
+  },
+  {
+   "ruling": "R-22235",
+   "item": "GAP-0373",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 paragraph names the P3 reference-load contract, the P1 dictionary read and the ACE confirmation as role, date and document reference."
+  },
+  {
+   "ruling": "R-22236",
+   "item": "GAP-0498",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 names GET /api/recovery/case/v1/reference-data/{tableCode} with one hop, 2 s timeout, and no lists as constants."
+  },
+  {
+   "ruling": "R-22237",
+   "item": "GAP-0499",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Secrets row names the rwb_source_data login (DP-02). Required flags and lengths are set at baseline review, not in this story."
+  },
+  {
+   "ruling": "R-22238",
+   "item": "GAP-0890",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Register path, field names and marker vocabulary appear in no source; fixing them here would invent values."
+  },
+  {
+   "ruling": "R-22239",
+   "item": "GAP-0891",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Users Roles and Permissions",
+   "change": "Give RW-REFADM the Reference data A letter in the SIT and production matrices and record RW-REFADM as the approver of a governance load.",
+   "note": "RW-REFADM already holds Reference data CRUD; the four-eyes rule stays with the module."
+  },
+  {
+   "ruling": "R-22240",
+   "item": "GAP-0893",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 names the service's own load path, applied in the approval transaction. Load state values are not in the sources."
+  },
+  {
+   "ruling": "R-22241",
+   "item": "GAP-2306",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Register path, answer field names and check names appear in no source; only masked and clear are given, so the fix would invent values."
+  }
+ ]
+}

@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10.\n\nOpen decisions (each with its assumptions, all still open): DL03 (ASM-0189, ASM-0193, ASM-0578, ASM-2567); DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863); DL11 (ASM-0553, ASM-0703, ASM-1051, ASM-1104); DL19 (ASM-1051, ASM-1164, ASM-1809, ASM-1810); DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355)."
+  },
+  {
+   "old": "consumed as the cached permission decision the service holds behind gateway-bff; this story adds no guard of its own",
+   "new": "consumed as the cached permission decision the service holds behind gateway-bff; every REST operation of 12.1 calls the authorise check POST /api/recovery/access/v1/authorise (DP-08) with the caller, the case, the area DOCUMENTS and the right of the operation (shape assumed; GAP-0952); this story adds no guard of its own"
+  },
+  {
+   "old": "| X11 | A role without Documents C sends captures | 403 | MSG-P4-002 | Access test TC-E2-024-16 |",
+   "new": "| X11 | A role without Documents C sends captures | 403 | MSG-P4-002 | AC16 |"
+  },
+  {
+   "old": "| X12 | The decision log write fails for an item | Item refused; nothing stored for it | MSG-P7-003 | Principle 5 test TC-E2-024-17 |",
+   "new": "| X12 | The decision log write fails for an item | Item refused; nothing stored for it | MSG-P7-003 | AC17 |"
+  },
+  {
+   "old": "the three capture-client Givens that state what the field app sends.",
+   "new": "the three capture-client Givens that state what the field app sends. Scenarios AC16 to AC18 are new: AC16 covers exception X11, AC17 covers exception X12 and business rule BR10, and AC18 covers business rule BR9."
+  },
+  {
+   "old": "    Then the system stores nothing\n```",
+   "new": "    Then the system stores nothing\n\n  Scenario: AC16 A role without Documents C sends captures (exception X11)\n    Given a phone collector with role RW-PHONECOL who has Documents R only\n    Given the capture client mock sends one photo for case \"RW-2026-000501\"\n    When the officer syncs\n    Then the response is 403 with MSG-P4-002\n    Then no file or document is stored\n\n  Scenario: AC17 A decision log write fails for one item (exception X12, business rule BR10)\n    Given the sync carries two photos for case \"RW-2026-000501\"\n    Given the rwb-decision contract mock fails the write for the first photo\n    When the officer syncs\n    Then the system refuses the first photo with MSG-P7-003\n    Then the system accepts the second photo\n    Then no file or document is stored for the first photo\n\n  Scenario: AC18 Position and bill data are not logged (business rule BR9)\n    Given a photo with a GPS position and a bill with amount \"1,284.50\"\n    When the officer syncs\n    Then the log lines for the sync carry the case ID, the item status and the message code only\n    Then no position, file name or bill value appears in any log line\n```"
+  },
+  {
+   "old": "| TC-E2-024-16 | X11, Access | Component | RW-PHONECOL user (Documents R) calls the field-captures operation; refused with 403 and MSG-P4-002 |",
+   "new": "| TC-E2-024-16 | X11, Access | Component | RW-PHONECOL user (Documents R) calls the field-captures operation; refused with 403 and MSG-P4-002 |\n| TC-E2-024-18 | AC16, X11, Access | Component | RW-PHONECOL user (Documents R) sends captures; refused with 403 and MSG-P4-002 |\n| TC-E2-024-19 | AC17, X12, BR10 | Component | Decision log write fails for one item of a sync; that item is refused with MSG-P7-003 and nothing is stored for it |\n| TC-E2-024-20 | AC18, BR9 | Component | Sync with a GPS position and a bill; log lines carry the case ID, the item status and the message code only |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17434",
+   "item": "DOR-RWB-P5-E2024-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Open decisions DL03, DL10, DL11, DL19, DL26 with their assumptions listed after the DL10 line in section 14."
+  },
+  {
+   "ruling": "R-17435",
+   "item": "DOR-RWB-P5-E2024-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X11 now AC16 with TC-E2-024-18; X12 now AC17 with TC-E2-024-19; section 5 Covered by updated."
+  },
+  {
+   "ruling": "R-17436",
+   "item": "DOR-RWB-P5-E2024-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR10 covered by AC17 and TC-E2-024-19; BR9 covered by AC18 and TC-E2-024-20."
+  },
+  {
+   "ruling": "R-17437",
+   "item": "DOR-RWB-P5-E2024-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 names the rwb-access authorise check POST /api/recovery/access/v1/authorise (DP-08) for each operation of 12.1."
+  },
+  {
+   "ruling": "R-17438",
+   "item": "DOR-RWB-P5-E2024-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Register bill_amount and due_date as fields, which AC3 and section 11 use, since neither is in LDM v9 or Data Classification v5.",
+   "note": "Field names used by the story are absent from both source models; story side unchanged."
+  },
+  {
+   "ruling": "R-17439",
+   "item": "DOR-RWB-P5-E2024-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The standard's meaning of MSG-P4-001 is not in this chunk; the 401 row keeps its text until the standard's wording is supplied."
+  },
+  {
+   "ruling": "R-22441",
+   "item": "GAP-3194",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Story Catalog v1; Ownership Map v1 (register row 121)",
+   "change": "Raise one ACE DB story per service without one (S2, S4, S5, S6, S7, P6, P8), or attach the column drop to the owning APP story, and cite the chosen story on row 121 before wave 2.",
+   "note": "This story is rwb-document, not one of the seven services; no story edit."
+  },
+  {
+   "ruling": "R-22589",
+   "item": "GAP-2223",
+   "status": "Cross-document",
+   "section": "10, 11",
+   "target": "RWB-P3-E1018-CON; rwb-access API specification; Ownership Map; rwb-case administration stories",
+   "change": "Add stageCode and routeCode to the Case resource; record the authorise request and response shape; name the checklist contract story; load task code, owner role, discretion, due-date parameter and decision code as data rows.",
+   "note": "Four missing details sit in other documents; the story names the authorise call and its assumptions in sections 10 and 14."
+  },
+  {
+   "ruling": "R-22590",
+   "item": "GAP-0949",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "RWB-P4-AD002-APP (PM-2026.12 permission file); TSD P4 v3 T6.1",
+   "change": "Add the five DOCUMENTS rows (RW-FIELDCOL CR, RW-CASEOWN CRU, RW-RESTRUCT CRU, SY-OCR CRU, RW-PHONECOL R) and a Documents column in the RBAC matrix.",
+   "note": "Section 10 letters come from the legacy authority table; they need written permission rows."
+  },
+  {
+   "ruling": "R-22591",
+   "item": "GAP-0952",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Publish the authorise, me-permissions and masking-policies shapes and state whether a sync is authorised once per manifest or once per item and how the field list is carried.",
+   "note": "Section 10 now names the authorise call and marks its shape as assumed under GAP-0952."
+  }
+ ]
+}

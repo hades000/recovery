@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "This story builds the harness and the evidence only. It builds no production screen, endpoint, table, workflow or schedule, and it owns no table. The real behaviour is owned by the three I stories RWB-P3-E2015-APP (the two read operations, the timer ordering, the escalation fields, the prescription warning and the merge in rwb-case), RWB-S8-E2015-APP (the deviation query, the pause and the clear of the stage clock, the contact stop and the return point) and RWB-P4-E2015-APP (the role, scope and Case record right check), and those three stories block the ITG run.",
+   "new": "This story builds the harness and the evidence only. It builds no production screen, endpoint, table, workflow or schedule, and it owns no table. The real behaviour is owned by the three I stories RWB-P3-E2015-APP (the two read operations, the timer ordering, the escalation fields, the prescription warning and the merge in rwb-case), RWB-S8-E2015-APP (the deviation query, the pause and the clear of the stage clock, the contact stop and the return point) and RWB-P4-E2015-APP (the role, scope and Case record right check), and those three stories block the ITG run. It is small: it fits within two weeks.\n\nOpen decisions DL10 and DL22 remain open. Assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 (DL10) and ASM-1162, ASM-1304, ASM-2217 and ASM-2569 (DL22) are confirmed by the programme directive of 26 November 2026, and the harness runs on them."
+  },
+  {
+   "old": "| ID | Trigger | What the harness asserts | Message | ITG test case |\n|---|---|---|---|---|",
+   "new": "| ID | Trigger | What the harness asserts | Message | ITG test case | Covered by |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| X1 | The case has no running, paused or expired timer (RW-2026-000506) | The timers section is returned empty with the empty sentence; the prescription date and the deviations are still returned | MSG-P3-018 | TC-E2-015-08-ITG |",
+   "new": "| X1 | The case has no running, paused or expired timer (RW-2026-000506) | The timers section is returned empty with the empty sentence; the prescription date and the deviations are still returned | MSG-P3-018 | TC-E2-015-08-ITG | AC4 |"
+  },
+  {
+   "old": "| X2 | The case is outside the caller's scope (RW-2026-000507 in SME-NTH read with a scope Own in MTG-BKK) | 404 from the composite route; nothing is returned and nothing is written | MSG-P4-003 | TC-E2-015-09-ITG |",
+   "new": "| X2 | The case is outside the caller's scope (RW-2026-000507 in SME-NTH read with a scope Own in MTG-BKK) | 404 from the composite route; nothing is returned and nothing is written | MSG-P4-003 | TC-E2-015-09-ITG | AC4 |"
+  },
+  {
+   "old": "| X3 | The deviation query does not answer within 2 s | The timers and the prescription date are returned; the deviation section carries the message and the on hold banner still shows from the case's deviation flag | MSG-GEN-006 | TC-E2-015-10-ITG |",
+   "new": "| X3 | The deviation query does not answer within 2 s | The timers and the prescription date are returned; the deviation section carries the message and the on hold banner still shows from the case's deviation flag | MSG-GEN-006 | TC-E2-015-10-ITG | AC4 |"
+  },
+  {
+   "old": "| X4 | Two deviations are open on one case | Both show with their own handler and approver; after one clears the case stays on hold with the other open | MSG-P3-004 | TC-E2-015-05-ITG |",
+   "new": "| X4 | Two deviations are open on one case | Both show with their own handler and approver; after one clears the case stays on hold with the other open | MSG-P3-004 | TC-E2-015-05-ITG | AC3 |"
+  },
+  {
+   "old": "| X5 | The prescription date is 91 days away with a 90 day warning | No warning; the prescription date is returned without MSG-P3-003 | None | TC-E2-015-03-ITG |",
+   "new": "| X5 | The prescription date is 91 days away with a 90 day warning | No warning; the prescription date is returned without MSG-P3-003 | None | TC-E2-015-03-ITG | AC2 |"
+  },
+  {
+   "old": "| X6 | A role without Case record R calls the timers operation | 403 on the direct call and on the composite route; the answer carries the refusal, not an empty timers list | MSG-P4-002 | TC-E2-015-11-ITG |",
+   "new": "| X6 | A role without Case record R calls the timers operation | 403 on the direct call and on the composite route; the answer carries the refusal, not an empty timers list | MSG-P4-002 | TC-E2-015-11-ITG | None in §7 (access owned by RWB-P4-E2015-APP) |\n\nScreen states of SCR-03 in this harness: the empty state is asserted by X1, the error state by X3 and the no-access state by X6. The loading state is Not specified in the source documents (DOR-RWB-ITG-E2015-ITG-10)."
+  },
+  {
+   "old": "| Depends on (build) | None |",
+   "new": "| Depends on (build) | RWB-P3-E2015-APP, RWB-S8-E2015-APP, RWB-P4-E2015-APP (not yet built) |"
+  },
+  {
+   "old": "    And no call changed a timer, a deviation or the case",
+   "new": "    And no call changed a timer, a deviation or the case\n\n  Scenario: AC5 Clock pause and routing to the owner (new, D-RCV-60)\n    When the harness reads the answer for \"RW-2026-000502\"\n    Then the deviation \"X3\" is routed to handler \"U-SP-01\"\n    And the stage clock is shown as paused with state \"WITH_FCR_OFFICER\"\n    And the prescription date is still returned"
+  },
+  {
+   "old": "These four criteria are new for the ITG harness and do not restate the app criteria owned by the I stories.",
+   "new": "These five criteria are new for the ITG harness and do not restate the app criteria owned by the I stories."
+  },
+  {
+   "old": "| TC-E2-015-11-ITG | Access | Component | RW-REFADM (no Case record right) calls `GET /cases/{caseId}/timers`; refused with MSG-P4-002 |",
+   "new": "| TC-E2-015-11-ITG | Access | Component | RW-REFADM (no Case record right) calls `GET /cases/{caseId}/timers`; refused with MSG-P4-002 |\n| TC-E2-015-12-ITG | AC5 | Integration | X3 on RW-2026-000502 with handler U-SP-01 and paused state WITH_FCR_OFFICER |"
+  },
+  {
+   "old": "AC4 takes -08-ITG, -09-ITG and -10-ITG. The full legacy test",
+   "new": "AC4 takes -08-ITG, -09-ITG and -10-ITG; AC5 takes -12-ITG. The Covers entries AC5 to AC10 are legacy numbers of RWB-E2-015 and do not refer to the criteria of §7, which are AC1 to AC5. The full legacy test"
+  },
+  {
+   "old": "| REQ-DVH-002 | A deviation pauses the stage clock and keeps the prescription clock running | Business Requirements Epic 2, section 4; Program, section 5.15 | FEAT-DVH-02, FEAT-DVH-03, FEAT-DVH-05, FEAT-DVH-06, FEAT-DVH-09 | 11 Handle customer care and deviations | R-DEV-01, R-UNI-43 | TC-E2-015-02-ITG, TC-E2-015-05-ITG to TC-E2-015-07-ITG |",
+   "new": "| REQ-DVH-002 | A deviation pauses the stage clock and keeps the prescription clock running | Business Requirements Epic 2, section 4; Program, section 5.15 | FEAT-DVH-02, FEAT-DVH-03, FEAT-DVH-05, FEAT-DVH-06, FEAT-DVH-09 | 11 Handle customer care and deviations | R-DEV-01, R-UNI-43 | TC-E2-015-02-ITG, TC-E2-015-05-ITG to TC-E2-015-07-ITG, TC-E2-015-12-ITG |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14282",
+   "item": "DOR-RWB-ITG-E2015-ITG-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add a role for the member of the integration and QA team, or name the existing role code the harness user holds, so section 1 uses a role code or name from the list.",
+   "note": "Persona in section 1 is not a role in UR&P v5; no role code is invented in this story."
+  },
+  {
+   "ruling": "R-14283",
+   "item": "DOR-RWB-ITG-E2015-ITG-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Empty state mapped to X1, error to X3, no-access to X6; loading state marked not specified in the source documents."
+  },
+  {
+   "ruling": "R-14284",
+   "item": "DOR-RWB-ITG-E2015-ITG-12",
+   "status": "Cross-document",
+   "section": "16, 18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists of REQ-WKM-004, REQ-WKM-005, REQ-DVH-002 and REQ-DRI-001 with section 18 of this story, which now adds TC-E2-015-12-ITG to REQ-DVH-002.",
+   "note": "Section 16 now limits owned criteria to AC1 to AC5; RTM v7 list difference sits outside this story."
+  },
+  {
+   "ruling": "R-14285",
+   "item": "DOR-RWB-ITG-E2015-ITG-15",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Section 1 now states the story is small and fits within two weeks."
+  },
+  {
+   "ruling": "R-14286",
+   "item": "DOR-RWB-ITG-E2015-ITG-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Depends on (build) now names the three I stories that are not yet built."
+  },
+  {
+   "ruling": "R-14287",
+   "item": "DOR-RWB-ITG-E2015-ITG-18",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Open decisions DL10 and DL22 recorded as open, with their eight assumptions confirmed by the 26 November directive."
+  },
+  {
+   "ruling": "R-14288",
+   "item": "DOR-RWB-ITG-E2015-ITG-3",
+   "status": "Resolved",
+   "section": "5; 7",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to section 5; X1 to X5 tied to AC2 to AC4; X6 has no section 7 criterion and says so."
+  },
+  {
+   "ruling": "R-22212",
+   "item": "GAP-1823",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 for clock pause and owner routing with TC-E2-015-12-ITG; the FSD row rewrite stays with the groomer and owner."
+  },
+  {
+   "ruling": "R-22350",
+   "item": "GAP-3177",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Temporal Workflow and Activity Catalog v1",
+   "change": "Register the five-minute next-action Schedule in rwb-case, and delete EV-18 from the Epic 2 contract tables.",
+   "note": "This story text holds no JOB-05 or EV-18 reference; the change sits in the catalogue and the contract tables."
+  },
+  {
+   "ruling": "R-22498",
+   "item": "GAP-1832",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Contract story for rwb.deviation.events.v1 (EV-06, EV-07)",
+   "change": "Define the envelope of DeviationRaised and DeviationCleared: case key, deviation code, state, contact stop flag, return point and decision record reference, with no personal or financial value.",
+   "note": "Schema belongs to the contract story; AC3 of this story already reads the contact stop and return point."
+  }
+ ]
+}

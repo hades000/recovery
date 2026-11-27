@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "The queue shows the handler and the service level; it shows no contact-stop flag for X4, because the contact stop of R-DEV-01 covers X1 to X3.",
+   "new": "The queue shows the handler and the service level; it shows no contact-stop flag for X4, because the contact stop of R-DEV-01 covers X1 to X3. The empty, error and no access states of SCR-08 are Not specified in the source documents (CG-ALL-11517), because Screen Specifications v1 gives none of them for SCR-08; its loading state is the list state above."
+  },
+  {
+   "old": "| X2 | The caller does not hold Case record U of the operation | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC3, TC-E7-004-03 |",
+   "new": "| X2 | The caller does not hold Case record U of the operation | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC3, AC8, TC-E7-004-03, TC-E7-004-18 |"
+  },
+  {
+   "old": "| X6 | The deviation sits with its owner past the service level of R-DEV-20 | The case escalates to the team manager and the breach is reported; the state does not change | None named | AC4, TC-E7-004-07 |",
+   "new": "| X6 | The deviation sits with its owner past the service level of R-DEV-20 | The case escalates to the team manager and the breach is reported; the state does not change | None named | AC4, AC9, TC-E7-004-07, TC-E7-004-19 |"
+  },
+  {
+   "old": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC7, TC-E7-004-10, Section 17, BR4, BR5 |",
+   "new": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC7, AC10, TC-E7-004-10, TC-E7-004-11, Section 17, BR4, BR5 |"
+  },
+  {
+   "old": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released",
+   "new": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC8 Caller without Case record U on either operation (exception X2)\n    Given the caller does not hold Case record U of the operation\n    When the caller calls either of the two operations\n    Then the caller gets 403 with MSG-P4-002 before any read, nothing changes and no record is written\n\n  Scenario: AC9 Service level read from the package (exception X6)\n    Given the deviation is in DEV_WITH_OWNER and its time there exceeds the service level read from the DEVIATIONS package in force\n    When the service level is breached\n    Then the case escalates to the team manager, the breach is reported and the state does not change\n\n  Scenario: AC10 Boundary reach by a test (exception X9)\n    Given a test reaches a v_ace_* view, a recovery_case row, a timer row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC11 Architecture rules of section 8 (BR1 to BR11)\n    Given the story is built\n    When the component and boundary tests run\n    Then only rwb_deviation writes the deviation table, the decision is recorded before any change, no cross-schema join or foreign key exists, and no person name, identity number or case fact is copied into rwb_deviation\n\n  Scenario: AC12 Error answers of the provided operations (401, 403, 404)\n    Given a caller calls one of the two operations with a credential or a deviation that the contract refuses\n    When the operation answers\n    Then the answer is the status code of the operation's contract among 401, 403 or 404, and nothing changes\n\n  Scenario: AC13 Replay of a write with the same Idempotency-Key\n    Given a write has been accepted with an Idempotency-Key\n    When the same write is replayed with the same key\n    Then the first answer is returned again and no second row, record or event is written\n\n  Scenario: AC14 Activity retry and timeout\n    Given an activity of section 12 is retried or times out\n    When the retry runs\n    Then the step retries on the workflow's own schedule, nothing is written and no move is answered\n\n  Scenario: AC15 Consumed call fails or does not answer\n    Given a consumed contract fails or does not answer inside 2 s\n    When the step calls it\n    Then nothing is written, no move is answered and the caller sees 503\n\n  Scenario: AC16 Disallowed status change\n    Given a deviation is in a state from which section 8 does not allow the event of the status change\n    When the status change is requested\n    Then the change is refused and nothing is written"
+  },
+  {
+   "old": "| TC-E7-004-10 | AC7 | Component | A statement reaching a v_ace_* view, a recovery_case row, a timer row or another service's schema; the boundary test fails the build |",
+   "new": "| TC-E7-004-10 | AC7 | Component | A statement reaching a v_ace_* view, a recovery_case row, a timer row or another service's schema; the boundary test fails the build |\n| TC-E7-004-11 | AC10 | Component | A test reaching a v_ace_* view, a recovery_case row, a timer row or another service's schema; the boundary test fails the build |\n| TC-E7-004-12 | AC11 | Component | Rules BR1 to BR11 of section 8 checked by the component and boundary tests; proposed test Not specified in the source documents (NEWAC-RWB-S8-E7004-APP-AC11) |\n| TC-E7-004-13 | AC12 | Contract | The two operations checked for 401, 403 and 404 answers; the 401 and 404 conditions Not specified in the source documents (NEWAC-RWB-S8-E7004-APP-AC12) |\n| TC-E7-004-14 | AC13 | Component | A write accepted with an Idempotency-Key and replayed with the same key; the first answer returned and one row, one record and one event |\n| TC-E7-004-15 | AC14 | Component | An activity of section 12 retried and timed out; the step retries on the workflow's schedule and nothing is written |\n| TC-E7-004-16 | AC15 | Component | A consumed contract that fails or does not answer inside 2 s; nothing written, no move answered and 503 returned |\n| TC-E7-004-17 | AC16 | Component | A status change that section 8 does not allow; the change is refused and nothing is written |\n| TC-E7-004-18 | AC8 | Component | A role without the Case record right U calling either operation; 403 with MSG-P4-002 and no read |\n| TC-E7-004-19 | AC9 | Component | A deviation in DEV_WITH_OWNER past the service level read from the DEVIATIONS package; escalation and breach reported, state unchanged |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-27829",
+   "item": "CG-ALL-11517",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 now states that the empty, error and no access states of SCR-08 are Not specified (CG-ALL-11517); loading is the list state.",
+   "note": "SCR-08 empty, error and no access marked Not specified (CG-ALL-11517); loading kept from the legacy table."
+  },
+  {
+   "ruling": "R-33124",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC10",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC10 (boundary reach by a test) to section 7, TC-E7-004-11 to section 16, and AC10 to the X9 covered-by cell.",
+   "note": "Added AC10 and TC-E7-004-11. Gherkin reuses the X9 grant-refusal outcome; X9 covered-by updated."
+  },
+  {
+   "ruling": "R-33125",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 to section 7 covering BR1 to BR11 and TC-E7-004-12 to section 16; proposed test Not specified in the source documents.",
+   "note": "Added AC11 (BR1 to BR11) and TC-E7-004-12; the test detail is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-33126",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 to section 7 for the 401, 403 and 404 answers and TC-E7-004-13 to section 16; the 401 and 404 conditions are Not specified.",
+   "note": "Added AC12 and TC-E7-004-13; 401 and 404 conditions marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-33127",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC13 (replay with the same Idempotency-Key) to section 7 and TC-E7-004-14 to section 16.",
+   "note": "Added AC13 replay criterion and TC-E7-004-14 for the same-key replay."
+  },
+  {
+   "ruling": "R-33128",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 (activity retry and timeout) to section 7 and TC-E7-004-15 to section 16.",
+   "note": "Added AC14 activity retry and timeout criterion and TC-E7-004-15."
+  },
+  {
+   "ruling": "R-33129",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 (consumed call fails or does not answer) to section 7 and TC-E7-004-16 to section 16, using the X4 outcome.",
+   "note": "Added AC15 failed consumed call criterion with 503 from X4 and TC-E7-004-16."
+  },
+  {
+   "ruling": "R-33130",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC16 (disallowed status change refused) to section 7 and TC-E7-004-17 to section 16; no refusal code is named.",
+   "note": "Added AC16 disallowed transition refusal and TC-E7-004-17; no refusal code in the sources."
+  },
+  {
+   "ruling": "R-33131",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC6",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC8 (caller without Case record U on either operation) to section 7, TC-E7-004-18 to section 16, and AC8 to the X2 covered-by cell. AC6 already exists, so the next free number is used.",
+   "note": "AC6 is taken, so added AC8 and TC-E7-004-18 for X2; X2 covered-by updated."
+  },
+  {
+   "ruling": "R-33132",
+   "item": "NEWAC-RWB-S8-E7004-APP-AC7",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC9 (service level read from the package for X6) to section 7, TC-E7-004-19 to section 16, and AC9 to the X6 covered-by cell. AC7 already exists, so the next free number is used.",
+   "note": "AC7 is taken, so added AC9 and TC-E7-004-19 for X6; X6 covered-by updated."
+  }
+ ]
+}

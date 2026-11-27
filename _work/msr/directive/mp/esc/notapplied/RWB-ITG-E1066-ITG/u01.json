@@ -1,0 +1,119 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E1066-ITG",
+ "unit": "u01",
+ "rulings": [
+  "R-14134",
+  "R-14136",
+  "R-22260",
+  "R-22261",
+  "R-22262",
+  "R-22264",
+  "R-28666"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 6
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-14134",
+     "item": "DOR-RWB-ITG-E1066-ITG-10",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "Empty state from RWB-P1-E1068-APP (X5); no-access and error messages from RWB-P1-E1066-CON and this story. Screen Specifications v1 SCR-03 lists no such states."
+    },
+    {
+     "ruling": "R-14136",
+     "item": "DOR-RWB-ITG-E1066-ITG-15",
+     "status": "Resolved",
+     "section": "6",
+     "target": "",
+     "change": "",
+     "note": "Two-week limit from Definition of Ready and Done v4, item 15, accepted under the directive. Size field unchanged; the squad still sizes it."
+    },
+    {
+     "ruling": "R-22260",
+     "item": "GAP-0375",
+     "status": "Resolved",
+     "section": "12.2",
+     "target": "",
+     "change": "",
+     "note": "Wire shape taken from RWB-P1-E1066-CON (AC4, 12.1); compensation record from RWB-P3-E1066-APP flow and 12.7."
+    },
+    {
+     "ruling": "R-22261",
+     "item": "GAP-0504",
+     "status": "Resolved",
+     "section": "12.2",
+     "target": "",
+     "change": "",
+     "note": "Path follows RWB-P1-E1066-CON, /cases/{caseId}/interactions, not the fix's shorter /interactions. RWB-P3-E1066-APP flow step 4 still shows the shorter path."
+    },
+    {
+     "ruling": "R-22262",
+     "item": "GAP-0505",
+     "status": "Resolved",
+     "section": "12.2",
+     "target": "",
+     "change": "",
+     "note": "Path, login name, property names and baseline review of required flags stated, per RWB-P1-E1066-CON and the proposed fix."
+    },
+    {
+     "ruling": "R-22264",
+     "item": "GAP-2255",
+     "status": "Resolved",
+     "section": "12.7",
+     "target": "",
+     "change": "",
+     "note": "Table, states, key and write order from RWB-P3-E1066-APP flow and 12.7. Flyway version stays with the sequence owner."
+    },
+    {
+     "ruling": "R-28666",
+     "item": "GAP-0506",
+     "status": "Cross-document",
+     "section": "9",
+     "target": "RWB-P1-E1066-OPS",
+     "change": "Carry every deployment value, alert threshold, probe timing, window and incident route as a named chart value set per environment; fail the release when the append-only trigger is missing.",
+     "note": "Deployment content belongs to the OPS story, which already fails the release on a missing trigger (BR2). No values exist in the sources."
+    }
+   ],
+   "edits": [
+    {
+     "old": "SCR-03 states: empty, Not specified in the source documents (CG-ALL-427); loading, as defined in Screen Specifications v1 SCR-03; error, Not specified in the source documents (CG-ALL-427); no access, Not specified in the source documents (CG-ALL-427).",
+     "new": "SCR-03 states: empty, a case with no ledger entry shows the Empty state of the history panel (RWB-P1-E1068-APP) and no message; loading, as defined in Screen Specifications v1 SCR-03; error, a failed write shows MSG-P1-022 and the action is not saved; no access, MSG-P4-002 for a role without the Case record right and MSG-P4-003 for a case that is missing or out of scope (RWB-P1-E1066-CON)."
+    },
+    {
+     "old": "| Small | Seven scenarios over three services and one shared topic; no service code and no schema change |",
+     "new": "| Small | Can be finished in two weeks or less: seven scenarios over three services and one shared topic; no service code and no schema change |"
+    },
+    {
+     "old": "The request and response fields of the interaction write, the Idempotency-Key rule, the failure mapping and the compensation mechanism are Not specified in the source documents (GAP-0375; ASM-0538), so the suite asserts the outcomes named in section 7 and not a wire shape it would have to invent.",
+     "new": "The interaction write follows the contract RWB-P1-E1066-CON (GAP-0375, GAP-0504, GAP-0505; ASM-0538). The append path is `/cases/{caseId}/interactions` on the rwb-source-data base, called under the `rwb_source_data` login (DP-02), with `InteractionRequest` in, `Interaction` out, property names from the API specification and a required `Idempotency-Key` header. P1 writes the entry, its local decision record and its outbox row in one transaction in `rwb_source_data` and answers 201 with the entry identifier and caseSeq. A repeat with the same key and body returns the stored entry with the same caseSeq and writes no second row; the same key with a different body answers 409; a missing key answers 400 with MSG-GEN-004. A missing required value answers 422 with MSG-GEN-001, a missing Case record C right 403 with MSG-P4-002, an unknown or out-of-scope case 404 with MSG-P4-003, and a failed write 503 with MSG-P1-022. The required flags of the ledger values are those of the contract, settled at its baseline review. The caller treats any non-2xx answer as a failed action and never keeps an action without its entry. rwb-case records each case action in its link table `interaction_link` (RWB-P3-E1066-APP): `PENDING` before the append, `COMMITTED` after 201, and `REFUSED` when the action is not applied."
+    },
+    {
+     "old": "| Compensation record of the P3 case action | `rwb_case` | the field or record that marks an action as compensated | Read through P3 | Not specified in the source documents (GAP-0375; ASM-0539) |",
+     "new": "| Compensation record of the P3 case action | `interaction_link` | state `REFUSED` of the action's link row (GAP-2255; ASM-0539) | Written by P3; the suite reads the outcome through the P3 case read | rwb_case |"
+    },
+    {
+     "old": "`recovery_case` in schema `rwb_case` (P3); and `decision_log_entry`",
+     "new": "`recovery_case` and `interaction_link` in schema `rwb_case` (P3; `interaction_link` holds one row per case action with case ID, action reference, event code, entry identifier, `case_seq`, decision log reference, key, state and timestamps, unique on the action reference and on the key, with one key derived per action reference and the append made before the local commit of the action); and `decision_log_entry`"
+    },
+    {
+     "old": "this story; the record of the compensation is the open point GAP-0375.",
+     "new": "this story; the record of the compensation is the `REFUSED` state of the `interaction_link` row in rwb-case (GAP-2255)."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

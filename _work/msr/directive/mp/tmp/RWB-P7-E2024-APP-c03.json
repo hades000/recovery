@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "and the entry carries references, codes, the capture kind and dates only | Legacy BR9 and section 17; CTL-11; DL26; NFR-033 |",
+   "new": "and the entry carries references, codes, the capture kind and dates only; the P2 fields classed as personal data are carried in none of them | Legacy BR9 and section 17; CTL-11; DL26; NFR-033 |"
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10. Open decisions of this story, each still open and run on its assumptions: DL03 (ASM-0189, ASM-0193, ASM-0578, ASM-2567); DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863); DL11 (ASM-0553, ASM-0703, ASM-1051, ASM-1104); DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355)."
+  },
+  {
+   "old": "10. The boundary test: no write to `rwb_document`, `rwb_case` or `rwb_access`,",
+   "new": "10. The boundary test: no write to `rwb_document`, `rwb_case` or `rwb_access` (the schemas of rwb-document, rwb-case and rwb-access, owned by those services and named here as boundaries only),"
+  },
+  {
+   "old": "| MSG-P4-002, MSG-P4-003 | TC-E2-024-16 |",
+   "new": "| MSG-P4-002, MSG-P4-003 | AC8, TC-E2-024-16 |"
+  },
+  {
+   "old": "(produced by `rwb-document` and `rwb-access`) | TC-E2-024-12, TC-E2-024-14, TC-E2-024-15 |",
+   "new": "(produced by `rwb-document` and `rwb-access`) | AC9, TC-E2-024-12, TC-E2-024-14, TC-E2-024-15 |"
+  },
+  {
+   "old": "Scenario: AC1 Ten DOCATT records for one inspection, chained and readable (new, D-RCV-60)",
+   "new": "Scenario: AC1 Ten DOCATT records for one inspection, chained and readable (new, D-RCV-60; covers BR1, BR2)"
+  },
+  {
+   "old": "Scenario: AC3 A repeated item and a redelivered fact write no second record (new, D-RCV-60)",
+   "new": "Scenario: AC3 A repeated item and a redelivered fact write no second record (new, D-RCV-60; covers BR14)"
+  },
+  {
+   "old": "Scenario: AC4 The record cannot be changed (new, D-RCV-60)",
+   "new": "Scenario: AC4 The record cannot be changed (new, D-RCV-60; covers BR5)"
+  },
+  {
+   "old": "Scenario: AC5 A record that cannot be written refuses the item (new, D-RCV-60)",
+   "new": "Scenario: AC5 A record that cannot be written refuses the item (new, D-RCV-60; covers BR4, BR13)"
+  },
+  {
+   "old": "Then the two entries are read for case \"RW-2026-000501\" beside the ten entries of the first sync",
+   "new": "Then the two entries are read for case \"RW-2026-000501\" beside the ten entries of the first sync\n\n  Scenario: AC8 A read without the DECISION_LOG right or outside the scope is refused (new, D-RCV-60)\n    Given the rwb-access contract mock returns no right in the DECISION_LOG area for role \"RW-FIELDCOL\" on case \"RW-2026-000501\" and returns case \"RW-2026-000502\" outside the scope of \"FC-01\"\n    When GET /api/recovery/decision/v1/decision-log for case \"RW-2026-000501\" is called by the field collector \"FC-01\"\n    Then the call returns 403 with \"MSG-P4-002\" and nothing is returned\n    When GET /api/recovery/decision/v1/decision-log for case \"RW-2026-000502\" is called by \"FC-01\"\n    Then the call returns 404 with \"MSG-P4-003\" and nothing is returned\n    Then the rwb-document contract mock is never called\n\n  Scenario: AC9 A request that never reached the store is refused by its owner, not decided (new, D-RCV-60)\n    Given the rwb-document contract mock refuses a request of case \"RW-2026-000502\" before the store takes it, with \"MSG-GEN-002\"\n    When the field app sends the request of case \"RW-2026-000502\" for \"FC-01\"\n    Then no decision_log_entry exists for case \"RW-2026-000502\" with decision code \"DOCATT\"\n    Then no chain_seq is used, and the refusal is recorded by rwb-document and rwb-access, not by this story\n\n  Scenario: AC10 The decision code is read from reference data, a missing record is reported and nothing else is written (new, D-RCV-60; covers BR8, BR10, BR12)\n    Given the rwb-case reference-data contract mock returns the decision code list in force without \"DOCATT\"\n    When the ten DOCATT records of that sync reach rwb.decision-record.v1 as DecisionRecorded facts\n    Then each is refused with \"MSG-P7-009\" naming \"decisionCode\" and no decision_log_entry is written\n    Given the ten entries of AC1 exist for case \"RW-2026-000501\" and the rwb-document contract mock lists one document of that case with no DOCATT entry\n    When the completeness checker runs over the ingest window\n    Then the document with no entry is reported as a gap and alerted, and no entry is written for it\n    Then the story writes no row of rwb_document, rwb_case or rwb_access and reads no table of another service"
+  },
+  {
+   "old": "These seven criteria are new",
+   "new": "These ten criteria are new"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18135",
+   "item": "DOR-RWB-P7-E2024-APP-11",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR9 states that the P2 fields classed as personal data are carried in none of the entry, fact, outbox or logs.",
+   "note": "BR9 now names the P2 personal-data fields as carried nowhere in the slice."
+  },
+  {
+   "ruling": "R-18136",
+   "item": "DOR-RWB-P7-E2024-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Open decisions DL03, DL10, DL11 and DL26 listed with their assumptions, each run on its assumption.",
+   "note": "Section 14 lists each open decision with its assumption IDs."
+  },
+  {
+   "ruling": "R-18137",
+   "item": "DOR-RWB-P7-E2024-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 10 names rwb_document, rwb_case and rwb_access as schemas owned by other services, named as boundaries only.",
+   "note": "Other schemas named in section 13 are marked as owned elsewhere and not written or read."
+  },
+  {
+   "ruling": "R-18138",
+   "item": "DOR-RWB-P7-E2024-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC8 for X10 and AC9 for X11; section 5 Covered by now cites them with the existing TC rows.",
+   "note": "X10 and X11 now have criteria; existing TC rows cited, no new TC rows added."
+  },
+  {
+   "ruling": "R-18139",
+   "item": "DOR-RWB-P7-E2024-APP-4",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "Scenario titles tag BR1, BR2, BR4, BR5, BR13 and BR14; new AC10 covers BR8, BR10 and BR12.",
+   "note": "All 15 rules now cited by a criterion; BR3, BR6, BR7, BR9, BR11 and BR15 unchanged."
+  },
+  {
+   "ruling": "R-18140",
+   "item": "DOR-RWB-P7-E2024-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Platform message standard",
+   "change": "State the standard meaning of MSG-P7-009 and MSG-GEN-006, or align the story's use of both IDs to it.",
+   "note": "Meaning of both IDs differs from the standard; standard text is not in the source set."
+  },
+  {
+   "ruling": "R-22441",
+   "item": "GAP-3194",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Story Catalog v1",
+   "change": "Raise an ACE DB story for the column drop in S2, S4, S5, S6, S7, P6 and P8, or attach the drop to the creating APP story, and cite the chosen story on row 121 before wave 2.",
+   "note": "This story is rwb-decision and drops no retained columns; no story edit."
+  },
+  {
+   "ruling": "R-22589",
+   "item": "GAP-2223",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P3-E1018-CON",
+   "change": "Add stageCode and routeCode to the Case resource; record the authorise request and response shape in the rwb-access API specification; name the checklist contract story in the Ownership Map and C dependency set; load task code, owner role, discretion, due-date parameter and decision code as data rows.",
+   "note": "Fields and shapes are owned by the P3 contract and the rwb-access specification."
+  },
+  {
+   "ruling": "R-22590",
+   "item": "GAP-0949",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P4-AD002-APP",
+   "change": "Add the five DOCUMENTS rows (RW-FIELDCOL CR, RW-CASEOWN CRU, RW-RESTRUCT CRU, SY-OCR CRU, RW-PHONECOL R) to the PM-2026.12 permission file, and add a Documents column to the TSD P4 RBAC matrix.",
+   "note": "Permission rows and the RBAC matrix column sit in the P4 documents, not in this story."
+  },
+  {
+   "ruling": "R-22591",
+   "item": "GAP-0952",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Publish the authorise, me-permissions and masking-policies shapes; state whether a sync is authorised once for the manifest or once per item, and how the field list is carried.",
+   "note": "The authorise shape is owned by the P4 contract story; not specified in the source set."
+  }
+ ]
+}

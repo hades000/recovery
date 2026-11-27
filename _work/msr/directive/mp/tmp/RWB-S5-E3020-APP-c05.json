@@ -1,0 +1,106 @@
+{
+ "edits": [
+  {
+   "old": "| PRD reference | 03 Requirements and specifications/PRD/Recovery Workbench PRD S5 rwb-asset v1.md (no FR mapped to no REQ IDs) |",
+   "new": "| PRD reference | 03 Requirements and specifications/PRD/Recovery Workbench PRD S5 rwb-asset v1.md (no FR mapped; traces to REQ-S5-001 of the Business Requirements Program v4 until the split plan allocates a requirement id to this key) |"
+  },
+  {
+   "old": "| X2 | The role lacks the Asset and disposal right of the operation | 403 before any read or write; nothing changes | MSG-P4-002 | AC1, TC-E3-020-05 |",
+   "new": "| X2 | The role lacks the Asset and disposal right of the operation | 403 before any read or write; nothing changes | MSG-P4-002 | AC1, AC7, TC-E3-020-05 |"
+  },
+  {
+   "old": "| X3 | The case is not in `ASSET_PENDING_TAKE_ON` | 409 and nothing is written; the take-on is not re-evaluated | None | AC2, AC3 |",
+   "new": "| X3 | The case is not in `ASSET_PENDING_TAKE_ON` | 409 and nothing is written; the take-on is not re-evaluated | None | AC2, AC3, AC10 |"
+  },
+  {
+   "old": "| X5 | An S2, rwb-source-data or rwb-case call does not answer inside 2 s, or its breaker is open | The step retries on the workflow schedule; nothing is written; the caller sees 503 with the platform error envelope | None | AC1, AC3 |",
+   "new": "| X5 | An S2, rwb-source-data or rwb-case call does not answer inside 2 s, or its breaker is open | The step retries on the workflow schedule; nothing is written; the caller sees 503 with the platform error envelope | None | AC1, AC3, AC8, AC9 |"
+  },
+  {
+   "old": "| X8 | A component, a statement or a test reaches a `v_ace_*` view, another service's schema or a `recovery_case` row | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | AC5, §17, BR3, BR5 |",
+   "new": "| X8 | A component, a statement or a test reaches a `v_ace_*` view, another service's schema or a `recovery_case` row | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | AC5, TC-E3-020-09, §17, BR3, BR5 |"
+  },
+  {
+   "old": "    Then the grant refuses the statement and the build fails",
+   "new": "    Then the grant refuses the statement and the build fails\n\n  Scenario: AC6 Business rules BR1 to BR10 (section 8)\n    Given the business rules BR1 to BR10 of section 8 are in force\n    When the boundary and guardrail tests run\n    Then each rule BR1 to BR10 holds as stated in section 8\n\n  Scenario: AC7 Error answers of the provided operations (401, 403, 404)\n    Given a provided operation is called\n    When the call presents no valid login, the role lacks the Asset and disposal right, or the case is not found\n    Then the answer is 401, 403 or 404 respectively and carries the platform error envelope\n\n  Scenario: AC8 Activity retry and timeout (X5)\n    Given a case in state ASSET_PENDING_TAKE_ON\n    When a consumed call does not answer inside 2 s during the takeOnAsset activity\n    Then the step retries on the workflow schedule and nothing is written\n\n  Scenario: AC9 Consumed call fails or its breaker is open (X5)\n    Given a consumed call fails or its circuit breaker is open\n    When the take-on step runs\n    Then nothing is written and the caller sees 503 with the platform error envelope\n\n  Scenario: AC10 Disallowed status change is refused (X3)\n    Given the rwb-case contract mock returns a case state other than ASSET_PENDING_TAKE_ON\n    When the take-on is requested\n    Then the answer is 409, nothing is written and the take-on is not re-evaluated"
+  },
+  {
+   "old": "| TC-E3-020-08 | §12.7 table boundary (ASM-3438) | Boundary | The tables of §12.7 only: the written and read sets checked against the list; no foreign key leaves the schema (DP-01, DP-05) |",
+   "new": "| TC-E3-020-08 | §12.7 table boundary (ASM-3438) | Boundary | The tables of §12.7 only: the written and read sets checked against the list; no foreign key leaves the schema (DP-01, DP-05) |\n| TC-E3-020-09 | AC5 | Boundary | A component, a statement or a test that reaches a `v_ace_*` view, another service's schema or a `recovery_case` row; the grant refusal and the failed build asserted |\n| TC-E3-020-10 | AC6 | Boundary | Each rule BR1 to BR10 of §8 checked against its source row and against the boundary and guardrail tests |\n| TC-E3-020-11 | AC7 | Component | Three calls: no valid login, a role without the Asset and disposal right, an unknown case; 401, 403 and 404 asserted with the platform error envelope |\n| TC-E3-020-12 | AC8 | Component | A consumed contract that does not answer inside 2 s; retry scheduled on the workflow schedule and no row written |\n| TC-E3-020-13 | AC9 | Component | A consumed call that fails or a breaker that is open; 503 with the platform error envelope and nothing written |\n| TC-E3-020-14 | AC10 | Component | A case not in ASSET_PENDING_TAKE_ON; 409 asserted and nothing written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29151",
+   "item": "GAP-2839",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC3 kept verbatim with origin tag; R-DIS-02 is this step's rule; R-DIS-01 and R-DIS-03 named as sibling rules in section 8."
+  },
+  {
+   "ruling": "R-29154",
+   "item": "GAP-2845",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "PRD reference row now traces the story to REQ-S5-001 of the Business Requirements Program v4 until the split plan allocates an id."
+  },
+  {
+   "ruling": "R-32576",
+   "item": "NEWAC-RWB-S5-E3020-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 refusing a disallowed case state with 409 (from X3) and TC-E3-020-14."
+  },
+  {
+   "ruling": "R-32577",
+   "item": "NEWAC-RWB-S5-E3020-APP-AC5",
+   "status": "Resolved",
+   "section": "5, 17",
+   "target": "",
+   "change": "",
+   "note": "AC5 exists in section 7; X8 now cites TC-E3-020-09 and section 16 gains the boundary test row for AC5."
+  },
+  {
+   "ruling": "R-32578",
+   "item": "NEWAC-RWB-S5-E3020-APP-AC6",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 covering BR1 to BR10 through boundary and guardrail tests, with TC-E3-020-10."
+  },
+  {
+   "ruling": "R-32579",
+   "item": "NEWAC-RWB-S5-E3020-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 for 401, 403 and 404 answers with platform error envelope; TC-E3-020-11; X2 cites AC7."
+  },
+  {
+   "ruling": "R-32580",
+   "item": "NEWAC-RWB-S5-E3020-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 for a consumed call not answering inside 2 s with retry on the workflow schedule; TC-E3-020-12; X5 cites AC8."
+  },
+  {
+   "ruling": "R-32581",
+   "item": "NEWAC-RWB-S5-E3020-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 for a failed call or open breaker with 503 and nothing written; TC-E3-020-13; X5 cites AC9."
+  }
+ ]
+}

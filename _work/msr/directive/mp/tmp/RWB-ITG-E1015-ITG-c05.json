@@ -1,0 +1,59 @@
+{
+ "edits": [
+  {
+   "old": "    Then DP06 is not flagged stale on the days between its batches\n    Then its own weekly cut-off decides its stamp",
+   "new": "    Then DP06 is not flagged stale on the days between its batches\n    Then its own weekly cut-off decides its stamp\n\n  Scenario: AC14 Architecture guardrails hold across the run (BR9, BR10, BR11, BR12, BR13)\n    Given the suite runs against the wave-1 services with the synthetic data set of the harness\n    When the run reads, calls, publishes and asserts every stamp, product record, job run and case record\n    Then no service table is read and a table read fails the run\n    Then every cross-service call is one hop on the owner's base with a 2 s timeout and no chained call\n    Then every event asserted is a CloudEvents 1.0 envelope with IDs and facts only, and the suite publishes no event of its own\n    Then the freshness stamp holds product codes, source codes and times only\n    Then the run uses synthetic data only and never production or a production copy\n\n  Scenario: AC15 A retried or timed-out activity records no verdict early\n    Given a cross-service call of the run is one hop with the 2 s timeout of BR10\n    When the activity running the call exceeds 2 s\n    Then the activity times out and is retried; the retry count is Not specified in the source documents (NEWAC-RWB-ITG-E1015-ITG-AC15)\n    Then no stamp assertion passes on the timed-out call and no verdict is recorded until the retry resolves\n\n  Scenario: AC16 A consumed call fails or does not answer\n    Given a consumed call of the run returns an error or no answer\n    When the call is made\n    Then the run is FAILED with the call named\n    Then no stamp assertion runs on that call and no verdict is recorded\n\n  Scenario: AC17 A status change the model does not allow is refused\n    Given DP01 is \"LOADED\" for 2026-11-30\n    When a status change the model does not allow is written to data_product_load\n    Then the change is refused and DP01 stays \"LOADED\" for 2026-11-30\n    Then the refusal message is Not specified in the source documents (NEWAC-RWB-ITG-E1015-ITG-AC17)"
+  },
+  {
+   "old": "| TC-E1-015-15-ITG | BR12, BR13 | Integration | Synthetic W1J01 data set; product codes, source codes and times only; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-015-15-ITG | BR12, BR13 | Integration | Synthetic W1J01 data set; product codes, source codes and times only; end-to-end: real services on the wave 1 contracts |\n| TC-E1-015-16-ITG | AC14; BR9, BR10, BR11, BR12, BR13 | Integration | Guardrail and boundary run: no service table read, one hop per call with 2 s timeout, CloudEvents envelope, stamp without case data, synthetic data only; end-to-end: real services on the wave 1 contracts |\n| TC-E1-015-17-ITG | AC15, BR10 | Integration | Cross-service call exceeding 2 s; retry count Not specified in the source documents (NEWAC-RWB-ITG-E1015-ITG-AC15); end-to-end: real services on the wave 1 contracts |\n| TC-E1-015-18-ITG | AC16 | Integration | Consumed call returns an error or no answer; end-to-end: real services on the wave 1 contracts |\n| TC-E1-015-19-ITG | AC17 | Integration | DP01 LOADED for 2026-11-30; write of a status the model does not allow; refusal message Not specified in the source documents (NEWAC-RWB-ITG-E1015-ITG-AC17); end-to-end: real services on the wave 1 contracts |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29755",
+   "item": "NEWAC-RWB-ITG-E1015-ITG-AC13",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 is already covered by AC12 (contract probe scenario) and TC-E1-015-13-ITG in the story; no new criterion added to avoid duplicating AC12."
+  },
+  {
+   "ruling": "R-29756",
+   "item": "NEWAC-RWB-ITG-E1015-ITG-AC14",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 guardrail scenario for BR9-BR13 in section 7 and TC-E1-015-16-ITG in section 16. Proposed test steps taken from the rule text."
+  },
+  {
+   "ruling": "R-29757",
+   "item": "NEWAC-RWB-ITG-E1015-ITG-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for retried or timed-out activity with TC-E1-015-17-ITG. Retry count is Not specified in the source documents (NEWAC-RWB-ITG-E1015-ITG-AC15)."
+  },
+  {
+   "ruling": "R-29758",
+   "item": "NEWAC-RWB-ITG-E1015-ITG-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for a consumed call that fails or does not answer, with TC-E1-015-18-ITG. No new message code invented."
+  },
+  {
+   "ruling": "R-29759",
+   "item": "NEWAC-RWB-ITG-E1015-ITG-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for a disallowed status change with TC-E1-015-19-ITG. Refusal message Not specified in the source documents (NEWAC-RWB-ITG-E1015-ITG-AC17)."
+  }
+ ]
+}

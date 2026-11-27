@@ -1,0 +1,139 @@
+{
+ "edits": [
+  {
+   "old": "2. The extract reads the legacy cutover dump once and selects the `reference_version` rows whose table code the Workbench owns, with their version number, version label, valid from and valid to dates and approver.",
+   "new": "2. The extract reads the legacy cutover dump once and selects the `reference_version` rows whose table code the Workbench owns, with their version number, version label, valid from and valid to dates and approver. The rule rows and their test cases are not read; they stay with the rule registry of rwb-decision."
+  },
+  {
+   "old": "7. It calls the verify operation on each load id and reads each version in force back through `GET /api/recovery/case/v1/admin/lists/{listCode}` with the cutover date, comparing row count, content hash, approver and valid from date with the file.",
+   "new": "7. It calls the verify operation on each load id and reads each version in force back through `GET /api/recovery/case/v1/admin/lists/{listCode}` with the cutover date, comparing row count, content hash, approver and valid from date with the file. Approval of each version is done by rwb-case, not by this story."
+  },
+  {
+   "old": "    And every rule row names the test case that proves it",
+   "new": "    And no rule row or rule test case is read or written by this story"
+  },
+  {
+   "old": "| BR4 | Every rule row names the test case that proves it, or the file is refused whole | Legacy AC2 | AC2; TC-DM-014-02 |",
+   "new": "| BR4 | Rule rows and their test cases are not loaded by this story; they stay with the rule registry of rwb-decision | Legacy AC2; GAP-2179 | AC2; TC-DM-014-02 |"
+  },
+  {
+   "old": "The reference-data fake: a validated load, a misplaced hash, a missing approver, and one rule row with no test case",
+   "new": "The reference-data fake: a validated load, a misplaced hash, and a missing approver"
+  },
+  {
+   "old": "| BR6 | A repeated load of the same table, valid from date and content hash writes nothing and returns the first load | Reference-data contract BR5 | AC2; TC-DM-014-02 |",
+   "new": "| BR6 | A repeated load of the same table, valid from date and content hash writes nothing and returns the first load | Reference-data contract BR5 | AC4; TC-DM-014-05 |"
+  },
+  {
+   "old": "    And the migrated records are served from the new schema",
+   "new": "    And the migrated records are served from the new schema\n\n  Scenario: AC4 A repeated load writes nothing and returns the first load (new, D-RCV-60)\n    Given a reference load already accepted for a table code, valid from date and content hash\n    When the same load is posted again\n    Then no row is written and the first load is returned"
+  },
+  {
+   "old": "    Then no row is written and the first load is returned",
+   "new": "    Then no row is written and the first load is returned\n\n  Scenario: AC5 A load status the contract does not allow is refused (new, D-RCV-60)\n    Given the rwb-case contract returns for a load a status it does not allow\n    When the extract reads that status\n    Then the refusal is recorded in the cutover record and the pipeline stops at the gate"
+  },
+  {
+   "old": "| MSG-P1-001 | Warning | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | Warning | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "No new state, label or message is introduced on either screen.",
+   "new": "No new state, label or message is introduced on either screen.\n\nSCR-44 states: empty, loading, error and no access are Not specified in the source documents (CG-ALL-1991)."
+  },
+  {
+   "old": "SCR-44 states: empty, loading, error and no access are Not specified in the source documents (CG-ALL-1991).",
+   "new": "SCR-44 states: empty, loading, error and no access are Not specified in the source documents (CG-ALL-1991).\n\nSCR-45 states: loading as Screen Specifications v1 gives it; empty, error and no access are Not specified in the source documents (CG-ALL-1992)."
+  },
+  {
+   "old": "| TC-DM-014-04 | Access | Component | A caller without the platform-administration right, and the same caller with it |",
+   "new": "| TC-DM-014-04 | Access | Component | A caller without the platform-administration right, and the same caller with it |\n| TC-DM-014-05 | AC4 | Contract | The reference-data fake: the same table, valid from date and content hash posted twice |"
+  },
+  {
+   "old": "| TC-DM-014-05 | AC4 | Contract | The reference-data fake: the same table, valid from date and content hash posted twice |",
+   "new": "| TC-DM-014-05 | AC4 | Contract | The reference-data fake: the same table, valid from date and content hash posted twice |\n| TC-DM-014-06 | AC5 | Contract | Not specified in the source documents (NEWAC-RWB-P1-DM014-APP-AC5) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22955",
+   "item": "GAP-0238",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Story scope already limited to rwb-case tables (section 4 steps 2-7); other owner schemas load their own reference tables."
+  },
+  {
+   "ruling": "R-22956",
+   "item": "GAP-2179",
+   "status": "Resolved",
+   "section": "4, 7, 8",
+   "target": "",
+   "change": "Step 2 excludes rule rows; step 7 notes rwb-case approves; AC2 rule-row Then replaced; BR4 reworded; TC-DM-014-02 data trimmed.",
+   "note": "Rule rows stay with rwb-decision registry; four ACE lists read only via named views (step 4). Approval and serving stay with rwb-case."
+  },
+  {
+   "ruling": "R-23187",
+   "item": "GAP-0544",
+   "status": "Resolved",
+   "section": "4, 7, 8",
+   "target": "",
+   "change": "Same edits as GAP-2179: rule rows excluded from P1 flow and AC2; BR4 and TC-DM-014-02 aligned.",
+   "note": "P1 extracts and hands off to rwb-case via contract; rule rows go to rwb-decision registry; P1 writes no reference row."
+  },
+  {
+   "ruling": "R-24282",
+   "item": "CG-ALL-1988",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text set to the Error and Message Standard v4 wording: Today's load has not arrived.",
+   "note": "Standard text copied; the story use (stale load after late ACE batch) is within the standard's use, so no new ID."
+  },
+  {
+   "ruling": "R-24283",
+   "item": "CG-ALL-1990",
+   "status": "Not applied",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Migration name is at line 251, outside the supplied text. Next Vnnnn number is not in the source documents (CG-ALL-1990)."
+  },
+  {
+   "ruling": "R-24284",
+   "item": "CG-ALL-1991",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Added SCR-44 state line: empty, loading, error and no access Not specified in the source documents.",
+   "note": "Screen Specifications v1 lacks all four SCR-44 states, so each is marked Not specified."
+  },
+  {
+   "ruling": "R-24285",
+   "item": "CG-ALL-1992",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Added SCR-45 state line: loading per specification; empty, error and no access Not specified in the source documents.",
+   "note": "Screen Specifications v1 lacks empty, error and no access for SCR-45; those are marked Not specified."
+  },
+  {
+   "ruling": "R-30165",
+   "item": "NEWAC-RWB-P1-DM014-APP-AC4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC4 (repeated load writes nothing), BR6 now covered by AC4 and TC-DM-014-05. BR1-BR5 remain on AC1-AC3 and their TCs.",
+   "note": "AC4 covers BR6; BR1-BR5 already have criteria and TC rows on AC1-AC3. Test data written as Not specified where source is silent."
+  },
+  {
+   "ruling": "R-30166",
+   "item": "NEWAC-RWB-P1-DM014-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC5 (disallowed load status refused and recorded) and TC-DM-014-06 with data Not specified in the source documents.",
+   "note": "AC5 refuses a contract status the contract does not allow; the proposed test data is Not specified in the source documents."
+  }
+ ]
+}

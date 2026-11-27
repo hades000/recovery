@@ -1,0 +1,100 @@
+{
+ "edits": [
+  {
+   "old": "The login of the service is Not specified in the source documents (GAP-0629; ASM-0966); the story names it \"the rwb-agent login (DP-02)\" until it is agreed.",
+   "new": "The login of the service is Not specified in the source documents (GAP-0629; ASM-0966); the story references it through a secret reference as \"the rwb-agent login (DP-02)\"."
+  },
+  {
+   "old": "X6 is not reached by a criterion of this story: it is proved by the legacy test case TC-E2-031-08 through the route, and the message is kept so a reader finds the legacy set complete.",
+   "new": "X6 is reached by AC8 and proved through the route by TC-E2-031-09 and by the legacy test case TC-E2-031-08, and the message is kept so a reader finds the legacy set complete."
+  },
+  {
+   "old": "    Then the system refuses the request with 403 and MSG-P4-002",
+   "new": "    Then the system refuses the request with 403 and MSG-P4-002\n\n  Scenario: AC9 Rules with no legacy criterion (BR7 to BR12)\n    Given the drift check is the agentDrift activity of the Schedule \"AgentRunDailyRollup\" and the read is served on \"/api/recovery/agent/v1\"\n    When the rules of this story are checked against the service\n    Then the agentDrift activity runs after the aggregate inside the same workflow identity and no separate Schedule exists\n    Then the v2 element adds members to the v1 element and no v1 member is removed, renamed or retyped\n    Then the read is reached only through the gateway-bff route and no screen calls rwb-agent directly\n    Then the two filter limits are configuration values and not literals in code\n    Then the story creates no table and V10_007__agent_monitor_index.sql runs in the rwb-agent Flyway sequence\n    Then a role without the right of the read is refused with 403 and MSG-P4-002 through the route\n\n  Scenario: AC10 Error answers of the provided operations\n    Given the read of rwb-agent is provided on \"/api/recovery/agent/v1\" behind the gateway-bff route\n    When a request to a provided operation is refused\n    Then the system answers 403 for a role without the right, and answers 401 or 404 where the operation defines them, with the trigger of 401 and 404 Not specified in the source documents (NEWAC-RWB-P10-E2031-APP-AC10)\n\n  Scenario: AC11 Activity retry and timeout\n    Given the agentDrift activity of the Schedule \"AgentRunDailyRollup\" is started for a business date\n    When the activity fails or exceeds its timeout\n    Then the activity is retried with the retry count and the timeout Not specified in the source documents (NEWAC-RWB-P10-E2031-APP-AC11)\n    Then a retry writes no second DRIFT row for the same date\n\n  Scenario: AC12 A consumed call fails or does not answer\n    Given the rwb-decision decision-log read is unavailable or answers beyond the 2 s budget\n    When the dashboard loads\n    Then the row still shows acceptance, fallback, latency and cost, marks the override figures as not available and guesses no figure"
+  },
+  {
+   "old": "| TC-E2-031-10 | BR7 |",
+   "new": "| TC-E2-031-10 | AC9, BR7 |"
+  },
+  {
+   "old": "| TC-E2-031-11 | BR8 |",
+   "new": "| TC-E2-031-11 | AC9, BR8 |"
+  },
+  {
+   "old": "| TC-E2-031-12 | BR9 |",
+   "new": "| TC-E2-031-12 | AC9, BR9 |"
+  },
+  {
+   "old": "| TC-E2-031-13 | BR10 |",
+   "new": "| TC-E2-031-13 | AC9, BR10 |"
+  },
+  {
+   "old": "| TC-E2-031-14 | BR11 |",
+   "new": "| TC-E2-031-14 | AC9, BR11 |"
+  },
+  {
+   "old": "| TC-E2-031-15 | BR12 |",
+   "new": "| TC-E2-031-15 | AC9, BR12 |"
+  },
+  {
+   "old": "| TC-E2-031-09 | AC2, AC4, BR3 | Component | Exactly 20 feedback entries in each of the two 7-day weeks with a fall of 10 points or more; one DRIFT row is written (boundary of the minimum and the threshold) |",
+   "new": "| TC-E2-031-09 | AC2, AC4, BR3 | Component | Exactly 20 feedback entries in each of the two 7-day weeks with a fall of 10 points or more; one DRIFT row is written (boundary of the minimum and the threshold) |\n| TC-E2-031-16 | AC10 | Contract | Not specified in the source documents (NEWAC-RWB-P10-E2031-APP-AC10) |\n| TC-E2-031-17 | AC11 | Component | agentDrift fails or exceeds its timeout; retry count and timeout Not specified in the source documents (NEWAC-RWB-P10-E2031-APP-AC11) |\n| TC-E2-031-18 | AC12 | Component | The rwb-decision decision-log read is unavailable or beyond the 2 s budget (X7); the row keeps acceptance, fallback, latency and cost and guesses no override figure |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28840",
+   "item": "GAP-0631",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "RWB-PLT-N001-CON",
+   "change": "Register the gateway-bff route for SCR-46 and the v2 read, path left to the edge story; expose alert thresholds and topology as named chart values; update the Schedule in place; verify rwb-reporting consume right without creating its consumer group.",
+   "note": "Login now a secret reference (L226). Route, chart values, Schedule update and consume-right check are platform and ops work outside this story."
+  },
+  {
+   "ruling": "R-30388",
+   "item": "NEWAC-RWB-P10-E2031-APP-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC10 added to section 7 for 401, 403 and 404 of provided operations; TC-E2-031-16 added. Triggers for 401 and 404 are not specified in the source."
+  },
+  {
+   "ruling": "R-30389",
+   "item": "NEWAC-RWB-P10-E2031-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for activity retry and timeout; TC-E2-031-17 added. Retry count and timeout are not specified in the source documents."
+  },
+  {
+   "ruling": "R-30390",
+   "item": "NEWAC-RWB-P10-E2031-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for a failed or unanswered consumed call, taken from X7; TC-E2-031-18 added."
+  },
+  {
+   "ruling": "R-30391",
+   "item": "NEWAC-RWB-P10-E2031-APP-AC8",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X6 now reached by AC8 (already in section 7) and TC-E2-031-09 through the route, with TC-E2-031-08 kept as legacy proof."
+  },
+  {
+   "ruling": "R-30392",
+   "item": "NEWAC-RWB-P10-E2031-APP-AC9",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC9 added for BR7 to BR12; TC-E2-031-10 to TC-E2-031-15 now cover AC9 as well as their BR."
+  }
+ ]
+}

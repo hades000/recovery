@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "**litigation officer, a case owner, a team manager, a compliance and PDPA officer or an internal auditor who works the document review queue**",
+   "new": "**litigation officer (RW-LITOFF), case owner (RW-CASEOWN), team manager (RW-TEAMMGR), compliance and PDPA officer (RW-COE) or internal auditor (RW-AUDIT) who works the document review queue**"
+  },
+  {
+   "old": "| X4 | The token carries no Recovery role, or no second factor | No answer is given: 401 before the policy is read; one refusal entry with the reason | MSG-P4-001 | BR4 |",
+   "new": "| X4 | The token carries no Recovery role, or no second factor | No answer is given: 401 before the policy is read; one refusal entry with the reason | MSG-P4-001 | AC9, BR4 |"
+  },
+  {
+   "old": "| X6 | Two roles of the caller conflict (for example RW-SECADM with a business role) | The sign-in access check refuses the session from the `role_conflict` rows this service holds; no authorise request is made | MSG-P4-006 | BR4 |",
+   "new": "| X6 | Two roles of the caller conflict (for example RW-SECADM with a business role) | The sign-in access check refuses the session from the `role_conflict` rows this service holds; no authorise request is made | MSG-P4-006 | AC10, BR4 |"
+  },
+  {
+   "old": "| X7 | The caller is an agent or a service identity, not a person | The same checks run under the service identity's roles; a service identity with no role is refused 401 | MSG-P4-001 | BR4, section 10 |",
+   "new": "| X7 | The caller is an agent or a service identity, not a person | The same checks run under the service identity's roles; a service identity with no role is refused 401 | MSG-P4-001 | AC11, BR4, section 10 |"
+  },
+  {
+   "old": "| X8 | The reference list of scope is not available | No answer is given rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | BR2 |",
+   "new": "| X8 | The reference list of scope is not available | No answer is given rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | AC12, BR2 |"
+  },
+  {
+   "old": "| X9 | A new type is set on the item and extraction runs again for it | Not this story's: the re-run and its fields are P5's; the access answer is recomputed on the next read with the new field IDs | None | Out of scope |",
+   "new": "| X9 | A new type is set on the item and extraction runs again for it | Not this story's: the re-run and its fields are P5's; the access answer is recomputed on the next read with the new field IDs | None | AC13 |"
+  },
+  {
+   "old": "AC1 to AC8 are the criteria this story owns",
+   "new": "AC1 to AC13 are the criteria this story owns"
+  },
+  {
+   "old": "    Then the earlier change from \"PM-2026.11\" to \"PM-2026.12\" reached the answer the same way",
+   "new": "    Then the earlier change from \"PM-2026.11\" to \"PM-2026.12\" reached the answer the same way\n\n  Scenario: AC9 A caller with no Recovery role or no second factor is refused before the policy is read (new, D-RCV-60)\n    Given a test user holds no Recovery role in the token\n    When the caller asks POST /api/recovery/access/v1/authorise for area \"DOCUMENTS\", right \"R\" and item \"IN-0101\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n    Then no permission row is read and one AC-DENY decision record is written with the reason\n\n  Scenario: AC10 Two conflicting roles of a caller refuse the session at sign-in (new, D-RCV-60)\n    Given a test user holds RW-SECADM together with a business role\n    When the test user signs in\n    Then the session is refused from the role_conflict rows of rwb_access with message MSG-P4-006\n    Then no authorise request is made\n\n  Scenario: AC11 A service identity with no role is refused (new, D-RCV-60)\n    Given a service identity holds no role\n    When the service identity asks POST /api/recovery/access/v1/authorise for area \"DOCUMENTS\", right \"R\" and item \"IN-0101\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n\n  Scenario: AC12 A read is not answered when the scope list is not available (new, D-RCV-60)\n    Given test user \"U-5101\" holds RW-LITOFF in team \"LIT-BKK\"\n    Given the scope list LOV-SCOPE is not available\n    When \"U-5101\" asks for area \"DOCUMENTS\", right \"R\" and item \"IN-0101\" with review team \"LIT-BKK\"\n    Then the answer is refused with status 503 and message MSG-GEN-006\n    Then no scope is guessed and the refusal is recorded\n\n  Scenario: AC13 A new type on an item changes the fields the next read answers (new, D-RCV-60)\n    Given test user \"U-5101\" holds RW-LITOFF in team \"LIT-BKK\"\n    Given the rwb-document contract mock returns intake item \"IN-0101\" in review team \"LIT-BKK\" with a new type and new field IDs after extraction runs again\n    When \"U-5101\" asks for area \"DOCUMENTS\", right \"R\", item \"IN-0101\" and the new field IDs\n    Then the access answer is recomputed on this read with the new field IDs and marks each one \"masked\""
+  },
+  {
+   "old": "| TC-E1-054-23 | §12.7 tables (ASM-3438) | Component | Boundary of the §12.7 tables: a request with an unknown reference reads only role, permission, masking_rule and role_conflict; no table of rwb_document, rwb_case, rwb_decision or rwb_source_data is read |",
+   "new": "| TC-E1-054-23 | §12.7 tables (ASM-3438) | Component | Boundary of the §12.7 tables: a request with an unknown reference reads only role, permission, masking_rule and role_conflict; no table of rwb_document, rwb_case, rwb_decision or rwb_source_data is read |\n| TC-E1-054-24 | AC6, BR5 | Component | No MASK-SIT-01 row covers DF-DOC-015 for any role; RW-LITOFF on IN-0101 with DF-DOC-015 and DF-DOC-017; DF-DOC-015 marked masked with XXXX-XX-XX, DF-DOC-017 masked, one AC-READ entry names both |\n| TC-E1-054-25 | AC8, BR9 | Component | RW-LITOFF asks twice under PM-2026.12 and MASK-SIT-01; second answer served from cache; PM-2026.13 and MASK-SIT-02 approved and AccessPolicyChanged published; next ask answered under both with no deployment |\n| TC-E1-054-26 | AC9, BR4 | Component | Token with no Recovery role asks for IN-0101; 401 with MSG-P4-001 before any permission read, one AC-DENY entry with the reason |\n| TC-E1-054-27 | AC10, BR4 | Component | Caller holding RW-SECADM with a business role signs in; session refused from role_conflict rows with MSG-P4-006; no authorise request made |\n| TC-E1-054-28 | AC11, BR4 | Component | Service identity with no role asks for IN-0101; 401 with MSG-P4-001 |\n| TC-E1-054-29 | AC12, BR2 | Component | LOV-SCOPE not available during a read of IN-0101 by RW-LITOFF; 503 with MSG-GEN-006, no scope guessed, refusal recorded |\n| TC-E1-054-30 | AC13, BR5 | Component | New type set on IN-0101 and extraction run again; the next read answers with the new field IDs, each marked masked |"
+  },
+  {
+   "old": "the Thai text follows DL10",
+   "new": "the Thai text follows DL10 (open decision; assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 confirmed by the directive of 26 November 2026)"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10681",
+   "item": "CG-ALL-5064",
+   "status": "Not applied",
+   "section": "12.3",
+   "target": "",
+   "change": "",
+   "note": "Catalog payload not specified (gap-0127; asm-0204), so there is nothing to align to. Story payload left unchanged."
+  },
+  {
+   "ruling": "R-10682",
+   "item": "CG-ALL-5066",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for 'Two roles of the caller conflict' with text '{role} may not be held together with {role}.'; the story cites it once it exists",
+   "note": "New ID not yet assigned; story keeps MSG-P4-006 until then."
+  },
+  {
+   "ruling": "R-10683",
+   "item": "CG-ALL-5068",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-054-24 for AC6 and TC-E1-054-25 for AC8."
+  },
+  {
+   "ruling": "R-16710",
+   "item": "DOR-RWB-P4-E1054-APP-1",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Role names replaced by codes from PM-2026.12; compliance officer mapped to RW-COE (confirm in Users Roles v5)."
+  },
+  {
+   "ruling": "R-16711",
+   "item": "DOR-RWB-P4-E1054-APP-10",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P5-E1054-APP",
+   "change": "Add empty, loading, error and no-access states for SCR-31 Document review queue",
+   "note": "SCR-31 is P5's; this story builds no screen, so the states belong there."
+  },
+  {
+   "ruling": "R-16712",
+   "item": "DOR-RWB-P4-E1054-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "DL10 marked open with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 confirmed by the directive."
+  },
+  {
+   "ruling": "R-16713",
+   "item": "DOR-RWB-P4-E1054-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC9 to AC13 added for X4, X6, X7, X8, X9 with TC-E1-054-26 to 30; section 5 Covered by column updated."
+  },
+  {
+   "ruling": "R-16714",
+   "item": "DOR-RWB-P4-E1054-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR4 covered by AC9 and TC-E1-054-26; BR9 covered by AC8 and TC-E1-054-25."
+  },
+  {
+   "ruling": "R-16715",
+   "item": "DOR-RWB-P4-E1054-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Add DF-REF-039 for role.entra_group (table role in rwb_access) to the model",
+   "note": "Story keeps DF-REF-039; LDM v9 does not hold it."
+  },
+  {
+   "ruling": "R-16716",
+   "item": "DOR-RWB-P4-E1054-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for 'Two roles of the caller conflict' with text '{role} may not be held together with {role}.'; the story cites it once it exists",
+   "note": "Same new ID as CG-ALL-5066; story keeps MSG-P4-006 until then."
+  }
+ ]
+}

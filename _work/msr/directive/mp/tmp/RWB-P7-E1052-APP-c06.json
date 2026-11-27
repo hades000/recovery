@@ -1,0 +1,103 @@
+{
+ "edits": [
+  {
+   "old": "The nine criteria below are new for the `rwb-decision` slice",
+   "new": "The twelve criteria below are new for the `rwb-decision` slice"
+  },
+  {
+   "old": "The nine criteria are new and `acs` is empty for this story",
+   "new": "The twelve criteria are new and `acs` is empty for this story"
+  },
+  {
+   "old": "    Then the responses are 403 with MSG-P4-002 and 404 with MSG-P4-003, and no entry is returned\n```",
+   "new": "    Then the responses are 403 with MSG-P4-002 and 404 with MSG-P4-003, and no entry is returned\n\n  Scenario: AC10 The ledger rules hold on every append: one entry per decision, the hash chain, the rule pair, the version in force and the service boundary (new, D-RCV-60)\n    Given the rwb-comms contract mock returns a D7.1 record for notice \"N-0001\", case \"RW-2026-000123\", notice type \"DEMAND\", rule \"R-LIT-03\", template \"DEMAND-MTG\" version 2, data date 2026-11-25 and final call \"GENERATED\"\n    When the ledger consumes that record\n    Then one entry exists for the decision, its prev_hash equals the entry_hash of the previous entry and its entry_hash is the SHA-256 of the canonical form, with no UPDATE and no DELETE\n    Then rule \"R-LIT-03\" and its version \"LIT-2026.12\" are both on the entry and the pair exists in the rule registry at the version in force\n    Then the final-call set, the hold reasons and the message ids are read at the version in force, and this service evaluates no rule, resolves no merge code, renders no document and holds no notice\n\n  Scenario: AC11 A read without a valid credential is answered 401 (new, D-RCV-60)\n    Given the caller sends no valid credential\n    When the caller sends GET /api/recovery/decision/v1/decision-log/{entryId}\n    When the caller sends GET /api/recovery/decision/v1/decision-log?caseId=RW-2026-000123&decision=D7.1&from=2026-11-25&to=2026-11-25&page=1\n    Then the response is 401 and no entry is returned\n\n  Scenario: AC12 A consumed call that fails or does not answer leaves no entry returned (new, D-RCV-60)\n    Given the rwb-access contract mock does not answer the scope check for case \"RW-2026-000123\"\n    When the reader sends GET /api/recovery/decision/v1/decision-log?caseId=RW-2026-000123&decision=D7.1&from=2026-11-25&to=2026-11-25&page=1\n    Then the response is Not specified in the source documents (NEWAC-RWB-P7-E1052-APP-AC12) and no entry is returned\n```"
+  },
+  {
+   "old": "| TC-E1-052-12 | Section 12.7 tables (ASM-3438) | Component | Not specified in the source documents (DOR-RWB-P7-E1052-APP-12) |",
+   "new": "| TC-E1-052-12 | Section 12.7 tables (ASM-3438) | Component | Not specified in the source documents (DOR-RWB-P7-E1052-APP-12) |\n| TC-E1-052-13 | AC10, BR1, BR3, BR5, BR10, BR13, BR14 | Component | Record for `RW-2026-000123` notice `N-0001` on 2026-11-25; one chained entry with rule pair `R-LIT-03` and `LIT-2026.12`, no rule evaluation, no merge resolution, no document |\n| TC-E1-052-14 | AC11, BR8 | Component | Read of the decision log with no valid credential; 401 and no entry returned |\n| TC-E1-052-15 | AC12, BR8 | Component | `rwb-access` contract mock does not answer; response Not specified in the source documents (NEWAC-RWB-P7-E1052-APP-AC12) and no entry returned |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28616",
+   "item": "GAP-1087",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P6 v2 (T3.2, list of values)",
+   "change": "Add LOV-HOLD-REASON carrying POSTAL_ADDRESS and TEMPLATE_WITHDRAWN and any later value, read through the reference-data contract",
+   "note": "Hold reason LOV belongs to TSD P6 v2; no story edit needed."
+  },
+  {
+   "ruling": "R-28617",
+   "item": "GAP-1088",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "rwb-comms AsyncAPI document",
+   "change": "Publish NoticeGenerated schema naming noticeId, caseId, templateId, templateVersion, noticeType and generatedAt; confirm with rwb-decision and rwb-reporting",
+   "note": "Payload schema is owned by rwb-comms AsyncAPI."
+  },
+  {
+   "ruling": "R-28618",
+   "item": "GAP-2349",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Work Package split plan",
+   "change": "Record one owning story per legacy criterion and mark secondary slices as test-case-bearing but criterion-free",
+   "note": "Story section 7 already states the legacy criteria stay with P6; plan change is outside this story."
+  },
+  {
+   "ruling": "R-28619",
+   "item": "GAP-1083",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Service Contract Catalog and gateway-bff route",
+   "change": "Record that the Litigation right and scope test of the notice operations are enforced at the edge under RWB-PLT-N001-CON; add DP-08 and RWB-P4-E1037-CON only if the check moves into the service",
+   "note": "Check stays at the edge; no story change unless it moves into the service."
+  },
+  {
+   "ruling": "R-28620",
+   "item": "GAP-0754",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Metadata rows kept as the work package gives them; platform contract dependencies stay in the pattern table and preconditions."
+  },
+  {
+   "ruling": "R-28621",
+   "item": "GAP-2455",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Service Contract Catalog v1",
+   "change": "Confirm rwb-decision appends every DecisionRecorded fact to decision_log_entry, local record is working record and ledger entry is record of record; RWB-PLT-E1027-CON, RWB-PLT-TE006-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON stay baseline outside the H row",
+   "note": "Ledger ownership is decided in Service Contract Catalog v1; BR13 already cites GAP-2455."
+  },
+  {
+   "ruling": "R-31454",
+   "item": "NEWAC-RWB-P7-E1052-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added to section 7 and TC-E1-052-13 added to section 16 covering BR1, BR3, BR5, BR10, BR13, BR14."
+  },
+  {
+   "ruling": "R-31455",
+   "item": "NEWAC-RWB-P7-E1052-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for 401 on both reads and TC-E1-052-14 added to section 16."
+  },
+  {
+   "ruling": "R-31456",
+   "item": "NEWAC-RWB-P7-E1052-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for a failed consumed call; expected response left as Not specified in the source documents; TC-E1-052-15 added."
+  }
+ ]
+}

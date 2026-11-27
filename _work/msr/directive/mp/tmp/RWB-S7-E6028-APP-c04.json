@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "and the monthly scan is the Schedule of RWB-S7-E6013-APP (§12.6).",
+   "new": "and the monthly scan is the Schedule of RWB-S7-E6013-APP (§12.6). The write-off states are this service's own record inside `WriteOffWorkflow`, and rwb-case moves the case state on the published outcome; the split of the state between this service and rwb-case is an open question with the P3 owner, so that no state has two writers (GAP-1800). Payment matching after charge-off is not run here: the match is the `ProceedsMatched` event (EV-25) published by rwb-payment, the recovery, the income and the agency fee are recorded in this service, a payment that matches nothing is held in the exception list shown here, and the ownership of the initial match is an open question with the P8 owner (GAP-1812). The hand-over of a charged-off population to the debt sale route is carried here as product behaviour, with the population, the route and the approval recorded here; the call type and its direction are an open question with the S6 owner before wave 4 system test (GAP-1799)."
+  },
+  {
+   "old": "the cross-service journey belongs to the wave 4 harness (RWB-ITG-E6028-ITG).",
+   "new": "the cross-service journey belongs to the wave 4 harness (RWB-ITG-E6028-ITG). The harness pack is not specified in the source documents: the fixture layout, the synthetic keys, the amounts, the write-off committee limit, the business date, the evidence format and retention, and the gate are agreed at the wave 4 entry check and held as configuration (GAP-0458). The write-off read and the write-off sale operation are not published, so the population is asserted through the case read, the decision record and DP09, and the handover is driven by the lot operation that S6 publishes."
+  },
+  {
+   "old": "of RWB-E6-028 word for word, with their origin tag added and nothing else changed:",
+   "new": "of RWB-E6-028 with their origin tag added and the record term renamed (CG-ALL-11243):"
+  },
+  {
+   "old": "and `the decision log cannot be written` all stand",
+   "new": "and `the decision record cannot be written` all stand"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "AC5 and AC6 are not legacy criteria: they are written for this story to cover exceptions X2 and X8 of section 5.",
+   "new": "AC5 and AC6 are not legacy criteria: they are written for this story to cover exceptions X2 and X8 of section 5. AC10 is not a legacy criterion either: it is written for this story for the retry and timeout of `recordSaleSelection` (section 12.5)."
+  },
+  {
+   "old": "Then nothing is released",
+   "new": "Then nothing is released\n\n  Scenario: AC10 Activity retry and timeout\n    Given the activity recordSaleSelection is retried after a failure or a timeout\n    When the retry runs\n    Then the decision record and the case move exist once for the write-off reference, as after a single run\n    Then the answer is the answer of the first run"
+  },
+  {
+   "old": "The refusal, missing-field, wrong-state and not-recorded states read the messages of section 14.",
+   "new": "The refusal, missing-field, wrong-state and not-recorded states read the messages of section 14. The empty, loading, error and no access states are not in Screen Specifications v1 for SCR-27 and are Not specified in the source documents (CG-ALL-11244)."
+  },
+  {
+   "old": "a log or a workflow input |",
+   "new": "a log or a workflow input |\n| TC-E6-028-11 | AC10 | Component | Not specified in the source documents (NEWAC-RWB-S7-E6028-APP-AC10) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22833",
+   "item": "GAP-1800",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "Write-off states kept as the stage record in WriteOffWorkflow; state split with the P3 owner recorded as an open question."
+  },
+  {
+   "ruling": "R-22835",
+   "item": "GAP-1812",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "ProceedsMatched (EV-25) consumed as the match; unmatched payment held in the exception list; initial match ownership open with P8 owner."
+  },
+  {
+   "ruling": "R-22836",
+   "item": "GAP-0458",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Harness pack values held as configuration to agree at the wave 4 entry check; population asserted through case read, decision record and DP09."
+  },
+  {
+   "ruling": "R-22837",
+   "item": "GAP-1311",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "TSD P7 v2 (T-A.1, T-A.2) and the Ownership Map",
+   "change": "Publish the raise as POST /approvals on the decision base with caseId, decisionCode, regulationItem, capabilityArea, productGroup, amount, sourceType, sourceRef, ruleId, ruleVersion and Idempotency-Key; give field sets for ApprovalPage, ApprovalDetail, ApprovalAction, DecisionLogPage and DecisionLogEntry; read decision code and final calls as LOV-DECISION and final-call reference data; keep the five LOV-APPROVAL-STATUS values with escalation_level inside WAITING; state the message texts and login name as the proposed fix of GAP-1311 sets.",
+   "note": "Approval raise, action and answer shapes and value sets have no source; the change belongs to TSD P7 v2 and the Ownership Map."
+  },
+  {
+   "ruling": "R-22839",
+   "item": "GAP-1314",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "P4 role model (Users Roles and Permissions) and TSD P7 v2",
+   "change": "Read TSD P7 v2 T-A.1 Decision log right A as the right on approval operations and the FSD P7 v3 T6.1 column as read only; carry WRITE_OFF_AND_POSTING on the approval row and require both in the authorise answer; add RW-CREDCOMM to the holders of the capability right, or record why the routed role cannot decide, before the wave entry check.",
+   "note": "Right and role for escalated write-off approval read two ways; the fix belongs to the P4 role model and TSD P7 v2."
+  },
+  {
+   "ruling": "R-22841",
+   "item": "GAP-1799",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "Hand-over carried as product behaviour with population, route and approval recorded; call type and direction open with S6 owner before wave 4 system test."
+  },
+  {
+   "ruling": "R-22842",
+   "item": "GAP-1312",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Dependency Map (DP table and metadata rows of RWB-S7-E6028-APP)",
+   "change": "Carry H RWB-PLT-E1027-CON (DP-03) and H RWB-PLT-N001-CON (DP-19) as non-blocking platform contracts of wave 0; carry the four consumed contracts (P4 delegation-limit answer, P4 authorise call, P3 case read, reference-data list values) as published contracts of P3 and P4, built against their fakes; leave the metadata rows as the plan gives them.",
+   "note": "Platform and consumed contracts missing from the DP table; section 13 citation of this row is not in this chunk and remains to be added."
+  },
+  {
+   "ruling": "R-27719",
+   "item": "CG-ALL-11243",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Legacy decision log wording in AC1, AC4 and the AC note replaced with decision record; workflow and record terms used."
+  },
+  {
+   "ruling": "R-27720",
+   "item": "CG-ALL-11244",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access states added as Not specified in the source documents, since Screen Specifications v1 lacks them."
+  },
+  {
+   "ruling": "R-33017",
+   "item": "NEWAC-RWB-S7-E6028-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for activity retry and timeout and TC-E6-028-11; test data Not specified in the source documents."
+  }
+ ]
+}

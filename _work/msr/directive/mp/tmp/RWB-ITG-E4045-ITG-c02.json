@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "| Stub for rwb-source-data | `GET /data-products/{productCode}/records` | Day-1 assertion of the `v_ace_payment` row |",
+   "new": "| Stub for rwb-source-data | `GET /data-products/{productCode}/records` | Day-1 assertion and Given of the `v_ace_payment` row; no test-data line reads the view directly |"
+  },
+  {
+   "old": "3. Build the ProceedsProbe to read the payment row from `v_ace_payment` and the fees from rwb-payment (X3).",
+   "new": "3. Build the ProceedsProbe to read the payment row through the rwb-source-data contract fake (section 12.8) and the fees from rwb-payment (X3)."
+  },
+  {
+   "old": "| DF-ACE-043 to DF-ACE-054 | v_ace_payment | payment_code, account_key, payment_date, payment_amount, payment_channel, capital_amount | Read, through the rwb-source-data data product (DP-05) |",
+   "new": "| DF-ACE-043 to DF-ACE-054 | v_ace_payment | payment_code, account_key, payment_date, payment_amount, payment_channel, capital_amount | Read, through the rwb-source-data data product (DP-05); no direct view read |"
+  },
+  {
+   "old": "| Depends on (build) | None |",
+   "new": "| Depends on (build) | None (RWB-P8-E4045-APP is an integration dependency only; the Day-1 run uses the rwb-payment stub in section 12.8) |"
+  },
+  {
+   "old": "The report text is for the wave entry check and is not part of the message standard. R-LIT-41, R-LIT-42, R-DIS-11, R-DIS-54 and R-WO-37 carry no message ID in the rule set, so the harness asserts the state, the data, the proceeds and the decision record, and names a message ID only where an owning service returns one of the three in section 14.",
+   "new": "The report text is for the wave entry check and is not part of the message standard. R-LIT-41, R-LIT-42, R-DIS-11, R-DIS-54 and R-WO-37 carry no message ID in the rule set, so the harness asserts the state, the data, the proceeds and the decision record, and names a message ID only where an owning service returns one of the three in section 14.\n\nThe harness shows no screen, so SCR-28 has no empty, loading, error or no-access state in this story; those states belong to the story that owns SCR-28 and are not restated here (DOR-RWB-ITG-E4045-ITG-10)."
+  },
+  {
+   "old": "| X11 | A role that does not include the right is authorised, or a caller outside the case scope passes | The run fails on the access check and the report names the operation | MSG-P4-002 | TC-E4-045-03-ITG |",
+   "new": "| X11 | A role that does not include the right is authorised, or a caller outside the case scope passes | The run fails on the access check and the report names the operation | MSG-P4-002 | AC3 |"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision log with the rule version\n    And a vendor fee is matched on the proceeds when proceeds are applied (BR5)\n\n  Scenario: AC3 Access check (covers exception X11)\n    Given a caller whose role does not include the right, or a caller outside the case scope\n    When the fee step is authorised through POST /api/recovery/access/v1/authorise\n    Then the call is refused with MSG-P4-002 and the report names the operation"
+  },
+  {
+   "old": "The fee tables' owner and storage are not named by any source read, and the harness reads the fee terms through the owning contracts and holds no copy.",
+   "new": "The fee tables' owner and storage are not named by any source read, and the harness reads the fee terms through the owning contracts and holds no copy.\n\nReference data: the harness reads the fee tables and the court fee and charge schedules as reference data through the reference-data contract (DP-06, DP-07). The parameter names and keys are not specified in the source documents (DOR-RWB-ITG-E4045-ITG-20)."
+  },
+  {
+   "old": "| TC-E4-045-01-ITG | AC1, BR1, BR2, BR3, BR4, BR6 | Integration | Seeded case with a payment and a partner on a contracted fee schedule |",
+   "new": "| TC-E4-045-01-ITG | AC1, BR1, BR2, BR3, BR4, BR5, BR6 | Integration | Seeded case with a payment and a partner on a contracted fee schedule |"
+  },
+  {
+   "old": "| TC-E4-045-02-ITG | AC2 (owned by RWB-P8-E4045-APP), BR7 | Integration | Decision log forced to fail; MSG-P7-003 |",
+   "new": "| TC-E4-045-02-ITG | BR7 (negative path only; AC2 is owned by RWB-P8-E4045-APP) | Integration | Decision log forced to fail; MSG-P7-003 |"
+  },
+  {
+   "old": "| TC-E4-045-03-ITG | Access | Component | A role without the right; MSG-P4-002 |",
+   "new": "| TC-E4-045-03-ITG | AC3 (X11), Access | Component | A role without the right; MSG-P4-002 |"
+  },
+  {
+   "old": "14. Harness: publishes one evidence report per story and business date, naming the criterion, the assertions, the contract versions and whether each hop was a stub or the owner. The evidence format and its retention are not specified in the source documents (GAP-0431; ASM-0607).",
+   "new": "14. Harness: publishes one evidence report per story and business date, naming the criterion, the assertions, the contract versions and whether each hop was a stub or the owner. The evidence format and its retention are not specified in the source documents (GAP-0431; ASM-0607).\n\nThe wave 3 entry check, with the integration and QA leads, settles the harness environment, the seeded identifiers, the fixed business date, the data product codes, the evidence format and the gate thresholds for this story (GAP-0436). No value is set in this story until that check."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09481",
+   "item": "CG-ALL-881",
+   "status": "Resolved",
+   "section": "4, 12.8",
+   "target": "",
+   "change": "",
+   "note": "Payment row Given and test data now read only through the rwb-source-data contract fake in 12.8; no direct ACE view read remains in the story."
+  },
+  {
+   "ruling": "R-14476",
+   "item": "DOR-RWB-ITG-E4045-ITG-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Recovery Workbench Users Roles and Permissions v5",
+   "change": "Add a role code and name for the integration and QA team that the section 1 story role refers to, then map the story role to it.",
+   "note": "Story role phrase is not a role code in Users Roles and Permissions v5; the story cannot name a code the source does not give."
+  },
+  {
+   "ruling": "R-14477",
+   "item": "DOR-RWB-ITG-E4045-ITG-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Story states it has no screen, so SCR-28 empty, loading, error and no-access states sit with the owning story."
+  },
+  {
+   "ruling": "R-14478",
+   "item": "DOR-RWB-ITG-E4045-ITG-12",
+   "status": "Cross-document",
+   "section": "16, 18",
+   "target": "Recovery Workbench Test Cases v8.xlsx; Recovery Workbench RTM v7",
+   "change": "Add rows TC-E4-045-01-ITG to TC-E4-045-04-ITG to Story test cases, and align section 18 test lists to the section 16 IDs in RTM v7.",
+   "note": "TC-02 now covers only BR7 as negative path; ITG IDs and section 18 lists need the other two documents updated."
+  },
+  {
+   "ruling": "R-14479",
+   "item": "DOR-RWB-ITG-E4045-ITG-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Depends on (build) row now states RWB-P8-E4045-APP is an integration dependency served by the Day-1 stub."
+  },
+  {
+   "ruling": "R-14480",
+   "item": "DOR-RWB-ITG-E4045-ITG-20",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 names the fee tables and schedules as reference data through DP-06 and DP-07; parameter keys flagged as not specified."
+  },
+  {
+   "ruling": "R-14481",
+   "item": "DOR-RWB-ITG-E4045-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC3 for the access check in Gherkin; X11 now covered by AC3 and TC-E4-045-03-ITG covers AC3."
+  },
+  {
+   "ruling": "R-14482",
+   "item": "DOR-RWB-ITG-E4045-ITG-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR5 added to AC1 as a Then line and to TC-E4-045-01-ITG coverage."
+  },
+  {
+   "ruling": "R-14483",
+   "item": "DOR-RWB-ITG-E4045-ITG-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "DF-ACE row marked as read only through the rwb-source-data data product with no direct view read."
+  },
+  {
+   "ruling": "R-22766",
+   "item": "GAP-0436",
+   "status": "Resolved",
+   "section": "4, 12.8",
+   "target": "",
+   "change": "",
+   "note": "Step 14 now assigns the harness values to the wave 3 entry check with integration and QA leads; no value invented."
+  }
+ ]
+}

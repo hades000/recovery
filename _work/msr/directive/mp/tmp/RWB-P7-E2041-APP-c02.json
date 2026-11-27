@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "writes the record on `rwb.decision-record.v1`",
+   "new": "writes the record on `rwb.decision.DecisionRecorded.v1`"
+  },
+  {
+   "old": "404 an unknown package code; 422 `to` before `from` (MSG-GEN-003) and a checklist limit broken (MSG-GEN-001); 503 the store or the record writer is down.",
+   "new": "404 an unknown package code (Not specified in the source documents (CG-ALL-7409)); 422 `to` before `from` (MSG-GEN-003) and a checklist limit broken (MSG-GEN-001); 503 the store is down (Not specified in the source documents (CG-ALL-7409)) or the record writer is down (MSG-P7-003)."
+  },
+  {
+   "old": "The nine below are new under D-RCV-60",
+   "new": "The fifteen below are new under D-RCV-60"
+  },
+  {
+   "old": "Given those entries carry rule_id \"ALLOC-031\" on 700 of them and \"ALLOC-032\" on 600",
+   "new": "Given those entries carry rule_id \"ALLOC-031\" on 700 of them and \"ALLOC-032\" on 600 (test data; the rule ID is not in a current source)"
+  },
+  {
+   "old": "Then no rule_change table, no change_request table and no checklist child table exists in rwb_decision",
+   "new": "Then no separate rule-change table, no change-request table and no checklist child table exists in rwb_decision"
+  },
+  {
+   "old": "no `rule_change` table, no `change_request` column and no checklist child table is created (BR9, AC9).",
+   "new": "no separate rule-change table, no change-request column and no checklist child table is created (BR9, AC9)."
+  },
+  {
+   "old": "Then the check reads only rwb_decision and no other schema",
+   "new": "Then the check reads only rwb_decision and no other schema\n\n  Scenario: AC10 The author check is made by the service and not only by a screen (new, D-RCV-60)\n    Given version \"ALLOC-2026.12\" is LOADED and authored by \"U-41\"\n    When \"U-41\" calls POST /api/recovery/decision/v1/admin/rule-package-versions/{versionId}/approve without a screen\n    Then the service refuses the call with 403 and MSG-P7-002\n    Then the version stays LOADED with an empty approver\n\n  Scenario: AC11 A rollback appears as its own entry naming the version it returns to (new, D-RCV-60)\n    Given \"ALLOC-2026.12\" is IN_FORCE and \"ALLOC-2026.11\" is SUPERSEDED\n    When a rollback of \"ALLOC-2026.12\" to \"ALLOC-2026.11\" is loaded with rollback plan \"Roll back to ALLOC-2026.11\" and approved\n    When \"U-AUD-01\" reads GET /api/recovery/decision/v1/admin/rule-packages/change-report for 2026-12-01 to 2026-12-31 with packageCode ALLOCATION\n    Then the report shows a separate entry whose rolledBackTo is \"ALLOC-2026.11\"\n\n  Scenario: AC12 The checklist is one JSON object in DF-REF-295 and no other column (new, D-RCV-60)\n    Given version \"ALLOC-2026.12\" carries a complete checklist\n    When the version row is read from rwb_decision\n    Then change_checklist holds one JSON object in DF-REF-295\n    Then no other column of rule_package_version holds a checklist item\n\n  Scenario: AC13 The registry, the checklist and the report read only rwb_decision (new, D-RCV-60)\n    Given \"U-AUD-01\" holds RW-AUDIT\n    When \"U-AUD-01\" reads GET /api/recovery/decision/v1/admin/rule-packages/change-report for 2026-12-01 to 2026-12-31 with packageCode ALLOCATION\n    Then the report reads rwb_decision and no other schema\n    Then no other service reads rule_package_version or change_checklist\n\n  Scenario: AC14 An approval is not taken when its decision record cannot be written (new, D-RCV-60)\n    Given version \"ALLOC-2026.12\" has a complete checklist and was loaded by \"U-41\"\n    Given the decision-record library cannot write\n    When \"U-51\" approves version \"ALLOC-2026.12\"\n    Then the answer is 503 with MSG-P7-003 and the version stays LOADED with no approver\n    Then no rwb.decision.DecisionRecorded.v1 event is published and no hash-chained record is written\n\n  Scenario: AC15 The checklist limits and paging defaults are parameters and not code (new, D-RCV-60)\n    Given the rwb-case parameters contract mock returns checklist max 8 KB and changeRequestRef 30\n    When the changeRequestRef limit parameter is changed to a value greater than 30\n    Then the load of a checklist with that longer changeRequestRef is accepted with no code change"
+  },
+  {
+   "old": "| TC-E2-041-13 | AC9, BR9, section 12.7 | Component | Testcontainers database migrated from empty; `rwb_decision` with no new table and no new column |",
+   "new": "| TC-E2-041-13 | AC9, BR9, section 12.7 | Component | Testcontainers database migrated from empty; `rwb_decision` with no new table and no new column |\n| TC-E2-041-14 | AC5, BR2 | Component | ALLOCATION \"ALLOC-2026.12\" authored by \"U-41\"; approve by \"U-41\" refused with MSG-P7-002 |\n| TC-E2-041-15 | AC9, BR9 | Contract | Schema check of rwb_decision after the release Flyway sequence |\n| TC-E2-041-16 | AC10, BR2 | Component | ALLOCATION \"ALLOC-2026.12\" authored by \"U-41\"; approve called without a screen |\n| TC-E2-041-17 | AC11, BR7 | Component | Rollback of \"ALLOC-2026.12\" to \"ALLOC-2026.11\"; the report entry |\n| TC-E2-041-18 | AC12, BR9 | Component | Complete checklist on \"ALLOC-2026.12\"; one JSON object in DF-REF-295 |\n| TC-E2-041-19 | AC13, BR10 | Contract | Change report read by \"U-AUD-01\" for December 2026 |\n| TC-E2-041-20 | AC14, BR11 | Component | Approve of \"ALLOC-2026.12\" with the decision-record library unable to write |\n| TC-E2-041-21 | AC15, BR12 | Component | changeRequestRef limit parameter changed above 30 |"
+  },
+  {
+   "old": "copies of all thirteen cases",
+   "new": "copies of all twenty-one cases"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-06931",
+   "item": "DOR-RWB-P7-E2041-APP-8",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Event type in step 7 corrected to rwb.decision.DecisionRecorded.v1 per Kafka Catalog v1. The authorise path is not cited in this story, so no edit was needed for it."
+  },
+  {
+   "ruling": "R-11351",
+   "item": "CG-ALL-7406",
+   "status": "Resolved",
+   "section": "7, 17",
+   "target": "",
+   "change": "",
+   "note": "Negative assertions reworded to plain words (no separate rule-change table) so no non-dictionary name remains in the story."
+  },
+  {
+   "ruling": "R-11352",
+   "item": "CG-ALL-7407",
+   "status": "Resolved",
+   "section": "7, 17",
+   "target": "",
+   "change": "",
+   "note": "Negative assertions reworded to plain words (no change-request column or table) so no non-dictionary name remains in the story."
+  },
+  {
+   "ruling": "R-11353",
+   "item": "CG-ALL-7409",
+   "status": "Not applied",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "503 record writer mapped to MSG-P7-003 as in AC2. The 404 and store-down message IDs are not in the sources, so placeholders remain."
+  },
+  {
+   "ruling": "R-11354",
+   "item": "CG-ALL-7412",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "ALLOC-032 in AC8 marked as test data, since no current source holds the rule ID."
+  },
+  {
+   "ruling": "R-11355",
+   "item": "CG-ALL-7414",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-041-14 for AC5 and TC-E2-041-15 for AC9; count in the ITG note updated to twenty-one."
+  },
+  {
+   "ruling": "R-18189",
+   "item": "DOR-RWB-P7-E2041-APP-10",
+   "status": "Not applied",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "SCR-39 and its screen states are not in the text supplied for this chunk, so no state can be added without inventing a screen spec."
+  },
+  {
+   "ruling": "R-18190",
+   "item": "DOR-RWB-P7-E2041-APP-11",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "Data Classification v5",
+   "change": "Classify the author and approver staff IDs carried by RulePackageChangeEntry as personal data, or confirm they are not personal data.",
+   "note": "The story's no-personal-data statement conflicts with author and approver fields; the classing belongs in Data Classification v5."
+  },
+  {
+   "ruling": "R-18191",
+   "item": "DOR-RWB-P7-E2041-APP-18",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Open decision DL10 is in section 18, which is not in this chunk. Business decisions are already removed, so the entry cannot be edited here."
+  },
+  {
+   "ruling": "R-18192",
+   "item": "DOR-RWB-P7-E2041-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 to AC15 for BR2, BR7, BR9, BR10, BR11 and BR12, with test cases TC-E2-041-16 to TC-E2-041-21."
+  }
+ ]
+}

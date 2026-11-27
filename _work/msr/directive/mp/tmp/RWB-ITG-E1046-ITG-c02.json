@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "| Depends on (build) | None |",
+   "new": "| Depends on (build) | None (the five integration dependencies below are not yet built; see section 13) |"
+  },
+  {
+   "old": "| BR9 | The approval of a version is written as one local decision record by the owning service in its own schema and is collected into the P7 central ledger within five minutes; the pack reads the approval only through the ledger | DP-03; ADR-022; ASM-0472 |",
+   "new": "| BR9 | The approval of a version is written as one local decision record by the owning service in its own schema and is collected into the P7 central ledger within five minutes; the pack reads the approval only through the ledger | DP-03; ADR-022; ASM-0472 |\n\nOpen decisions for section 8: DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863) and DL28 (assumptions ASM-1861, ASM-1925, ASM-2093, ASM-2727). Each decision is still open and its assumptions apply until it closes."
+  },
+  {
+   "old": "template and merge_field sit in rwb_comms, the body in P5, the field registry in P1; the pack asserts through contracts only",
+   "new": "template and merge_field sit in rwb_comms (owner P6 rwb-comms), the body in the P5 schema, the field registry in P1 rwb-source-data; this story holds no table in any of them, reads the catalogue only through the P6 contract and asserts through contracts only"
+  },
+  {
+   "old": "| Generation assertion | Assertion | Calls the P5 generated-documents operation and reads the template version recorded on the stored document |",
+   "new": "| Generation assertion | Assertion | Calls POST /cases/{caseId}/generated-documents on /api/recovery/document/v1 (P5 rwb-document) and reads the template version recorded on the stored document |"
+  },
+  {
+   "old": "The reference-load path and the three lists of section 12.2",
+   "new": "The reference-load path (POST /admin/reference-loads, owner P3 rwb-case) and the three lists of section 12.2"
+  },
+  {
+   "old": "5. Add the load-result assertions: refused rows per load, the catalog version in force, the version number and state created, and the catalog version that stays in force on a refusal.",
+   "new": "5. Add the load-result assertions: refused rows per load, the catalog version in force, the version number and state created, and the catalog version that stays in force on a refusal. The template load and its idempotency are asserted on the operation the legacy load maps to: POST /admin/templates on /api/recovery/comms/v1, with the legacy SHA-256 file hash as the idempotency key."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14021",
+   "item": "DOR-RWB-ITG-E1046-ITG-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Header Depends on (build) row now states the five integration dependencies are not yet built; section 13 names them."
+  },
+  {
+   "ruling": "R-14022",
+   "item": "DOR-RWB-ITG-E1046-ITG-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added open decisions DL10 and DL28 with their assumptions after the section 8 table; DL28 also remains cited in BR7."
+  },
+  {
+   "ruling": "R-14023",
+   "item": "DOR-RWB-ITG-E1046-ITG-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "DP-01 row now names rwb_comms with owner P6 and states this story holds no table in any other service's schema."
+  },
+  {
+   "ruling": "R-14024",
+   "item": "DOR-RWB-ITG-E1046-ITG-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Adding ACs to section 7 and TCs to section 16 needs their existing text and ID pattern, which is outside this chunk. BR1-BR9 remain uncovered here."
+  },
+  {
+   "ruling": "R-22121",
+   "item": "GAP-1023",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "TSD P5 (document table)",
+   "change": "Add template_code varchar(30) and template_version integer beside template_id and treatment_id; build partial unique index on (treatment_id, template_id) where state is DRAFT and is_active. Story path set to Ownership Map.",
+   "note": "Story generation assertion now uses POST /cases/{caseId}/generated-documents on /api/recovery/document/v1; document column changes sit in TSD P5."
+  },
+  {
+   "ruling": "R-22122",
+   "item": "GAP-1879",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "DP-01 row: story reads the catalogue only through the P6 contract, never as a table, and holds neither table."
+  },
+  {
+   "ruling": "R-22123",
+   "item": "GAP-1064",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-P6-E1046-APP plan (C list)",
+   "change": "Add the rwb-source-data data-dictionary contract (GET /admin/data-dictionary/fields) to the C list, or confirm the published admin surface covers it; until then fake with one hop and 2 s timeout (DP-11).",
+   "note": "The missing C dependency sits in the P6 app slice's plan, not in this ITG story."
+  },
+  {
+   "ruling": "R-22124",
+   "item": "GAP-1068",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-P6-E1046-APP story and plan",
+   "change": "Enforce declared area and right at gateway-bff for every admin route; service refuses absent right with 403 MSG-P4-002; add DP-08 with RWB-P4-E1037-CON only if a service-side authorise call is required.",
+   "note": "The guard and DP-08 belong to the P6 app slice; this ITG story has no admin operations to change."
+  },
+  {
+   "ruling": "R-22126",
+   "item": "GAP-0360",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "DP-07 row now names POST /admin/reference-loads with owner P3 rwb-case; BR5, BR8 and BR9 already carry the refusal, owner and decision-record rules."
+  },
+  {
+   "ruling": "R-22127",
+   "item": "GAP-1063",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "rwb-comms API file and wave 1 harness",
+   "change": "Record that the legacy POST /api/recovery/v1/admin/reference-loads maps to POST /admin/templates plus approve and withdraw on /api/recovery/comms/v1, with the SHA-256 file hash kept as the idempotency rule.",
+   "note": "Story build step 5 now asserts the template load and idempotency on POST /admin/templates; the mapping record belongs to the rwb-comms file."
+  }
+ ]
+}

@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| Contract dependencies | rwb-source-data DP06 Collateral and assets (operation Not specified in the source documents, GAP-2837); rwb-case stage boundary (CaseWorkflow) |",
+   "new": "| Contract dependencies | rwb-source-data DP06 Collateral and assets (operation Not specified in the source documents, GAP-2837); rwb-case stage boundary (CaseWorkflow); rwb-case case state read and stage move: operation Not specified in the source documents (GAP-1909; GAP-2838) |"
+  },
+  {
+   "old": "| External dependencies | None |",
+   "new": "| External dependencies | None (RPS, AMIS and the Field App feed ACE and are reached only through rwb-source-data DP06; no direct adapter exists in rwb-asset; GAP-1910) |"
+  },
+  {
+   "old": "so the ownership of `asset` is read from those two sources and recorded (GAP-2837; ASM-4698).",
+   "new": "so the ownership of `asset` is read from those two sources and recorded (GAP-2837; ASM-4698). The holding record is this service's own record in schema `rwb_asset`, keyed by the ACE asset key with no foreign key and no copied ACE column; the ACE asset stays read-only through the rwb-source-data contract (GAP-1751)."
+  },
+  {
+   "old": "4. `AssetTakeOnEvaluator` loads the DISPOSAL package version in force and evaluates R-DIS-01 on the fact: asset_type = vehicle and statutory_notice_proved = Y (FSD S5 A2.1.3.1; Business Rules and Routing Logic v4).",
+   "new": "4. `AssetTakeOnEvaluator` loads the DISPOSAL package version in force and evaluates R-DIS-01 on the fact: asset_type = vehicle and statutory_notice_proved = Y (FSD S5 A2.1.3.1; Business Rules and Routing Logic v4). The disposal rules are versioned data rows, the package version is recorded on every decision, and the package code, the other R-DIS rules and the state list are held in the rule package of rwb-decision (GAP-1761)."
+  },
+  {
+   "old": "11. SCR-21 and SCR-22 read the asset, its holding status and its cost to date from this service through the gateway-bff composite route, read only, next to the case and the route state of rwb-case (DP-19).",
+   "new": "11. SCR-21 and SCR-22 read the asset, its holding status and its cost to date from this service through the gateway-bff composite route, read only, next to the case and the route state of rwb-case (DP-19).\n12. Where the take-on needs a statutory notice, it is raised through the rwb-comms contract and its proof of delivery is read back as an event; the photographs, inspection report and transfer document are stored only through the rwb-document contract (GAP-1767)."
+  },
+  {
+   "old": "| MSG-P1-001 | The ACE data product of the case is stale (X4, VR-S5-001-1) | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The ACE data product of the case is stale (X4, VR-S5-001-1) | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "The text is the legacy and FSD wording, copied unchanged; no message is reworded and none is added.",
+   "new": "The text is the legacy and FSD wording, copied unchanged; no message is reworded and none is added.\n\nError conditions 400 and 422 bind to MSG-GEN-001; 403 binds to MSG-P4-002; 401, 404 and 503 bind to Not specified in the source documents (GAP-2838)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23466",
+   "item": "GAP-1907",
+   "status": "Cross-document",
+   "section": "2",
+   "target": "Ownership Map (ownership.json)",
+   "change": "Add an asset table row owned by S5, from Architecture v5 slides 19 and 41 and TSD S5 T3.1. The ACE fact is already read through the rwb-source-data DP06 contract.",
+   "note": "Story already records asset as S5 (ownership line) and reads the ACE fact via rwb-source-data with a placeholder. Ownership Map row needs adding by its owner."
+  },
+  {
+   "ruling": "R-23467",
+   "item": "GAP-1909",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Contract dependencies row now declares the case state read and stage move with operation placeholder. Name confirmation with rwb-case remains before tag."
+  },
+  {
+   "ruling": "R-23468",
+   "item": "GAP-1910",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "External dependencies stays None; row now names RPS, AMIS and Field App behind rwb-source-data DP06 with no direct adapter in rwb-asset."
+  },
+  {
+   "ruling": "R-23469",
+   "item": "GAP-2838",
+   "status": "Cross-document",
+   "section": "Header, 14",
+   "target": "RWB-S5-E3019-CON contract README",
+   "change": "Record the tag date; confirm the DP06 operation name with rwb-source-data and the case move element with rwb-case before the tag; publish the AssetTakenOn consumer list.",
+   "note": "Placeholders and case boundary declared in story; error codes bound in section 14 where existing IDs fit. Remaining 401, 404, 503 unbound."
+  },
+  {
+   "ruling": "R-23470",
+   "item": "GAP-2848",
+   "status": "Not applied",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "New R-DIS-03 criterion needs a section 16 test row, which is not in this chunk; adding only the AC would leave it inconsistent. No edit made."
+  },
+  {
+   "ruling": "R-23471",
+   "item": "GAP-1751",
+   "status": "Cross-document",
+   "section": "2",
+   "target": "Ownership Map (ownership.json)",
+   "change": "Add an asset row owned by S5 in schema rwb_asset, alongside listing and asset_sale.",
+   "note": "Story now states the holding record is its own, keyed by ACE asset key with no FK or copied ACE column. Ownership Map row still needed."
+  },
+  {
+   "ruling": "R-23472",
+   "item": "GAP-1767",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Architecture v5 connection matrix (slide 13)",
+   "change": "Add S5 cells to P5 (rwb-document) and P6 (rwb-comms) so the notice request and evidence upload have drawn paths.",
+   "note": "Step 12 added: notice via rwb-comms with proof read back as event; documents only via rwb-document. Matrix cells still missing."
+  },
+  {
+   "ruling": "R-23473",
+   "item": "GAP-1761",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 4 now states disposal rules are versioned data rows, package version recorded per decision, and the rest held in the rwb-decision rule package."
+  },
+  {
+   "ruling": "R-27270",
+   "item": "CG-ALL-9611",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text now copied from Error and Message Standard v4. The When wording is close enough that no new ID is needed."
+  },
+  {
+   "ruling": "R-27271",
+   "item": "CG-ALL-9613",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "The AC1 and AC4 lines are not in this chunk. The legacy quotes in the section 7 note must stay word for word, so no wording edit was made."
+  }
+ ]
+}

@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "| X1 | The notice is outside the caller's scope or does not exist | Refused with 404; nothing changes | None | TC-E4-038-03 |",
+   "new": "| X1 | The notice is outside the caller's scope or does not exist | Refused with 404; nothing changes | None | AC3 (TC-E4-038-04) |"
+  },
+  {
+   "old": "| X8 | A role without the Documents right | Refused with 403; nothing changes | MSG-P4-002 | TC-E4-038-03 |",
+   "new": "| X8 | A role without the Documents right | Refused with 403; nothing changes | MSG-P4-002 | AC4 (TC-E4-038-05) |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 A notice outside the caller's scope or not found is refused with 404 (new, D-RCV-60)\n    Given the caller is outside the scope of notice \"N-0101\" or the notice does not exist\n    When the customer raises a dispute on notice \"N-0101\"\n    Then the system refuses with 404 and nothing changes\n\n  Scenario: AC4 A role without the Documents right is refused with 403 (new, D-RCV-60)\n    Given the caller has a role without the Documents right\n    When the caller sends the dispute POST for notice \"N-0101\"\n    Then the system refuses with 403, the user sees MSG-P4-002 and nothing changes"
+  },
+  {
+   "old": "`V4038_1__notice_dispute.sql` creates `notice_dispute`",
+   "new": "`V<nnnn>__notice_dispute.sql` creates `notice_dispute`"
+  },
+  {
+   "old": "`V4038_1__notice_dispute.sql` creates the new table",
+   "new": "`V<nnnn>__notice_dispute.sql` creates the new table"
+  },
+  {
+   "old": "| TC-E4-038-03 | Access | Component | A role without the Documents right sends the POST and the GET; refused with 403 and MSG-P4-002; a notice outside the scope answers 404 |",
+   "new": "| TC-E4-038-03 | Access | Component | A role without the Documents right sends the POST and the GET; refused with 403 and MSG-P4-002; a notice outside the scope answers 404 |\n| TC-E4-038-04 | Scope | Component | AC3: a notice outside the caller's scope or not found is refused with 404 and nothing changes |\n| TC-E4-038-05 | Access | Component | AC4: a role without the Documents right sends the dispute POST; refused with 403 and MSG-P4-002 |\n| TC-E4-038-06 | Rule | Component | BR4: DeviationCleared lifts the stop on the permitted channels only, and only when the deviation owner clears it |\n| TC-E4-038-07 | Rule | Component | BR6: customer, contact and consent facts are read on the rwb-source-data contract within 2 s; no v_ace_* view is read |\n| TC-E4-038-08 | Rule | Component | BR7: no business value is hard-coded; reason codes, channel list, decision code, rule id and rule version are read as data |\n| TC-E4-038-09 | Rule | Component | BR8: a contact during a stop is refused with MSG-P6-001 and a contact on a channel without consent with MSG-P6-002 |\n| TC-E4-038-10 | Rule | Component | BR9: a dispute never lifts a legal hold on the case; the dispute stop is additional to it |\n| TC-E4-038-11 | Rule | Component | BR10: a repeated POST with the same Idempotency-Key returns the first answer and raises no second deviation |\n| TC-E4-038-12 | Rule | Component | BR11: a deviation event that arrives twice is ignored and the idempotency hit is recorded |\n| TC-E4-038-13 | Rule | Component | BR12: only /api/recovery/comms/v1 and rwb.comms.events.v1 are declared; no other path or topic is declared as own |\n| TC-E4-038-14 | Rule | Component | BR13: raising a dispute emits no event of this service; the only event of the check is DecisionRecorded |\n| TC-E4-038-15 | Rule | Component | BR14: a missing owner answer never records a dispute as fully raised nor answers with a deviation reference it does not hold |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17768",
+   "item": "DOR-RWB-P6-E4038-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "AC3 and AC4 added in section 7; X1 and X8 in section 5 now covered by AC3 and AC4; TC-E4-038-04 and TC-E4-038-05 added in section 16",
+   "note": "X1 and X8 now have covering criteria AC3 and AC4 (new) and test rows TC-E4-038-04 and -05."
+  },
+  {
+   "ruling": "R-17769",
+   "item": "DOR-RWB-P6-E4038-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "Test rows TC-E4-038-06 to TC-E4-038-15 added in section 16 for BR4 and BR6 to BR14",
+   "note": "Each of BR4 and BR6 to BR14 now has a test row in section 16; no new criteria were needed."
+  },
+  {
+   "ruling": "R-17770",
+   "item": "DOR-RWB-P6-E4038-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add entity notice_dispute of rwb_comms and field party_id of notice (DF-LEG-030) so both resolve in LDM v9 and Data Classification v5",
+   "note": "Not a story change; the entity and field names are missing from the data model documents."
+  },
+  {
+   "ruling": "R-23095",
+   "item": "GAP-1112",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P6-E4038-CON",
+   "change": "Publish the two operations, the DisputeRequest and Dispute schemas and the notice_dispute row on Day 1 with the section 11 placeholders; element detail to the data steward",
+   "note": "Contract baseline is another document; story already marks the fields as not specified."
+  },
+  {
+   "ruling": "R-23096",
+   "item": "GAP-1113",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 already declares the deviation create as consumed and faked; Contract dependencies stay None. The S8 C row waits for an S8 story."
+  },
+  {
+   "ruling": "R-23097",
+   "item": "GAP-1114",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "TSD P6 v2 T6.1 rights matrix and the rwb-access contract",
+   "change": "Add the customer principal row with the edge's coarse permission; no role code is written in the story",
+   "note": "Rights matrix and access contract are outside this story; story names gateway-bff as the principal's edge."
+  },
+  {
+   "ruling": "R-23098",
+   "item": "GAP-1116",
+   "status": "Cross-document",
+   "section": "12.4",
+   "target": "RWB-P6-E4038-CON; S8 rwb-deviation owner",
+   "change": "Fix the consumer element of DeviationRaised and DeviationCleared and the hold_reason carrier; S8 owner publishes payload and key before the app story is done",
+   "note": "Event payload and key are published by the S8 owner, not in this story."
+  },
+  {
+   "ruling": "R-23099",
+   "item": "GAP-2374",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-P6-E4038-CON",
+   "change": "Fix the two operations, the request and answer shapes and the notice_dispute table; confirm the deviation operation and customer authorisation at baseline review",
+   "note": "Item names dispute_intake and DisputeAnswer; story uses notice_dispute and Dispute. Story names kept; one name to be chosen at the baseline review."
+  },
+  {
+   "ruling": "R-23100",
+   "item": "GAP-2375",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-P6-E4038-CON",
+   "change": "Baseline the two operations, shapes and notice_dispute table as declared; rwb-deviation owner publishes deviation open and read; gateway-bff declares customer session and scope",
+   "note": "Baseline and deviation contracts are other documents; values confirmed at consumer sign-off."
+  },
+  {
+   "ruling": "R-26136",
+   "item": "CG-ALL-6710",
+   "status": "Resolved",
+   "section": "11, 13",
+   "target": "",
+   "change": "Migration name now V<nnnn>__notice_dispute.sql in sections 11 and 13",
+   "note": "Form matches V0001 to Vnnnn. The next number of the rwb_comms sequence is not in the sources, so it is not written."
+  }
+ ]
+}

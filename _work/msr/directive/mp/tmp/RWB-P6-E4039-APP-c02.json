@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "**Feature switch.** `rwb.comms.contact-repository`, read as a parameter; off refuses both operations and records nothing.",
+   "new": "**Feature switch.** `rwb.comms.contact-repository`, read as a parameter; off refuses both operations and records nothing.\n\n**Screen states (SCR-33).** Loading: Not specified in the source documents (DOR-RWB-P6-E4039-APP-10). Empty: the owner returns no contact point and the answer is the 404 of X3. Error: the 503 of X6 and X7 is shown. No access: the 403 of X2 with MSG-P4-002 is shown.\n\n**Personal data.** No field of this story is classed as personal data, because the contact value, the masked contact value, the name and the identity number are not carried (BR10); the identifier, the code and the date are the only fields carried."
+  },
+  {
+   "old": "| TC-E4-039-04 | Principle 5 | NFR | The decision log write is forced to fail on 10 consent changes; no write is sent to the owner, no consent state changes and an incident is raised under R-UNI-39 |",
+   "new": "| TC-E4-039-04 | Principle 5 | NFR | The decision log write is forced to fail on 10 consent changes; no write is sent to the owner, no consent state changes and an incident is raised under R-UNI-39 |\n| TC-E4-039-05 | Section 12 (BR12, BR13) | Contract | The operations, events and activities of section 12 are called against the rwb-source-data contract fake; the events are checked for topic `rwb.comms.events.v1` and `DecisionRecorded` as the only event of a consent change |\n| TC-E4-039-06 | Section 12.7 (BR1, BR14; ASM-3438) | Component | Boundary test of the tables of section 12.7: the schema declares no contact table, no consent column and no `v_ace_*` query, and holds no party or case row |"
+  },
+  {
+   "old": "| Legacy feature | FEAT-COM-05 Maintain the contact repository (FSD P6 A2.18), prerequisite FEAT-RDF-04 |",
+   "new": "| Legacy feature | FEAT-COM-05 Maintain the contact repository (FSD P6 A2.18), prerequisite FEAT-RDF-04 |\n| Feature link | FEAT-COM-05 Maintain the contact repository, in the rwb-comms slice |\n| Legacy L3 process | Not specified in the source documents (DOR-RWB-P6-E4039-APP-2) |"
+  },
+  {
+   "old": "- The feature switch `rwb.comms.contact-repository`, read as a parameter: off refuses both operations with 404 and records nothing.",
+   "new": "- The feature switch `rwb.comms.contact-repository`, read as a parameter: off refuses both operations with 404 and records nothing.\n- The parameters above and the LOV-CHANNEL list are read through the reference-data contract of DP-06 and DP-07; the contract name is Not specified in the source documents (DOR-RWB-P6-E4039-APP-20)."
+  },
+  {
+   "old": "No contact table, no consent column, no contact-value column and no foreign key to `rwb_source_data`, `rwb_case` or `rwb_deviation` is created.",
+   "new": "No contact table, no consent column, no contact-value column and no foreign key to another service's schema is created (DP-01)."
+  },
+  {
+   "old": "| X1 | The party is absent, or outside the caller's scope | 404; nothing is read and nothing changes | None | TC-E4-039-03 |",
+   "new": "| X1 | The party is absent, or outside the caller's scope | 404; nothing is read and nothing changes | None | AC3; TC-E4-039-03; TC-E4-039-07 |"
+  },
+  {
+   "old": "| X2 | The role lacks the Documents right | 403; nothing is read and nothing changes | MSG-P4-002 | TC-E4-039-03 |",
+   "new": "| X2 | The role lacks the Documents right | 403; nothing is read and nothing changes | MSG-P4-002 | AC4; TC-E4-039-03; TC-E4-039-08 |"
+  },
+  {
+   "old": "| X5 | The `If-Match` version is stale | 409; nothing is sent to the owner and no record is written | Not specified in the source documents (GAP-1121; ASM-2069) | TC-E4-039-01 |",
+   "new": "| X5 | The `If-Match` version is stale | 409; nothing is sent to the owner and no record is written | Not specified in the source documents (GAP-1121; ASM-2069) | AC5; TC-E4-039-01; TC-E4-039-09 |"
+  },
+  {
+   "old": "| X8 | A consent state or a channel code is not in the reference data in force | 422; the owner is not called | MSG-GEN-001 | TC-E4-039-04 |",
+   "new": "| X8 | A consent state or a channel code is not in the reference data in force | 422; the owner is not called | MSG-GEN-001 | AC6; TC-E4-039-04; TC-E4-039-10 |"
+  },
+  {
+   "old": "| X9 | The PUT is repeated with the same `If-Match` | The first answer is returned with status 200 and no second change is recorded | None | TC-E4-039-01 |",
+   "new": "| X9 | The PUT is repeated with the same `If-Match` | The first answer is returned with status 200 and no second change is recorded | None | AC7; TC-E4-039-01; TC-E4-039-11 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Party absent or outside the caller's scope (X1)\n    Given the party is absent or outside the caller's scope\n    When the user reads or changes the contact points\n    Then the answer is 404, nothing is read and nothing changes\n\n  Scenario: AC4 Documents right lacking (X2)\n    Given the caller's role lacks the Documents right\n    When the user reads or changes the contact points\n    Then the answer is 403, nothing is read and nothing changes\n    Then the user sees MSG-P4-002\n\n  Scenario: AC5 Stale version (X5)\n    Given the If-Match version is stale\n    When the user changes a contact point\n    Then the answer is 409, nothing is sent to the owner and no record is written\n\n  Scenario: AC6 Consent state or channel code not in reference data (X8)\n    Given a consent state or a channel code is not in the reference data in force\n    When the user changes a contact point\n    Then the answer is 422 and the owner is not called\n    Then the user sees MSG-GEN-001\n\n  Scenario: AC7 Repeated change with the same version (X9)\n    Given a change with an If-Match version has been answered\n    When the change is repeated with the same If-Match version\n    Then the first answer is returned with status 200 and no second change is recorded"
+  },
+  {
+   "old": "| TC-E4-039-06 | Section 12.7 (BR1, BR14; ASM-3438) | Component | Boundary test of the tables of section 12.7: the schema declares no contact table, no consent column and no `v_ace_*` query, and holds no party or case row |",
+   "new": "| TC-E4-039-06 | Section 12.7 (BR1, BR14; ASM-3438) | Component | Boundary test of the tables of section 12.7: the schema declares no contact table, no consent column and no `v_ace_*` query, and holds no party or case row |\n| TC-E4-039-07 | AC3 | Component | A party that is absent, and a party outside the caller's scope; answered 404, nothing read or changed |\n| TC-E4-039-08 | AC4 | Component | A role without the Documents right sends the GET and the PUT; refused with 403 and MSG-P4-002 |\n| TC-E4-039-09 | AC5 | Component | A PUT with a stale `If-Match` version; answered 409, nothing sent to the owner and no record written |\n| TC-E4-039-10 | AC6 | Component | A PUT with a consent state or a channel code not in the reference data in force; answered 422, owner not called, MSG-GEN-001 |\n| TC-E4-039-11 | AC7 | Component | The same PUT repeated with the same `If-Match`; the first answer is returned with 200 and no second change is recorded |"
+  },
+  {
+   "old": "| BR14 | The party, the case and the deviation are other services' facts: the party and the case come with the request and through the case references the events carry, and this service holds no case row and no party row | Architecture v5 slide 41; Ownership Map (`recovery_case`, `case_party` owned by P3) |",
+   "new": "| BR14 | The party, the case and the deviation are other services' facts: the party and the case come with the request and through the case references the events carry, and this service holds no case row and no party row | Architecture v5 slide 41; Ownership Map (`recovery_case`, `case_party` owned by P3) |\n\n**Rule coverage.** BR1: TC-E4-039-06; BR2: AC8, TC-E4-039-12; BR3: AC2, TC-E4-039-02; BR4: AC1, TC-E4-039-01; BR5: AC9, TC-E4-039-13; BR6: AC10, TC-E4-039-14; BR7: AC11, TC-E4-039-15; BR8: AC12, TC-E4-039-16; BR9: AC13, TC-E4-039-17; BR10: AC14, TC-E4-039-18; BR11: AC5, TC-E4-039-09; BR12: TC-E4-039-05; BR13: TC-E4-039-05; BR14: TC-E4-039-06."
+  },
+  {
+   "old": "    Then the first answer is returned with status 200 and no second change is recorded",
+   "new": "    Then the first answer is returned with status 200 and no second change is recorded\n\n  Scenario: AC8 Owner times out or fails (X6; BR2)\n    Given the consent and verification write of the owner times out or answers 5xx\n    When the user changes a contact point\n    Then nothing changes, the attempt stays in the local chain and the answer is 503\n\n  Scenario: AC9 Contact stop in force (BR5)\n    Given a contact stop is in force for the case\n    When the user reads the contact points\n    Then the read answer carries the stop mark\n\n  Scenario: AC10 Rule values read as data (BR6)\n    Given the verification rule or the failed-count threshold changes in the reference data\n    When the user reads the contact points\n    Then the new value applies with no change to the code\n\n  Scenario: AC11 Consent change keeps the contact value (BR7)\n    Given a consent change is accepted for a channel\n    When the change is recorded\n    Then no contact point is deleted and no contact value changes\n\n  Scenario: AC12 New verified contact point (BR8)\n    Given the owner writes a new verified contact point\n    When the user reads the contact points\n    Then the verified state is visible and this service clears no deviation\n\n  Scenario: AC13 Contact stop does not change consent (BR9)\n    Given a contact stop is applied\n    When the stop takes effect\n    Then the channel leaves the contact plan and no consent record is removed or added\n\n  Scenario: AC14 Identifier, code and date only (BR10)\n    Given a contact point is read or a consent change is recorded\n    When the element is logged, published or written\n    Then it carries an identifier, a code and a date only, and no contact value, masked contact value, name or identity number"
+  },
+  {
+   "old": "| TC-E4-039-11 | AC7 | Component | The same PUT repeated with the same `If-Match`; the first answer is returned with 200 and no second change is recorded |",
+   "new": "| TC-E4-039-11 | AC7 | Component | The same PUT repeated with the same `If-Match`; the first answer is returned with 200 and no second change is recorded |\n| TC-E4-039-12 | AC8 | Component | The owner's consent and verification write forced to time out and forced to answer 5xx; answered 503, nothing changed, attempt kept in the local chain |\n| TC-E4-039-13 | AC9 | Component | A contact stop in force for the case; the read answer carries the stop mark |\n| TC-E4-039-14 | AC10 | Component | The verification rule and the failed-count threshold changed in the reference data; the new value is applied with no code change |\n| TC-E4-039-15 | AC11 | Component | An accepted consent change; no contact point is deleted and no contact value changes |\n| TC-E4-039-16 | AC12 | Component | A new verified contact point written by the owner; the verified state is visible and no deviation is cleared by this service |\n| TC-E4-039-17 | AC13 | Component | A contact stop applied; the channel leaves the contact plan and no consent record is removed or added |\n| TC-E4-039-18 | AC14 | NFR | A contact point read and a consent change recorded; the logged, published and written elements carry identifier, code and date only |"
+  },
+  {
+   "old": "| SourceDataContactClient | Adapter | The contact read and the consent write of the rwb-source-data contract, one hop, 2 s, with a breaker |",
+   "new": "| SourceDataContactClient | Adapter | The contact read with the consent state, the verification and the failed count, and the consent and verification write of the rwb-source-data contract, one hop, 2 s, with a breaker |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11117",
+   "item": "CG-ALL-6728",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx (tab Story test cases)",
+   "change": "Add rows TC-E4-039-01 to TC-E4-039-04 with Given, When and Then copied from the criteria they cover (AC1, AC2, Access, Principle 5)",
+   "note": "Story test cases in v8 lack these four rows; the story keeps its IDs and covers unchanged."
+  },
+  {
+   "ruling": "R-17779",
+   "item": "DOR-RWB-P6-E4039-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Screen states of SCR-33 added: loading, empty, error and no access in the feature switch paragraph",
+   "note": "Loading state is Not specified in the source documents; the other three states follow X2, X3, X6 and X7."
+  },
+  {
+   "ruling": "R-17780",
+   "item": "DOR-RWB-P6-E4039-APP-11",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Personal-data classification stated: no personal-data field is carried, per BR10",
+   "note": "Contact value, masked value, name and identity number are not carried; identifier, code and date are the only fields."
+  },
+  {
+   "ruling": "R-17781",
+   "item": "DOR-RWB-P6-E4039-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E4-039-05 contract test for section 12 operations and events and TC-E4-039-06 boundary test for section 12.7 tables (ASM-3438)",
+   "note": "Contract and boundary tests added; TC-E4-039-01 to -04 are in Test Cases v8 under CG-ALL-6728."
+  },
+  {
+   "ruling": "R-17782",
+   "item": "DOR-RWB-P6-E4039-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Feature link row and Legacy L3 process row added to the traceability table",
+   "note": "L3 process is Not specified in the source documents; table is row-based, so the feature and L3 values are rows."
+  },
+  {
+   "ruling": "R-17783",
+   "item": "DOR-RWB-P6-E4039-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Parameters and LOV-CHANNEL named as read through the reference-data contract of DP-06 and DP-07",
+   "note": "Reference-data contract name is Not specified in the source documents; parameters are named in the configuration list."
+  },
+  {
+   "ruling": "R-17784",
+   "item": "DOR-RWB-P6-E4039-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Migration line names no other service's schema; it states no foreign key to another service's schema",
+   "note": "Other schemas are no longer named in section 13; ownership of rwb_comms unchanged."
+  },
+  {
+   "ruling": "R-17785",
+   "item": "DOR-RWB-P6-E4039-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "AC3 to AC7 added for X1, X2, X5, X8, X9; section 5 Covered by column updated; TC-E4-039-07 to -11 added",
+   "note": "Each exception now has its own criterion and test case; X3, X4, X6 and X7 keep their existing AC mapping."
+  },
+  {
+   "ruling": "R-17786",
+   "item": "DOR-RWB-P6-E4039-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Rule coverage paragraph added; AC8 to AC14 and TC-E4-039-12 to -18 added for BR2, BR5 to BR10",
+   "note": "Every BR1 to BR14 maps to a criterion or a test case; BR11 to BR14 map to existing or contract tests."
+  },
+  {
+   "ruling": "R-22573",
+   "item": "GAP-1605",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "SourceDataContactClient reads contact point, consent, verification and failed count, and writes consent and verification, through the rwb-source-data contract",
+   "note": "Enforcement stays in rwb-comms (BR5, BR9); consent data is read and written only through the P1 contract."
+  }
+ ]
+}

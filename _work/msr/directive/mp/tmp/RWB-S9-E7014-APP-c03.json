@@ -1,0 +1,192 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The role does not hold partner portal right C | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | TC-E7-014-03 |",
+   "new": "| X2 | The role does not hold partner portal right C | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC3, TC-E7-014-03, TC-E7-014-07 |"
+  },
+  {
+   "old": "| X4 | The target or the cure period is absent from reference data at its version | 422 or 503 with nothing written; the step never falls back to a value of the code | MSG-GEN-001 | Section 17, BR7 |",
+   "new": "| X4 | The target or the cure period is absent from reference data at its version | 422 or 503 with nothing written; the step never falls back to a value of the code | MSG-GEN-001 | Section 17, BR7, AC4, TC-E7-014-08 |"
+  },
+  {
+   "old": "| X5 | The rwb-comms notice request does not answer inside 2 s, or its breaker is open | The transaction rolls back, the activity retries on the workflow's schedule under the same `Idempotency-Key`, and nothing is committed | None | BR4 |",
+   "new": "| X5 | The rwb-comms notice request does not answer inside 2 s, or its breaker is open | The transaction rolls back, the activity retries on the workflow's schedule under the same `Idempotency-Key`, and nothing is committed | None | BR4, AC5, TC-E7-014-09 |"
+  },
+  {
+   "old": "| X6 | The same submission arrives twice | One instruction, one notice and one record; the repeat answers what exists | None | BR10 |",
+   "new": "| X6 | The same submission arrives twice | One instruction, one notice and one record; the repeat answers what exists | None | BR10, AC6, TC-E7-014-10 |"
+  },
+  {
+   "old": "| X7 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` or `timer` row, a `notice` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR5, BR6 |",
+   "new": "| X7 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` or `timer` row, a `notice` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR5, BR6, AC7, TC-E7-014-11 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003\n```",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Role without partner portal right C (X2)\n    Given the user's role does not hold partner portal right C\n    When the notice is requested\n    Then the request is refused with 403 before any read or write, nothing changes, no record is written and the user sees MSG-P4-002\n\n  Scenario: AC4 Target or cure period absent at its version (X4)\n    Given the target or the cure period is absent from reference data at its version\n    When the notice is requested\n    Then the request is refused with 422 or 503, nothing is written and the user sees MSG-GEN-001\n\n  Scenario: AC5 rwb-comms does not answer inside 2 s (X5)\n    Given the rwb-comms notice request does not answer inside 2 s or its breaker is open\n    When the action is taken\n    Then the transaction rolls back, nothing is committed and the activity retries under the same Idempotency-Key\n\n  Scenario: AC6 Same submission twice (X6)\n    Given the same submission arrives twice\n    When the action is taken\n    Then one instruction, one notice and one record exist and the repeat answers what exists\n\n  Scenario: AC7 Statement outside the boundary (X7)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case or timer row, a notice row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the build fails and nothing is released\n```"
+  },
+  {
+   "old": "### 8. Business rules",
+   "new": "### 8. Business rules\n\n**Rule coverage.** BR1 TC-E7-014-06; BR2 AC2, TC-E7-014-02, TC-E7-014-04; BR3 TC-E7-014-12; BR4 AC5, TC-E7-014-05, TC-E7-014-09; BR5 AC7, TC-E7-014-06, TC-E7-014-11; BR6 AC7, TC-E7-014-11; BR7 AC4, TC-E7-014-08; BR8 TC-E7-014-13; BR9 TC-E7-014-11; BR10 AC6, TC-E7-014-10; BR11 TC-E7-014-05."
+  },
+  {
+   "old": "DP-08 is not in this story's pattern set: the capability area and the right are declared per operation and the access guard is a service-template capability, so the check is stated and not built.",
+   "new": "DP-08 is not in this story's pattern set, but the rwb-access authorise check is named here: each operation calls the authorise check of rwb-access for the capability area \"Partner portal\" and the right it declares (C for the notice, R for the reads), and the access guard of the service template applies it, so the check is stated here and built by the template."
+  },
+  {
+   "old": "`decision_record` and `idempotency_key` are library objects",
+   "new": "the decision record and `idempotency_key` are library objects"
+  },
+  {
+   "old": "| decision_record | PLT library, created in `rwb_partner` | The local hash-linked decision record of the notice (DP-03) |",
+   "new": "| decision record (PLT library object) | PLT library, created in `rwb_partner` | The local hash-linked decision record of the notice (DP-03) |"
+  },
+  {
+   "old": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the service holds no timer.",
+   "new": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the service holds no timer.\n- The notice harness of RWB-ITG-E7014-ITG: the SIT base hosts, the fixture layout, the synthetic partner, instruction, case and notice keys, the stub answer shapes, the missed-target comparison against the named rule version, the evidence format and retention, and the pass or fail gate are agreed at the wave 4 entry check and recorded in the harness README, so the fixture stays data and no business value is hard-coded (GAP-0475)."
+  },
+  {
+   "old": "no write to `rwb_case`, `rwb_comms`, `rwb_decision` or any other schema",
+   "new": "no write to any other service's schema"
+  },
+  {
+   "old": "and SCR-34 answers through the composite route.",
+   "new": "and SCR-34 answers through the composite route.\n\n**Open decision.** DL22 stays open. Its assumptions ASM-1162, ASM-1304, ASM-2217 and ASM-2569 are confirmed by the directive of 26 November 2026, and this story does not close the decision."
+  },
+  {
+   "old": "| TC-E7-014-01 | AC1 | Component | The partner `PRT-0007` at `ACTIVE` with a score below its target, the reference-data fake and the rwb-comms fake; the notice reference, `ON_NOTICE`, the record, the target and the version asserted |",
+   "new": "| TC-E7-014-01 | AC1, run by RWB-ITG-E7014-ITG | Component | The partner `PRT-0007` at `ACTIVE` with a score below its target, the reference-data fake and the rwb-comms fake; the notice reference, `ON_NOTICE`, the record, the target and the version asserted |"
+  },
+  {
+   "old": "| TC-E7-014-04 | Principle 5 | Component | A forced decision log write failure inside the transaction; the panel status is unchanged and no record and no notice exist |",
+   "new": "| TC-E7-014-04 | Principle 5 | Component | A forced decision record write failure inside the transaction; the panel status is unchanged and no record and no notice exist |"
+  },
+  {
+   "old": "| TC-E7-014-06 | Section 12.7 tables (ASM-3438) | Component | Each table of section 12.7 read and written only by its owner; no foreign key across the schema (DP-01); boundary values: Not specified in the source documents (ASM-3438) |",
+   "new": "| TC-E7-014-06 | Section 12.7 tables (ASM-3438) | Component | Each table of section 12.7 read and written only by its owner; no foreign key across the schema (DP-01); boundary values: Not specified in the source documents (ASM-3438) |\n| TC-E7-014-07 | AC3 | Component | A role without partner portal right C; 403 with MSG-P4-002 before any read or write, nothing changed and no record written |\n| TC-E7-014-08 | AC4 | Component | The target or the cure period absent from reference data at its version; 422 or 503 with MSG-GEN-001, nothing written and no fallback value used |\n| TC-E7-014-09 | AC5 | Component | The rwb-comms fake does not answer inside 2 s, or its breaker is open; the transaction rolls back, nothing is committed and the retry reuses the same Idempotency-Key |\n| TC-E7-014-10 | AC6 | Component | The same submission sent twice; one instruction, one notice and one record, and the repeat answers the existing result |\n| TC-E7-014-11 | AC7 | Component | A statement that reaches a v_ace_* view, a recovery_case or timer row, a notice row or another service's schema; the grant refuses it and the boundary test fails the build |\n| TC-E7-014-12 | BR3, X3 | Component | Partners at SUSPENDED or EXITED, at ON_NOTICE, or with a contract ended; each refused with 409 and nothing written |\n| TC-E7-014-13 | BR8 | Component | The record, the answer, a log line and a workflow input of the synthetic partner; no contact name, e-mail, phone number or identity number present |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Feature | L3 process | Requirement (short) | Story element | Test cases |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| No requirement row traces to FEAT-PRM-11 | The requirement this feature serves is Not specified in the source documents (GAP-3127; ASM-5458): TSD S9 T8 maps REQ-S9-001 to REQ-S9-009 to FEAT-PRM-01 and FEAT-PRM-08, and REQ-S9-001 names notice and exit only among the six points | The trace rests on the legacy key, the feature row and AC-S9-011-01 | TC-E7-014-01 |",
+   "new": "| No requirement row traces to FEAT-PRM-11 | FEAT-PRM-11 | Not specified in the source documents (DOR-RWB-S9-E7014-APP-2) | The requirement this feature serves is Not specified in the source documents (GAP-3127; ASM-5458): TSD S9 T8 maps REQ-S9-001 to REQ-S9-009 to FEAT-PRM-01 and FEAT-PRM-08, and REQ-S9-001 names notice and exit only among the six points | The trace rests on the legacy key, the feature row and AC-S9-011-01 | TC-E7-014-01 |"
+  },
+  {
+   "old": "| REQ-S9-001 (nearest) | Every partner type is managed on the same six points, notice and exit among them | The notice step and the panel status | TC-E7-014-01 |",
+   "new": "| REQ-S9-001 (nearest) | FEAT-PRM-11 | Not specified in the source documents (DOR-RWB-S9-E7014-APP-2) | Every partner type is managed on the same six points, notice and exit among them | The notice step and the panel status | TC-E7-014-01 |"
+  },
+  {
+   "old": "| ADR-013 | 19 services inside ACE | rwb-partner as the owner of the partner panel | TC-E7-014-01 |",
+   "new": "| ADR-013 | FEAT-PRM-11 | Not specified in the source documents (DOR-RWB-S9-E7014-APP-2) | 19 services inside ACE | rwb-partner as the owner of the partner panel | TC-E7-014-01 |"
+  },
+  {
+   "old": "| ADR-014 | Schema and login per service | `rwb_partner` and its own login | TC-E7-014-01 |",
+   "new": "| ADR-014 | FEAT-PRM-11 | Not specified in the source documents (DOR-RWB-S9-E7014-APP-2) | Schema and login per service | `rwb_partner` and its own login | TC-E7-014-01 |"
+  },
+  {
+   "old": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The notice request and the reference-data read with their budget and breaker | TC-E7-014-01 |",
+   "new": "| ADR-020 | FEAT-PRM-11 | Not specified in the source documents (DOR-RWB-S9-E7014-APP-2) | Contract-first REST, one hop, 2 s timeout | The notice request and the reference-data read with their budget and breaker | TC-E7-014-01 |"
+  },
+  {
+   "old": "| ADR-022 | Local decision record plus central ledger | The record written before the notice is requested | TC-E7-014-02, TC-E7-014-04 |",
+   "new": "| ADR-022 | FEAT-PRM-11 | Not specified in the source documents (DOR-RWB-S9-E7014-APP-2) | Local decision record plus central ledger | The record written before the notice is requested | TC-E7-014-02, TC-E7-014-04 |"
+  },
+  {
+   "old": "`cure_period_days` exists for a broken treatment plan (R-RES-27 to R-RES-29) and no partner parameter of that name exists",
+   "new": "A cure-period field exists for a broken treatment plan (R-RES-27 to R-RES-29) and no partner parameter of that kind exists"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21537",
+   "item": "DOR-RWB-S9-E7014-APP-18",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added Open decision paragraph recording DL22 and its four assumptions",
+   "note": "DL22 recorded as open in section 13 with ASM-1162, ASM-1304, ASM-2217 and ASM-2569 as its assumptions."
+  },
+  {
+   "ruling": "R-21538",
+   "item": "DOR-RWB-S9-E7014-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added Feature and L3 process columns to the traceability table",
+   "note": "Section 18 now has Feature and L3 process columns; L3 process is not specified in the sources and says so."
+  },
+  {
+   "ruling": "R-21539",
+   "item": "DOR-RWB-S9-E7014-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Boundary test names no other schema; it refers to other services' schemas generally",
+   "note": "Build step 8 no longer names rwb_case, rwb_comms or rwb_decision; ownership stated as rwb_partner only."
+  },
+  {
+   "ruling": "R-21540",
+   "item": "DOR-RWB-S9-E7014-APP-3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC3 to AC7 for X2, X4, X5, X6, X7 with TC-E7-014-07 to -11 and updated section 5 Covered by",
+   "note": "AC3 to AC7 added in section 7 for X2, X4 to X7, each with a test case row and a Covered by link in section 5."
+  },
+  {
+   "ruling": "R-21541",
+   "item": "DOR-RWB-S9-E7014-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Rule coverage paragraph maps BR1 to BR11 to criteria and test cases; new TC-E7-014-12 and -13",
+   "note": "Each of BR1 to BR11 now maps to a test case; BR3 and BR8 get new TC-E7-014-12 and TC-E7-014-13."
+  },
+  {
+   "ruling": "R-21542",
+   "item": "DOR-RWB-S9-E7014-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Names the rwb-access authorise check per operation with capability area and right",
+   "note": "Section 10 names the rwb-access authorise check per operation for the Partner portal area and its declared right."
+  },
+  {
+   "ruling": "R-21543",
+   "item": "DOR-RWB-S9-E7014-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Renamed decision_record to decision record; removed cure_period_days name in section 3 line and LDM/DC name in section 11 and the schema table",
+   "note": "Names not in LDM v9 or Data Classification v5 removed; AC2 keeps legacy wording by its origin-tag rule, other criteria use the decision record term."
+  },
+  {
+   "ruling": "R-22891",
+   "item": "GAP-0475",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added bullet in section 13 that agrees harness environment, keys, comparison, evidence and gate at wave 4 entry",
+   "note": "Harness agreements recorded in section 13 for the wave 4 entry check; the harness README stays with RWB-ITG-E7014-ITG."
+  },
+  {
+   "ruling": "R-23661",
+   "item": "GAP-1837",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Recovery Workbench Ownership Map (Tables sheet, S9 rwb_partner rows); Logical Data Model; Physical Schema v6.sql",
+   "change": "Add scorecard result, fee claim and approval, review, conduct sample and field visit tables to rwb_partner with field lists and keys, named with the DB story; keep partner, partner_user and partner_instruction as they are.",
+   "note": "Table set belongs to the Ownership Map, LDM and physical schema; this story keeps its two tables."
+  },
+  {
+   "ruling": "R-28000",
+   "item": "CG-ALL-12053",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "TC-E7-014-01 Covers marked run by RWB-ITG-E7014-ITG",
+   "note": "TC-E7-014-01 marked as run by RWB-ITG-E7014-ITG, the owner of AC1."
+  }
+ ]
+}

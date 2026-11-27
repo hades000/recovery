@@ -1,0 +1,63 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P2-018 | Not specified in the source documents (DOR-RWB-S2-E2006-APP-9) | Not specified in the source documents (DOR-RWB-S2-E2006-APP-9) |",
+   "new": "| MSG-P2-018 | The recorded approval level is below the level the delegation of authority requires; answered by the caller's slice, not emitted here | Not specified in the source documents (DOR-RWB-S2-E2006-APP-9) |"
+  },
+  {
+   "old": "    Then no statement of this service reaches a case, queue, account, rule or document table and no `v_ace_*` view, and a role without the Treatment and offer right reads 403 with MSG-P4-002",
+   "new": "    Then no statement of this service reaches a case, queue, account, rule or document table and no `v_ace_*` view, and a role without the Treatment and offer right reads 403 with MSG-P4-002\n\n  Scenario: AC12 NLEADS is reached by the officer, never by this service (new, D-RCV-60)\n    Given the rwb-integration contract mock returns the recording write for treatment \"TRT-SYN-0610\" with reference \"NL-SYN-000610\", result \"APPROVED\", approval level \"L5\" and result date 2026-12-17\n    When the credit-result write is served with If-Match version 3\n    Then the reference and the result are stored as given, and this service opens no outbound call to NLEADS\n\n  Scenario: AC13 An unknown treatment answers 404 and a call without identity answers 401 (new, D-RCV-60)\n    Given a treatment ID that does not exist or lies outside the caller's scope\n    When GET \"/treatments/{treatmentId}\" is served for that ID on base \"/api/recovery/treatment/v1\"\n    Then the answer is 404 with MSG-P4-003\n    Then a call on the same path with no identity answers 401 with a message Not specified in the source documents (NEWAC-RWB-S2-E2006-APP-AC13)\n\n  Scenario: AC14 A replay of a recorded write with the same idempotency key is refused once-only (new, D-RCV-60)\n    Given the write of AC1 has been served once for treatment \"TRT-SYN-0610\" and its answer was lost\n    When the same write is served again with the same idempotency key, the key header being Not specified in the source documents (NEWAC-RWB-S2-E2006-APP-AC14)\n    Then the answer is 409 with MSG-P2-010 for 2026-12-17, no second record is written and no outbox row exists"
+  },
+  {
+   "old": "| TC-S2-E2006-APP-10 | BR10, section 12.7 | Contract | A boundary check over the tables of section 12.7: the write touches only `treatment` and `decision_record`, and no table outside `rwb_treatment` is read or written |",
+   "new": "| TC-S2-E2006-APP-10 | BR10, section 12.7 | Contract | A boundary check over the tables of section 12.7: the write touches only `treatment` and `decision_record`, and no table outside `rwb_treatment` is read or written |\n| TC-S2-E2006-APP-11 | AC12, BR4 | Contract | The credit-result write for \"TRT-SYN-0610\" with \"NL-SYN-000610\"; reference and result stored as given, no outbound call to NLEADS |\n| TC-S2-E2006-APP-12 | AC13 | Component | An unknown or out-of-scope treatment ID; 404 with MSG-P4-003; a call with no identity answers 401 |\n| TC-S2-E2006-APP-13 | AC14 | Component | Replay of the AC1 write with the same idempotency key; 409 with MSG-P2-010, no second record, no outbox row |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28724",
+   "item": "GAP-2484",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Service Story Catalog",
+   "change": "Give GET /cases/{caseId}/recommendation to the P7 story serving the decision screen; treat the four platform contracts as published before Day 1. Story metadata rows unchanged.",
+   "note": "Story metadata kept as the work package gives it; catalogue owns the recommendation read assignment."
+  },
+  {
+   "ruling": "R-29674",
+   "item": "ACR-RWB-S2-E2006-APP-AC8",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P2-018 row was present with placeholder cells; When now names the caller's slice as answerer. Message text stays DOR-RWB-S2-E2006-APP-9."
+  },
+  {
+   "ruling": "R-32053",
+   "item": "NEWAC-RWB-S2-E2006-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for BR4 (no outbound NLEADS call) with boundary test TC-S2-E2006-APP-11; test derived from the criterion."
+  },
+  {
+   "ruling": "R-32054",
+   "item": "NEWAC-RWB-S2-E2006-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 adds 404 with MSG-P4-003 and 401 with TC-S2-E2006-APP-12; the 401 message stays Not specified in the source documents."
+  },
+  {
+   "ruling": "R-32055",
+   "item": "NEWAC-RWB-S2-E2006-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC14 refuses a replay once-only with 409 MSG-P2-010 (TC-S2-E2006-APP-13); key header stays Not specified in the source documents."
+  }
+ ]
+}

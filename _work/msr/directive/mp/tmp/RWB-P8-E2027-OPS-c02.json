@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "### 12. Contract",
+   "new": "### 12. Contract\n\nContract version built against: v1, the `/v1` paths and the `.v1` event types and topics of this section."
+  },
+  {
+   "old": "| Event | Topic | Provisioning |\n|---|---|---|\n| `AceDataReady` (EV-26) | `rwb.source-data.events.v1` | Consumer group with inbox, `.retry` and `.dlt`; starts the JOB-07 run |\n| `rwb.treatment.TreatmentApproved.v1` (EV-10) | `rwb.treatment.events.v1` | Consumer group with its retry and dead-letter paths |\n| `rwb.decision.RulePackageInForce.v1` (EV-30) | `rwb.decision.events.v1` | Consumer group with its retry and dead-letter paths; one swap per package code and version label |\n| `rwb.decision.DecisionRecorded.v1` (EV-08) | `rwb.decision-record.v1` (shared) | Read-only consumer group for the ledger acknowledgement of a local record |\n| `rwb.debtsale.LotAwarded.v1` (EV-23) | `rwb.debtsale.events.v1` | Consumer group with its retry and dead-letter paths |\n| `rwb.asset.AssetSold.v1` | `rwb.asset.events.v1` | Consumer group with its retry and dead-letter paths |",
+   "new": "| Event | Topic | Provisioning | Consuming service |\n|---|---|---|---|\n| `AceDataReady` (EV-26) | `rwb.source-data.events.v1` | Consumer group with inbox, `.retry` and `.dlt`; starts the JOB-07 run | rwb-payment |\n| `rwb.treatment.TreatmentApproved.v1` (EV-10) | `rwb.treatment.events.v1` | Consumer group with its retry and dead-letter paths | rwb-payment |\n| `rwb.decision.RulePackageInForce.v1` (EV-30) | `rwb.decision.events.v1` | Consumer group with its retry and dead-letter paths; one swap per package code and version label | rwb-payment |\n| `rwb.decision.DecisionRecorded.v1` (EV-08) | `rwb.decision-record.v1` (shared) | Read-only consumer group for the ledger acknowledgement of a local record | rwb-payment |\n| `rwb.debtsale.LotAwarded.v1` (EV-23) | `rwb.debtsale.events.v1` | Consumer group with its retry and dead-letter paths | rwb-payment |\n| `rwb.asset.AssetSold.v1` | `rwb.asset.events.v1` | Consumer group with its retry and dead-letter paths | rwb-payment |"
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|\n| BR1 | The evaluated copy of PAYMENT_MATCH is refreshed on `RulePackageInForce`: fetch, verify the checksum, swap atomically; on any failure the version in force stays loaded | DP-04; Temporal and Drools slide 15 notes; ADR-017 |\n| BR2 | No version in force is a stopped run with MSG-P3-027; no default version, no empty model and no last-known-anything is substituted | legacy BR9; D-RCV-36 T3; R-UNI-41 |\n| BR3 | Every topic has a `.retry` topic and a `.dlt` topic, and a consumer never acknowledges an event it could not process | DP-09 as the platform pattern; Arch v5 slide 22 notes; RWB-PLT-TE006-CON |\n| BR4 | The JOB-07 and JOB-08 runs are event-started workflows on task queue `rwb-payment`; this release registers no Schedule and never touches JOB-20 | DP-10; Arch v5 slide 44 |\n| BR5 | The migration job writes schema `rwb_payment` only, and creates no registry table and no retired table | DP-01, DP-15; D-RCV-36 T10 |\n| BR6 | Readiness answers healthy only when the migration is at the expected schema version, the worker polls, the outbox relay is up and the version in force of PAYMENT_MATCH is loaded and verified | Arch v5 slide 27; Temporal and Drools slide 28 |\n| BR7 | Every secret and identity is a reference to the platform secret store; no secret is written into a values file, a chart template, a dashboard or a runbook | NFR-052; DP-02 |\n| BR8 | Every alert carries the package code, the version label, the topic, the consumer group or the workflow ID it needs, and links exactly one runbook entry with the owner role | Template and Rules §R7.2 s14 |\n| BR9 | A rule rollback is one call in rwb-decision and the swap back happens on the event; the service is never redeployed to change a rule | Arch v5 slide 27; Temporal and Drools slide 15 |\n| BR10 | One image digest and one chart version are promoted through the environments without a rebuild, and the canary gate holds the promotion until its slice is green | Template and Rules §R5.7 rule 6; RWB-PLT-N004-OPS |\n| BR11 | Nothing on a dashboard, an alert or a runbook carries a case fact or a personal datum | Template and Rules §R7.2 s17 |\n| BR12 | The alert thresholds, the cache-staleness window, the outbox-lag and dead-letter limits, the pool sizes, the canary percentage and the probe timings are values of the chart and never constants of a template or of code | GAP-2508; ASM-4156 |",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|\n| BR1 | The evaluated copy of PAYMENT_MATCH is refreshed on `RulePackageInForce`: fetch, verify the checksum, swap atomically; on any failure the version in force stays loaded | DP-04; Temporal and Drools slide 15 notes; ADR-017 | AC1; TC-P8-E2027-OPS-01 |\n| BR2 | No version in force is a stopped run with MSG-P3-027; no default version, no empty model and no last-known-anything is substituted | legacy BR9; D-RCV-36 T3; R-UNI-41 | AC1; TC-P8-E2027-OPS-01 |\n| BR3 | Every topic has a `.retry` topic and a `.dlt` topic, and a consumer never acknowledges an event it could not process | DP-09 as the platform pattern; Arch v5 slide 22 notes; RWB-PLT-TE006-CON | AC2; TC-P8-E2027-OPS-02 |\n| BR4 | The JOB-07 and JOB-08 runs are event-started workflows on task queue `rwb-payment`; this release registers no Schedule and never touches JOB-20 | DP-10; Arch v5 slide 44 | AC3; TC-P8-E2027-OPS-03 |\n| BR5 | The migration job writes schema `rwb_payment` only, and creates no registry table and no retired table | DP-01, DP-15; D-RCV-36 T10 | AC4; TC-P8-E2027-OPS-04 |\n| BR6 | Readiness answers healthy only when the migration is at the expected schema version, the worker polls, the outbox relay is up and the version in force of PAYMENT_MATCH is loaded and verified | Arch v5 slide 27; Temporal and Drools slide 28 | AC1, AC3; TC-P8-E2027-OPS-01, TC-P8-E2027-OPS-03 |\n| BR7 | Every secret and identity is a reference to the platform secret store; no secret is written into a values file, a chart template, a dashboard or a runbook | NFR-052; DP-02 | AC5; TC-P8-E2027-OPS-05 |\n| BR8 | Every alert carries the package code, the version label, the topic, the consumer group or the workflow ID it needs, and links exactly one runbook entry with the owner role | Template and Rules §R7.2 s14 | AC6; TC-P8-E2027-OPS-06 |\n| BR9 | A rule rollback is one call in rwb-decision and the swap back happens on the event; the service is never redeployed to change a rule | Arch v5 slide 27; Temporal and Drools slide 15 | AC6; TC-P8-E2027-OPS-06 |\n| BR10 | One image digest and one chart version are promoted through the environments without a rebuild, and the canary gate holds the promotion until its slice is green | Template and Rules §R5.7 rule 6; RWB-PLT-N004-OPS | AC6; TC-P8-E2027-OPS-06 |\n| BR11 | Nothing on a dashboard, an alert or a runbook carries a case fact or a personal datum | Template and Rules §R7.2 s17 | AC6; TC-P8-E2027-OPS-09 |\n| BR12 | The alert thresholds, the cache-staleness window, the outbox-lag and dead-letter limits, the pool sizes, the canary percentage and the probe timings are values of the chart and never constants of a template or of code | GAP-2508; ASM-4156 | AC6; TC-P8-E2027-OPS-06, TC-P8-E2027-OPS-09 |"
+  },
+  {
+   "old": "| MSG-P3-027 | No version is in force for PAYMENT_MATCH, or the run stops on the package-in-force check | The rule version was refused at the {check} check: {detail}. |",
+   "new": "| MSG-P3-027 | No version is in force for PAYMENT_MATCH, or the run stops on the package-in-force check | The {table} load was refused: {check}. The version in force is unchanged. |"
+  },
+  {
+   "old": "| TC-P8-E2027-OPS-06 | AC6 | NFR | The four alerts fire on synthetic metrics and link one runbook entry each; the canary gate holds a red slice and promotes a green one; the release rollback and the one-call rule rollback are rehearsed |",
+   "new": "| TC-P8-E2027-OPS-06 | AC6 | NFR | The four alerts fire on synthetic metrics and link one runbook entry each; the canary gate holds a red slice and promotes a green one; the release rollback and the one-call rule rollback are rehearsed |\n| TC-P8-E2027-OPS-07 | AC2, AC3 | NFR | Contract test: every operation, event and activity of section 12 (the paths, the event types and topics of section 12.4, and the activities) matches the published contracts; a missing or renamed one fails the build |\n| TC-P8-E2027-OPS-08 | AC4 | NFR | Boundary test of each table in section 12.7 (ASM-3438): proceeds and the four library objects are created in rwb_payment only and no other table is touched at the boundary; a job that crosses it fails |\n| TC-P8-E2027-OPS-09 | AC5, AC6 | NFR | Dashboards, alerts and runbooks hold no case fact or personal datum; the alert thresholds, cache-staleness window, outbox-lag and dead-letter limits, pool sizes, canary percentage and probe timings are read from chart values, and a template or code constant fails the check |"
+  },
+  {
+   "old": "this story adds the six deployment and operations cases above",
+   "new": "this story adds the nine deployment and operations cases above"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-07010",
+   "item": "DOR-RWB-P8-E2027-OPS-23",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "Contract version v1 stated under the section 12 heading",
+   "note": "Story now states contract version v1 for the /v1 paths and .v1 events it builds against."
+  },
+  {
+   "ruling": "R-07011",
+   "item": "DOR-RWB-P8-E2027-OPS-8",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "rwb-decision API yaml; Kafka Catalog v1; Temporal Catalog v1",
+   "change": "Publish GET /api/recovery/decision/v1/admin/rule-packages/PAYMENT_MATCH/versions and GET /api/recovery/decision/v1/rule-models/{packageCode}/{version} in rwb-decision API yaml; confirm event name rwb.decision.DecisionRecorded.v1 in Kafka Catalog v1; add the rule-cache refresh handler to Temporal Catalog v1",
+   "note": "Story names match Kafka Catalog for the event; the two GET paths and the Temporal handler are missing in their owning catalogs."
+  },
+  {
+   "ruling": "R-11441",
+   "item": "CG-ALL-7598",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "Logical Data Model v9",
+   "change": "Record decision_record as a PLT library table in LDM v9 (owner role Data), or use its dictionary name; section 12.7 already names it as a library table",
+   "note": "decision_record is a PLT library object, not a dictionary field; the owning document must record it."
+  },
+  {
+   "ruling": "R-11442",
+   "item": "CG-ALL-7604",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P3-027 text copied from Error and Message Standard v4 with placeholders {table} and {check}",
+   "note": "Wording now copied from the standard; no new message ID needed as the trigger is covered by the standard's raised-when list."
+  },
+  {
+   "ruling": "R-18281",
+   "item": "DOR-RWB-P8-E2027-OPS-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add platform engineer as a role code or name, or the story must name the existing role code from the register",
+   "note": "Role platform engineer is not in Users Roles and Permissions v5; the role register must carry it or the story changes to an existing code."
+  },
+  {
+   "ruling": "R-18282",
+   "item": "DOR-RWB-P8-E2027-OPS-10",
+   "status": "Not applied",
+   "section": "not in chunk",
+   "target": "",
+   "change": "",
+   "note": "SCR-28 and SCR-39 are in sections not in this chunk; empty, loading, error and no-access states must be added there."
+  },
+  {
+   "ruling": "R-18283",
+   "item": "DOR-RWB-P8-E2027-OPS-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-P8-E2027-OPS-07 (contract), TC-08 (section 12.7 boundary, ASM-3438) and TC-09; count updated to nine",
+   "note": "Contract test for section 12 and boundary test for section 12.7 tables added, both at Level NFR."
+  },
+  {
+   "ruling": "R-18284",
+   "item": "DOR-RWB-P8-E2027-OPS-18",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "DL10 and DL11 with their assumptions are in section 18, which is not in this chunk; record the directive confirmation there."
+  },
+  {
+   "ruling": "R-18285",
+   "item": "DOR-RWB-P8-E2027-OPS-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Consuming service column added to the events consumed table, value rwb-payment on each row",
+   "note": "Section 12.4 now states the owning service of each consumer group."
+  },
+  {
+   "ruling": "R-18286",
+   "item": "DOR-RWB-P8-E2027-OPS-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Covered by column added to the business rules table; TC-09 added for BR11 and BR12",
+   "note": "Each of BR1 to BR12 now maps to an acceptance criterion and a test case in sections 7 and 16."
+  }
+ ]
+}

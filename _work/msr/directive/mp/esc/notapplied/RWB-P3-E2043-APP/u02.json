@@ -1,0 +1,83 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E2043-APP",
+ "unit": "u02",
+ "rulings": [
+  "R-22047",
+  "R-22730",
+  "R-22737",
+  "R-22738",
+  "R-30735"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 2
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22047",
+     "item": "GAP-2016",
+     "status": "Cross-document",
+     "section": "",
+     "target": "Workflow Engine Design v3",
+     "change": "Durable timer is authoritative; timer row is the audit copy written by ApplyStateActivity in the same transaction as the state and read back on reopen; JOB-05 five-minute check retired.",
+     "note": "Timer design text is not in this story (grep of the story file found no timer section). Ruling applied to the design document that holds the conflicting text (section 4)."
+    },
+    {
+     "ruling": "R-22730",
+     "item": "GAP-2024",
+     "status": "Cross-document",
+     "section": "",
+     "target": "Temporal and Drools Design v1",
+     "change": "Parent forwards DeviationRaised to the running stage child; the child pauses its own stage timer on DeviationRaised and resumes it on DeviationCleared (slide 24 wording replaced).",
+     "note": "Parent-child clock text is not in this story (grep found none). Change belongs to the design document that holds the slide 24 text."
+    },
+    {
+     "ruling": "R-22737",
+     "item": "GAP-2019",
+     "status": "Cross-document",
+     "section": "",
+     "target": "Workflow Engine Design v3",
+     "change": "Parent starts the stage child with the case ID, retries the start with the same workflow ID, and raises an incident with MSG-P3-037 when retries are exhausted; case stays in its last applied state. Child start-to-close timeout is not specified in the source documents (GAP-2019).",
+     "note": "No child start or failure text in this story. MSG-P3-037 text is not in the source documents. Section 7 retry table is the evidence source."
+    },
+    {
+     "ruling": "R-22738",
+     "item": "GAP-2018",
+     "status": "Cross-document",
+     "section": "",
+     "target": "Workflow Engine Design v3",
+     "change": "Pivot activity waits for the ledger acknowledgement using the section 7 retry policy and a documented timeout; workflow fails with an incident at timeout without repeating a completed step. Timeout value is not specified in the source documents (GAP-2018).",
+     "note": "Strict-mode wait text is not in this story (grep found none). Timeout value is not in any source checked."
+    },
+    {
+     "ruling": "R-30735",
+     "item": "NEWAC-RWB-P3-E2043-APP-AC7",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "Added AC7 scenario (new, D-RCV-60) for BR5, BR11 and BR12, and test row TC-E2-043-12 in section 16.",
+     "note": "Proposed test was not in the sources, so the scenario is written from the section 8 rule text only; no value invented."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then the workflow ID starts \"ref-case-\" and never \"case-\"",
+     "new": "    Then the workflow ID starts \"ref-case-\" and never \"case-\"\n\n  Scenario: AC7 A payload, a reference value and an outbound call stay within the boundary rules (new, D-RCV-60)\n    Given the reference workflow \"ref-case-RW-2026-000777\" is running and waits for a CaseEvent\n    When a CaseEvent for the synthetic case is processed\n    Then the CaseEvent payload is stored encrypted by PdpaPayloadCodec and history, search attributes and logs hold references and codes only\n    Then a reference value is read through the rwb-case contract at the version in force and no status, route or timer value is written in code\n    Then the workflow makes no REST call and declares no route on gateway-bff, and its only remote call is WorkflowGateway to the Temporal frontend"
+    },
+    {
+     "old": "| TC-E2-043-11 | AC8 | End to end | Not specified in the source documents (NEWAC-RWB-P3-E2043-APP-AC8) |",
+     "new": "| TC-E2-043-11 | AC8 | End to end | Not specified in the source documents (NEWAC-RWB-P3-E2043-APP-AC8) |\n| TC-E2-043-12 | AC7, BR5, BR11, BR12 | NFR | Synthetic CaseEvent; payload, history, search attributes, logs, reference reads, gateway-bff routes and outbound calls checked against section 8 |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

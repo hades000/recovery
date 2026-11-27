@@ -1,0 +1,164 @@
+{
+ "edits": [
+  {
+   "old": "| DF-DOC-001 | `document` | id | Read (the `documentId` of the payload) |",
+   "new": "| DF-DOC-001 | `document` | id | Read (the `documentid` of the payload) |"
+  },
+  {
+   "old": "`storedAt` in the payload is the `created_at` of the document row, read from the store's own transaction.",
+   "new": "The payload carries no `storedAt`: the Kafka Catalog v1 event has four fields, and the created date of the document row is not carried."
+  },
+  {
+   "old": "the payload is IDs and codes only.",
+   "new": "the payload is IDs and codes only. The CloudEvents headers `ce_type`, `ce_source` and `ce_id` and the unique index `uk_document_case_type_hash` are transport and index objects, not dictionary fields; they are named here as such."
+  },
+  {
+   "old": "| `rwb.document.DocumentStored.v1` (legacy EV-16 `DocumentStored`) | `rwb.document.events.v1` | P5 | caseId | `documentId`, `caseId`, `documentType`, `source`, `storedAt` |",
+   "new": "| `rwb.document.DocumentStored.v1` (legacy EV-16 `DocumentStored`) | `rwb.document.events.v1` | P5 | caseId | `caseid`, `documentid`, `source`, `type` |"
+  },
+  {
+   "old": "| `documentId` | uuid | the document ID returned by the store |",
+   "new": "| `documentid` | uuid | the document ID returned by the store |"
+  },
+  {
+   "old": "| `caseId` | uuid | `RW-2026-000314` |",
+   "new": "| `caseid` | uuid | `RW-2026-000314` |"
+  },
+  {
+   "old": "| `documentType` | varchar(30) | a code of the type table in force, for example `COURT_NOTICE` |",
+   "new": "| `type` | varchar(30) | a code of the type table in force, for example `COURT_NOTICE` |"
+  },
+  {
+   "old": "| `source` | varchar(12) | a code of LOV-DOC-SOURCE, for example `SCAN` |\n| `storedAt` | timestamptz | the created date of the document row |",
+   "new": "| `source` | varchar(12) | a code of LOV-DOC-SOURCE, for example `SCAN` |"
+  },
+  {
+   "old": "Builds `DocumentStored` from the committed document row: the five fields, the case key and the event ID;",
+   "new": "Builds `DocumentStored` from the committed document row: the four Kafka Catalog v1 fields, the case key and the event ID;"
+  },
+  {
+   "old": "asserts the event code, the key and the five fields, with no mapping table in the service",
+   "new": "asserts the event code, the key and the four fields, with no mapping table in the service"
+  },
+  {
+   "old": "no `rwb_case` table and no other schema is read.",
+   "new": "no table of another service's schema is read."
+  },
+  {
+   "old": "the Documents tab (SCR-30) is served through the gateway-bff composite route by RWB-P5-E1026-APP.",
+   "new": "the Documents tab (SCR-30) is served through the gateway-bff composite route by RWB-P5-E1026-APP. Its empty, loading, error and no-access states are not part of this slice and are not specified here (DOR-RWB-P5-E1021-APP-10)."
+  },
+  {
+   "old": "a test that a field outside the five is not carried.",
+   "new": "a test that a field outside the four is not carried."
+  },
+  {
+   "old": "the payload carries the five fields and no personal data",
+   "new": "the payload carries the four fields and no personal data"
+  },
+  {
+   "old": "| MSG-P4-003 | The case is absent or outside the caller's scope | This case is not in your scope. |",
+   "new": "| MSG-P4-003 | The case is absent or outside the caller's scope | This case is not in your scope. |\n| MSG-P5-006 | Not specified in the source documents (DOR-RWB-P5-E1021-APP-9) | Not specified in the source documents (DOR-RWB-P5-E1021-APP-9) |"
+  },
+  {
+   "old": "| TC-E1-021-16 | AC1, BR6 — Principle 5 analogue: the decision record is rwb-case's; the hub's outbox guarantee is that a failed relay loses no event and duplicates none | NFR | Decision log write forced to fail for a rule transfer; event retried, case unchanged |",
+   "new": "| TC-E1-021-16 | AC1, BR6 — Principle 5 analogue: the decision record is rwb-case's; the hub's outbox guarantee is that a failed relay loses no event and duplicates none | NFR | Decision log write forced to fail for a rule transfer; event retried, case unchanged |\n| TC-E1-021-17 | AC2, BR2 — §12.7 boundary: the `document_type` row at its valid_from and valid_to edges is read for the version in force only | Component | DOCTYPE-2026.11 at the valid_from and valid_to boundary |\n| TC-E1-021-18 | BR3 — the record key is the case ID: two documents of one case publish with that case ID as key, and a document never changes the key | Contract | Two stores on case RW-2026-000314 |\n| TC-E1-021-19 | BR8 — the hub consumes no event and publishes no case state change: the store makes no RuleEvaluator call and no case state is carried in the payload | Component | Document stored on case RW-2026-000314 with rwb-case stub recording no call |"
+  },
+  {
+   "old": "VR-P3-010-1; DL23 |",
+   "new": "VR-P3-010-1; DL23 (open decision; assumptions ASM-1232, ASM-1237, ASM-1259, ASM-1560) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10840",
+   "item": "CG-ALL-5787",
+   "status": "Cross-document",
+   "section": "12.3",
+   "target": "Recovery Workbench LDM v9 and Data Classification v5 (owner: Data)",
+   "change": "Record ce_id as the CloudEvents 1.0 binary-mode header of the event envelope, a transport object, not a dictionary field.",
+   "note": "Story §11 and §12.3 already name ce_id as the CloudEvents header; the dictionary record belongs to the Data owner."
+  },
+  {
+   "ruling": "R-10841",
+   "item": "CG-ALL-5789",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "Payload set to caseid, documentid, source, type as in Kafka Catalog v1 EV-16; storedAt removed; dependent sections aligned.",
+   "note": "Payload table, §11 storedAt note and §13 factory, contract test, build step 1 and done-when now use the four catalog fields."
+  },
+  {
+   "ruling": "R-17113",
+   "item": "DOR-RWB-P5-E1021-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "DP-19 line states SCR-30 empty, loading, error and no-access states are outside this slice and not specified here.",
+   "note": "Story has no screen; the scope of the states is now explicit."
+  },
+  {
+   "ruling": "R-17114",
+   "item": "DOR-RWB-P5-E1021-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-021-17, a boundary test for the document_type rows of §12.7.",
+   "note": "P3 Test Cases v8 and RTM v7 list differences are in those workbooks and are not changed here."
+  },
+  {
+   "ruling": "R-17115",
+   "item": "DOR-RWB-P5-E1021-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "REQ-WKM-003 row names DL23 as an open decision with assumptions ASM-1232, ASM-1237, ASM-1259, ASM-1560.",
+   "note": "Open decision stated in §18; §9 text was not in this chunk and is not edited."
+  },
+  {
+   "ruling": "R-17116",
+   "item": "DOR-RWB-P5-E1021-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "DP-01 line no longer names rwb_case; it says no table of another service's schema is read.",
+   "note": "Only schema name in §13 removed; own schema rwb_document kept."
+  },
+  {
+   "ruling": "R-17117",
+   "item": "DOR-RWB-P5-E1021-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-021-18 (BR3 record key) and TC-E1-021-19 (BR8 no event consumed or case state published).",
+   "note": "Test coverage added for BR3 and BR8; any §7 criterion sits outside this chunk."
+  },
+  {
+   "ruling": "R-17118",
+   "item": "DOR-RWB-P5-E1021-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "§11 note names ce_type, ce_source, ce_id and uk_document_case_type_hash as transport and index objects, not dictionary fields.",
+   "note": "Dictionary registration of these objects remains with the Data owner under CG-ALL-5787."
+  },
+  {
+   "ruling": "R-17119",
+   "item": "DOR-RWB-P5-E1021-APP-8",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "Payload aligned to Kafka Catalog v1 (caseid, documentid, source, type); same edit as CG-ALL-5789.",
+   "note": "Contract payload now matches the catalog; dependent sections updated."
+  },
+  {
+   "ruling": "R-17120",
+   "item": "DOR-RWB-P5-E1021-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Added MSG-P5-006 row to the §14 message table with its text and trigger not specified in the source documents.",
+   "note": "Message is now listed; its wording is not in the source documents, so placeholders are used."
+  }
+ ]
+}

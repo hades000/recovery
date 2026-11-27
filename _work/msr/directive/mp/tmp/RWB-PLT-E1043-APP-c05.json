@@ -1,0 +1,54 @@
+{
+ "edits": [
+  {
+   "old": "| BR5 | An engine that finds no version in force for a table it needs does not run on stale or missing values: the client throws and the caller stops | RWB-E1-043 section 8 BR9; Principle 5; NFR-033 |",
+   "new": "| BR5 | An engine that finds no version in force for a table it needs does not run on stale or missing values: the client throws and the caller stops; a dated read with no version in force answers 404 with MSG-P3-027 naming the table code and the business date, and never an older version, a default row or an empty list | RWB-E1-043 section 8 BR9; Principle 5; NFR-033; GAP-0698 |"
+  },
+  {
+   "old": "    Then the cache holds no entry for a version that is not APPROVED",
+   "new": "    Then the cache holds no entry for a version that is not APPROVED\n\n  Scenario: AC11 The client serves only the eleven table codes and adds no code, status or message of its own (new, D-RCV-60)\n    Given the reference table codes held in LOV-REF-TABLE\n    When the client is asked for the table codes it serves\n    Then the eleven codes PRODUCT, REGION, EXPOSURE_BAND, ROLE, TEAM, QUEUE, SERVICE_LEVEL, DOCUMENT_TYPE, TEMPLATE, LEGAL_PERIOD and PRODUCT_PARAMETER are returned and no other code is\n    Then the status vocabulary and the messages are those of RWB-PLT-E1043-CON, and the client holds no table, writes no row and reads no other service's schema\n\n  Scenario: AC12 A consumed call that fails or does not answer stops the caller and serves no default (new, D-RCV-60)\n    Given the rwb-case call for \"QUEUE\" fails or does not answer\n    When the client reads \"QUEUE\" for 2026-11-30\n    Then it throws naming table \"QUEUE\" and business date 2026-11-30\n    Then the calling engine does not run and no default row, older version or empty list is served"
+  },
+  {
+   "old": "| TC-PLT-E1043-APP-07 | AC8 | Component | A VALIDATED LEGAL_PERIOD version and a ROLLED_BACK REGION version 5; neither is served and no such cache entry exists |",
+   "new": "| TC-PLT-E1043-APP-07 | AC8 | Component | A VALIDATED LEGAL_PERIOD version and a ROLLED_BACK REGION version 5; neither is served and no such cache entry exists |\n| TC-PLT-E1043-APP-08 | AC11 | Contract | The eleven table codes read from LOV-REF-TABLE; the client's code list asserted against them; the RWB-PLT-E1043-CON status and message fakes |\n| TC-PLT-E1043-APP-09 | AC12 | Component | rwb-case reference-data fake failing or not answering for QUEUE on 2026-11-30; the calling engine stub asserted not to run |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29036",
+   "item": "GAP-0698",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Ownership Map (API rows for the verify and rollback operations of the reference load)",
+   "change": "Give Reference data A on the verify and rollback operations, with the separation of duty of RWB-E1-043 section 10 unchanged.",
+   "note": "Story side applied: BR5 now states the 404 with MSG-P3-027 and no older version, default row or empty list."
+  },
+  {
+   "ruling": "R-29037",
+   "item": "GAP-0223",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Reference tables sheet of the Recovery Workbench workbook (Table column, rows 11, 13, 14, 15 and 16)",
+   "change": "Record each row's owner from the map item behind it, name reference_row as the carrier of the message catalogue, and leave the Table cells unchanged.",
+   "note": "No story edit needed; the Logical Data Model revision can later replace the reference_row assumption."
+  },
+  {
+   "ruling": "R-31749",
+   "item": "NEWAC-RWB-PLT-E1043-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 in section 7 covering BR1 to BR10 with TC-PLT-E1043-APP-08 in section 16."
+  },
+  {
+   "ruling": "R-31750",
+   "item": "NEWAC-RWB-PLT-E1043-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 in section 7 for a failed or unanswered call with TC-PLT-E1043-APP-09 in section 16."
+  }
+ ]
+}

@@ -1,0 +1,93 @@
+{
+ "edits": [
+  {
+   "old": "| BR3 | timer_spec \"n working days\" adds n working days; \"n days\" with any label before it adds n calendar days; \"same day\", \"Same day\" and \"immediate\" give the date of the move; \"next working day\" adds 1 working day | rule_row.timer_spec through RuleCatalog |",
+   "new": "| BR3 | timer_spec \"n working days\" adds n working days; \"n days\" with any label before it adds n calendar days, so \"payment due 30 days\" adds 30 calendar days; \"same day\", \"Same day\" and \"immediate\" give the date of the move; \"next working day\" adds 1 working day | rule_row.timer_spec through RuleCatalog |"
+  },
+  {
+   "old": "| BR4 | Any other timer_spec, including \"None\", takes the time for the to_state from the service levels and timers rows through the reference-data contract | DL22; DP-07 |",
+   "new": "| BR4 | Any other timer_spec, including \"None\" and \"deadline driven\", takes the time for the to_state from the service levels and timers rows through the reference-data contract | DL22; DP-07 |"
+  },
+  {
+   "old": "| BR13 | The rule catalog is read only through `RuleCatalog.row(ruleId, packageVersion)`; no workbook, no generated DRL and no rule table is read, and no second rule engine runs | D-RCV-36 T3, T5, T6; DP-04 |",
+   "new": "| BR13 | The rule catalog is read only through `RuleCatalog.row(ruleId, packageVersion)`; no workbook, no generated DRL and no rule table is read, and no second rule engine runs | D-RCV-36 T3, T5, T6; DP-04 |\n| BR14 | The latest state change of a case is its newest decision-log entry that carries a rule ID and a rule version; no decision code or final call is tested until LOV-DECISION marks the state-change codes | DF-DEC-003; DF-DEC-012; FSD P7 A2.3 |"
+  },
+  {
+   "old": "The fourteen criteria are the legacy criteria of RWB-E2-035, copied with their values and their dates.",
+   "new": "The fourteen criteria AC1 to AC14 are the legacy criteria of RWB-E2-035, copied with their values and their dates. AC15 to AC17 are added at readiness and have no legacy source."
+  },
+  {
+   "old": "    Then POST /api/recovery/integration/v1/next-actions:resolve answers 409 with MSG-P3-027 for the same package in force check",
+   "new": "    Then POST /api/recovery/integration/v1/next-actions:resolve answers 409 with MSG-P3-027 for the same package in force check\n\n  Scenario: AC15 The resolve writes nothing and reads only the catalog row (readiness, BR12 and BR13)\n    Given case \"RW-2026-000402\" in state IN_FCR_QUEUE\n    When the resolve is called for case \"RW-2026-000402\" on Friday 11 December 2026 with event CASE_PICKED_UP\n    Then the answer carries ruleId \"R-RES-04\" and packageVersion \"RES-2026.12\"\n    Then no column of recovery_case is written\n    Then RuleCatalog.row(\"R-RES-04\", \"RES-2026.12\") is the only rule read; no workbook, generated DRL or rule table is read\n\n  Scenario: AC16 A replay with the same idempotency key changes nothing (readiness)\n    Given case \"RW-2026-000402\" was resolved on 11 December 2026 with rule R-RES-04 and version \"RES-2026.12\"\n    When the same resolve call with the same idempotency key is sent again\n    Then the answer is the same as the first answer\n    Then no column of recovery_case is written and no task is raised\n\n  Scenario: AC17 A consumed call fails or does not answer (readiness)\n    Given the rule catalog mock does not answer the RuleCatalog.row call for R-RES-04 of version \"RES-2026.12\"\n    When the resolve is called for case \"RW-2026-000402\" on Friday 11 December 2026\n    Then no ruleId, owner or due date is returned from a partial result\n    Then the answer is the failure of the consumed call with message Not specified in the source documents (AC17)"
+  },
+  {
+   "old": "| TC-E2-035-16 | §12.7 tables, ASM-3438 | Component | Boundary values of each table of section 12.7; values Not specified in the source documents (DOR-RWB-P2-E2035-APP-12) |",
+   "new": "| TC-E2-035-16 | §12.7 tables, ASM-3438 | Component | Boundary values of each table of section 12.7; values Not specified in the source documents (DOR-RWB-P2-E2035-APP-12) |\n| TC-E2-035-17 | AC15, BR12, BR13 | Component | Resolve call on RW-2026-000402 with a write counter and a rule read counter |\n| TC-E2-035-18 | AC16, BR12 | Component | Same resolve call sent twice with the same idempotency key |\n| TC-E2-035-19 | AC17 | Component | Rule catalog does not answer for R-RES-04 of RES-2026.12 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28849",
+   "item": "GAP-2407",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "TSD P7 T3.2 and the reference-data load of LOV-DECISION",
+   "change": "Publish LOV-DECISION in the reference-data load with the state-change codes marked; the filter reads the mark.",
+   "note": "Story BR14 adds the interim rule: newest decision-log entry with a rule ID and rule version is the state change."
+  },
+  {
+   "ruling": "R-28850",
+   "item": "GAP-2408",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "rwb-case reference data (timer_spec list of values)",
+   "change": "Publish the timer spec shapes as a list of values with a parsing rule, extended with \"payment due 30 days\" and \"deadline driven\".",
+   "note": "Story BR3 names \"payment due 30 days\" as n days with a label; BR4 takes \"deadline driven\" from the service levels."
+  },
+  {
+   "ruling": "R-28851",
+   "item": "GAP-2411",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-PLT-DB",
+   "change": "Fix the per-service login name for rwb-integration in RWB-PLT-DB and the secret store, keeping migration and application roles apart.",
+   "note": "Story names no login and needs no edit."
+  },
+  {
+   "ruling": "R-28852",
+   "item": "GAP-2410",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Work package build sequence (WP line of RWB-P7-E2035-APP)",
+   "change": "Record that a secondary slice builds against platform contracts and published fakes and reads wave-1 rows through its own schema within R5.7 rule 5.",
+   "note": "No edit to this story; build dependencies of this header unchanged."
+  },
+  {
+   "ruling": "R-30488",
+   "item": "NEWAC-RWB-P2-E2035-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC15 and test case TC-E2-035-17 covering BR12 and BR13.",
+   "note": "Criterion checks that resolve writes no case column and reads only RuleCatalog.row."
+  },
+  {
+   "ruling": "R-30489",
+   "item": "NEWAC-RWB-P2-E2035-APP-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC16 and test case TC-E2-035-18 for a replay with the same idempotency key.",
+   "note": "Replay returns the same answer and writes nothing."
+  },
+  {
+   "ruling": "R-30490",
+   "item": "NEWAC-RWB-P2-E2035-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC17 and test case TC-E2-035-19 for a consumed call that fails or does not answer.",
+   "note": "Failure message Not specified in the source documents (AC17); no partial result returned."
+  }
+ ]
+}

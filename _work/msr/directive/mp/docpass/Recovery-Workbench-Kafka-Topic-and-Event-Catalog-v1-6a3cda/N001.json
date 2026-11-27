@@ -1,0 +1,161 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Kafka Topic and Event Catalog v1.xlsx",
+ "unit": "N001",
+ "items": [
+  "GAP-0097",
+  "GAP-1985",
+  "GAP-2052"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 10
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "N001-F1",
+     "finding": "GAP-1985",
+     "op": "xlsx_set",
+     "sheet": "Topics",
+     "key_header": "Topic",
+     "key": "rwb.decision-record.v1",
+     "header": "Partitions",
+     "old": "Not specified in the source documents (GAP-0125; ASM-0202)",
+     "new": 12
+    },
+    {
+     "fix_id": "N001-F2",
+     "finding": "GAP-1985",
+     "op": "xlsx_set",
+     "sheet": "Topics",
+     "key_header": "Topic",
+     "key": "rwb.decision-record.v1",
+     "header": "Replication",
+     "old": "Not specified in the source documents (GAP-0125; ASM-0202)",
+     "new": 3
+    },
+    {
+     "fix_id": "N001-F3",
+     "finding": "GAP-1985",
+     "op": "xlsx_set",
+     "sheet": "Topics",
+     "key_header": "Topic",
+     "key": "rwb.decision-record.v1",
+     "header": "Retention",
+     "old": "Not specified in the source documents (GAP-0125; ASM-0202)",
+     "new": "7 days"
+    },
+    {
+     "fix_id": "N001-F4",
+     "finding": "GAP-1985",
+     "op": "xlsx_set",
+     "sheet": "Topics",
+     "key_header": "Topic",
+     "key": "rwb.decision-record.v1",
+     "header": "Key",
+     "old": "Not specified in the source documents (GAP-0125; ASM-0202)",
+     "new": "caseId"
+    },
+    {
+     "fix_id": "N001-F5",
+     "finding": "GAP-1985",
+     "op": "xlsx_set",
+     "sheet": "Topics",
+     "key_header": "Topic",
+     "key": "rwb.decision-record.v1",
+     "header": "Basis",
+     "old": "Arch v5 slides 20 and 42 row 08; Ownership Map sheet Events row EV-08",
+     "new": "Arch v5 slides 20 and 42 row 08; Ownership Map sheet Events row EV-08; settings from ASM-0202 (GAP-1985)"
+    },
+    {
+     "fix_id": "N001-F6",
+     "finding": "GAP-1985",
+     "op": "xlsx_set_cell",
+     "sheet": "Topics",
+     "cell": "A2",
+     "old": "Settings of an event topic: 12 partitions, replication factor 3, 7-day retention, cleanup policy delete, record key caseId and CloudEvents 1.0 in binary mode (Arch v5 slide 9). The shared topic carries no settings of its own in any source (GAP-0125; ASM-0202).",
+     "new": "Settings of an event topic: 12 partitions, replication factor 3, 7-day retention, cleanup policy delete, record key caseId and CloudEvents 1.0 in binary mode (Arch v5 slide 9). The shared topic rwb.decision-record.v1 takes the same settings (ASM-0202; GAP-1985). Its ACLs are on sheet ACLs: all 19 services write it, and rwb-decision and rwb-reporting read it. Its schema subject naming: Not specified in the source documents (GAP-1985)."
+    },
+    {
+     "fix_id": "N001-F7",
+     "finding": "GAP-2052",
+     "op": "xlsx_set_cell",
+     "sheet": "Retry topics",
+     "cell": "A2",
+     "old": "Architecture v5 fixes three retry windows, 1 min, 10 min and 1 h, and RWB-PLT-N002-INF counts three retry topics per event topic. No source names a retry topic, so the name is left to the platform story and is not written here (GAP-0123; ASM-0200); a consumer binds to the retry topics through the outbox and inbox library and never by name.",
+     "new": "Architecture v5 fixes three retry windows, 1 min, 10 min and 1 h, and RWB-PLT-N002-INF counts three retry topics per event topic. The retry topics are named <event topic>.retry.1m, <event topic>.retry.10m and <event topic>.retry.1h, and the dead-letter topic <event topic>.dlt, for example rwb.case.events.v1.retry.1m and rwb.case.events.v1.dlt (GAP-2052). The names are carried in the naming library (RWB-PLT-E1047); a consumer binds to the retry topics through the outbox and inbox library."
+    },
+    {
+     "fix_id": "N001-F8",
+     "finding": "GAP-2052",
+     "op": "xlsx_set",
+     "sheet": "Retry topics",
+     "key_header": "Window",
+     "key": "1 min",
+     "header": "What it is for",
+     "old": "First retry window of a record that a consumer failed.",
+     "new": "First retry window of a record that a consumer failed. Topic name: <event topic>.retry.1m."
+    },
+    {
+     "fix_id": "N001-F9",
+     "finding": "GAP-2052",
+     "op": "xlsx_set",
+     "sheet": "Retry topics",
+     "key_header": "Window",
+     "key": "10 min",
+     "header": "What it is for",
+     "old": "Second retry window.",
+     "new": "Second retry window. Topic name: <event topic>.retry.10m."
+    },
+    {
+     "fix_id": "N001-F10",
+     "finding": "GAP-2052",
+     "op": "xlsx_set",
+     "sheet": "Retry topics",
+     "key_header": "Window",
+     "key": "1 h",
+     "header": "What it is for",
+     "old": "Third and last retry window; after it the record goes to the dead-letter topic.",
+     "new": "Third and last retry window; after it the record goes to the dead-letter topic. Topic name: <event topic>.retry.1h."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-1985",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5",
+      "F6"
+     ],
+     "note": "Settings and key taken from confirmed ASM-0202; ACLs already on sheet ACLs. Schema subject naming is in no source and is marked as not specified."
+    },
+    {
+     "item": "GAP-2052",
+     "status": "Resolved",
+     "fix_ids": [
+      "F7",
+      "F8",
+      "F9",
+      "F10"
+     ],
+     "note": "Retry names added; .dlt names were already listed. Naming library (RWB-PLT-E1047) and Error Handling Standard 8.3 are changed outside this workbook."
+    },
+    {
+     "item": "GAP-0097",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "ReportPublished, GuaranteeClaimFiled, GuaranteeClaimSettled and TreatmentClosed already have topics on sheets Topics and Events."
+    }
+   ]
+  }
+ ]
+}

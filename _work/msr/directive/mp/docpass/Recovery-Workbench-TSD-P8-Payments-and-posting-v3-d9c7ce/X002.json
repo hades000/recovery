@@ -1,0 +1,160 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Technical Specifications by Module v6/Recovery Workbench TSD P8 Payments and posting v3.md",
+ "unit": "X002",
+ "items": [
+  "R-21862",
+  "R-22408",
+  "R-22409",
+  "R-22410",
+  "R-22417",
+  "R-22628",
+  "R-22788",
+  "R-28438",
+  "R-28825"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "tries": [
+    {
+     "error": "DISPOSITION INCOMPLETE: no row for ['R-21862', 'R-22408', 'R-22409', 'R-22410', 'R-22417', 'R-22628', 'R-22788', 'R-28438', 'R-28825']"
+    },
+    {
+     "ok": true,
+     "fixes": 8
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "X002-F1",
+     "finding": "R-22417",
+     "op": "replace",
+     "old": "| DF-FIN-004 | account_payment_id | CROSS_REF | uuid | No | None | Workbench |",
+     "new": "| DF-FIN-004 | account_payment_id | TEXT | varchar(255) | No | None | ACE payment_code |"
+    },
+    {
+     "fix_id": "X002-F2",
+     "finding": "R-22417",
+     "op": "replace",
+     "old": "| proceeds | account_payment_id | account_payment | Many to 0 or 1 |",
+     "new": "| proceeds | account_payment_id | ACE payment_code (business key) | No foreign key |"
+    },
+    {
+     "fix_id": "X002-F3",
+     "finding": "R-21862",
+     "op": "insert_after",
+     "old": "### T3.3 Relationships",
+     "new": "case_id and treatment_id are uuid references with no foreign key; account_payment_id is the ACE payment_code business key with no foreign key (see T3.1). References resolve through the owners' contracts (DP-11; GAP-2538)."
+    },
+    {
+     "fix_id": "X002-F4",
+     "finding": "R-28438",
+     "op": "insert_after",
+     "old": "### T3.0 Standard record columns",
+     "new": "Primary key name, the two index names, the index column order and the Field IDs of is_active, state, version, created_at, created_by, updated_at and updated_by: Not specified in the source documents (GAP-2534)."
+    },
+    {
+     "fix_id": "X002-F5",
+     "finding": "R-22409",
+     "op": "replace",
+     "old": "maps errors to problem responses",
+     "new": "maps errors to problem+json responses on every non-2xx status"
+    },
+    {
+     "fix_id": "X002-F6",
+     "finding": "R-22409",
+     "op": "replace",
+     "old": "A contract change is a new version of the artefact, never a code change in the consumer (ADR-020).",
+     "new": "A contract change is a new version of the artefact, never a code change in the consumer (ADR-020). The service contracts are major version 1 with BACKWARD acceptance (GAP-1350)."
+    },
+    {
+     "fix_id": "X002-F7",
+     "finding": "R-22409",
+     "op": "replace",
+     "old": "Per-service Flyway sequence in `rwb_payment`.",
+     "new": "Per-service Flyway sequence in `rwb_payment`; next migration number Not specified in the source documents (GAP-1348; GAP-1350)."
+    },
+    {
+     "fix_id": "X002-F8",
+     "finding": "R-22788",
+     "op": "insert_after",
+     "old": "## Appendix T-A. API specification",
+     "new": "ALS interface ID, transport, layout and result codes, data product code, deliverFile(manifest) element set and TreatmentBooked field list: Not specified in the source documents (GAP-2548)."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "R-21862",
+     "status": "Resolved",
+     "fix_ids": [
+      "F3"
+     ],
+     "note": "case_id and treatment_id already uuid in T3.1; no-foreign-key statement added under T3.3. account_payment_id handled by F1 and F2."
+    },
+    {
+     "item": "R-22408",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F7"
+     ],
+     "note": "T3.1 field set kept; account_payment_id held as varchar(255) business key (F1). Flyway number not specified (F7). payment_missed_event_key not in this document."
+    },
+    {
+     "item": "R-22409",
+     "status": "Resolved",
+     "fix_ids": [
+      "F5",
+      "F6",
+      "F7"
+     ],
+     "note": "One OpenAPI and one AsyncAPI per service already in T5.2.3; MatchRequest already in T-A.2. Added problem+json, major version 1 BACKWARD, Flyway placeholder."
+    },
+    {
+     "item": "R-22410",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "Deployment values belong to the platform deployment spec, not this document. DL35 already lists deployment slots in Appendix T-B."
+    },
+    {
+     "item": "R-22417",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2"
+     ],
+     "note": "account_payment_id is now a varchar(255) ACE payment_code business key with no foreign key in T3.1 and T3.3."
+    },
+    {
+     "item": "R-22628",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "Change is to TSD P4 T-A.1 rwb-decision rule-package endpoints. This P8 document holds only API-P8-001 and API-P8-002."
+    },
+    {
+     "item": "R-22788",
+     "status": "Resolved",
+     "fix_ids": [
+      "F8"
+     ],
+     "note": "ALS, product code, manifest and TreatmentBooked values recorded as Not specified in the source documents (GAP-2548) in Appendix T-A."
+    },
+    {
+     "item": "R-28438",
+     "status": "Resolved",
+     "fix_ids": [
+      "F4"
+     ],
+     "note": "Key, index and Field ID details recorded under T3.0 as Not specified in the source documents (GAP-2534). Proceeds DDL is in TSD P8 as stated."
+    },
+    {
+     "item": "R-28825",
+     "status": "Belongs elsewhere",
+     "fix_ids": [],
+     "note": "rule_row catalogue and evaluation result belong to rwb-decision (TSD P3 T2.2). This document has no rule_row catalogue; payment_match_rule priority already present."
+    }
+   ]
+  }
+ ]
+}

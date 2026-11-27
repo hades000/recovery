@@ -1,0 +1,67 @@
+{
+ "edits": [
+  {
+   "old": "| X7 | A view does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database as the unavailable system; nothing is guessed from a cache | MSG-GEN-006 | AC7 |",
+   "new": "| X7 | A view does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database as the unavailable system; nothing is guessed from a cache | MSG-GEN-006 | AC7, AC9 |"
+  },
+  {
+   "old": "| X8 | A caller without the right calls either read | 403, and the refusal is logged without a key value | MSG-P4-002 | AC8 |",
+   "new": "| X8 | A caller without the right calls either read | 403, and the refusal is logged without a key value | MSG-P4-002 | AC8, AC10 |"
+  },
+  {
+   "old": "    Then the refusal is logged without the account key value",
+   "new": "    Then the refusal is logged without the account key value\n\n  Scenario: AC9 A view behind the candidate facts read that does not answer inside 5 s or answers an error yields 503 and no guessed value (new, D-RCV-60)\n    Given a view read for the candidate facts of 2026-12-14 does not answer inside 5 s or answers an error\n    When the run calls GET /entry-candidate-facts?businessDate=2026-12-14\n    Then the answer is 503 with a problem body naming the ACE database as the unavailable system and MSG-GEN-006\n    Then the answer holds no candidate fact and no value taken from a cache\n\n  Scenario: AC10 A caller without the right on the candidate facts read is refused and the refusal logs no key value (new, D-RCV-60)\n    Given a caller whose role does not include the candidate facts read\n    When the caller calls GET /entry-candidate-facts?businessDate=2026-12-14\n    Then the answer is 403 with MSG-P4-002 naming the action the caller tried\n    Then the refusal is logged without a key value\n\n  Scenario: AC11 The provided operations answer 401 without a credential, 403 without the right and 404 for an operation not provided (new, D-RCV-60)\n    Given a request to GET /api/recovery/source-data/v1/efs-history?accountKey=A-0001&businessDate=2026-12-14 carries no valid credential\n    When the request is sent\n    Then the answer is 401\n    And a caller whose role does not include the history read gets 403 on the same request\n    And a request to an operation not provided by this service answers 404"
+  },
+  {
+   "old": "| TC-E2-001-14 | AC8, X8 | Component | Caller whose role lacks the history read calls GET efs-history for A-0001; refused with MSG-P4-002 |",
+   "new": "| TC-E2-001-14 | AC8, X8 | Component | Caller whose role lacks the history read calls GET efs-history for A-0001; refused with MSG-P4-002 |\n| TC-E2-001-15 | AC9, X7 | End to end | View v_ace_customer held past 5 s for the candidate facts of 2026-12-14 |\n| TC-E2-001-16 | AC10, X8 | Component | Caller whose role lacks the candidate facts read calls GET /entry-candidate-facts?businessDate=2026-12-14; refused with MSG-P4-002 |\n| TC-E2-001-17 | AC11 | Component | Request to efs-history for A-0001 without a credential, with a role lacking the read, and to an operation not provided by the service |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28702",
+   "item": "GAP-1335",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Wave 2 dependency map",
+   "change": "Carry the six platform contracts RWB-PLT-E1027-CON, RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-N001-CON and the two rwb-case contracts RWB-P3-E1042-CON, RWB-P3-E1043-CON in the dependency map.",
+   "note": "Story metadata rows kept as the story object fixes them; the dependency map carries the eight contracts for sequencing."
+  },
+  {
+   "ruling": "R-30277",
+   "item": "NEWAC-RWB-P1-E2001-APP-AC10",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for the candidate facts read; X8 now covered by AC8 and AC10; TC-E2-001-16 added."
+  },
+  {
+   "ruling": "R-30278",
+   "item": "NEWAC-RWB-P1-E2001-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for 401, 403 and 404 of the provided operations; TC-E2-001-17 added."
+  },
+  {
+   "ruling": "R-30279",
+   "item": "NEWAC-RWB-P1-E2001-APP-AC12",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P3-E2001-APP",
+   "change": "Add a criterion that a case status change the case model does not allow is refused.",
+   "note": "This story owns no status change, so no disallowed-transition criterion is written here."
+  },
+  {
+   "ruling": "R-30280",
+   "item": "NEWAC-RWB-P1-E2001-APP-AC9",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added for a view timeout or error on the candidate facts read; X7 covered by AC7 and AC9; TC-E2-001-15 added."
+  }
+ ]
+}

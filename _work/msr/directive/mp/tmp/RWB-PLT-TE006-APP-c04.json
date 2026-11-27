@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| X10 | The decision record cannot be written when the limit is reached | Nothing changes; the delivery stays RETRYING and is attempted at the next window; an incident is raised (R-UNI-39) | MSG-P7-003 | TC-TE-006-13 |",
+   "new": "| X10 | The decision record cannot be written when the limit is reached | Nothing changes; the delivery stays RETRYING and is attempted at the next window; an incident is raised (R-UNI-39) | MSG-P7-003 | AC12, TC-TE-006-13, TC-TE-006-14 |"
+  },
+  {
+   "old": "| X11 | A role without Platform administration U resends a delivery | Refused with 403 by the P2 admin API | MSG-P4-002 | TC-TE-006-12 |",
+   "new": "| X11 | A role without Platform administration U resends a delivery | Refused with 403 by the P2 admin API | MSG-P4-002 | AC13, TC-TE-006-12, TC-TE-006-15 |"
+  },
+  {
+   "old": "    When JOB-11 runs on both at 10:01",
+   "new": "    When the relay worker runs on both instances at 10:01"
+  },
+  {
+   "old": "    Then the next attempt is due at 10:03",
+   "new": "    Then the next attempt is due at 10:03\n\n  Scenario: AC12 Decision record write fails at the exception move (new, X10)\n    Given the \"win-dispatch\" delivery for notice \"NT-SYN-0601\" has status RETRYING at its retry limit\n    Given the decision record write fails at the exception move\n    When the relay reaches the retry limit at 10:22\n    Then the delivery stays RETRYING and is attempted at the next window\n    Then the message MSG-P7-003 is written to the relay log and an incident is raised\n\n  Scenario: AC13 Role without Platform administration resends a delivery (new, X11)\n    Given delivery \"OBD-SYN-0001\" has status EXCEPTION\n    Given the user has role \"RW-DATASTEW\", which lacks the Platform administration right\n    When the user sends delivery \"OBD-SYN-0001\" again\n    Then the response is 403 with message MSG-P4-002\n    Then the delivery status stays EXCEPTION"
+  },
+  {
+   "old": "no legacy line was changed or dropped.",
+   "new": "no legacy line was changed or dropped. AC12 and AC13 are added for exceptions X10 and X11, which had no criterion.\n\nThe legacy case events SYSTEM_UNAVAILABLE, RETRY_SUCCEEDED and RETRY_LIMIT_REACHED are read as signals on CaseWorkflow in rwb-case, and the task RESOLVE_OUTBOX_DELIVERY is raised in rwb-case for the owner role set in the consumer configuration. The consumers resolve to rwb-integration, rwb-source-data and rwb-reporting. The legacy retry values are read as parameters, asserted in DEV, and approved before this story is Done. The retry topics and the dead-letter topic are asserted as the topic contract.\n\n| Path | Attempts | Interval | After the last attempt |\n|---|---|---|---|\n| Event delivery (outbox) | 3 retries | 1 min, 10 min and 1 h on the Kafka retry topics | Dead-letter topic with one alert to the platform administrator |\n| Outbound item to the exception queue (P2) | 3 retries | Legacy 1, 5 and 15 minutes, pending DL11 | Exception queue |\n| Temporal activity | 10 attempts | Initial interval 1 s, back-off 2 | Non-retryable list: Not specified in the source documents (GAP-1666) |"
+  },
+  {
+   "old": "No copy of another service's row is written.",
+   "new": "No copy of another service's row is written. The CloudEvents transport attributes `ce_specversion`, `ce_id`, `ce_type`, `ce_source`, `ce_subject` and `ce_time` are envelope headers (BR7), not LDM or Data Classification fields."
+  },
+  {
+   "old": "In MSG-P2-001, {interface} is the recipient name and {item} the event type and case number. Thai text for each message follows decision DL10.",
+   "new": "In MSG-P2-001, {interface} is the recipient name and {item} the event type and case number. Thai text for each message follows decision DL10.\n\nOpen decisions: DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863) is still open and sets the Thai text. DL11 (assumptions ASM-0553, ASM-0703, ASM-1051, ASM-1104) is still open; the legacy retry values rest on it (GAP-0382)."
+  },
+  {
+   "old": "| REQ-DRI-007 | Retry on a defined schedule; exception queue with a task for a named owner | Business Requirements Program, section 5.2 and section 6.4 | None | All recovery processes | R-UNI-33, R-UNI-35, R-UNI-36, R-UNI-39, R-UNI-40 | TC-TE-006-01 to TC-TE-006-13 |",
+   "new": "| REQ-DRI-007 | Retry on a defined schedule; exception queue with a task for a named owner | Business Requirements Program, section 5.2 and section 6.4 | Not specified in the source documents (DOR-RWB-PLT-TE006-APP-2) | All recovery processes | R-UNI-33, R-UNI-35, R-UNI-36, R-UNI-39, R-UNI-40 | TC-TE-006-01 to TC-TE-006-15 |"
+  },
+  {
+   "old": "| TC-TE-006-12 | Access | Component | RW-DATASTEW resends a delivery through the P2 admin API; refused with MSG-P4-002 |",
+   "new": "| TC-TE-006-12 | Access | Component | RW-DATASTEW resends a delivery through the P2 admin API; refused with MSG-P4-002 |\n| TC-TE-006-14 | AC12, BR8 | NFR | Decision record write forced to fail at the exception move with the delivery RETRYING; the delivery stays RETRYING; MSG-P7-003 in the relay log; incident raised |\n| TC-TE-006-15 | Access | Component | Role without the Platform administration right resends delivery OBD-SYN-0001 through the P2 admin API; refused with 403 and MSG-P4-002 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18877",
+   "item": "DOR-RWB-PLT-TE006-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Open decisions DL10 and DL11 listed in section 14 with their assumptions and stated as still open.",
+   "note": "DL10 and DL11 are named with their assumptions and marked open in section 14."
+  },
+  {
+   "ruling": "R-18878",
+   "item": "DOR-RWB-PLT-TE006-APP-2",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "03 Requirements and specifications/PRD/Recovery Workbench PRD PLT Platform v1.md",
+   "change": "Give FR-PLT-001, FR-PLT-009, FR-PLT-010, FR-PLT-011 and 10 more listed FR IDs one meaning each; name the feature for REQ-DRI-007.",
+   "note": "Feature cell set to a placeholder in section 18; the PRD FR IDs with two meanings need a PRD change."
+  },
+  {
+   "ruling": "R-18879",
+   "item": "DOR-RWB-PLT-TE006-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC12 for X10 and AC13 for X11 in section 7, added TC-TE-006-14 and TC-TE-006-15, and listed them in the Covered by column.",
+   "note": "X10 and X11 are now covered by new criteria AC12 and AC13, each with a test case row."
+  },
+  {
+   "ruling": "R-18880",
+   "item": "DOR-RWB-PLT-TE006-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Stated that the ce_ CloudEvents attributes are envelope headers and not LDM or Data Classification fields.",
+   "note": "Section 11 now states the ce_ attributes are envelope headers with no LDM or Data Classification field."
+  },
+  {
+   "ruling": "R-18881",
+   "item": "DOR-RWB-PLT-TE006-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 wording of MSG-P2-001 is not in the source set; aligning §14 would need invented text."
+  },
+  {
+   "ruling": "R-21874",
+   "item": "GAP-1416",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RWB-PLT-TE006-CON",
+   "change": "Publish one artifact with a major version; the three interfaces with exceptions; DDL template of four tables incl. processed_event and idempotency_key columns; CloudEvents 1.0 attributes incl. caseId and ce_type shape; inbox dedupe rule; retry ladder 1 min, 10 min, 1 h, dead-letter topic with one alert and replay tool; case-step events, task and decision record stay with owning service.",
+   "note": "Contract fix belongs in RWB-PLT-TE006-CON; this story already lists it as the publishing contract."
+  },
+  {
+   "ruling": "R-22266",
+   "item": "GAP-0376",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-E1-067 and the P1 ledger contract",
+   "change": "P1 runs one consumer group across the three topics, accepts current and previous schema versions, dedupes on CloudEvents id, assigns case_seq under case lock, orders by occurredAt then case_seq, and reports cross-topic inversions; keep the legacy event-to-code map.",
+   "note": "Ledger consumer ordering and dedupe belong to the P1 ledger contract and RWB-E1-067, not this library story."
+  },
+  {
+   "ruling": "R-22912",
+   "item": "GAP-1666",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added one retry table: 3 retries to the P2 exception queue, 1, 10 and 60 min then dead-letter topic with alert for events, 10 Temporal activity attempts with 1 s initial interval and back-off 2.",
+   "note": "Section 7 now has one retry table; non-retryable list is marked as not specified in the sources."
+  },
+  {
+   "ruling": "R-22914",
+   "item": "GAP-0382",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Section 7 note now maps the legacy case events to rwb-case signals, raises the task in rwb-case, resolves consumers to rwb-integration, rwb-source-data and rwb-reporting, and requires approval before Done.",
+   "note": "Section 7 note records the case-event mapping, task owner, three consumers and approval of the legacy values before Done."
+  },
+  {
+   "ruling": "R-22915",
+   "item": "GAP-1415",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-PLT-TE006-CON",
+   "change": "State which part of the exception path the library owns and which part the owning case-step service owns; the relay is a continuous per-service worker, not a Temporal Schedule; one alert to the platform administrator on the dead-letter path.",
+   "note": "Story side done: AC6 now runs the relay worker, not JOB-11; library/owner split of the exception path is in RWB-PLT-TE006-CON."
+  }
+ ]
+}

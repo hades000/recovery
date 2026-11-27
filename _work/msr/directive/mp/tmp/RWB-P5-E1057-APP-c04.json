@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-30 Case documents | list | A document attached from intake once RWB-P5-E1032-APP has matched it |",
+   "new": "| SCR-30 Case documents | list | A document attached from intake once RWB-P5-E1032-APP has matched it |\n| SCR-30 Case documents | empty | Not specified in the source documents (CG-ALL-6069) |\n| SCR-30 Case documents | loading | Not specified in the source documents (CG-ALL-6069) |\n| SCR-30 Case documents | error | Not specified in the source documents (CG-ALL-6069) |\n| SCR-30 Case documents | no access | Not specified in the source documents (CG-ALL-6069) |"
+  },
+  {
+   "old": "| SCR-44 Interface and job monitor | failed | The channel that failed, MSG-GEN-006 or MSG-P5-008 and the rerun action behind Platform administration right U |",
+   "new": "| SCR-44 Interface and job monitor | failed | The channel that failed, MSG-GEN-006 or MSG-P5-008 and the rerun action behind Platform administration right U |\n| SCR-44 Interface and job monitor | empty | Not specified in the source documents (CG-ALL-6070) |\n| SCR-44 Interface and job monitor | loading | Not specified in the source documents (CG-ALL-6070) |\n| SCR-44 Interface and job monitor | error | Not specified in the source documents (CG-ALL-6070) |\n| SCR-44 Interface and job monitor | no access | Not specified in the source documents (CG-ALL-6070) |"
+  },
+  {
+   "old": "| X3 | Partner subfolder code unknown or partner not ACTIVE | No intake row; file moved to the rejected folder | MSG-P5-007 | AC7 (RWB-S9-E1057-APP) |",
+   "new": "| X3 | Partner subfolder code unknown or partner not ACTIVE | No intake row; file moved to the rejected folder | MSG-P5-007 | AC19; AC7 (RWB-S9-E1057-APP) |"
+  },
+  {
+   "old": "| X5 | No new file on any channel | Run logged with zero counts | None | AC9 (RWB-S9-E1057-APP) |",
+   "new": "| X5 | No new file on any channel | Run logged with zero counts | None | AC20; AC9 (RWB-S9-E1057-APP) |"
+  },
+  {
+   "old": "| X9 | Email with no attachment, or only images under 10 KB | Email archived; no intake row | None | AC13 (RWB-S9-E1057-APP) |",
+   "new": "| X9 | Email with no attachment, or only images under 10 KB | Email archived; no intake row | None | AC21; AC13 (RWB-S9-E1057-APP) |"
+  },
+  {
+   "old": "| X12 | A user without Platform administration U reruns the job | 403 | MSG-P4-002 | AC17, TC-E1-057-17 |",
+   "new": "| X12 | A user without Platform administration U reruns the job | 403 | MSG-P4-002 | AC17, AC22, TC-E1-057-17 |"
+  },
+  {
+   "old": "    Then the scanner folder of \"BR-0123\" is read from the property set and no folder name is set in code",
+   "new": "    Then the scanner folder of \"BR-0123\" is read from the property set and no folder name is set in code\n\n  Scenario: AC19 A partner subfolder code unknown or partner not ACTIVE is refused (exception X3, legacy RWB-E1-057 AC7)\n    Given file \"partner-0001.pdf\" in the SFTP subfolder \"LF-099\" of the partner inbound folder\n    When the intake job runs\n    Then the system writes no document_intake row for \"partner-0001.pdf\"\n    Then \"partner-0001.pdf\" is in the rejected folder\n    Then the job record shows the file refused with MSG-P5-007\n\n  Scenario: AC20 No new file on any channel logs a run with zero counts (exception X5)\n    Given no new file is in any channel folder or mailbox\n    When the intake job runs\n    Then the job record shows the run with zero counts on every channel\n    Then the system writes no document_intake row\n\n  Scenario: AC21 An email with no usable attachment is archived without an intake row (exception X9)\n    Given email \"mail-0001\" with no attachment and email \"mail-0002\" whose only attachment is an image of 6 KB, below INTAKE_MIN_IMAGE_KB\n    When the intake job runs\n    Then both emails are archived\n    Then the system writes no document_intake row for either email\n\n  Scenario: AC22 A user without Platform administration U cannot rerun the job (exception X12)\n    Given RW-CASEOWN has no Platform administration U permission\n    When RW-CASEOWN reruns JOB-12\n    Then the system answers 403 with MSG-P4-002\n\n  Scenario: AC23 Types, sizes and windows come from parameters, not code (BR8)\n    Given the rwb-case contract mock returns the document-hub parameters INTAKE_ALLOWED_TYPES, INTAKE_MAX_FILE_MB, INTAKE_DUPLICATE_WINDOW_DAYS and INTAKE_MIN_IMAGE_KB\n    When the intake job runs\n    Then the allowed types, the size limit, the duplicate window and the minimum image size are read from those parameters\n    Then no type list, size limit or window is set as a literal in code\n\n  Scenario: AC24 The provided operations answer 401, 403 and 404 (section 12.1)\n    Given a request to an operation of section 12.1 without a valid credential\n    When the request is sent\n    Then the system answers 401\n    Then the system answers 403 to a user without the required right\n    Then the system answers 404 for a run that does not exist\n\n  Scenario: AC25 A retried or timed-out pickup activity does not take in a file twice (BR5, BR6)\n    Given the pickup activity fails with a transient error on file \"scan-0010.pdf\" and is retried (retry count: Not specified in the source documents (NEWAC-RWB-P5-E1057-APP-AC23))\n    When the retry runs\n    Then \"scan-0010.pdf\" has one document_intake row\n    Then a timed-out pickup activity leaves the file to be counted as a duplicate on the next run (timeout: Not specified in the source documents (NEWAC-RWB-P5-E1057-APP-AC23))"
+  },
+  {
+   "old": "AC17 and AC18 are added in this story.",
+   "new": "AC17 to AC25 are added in this story."
+  },
+  {
+   "old": "This story owns AC1, AC4, AC5, AC6, AC8, AC10, AC11, AC12, AC14, AC15, AC16, AC17 and AC18.",
+   "new": "This story owns AC1, AC4, AC5, AC6, AC8, AC10, AC11, AC12, AC14, AC15, AC16, AC17, AC18 and AC19 to AC25."
+  },
+  {
+   "old": "| TC-E1-057-20 | AC18, BR8 | Component | Channel folder read from the property set; a branch code in code fails review |",
+   "new": "| TC-E1-057-20 | AC18, BR8 | Component | Channel folder read from the property set; a branch code in code fails review |\n| TC-E1-057-21 | AC19, X3 (AC7 run by RWB-S9-E1057-APP) | End to end | Synthetic PDF in SFTP subfolder \"LF-099\" |\n| TC-E1-057-22 | AC20, X5 | End to end | All channels empty; run logged with zero counts |\n| TC-E1-057-23 | AC21, X9 | End to end | Email with no attachment; email with a 6 KB image |\n| TC-E1-057-24 | AC22, X12 | Component | RW-CASEOWN (Platform administration -) reruns JOB-12; refused with 403 and MSG-P4-002 |\n| TC-E1-057-25 | AC23, BR8 | Component | Code review of the type list, size limit, window and minimum image size; a literal in code fails review |\n| TC-E1-057-26 | AC24, section 12.1 operations | Contract | Requests to the section 12.1 operations without credential, without right and for an unknown run |\n| TC-E1-057-27 | AC25, BR5, BR6 | End to end | Pickup activity forced to fail once and to time out; the file is taken in once |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25851",
+   "item": "CG-ALL-6069",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "SCR-30 rows for empty, loading, error and no access added to section 15",
+   "note": "Description of each state is Not specified in the source documents; Screen Specifications v1 lacks empty, error and no access."
+  },
+  {
+   "ruling": "R-25852",
+   "item": "CG-ALL-6070",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "SCR-44 rows for empty, loading, error and no access added to section 15",
+   "note": "Description of each state is Not specified in the source documents; Screen Specifications v1 lacks all four states."
+  },
+  {
+   "ruling": "R-29083",
+   "item": "GAP-3234",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Story dependencies v5 (Dependency classes sheet, check row X)",
+   "change": "Record that platform technical-enabler work on the ten App development X rows is team-type work, tracked and never blocking; keep X on those rows",
+   "note": "No story edit; X kept on the ten rows as the proposed fix states."
+  },
+  {
+   "ruling": "R-31176",
+   "item": "NEWAC-RWB-P5-E1057-APP-AC17",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "AC19 added to section 7; X3 Covered by now cites AC19; TC-E1-057-21 added",
+   "note": "Numbered AC19 because AC17 and AC18 already exist in the story; test is TC-E1-057-21."
+  },
+  {
+   "ruling": "R-31177",
+   "item": "NEWAC-RWB-P5-E1057-APP-AC18",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "AC20 added to section 7; X5 Covered by now cites AC20; TC-E1-057-22 added",
+   "note": "Numbered AC20 as the next free number; test is TC-E1-057-22."
+  },
+  {
+   "ruling": "R-31178",
+   "item": "NEWAC-RWB-P5-E1057-APP-AC19",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "AC21 added to section 7; X9 Covered by now cites AC21; TC-E1-057-23 added",
+   "note": "Numbered AC21 as the next free number; test is TC-E1-057-23."
+  },
+  {
+   "ruling": "R-31179",
+   "item": "NEWAC-RWB-P5-E1057-APP-AC20",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "AC22 added to section 7; X12 Covered by now cites AC22; TC-E1-057-24 added",
+   "note": "Numbered AC22 as the next free number; test is TC-E1-057-24."
+  },
+  {
+   "ruling": "R-31180",
+   "item": "NEWAC-RWB-P5-E1057-APP-AC21",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC23 added to section 7 for BR8 parameters; TC-E1-057-25 added as component guardrail",
+   "note": "Numbered AC23 as the next free number; the rule is also tested as an architecture guardrail."
+  },
+  {
+   "ruling": "R-31181",
+   "item": "NEWAC-RWB-P5-E1057-APP-AC22",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC24 added to section 7 for 401, 403 and 404; TC-E1-057-26 added at contract level",
+   "note": "Numbered AC24 as the next free number; the operations are those of section 12.1."
+  },
+  {
+   "ruling": "R-31182",
+   "item": "NEWAC-RWB-P5-E1057-APP-AC23",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC25 added to section 7 for retry and timeout; TC-E1-057-27 added",
+   "note": "Numbered AC25; retry count and timeout value are Not specified in the source documents."
+  }
+ ]
+}

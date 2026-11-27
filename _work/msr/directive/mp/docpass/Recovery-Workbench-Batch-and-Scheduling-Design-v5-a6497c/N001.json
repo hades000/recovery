@@ -1,0 +1,158 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Batch and Scheduling Design v5.xlsx",
+ "unit": "N001",
+ "items": [
+  "GAP-0008",
+  "GAP-0031",
+  "GAP-0032",
+  "GAP-0033",
+  "GAP-0034",
+  "GAP-0035",
+  "GAP-0036",
+  "GAP-0037",
+  "GAP-0043",
+  "GAP-0044",
+  "GAP-0045",
+  "GAP-0046"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 4
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "N001-F1",
+     "finding": "GAP-0032",
+     "op": "xlsx_set",
+     "sheet": "Jobs",
+     "key_header": "ID",
+     "key": "JOB-05",
+     "header": "Note (v5)",
+     "old": "The 5-minute timer check is retired: durable timers live inside each workflow. D-RCV-36 T2 keeps the TimerScheduler port for Epic 1 and Epic 2 only (GAP-0042; ASM-0060).",
+     "new": "The 5-minute timer check is retired: durable timers live inside each workflow. D-RCV-36 T2 keeps the TimerScheduler port for Epic 1 and Epic 2 only (GAP-0042; ASM-0060). Durable timers replace the five-minute timer check and PLT owns the shared timer library (GAP-0032)."
+    },
+    {
+     "fix_id": "N001-F2",
+     "finding": "GAP-0035",
+     "op": "xlsx_set",
+     "sheet": "Jobs",
+     "key_header": "ID",
+     "key": "JOB-11",
+     "header": "Note (v5)",
+     "old": "Outbox relay to Kafka in every service, part of the service template and the shared libraries; each service runs its own relay, so there is no Schedule (ASM-0063).",
+     "new": "Outbox relay to Kafka in every service, part of the service template and the shared libraries; each service runs its own relay, so there is no Schedule (ASM-0063). The outbox relay is a platform library owned by PLT; no service builds its own (GAP-0035)."
+    },
+    {
+     "fix_id": "N001-F3",
+     "finding": "GAP-0036",
+     "op": "xlsx_set",
+     "sheet": "Jobs",
+     "key_header": "ID",
+     "key": "JOB-13",
+     "header": "Note (v5)",
+     "old": "Continuous DecisionRecorded ingest from Kafka in rwb-decision; the nightly copy to the data lake is removed with the data lake, so JOB-13 has no nightly run (GAP-0044; ASM-0064).",
+     "new": "Continuous DecisionRecorded ingest from Kafka in rwb-decision; the nightly copy to the data lake is removed with the data lake, so JOB-13 has no nightly run (GAP-0044; ASM-0064). The daily ledger seal (WORM) in rwb-decision replaces the data lake copy; no data lake remains in scope (GAP-0036)."
+    },
+    {
+     "fix_id": "N001-F4",
+     "finding": "GAP-0037",
+     "op": "xlsx_set",
+     "sheet": "Jobs",
+     "key_header": "ID",
+     "key": "JOB-15",
+     "header": "Note (v5)",
+     "old": "The bank's Airflow triggers the extract at 01:30 and re-runs any business date; rwb-reporting builds it from its own projections with no data lake. Architecture v5 slides 15 and 31 also describe a 01:30 Schedule (GAP-0045; ASM-0065).",
+     "new": "The bank's Airflow triggers the extract at 01:30 and re-runs any business date; rwb-reporting builds it from its own projections with no data lake. Architecture v5 slides 15 and 31 also describe a 01:30 Schedule (GAP-0045; ASM-0065). The reporting extract is the regulatory extract, sent through rwb-integration; no data lake remains in scope (GAP-0037)."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-0008",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-16 in Jobs and the map: Temporal Schedule, rwb-writeoff, monthly 3rd working day, gated on AceDataReady. Checked against the v5 build script, not the live file."
+    },
+    {
+     "item": "GAP-0031",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-01 is retired, no new story, read through the rwb-source-data ACE view contract. Checked against the v5 build script, not the live file."
+    },
+    {
+     "item": "GAP-0032",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "Adds PLT ownership of the timer library to the JOB-05 note. Old text comes from the build script plus register ID renumbering; live file not read."
+    },
+    {
+     "item": "GAP-0033",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-09 is retired, no new story, read through the v_ace_* views owned by rwb-source-data. Checked against the v5 build script, not the live file."
+    },
+    {
+     "item": "GAP-0034",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-10 note: rwb-comms owns the notice, window and Schedule; rwb-integration performs deliverFile. Checked against the v5 build script."
+    },
+    {
+     "item": "GAP-0035",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "JOB-11 note now says the relay is a platform library and no service builds its own. Old text derived from the build script; live file not read."
+    },
+    {
+     "item": "GAP-0036",
+     "status": "Resolved",
+     "fix_ids": [
+      "F3"
+     ],
+     "note": "JOB-13 note now names the daily ledger seal as the replacement. Old text derived from the build script; live file not read."
+    },
+    {
+     "item": "GAP-0037",
+     "status": "Resolved",
+     "fix_ids": [
+      "F4"
+     ],
+     "note": "JOB-15 note now says the reporting extract is the regulatory extract. Old text derived from the build script; live file not read."
+    },
+    {
+     "item": "GAP-0043",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-10 is owned by P6 rwb-comms, with deliverFile in rwb-integration. Checked against the v5 build script, not the live file."
+    },
+    {
+     "item": "GAP-0044",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-13: continuous DecisionRecorded ingest in P7 rwb-decision, no data-lake copy, no Schedule. Checked against the v5 build script."
+    },
+    {
+     "item": "GAP-0045",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-15: Airflow-triggered buildRegulatoryExtract in P9 rwb-reporting, no data lake. Checked against the v5 build script."
+    },
+    {
+     "item": "GAP-0046",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "JOB-16: Temporal Schedule write-off scan in S7 rwb-writeoff on the 3rd working day. Checked against the v5 build script."
+    }
+   ]
+  }
+ ]
+}

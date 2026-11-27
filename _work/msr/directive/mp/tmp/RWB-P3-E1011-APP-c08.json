@@ -1,0 +1,108 @@
+{
+ "edits": [
+  {
+   "old": "| BR14 | A role without the right of the capability area is refused with MSG-P4-002 and nothing is read or written | FSD P1 v3 A2.11.4.3 AC-EXC-P1-011-03; legacy section 5 X8 |",
+   "new": "| BR14 | A role without the right of the capability area is refused with MSG-P4-002 and nothing is read or written | FSD P1 v3 A2.11.4.3 AC-EXC-P1-011-03; legacy section 5 X8 |\n| BR15 | The quality run is started by one Schedule with SKIP overlap and a catch-up window whose cron is set at deployment; its three alert groups are configuration and its feature flag is rwb.p3.case-quality-run; rwb-reporting reads the case-side facts of the date through the reads of 12.1 | GAP-2238; legacy section 13 (rwb.p1.reconciliation) |"
+  },
+  {
+   "old": "    Then the build fails the boundary test and nothing is released",
+   "new": "    Then the build fails the boundary test and nothing is released\n\n  Scenario: AC13 No lake, extract or outbound item of the date (new, D-RCV-60)\n    Given the build of rwb-case is complete\n    When the guardrail of the build scans its code and its contracts for a data lake path, an extract file, an INT-19 adapter, a Power BI data set or an outbound item\n    Then the build fails the guardrail if any one is found and nothing is released\n\n  Scenario: AC14 A resource that does not exist (new, D-RCV-60)\n    Given no quality run exists for the business date asked\n    When the caller reads GET /quality-runs/{business_date}\n    Then the response is 404 and no row is written\n\n  Scenario: AC15 A reconciliation activity that is retried or times out (new, D-RCV-60)\n    Given the reconciliation activity of the quality run of 2026-11-30 fails with a transient error and is retried\n    When the retry completes\n    Then the run writes the nine rows for 2026-11-30 once and no row of the failed attempt\n    Given the reconciliation activity of the quality run of 2026-11-30 exceeds its timeout\n    When the timeout is reached\n    Then the run state of 2026-11-30 is FAILED with the activity named and no quality result is written\n\n  Scenario: AC16 A consumed call that fails or does not answer (new, D-RCV-60)\n    Given the call of the quality run of 2026-11-30 to rwb-source-data fails or is not answered\n    When the run reaches the call\n    Then the run writes no quality result for 2026-11-30, its state is FAILED with rwb-source-data named and the data steward, platform administrator and team manager groups receive MSG-GEN-006"
+  },
+  {
+   "old": "| TC-E1-011-13 | AC12, BR11 | Component | A read outside `/api/recovery/case/v1` and a cross-schema read in the build; the boundary test fails and nothing is released |",
+   "new": "| TC-E1-011-13 | AC12, BR11 | Component | A read outside `/api/recovery/case/v1` and a cross-schema read in the build; the boundary test fails and nothing is released |\n| TC-E1-011-14 | AC13, BR11 | Component | Build of rwb-case scanned for a data lake path, an extract file, an INT-19 adapter, a Power BI data set or an outbound item; the guardrail fails the build |\n| TC-E1-011-15 | AC14 | Component | GET /quality-runs/{business_date} for a date with no run; 404 with no row written |\n| TC-E1-011-16 | AC15, BR8 | Component | Reconciliation activity failed on a transient error, then retried; activity timed out; the run state FAILED with the activity named |\n| TC-E1-011-17 | AC16, BR10, BR12 | NFR | rwb-source-data call fails or does not answer; state FAILED; MSG-GEN-006 naming rwb-source-data |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28476",
+   "item": "GAP-2238",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR15 added: one Schedule with SKIP overlap, cron set at deployment, three alert groups as configuration, flag rwb.p3.case-quality-run, facts read via section 12.1."
+  },
+  {
+   "ruling": "R-28477",
+   "item": "GAP-3169",
+   "status": "Resolved",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Story text names no 'case exceptions' table; reconciliation_result stays with rwb-source-data per change log. No edit needed."
+  },
+  {
+   "ruling": "R-28478",
+   "item": "GAP-3172",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Build Notes v6",
+   "change": "State the wave 1 delivery of rwb-asset in the service epic and the wave plan, and that the rwb-asset service wave governs its later stories (R5.6 conflict row).",
+   "note": "Wave plan and conflict row belong to the build notes; this story's wave row is unchanged."
+  },
+  {
+   "ruling": "R-28479",
+   "item": "GAP-1457",
+   "status": "Cross-document",
+   "section": "",
+   "target": "BRD v4",
+   "change": "Renumber section 3 headings by service epic in a later BRD version, keeping every requirement key unchanged.",
+   "note": "Heading renumbering belongs to the BRD; section 9 trace table already names the primary service epic."
+  },
+  {
+   "ruling": "R-30512",
+   "item": "NEWAC-RWB-P3-E1011-APP-AC11",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 exists in section 7 and TC-E1-011-12 covers it; X8 names AC11. No edit needed."
+  },
+  {
+   "ruling": "R-30513",
+   "item": "NEWAC-RWB-P3-E1011-APP-AC12",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 exists in section 7 and TC-E1-011-13 covers AC12 and BR11. X10 names AC12. No edit needed."
+  },
+  {
+   "ruling": "R-30514",
+   "item": "NEWAC-RWB-P3-E1011-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 added as a build guardrail for BR11 with test row TC-E1-011-14."
+  },
+  {
+   "ruling": "R-30515",
+   "item": "NEWAC-RWB-P3-E1011-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC14 added: no-run read answers 404 with no row written; test row TC-E1-011-15 added."
+  },
+  {
+   "ruling": "R-30516",
+   "item": "NEWAC-RWB-P3-E1011-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC15 added: transient retry writes once; timeout sets FAILED with activity named; test row TC-E1-011-16 added."
+  },
+  {
+   "ruling": "R-30517",
+   "item": "NEWAC-RWB-P3-E1011-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC16 added: unanswered or failed rwb-source-data call gives FAILED with MSG-GEN-006; test row TC-E1-011-17 added."
+  }
+ ]
+}

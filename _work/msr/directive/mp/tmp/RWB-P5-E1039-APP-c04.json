@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| BR1 | Every read of a document's content writes one access entry as it happens; here one record per served read, committed before the bytes (legacy BR1) | REQ-ACA-006; FEAT-ACA-08; NFR-042; legacy BR1 |",
+   "new": "| BR1 | Every read of a document's content writes one access entry as it happens; here one record per served read, committed before the bytes (legacy BR1). Only the content read is owned here; the metadata, search and intake reads keep their own legacy keys and wire the same recorder | REQ-ACA-006; FEAT-ACA-08; NFR-042; legacy BR1 |"
+  },
+  {
+   "old": "And the record carries no field value, no extracted field value, no person name and no file content",
+   "new": "And the record carries no field value, no extracted field value, no field ID, no person name and no file content"
+  },
+  {
+   "old": "And one incident is raised to the platform administrator queue",
+   "new": "And one incident is raised to the platform administrator queue, whose name is a parameter of this service"
+  },
+  {
+   "old": "so a grant that ended one second ago cannot mark a record.",
+   "new": "so a grant that ended one second ago cannot mark a record. The session answer is reused within one request only."
+  },
+  {
+   "old": "The six criteria are new and test only this deliverable:",
+   "new": "The eight criteria are new and test only this deliverable:"
+  },
+  {
+   "old": "the refusals and the version. No legacy criterion",
+   "new": "the refusals, the version, the platform administrator's letters and the personal-data guard. No legacy criterion"
+  },
+  {
+   "old": "And the record never carries the storage reference, the content hash or the retention class",
+   "new": "And the record never carries the storage reference, the content hash or the retention class\n\n  Scenario: AC7 A platform administrator reads within the RW-PLATADM letters and no personal data reaches the record or the logs (new, D-RCV-60)\n    Given test user \"U-4104\" holds RW-PLATADM with Documents R and has no active grant\n    When \"U-4104\" reads document \"DOC-2026-0009981\" of case \"RW-2026-000123\" at 10:15 on 3 December 2026\n    Then the read is served and one record with decision code \"AC-READ\" is committed with no grant ID\n    And a right beyond the RW-PLATADM letters is refused with MSG-P4-002 and no record\n    And the record, the log lines and the metrics carry the user id, the document reference and the case reference only, with no name, identity number or file body\n\n  Scenario: AC8 A call with no valid session is answered 401 and writes no record (new, D-RCV-60)\n    Given test user \"U-4101\" has no valid session\n    When the content of document \"DOC-2026-0009981\" is requested through GET /api/recovery/document/v1/documents/{documentId}/content\n    Then the call returns status 401 with no byte of the file\n    And no record is committed and no incident is raised"
+  },
+  {
+   "old": "| TC-E1-039-14 | Section 12.7 tables; here AC4 | Component | Boundary test of the tables of section 12.7: each owned table at its boundary and no foreign-schema table read (DP-01); ASM-3438 |",
+   "new": "| TC-E1-039-14 | Section 12.7 tables; here AC4 | Component | Boundary test of the tables of section 12.7: each owned table at its boundary and no foreign-schema table read (DP-01); ASM-3438 |\n| TC-E1-039-15 | AC7, BR7, BR9; here AC7 | Component | RW-PLATADM test user \"U-4104\" with Documents R and no grant: the read served, a right beyond the letters refused with MSG-P4-002, and a scan of the record, the logs and the metrics for personal data |\n| TC-E1-039-16 | AC8; here AC8 | Component | Content read of DOC-2026-0009981 with no valid session: status 401, no bytes, no record, no incident |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28577",
+   "item": "GAP-2076",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P4-E1039-CON",
+   "change": "The access row records the version the owning service applied at the event; the rwb-decision registry stays the source of the version and its effective date.",
+   "note": "Version-in-force rule belongs to the rwb-access and rwb-decision contracts; this story holds no rule version."
+  },
+  {
+   "ruling": "R-28589",
+   "item": "GAP-2341",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR1 now states only the content read is owned here; metadata, search and intake reads keep legacy keys and wire the same recorder."
+  },
+  {
+   "ruling": "R-28590",
+   "item": "GAP-0165",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "Ownership Map v1",
+   "change": "Add an access log row to the Tables sheet: P4 table in rwb_access, append-only, created by RWB-P4-E1039-DB.",
+   "note": "Access log is not itemised in the Ownership Map; this story already reads no rwb_access table (AC4)."
+  },
+  {
+   "ruling": "R-28592",
+   "item": "GAP-2069",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "Ownership Map v1",
+   "change": "Add an access_log table in rwb_access owned by P4, append-only, behind GET /admin/access-log.",
+   "note": "No access_log table in the map; story side already calls the read only through GET /api/recovery/access/v1/admin/access-log."
+  },
+  {
+   "ruling": "R-28593",
+   "item": "GAP-2340",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 adds no field ID to the content-read record; area DOCUMENTS already stated. No result code is carried by this record."
+  },
+  {
+   "ruling": "R-28594",
+   "item": "GAP-2342",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC2 names the queue as a parameter of this service; BR5 states the session answer is reused within one request only."
+  },
+  {
+   "ruling": "R-29589",
+   "item": "ACR-RWB-P5-E1039-APP-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC4 already states its When trigger (read through GET content); no text change needed."
+  },
+  {
+   "ruling": "R-29590",
+   "item": "ACR-RWB-P5-E1039-APP-AC5",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC5 already states its When trigger (content request of the document); no text change needed."
+  },
+  {
+   "ruling": "R-31122",
+   "item": "NEWAC-RWB-P5-E1039-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 for BR7 and BR9 with TC-E1-039-15; next free AC number under the story pattern is AC7."
+  },
+  {
+   "ruling": "R-31123",
+   "item": "NEWAC-RWB-P5-E1039-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 for the 401 answer with no session, with TC-E1-039-16; next free AC number under the story pattern is AC8."
+  }
+ ]
+}

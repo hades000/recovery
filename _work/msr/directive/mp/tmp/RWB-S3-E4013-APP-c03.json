@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "The check is the platform guard library's: this story declares the capability area \"Treatment and offer\" and the right C or U on each entry point, and no check is written in code.",
+   "new": "The check is the platform guard library's: this story declares the capability area \"Treatment and offer\" and the right C or U on each entry point, and no check is written in code. Each entry point calls the rwb-access authorise check of DP-08 through that library."
+  },
+  {
+   "old": "is the unattended `assembleChecklist` activity of this service and not a call to rwb-agent, because no source binds FEAT-GUA-01 to the agent runtime (ASM-4495);",
+   "new": "is the `assembleChecklist` activity of this service, which calls the agent through the rwb-agent contract as a Temporal activity, takes the checklist result when the agent does not answer inside 60 seconds or fails the schema check (NFR-024; NFR-055), and records which of the two assembled the claim;"
+  },
+  {
+   "old": "| BR5 | The claim row is one write on `guarantee_claim`: `claim_type` from LOV-CLAIM-TYPE, `claim_deadline`, `claimed_amount` and `status = PREPARING` of LOV-CLAIM-STATUS, with `filed_at` and `paid_amount` left null until the filing | TSD S3 T3.1, T3.2 |",
+   "new": "| BR5 | The claim row is one write on `guarantee_claim`: `claim_type` from LOV-CLAIM-TYPE, `claim_deadline`, `claimed_amount` and `status = PREPARING` of LOV-CLAIM-STATUS, with `filed_at` and `paid_amount` left null until the filing; the workflow state is the state of record and the claim status is derived from it at each transition through a mapping held as versioned reference data | TSD S3 T3.1, T3.2; GAP-1720 |"
+  },
+  {
+   "old": "The claim deadline, the preparation window and the warning window are not restated in this document: they are read at run time from versioned reference data per scheme (GAP-1728; Q-013).",
+   "new": "The claim deadline, the TCG quota, the preparation window and the warning window are not restated in this document: they are read at run time from versioned reference data per scheme (GAP-1728; Q-013; GAP-1476). The remaining quota and the remaining days are shown on the claim; the filing stays with RWB-S3-E4014-APP, and the guarantee officer files the claim by hand until INT-29 is available."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19557",
+   "item": "DOR-RWB-S3-E4013-APP-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Sections 7 and 16 are not in this chunk, so new AC and TC IDs cannot be numbered without inventing them."
+  },
+  {
+   "ruling": "R-19558",
+   "item": "DOR-RWB-S3-E4013-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Authority section now names the DP-08 rwb-access authorise check for each entry point.",
+   "note": "Authority section names the DP-08 rwb-access authorise check. Role count left unchanged."
+  },
+  {
+   "ruling": "R-19559",
+   "item": "DOR-RWB-S3-E4013-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add or map decision_record, guarantee_type and scheme_code, or record decision_record as the PLT library object of DP-03 outside the LDM.",
+   "note": "Story rows unchanged; the names are absent from LDM v9 and DC v5."
+  },
+  {
+   "ruling": "R-19560",
+   "item": "DOR-RWB-S3-E4013-APP-8",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "Kafka Catalog v1; Temporal Catalog v1",
+   "change": "Register rwb-guarantee as consumer of rwb.decision.RulePackageInForce.v1; add activities assembleChecklist and recordPreparation to the Temporal Catalog.",
+   "note": "PATCH idempotency key not added; no key is specified in the sources."
+  },
+  {
+   "ruling": "R-23385",
+   "item": "GAP-1719",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Checklist step now calls the agent through the rwb-agent contract with a 60 s fallback and records the assembler.",
+   "note": "Step 2 calls the agent via rwb-agent (60 s, schema fallback, recorded). Arch v5 S3 cell and Ownership Map need entries elsewhere."
+  },
+  {
+   "ruling": "R-23386",
+   "item": "GAP-2708",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Service event set and the missing-scheme-document message ID are in no source; other values are already on the story."
+  },
+  {
+   "ruling": "R-23387",
+   "item": "GAP-1476",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Quota and deadline read per scheme from reference data; remaining quota and days shown on the claim; officer files by hand until INT-29.",
+   "note": "Quota and deadline held as per-scheme reference data; officer files manually until INT-29 is available."
+  },
+  {
+   "ruling": "R-23388",
+   "item": "GAP-2709",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-S3-E4013-CON; RWB-S3-E4014-CON; TSD S3 v2 T-A.1",
+   "change": "Split the guarantee-claim resource by operation between the two contract stories; add a read operation if SCR-17 needs one; decide checklist fields in the LDM; state claim-row retention.",
+   "note": "Split by operation between the two contract stories; read operation, checklist fields and retention rule still open."
+  },
+  {
+   "ruling": "R-23389",
+   "item": "GAP-1720",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR5 states the workflow state is the state of record and the claim status is derived via versioned mapping.",
+   "note": "Workflow state is the record; status derived at each transition via versioned mapping (BR5). Mapping values are not in sources."
+  },
+  {
+   "ruling": "R-23390",
+   "item": "GAP-1726",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "API Specification v4; TSD S3 v2 T-A.1",
+   "change": "Add the claim read operation to the service contract on the path the gateway will call; the path is not asserted in this document.",
+   "note": "No GET in the API spec or TSD; add the read, then screen and case tab stories can cite it."
+  }
+ ]
+}

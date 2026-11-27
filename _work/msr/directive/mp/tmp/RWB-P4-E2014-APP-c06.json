@@ -1,0 +1,111 @@
+{
+ "edits": [
+  {
+   "old": "    Given the policy pack fixture holds no masking row in \"MASK-SIT-01\" for the field \"date_of_birth\" for any role",
+   "new": "    Given the rwb-source-data contract mock returns no masking row in \"MASK-SIT-01\" for the field \"date_of_birth\" for any role"
+  },
+  {
+   "old": "| X5 | The decision record of the access entry cannot be written | The call returns 503, no answer and no data; the reason is logged; the cache is unchanged | MSG-P7-003 | AC9 |",
+   "new": "| X5 | The decision record of the access entry cannot be written | The call returns 503, no answer and no data; the reason is logged; the cache is unchanged | MSG-P7-003 | AC9, AC11 |"
+  },
+  {
+   "old": "| X6 | A second call arrives with the same `Idempotency-Key` | The first answer and its entry are returned; no second entry is written | None | AC10 |",
+   "new": "| X6 | A second call arrives with the same `Idempotency-Key` | The first answer and its entry are returned; no second entry is written | None | AC10, AC12 |"
+  },
+  {
+   "old": "The ten criteria above are the ones this story owns;",
+   "new": "The fourteen criteria above are the ones this story owns;"
+  },
+  {
+   "old": "    Then no second access-log entry is written for that call",
+   "new": "    Then no second access-log entry is written for that call\n\n  Scenario: AC11 A decision record that cannot be written returns 503 and no answer (new, D-RCV-60)\n    Given the decision-record fake forces the write of the access entry to fail\n    When \"U-9212\" asks the authorise path for area \"LITIGATION\" and right \"R\" on notice \"N-0201\"\n    Then the call returns status 503 and message MSG-P7-003\n    Then the call holds no answer and no data and the cache is unchanged\n\n  Scenario: AC12 A second call with the same Idempotency-Key returns the first answer (new, D-RCV-60)\n    Given \"U-9212\" has made an authorise call with an Idempotency-Key for area \"LITIGATION\" and right \"R\" on notice \"N-0201\"\n    When the second call arrives with the same Idempotency-Key\n    Then the first answer is returned and no second access-log entry is written\n\n  Scenario: AC13 An authorise call without a valid caller session is refused with 401 (new, D-RCV-60)\n    Given the authorise call carries no valid caller session\n    When the call is made to POST /api/recovery/access/v1/authorise for area \"LITIGATION\" and right \"R\" on notice \"N-0201\"\n    Then the call is refused with status 401\n    Then the call holds no answer and no data\n\n  Scenario: AC14 A replayed write with the same Idempotency-Key answers with the first answer's versions (new, D-RCV-60)\n    Given \"U-9212\" has made an authorise call with an Idempotency-Key for area \"LITIGATION\" and right \"R\" and received matrix version \"PM-2026.12\" and masking version \"MASK-SIT-01\"\n    When the replay arrives with the same Idempotency-Key\n    Then the replay answers with matrix version \"PM-2026.12\" and masking version \"MASK-SIT-01\" and no second access-log entry is written"
+  },
+  {
+   "old": "| TC-E2-014-15 | AC10 | Component | Second authorise call with the same Idempotency-Key; the first answer and its entry are returned and no second entry is written |",
+   "new": "| TC-E2-014-15 | AC10 | Component | Second authorise call with the same Idempotency-Key; the first answer and its entry are returned and no second entry is written |\n| TC-E2-014-16 | AC11, BR7 | Component | Decision-record write forced to fail through the decision-record fake; 503 MSG-P7-003, no answer and no data, cache unchanged |\n| TC-E2-014-17 | AC12, BR7 | Component | Second authorise call with the same Idempotency-Key; the first answer is returned and no second entry is written |\n| TC-E2-014-18 | AC13 | Component | Authorise call with no valid caller session; 401, no answer and no data |\n| TC-E2-014-19 | AC14, BR7 | Component | Replayed authorise call with the same Idempotency-Key; the answer carries `PM-2026.12` and `MASK-SIT-01` and no second entry is written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28772",
+   "item": "GAP-1266",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P7-E2014-CON",
+   "change": "Publish field types of the approval screen model and queue paging defaults: page size default 20, maximum 100.",
+   "note": "Contract-side change; the story does not own the approval page query shape."
+  },
+  {
+   "ruling": "R-28773",
+   "item": "GAP-1271",
+   "status": "Cross-document",
+   "section": "",
+   "target": "TSD P7 v2 (observability text)",
+   "change": "Add dashboard and alert thresholds: any 5xx in five minutes; route p95 above registered budget; failed record write; empty D7.1 queue for 24 hours.",
+   "note": "Observability thresholds belong to the TSD P7 observability text, reviewed with the platform owner."
+  },
+  {
+   "ruling": "R-28774",
+   "item": "GAP-2391",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-case reference data (TSD P6 v2 T3.2)",
+   "change": "Add LOV-HOLD-REASON with REFUSED_BY_APPROVER and TEMPLATE_WITHDRAWN; keep switch key rwb.decision.notice-approval read by both services until renamed.",
+   "note": "Reference data and switch key are owned outside this story."
+  },
+  {
+   "ruling": "R-28775",
+   "item": "GAP-2389",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Plan split slice RWB-P6-E2014-APP (next plan revision)",
+   "change": "Keep H empty; add RWB-PLT-E1027-CON, RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-N001-CON and the two rwb-case contracts of DP-06 and DP-07 to the C list.",
+   "note": "Plan change; fakes of 12.8 stand in until the revision lands."
+  },
+  {
+   "ruling": "R-29513",
+   "item": "ACR-RWB-P4-E2014-APP-AC5",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC5 Given now reads the rwb-source-data contract mock instead of an ACE view.",
+   "note": "Given rewritten to use rwb-source-data contract mock, per DP-01 and DP-05."
+  },
+  {
+   "ruling": "R-30924",
+   "item": "NEWAC-RWB-P4-E2014-APP-AC11",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC11 for X5 decision-record write failure; X5 Covered by now AC9, AC11; added TC-E2-014-16.",
+   "note": "Test data uses the existing decision-record fake; no proposed test was given in the source."
+  },
+  {
+   "ruling": "R-30925",
+   "item": "NEWAC-RWB-P4-E2014-APP-AC12",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC12 for X6 repeated Idempotency-Key; X6 Covered by now AC10, AC12; added TC-E2-014-17.",
+   "note": "Covers X6 by re-asserting the first answer and no second entry; no proposed test was given in the source."
+  },
+  {
+   "ruling": "R-30926",
+   "item": "NEWAC-RWB-P4-E2014-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC13 for 401 on the authorise path; added TC-E2-014-18.",
+   "note": "401 taken from the authorise row; 404 is not in that row's answer list, so it is not added."
+  },
+  {
+   "ruling": "R-30927",
+   "item": "NEWAC-RWB-P4-E2014-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 for replay with the same Idempotency-Key returning the first answer's versions; added TC-E2-014-19.",
+   "note": "Replay assertion uses versions from the first answer; no proposed test was given in the source."
+  }
+ ]
+}

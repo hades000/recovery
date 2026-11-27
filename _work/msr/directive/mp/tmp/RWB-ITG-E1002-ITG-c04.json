@@ -1,0 +1,180 @@
+{
+ "edits": [
+  {
+   "old": "What no source states is the target read operation by which rwb-case serves the list that rwb-source-data builds, and how the daily extract reaches rwb-reporting once the data lake is removed: Not specified in the source documents (GAP-0335; ASM-0429). The story proves the two operations that exist today and records the choice as an assumption, so a change of operation is one contract edit and one test change.",
+   "new": "The target read operation by which rwb-case serves the list that rwb-source-data builds is GET /api/recovery/case/v1/cases and GET /api/recovery/case/v1/queues/{queueId}/cases on the rwb-case base; the daily extract reaches rwb-reporting through the rwb-integration activity deliverFile, with rwb.integration.FileDelivered.v1 and rwb.integration.FileFailed.v1 and no data lake path (GAP-0335)."
+  },
+  {
+   "old": "by the JOB-04 reconciliation workflow started by `rwb.source-data.AceDataReady.v1`",
+   "new": "by the CaseListBuildWorkflow started by `rwb.source-data.AceDataReady.v1`"
+  },
+  {
+   "old": "and starts its reconciliation workflow on task queue `rwb-source-data` (DP-10, DP-14)",
+   "new": "and starts its CaseListBuildWorkflow on task queue `rwb-source-data` (DP-10, DP-14)"
+  },
+  {
+   "old": "starts the reconciliation workflow for 2026-11-30 on task queue `rwb-source-data`, as an event-started workflow and not from a shared scheduler (DP-10).",
+   "new": "starts CaseListBuildWorkflow for 2026-11-30 on task queue `rwb-source-data`, as an event-started workflow and not from a shared scheduler (DP-10); its DailyCaseList schedule starts it only at the 07:15 fallback."
+  },
+  {
+   "old": "Given v_ace_account holds 28,140 accounts at 90 days past due or more with data_as_of 2026-11-30",
+   "new": "Given the rwb-source-data contract holds 28,140 accounts at 90 days past due or more with data_as_of 2026-11-30"
+  },
+  {
+   "old": "When the case list step of JOB-04 runs",
+   "new": "When the case list step of CaseListBuildWorkflow runs"
+  },
+  {
+   "old": "Given the ALS batch for 2026-11-30 completed at 05:40 and JOB-03 completed at 06:52",
+   "new": "Given the ALS batch for 2026-11-30 completed at 05:40 and the allocation run completed at 06:52"
+  },
+  {
+   "old": "When the DP01 cut-off passes and JOB-04 is triggered",
+   "new": "When the DP01 cut-off passes and CaseListBuildWorkflow is triggered"
+  },
+  {
+   "old": "receives MSG-P1-001 \"DP01 Account and arrears is from 2026-11-27. Today's ACE batch has not arrived.\"",
+   "new": "receives MSG-P1-001 \"DP01 Account and arrears is from 2026-11-27. Today's load has not arrived.\""
+  },
+  {
+   "old": "starts its reconciliation workflow on queue rwb-source-data",
+   "new": "starts its CaseListBuildWorkflow on queue rwb-source-data"
+  },
+  {
+   "old": "no second reconciliation workflow is started for 2026-11-30",
+   "new": "no second CaseListBuildWorkflow run is started for 2026-11-30"
+  },
+  {
+   "old": "Given RW-CASEOWN calls the JOB-04 run listing on the rwb-source-data base",
+   "new": "Given RW-CASEOWN calls the CaseListBuildWorkflow run listing on the rwb-source-data base"
+  },
+  {
+   "old": "| ReconciliationWorkflow (JOB-04) with the case list step | Workflow, event-started by AceDataReady | `rwb-source-data` | P1 rwb-source-data | Builds and replaces the `case_list_row` rows of the business date in one transaction (AC1, AC12, AC15) |",
+   "new": "| CaseListBuildWorkflow (case list step of JOB-04) | Workflow, started by AceDataReady and by the DailyCaseList schedule | `rwb-source-data` | P1 rwb-source-data | Builds and replaces the `case_list_row` rows of the business date in one transaction (AC1, AC12, AC15) |\n| DailyCaseList | Schedule, 07:15 Asia/Bangkok, overlap policy SKIP | `rwb-source-data` | P1 rwb-source-data | Fallback start at 07:15, the value of `caselist.allocation.wait.until`, for the business date |"
+  },
+  {
+   "old": "| MSG-P1-001 | The ACE batch for the business date is not complete and the list is not built | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The ACE batch for the business date is not complete and the list is not built | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "in its four states — Loading, empty, list and filtered —",
+   "new": "in its states — Loading, empty, list and filtered; the error and no access states are Not specified in the source documents (CG-ALL-141) —"
+  },
+  {
+   "old": "| TC-E1-002-02-ITG | AC2, BR1 | Integration | Built list; case RW-2026-000123 |",
+   "new": "| TC-E1-002-02-ITG | AC2, BR1 (run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS) | Integration | Built list; case RW-2026-000123 |"
+  },
+  {
+   "old": "| TC-E1-002-06-ITG | AC6 | Integration | JOB-03 not complete at 07:15 |",
+   "new": "| TC-E1-002-06-ITG | AC6 (run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS) | Integration | The allocation run not complete at 07:15 |"
+  },
+  {
+   "old": "| TC-E1-002-07-ITG | AC7, BR6 | Integration | Restart of a built date |",
+   "new": "| TC-E1-002-07-ITG | AC7, BR6 (run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS) | Integration | Restart of a built date |"
+  },
+  {
+   "old": "| TC-E1-002-08-ITG | AC8 | Integration | rwb-case contract error after 12,000 accounts |",
+   "new": "| TC-E1-002-08-ITG | AC8 (run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS) | Integration | rwb-case contract error after 12,000 accounts |"
+  },
+  {
+   "old": "| TC-E1-002-09-ITG | AC9, BR7 | Integration | deliverFile forced to fail all retries |",
+   "new": "| TC-E1-002-09-ITG | AC9, BR7 (run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS) | Integration | deliverFile forced to fail all retries |"
+  },
+  {
+   "old": "| TC-E1-002-11-ITG | AC16, Access | Integration | RW-CASEOWN calls the JOB-04 run listing on the rwb-source-data base; refused with MSG-P4-002 |",
+   "new": "| TC-E1-002-11-ITG | AC16, Access | Integration | RW-CASEOWN calls the CaseListBuildWorkflow run listing on the rwb-source-data base; refused with MSG-P4-002 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21869",
+   "item": "GAP-0335",
+   "status": "Resolved",
+   "section": "2",
+   "target": "",
+   "change": "§2 names the rwb-case read operations and the deliverFile route to rwb-reporting with no lake path.",
+   "note": "Read operations and extract route now stated in §2 from the accepted fix; no data lake path. Story side resolved."
+  },
+  {
+   "ruling": "R-21870",
+   "item": "GAP-0486",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P1-E1002-CON and RWB-P1-E1002-APP",
+   "change": "Define GET /case-list/dates/{businessDate}, GET /case-list/rows and the snapshot(page) input and output shapes as in the proposed fix.",
+   "note": "Case-list read operations and answer shapes belong to the P1 contract and app stories."
+  },
+  {
+   "ruling": "R-21872",
+   "item": "GAP-1991",
+   "status": "Cross-document",
+   "section": "",
+   "target": "TSD P1 v3",
+   "change": "Keep lake_copy_watermark as the watermark of the last published reporting projection and drop the lake extract INT-19 and INT-20 (DP-17).",
+   "note": "Lake copy removal sits in TSD P1 v3; this story already has no lake path."
+  },
+  {
+   "ruling": "R-23723",
+   "item": "CG-ALL-134",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text copied from Error and Message Standard v4; AC5 quotes the same text.",
+   "note": "MSG-P1-001 now uses the standard English text; AC5 updated to match."
+  },
+  {
+   "ruling": "R-23724",
+   "item": "CG-ALL-136",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Rows TC-E1-002-02, -06, -07, -08 and -09 marked run by the owning stories.",
+   "note": "Row 11 covers AC16, which this story owns, not AC11; no move needed. Other five rows marked run by owner."
+  },
+  {
+   "ruling": "R-23725",
+   "item": "CG-ALL-137",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the test lists of REQ-RDF-007, REQ-RDF-009 and the third differing requirement with RWB-ITG-E1002-ITG §18 in the next RTM version.",
+   "note": "RTM v7 test lists differ for three requirements; alignment is an RTM change."
+  },
+  {
+   "ruling": "R-23726",
+   "item": "CG-ALL-140",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "JOB-nn wording replaced by workflow names in AC1, AC3, AC5, AC16 and rows 06 and 11.",
+   "note": "Six lines now use CaseListBuildWorkflow or the allocation run; no decision log or job record wording remains."
+  },
+  {
+   "ruling": "R-23727",
+   "item": "CG-ALL-141",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Error and no access states marked Not specified in the source documents (CG-ALL-141); loading and empty kept.",
+   "note": "SCR-02 states now list loading, empty, list and filtered; error and no access marked not specified."
+  },
+  {
+   "ruling": "R-28446",
+   "item": "GAP-0487",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "CaseListBuildWorkflow named in §12.5, §4 step 2, AC12 and AC15; DailyCaseList schedule at 07:15 Asia/Bangkok added.",
+   "note": "Workflow name, schedule and 07:15 fallback fixed; fallback read from caselist.allocation.wait.until."
+  },
+  {
+   "ruling": "R-29244",
+   "item": "ACR-RWB-ITG-E1002-ITG-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC1 Given now states the rwb-source-data contract holds the 28,140 accounts, not the ACE view.",
+   "note": "AC1 Given rewritten to read through the rwb-source-data contract (DP-01, DP-05)."
+  }
+ ]
+}

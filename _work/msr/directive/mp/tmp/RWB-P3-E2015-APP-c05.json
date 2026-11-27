@@ -1,0 +1,54 @@
+{
+ "edits": [
+  {
+   "old": "    Then the case record view writes no timer, deviation or case row and the escalation fields stay as they were",
+   "new": "    Then the case record view writes no timer, deviation or case row and the escalation fields stay as they were\n\n  Scenario: AC13 Error answers of the timer and deviation operations (covers BR11)\n    Given a caller without a valid credential\n    When the caller calls \"GET /cases/{caseId}/timers\" on case \"RW-2026-000501\"\n    Then the answer is 401 with Not specified in the source documents (NEWAC-RWB-P3-E2015-APP-AC13)\n    Then a case outside the caller's scope is refused with 404 with MSG-P4-003 and not an empty list\n    Then a role without Case record R is refused with 403 as in AC11\n\n  Scenario: AC14 Downstream called once and timed out (covers BR12)\n    Given the rwb-deviation contract mock does not answer within 2 seconds for case \"RW-2026-000502\"\n    When \"U-CO-01\" opens the case record\n    Then the deviation query is called once with no retry\n    Then the timers and the prescription date still show and only the deviation section degrades\n\n  Scenario: AC15 Disallowed status change refused (covers BR10)\n    Given case \"RW-2026-000501\" has status \"IN_PROGRESS\"\n    When a status change that the case status model does not allow is sent for case \"RW-2026-000501\"\n    Then the answer is refused with Not specified in the source documents (NEWAC-RWB-P3-E2015-APP-AC15)\n    Then the case status stays \"IN_PROGRESS\" and no case row is written"
+  },
+  {
+   "old": "The twelve criteria above are owned by this story",
+   "new": "The fifteen criteria above are owned by this story"
+  },
+  {
+   "old": "| TC-E2-015-13 | §12.7, ASM-3438 | Boundary | Tables of section 12.7; a write to deviation or decision_log_entry, or a foreign key into another schema, fails the build (DP-01) |",
+   "new": "| TC-E2-015-13 | §12.7, ASM-3438 | Boundary | Tables of section 12.7; a write to deviation or decision_log_entry, or a foreign key into another schema, fails the build (DP-01) |\n| TC-E2-015-14 | AC13, BR11 | Component | Calls to `GET /cases/{caseId}/timers` without a credential (401), for a case outside scope (404) and by RW-REFADM without Case record R (403) |\n| TC-E2-015-15 | AC14, BR12 | NFR | Stubbed deviation query not answering within 2 seconds; one call only, no retry; timers and prescription date still returned |\n| TC-E2-015-16 | AC15, BR10 | Component | Status change not allowed by the case status model sent for case RW-2026-000501; refused and no case row written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30691",
+   "item": "NEWAC-RWB-P3-E2015-APP-AC12",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR10 is already covered by AC12 and its boundary row TC-E2-015-13 (§12.7). No new criterion added."
+  },
+  {
+   "ruling": "R-30692",
+   "item": "NEWAC-RWB-P3-E2015-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC13 (401, 403, 404 of the timer and deviation operations) and TC-E2-015-14.",
+   "note": "401 answer code not specified in source documents; placeholder kept in AC13."
+  },
+  {
+   "ruling": "R-30693",
+   "item": "NEWAC-RWB-P3-E2015-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 (downstream called once, 2 s timeout degrades only its section) and TC-E2-015-15.",
+   "note": "Based on BR12: one call, no retry, 2 s timeout."
+  },
+  {
+   "ruling": "R-30694",
+   "item": "NEWAC-RWB-P3-E2015-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 (disallowed status change refused, no case row written) and TC-E2-015-16.",
+   "note": "Refusal answer code not specified in source documents; placeholder kept in AC15."
+  }
+ ]
+}

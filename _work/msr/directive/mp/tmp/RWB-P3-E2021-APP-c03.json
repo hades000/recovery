@@ -1,0 +1,156 @@
+{
+ "edits": [
+  {
+   "old": "- Migration `V2021_1__notice_task_index.sql` runs in the service's own migration sequence with a parameterised schema name; no other schema is touched and no foreign key into `rwb_comms` or `rwb_source_data` is created.",
+   "new": "- Migration `V2021_1__notice_task_index.sql` runs in the service's own migration sequence with a parameterised schema name; no other schema is touched and no foreign key into `rwb_comms` (owned by rwb-comms, P6) or `rwb_source_data` (owned by rwb-source-data, P1) is created."
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| BR1 | A legal hold on a case stops every outbound action on it and every letter for it | R-UNI-20; REQ-OCC-005 |",
+   "new": "| BR1 | A legal hold on a case stops every outbound action on it and every letter for it | R-UNI-20; REQ-OCC-005 | AC1 |"
+  },
+  {
+   "old": "| BR2 | Lifting the hold returns the case to the status it held when the hold was placed, and the move is recorded | R-UNI-21 |",
+   "new": "| BR2 | Lifting the hold returns the case to the status it held when the hold was placed, and the move is recorded | R-UNI-21 | AC2 |"
+  },
+  {
+   "old": "| BR3 | The case exposes the hold as one flag on its published read; no other service reads the case tables for it | R-PREC (Arch v5 catalogue); DP-01 |",
+   "new": "| BR3 | The case exposes the hold as one flag on its published read; no other service reads the case tables for it | R-PREC (Arch v5 catalogue); DP-01 | AC1 |"
+  },
+  {
+   "old": "| BR4 | Every dispatch and every proof of delivery is one ledger entry for the case, with its channel, conduct result and delivery status | REQ-ILG-010; FEAT-ILG-07 |",
+   "new": "| BR4 | Every dispatch and every proof of delivery is one ledger entry for the case, with its channel, conduct result and delivery status | REQ-ILG-010; FEAT-ILG-07 | AC3, AC4 |"
+  },
+  {
+   "old": "| BR5 | A refused, returned or undeliverable letter records the result and moves the case to its owner with an action, under R-LIT-09 | R-LIT-09; CTL-15 |",
+   "new": "| BR5 | A refused, returned or undeliverable letter records the result and moves the case to its owner with an action, under R-LIT-09 | R-LIT-09; CTL-15 | AC5 |"
+  },
+  {
+   "old": "| BR6 | No notice-period clock is started from a print date or from an unserved letter; the clock is the E5002 story's and starts from the delivery date | R-LIT-07; R-LIT-08 |",
+   "new": "| BR6 | No notice-period clock is started from a print date or from an unserved letter; the clock is the E5002 story's and starts from the delivery date | R-LIT-07; R-LIT-08 | None yet; new AC and TC rows needed |"
+  },
+  {
+   "old": "| BR7 | A held or unserved result that cannot be written to the decision record does not proceed | Principle 5; R-UNI-39 |",
+   "new": "| BR7 | A held or unserved result that cannot be written to the decision record does not proceed | Principle 5; R-UNI-39 | AC8 |"
+  },
+  {
+   "old": "| BR8 | Which hold reasons, task codes and due dates apply is data held as reference data, never code | Principle 1; LOV-ROLE; GAP-2218 |",
+   "new": "| BR8 | Which hold reasons, task codes and due dates apply is data held as reference data, never code | Principle 1; LOV-ROLE; GAP-2218 | None yet; new AC and TC rows needed |"
+  },
+  {
+   "old": "No approval level from the delegation of authority applies in this story; approval of the notice itself is RWB-P3-E2014-APP and RWB-P6-E2021-APP.",
+   "new": "No approval level from the delegation of authority applies in this story; approval of the notice itself is RWB-P3-E2014-APP and RWB-P6-E2021-APP. The notice approval is held in the ApprovalWorkflow of rwb-decision as a child of NoticeDispatchWorkflow, with the notice as its source; POST /notices/{noticeId}/approve of rwb-litigation is the litigation officer's decision point; the notice waits in Approved and is not written to the file (GAP-2093).\n\nEach REST operation of this story is authorised by the rwb-access authorise check of DP-08 for the role that calls it; the check's identifier is Not specified in the source documents (DOR-RWB-P3-E2021-APP-6)."
+  },
+  {
+   "old": "| MSG-P4-003 | The case is outside the caller's scope | This case is not in your scope. |",
+   "new": "| MSG-P4-003 | The case is outside the caller's scope | This case is not in your scope. |\n| MSG-P4-002 | Not specified in the source documents (DOR-RWB-P3-E2021-APP-9) | Not specified in the source documents (DOR-RWB-P3-E2021-APP-9) |"
+  },
+  {
+   "old": "| Integration dependencies | RWB-ACE-001 (ACE view v_ace_pod for proof of delivery; not yet accepted by the ACE team) |",
+   "new": "| Integration dependencies | RWB-ACE-001 (ACE view v_ace_pod read by rwb-source-data for proof of delivery; this story takes the proof as EV-15 from rwb-comms and does not read the view; not yet accepted by the ACE team) |"
+  },
+  {
+   "old": "| NoticeFactConsumer | Inbox consumer | Consumes EV-14 and EV-15, deduplicates by event ID and business date, signals CaseWorkflow |",
+   "new": "| NoticeFactConsumer | Inbox consumer | Consumes EV-14 and EV-15, deduplicates by event ID and business date, signals CaseWorkflow; EV-15 NoticeDelivered is published by rwb-comms when a proof is matched to its notice by barcode |"
+  },
+  {
+   "old": "- The 2 s timeout and the single hop are the platform rule of DP-11, not a configurable value of this story.",
+   "new": "- The 2 s timeout and the single hop are the platform rule of DP-11, not a configurable value of this story.\n- The conduct and consent rule package is one versioned package governed in rwb-decision and evaluated by this service; this story records the conduct result on each entry (BR4). The package identifier is Not specified in the source documents (GAP-1610); the conduct and QA officer approves its first version."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16212",
+   "item": "DOR-RWB-P3-E2021-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Migration bullet now states rwb_comms is owned by rwb-comms and rwb_source_data by rwb-source-data; no foreign key created."
+  },
+  {
+   "ruling": "R-16213",
+   "item": "DOR-RWB-P3-E2021-APP-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added: BR1-5 and BR7 mapped to ACs from build steps. BR6 and BR8 need new AC and TC rows in 7 and 16, outside this chunk."
+  },
+  {
+   "ruling": "R-16214",
+   "item": "DOR-RWB-P3-E2021-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 now states REST operations are authorised by the rwb-access authorise check of DP-08; its identifier left as not specified."
+  },
+  {
+   "ruling": "R-16215",
+   "item": "DOR-RWB-P3-E2021-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P4-002 listed in section 14; When and message text are placeholders, as the source gives neither."
+  },
+  {
+   "ruling": "R-22173",
+   "item": "GAP-1597",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Integration dependency now states proof arrives as EV-15 from rwb-comms; the story does not read v_ace_pod. ACE team owns the v_ace_pod writer question."
+  },
+  {
+   "ruling": "R-22174",
+   "item": "GAP-2090",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Ownership Map v1 (sheet Tables, P6 rows) and TSD P6 T3.1",
+   "change": "Add barcode, callback date and delivery status as fields of the notice row with no separate proof table unless the DB story of rwb-comms needs one; name the owner row for these fields.",
+   "note": "Ownership Map and TSD P6 object list belong to P6 documents; no story text change."
+  },
+  {
+   "ruling": "R-22175",
+   "item": "GAP-2096",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "NoticeFactConsumer row states EV-15 NoticeDelivered is published by rwb-comms on barcode match; no new event or job added."
+  },
+  {
+   "ruling": "R-22476",
+   "item": "GAP-2093",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 holds approval in rwb-decision ApprovalWorkflow with S4 POST /notices/{noticeId}/approve as decision point; notice waits in Approved."
+  },
+  {
+   "ruling": "R-22553",
+   "item": "GAP-1610",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Configuration bullet names one versioned conduct and consent package governed in rwb-decision; its identifier is not given in the sources."
+  },
+  {
+   "ruling": "R-22556",
+   "item": "GAP-2181",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-P1-E1016-CON; RWB-P1-E1066-CON; LOV-SEND-STATUS",
+   "change": "Publish the DP02 contact-and-consent row and its vocabulary in RWB-P1-E1016-CON; add the LETTER append required-members table to RWB-P1-E1066-CON; add UNSERVED to LOV-SEND-STATUS with version or confirm FAILED mapping.",
+   "note": "Contract and LOV changes belong to P1 contracts and the reference-data owner; no story text change."
+  }
+ ]
+}

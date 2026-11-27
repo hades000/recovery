@@ -1,0 +1,41 @@
+{
+ "edits": [
+  {
+   "old": "    Then the grant refuses the statement and the boundary test fails the build; nothing is released",
+   "new": "    Then the grant refuses the statement and the boundary test fails the build; nothing is released\n\n  Scenario: AC7 Activity retry and timeout\n    Given the rwb-integration contract mock does not answer the buyer file request of lot \"LOT-2026-000042\" within the activity timeout\n    When the data transfer activity runs\n    Then the activity is retried under the retry policy of the activity\n    Then when the retries are exhausted the transfer is not recorded and the lot status is unchanged\n\n  Scenario: AC8 A consumed call fails\n    Given the rwb-payment contract mock returns an error for the buyer remittance of lot \"LOT-2026-000042\"\n    Given the rwb-case contract mock returns the case state \"SETTLEMENT_PENDING\" for \"RC-2026-000842\"\n    When the settlement step runs\n    Then no transfer is recorded and the lot status is unchanged\n    Then the case does not move to SETTLED\n\n  Scenario: AC9 A disallowed status change is refused\n    Given the lot \"LOT-2026-000042\" has the status TRANSFERRED\n    When a status change the model does not allow is requested for the lot\n    Then the status change is refused and the lot status is unchanged\n    Then no event is published"
+  },
+  {
+   "old": "| TC-E6-007-09 | AC6 | Boundary | A statement reaching rwb_case, rwb_partner, rwb_integration, rwb_payment or another service's schema; the boundary test of the §12.7 tables fails the build (ASM-3438) |",
+   "new": "| TC-E6-007-09 | AC6 | Boundary | A statement reaching rwb_case, rwb_partner, rwb_integration, rwb_payment or another service's schema; the boundary test of the §12.7 tables fails the build (ASM-3438) |\n| TC-E6-007-10 | AC7 | Component | Buyer file request of lot `LOT-2026-000042` not answered within the activity timeout; the retries and the stop after the retries asserted on the fakes |\n| TC-E6-007-11 | AC8 | Component | rwb-payment fake returns an error for the buyer remittance of lot `LOT-2026-000042`; no transfer recorded, lot unchanged and no case move answered |\n| TC-E6-007-12 | AC9 | Component | Lot `LOT-2026-000042` at `TRANSFERRED` with a status change the model does not allow requested; change refused, lot unchanged and no event published |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32856",
+   "item": "NEWAC-RWB-S6-E6007-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 scenario (activity retry and timeout) to section 7 and TC-E6-007-10 to section 16.",
+   "note": "AC7 added for activity retry and timeout; test row TC-E6-007-10 added. No timeout or retry values invented."
+  },
+  {
+   "ruling": "R-32857",
+   "item": "NEWAC-RWB-S6-E6007-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 scenario (consumed call fails) to section 7 and TC-E6-007-11 to section 16.",
+   "note": "AC8 added for a failed consumed call; test row TC-E6-007-11 added."
+  },
+  {
+   "ruling": "R-32858",
+   "item": "NEWAC-RWB-S6-E6007-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 scenario (disallowed status change refused) to section 7 and TC-E6-007-12 to section 16.",
+   "note": "AC9 added for a disallowed transition; test row TC-E6-007-12 added."
+  }
+ ]
+}

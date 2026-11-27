@@ -1,0 +1,200 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P4-002 | TC-E6-016-04 |",
+   "new": "| MSG-P4-002 | AC4, TC-E6-016-04 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5, BR6 |",
+   "new": "| None (pipeline log) | AC5, Section 17, BR5, BR6 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 Access (no legacy origin; exception X2)\n    Given a role without the Write-off and posting right C\n    When the role asks for the removal of a proposed case\n    Then the system answers 403 with MSG-P4-002 before any read or write\n    Then nothing changes and no record is written\n\n  Scenario: AC5 ACE and schema boundary (no legacy origin; exception X8)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case row or another service's schema\n    When the boundary test runs in the build\n    Then the grant refuses the statement and the build fails\n    Then nothing is released\n\n  Scenario: AC6 Repeated request (no legacy origin; exception X7, rule BR8)\n    Given case RC-2026-000716 was removed by an earlier request with an Idempotency-Key\n    When the same request is sent again with the same Idempotency-Key\n    Then one decision record exists and the answer is the removal that exists\n    Then a request for a case already removed is refused with 409\n\n  Scenario: AC7 No personal data (no legacy origin; rule BR9)\n    Given a removal with a reason, its decision record, a log and a workflow input\n    When the removal is written\n    Then none of them carries a person name, address, contact value or identity number\n    Then the case is carried as a case reference only"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the local decision record with the rule version"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the local decision record cannot be written"
+  },
+  {
+   "old": "with their origin tag added and nothing else changed: the repeated",
+   "new": "with their origin tag added and the decision-log wording changed to the local decision record of DP-03: the repeated"
+  },
+  {
+   "old": "`the action is taken` and `the decision log cannot be written` all stand.",
+   "new": "`the action is taken` all stand, and the `decision log` of AC1 and AC3 is written as the local decision record."
+  },
+  {
+   "old": "and those are the only additions.",
+   "new": "and those are the only additions to the legacy lines; AC4 to AC7 carry no legacy origin."
+  },
+  {
+   "old": "| Rule | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer |\n|---|---|---|---|---|---|---|---|---|---|---|",
+   "new": "| Rule | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer | BR ID |\n|---|---|---|---|---|---|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| Write-off team | Case Workspace, Decision Log | None |",
+   "new": "| Write-off team | Case Workspace, Decision Log | None | BR10 |"
+  },
+  {
+   "old": "TSD S7 T6.2 |",
+   "new": "TSD S7 T6.2 |\n| BR10 | The removal rule R-WO-07 of the WO package: from POPULATION_PROPOSED on TEAM_REMOVED_CASE, with removal_reason present, to CASE_REMOVED_BY_TEAM; the rule and its version are the rule row of rwb-decision | Business Rules and Routing Logic v4 row R-WO-07; FSD S7 A2.4.3.1 |\n\n**Coverage.** BR1 is covered by AC1 and TC-E6-016-01; BR2 by AC1, AC3, TC-E6-016-01, TC-E6-016-03 and TC-E6-016-05; BR3 and BR4 by AC2 and TC-E6-016-02; BR5 and BR6 by AC5 and TC-E6-016-07; BR7 by AC1 and TC-E6-016-01; BR8 by AC6 and TC-E6-016-08; BR9 by AC7 and TC-E6-016-09; BR10 by AC1, AC2, TC-E6-016-01 and TC-E6-016-02."
+  },
+  {
+   "old": "The rights are the rows of TSD S7 T6.1 and nothing wider,",
+   "new": "The rights are the rows of TSD S7 T6.1 and nothing wider; every operation calls the rwb-access authorise check for the capability area `Write-off and posting` and right C before any read or write, and that check is the DP-08 check stated here,"
+  },
+  {
+   "old": "| `removal_reason` | the removal reason of R-WO-07 | Read as a request input and recorded in the decision record; the field, its column, its list and its owner are Not specified in the source documents (GAP-3023; ASM-5030) |",
+   "new": "| Not specified in the source documents (DOR-RWB-S7-E6016-APP-7) | decision record (PLT library, created in `rwb_writeoff`) | `removal_reason` | Read as a request input and stored in the decision record as free text validated as present; no column, field ID or list of values is given in any source (GAP-3023; ASM-5030) |"
+  },
+  {
+   "old": "8. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to `rwb_case`, `rwb_decision` or any other schema (X8, BR5, BR6).",
+   "new": "8. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, and no write to any schema other than `rwb_writeoff` (AC5, X8, BR5, BR6)."
+  },
+  {
+   "old": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the removal has no timer.",
+   "new": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the removal has no timer.\n- Parameters read by this step: the feature flag `rwb.writeoff.removal-v1`, the 2 s budget and the WO rule package version in force; the reference-data contract that serves them (DP-06, DP-07) is Not specified in the source documents (DOR-RWB-S7-E6016-APP-20)."
+  },
+  {
+   "old": "The Drools kit of DP-04 would add `RWB-PLT-E1072-CON`; the package is read as data and evaluated by this service's own evaluator, so no kit is declared.",
+   "new": "The Drools kit of DP-04 is recorded as `RWB-PLT-E1072-CON`, with `RWB-P7-E1073-CON` as the rule kit the stage needs; the package is read as data and evaluated by this service's own evaluator."
+  },
+  {
+   "old": "The outbox library of DP-09 would add `RWB-PLT-TE006-CON` and is needed only by the stories that publish. The plan's H row stands unchanged.",
+   "new": "The outbox library of DP-09 is recorded as `RWB-PLT-TE006-CON`, the wave 0 library the service's topic `rwb.decision-record.v1` needs. The plan's H, C, I and X rows stand as they are."
+  },
+  {
+   "old": "every case is tested on the fakes, so every case is `Component`.",
+   "new": "every legacy case is tested on the fakes, so every legacy case is `Component`. The added cases are TC-E6-016-06 (Contract), TC-E6-016-07 (Boundary), TC-E6-016-08 and TC-E6-016-09 (both Component); they carry no legacy origin."
+  },
+  {
+   "old": "| TC-E6-016-04 | Access | Component |",
+   "new": "| TC-E6-016-04 | AC4 | Component |"
+  },
+  {
+   "old": "| TC-E6-016-05 | Principle 5 | Component | A forced decision log write failure inside the transaction; the case stays at `POPULATION_PROPOSED` and no record exists |",
+   "new": "| TC-E6-016-05 | Principle 5 | Component | A forced decision record write failure inside the transaction; the case stays at `POPULATION_PROPOSED` and no record exists |\n| TC-E6-016-06 | §12 operations, events and activities | Contract | The removal operation and the case-move answer checked against their published contract on the fakes; the error envelope, the message ids and the absence of any published event asserted |\n| TC-E6-016-07 | §12.7 tables and AC5 | Boundary | Every table of §12.7 present in `rwb_writeoff` and no statement, grant or read outside it; a component that reads a `v_ace_*` view or `recovery_case` fails the build |\n| TC-E6-016-08 | AC6 | Component | The same request and the same `Idempotency-Key` sent twice, and a case already removed sent again; one record, one answer and 409 for the removed case asserted |\n| TC-E6-016-09 | AC7 | Component | A removal with a reason and a log line carrying no person name, address, contact value or identity number; the record and the workflow input asserted to carry the case reference only |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Story element | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| The removal step, the record and the case-move answer | TC-E6-016-01, TC-E6-016-02, TC-E6-016-03, TC-E6-016-05 |",
+   "new": "| The removal step, the record and the case-move answer | TC-E6-016-01, TC-E6-016-02, TC-E6-016-03, TC-E6-016-05 | FEAT-WOF-04 | Not specified in the source documents (DOR-RWB-S7-E6016-APP-2) |"
+  },
+  {
+   "old": "| rwb-writeoff as the owner of the write-off stage | TC-E6-016-01 |",
+   "new": "| rwb-writeoff as the owner of the write-off stage | TC-E6-016-01 | FEAT-WOF-04 | Not specified in the source documents (DOR-RWB-S7-E6016-APP-2) |"
+  },
+  {
+   "old": "| `rwb_writeoff` and its own login | TC-E6-016-01 |",
+   "new": "| `rwb_writeoff` and its own login | TC-E6-016-01 | FEAT-WOF-04 | Not specified in the source documents (DOR-RWB-S7-E6016-APP-2) |"
+  },
+  {
+   "old": "| The three consumed rows with their budget and breaker | TC-E6-016-01, TC-E6-016-02 |",
+   "new": "| The three consumed rows with their budget and breaker | TC-E6-016-01, TC-E6-016-02 | FEAT-WOF-04 | Not specified in the source documents (DOR-RWB-S7-E6016-APP-2) |"
+  },
+  {
+   "old": "| The record written before the case moves | TC-E6-016-03, TC-E6-016-05 |",
+   "new": "| The record written before the case moves | TC-E6-016-03, TC-E6-016-05 | FEAT-WOF-04 | Not specified in the source documents (DOR-RWB-S7-E6016-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20844",
+   "item": "DOR-RWB-S7-E6016-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add Story test cases rows TC-E6-016-01 to TC-E6-016-09 under the same IDs; §16 now holds the contract (06) and boundary (07) rows",
+   "note": "Story side added TC-06 contract for §12 and TC-07 boundary for §12.7; v8 workbook lacks the rows."
+  },
+  {
+   "ruling": "R-20845",
+   "item": "DOR-RWB-S7-E6016-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature column (FEAT-WOF-04) and L3 process column added; L3 process placeholder named as not specified."
+  },
+  {
+   "ruling": "R-20846",
+   "item": "DOR-RWB-S7-E6016-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Parameters named in §13 with the reference-data contract as a placeholder (DP-06, DP-07 not specified in sources)."
+  },
+  {
+   "ruling": "R-20847",
+   "item": "DOR-RWB-S7-E6016-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Build step 8 no longer names rwb_case or rwb_decision; the boundary is any schema other than rwb_writeoff."
+  },
+  {
+   "ruling": "R-20848",
+   "item": "DOR-RWB-S7-E6016-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC4 (X2) and AC5 (X8) added in Gherkin, with §5 Covered by updated and AC6 and AC7 added for the rule coverage."
+  },
+  {
+   "ruling": "R-20849",
+   "item": "DOR-RWB-S7-E6016-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR ID BR10 given to R-WO-07; AC6 and AC7 with TC-08 and TC-09 added; coverage paragraph maps BR1 to BR10."
+  },
+  {
+   "ruling": "R-20850",
+   "item": "DOR-RWB-S7-E6016-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD to the role list",
+   "note": "Story §10 now names the rwb-access authorise check per operation (DP-08 check stated here)."
+  },
+  {
+   "ruling": "R-20851",
+   "item": "DOR-RWB-S7-E6016-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add removal_reason as a field and decision_record as an entity; recovery_log is named only as a retired element",
+   "note": "Story §11 removal_reason row completed; AC1, AC3 and §7 wording moved to local decision record."
+  },
+  {
+   "ruling": "R-23239",
+   "item": "GAP-3023",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Dependencies paragraph records TE006 as wave 0 library and E1072 with E1073 as rule kit; H, C, I, X rows kept; reason free text."
+  },
+  {
+   "ruling": "R-23626",
+   "item": "GAP-3024",
+   "status": "Cross-document",
+   "section": "11, 12, 13",
+   "target": "RWB-S7-E6016-CON contract baseline (contract README)",
+   "change": "Publish the removal operation with placeholder path and element names, bind errors to section 14 message ids, and record the tag date in the README",
+   "note": "Story side already declares free-text reason and child workflow boundary; baseline lives in the CON contract."
+  }
+ ]
+}

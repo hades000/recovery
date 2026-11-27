@@ -1,0 +1,268 @@
+{
+ "story": "RWB-PLT-TE006-CON",
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 3
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-18884",
+     "item": "DOR-RWB-PLT-TE006-CON-11",
+     "status": "Cross-document",
+     "section": "17",
+     "target": "Recovery Workbench Logical Data Model and Data Dictionary v9",
+     "change": "Confirm the Personal data flag of the P2 fields that detcheck flagged; this story carries none, and the four contract tables are already Personal data No.",
+     "note": "LDM v9 (_work cache) rows DF-OPS-178 to DF-OPS-202 are Personal data No. The flagged P2 fields are not in this story, so no story edit."
+    },
+    {
+     "ruling": "R-18886",
+     "item": "DOR-RWB-PLT-TE006-CON-18",
+     "status": "Resolved",
+     "section": "19",
+     "target": "",
+     "change": "",
+     "note": "Added open decision lines DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863) and DL11 (ASM-0553, ASM-0703, ASM-1051, ASM-1104) to section 19."
+    },
+    {
+     "ruling": "R-18888",
+     "item": "DOR-RWB-PLT-TE006-CON-4",
+     "status": "Resolved",
+     "section": "7 and 16",
+     "target": "",
+     "change": "",
+     "note": "Added AC7 to AC15 in section 7, one per rule BR1 to BR9 from section 8, with test rows TC-PLT-TE006-CON-06 to -14 in section 16."
+    }
+   ],
+   "edits": [
+    {
+     "old": "Then the contract test of each consuming service runs against the published jar and fails on any drift from section 12",
+     "new": "Then the contract test of each consuming service runs against the published jar and fails on any drift from section 12\n\n  Scenario: AC7 The outbox row and its deliveries share the caller's transaction (BR1) (new, D-RCV-60)\n    Given a service that changes a case and publishes one event in the same call\n    When the transaction rolls back\n    Then neither the change nor the outbox_event and outbox_delivery rows exist\n    Then the outbox rows are written in the caller's schema and no other schema\n\n  Scenario: AC8 The event carries a CloudEvents id and a repeat is dropped (BR2) (new, D-RCV-60)\n    Given an event published with a CloudEvents id and an idempotency key\n    When a consumer receives a repeat with the same ce_id\n    Then processed_event or IdempotencyGuard drops the repeat and the consumer answers OK\n\n  Scenario: AC9 Delivery is at least once with one consumer group and one delivery state per recipient (BR3) (new, D-RCV-60)\n    Given an event with two recipients\n    When the relay publishes it and one delivery is not acknowledged\n    Then each recipient has its own consumer group and its own outbox_delivery row\n    Then the unacknowledged delivery is delivered again\n\n  Scenario: AC10 Events for one case reach each recipient in write order by caseId (BR4) (new, D-RCV-60)\n    Given two events for the same case written in order\n    When they are published\n    Then both use the caseId record key\n    Then each recipient receives them in the order they were written\n\n  Scenario: AC11 A failed record climbs the retry topics and then reaches the dead-letter topic with one alert (BR5) (new, D-RCV-60)\n    Given a consumer that fails\n    When the record fails on every attempt\n    Then the record climbs the retry topics at 1 min, 10 min and 1 h\n    Then the record then goes to the dead-letter topic with one alert and the replay tool is its recovery path\n\n  Scenario: AC12 The library raises no case event, no task and no decision record (BR6) (new, D-RCV-60)\n    Given the library fake in a contract test of a consuming service\n    When the library handles an event\n    Then no case event, no task and no decision record is raised by the library\n    Then the consumer's owning service raises them through its own contract\n\n  Scenario: AC13 Payloads hold references and codes only and carry the schema version and trace context (BR7) (new, D-RCV-60)\n    Given an outbox_event to publish\n    When it is validated against the registry before publish\n    Then the payload holds references and codes and no personal data\n    Then the event carries its schema version and the envelope carries the W3C trace context\n\n  Scenario: AC14 A contract change is backward compatible or a new major version with a migration note (BR8) (new, D-RCV-60)\n    Given a change to an event schema\n    When the change is submitted to the registry\n    Then a backward-compatible change is accepted\n    Then a breaking change is a new major version with a migration note\n\n  Scenario: AC15 The recipient list, the owners and the retry windows are configuration (BR9) (new, D-RCV-60)\n    Given the library code and its published interfaces\n    When the recipient list, the owners and the retry windows are read\n    Then they come from configuration behind the published interfaces\n    Then no recipient, owner or retry window value is held in the library code"
+    },
+    {
+     "old": "| TC-PLT-TE006-CON-05 | AC6 | Contract | A backward-compatible change accepted, a breaking change refused, and the drift test against the published jar |",
+     "new": "| TC-PLT-TE006-CON-05 | AC6 | Contract | A backward-compatible change accepted, a breaking change refused, and the drift test against the published jar |\n| TC-PLT-TE006-CON-06 | AC7, BR1 | Component | A case change and its outbox rows written in one transaction and rolled back; rows checked in the caller's schema only |\n| TC-PLT-TE006-CON-07 | AC8, BR2 | Component | The same ce_id delivered twice to a consumer |\n| TC-PLT-TE006-CON-08 | AC9, BR3 | Contract | One event with two recipients and one unacknowledged delivery |\n| TC-PLT-TE006-CON-09 | AC10, BR4 | Contract | Two ordered events for one caseId |\n| TC-PLT-TE006-CON-10 | AC11, BR5 | Contract | A consumer failing on every attempt, a dead-letter landing and one alert |\n| TC-PLT-TE006-CON-11 | AC12, BR6 | Contract | The library fake handling one event, with no case event, task or decision record raised |\n| TC-PLT-TE006-CON-12 | AC13, BR7 | Contract | An outbox payload of references and codes only, and an envelope with trace context |\n| TC-PLT-TE006-CON-13 | AC14, BR8 | Contract | A backward-compatible schema change accepted and a breaking change refused without a new major version |\n| TC-PLT-TE006-CON-14 | AC15, BR9 | Contract | The recipient list and the retry windows read from configuration |"
+    },
+    {
+     "old": "- The retry values as a business decision: DL11, and the conflict recorded in GAP-1416.",
+     "new": "- The retry values as a business decision: DL11, and the conflict recorded in GAP-1416.\n- Open decision DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863): the decision is still open.\n- Open decision DL11 (assumptions ASM-0553, ASM-0703, ASM-1051, ASM-1104): the decision is still open."
+    }
+   ],
+   "findings": [],
+   "stage": "notapplied",
+   "unit": "u01"
+  },
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 0
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22914",
+     "item": "GAP-0382",
+     "status": "Not applied",
+     "section": "7, 12, 16",
+     "target": "",
+     "change": "",
+     "note": "Fix edits sections 7, 12 and 16, whose text is not in this chunk. No exact old text was supplied, so nothing was edited. Re-run with those parts."
+    },
+    {
+     "ruling": "R-22915",
+     "item": "GAP-1415",
+     "status": "Not applied",
+     "section": "3, 4, 5, 12",
+     "target": "",
+     "change": "",
+     "note": "Retry ladder, relay and exception-path text is in sections 3, 4, 5 and 12, none of which is in this chunk. No exact old text was supplied, so nothing was edited."
+    },
+    {
+     "ruling": "R-23293",
+     "item": "GAP-1401",
+     "status": "Not applied",
+     "section": "12.7",
+     "target": "",
+     "change": "",
+     "note": "Section 12.7 holds the schema, error-map source and scope lines, and is not in this chunk. No exact old text was supplied, so nothing was edited."
+    }
+   ],
+   "edits": [],
+   "findings": [],
+   "stage": "notapplied",
+   "unit": "u02"
+  },
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 16
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "DOR-RWB-PLT-TE006-CON-12",
+     "item": "Definition of Ready item 12 Test cases: Partial",
+     "status": "Resolved",
+     "section": "12.7, 16",
+     "target": "",
+     "change": "Added TC-PLT-TE006-CON-15 (boundary test for the §12.7 tables, ASM-3438) in section 16.",
+     "note": "Boundary test row renumbered to TC-PLT-TE006-CON-15 to clear the duplicate ID."
+    },
+    {
+     "ruling": "NEWAC-RWB-PLT-TE006-CON-AC7",
+     "item": "AC7: §8 BR1 to BR9 have no criterion and no test",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "AC7 to AC15 added in section 7, one per rule BR1 to BR9, with test rows TC-PLT-TE006-CON-06 to -14.",
+     "note": "Combined duplicate AC7 removed. Data not specified in source documents."
+    },
+    {
+     "ruling": "NEWAC-RWB-PLT-TE006-CON-AC8",
+     "item": "AC8: a status change the model does not allow is refused",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "AC16 added in section 7 for a refused disallowed status change; test row TC-PLT-TE006-CON-16 added.",
+     "note": "Renumbered from AC8 to AC16 to clear the duplicate. Test text is a placeholder: Not specified in the source documents."
+    }
+   ],
+   "edits": [
+    {
+     "old": "Scenario: AC7 The outbox row and its deliveries share the caller's transaction (BR1) (new, D-RCV-60)",
+     "new": "Scenario: AC7 The outbox row and its deliveries share the caller's transaction (BR1)"
+    },
+    {
+     "old": "Scenario: AC8 The event carries a CloudEvents id and a repeat is dropped (BR2) (new, D-RCV-60)",
+     "new": "Scenario: AC8 The event carries a CloudEvents id and a repeat is dropped (BR2)"
+    },
+    {
+     "old": "Scenario: AC9 Delivery is at least once with one consumer group and one delivery state per recipient (BR3) (new, D-RCV-60)",
+     "new": "Scenario: AC9 Delivery is at least once with one consumer group and one delivery state per recipient (BR3)"
+    },
+    {
+     "old": "Scenario: AC10 Events for one case reach each recipient in write order by caseId (BR4) (new, D-RCV-60)",
+     "new": "Scenario: AC10 Events for one case reach each recipient in write order by caseId (BR4)"
+    },
+    {
+     "old": "Scenario: AC11 A failed record climbs the retry topics and then reaches the dead-letter topic with one alert (BR5) (new, D-RCV-60)",
+     "new": "Scenario: AC11 A failed record climbs the retry topics and then reaches the dead-letter topic with one alert (BR5)"
+    },
+    {
+     "old": "Scenario: AC12 The library raises no case event, no task and no decision record (BR6) (new, D-RCV-60)",
+     "new": "Scenario: AC12 The library raises no case event, no task and no decision record (BR6)"
+    },
+    {
+     "old": "Scenario: AC13 Payloads hold references and codes only and carry the schema version and trace context (BR7) (new, D-RCV-60)",
+     "new": "Scenario: AC13 Payloads hold references and codes only and carry the schema version and trace context (BR7)"
+    },
+    {
+     "old": "Scenario: AC14 A contract change is backward compatible or a new major version with a migration note (BR8) (new, D-RCV-60)",
+     "new": "Scenario: AC14 A contract change is backward compatible or a new major version with a migration note (BR8)"
+    },
+    {
+     "old": "Scenario: AC15 The recipient list, the owners and the retry windows are configuration (BR9) (new, D-RCV-60)",
+     "new": "Scenario: AC15 The recipient list, the owners and the retry windows are configuration (BR9)"
+    },
+    {
+     "old": "  Scenario: AC7 The section 8 business rules hold\n    Given a service applies the library and writes a change with its event\n    When the change and the event are committed through the library\n    Then the outbox row and its deliveries are written in the caller's transaction and schema (BR1)\n    Then each event carries a CloudEvents id and an idempotency key unique in the caller's outbox (BR2)\n    Then each recipient has its own consumer group and its own delivery state with at-least-once delivery (BR3)\n    Then events for one case are ordered through the caseId record key (BR4)\n    Then a failed record climbs the retry topics at 1 min, 10 min and 1 h and then goes to the dead-letter topic with one alert (BR5)\n    Then the library raises no case event, no task and no decision record (BR6)\n    Then payloads hold references and codes and no personal data, and the event carries its schema version (BR7)\n    Then a contract change is backward compatible in the registry and a breaking change is a new major version with a migration note (BR8)\n    Then the recipient list, the owners and the retry windows are read from configuration and never from library code (BR9)\n\n  Scenario: AC8 A disallowed status change is refused",
+     "new": "  Scenario: AC16 A disallowed status change is refused"
+    },
+    {
+     "old": "| TC-PLT-TE006-CON-06 | AC2 | Component |",
+     "new": "| TC-PLT-TE006-CON-15 | AC2 | Component |"
+    },
+    {
+     "old": "| TC-PLT-TE006-CON-07 | AC7 | Contract | Not specified in the source documents (NEWAC-RWB-PLT-TE006-CON-AC7) |\n| TC-PLT-TE006-CON-08 | AC8 | Component | Not specified in the source documents (NEWAC-RWB-PLT-TE006-CON-AC8) |",
+     "new": "| TC-PLT-TE006-CON-16 | AC16 | Component | Not specified in the source documents (NEWAC-RWB-PLT-TE006-CON-AC8) |\n| TC-PLT-TE006-CON-17 | Event and Schedule boundary | Contract | No outbox producer, consumer, inbox row or Schedule is created by this slice |"
+    },
+    {
+     "old": "Platform H rows added by the pattern table:",
+     "new": "Platform contracts added by the pattern table (wave 0 shared baseline):"
+    },
+    {
+     "old": "in this slice; DP09 and DP10 are prohibitions here (GAP-1899) |",
+     "new": "in this slice (GAP-1899) |"
+    },
+    {
+     "old": "Azure Event Hubs Premium fallback; dedicated topics and ACLs reserved in wave 0 (GAP-0011) |",
+     "new": "Azure Event Hubs Premium fallback (GAP-0011) |"
+    },
+    {
+     "old": "- Open decision DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863): the decision is still open.\n- Open decision DL11 (assumptions ASM-0553, ASM-0703, ASM-1051, ASM-1104): the decision is still open.",
+     "new": ""
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "NEWAC-RWB-PLT-TE006-CON-AC7",
+     "kind": "forbidden",
+     "issue": "Scenario headings AC7 to AC15 carry the decision ID '(new, D-RCV-60)' in the story text, which the directive forbids."
+    },
+    {
+     "ruling": "NEWAC-RWB-PLT-TE006-CON-AC8",
+     "kind": "wrong",
+     "issue": "AC7 and AC8 are each used twice in section 7. The combined 'section 8 business rules' scenario duplicates AC7 to AC15, and the disallowed-status scenario reuses AC8."
+    },
+    {
+     "ruling": "NEWAC-RWB-PLT-TE006-CON-AC7",
+     "kind": "wrong",
+     "issue": "Test IDs TC-06, TC-07 and TC-08 are each used twice. The AC2, AC7 and AC8 rows clash with the BR test rows."
+    },
+    {
+     "ruling": "GAP-2354",
+     "kind": "wrong",
+     "issue": "Body text calls the platform contracts 'Platform H rows', contradicting the header label 'wave 0, not H'."
+    },
+    {
+     "ruling": "GAP-1899",
+     "kind": "invented",
+     "issue": "Boundary row adds 'DP09 and DP10 are prohibitions here', which the disposition does not state."
+    },
+    {
+     "ruling": "GAP-0011",
+     "kind": "invented",
+     "issue": "External dependencies row claims topics and ACLs are reserved in wave 0, which the hosting-not-confirmed note does not support."
+    },
+    {
+     "ruling": "DOR-RWB-PLT-TE006-CON-18",
+     "kind": "wrong",
+     "issue": "DL10 and DL11 lines were added with 'still open' claims, though the disposition is Not applied because section 19 text is absent."
+    },
+    {
+     "ruling": "GAP-1899",
+     "kind": "incomplete",
+     "issue": "Disposition says a boundary test row sits in section 16, but no such row exists."
+    },
+    {
+     "ruling": "NEWAC-RWB-PLT-TE006-CON-AC8",
+     "kind": "wrong",
+     "issue": "Placeholder test row for AC8 reuses an ID and the disallowed-status criterion lacks a unique AC ID."
+    },
+    {
+     "ruling": "DOR-RWB-PLT-TE006-CON-12",
+     "kind": "wrong",
+     "issue": "Disposition cites TC-PLT-TE006-CON-06 for the boundary test, but that ID now belongs to the AC7 BR1 row."
+    }
+   ],
+   "stage": "audit",
+   "unit": "audit"
+  }
+ ],
+ "opus_findings": 10,
+ "lint_after": "- none"
+}

@@ -1,0 +1,95 @@
+{
+ "edits": [
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Ownership and boundary rules hold\n    Given the rwb-source-data, rwb-treatment and rwb-case contract stubs are in place\n    When the run reads the receipt and the rental, and the same fact is presented twice\n    Then no v_ace_* view or ACE table is read, and no rental, debit or arrears rule is evaluated\n    Then no task, case state or notice is written, and the repeat of the same fact writes once, records once, publishes once and is counted\n\n  Scenario: AC4 Error answers of the provided operations\n    Given a caller without a valid credential, a caller without the right, and a request for an unknown identifier\n    When each caller calls a provided operation\n    Then the operation answers 401, 403 and 404 respectively\n\n  Scenario: AC5 Replay of a write with the same Idempotency-Key\n    Given a write has been accepted once with its Idempotency-Key\n    When the same write is replayed with the same Idempotency-Key\n    Then the write is not repeated, no second row or record is written, no second event is published, and the repeat is counted\n\n  Scenario: AC6 Duplicate delivery of a consumed event\n    Given a consumed event has been processed once through the inbox\n    When the same event is redelivered\n    Then it is acted on once and the redelivery is counted\n\n  Scenario: AC7 Activity retry and timeout\n    Given an activity of the run has timed out before it committed\n    When the activity is retried\n    Then at most one row, one record and one event are written for the fact\n\n  Scenario: AC8 A consumed call fails or does not answer\n    Given the rwb-source-data or rwb-treatment call fails or does not answer\n    When the run reads the receipt or the rental\n    Then no row, record or event is written for that rental\n\n  Scenario: AC9 A disallowed status change is refused\n    Given a status change that the state model does not allow for the proceeds row\n    When the change is requested\n    Then the change is refused and nothing changes"
+  },
+  {
+   "old": "| TC-E4-048-13 | BR11; the auto-debit instruction is not written by this story, which collects, matches and follows up | Component | A rental whose auto-debit instruction sits in rwb-treatment |",
+   "new": "| TC-E4-048-13 | BR11; the auto-debit instruction is not written by this story, which collects, matches and follows up | Component | A rental whose auto-debit instruction sits in rwb-treatment |\n| TC-E4-048-14 | AC3 (BR5, BR6, BR7, BR9, BR10, BR11); the ownership and boundary rules hold on each run and the repeat is counted | Component | The rwb-source-data, rwb-treatment and rwb-case contract stubs of TC-E4-048-08 to TC-E4-048-10 |\n| TC-E4-048-15 | AC4; the provided operations answer 401, 403 and 404 on their error cases | Component | Not specified in the source documents (NEWAC-RWB-P8-E4048-APP-AC4) |\n| TC-E4-048-16 | AC5 (BR9); a replay of a write with the same Idempotency-Key writes, records and publishes nothing again | Component | Not specified in the source documents (NEWAC-RWB-P8-E4048-APP-AC5) |\n| TC-E4-048-17 | AC6 (BR9); a redelivered consumed event is acted on once | Component | Not specified in the source documents (NEWAC-RWB-P8-E4048-APP-AC6) |\n| TC-E4-048-18 | AC7; a retried or timed-out activity writes at most one row, one record and one event | Component | Not specified in the source documents (NEWAC-RWB-P8-E4048-APP-AC7) |\n| TC-E4-048-19 | AC8; a failed or unanswered consumed call writes no row, record or event | Component | Not specified in the source documents (NEWAC-RWB-P8-E4048-APP-AC8) |\n| TC-E4-048-20 | AC9; a disallowed status change is refused and nothing changes | Component | Not specified in the source documents (NEWAC-RWB-P8-E4048-APP-AC9) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29021",
+   "item": "GAP-1382",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Temporal and Drools Design",
+   "change": "Name the rental collection workflow as a local baseline choice and read the arrears threshold from the package version in force announced on RulePackageInForce until rwb-decision names the package code",
+   "note": "Fix lies in the design baseline; story BR6 already keeps the arrears limit with rwb-treatment and evaluates neither rule."
+  },
+  {
+   "ruling": "R-29022",
+   "item": "GAP-2525",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR11 already places the auto-debit instruction with FEAT-TRT-16 in rwb-treatment; this story collects, matches and follows up. No edit needed."
+  },
+  {
+   "ruling": "R-31646",
+   "item": "NEWAC-RWB-P8-E4048-APP-AC3",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC3 scenario for BR5, BR6, BR7, BR9, BR10, BR11 and TC-E4-048-14 linked to the existing stubs of TC-08 to TC-10.",
+   "note": "AC3 added in section 7 with TC-E4-048-14 in section 16; boundary rules use the existing contract stubs."
+  },
+  {
+   "ruling": "R-31647",
+   "item": "NEWAC-RWB-P8-E4048-APP-AC4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC4 scenario for 401, 403 and 404 answers and TC-E4-048-15.",
+   "note": "AC4 added for 401, 403 and 404 answers; test data not specified in the source documents and recorded as such."
+  },
+  {
+   "ruling": "R-31648",
+   "item": "NEWAC-RWB-P8-E4048-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC5 scenario for replay with the same Idempotency-Key and TC-E4-048-16.",
+   "note": "AC5 added for idempotent replay; test data not specified in the source documents and recorded as such."
+  },
+  {
+   "ruling": "R-31649",
+   "item": "NEWAC-RWB-P8-E4048-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC6 scenario for duplicate delivery of a consumed event and TC-E4-048-17.",
+   "note": "AC6 added for redelivered events; test data not specified in the source documents and recorded as such."
+  },
+  {
+   "ruling": "R-31650",
+   "item": "NEWAC-RWB-P8-E4048-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 scenario for activity retry and timeout and TC-E4-048-18.",
+   "note": "AC7 added for retry and timeout; test data not specified in the source documents and recorded as such."
+  },
+  {
+   "ruling": "R-31651",
+   "item": "NEWAC-RWB-P8-E4048-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 scenario for a failed or unanswered consumed call and TC-E4-048-19.",
+   "note": "AC8 added for failed consumed calls; test data not specified in the source documents and recorded as such."
+  },
+  {
+   "ruling": "R-31652",
+   "item": "NEWAC-RWB-P8-E4048-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 scenario for a disallowed status change and TC-E4-048-20.",
+   "note": "AC9 added for refused disallowed transitions; test data not specified in the source documents and recorded as such."
+  }
+ ]
+}

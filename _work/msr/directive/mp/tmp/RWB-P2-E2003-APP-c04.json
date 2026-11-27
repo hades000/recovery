@@ -1,0 +1,88 @@
+{
+ "edits": [
+  {
+   "old": "Given \"C-0410\" holds a revolving credit line \"A-0411\" with status \"ACTIVE\" and a personal loan \"A-0412\" with status \"DELINQUENT\" in v_ace_party_product, both with data as of 2026-12-14",
+   "new": "Given \"C-0410\" holds a revolving credit line \"A-0411\" with status \"ACTIVE\" and a personal loan \"A-0412\" with status \"DELINQUENT\", both with data as of 2026-12-14"
+  },
+  {
+   "old": "Given v_ace_party_product holds no row for 2026-12-14 and its last rows are for 2026-12-13",
+   "new": "Given the DP02 holding has no row for 2026-12-14 and its last rows are for 2026-12-13"
+  },
+  {
+   "old": "The mention of `v_ace_party_product` in AC1 and AC2 is the legacy wording kept verbatim; the view is read by rwb-source-data, and this story sees only its contract (GAP-0662; ASM-1149).",
+   "new": "The Givens of AC1 and AC2 read the rwb-source-data contract only; the view v_ace_party_product is read by rwb-source-data, and this story sees only its contract (GAP-0662; ASM-1149)."
+  },
+  {
+   "old": "AC1 to AC7 are the criteria this story owns; every value of AC1 to AC6 is copied unchanged from the legacy story, and AC7 is new for the realignment (X6).",
+   "new": "AC1 to AC9 are the criteria this story owns; every value of AC1 to AC6 is copied unchanged from the legacy story, AC7 is new for the realignment (X6), and AC8 and AC9 are new for D-RCV-60."
+  },
+  {
+   "old": "Then nothing is read, shown or logged as a product read",
+   "new": "Then nothing is read, shown or logged as a product read\n\n  Scenario: AC8 Rules BR6, BR7 and BR9 hold on every read (new, D-RCV-60)\n    Given the rwb-source-data contract mock returns product \"A-0411\" with a status code that is not in LOV-PRODUCT-STATUS\n    When the view loads\n    Then the product status code is held on the data quality break list\n    Then nothing is written to rwb_integration and the holding is read again on the next request\n    Then the read writes no row, decision record, event or workflow; its only write is the PII access event\n\n  Scenario: AC9 Error answers 401 and 403 (new, D-RCV-60)\n    Given the caller has no session\n    When the caller calls GET /cases/{caseId}/customer-products\n    Then the response is 401 with message MSG-P4-001\n    Then a caller without the Case record right gets 403 with message MSG-P4-002"
+  },
+  {
+   "old": "| TC-E2-003-12 | BR11 | Component | Flag rwb.integration.customer-products off: panel hidden and endpoint answers with an error |",
+   "new": "| TC-E2-003-12 | BR11 | Component | Flag rwb.integration.customer-products off: panel hidden and endpoint answers with an error |\n| TC-E2-003-13 | AC8, BR6, BR7, BR9 | Component | Product status code not in LOV-PRODUCT-STATUS is held on the data quality break list; the read writes no row, decision record, event or workflow |\n| TC-E2-003-14 | AC9 | Component | Caller without a session gets 401 with MSG-P4-001; role RW-REFADM without the Case record right gets 403 with MSG-P4-002 |"
+  },
+  {
+   "old": "TC-E2-003-01 to TC-E2-003-12 are the ones this story runs",
+   "new": "TC-E2-003-01 to TC-E2-003-14 are the ones this story runs"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29343",
+   "item": "ACR-RWB-P2-E2003-APP-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 Given no longer reads v_ace_party_product; the rwb-source-data mock Given carries the products. Section 7 note updated."
+  },
+  {
+   "ruling": "R-29344",
+   "item": "ACR-RWB-P2-E2003-APP-AC2",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC2 Given now reads the DP02 holding through the rwb-source-data contract, not v_ace_party_product. Section 7 note updated."
+  },
+  {
+   "ruling": "R-30455",
+   "item": "NEWAC-RWB-P2-E2003-APP-AC10",
+   "status": "Not applied",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Story defines no status change: its read writes nothing (BR9) and no transition model exists, so no criterion can be written from the sources."
+  },
+  {
+   "ruling": "R-30456",
+   "item": "NEWAC-RWB-P2-E2003-APP-AC7",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X6 is covered by AC7 in section 5, and AC7 is covered by TC-E2-003-07 in section 16. No story change needed."
+  },
+  {
+   "ruling": "R-30457",
+   "item": "NEWAC-RWB-P2-E2003-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 added with TC-E2-003-13 for BR6, BR7, BR9. BR8, BR10, BR12 stay with TC-08 and TC-09; BR11 with TC-12."
+  },
+  {
+   "ruling": "R-30458",
+   "item": "NEWAC-RWB-P2-E2003-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added: no session gives 401 with MSG-P4-001; no Case record right gives 403 with MSG-P4-002. Test row TC-E2-003-14."
+  }
+ ]
+}

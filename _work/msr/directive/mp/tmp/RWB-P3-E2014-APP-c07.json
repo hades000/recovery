@@ -1,0 +1,58 @@
+{
+ "edits": [
+  {
+   "old": "These eight criteria are the ones this slice owns;",
+   "new": "These criteria are the ones this slice owns;"
+  },
+  {
+   "old": "    Then the event is redelivered and the task is raised once when the library answers",
+   "new": "    Then the event is redelivered and the task is raised once when the library answers\n\n  Scenario: AC11 No business value is written in code and no postal address value leaves the service (new, D-RCV-60)\n    Given the rwb-decision contract mock publishes rwb.decision.ApprovalRefused.v1 for approval \"A-0201\", notice \"N-0201\" and case \"RW-2026-000123\" with final call \"REFUSED\"\n    When the case router reads the event\n    Then the task code, element type, task status, owner role, assignment reason and due time are read from reference data with the version in force\n    Then the panel, the task, the record and the timeline item carry the postal address as the field \"POSTAL_ADDRESS\" and no value of it\n    Given the rwb-decision contract mock publishes an outcome event for case \"RW-2026-000999\" in status \"CLOSED\"\n    When the case router reads the event\n    Then no task is raised on that case and the mismatch is recorded\n\n  Scenario: AC12 The provided operations answer 401 without a valid credential (new, D-RCV-60)\n    Given the caller holds no valid credential\n    When the composite route calls GET /api/recovery/case/v1/cases/RW-2026-000123\n    Then the call is refused with status 401\n    Then the answer carries no case fact\n\n  Scenario: AC13 A retried or timed-out activity raises no second task (new, D-RCV-60)\n    Given the rwb-decision contract mock publishes rwb.decision.ApprovalRefused.v1 for approval \"A-0201\", notice \"N-0201\" and case \"RW-2026-000123\" with final call \"REFUSED\"\n    When the activity is retried after a stale case version is met at commit\n    Then the activity retries and the case still has exactly one open redress task\n    When the activity times out before its commit\n    Then no task, no assignment row and no outbox row is written and the event is redelivered\n\n  Scenario: AC14 A consumed call that fails or does not answer is refused and reads no fact (new, D-RCV-60)\n    Given the rwb-access contract mock does not answer for area \"Case record\", right \"R\" and case \"RW-2026-000123\"\n    When \"U-9212\" opens the case facts panel of case \"RW-2026-000123\"\n    Then the call is refused and no case fact is read\n    Given the rwb-source-data contract mock fails for the total balance of case \"RW-2026-000123\"\n    When \"U-9212\" opens the case facts panel of case \"RW-2026-000123\"\n    Then the answer carries no total balance and the failure is recorded with the case and the call"
+  },
+  {
+   "old": "| TC-E2-014-14 | BR9, BR10, BR11 | Component | Closed case `RW-2026-000999` as in TC-E2-014-12; the task code, status and role are read from reference data with the version in force, and no postal address value is in the panel or the task |",
+   "new": "| TC-E2-014-14 | BR9, BR10, BR11 | Component | Closed case `RW-2026-000999` as in TC-E2-014-12; the task code, status and role are read from reference data with the version in force, and no postal address value is in the panel or the task |\n| TC-E2-014-15 | AC11, BR9, BR10, BR11 | Component | Refused notice `N-0201` on case `RW-2026-000123` as in AC11; the task code, element type, status, role, reason and due time are read from reference data, and the postal address is named and never valued |\n| TC-E2-014-16 | AC12, BR3 | Contract | Caller without a valid credential calls GET /api/recovery/case/v1/cases/RW-2026-000123; 401 is answered and no case fact is in the answer |\n| TC-E2-014-17 | AC13, BR6, BR8 | NFR | Activity retried after a stale case version and activity timed out before commit on the refusal of `N-0201`; at most one open task, and no task, assignment or outbox row from the timed-out attempt |\n| TC-E2-014-18 | AC14, BR3 | Contract | rwb-access does not answer and rwb-source-data fails for the total balance; no case fact is answered and the failure is recorded |"
+  },
+  {
+   "old": "TC-E2-014-13 and TC-E2-014-14 are this story's own cases for the table boundary and for BR9 to BR11.",
+   "new": "TC-E2-014-13 to TC-E2-014-18 are this story's own cases for the table boundary, for BR9 to BR11 and for AC11 to AC14."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30686",
+   "item": "NEWAC-RWB-P3-E2014-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 covering BR9 to BR11 in section 7 and test row TC-E2-014-15 in section 16."
+  },
+  {
+   "ruling": "R-30687",
+   "item": "NEWAC-RWB-P3-E2014-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for 401 without a valid credential in section 7 and test row TC-E2-014-16 in section 16."
+  },
+  {
+   "ruling": "R-30688",
+   "item": "NEWAC-RWB-P3-E2014-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 for a retried or timed-out activity in section 7 and test row TC-E2-014-17 in section 16."
+  },
+  {
+   "ruling": "R-30689",
+   "item": "NEWAC-RWB-P3-E2014-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for a failed or unanswered consumed call in section 7 and test row TC-E2-014-18 in section 16."
+  }
+ ]
+}

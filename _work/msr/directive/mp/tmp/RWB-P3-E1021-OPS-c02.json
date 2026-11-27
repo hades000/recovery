@@ -1,0 +1,228 @@
+{
+ "edits": [
+  {
+   "old": "| ID | Situation | What the deployment does |\n|---|---|---|",
+   "new": "| ID | Situation | What the deployment does | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| D1 | The migration job fails | The release stops before the new pods; the old pods keep serving; the job log names the failing script |",
+   "new": "| D1 | The migration job fails | The release stops before the new pods; the old pods keep serving; the job log names the failing script | AC5 |"
+  },
+  {
+   "old": "| D2 | The worker crash-loops on the task queue | The rollout is held by the readiness gate; the previous worker keeps polling; an alert fires on the restart count |",
+   "new": "| D2 | The worker crash-loops on the task queue | The rollout is held by the readiness gate; the previous worker keeps polling; an alert fires on the restart count | AC2 |"
+  },
+  {
+   "old": "| D3 | A package version is not in force in SIT | `NoPackageInForce` is non-retryable; the alert counts it; the event stays on the inbound topic for redelivery once a version is in force (MSG-P3-027) |",
+   "new": "| D3 | A package version is not in force in SIT | `NoPackageInForce` is non-retryable; the alert counts it; the event stays on the inbound topic for redelivery once a version is in force (MSG-P3-027) | AC2, AC4 |"
+  },
+  {
+   "old": "| D4 | The dead-letter topic grows | An alert fires on the rate and the depth; the runbook gives the drain and replay steps |",
+   "new": "| D4 | The dead-letter topic grows | An alert fires on the rate and the depth; the runbook gives the drain and replay steps | AC3, AC4 |"
+  },
+  {
+   "old": "| D5 | The topic does not exist at release time | The release creates it; if creation is refused by policy, the release fails before the worker starts, and the operator raises it to the platform team |",
+   "new": "| D5 | The topic does not exist at release time | The release creates it; if creation is refused by policy, the release fails before the worker starts, and the operator raises it to the platform team | AC3 |"
+  },
+  {
+   "old": "| D6 | A rollout changes the workflow code | The replay gate compares the build ID; a non-deterministic change is refused and the previous build ID keeps polling |",
+   "new": "| D6 | A rollout changes the workflow code | The replay gate compares the build ID; a non-deterministic change is refused and the previous build ID keeps polling | AC2 |"
+  },
+  {
+   "old": "| D7 | The flag is switched on before the migration | The release order puts the migration before the flag; the flag is a release step, not a chart value, so it cannot precede the migration |",
+   "new": "| D7 | The flag is switched on before the migration | The release order puts the migration before the flag; the flag is a release step, not a chart value, so it cannot precede the migration | AC5 |"
+  },
+  {
+   "old": "| D8 | The decision-record topic is unavailable | The record write and the state change fail together (R-UNI-39) and the activity is retried; the alert on the outbox backlog covers it |",
+   "new": "| D8 | The decision-record topic is unavailable | The record write and the state change fail together (R-UNI-39) and the activity is retried; the alert on the outbox backlog covers it | AC3, AC4 |"
+  },
+  {
+   "old": "    Then every topic name comes from the naming library and none is typed in a template",
+   "new": "    Then every topic name comes from the naming library and none is typed in a template\n    Then the route-decided trigger of TRF-002 is asserted as the route-decided fact that rwb-case commits on rwb.case.CaseStateChanged.v1 in wave 1; the RouteDecided announcement of rwb-valuation is asserted separately in wave 3 (assumption, GAP-0346)"
+  },
+  {
+   "old": "    Then a dry run of the runbook in SIT is signed off with the case numbers it used",
+   "new": "    Then a dry run of the runbook in SIT is signed off with the case numbers it used\n\n  Scenario: AC6 The rule package is fetched by the kit and no rule table is shipped (new, D-RCV-60)\n    Given the image and the chart of rwb-case version 1\n    When both are read\n    Then no rule table and no rule package is in the image or the chart\n    Then the package version is fetched and checksum-verified by the kit at start (DP-04; D-RCV-36 T5)\n\n  Scenario: AC7 The record and the state change commit in one transaction (new, D-RCV-60)\n    Given a transfer whose decision-record write fails in SIT\n    When the transfer is attempted\n    Then the case and its open assignment are unchanged and the case is not moved (R-UNI-39)\n\n  Scenario: AC8 A repeated POST is answered from the stored response of its Idempotency-Key (new, D-RCV-60)\n    Given the rendered api deployment\n    When a transfer POST is repeated with the same Idempotency-Key\n    Then the second answer is the stored response of the first and no second transfer is made\n    Then the store is provided by the platform library and the chart declares no store (Architecture v5 slide 11; TSD P3 API-P3-006)"
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| BR1 | The transfer activity retries with 1 s initial interval, back-off 2 and 10 attempts; `NoPackageInForce` is non-retryable | Temporal and Drools design, slide 14 |",
+   "new": "| BR1 | The transfer activity retries with 1 s initial interval, back-off 2 and 10 attempts; `NoPackageInForce` is non-retryable | Temporal and Drools design, slide 14 | AC2; TC-P3-E1021-OPS-02 |"
+  },
+  {
+   "old": "| BR2 | The rule package version is fetched and checksum-verified by the kit; the deployment never ships a rule table | DP-04; D-RCV-36 T5 |",
+   "new": "| BR2 | The rule package version is fetched and checksum-verified by the kit; the deployment never ships a rule table | DP-04; D-RCV-36 T5 | AC6; TC-P3-E1021-OPS-08 |"
+  },
+  {
+   "old": "| BR3 | The record and the state change commit in one transaction; a failure leaves the case unchanged | R-UNI-39 |",
+   "new": "| BR3 | The record and the state change commit in one transaction; a failure leaves the case unchanged | R-UNI-39 | AC7; TC-P3-E1021-OPS-09 |"
+  },
+  {
+   "old": "| BR4 | Topic and event names follow the naming rule; retry and dead-letter topics are created with the topic | DP-09; DP-14 |",
+   "new": "| BR4 | Topic and event names follow the naming rule; retry and dead-letter topics are created with the topic | DP-09; DP-14 | AC3; TC-P3-E1021-OPS-03 |"
+  },
+  {
+   "old": "| BR5 | The capability is switched by `rwb.p3.transfer`; off means no rule transfer and 404 on the two operations | RWB-E1-021, section 13 |",
+   "new": "| BR5 | The capability is switched by `rwb.p3.transfer`; off means no rule transfer and 404 on the two operations | RWB-E1-021, section 13 | AC5; TC-P3-E1021-OPS-05 |"
+  },
+  {
+   "old": "| BR6 | The migration is forward-only and runs before the new pods | DP-15 |",
+   "new": "| BR6 | The migration is forward-only and runs before the new pods | DP-15 | AC5; TC-P3-E1021-OPS-05 |"
+  },
+  {
+   "old": "| BR7 | No credential, host name or business value is in a template | BR-P3-010; security baseline |",
+   "new": "| BR7 | No credential, host name or business value is in a template | BR-P3-010; security baseline | AC1; TC-P3-E1021-OPS-01 |"
+  },
+  {
+   "old": "| BR8 | The Temporal timer replaces the legacy timer job inside the workflow; no new Schedule is created for the transfer | The timer ruling in the Ownership Map; RWB-P3-E1028-CON |",
+   "new": "| BR8 | The Temporal timer replaces the legacy timer job inside the workflow; no new Schedule is created for the transfer | The timer ruling in the Ownership Map; RWB-P3-E1028-CON | AC2; TC-P3-E1021-OPS-02 |"
+  },
+  {
+   "old": "| BR9 | A repeated POST is answered from the stored response of its `Idempotency-Key`; the platform library provides the store | Architecture v5 slide 11; TSD P3 API-P3-006 |",
+   "new": "| BR9 | A repeated POST is answered from the stored response of its `Idempotency-Key`; the platform library provides the store | Architecture v5 slide 11; TSD P3 API-P3-006 | AC8; TC-P3-E1021-OPS-10 |"
+  },
+  {
+   "old": "| Item | Value | Source |\n|---|---|---|",
+   "new": "| Item | Value | Source | BR Field ID |\n|---|---|---|---|"
+  },
+  {
+   "old": "| Schema | `rwb_case` | Template and Rules §R4 |",
+   "new": "| Schema | `rwb_case` | Template and Rules §R4 | BR6 |"
+  },
+  {
+   "old": "| Migration applied | `V1021_1__transfer.sql` | RWB-E1-021 section 13, adapted to the per-service sequence |",
+   "new": "| Migration applied | `V1021_1__transfer.sql` | RWB-E1-021 section 13, adapted to the per-service sequence | BR6 |"
+  },
+  {
+   "old": "| Tables touched by the migration | `recovery_case` (status_before_hold), `assignment` (transfer_reason_code, the partial unique index), `processed_event` | RWB-E1-021 section 13 |",
+   "new": "| Tables touched by the migration | `recovery_case` (status_before_hold), `assignment` (transfer_reason_code, the partial unique index), `processed_event` | RWB-E1-021 section 13 | BR3 |"
+  },
+  {
+   "old": "| Topic owned | `rwb.case.events.v1` with retry and dead-letter | DP-09, DP-14 |",
+   "new": "| Topic owned | `rwb.case.events.v1` with retry and dead-letter | DP-09, DP-14 | BR4 |"
+  },
+  {
+   "old": "| Topic consumed | `rwb.decision-record.v1` | DP-03 |",
+   "new": "| Topic consumed | `rwb.decision-record.v1` | DP-03 | BR3 |"
+  },
+  {
+   "old": "| Temporal | Namespace `rwb-recovery`, task queue `rwb-case` | Template and Rules §R4 |",
+   "new": "| Temporal | Namespace `rwb-recovery`, task queue `rwb-case` | Template and Rules §R4 | BR1 |"
+  },
+  {
+   "old": "| Secret | The credential of the rwb-case login (DP-02), by reference only; its name is Not specified in the source documents (GAP-0688; ASM-1235) | DP-02 |",
+   "new": "| Secret | The credential of the rwb-case login (DP-02), by reference only; its name is Not specified in the source documents (GAP-0688; ASM-1235) | DP-02 | BR7 |"
+  },
+  {
+   "old": "| Configuration keys | `transfer.enabled`, `transfer.taskQueue`, `transfer.retry.initialInterval`, `transfer.retry.backoff`, `transfer.retry.maxAttempts`, `transfer.retry.nonRetryable`, `outbox.relay.interval`, `alert.noPackageInForce.threshold` | This story |",
+   "new": "| Configuration keys | `transfer.enabled`, `transfer.taskQueue`, `transfer.retry.initialInterval`, `transfer.retry.backoff`, `transfer.retry.maxAttempts`, `transfer.retry.nonRetryable`, `outbox.relay.interval`, `alert.noPackageInForce.threshold` | This story | BR1, BR5 |"
+  },
+  {
+   "old": "| Feature flag | `rwb.p3.transfer` | RWB-E1-021 section 13 |",
+   "new": "| Feature flag | `rwb.p3.transfer` | RWB-E1-021 section 13 | BR5 |"
+  },
+  {
+   "old": "| TC-P3-E1021-OPS-05 | AC5 | NFR | The runbook dry run: migration, worker, api, smoke, flag on, one rule transfer, one manual transfer, flag off, rollback |",
+   "new": "| TC-P3-E1021-OPS-05 | AC5 | NFR | The runbook dry run: migration, worker, api, smoke, flag on, one rule transfer, one manual transfer, flag off, rollback |\n| TC-P3-E1021-OPS-06 | §12 operations, events and activities | Contract | Each operation, event and activity of section 12 checked against the rwb-case contract |\n| TC-P3-E1021-OPS-07 | §12.7 tables | Boundary | The migration against each table of section 12.7 at its boundary: the three added columns and index, the read tables unchanged, processed_event created in rwb_case (ASM-3438) |\n| TC-P3-E1021-OPS-08 | AC6 | NFR | A chart render and an image scan: no rule table or rule package; the kit fetch and checksum at start |\n| TC-P3-E1021-OPS-09 | AC7 | Integration | A forced decision-record write failure during a transfer in SIT: the case and its open assignment unchanged |\n| TC-P3-E1021-OPS-10 | AC8 | Integration | A repeated transfer POST with the same Idempotency-Key in SIT: one transfer, second answer equal to the first |"
+  },
+  {
+   "old": "| REQ-WKM-003 | A case is transferred or reassigned manually only with a reason code from the agreed list | Epic 2, work management | FEAT-CWC-10 | All recovery processes | VR-P3-010-1; DL23 | TC-P3-E1021-OPS-01, TC-P3-E1021-OPS-05 |",
+   "new": "| REQ-WKM-003 | A case is transferred or reassigned manually only with a reason code from the agreed list | Epic 2, work management | FEAT-CWC-10 | All recovery processes | VR-P3-010-1; DL23 (open; assumptions ASM-1232, ASM-1237, ASM-1259, ASM-1560 confirmed by directive 26 November 2026) | TC-P3-E1021-OPS-01, TC-P3-E1021-OPS-05 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15864",
+   "item": "DOR-RWB-P3-E1021-OPS-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add the role 'DevOps engineer' named in section 1, or give it a role code; no edit in this story",
+   "note": "Role name is a Users Roles and Permissions change. Story section 1 left as is."
+  },
+  {
+   "ruling": "R-15865",
+   "item": "DOR-RWB-P3-E1021-OPS-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16, 18",
+   "target": "Test Cases v8; RTM v7",
+   "change": "Register TC-P3-E1021-OPS-01 to -07 in Test Cases v8; align the section 18 test lists with RTM v7",
+   "note": "Story added contract TC-06 and boundary TC-07 to section 16. Registration and RTM alignment are cross-document."
+  },
+  {
+   "ruling": "R-15866",
+   "item": "DOR-RWB-P3-E1021-OPS-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "DL23 row lists assumptions ASM-1232, ASM-1237, ASM-1259, ASM-1560 as confirmed; decision stays open",
+   "note": "Each open decision now shows its assumptions as confirmed by the 26 November 2026 directive."
+  },
+  {
+   "ruling": "R-15867",
+   "item": "DOR-RWB-P3-E1021-OPS-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Section 5 gains a Covered by column tying each exception path to an acceptance criterion",
+   "note": "Each of D1 to D8 now names the AC IDs of section 7 that cover it."
+  },
+  {
+   "ruling": "R-15868",
+   "item": "DOR-RWB-P3-E1021-OPS-4",
+   "status": "Resolved",
+   "section": "8, 7, 16",
+   "target": "",
+   "change": "Section 8 gains Covered by column; new AC6 to AC8 in section 7 and TC-08 to TC-10 in section 16 for BR2, BR3, BR9",
+   "note": "BR1 to BR9 each map to a criterion and a test case."
+  },
+  {
+   "ruling": "R-15869",
+   "item": "DOR-RWB-P3-E1021-OPS-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 gains a BR Field ID column; each of the nine rows maps to a section 8 rule",
+   "note": "All nine data rows now carry a BR Field ID from section 8."
+  },
+  {
+   "ruling": "R-15870",
+   "item": "DOR-RWB-P3-E1021-OPS-8",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "Kafka Catalog v1",
+   "change": "Add P2 rwb-case as consumer of rwb.case.CaseStateChanged.v1 and of rwb.decision.ApprovalRequested.v1",
+   "note": "Both consumer registrations belong in Kafka Catalog v1. No story edit."
+  },
+  {
+   "ruling": "R-15871",
+   "item": "DOR-RWB-P3-E1021-OPS-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Standard v4 wording governs MSG-P3-027; section 14 then takes that same wording in place of its current text",
+   "note": "Standard wording is not in the source set here, so section 14 cannot be changed yet."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "BRD section 8.2",
+   "change": "State that Epic 1 stories keep the business-epic wave; delivery lead confirms the wave per story at build sequencing",
+   "note": "RWB-P3-E1021-OPS is rwb-case wave 1, not an affected service. No story edit."
+  },
+  {
+   "ruling": "R-22009",
+   "item": "GAP-0346",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC3 gains a Then line: route-decided trigger asserted on rwb.case.CaseStateChanged.v1 in wave 1; S1 announcement in wave 3 (assumption, GAP-0346)",
+   "note": "Trigger event recorded as an assumption; no value invented."
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+{
+ "edits": [
+  {
+   "old": "    Then the count and the amount of the payments of 2026-12-14 equal the count and the amount of the proceeds rows for 2026-12-14",
+   "new": "    Then the count and the amount of the payments of 2026-12-14 equal the count and the amount of the proceeds rows for 2026-12-14\n\n  Scenario: AC16 Proceeds row written in rwb_payment only (no legacy criterion; rule BR11)\n    Given payment \"PAY-90001\" matches the installment of \"T-0701\" on 2026-12-15\n    When JOB-07 writes the match\n    Then the proceeds row is written in rwb_payment\n    Then recovery_case, the route state and the assignment are answered by rwb-case and are not written by rwb-payment\n\n  Scenario Outline: AC17 Error answer of a provided operation (no legacy criterion; problem+json on every non-2xx status)\n    Given a request to a provided operation of rwb-payment with <condition>\n    When the request is sent\n    Then the answer is <status> with a problem+json body\n\n    Examples:\n      | condition | status |\n      | no valid credential | 401 |\n      | a valid credential without the grant the operation needs | 403 |\n      | a resource that does not exist | 404 |\n\n  Scenario: AC18 Replay of a write with the same idempotency key (no legacy criterion; rule BR13)\n    Given a write of rwb-payment was accepted under an idempotency key\n    When the same write is sent again under the same idempotency key\n    Then the second request gets the answer of the first\n    Then no second proceeds row and no second outbox row are written\n\n  Scenario: AC19 Duplicate delivery of a consumed event (no legacy criterion; rule BR6)\n    Given the rwb-source-data AceDataReady fake delivered the ALS business date 2026-12-15 and JOB-07 consumed it\n    When the same AceDataReady event is delivered again\n    Then no second matching run is started for 2026-12-15\n    Then no second ProceedsMatched or PaymentMissed is written\n\n  Scenario: AC20 Activity retries exhausted without an answer (no legacy criterion; exception X8)\n    Given the rwb-case open-case fake does not answer within 2 s on any of the 10 attempts\n    When JOB-07 runs for business date 2026-12-14\n    Then the activity stops after the 10th attempt on the workflow policy\n    Then nothing is written\n\n  Scenario: AC21 Status change the model does not allow is refused (no legacy criterion; status model of rwb-case)\n    Given plan \"T-0701\" is in state \"PLAN_CURE_PERIOD\"\n    When a movement of plan \"T-0701\" is requested that the status model of rwb-case does not allow\n    Then the movement is refused with a problem+json answer\n    Then no case movement is recorded"
+  },
+  {
+   "old": "AC10 to AC15 are added in this split for exceptions X2, X3, X8 and X9 and for rules BR3 and BR8, and carry no legacy origin tag.",
+   "new": "AC10 to AC15 are added in this split for exceptions X2, X3, X8 and X9 and for rules BR3 and BR8, and carry no legacy origin tag. AC16 to AC21 are added in this split for rule BR11 and for the error answers, replays, redeliveries, retries and refused movements named in their Scenario lines, and carry no legacy origin tag."
+  },
+  {
+   "old": "| TC-E2-008-18 | AC15, BR8 | Component | payments of 2026-12-14 reconciled to proceeds |",
+   "new": "| TC-E2-008-18 | AC15, BR8 | Component | payments of 2026-12-14 reconciled to proceeds |\n| TC-E2-008-19 | AC16, BR11 | Component | `PAY-90001` matched to the installment of `T-0701` |\n| TC-E2-008-20 | AC17 | Component | rwb-payment OpenAPI fake: request without credential, without grant, and for a missing resource |\n| TC-E2-008-21 | AC18, BR13 | Component | write sent twice under the same idempotency key |\n| TC-E2-008-22 | AC19, BR6 | Component | `AceDataReady` for 2026-12-15 delivered twice |\n| TC-E2-008-23 | AC20, AC12 | Component | open-case fake silent on all 10 attempts |\n| TC-E2-008-24 | AC21 | Component | movement of plan `T-0701` not allowed by the rwb-case status model |"
+  },
+  {
+   "old": "TC-E2-008-13 to -18 cover AC10 to AC15 and have no legacy case.",
+   "new": "TC-E2-008-13 to -18 cover AC10 to AC15 and have no legacy case. TC-E2-008-19 to -24 cover AC16 to AC21 and have no legacy case."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31566",
+   "item": "NEWAC-RWB-P8-E2008-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR3, BR4, BR5, BR8 already covered by AC10, AC11, AC14, AC15 and TC-13, -14, -17, -18. BR11 added as AC16 with TC-E2-008-19."
+  },
+  {
+   "ruling": "R-31567",
+   "item": "NEWAC-RWB-P8-E2008-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 (Scenario Outline) for 401, 403, 404 answers of provided operations with TC-E2-008-20. Proposed test not given in source."
+  },
+  {
+   "ruling": "R-31568",
+   "item": "NEWAC-RWB-P8-E2008-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 for replay with the same idempotency key with TC-E2-008-21. Proposed test not given in source."
+  },
+  {
+   "ruling": "R-31569",
+   "item": "NEWAC-RWB-P8-E2008-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC19 for duplicate delivery of AceDataReady with TC-E2-008-22. Proposed test not given in source."
+  },
+  {
+   "ruling": "R-31570",
+   "item": "NEWAC-RWB-P8-E2008-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC20 for activity retries exhausted without answer with TC-E2-008-23. Proposed test not given in source."
+  },
+  {
+   "ruling": "R-31571",
+   "item": "NEWAC-RWB-P8-E2008-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC21 for refused disallowed status movement with TC-E2-008-24. Proposed test not given in source."
+  }
+ ]
+}

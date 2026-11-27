@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "What no source states is the target read operation by which rwb-case serves the list that rwb-source-data builds, and how the daily extract reaches rwb-reporting once the data lake is removed: Not specified in the source documents (GAP-0335; ASM-0429). The story proves the two operations that exist today and records the choice as an assumption, so a change of operation is one contract edit and one test change.",
+   "new": "The target read operation by which rwb-case serves the list that rwb-source-data builds is `GET /api/recovery/case/v1/cases` and `GET /api/recovery/case/v1/queues/{queueId}/cases` on the rwb-case base, and the daily extract reaches rwb-reporting through the rwb-integration activity `deliverFile` on queue `rwb-integration` with a manifest of fileId, batchId, sha256 and record count, with `rwb.integration.FileDelivered.v1` and `rwb.integration.FileFailed.v1` on `rwb.integration.events.v1` and no data lake path (GAP-0335, resolved at the wave-1 contract review)."
+  },
+  {
+   "old": "| MSG-P1-001 | The ACE batch for the business date is not complete and the list is not built | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The ACE batch for the business date is not complete and the list is not built | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "MSG-P1-001 \"DP01 Account and arrears is from 2026-11-27. Today's ACE batch has not arrived.\"",
+   "new": "MSG-P1-001 \"DP01 Account and arrears is from 2026-11-27. Today's load has not arrived.\""
+  },
+  {
+   "old": "Given v_ace_account holds 28,140 accounts at 90 days past due or more with data_as_of 2026-11-30",
+   "new": "Given rwb-source-data reads from v_ace_account, through its own contract, 28,140 accounts at 90 days past due or more with data_as_of 2026-11-30"
+  },
+  {
+   "old": "When the case list step of JOB-04 runs",
+   "new": "When the case list step of ReconciliationWorkflow runs"
+  },
+  {
+   "old": "Given the ALS batch for 2026-11-30 completed at 05:40 and JOB-03 completed at 06:52",
+   "new": "Given the ALS batch for 2026-11-30 completed at 05:40 and the morning allocation completed at 06:52"
+  },
+  {
+   "old": "When the DP01 cut-off passes and JOB-04 is triggered",
+   "new": "When the DP01 cut-off passes and ReconciliationWorkflow is triggered"
+  },
+  {
+   "old": "Scenario: AC11 Access to the JOB-04 run listing is refused",
+   "new": "Scenario: AC11 Access to the ReconciliationWorkflow run listing is refused"
+  },
+  {
+   "old": "Given RW-CASEOWN signs in with a role that does not include the JOB-04 run listing",
+   "new": "Given RW-CASEOWN signs in with a role that does not include the ReconciliationWorkflow run listing"
+  },
+  {
+   "old": "When RW-CASEOWN calls the JOB-04 run listing on the rwb-source-data base",
+   "new": "When RW-CASEOWN calls the ReconciliationWorkflow run listing on the rwb-source-data base"
+  },
+  {
+   "old": "| TC-E1-002-11-ITG | AC11, Access | Integration | RW-CASEOWN calls the JOB-04 run listing on the rwb-source-data base; refused with MSG-P4-002 |",
+   "new": "| TC-E1-002-11-ITG | AC11, Access | Integration | RW-CASEOWN calls the ReconciliationWorkflow run listing on the rwb-source-data base; refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E1-002-03-ITG | AC3, BR5 | Integration | ALS batch complete at 05:40; JOB-03 complete at 06:52; step complete at 07:12 |",
+   "new": "| TC-E1-002-03-ITG | AC3, BR5 | Integration | ALS batch complete at 05:40; morning allocation complete at 06:52; step complete at 07:12 |"
+  },
+  {
+   "old": "| TC-E1-002-02-ITG | AC2, BR1 | Integration | Built list; case RW-2026-000123 |",
+   "new": "| TC-E1-002-02-ITG | AC2, BR1 | Integration | Run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS (owner); built list; case RW-2026-000123 |"
+  },
+  {
+   "old": "| TC-E1-002-06-ITG | AC6 | Integration | JOB-03 not complete at 07:15 |",
+   "new": "| TC-E1-002-06-ITG | AC6 | Integration | Run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS (owner); morning allocation not complete at 07:15 |"
+  },
+  {
+   "old": "| TC-E1-002-07-ITG | AC7, BR6 | Integration | Restart of a built date |",
+   "new": "| TC-E1-002-07-ITG | AC7, BR6 | Integration | Run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS (owner); restart of a built date |"
+  },
+  {
+   "old": "| TC-E1-002-08-ITG | AC8 | Integration | rwb-case contract error after 12,000 accounts |",
+   "new": "| TC-E1-002-08-ITG | AC8 | Integration | Run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS (owner); rwb-case contract error after 12,000 accounts |"
+  },
+  {
+   "old": "| TC-E1-002-09-ITG | AC9, BR7 | Integration | deliverFile forced to fail all retries |",
+   "new": "| TC-E1-002-09-ITG | AC9, BR7 | Integration | Run by RWB-P1-E1002-APP, RWB-P3-E1002-APP or RWB-P1-E1002-OPS (owner); deliverFile forced to fail all retries |"
+  },
+  {
+   "old": "in its four states — Loading, empty, list and filtered — served by",
+   "new": "in its four states — Loading, empty, list and filtered — with the error and no access states Not specified in the source documents (CG-ALL-141), served by"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21869",
+   "item": "GAP-0335",
+   "status": "Resolved",
+   "section": "2",
+   "target": "",
+   "change": "",
+   "note": "Read operations and the deliverFile, FileDelivered and FileFailed path with no lake now stated in section 2 as agreed at the contract review."
+  },
+  {
+   "ruling": "R-21870",
+   "item": "GAP-0486",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P1-E1002-CON and RWB-P1-E1002-APP",
+   "change": "Publish GET /case-list/dates/{businessDate} (businessDate, publishStatus, rowCount, refreshedAt) and GET /case-list/rows (19 columns DF-RPT-001 to DF-RPT-019, filtered by businessDate, team, queue, product); snapshot(page) takes business date and page.",
+   "note": "The read shapes belong to the P1 contract and app stories; this story uses no such operation. Max page size and sort key stay open."
+  },
+  {
+   "ruling": "R-21872",
+   "item": "GAP-1991",
+   "status": "Cross-document",
+   "section": "",
+   "target": "TSD P1 v3",
+   "change": "Keep lake_copy_watermark as the watermark of the last published reporting projection; drop the lake extract INT-19 and INT-20 (DP-17).",
+   "note": "The lake copy and its watermark are P1 design content; this story already reads no lake copy in its flow."
+  },
+  {
+   "ruling": "R-23723",
+   "item": "CG-ALL-134",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4 in section 14 and in AC5; the use is treated as the stale-data case."
+  },
+  {
+   "ruling": "R-23724",
+   "item": "CG-ALL-136",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Rows for AC2, AC6, AC7, AC8, AC9 marked as run by the owner stories. AC11 row kept because section 7 holds the AC11 scenario."
+  },
+  {
+   "ruling": "R-23725",
+   "item": "CG-ALL-137",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the REQ-RDF-007 and REQ-RDF-009 test lists in the next RTM version with section 18 of RWB-ITG-E1002-ITG.",
+   "note": "The RTM test lists are outside this story and cannot be reconciled from the evidence here; section 18 is unchanged."
+  },
+  {
+   "ruling": "R-23726",
+   "item": "CG-ALL-140",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "JOB-03, JOB-04, decision log wording replaced by the morning allocation and ReconciliationWorkflow in section 7 and TC rows 03, 06 and 11."
+  },
+  {
+   "ruling": "R-23727",
+   "item": "CG-ALL-141",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 names the error and no access states as Not specified in the source documents, since the screen specification lacks them."
+  },
+  {
+   "ruling": "R-28446",
+   "item": "GAP-0487",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "RWB-P1-E1002-APP, RWB-P1-E1002-CON and RWB-P1-E1002-OPS",
+   "change": "Name CaseListBuildWorkflow (one run per business date, workflow ID = business date), started by rwb.source-data.AceDataReady.v1 and by the DailyCaseList Schedule at 07:15 Asia/Bangkok, overlap SKIP, catch-up one business date; 07:15 read from caselist.allocation.wait.until.",
+   "note": "The workflow name and schedule belong to the P1 documents; section 12.5 keeps its name until the P1 change is published."
+  },
+  {
+   "ruling": "R-29244",
+   "item": "ACR-RWB-ITG-E1002-ITG-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 Given now reads through the rwb-source-data contract rather than naming the ACE view as read by this service."
+  }
+ ]
+}

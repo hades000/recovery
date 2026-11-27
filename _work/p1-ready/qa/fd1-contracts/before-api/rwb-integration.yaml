@@ -1,0 +1,955 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-integration (Integration)"
+  version: 5.1.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-integration (Integration, module P2, service
+    wave 1) under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16
+    November 2026) by the D-RCV-60 microservice realignment.
+    This document holds 9 operations under REST base /api/recovery/integration/v1; schema rwb_integration; topic
+    rwb.integration.events.v1; Temporal task queue rwb-integration in namespace rwb-recovery. The v4 text of
+    every operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: GET /feature-flags (now gateway-bff (PLT platform surface),
+    owner PLT); GET /admin/feature-flags (now gateway-bff (PLT platform surface), owner PLT); POST
+    /admin/feature-flags (now gateway-bff (PLT platform surface), owner PLT); PATCH
+    /admin/feature-flags/{flagKey} (now gateway-bff (PLT platform surface), owner PLT).
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-integration.asyncapi.yaml.
+servers:
+- url: "/api/recovery/integration/v1"
+  description: "Relative to the rwb-integration service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Cases"
+- name: "Treatment"
+- name: "Administration"
+x-service:
+  code: "P2"
+  service: "rwb-integration"
+  name: "Integration"
+  wave: 1
+  schema: "rwb_integration"
+  rest-base: "/api/recovery/integration/v1"
+  topic: "rwb.integration.events.v1"
+  task-queue: "rwb-integration"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-integration.asyncapi.yaml"
+  operations: 9
+paths:
+  /admin/outbound-items:
+    get:
+      tags:
+      - Administration
+      summary: List outbound file items by status and interface for the exception queue
+      operationId: getAdminOutboundItems
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: interfaceId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutboundItem'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/outbound-items/{itemId}/resend:
+    post:
+      tags:
+      - Administration
+      summary: 'Send an outbound item in the exception queue again: status PENDING, attempt count 0'
+      operationId: postAdminOutboundItemsItemidResend
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Platform administration
+        right: U
+      x-first-release: E1
+      parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutboundItem'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/outbox/deliveries:
+    get:
+      tags:
+      - Administration
+      summary: List application event outbox deliveries by status and consumer
+      operationId: getAdminOutboxDeliveries
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: consumer
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: eventType
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutboxDeliveryPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/outbox/deliveries/{deliveryId}/resend:
+    post:
+      tags:
+      - Administration
+      summary: 'Send an outbox delivery in the exception queue again: status PENDING, attempt count 0'
+      operationId: postAdminOutboxDeliveriesDeliveryidResend
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Platform administration
+        right: U
+      x-first-release: E1
+      parameters:
+      - name: deliveryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutboxDelivery'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/scheduled-jobs:
+    get:
+      tags:
+      - Administration
+      summary: List the job catalog with owner, schedule, run book and alert threshold
+      operationId: getAdminScheduledJobs
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobCatalogEntry'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/plan-status:
+    get:
+      tags:
+      - Cases
+      summary: Read the ACE restructure plan status of the case, live with fallback to the stored status
+      operationId: getCasesCaseidPlanStatus
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanStatus'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/customer-products:
+    get:
+      tags:
+      - Cases
+      summary: Read the other products of the case's borrowers from the customer profile, masked by role
+      operationId: getCasesCaseidCustomerProducts
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProducts'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /treatments/{treatmentId}/credit-pack:
+    get:
+      tags:
+      - Treatment
+      summary: Assemble the credit approval pack for submission in NLEADS
+      operationId: getTreatmentsTreatmentidCreditPack
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Treatment and offer
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: treatmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditPack'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /treatments/{treatmentId}/credit-result:
+    get:
+      tags:
+      - Treatment
+      summary: Read the NLEADS credit decision for the treatment from ACE
+      operationId: getTreatmentsTreatmentidCreditResult
+      x-module: P2
+      x-owner: "P2"
+      x-capability:
+        area: Treatment and offer
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: treatmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: 'D-RCV-35 and TSD P2 v3 (API-P2-013 retired): the Workbench no longer receives or records the NLEADS result. NLEADS lands in
+        ACE credit_decision (RWB-ACE-001) and this endpoint reads it through v_ace_credit_decision for the treatment''s account_key and nleadsRef.
+        No decision returns 404 MSG-P3-024 until ACE holds it.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditResult'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    CaseAccount:
+      type: object
+      description: Links each ACE account to the case it is recovered under.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the case account link
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        accountKey:
+          type: string
+          maxLength: 255
+          description: ACE account_key of the account (v_ace_account); business key, no foreign key
+        isPrimary:
+          type: boolean
+          description: True for the account the case was opened on
+        linkedFrom:
+          type: string
+          format: date
+          description: Date the account joined the case
+        linkedTo:
+          type: string
+          format: date
+          description: Date the account left the case
+      required:
+      - id
+      - caseId
+      - accountKey
+      - isPrimary
+      - linkedFrom
+    Treatment:
+      type: object
+      description: A resolution put to the customer or carried out on the case, with its terms and outcome.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the treatment
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        decisionLogId:
+          type: string
+          format: uuid
+          description: The decision that approved it
+        treatmentType:
+          type: string
+          maxLength: 20
+          enum:
+          - RESTRUCTURE
+          - SETTLEMENT
+          - DEED_IN_LIEU
+          - BUY_BACK
+          - GUARANTEE_CLAIM
+          - REPOSSESSION
+          - AUCTION
+          - DEBT_SALE
+          - WRITE_OFF
+          - RAMC_TRANSFER
+          - RENTAL
+          description: Restructure, settlement, deed in lieu, buy-back, guarantee claim, repossession, auction, debt sale, write-off, RAMC transfer,
+            rental
+        proposedBy:
+          type: string
+          maxLength: 10
+          enum:
+          - AGENT
+          - RULE
+          - PERSON
+          description: Agent, rule, person
+        proposedAt:
+          type: string
+          format: date-time
+          description: When proposed
+        offerAmount:
+          type: number
+          description: Amount offered or agreed, baht
+        haircutAmount:
+          type: number
+          description: Amount forgiven, baht
+        installments:
+          type: integer
+          description: Number of installments in a plan
+        validUntil:
+          type: string
+          format: date
+          description: Offer validity
+        approvalLevel:
+          type: string
+          maxLength: 4
+          enum:
+          - L1
+          - L2
+          - L3
+          - L4
+          - L5
+          - L6
+          description: Approval level that approved it
+        bookedAt:
+          type: string
+          format: date-time
+          description: When booked in the core
+        outcome:
+          type: string
+          maxLength: 12
+          enum:
+          - KEPT
+          - BROKEN
+          - COMPLETED
+          - CANCELED
+          - DECLINED
+          description: Kept, broken, completed, canceled, declined
+        outcomeAt:
+          type: string
+          format: date-time
+          description: When the outcome was recorded
+        nleadsRef:
+          type: string
+          maxLength: 30
+          description: NLEADS reference of the credit approval, read from v_ace_credit_decision; read only
+          readOnly: true
+        creditResult:
+          type: string
+          maxLength: 10
+          enum:
+          - APPROVED
+          - REFUSED
+          description: Approved or refused, read from v_ace_credit_decision; read only
+          readOnly: true
+        creditResultReason:
+          type: string
+          maxLength: 1000
+          description: Reason given by NLEADS, read from v_ace_credit_decision; read only
+          readOnly: true
+        creditResultAt:
+          type: string
+          format: date-time
+          description: When NLEADS gave the decision, read from v_ace_credit_decision; read only
+          readOnly: true
+        interestRate:
+          type: number
+          description: Approved interest rate of the plan, percent
+        bookingDifference:
+          type: object
+          description: 'Each term that differs between approval and booking: term, approved, booked, business date'
+        firstDueDate:
+          type: string
+          format: date
+          description: Date the first installment is due
+        signatureStatus:
+          type: string
+          maxLength: 12
+          enum:
+          - PENDING
+          - SIGNED
+          - NOT_SIGNED
+          description: Pending, signed or not signed, read by the routing rules
+        installmentAmount:
+          type: number
+          description: Amount due per plan installment, baht
+        installmentsPaid:
+          type: integer
+          description: Installments matched so far
+        installmentShortfall:
+          type: number
+          description: Shortfall left on the plan by a partial payment, baht
+      required:
+      - id
+      - caseId
+      - treatmentType
+      - proposedBy
+      - proposedAt
+      - installmentsPaid
+    Document:
+      type: object
+      description: A document held against a case.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the document
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        personKey:
+          type: string
+          maxLength: 255
+          description: ACE person_key of the customer the document belongs to
+        documentType:
+          type: string
+          maxLength: 30
+          description: Type from the document checklist
+        source:
+          type: string
+          maxLength: 12
+          enum:
+          - SCAN
+          - UPLOAD
+          - GENERATED
+          - PARTNER
+          - EMAIL
+          description: Scan, upload, generated, partner, email
+        storageRef:
+          type: string
+          maxLength: 400
+          description: Reference to the stored file
+        classificationConfidence:
+          type: number
+          description: OCR classification confidence
+        reviewStatus:
+          type: string
+          maxLength: 12
+          enum:
+          - NOT_NEEDED
+          - PENDING
+          - CONFIRMED
+          - CORRECTED
+          description: Not needed, pending, confirmed, corrected
+        retentionClass:
+          type: string
+          maxLength: 10
+          description: Retention class
+        writeOnce:
+          type: boolean
+          description: True for legal documents held write-once
+        docVersion:
+          type: integer
+          description: Document version
+        previousVersionId:
+          type: string
+          format: uuid
+          description: The document row this version supersedes; empty for version 1
+        contentSha256:
+          type: string
+          maxLength: 64
+          description: SHA-256 of the stored file, for the duplicate check and the integrity check
+        capturedAt:
+          type: string
+          format: date-time
+          description: Device time when the field app captured the file
+        captureLatitude:
+          type: number
+          x-personal-data: true
+          description: GPS latitude at capture. Masked unless the caller's role may see it
+        captureLongitude:
+          type: number
+          x-personal-data: true
+          description: GPS longitude at capture. Masked unless the caller's role may see it
+        clientFileId:
+          type: string
+          maxLength: 64
+          description: Field app file ID, unique per case, for repeat syncs
+        captureKind:
+          type: string
+          maxLength: 12
+          enum:
+          - PHOTO
+          - BILL
+          - CHECKLIST
+          description: Photo, bill or checklist
+        templateId:
+          type: string
+          format: uuid
+          description: Template version a generated document was made from
+        treatmentId:
+          type: string
+          format: uuid
+          description: Treatment a generated document belongs to
+      required:
+      - id
+      - caseId
+      - documentType
+      - source
+      - storageRef
+      - reviewStatus
+      - retentionClass
+      - writeOnce
+      - docVersion
+      - contentSha256
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI of the error-map row
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          description: Request path and trace ID, stamped by the owning service
+        messageCode:
+          type: string
+          pattern: '^MSG-[A-Z0-9]+(-[A-Z0-9]+)*-\d{3}$'
+        messageTh:
+          type: string
+          description: Thai text of the message code
+        field:
+          type: string
+          description: JSON Pointer or parameter or header name of the first failing input
+        errors:
+          type: array
+          description: Present only on 400 or 422 when more than one input fails
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              messageCode:
+                type: string
+                pattern: '^MSG-[A-Z0-9]+(-[A-Z0-9]+)*-\d{3}$'
+              detail:
+                type: string
+            required: [field, messageCode, detail]
+        traceId:
+          type: string
+          pattern: '^[0-9a-fA-F]{32}$'
+          description: 32-hex W3C trace ID of the request
+      required: [type, title, status, messageCode, traceId]
+    OutboundItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        interfaceId:
+          type: string
+        status:
+          type: string
+        attemptCount:
+          type: integer
+        lastError:
+          type: string
+        caseCount:
+          type: integer
+        ownerRole:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+    OutboxDeliveryPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutboxDelivery'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    OutboxDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+        caseId:
+          type: string
+          format: uuid
+        consumer:
+          type: string
+        status:
+          type: string
+        attemptCount:
+          type: integer
+        nextAttemptAt:
+          type: string
+          format: date-time
+        lastErrorCode:
+          type: string
+        deliveredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    JobCatalogEntry:
+      type: object
+      properties:
+        jobId:
+          type: string
+        jobName:
+          type: string
+        ownerRole:
+          type: string
+        schedule:
+          type: string
+        runbookPath:
+          type: string
+        expectedMinutes:
+          type: integer
+        alertAfterMinutes:
+          type: integer
+        firstRelease:
+          type: string
+    PlanStatus:
+      type: object
+      properties:
+        planRef:
+          type: string
+        status:
+          type: string
+        statusDate:
+          type: string
+          format: date
+        live:
+          type: boolean
+        messageCode:
+          type: string
+    CustomerProducts:
+      type: object
+      properties:
+        dataAsOf:
+          type: string
+          format: date
+        stale:
+          type: boolean
+        messageCode:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerProduct'
+      description: Other products of the case borrowers, read through v_ace_party_product.
+    CustomerProduct:
+      type: object
+      properties:
+        personKey:
+          type: string
+          maxLength: 255
+        partyRole:
+          type: string
+        productType:
+          type: string
+        accountNo:
+          type: string
+        productStatus:
+          type: string
+        dataAsOf:
+          type: string
+          format: date
+    CreditPack:
+      type: object
+      properties:
+        caseNo:
+          type: string
+        productGroup:
+          type: string
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseAccount'
+        collateral:
+          type: array
+          items:
+            type: string
+        terms:
+          $ref: '#/components/schemas/Treatment'
+        requiredLevel:
+          type: string
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        messages:
+          type: array
+          items:
+            type: string
+    CreditResult:
+      type: object
+      description: NLEADS credit decision as ingested into ACE, read through v_ace_credit_decision. Read only.
+      properties:
+        creditDecisionKey:
+          type: string
+          maxLength: 255
+          description: ACE credit_decision_key; business key
+        accountKey:
+          type: string
+          maxLength: 255
+          description: ACE account_key the decision is for
+        nleadsRef:
+          type: string
+          maxLength: 30
+          description: NLEADS reference of the credit approval
+        result:
+          type: string
+          maxLength: 10
+          description: Approved or refused, from NLEADS
+        reason:
+          type: string
+          maxLength: 1000
+          description: Reason given by NLEADS; present when refused
+        decidedAt:
+          type: string
+          format: date-time
+          description: When NLEADS gave the decision
+        sourceSystem:
+          type: string
+          description: NLEADS
+        dataAsOf:
+          type: string
+          format: date
+          description: ACE business date of the row

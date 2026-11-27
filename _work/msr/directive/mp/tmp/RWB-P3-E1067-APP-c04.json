@@ -1,0 +1,32 @@
+{
+ "edits": [
+  {
+   "old": "    And no row is written for the refused call",
+   "new": "    And no row is written for the refused call\n\n  Scenario: AC10 A consumed call fails or does not answer (new, D-RCV-60)\n    Given the rwb-source-data contract mock fails or does not answer the delivery of an event\n    When CaseCreated for case \"RW-2026-000301\" is delivered\n    Then the event is not lost: its outbox row stays in the outbox and the relay retries it, as BR5 requires\n    And rwb-case writes no ledger row for the failed call\n\n  Scenario: AC11 Payloads, outbox write and ledger boundary hold (new, D-RCV-60)\n    Given case \"RW-2026-000301\" is created at 2026-12-01T06:10+07:00 by SY-CASEWF\n    When the action commits\n    Then one outbox row for CaseCreated is written in the same transaction and JOB-11 Outbox sender publishes it every minute\n    And the payload carries references and codes only: case, case number, product group, queue and owner references, rule and timer codes\n    And no `interaction` row is written and no ledger writer is called from rwb_case for these actions"
+  },
+  {
+   "old": "| TC-E1-067-12 | AC9 | Contract | Not specified in the source documents (NEWAC-RWB-P3-E1067-APP-AC10) |",
+   "new": "| TC-E1-067-12 | AC9 | Contract | Not specified in the source documents (NEWAC-RWB-P3-E1067-APP-AC10) |\n| TC-E1-067-13 | AC10 | Component | rwb-source-data contract mock forced to fail or not answer one CaseCreated delivery for case RW-2026-000301 |\n| TC-E1-067-14 | AC11, BR7, BR8, BR9 | Component | CaseCreated committed for case RW-2026-000301; outbox row, payload fields and attempted writes to `interaction` from the rwb_case login |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30625",
+   "item": "NEWAC-RWB-P3-E1067-APP-AC11",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "Added AC10 (next free number) for a consumed call that fails or does not answer; added test row TC-E1-067-13 covering AC10.",
+   "note": "Added AC10 (next free number) for a failed or silent consumed call; test row TC-E1-067-13 added. Proposed test data taken from the story, not invented."
+  },
+  {
+   "ruling": "R-30626",
+   "item": "NEWAC-RWB-P3-E1067-APP-AC9",
+   "status": "Resolved",
+   "section": "7; 8; 16",
+   "target": "",
+   "change": "Added AC11 covering BR7, BR8 and BR9 (payload references only, outbox write in the action transaction, no ledger write); added test row TC-E1-067-14.",
+   "note": "Added AC11 covering BR7, BR8, BR9 (payload, outbox write, ledger boundary); test row TC-E1-067-14 added. Numbered as next free AC."
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The ACE batch for ALS and business date D is not COMPLETE by 09:00 | The step does not run a good morning: the data products show the stale date, the run holds with the waiting count, the data steward is alerted, and the cases are created on the next good business date | MSG-P1-001, MSG-P2-007 | AC3 (owned by RWB-P1-E2001-APP; driven here) |",
+   "new": "| X2 | The ACE batch for ALS and business date D is not COMPLETE by 09:00 | The step does not run a good morning: the data products show the stale date, the run holds with the waiting count, the data steward is alerted, and the cases are created on the next good business date | MSG-P1-001, MSG-P2-007 | AC13 (driven here; AC3 owned by RWB-P1-E2001-APP) |"
+  },
+  {
+   "old": "    Then no case, account link or EFS entry is written",
+   "new": "    Then no case, account link or EFS entry is written\n\n  Scenario: AC13 ACE batch not COMPLETE by 09:00 (exception X2)\n    Given the ACE batch for ALS with business date 2026-12-15 is not COMPLETE at 09:00\n    When the hand-over step is due for business date 2026-12-15\n    Then the step does not run and the data products show the stale date\n    Then the run holds with the waiting count and the data steward is alerted\n    Then the run summary carries message MSG-P1-001 and MSG-P2-007\n    Then the cases are created on the next good business date\n\n  Scenario: AC16 Activity timed out and retried (exception X8)\n    Given the rwb-source-data contract mock does not answer inside the 2 s budget for the hand-over activity\n    When the hand-over activity runs for business date 2026-12-14\n    Then the activity is retried with jitter on a 5xx answer and is not retried on a 4xx answer\n    Then the run ends as PARTIAL with the unanswered call named and message MSG-GEN-006\n    Then the accounts it covered are tried in the next run"
+  },
+  {
+   "old": "| TC-E2-001-15 | BR13 | Component | A browser call to the step is refused; the step is reached only through gateway-bff composite routes for SCR-02, SCR-04 and SCR-45 |",
+   "new": "| TC-E2-001-15 | BR13 | Component | A browser call to the step is refused; the step is reached only through gateway-bff composite routes for SCR-02, SCR-04 and SCR-45 |\n| TC-E2-001-16 | AC16, X8 | Contract | rwb-source-data contract mock: timeout, a 5xx answer and a 4xx answer; one hop, retry with jitter on a 5xx only; the run ends PARTIAL with MSG-GEN-006 |\n| TC-E2-001-17 | AC13, X2 | Component | ACE batch for ALS of 2026-12-15 not COMPLETE at 09:00; the hold and messages MSG-P1-001 and MSG-P2-007 through the P1 fake |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30444",
+   "item": "NEWAC-RWB-P2-E2001-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC16 added to section 7 for timeout and retry of the hand-over activity (X8); TC-E2-001-16 added to section 16."
+  },
+  {
+   "ruling": "R-30445",
+   "item": "NEWAC-RWB-P2-E2001-APP-AC9",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 added to section 7 for X2 hold at 09:00; X2 Covered by now AC13; TC-E2-001-17 added. AC13 is next free number in this chunk."
+  }
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E1-007-11 | AC2 | Component | The store call with the built extract; one document ID and one upload link returned; no second store call for the same review date |",
+   "new": "| TC-E1-007-11 | AC2 | Component | The store call with the built extract; one document ID and one upload link returned; no second store call for the same review date |\n| TC-E1-007-13 | AC2, BR4, BR5, BR7 | Component | Fixture role, permission, masking_rule and delegation_limit rows at the versions in force for 2026-11-30; buildAccessReviewFile run; manifest read back and checked against the file_pattern of the interface row, the stored bytes and the rows written |"
+  },
+  {
+   "old": "    Given a class \"th.co.scb.ace.workbench.recovery.access.review.CustomerReader\" with a query on \"recovery.v_ace_customer\"\n    When the pipeline runs the boundary rule of the rwb-access build\n    Then the build fails with boundary rule BND-6, the class and the object\n    When the same class names \"public.customer\" instead",
+   "new": "    Given a class \"th.co.scb.ace.workbench.recovery.access.review.CustomerReader\" that reads its source rows through the rwb-source-data contract (DP-01, DP-05) and queries no ACE view\n    When the pipeline runs the boundary rule of the rwb-access build\n    Then the build passes\n    When the same class is changed to query \"recovery.v_ace_customer\" instead\n    Then the build fails with boundary rule BND-6, the class and the object\n    When the same class names \"public.customer\" instead"
+  },
+  {
+   "old": "    Then a re-run of the review for the same date makes no second document, no second deliverFile call and no second request entry",
+   "new": "    Then a re-run of the review for the same date makes no second document, no second deliverFile call and no second request entry\n\n  Scenario: AC9 A consumed call that fails or does not answer records nothing (new, D-RCV-60)\n    Given the rwb-integration activity deliverFile on task queue \"rwb-integration\" fails or does not answer for the manifest of \"2026-11-30\"\n    When requestFileDelivery runs on queue \"rwb-access\"\n    Then the failure returns to the workflow with no delivery recorded, no outcome entry written and no second call in that run\n    Then the request is not recorded as delivered and the outcome listener writes no entry for the call\n\n  Scenario: AC10 The rules with no scenario are held by the run (new, D-RCV-60)\n    Given the review run for \"2026-11-30\" with its fixture rows and the fakes of RWB-P2-E1007-CON\n    When buildAccessReviewFile, requestFileDelivery and the outcome listener run\n    Then the file name and layout are read from the interface row (BR4), one file is built per business date with the sha256 and the record count of the rows written (BR5), and the bytes are stored once through rwb-document (BR6)\n    Then the manifest carries the fields of BR7, the request is one deliverFile call on rwb-integration (BR9) and one decision-record entry is written in the same transaction as the idempotency key (BR10)\n    Then no transport, retry ladder, exception queue or owner task of rwb-integration or rwb-case is built or read (BR11), the delivered and failed entries carry the fields of BR13 and the failed alert goes only to the alert role (BR14)\n    Then the item status is read only through GET /api/recovery/integration/v1/admin/outbound-items with a 2 s budget (BR16), no lake path is built (BR17), no SFTP class or second file copy is built (BR18), and only buildAccessReviewFile and requestFileDelivery run on queue \"rwb-access\" (BR1)"
+  },
+  {
+   "old": "The eight criteria above are new",
+   "new": "The ten criteria above are new"
+  },
+  {
+   "old": "| TC-E1-007-12 | §12.7 tables (ASM-3438) | Component | A write attempt by the rwb-access login against each of `role`, `permission`, `masking_rule` and `delegation_limit`; refused, with no row written or altered |",
+   "new": "| TC-E1-007-12 | §12.7 tables (ASM-3438) | Component | A write attempt by the rwb-access login against each of `role`, `permission`, `masking_rule` and `delegation_limit`; refused, with no row written or altered |\n| TC-E1-007-14 | AC9, BR9, BR10 | Integration | Not specified in the source documents (NEWAC-RWB-P4-E1007-APP-AC10) |\n| TC-E1-007-15 | AC10, BR1, BR4, BR5, BR6, BR7, BR9, BR10, BR11, BR13, BR14, BR16, BR17, BR18 | Component | Not specified in the source documents (NEWAC-RWB-P4-E1007-APP-AC9) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28918",
+   "item": "GAP-3233",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Legacy dependency trace sheet",
+   "change": "Keep the five Not carried rows visible in the trace; add an X row only if the run books or the harness waits for the named story",
+   "note": "Five trace rows stay Not carried. No edit to this story. Follow-up X row only if the run books or harness wait for the named story."
+  },
+  {
+   "ruling": "R-29457",
+   "item": "ACR-RWB-P4-E1007-APP-AC2",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-007-13 covering AC2 with BR4, BR5 and BR7 at Component level",
+   "note": "AC2 was covered only in shared rows; dedicated TC-E1-007-13 added for the manifest and stored file."
+  },
+  {
+   "ruling": "R-29458",
+   "item": "ACR-RWB-P4-E1007-APP-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC7 Given rewritten to read through the rwb-source-data contract; the ACE view query becomes the negative case",
+   "note": "Given no longer reads an ACE view. BND-6 boundary check kept as the negative case."
+  },
+  {
+   "ruling": "R-30832",
+   "item": "NEWAC-RWB-P4-E1007-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 (consumed call fails or does not answer) and TC-E1-007-14; criteria count changed from eight to ten",
+   "note": "Test data not in sources, carried as Not specified. AC9 is the next free story number; count line updated."
+  },
+  {
+   "ruling": "R-30833",
+   "item": "NEWAC-RWB-P4-E1007-APP-AC9",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added AC10 holding BR1, BR4 to BR7, BR9 to BR11, BR13, BR14, BR16 to BR18 and TC-E1-007-15",
+   "note": "Rules now asserted by AC10 and TC-E1-007-15. Test data not in sources. BR17 and BR18 also covered by BND-6 in AC7."
+  }
+ ]
+}

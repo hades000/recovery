@@ -1,0 +1,350 @@
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - gateway-bff (edge and platform operations)"
+  version: 5.0.0
+  description: >-
+    Edge document of the Recovery Workbench API. The D-RCV-60 realignment puts every operation in the document
+    of the service that owns it; this document holds the operations whose owner in Microservice Ownership Map v1
+    is PLT, because PLT is the platform library and is not one of the 19 services: the four feature-flag
+    operations (ASM-0039) and the platform workflow smoke check (ASM-0042). No service document repeats
+    them.
+    The edge rules of DP-19 apply to every document of the set: the browser calls the shared App Gateway, which
+    routes /recovery/* and /api/recovery/* to the Recovery gateway-bff (Arch v5 slide 34); the BFF checks the
+    session in Redis, gets a short-lived JWT through ACE Common sign-in, checks the coarse permission and makes
+    one REST hop to the owning service, 2 s budget (Arch v5 slides 30 and 35). The composite screen routes of
+    the BFF are not specified in the source documents (GAP-0094; ASM-0159) and are not added
+    here.
+    The platform-owned operations are published on this edge surface, and their base path under the BFF is
+    /api/recovery, the edge route of the gateway-bff (GAP-0095; ASM-0158); the operation paths are unchanged
+    from v4 and follow that base.
+servers:
+- url: "/api/recovery"
+  description: "Relative to the Recovery gateway-bff behind the shared App Gateway (Arch v5 slide 34)"
+security:
+- entraId: []
+tags:
+- name: "Administration"
+x-service:
+  code: "PLT"
+  service: "gateway-bff"
+  name: "Edge and gateway (platform library surface)"
+  wave: 0
+  schema: "none (no schema of its own; Redis session store, Arch v5 slide 34)"
+  rest-base: "/api/recovery"
+  topic: "none (no topic of its own; it consumes ApprovalRequested, TimerBreached and AceDataLate)"
+  task-queue: "none"
+  namespace: "rwb-recovery"
+  asyncapi: "none (no topic of its own)"
+  operations: 5
+paths:
+  /admin/workflows/smoke:
+    post:
+      tags:
+      - Administration
+      summary: Start the platform smoke workflow on demand
+      operationId: postAdminWorkflowsSmoke
+      x-module: P3
+      x-owner: "PLT"
+      x-owner-note: "API Specification v4 x-module P3; owner PLT per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0042"
+      x-capability:
+        area: Platform administration
+        right: C
+      x-first-release: E1
+      description: Starts platform-smoke-{yyyymmdd} on task queue rwb-platform for RW-PLATADM and returns 202. A duplicate workflow ID returns the running execution, not a second run. When Temporal is unavailable the call
+        returns 503 with MSG-P3-036; when rwb.p3.temporal is off it returns 404.
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflowId:
+                    type: string
+                  workflowType:
+                    type: string
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /feature-flags:
+    get:
+      tags:
+      - Administration
+      summary: Read the effective feature flag values for the caller's environment
+      operationId: getFeatureFlags
+      x-module: P2
+      x-owner: "PLT"
+      x-owner-note: "API Specification v4 x-module P2; owner PLT per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0039"
+      x-capability:
+        area: None
+        right: R
+      x-first-release: E1
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FeatureFlagValue'
+        '401':
+          $ref: '#/components/responses/E401'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/feature-flags:
+    get:
+      tags:
+      - Administration
+      summary: List feature flags with values per environment, owner and removal date
+      operationId: getAdminFeatureFlags
+      x-module: P2
+      x-owner: "PLT"
+      x-owner-note: "API Specification v4 x-module P2; owner PLT per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0039"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: overdue
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: owner
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FeatureFlag'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+    post:
+      tags:
+      - Administration
+      summary: Create a feature flag
+      operationId: postAdminFeatureFlags
+      x-module: P2
+      x-owner: "PLT"
+      x-owner-note: "API Specification v4 x-module P2; owner PLT per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0039"
+      x-capability:
+        area: Platform administration
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureFlagRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/feature-flags/{flagKey}:
+    patch:
+      tags:
+      - Administration
+      summary: Change a feature flag value for one environment with a reason
+      operationId: patchAdminFeatureFlagsFlagkey
+      x-module: P2
+      x-owner: "PLT"
+      x-owner-note: "API Specification v4 x-module P2; owner PLT per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0039"
+      x-capability:
+        area: Platform administration
+        right: U
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureFlagChange'
+      parameters:
+      - name: flagKey
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        messageCode:
+          type: string
+        messageTh:
+          type: string
+        field:
+          type: string
+        traceId:
+          type: string
+    FeatureFlagValue:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: boolean
+    FeatureFlag:
+      type: object
+      properties:
+        key:
+          type: string
+        description:
+          type: string
+        ownerUserId:
+          type: string
+          format: uuid
+        ownerTeam:
+          type: string
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlagEnvironmentValue'
+        removalDate:
+          type: string
+          format: date
+        daysOverdue:
+          type: integer
+        version:
+          type: integer
+    FlagEnvironmentValue:
+      type: object
+      properties:
+        environment:
+          type: string
+        value:
+          type: boolean
+    FeatureFlagRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        description:
+          type: string
+        ownerUserId:
+          type: string
+          format: uuid
+        ownerTeam:
+          type: string
+        defaultOn:
+          type: boolean
+        removalDate:
+          type: string
+          format: date
+    FeatureFlagChange:
+      type: object
+      properties:
+        environment:
+          type: string
+        value:
+          type: boolean
+        reason:
+          type: string

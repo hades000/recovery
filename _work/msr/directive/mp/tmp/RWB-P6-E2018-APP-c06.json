@@ -1,0 +1,77 @@
+{
+ "edits": [
+  {
+   "old": "Then the response is status 422 with MSG-GEN-001 naming \"signed document\"",
+   "new": "Then the response is status 422 with MSG-GEN-001 naming \"signed document\"\n\n  Scenario: AC12 Architecture constraints of section 8 hold (new; BR10 to BR15)\n    Given the rwb-comms service is deployed with its schema, published events and code\n    When the schema, the published events and the code are inspected\n    Then no table in rwb_comms holds a signature request state\n    Then every signature request read or update goes through the published rwb-document contract\n    Then no signature record is written except through the published rwb-treatment contract with method E_SIGNATURE, BRANCH or PAPER\n    Then no value of the signature basis, the method list or the status list is held in code\n    Then no comms event is published for a signature\n    Then no call is made to EasyApp except through the ACE common module e-signature path INT-34\n    Then every POST carries an Idempotency-Key and the REST base \"/api/recovery/comms/v1\" is used\n    Then no personal data and no signed PDF content appears in an event, a workflow input or a log\n\n  Scenario: AC13 Error answers of the provided operations (new; 401, 403, 404)\n    Given a caller without valid credentials\n    When the caller sends a request to a provided signature-request operation of section 12.1\n    Then the response is status 401\n    Given a caller with valid credentials but without the operation right\n    When the caller sends a request to a provided signature-request operation of section 12.1\n    Then the response is status 403\n    Given a treatment identifier that matches no treatment\n    When the caller sends a request to a provided signature-request operation of section 12.1 for that identifier\n    Then the response is status 404\n\n  Scenario: AC14 Replay of a write with the same Idempotency-Key (new)\n    Given a signature request for \"D-0601\" was created with an Idempotency-Key\n    When the same POST is sent again with the same Idempotency-Key\n    Then the system creates no second signature request\n    Then the response returns the result of the first request"
+  },
+  {
+   "old": "| TC-E2-018-14 | Section 12.7 tables (ASM-3438) | Component | Boundary test of the tables of section 12.7; Not specified in the source documents (DOR-RWB-P6-E2018-APP-12) |",
+   "new": "| TC-E2-018-14 | Section 12.7 tables (ASM-3438) | Component | Boundary test of the tables of section 12.7; Not specified in the source documents (DOR-RWB-P6-E2018-APP-12) |\n| TC-E2-018-15 | AC12, BR10, BR11, BR12, BR13, BR14, BR15 | Component | Inspection of schema, published events and code; Not specified in the source documents (NEWAC-RWB-P6-E2018-APP-AC12) |\n| TC-E2-018-16 | AC13 | Component | Caller without credentials, caller without the operation right, and a treatment identifier that matches no treatment; Not specified in the source documents (NEWAC-RWB-P6-E2018-APP-AC13) |\n| TC-E2-018-17 | AC14 | Component | Same POST sent twice with the same Idempotency-Key; Not specified in the source documents (NEWAC-RWB-P6-E2018-APP-AC14) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28787",
+   "item": "GAP-1184",
+   "status": "Resolved",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "Section 12.1 already serves as the contract baseline; contract tests TC-E2-018-13 keep it. No CON story added here; no edit needed."
+  },
+  {
+   "ruling": "R-28788",
+   "item": "GAP-1185",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR13 already publishes no comms event for a signature; the routing reads the treatment. No edit needed."
+  },
+  {
+   "ruling": "R-28789",
+   "item": "GAP-2355",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR10 and BR13 already hold no signature event; DocumentStored is the only event of this story. No edit needed."
+  },
+  {
+   "ruling": "R-28790",
+   "item": "GAP-2357",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Users Roles and Permissions (RBAC matrix); message standard (next version)",
+   "change": "Confirm Documents C, R and U as the operation-level rights of the five signature-request operations; add a rwb-document message for a closed signature request at the next message standard version. Story keeps MSG-P3-005 unchanged meanwhile.",
+   "note": "MSG-P3-005 kept in section 14 for the closed-request refusal. The owed rwb-document message and the RBAC rights belong to the owning documents."
+  },
+  {
+   "ruling": "R-31304",
+   "item": "NEWAC-RWB-P6-E2018-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 to section 7 covering BR10 to BR15, and test row TC-E2-018-15 in section 16."
+  },
+  {
+   "ruling": "R-31305",
+   "item": "NEWAC-RWB-P6-E2018-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 to section 7 for 401, 403 and 404 answers, and test row TC-E2-018-16 in section 16."
+  },
+  {
+   "ruling": "R-31306",
+   "item": "NEWAC-RWB-P6-E2018-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 to section 7 for replay with the same Idempotency-Key, and test row TC-E2-018-17 in section 16."
+  }
+ ]
+}

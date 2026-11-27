@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| Size | Set by the squad at refinement (DOR-RWB-P10-E2030-APP-16) |",
+   "new": "| Size | Small: fits within two weeks; the squad sets the point value at refinement (DOR-RWB-P10-E2030-APP-16) |"
+  },
+  {
+   "old": "| Ready to start | After RWB-P10-E1058-APP |",
+   "new": "| Ready to start | After RWB-P10-E1058-APP is done (build dependency not yet done) |"
+  },
+  {
+   "old": "| BR10 | Every run fact leaves as a CloudEvents 1.0 message on `rwb.agent.events.v1`, keyed by the case; the pack and the completeness list are never published | DP-09; DP-14; EV-28 |",
+   "new": "| BR10 | Every run fact leaves as a CloudEvents 1.0 message on `rwb.agent.events.v1`, keyed by the case; the pack and the completeness list are never published | DP-09; DP-14; EV-28 |\n| BR11 | Field values read from rwb-document are personal data: each is masked before the model call, and the agent run stores no field value | Not specified in the source documents (DOR-RWB-P10-E2030-APP-11) |"
+  },
+  {
+   "old": "| X7 | A role without the right | Refused with 403; nothing changes | MSG-P4-002 | TC-E2-030-10 |",
+   "new": "| X7 | A role without the right | Refused with 403; nothing changes | MSG-P4-002 | AC10 |"
+  },
+  {
+   "old": "    Then the system refuses the approval with 409 and MSG-P7-002",
+   "new": "    Then the system refuses the approval with 409 and MSG-P7-002\n\n  Scenario: AC10 A role without the right (covers X7)\n    Given a user with role \"RW-LITOFF\"\n    When the user calls POST `/admin/agent-evaluations`\n    Then the system refuses the call with 403 and MSG-P4-002\n    Then no evaluation run, policy version or score row changes\n\n  Scenario: AC11 States of the run read (empty, in progress, failed)\n    Given no agent run exists for case \"RW-2026-000904\" and the evaluation\n    When the run of case \"RW-2026-000904\" is read with GET `/agent-runs/{id}`\n    Then the read returns no run and no pack\n    Given the agent run of case \"RW-2026-000901\" has status \"RUNNING\"\n    When the run of case \"RW-2026-000901\" is read with GET `/agent-runs/{id}`\n    Then the read shows the run as in progress and returns no pack\n    Given the agent run of case \"RW-2026-000901\" has status \"TIMED_OUT\"\n    When the run of case \"RW-2026-000901\" is read with GET `/agent-runs/{id}`\n    Then the read shows the run as failed with fallback true and the reason recorded\n\n  Scenario: AC12 Field values are masked before the model call (BR11)\n    Given the rwb-document contract mock returns field values of case \"RW-2026-000901\" that are personal data\n    When the agent runs\n    Then every field value reaches the model call masked\n    Then the agent run stores no field value\n\n  Scenario: AC13 Minimum sample is data with a version (BR9)\n    Given the rwb-case parameters contract returns the minimum sample 50 for policy \"LEGAL_DOC\" version \"P2\"\n    When RW-COE loads policy \"LEGAL_DOC\" version \"P2\" with mode \"L1\"\n    Then the load checks the sample size against the parameter value read at load time\n    Given the rwb-case parameters contract returns no minimum sample for policy \"LEGAL_DOC\" version \"P2\"\n    When RW-COE loads policy \"LEGAL_DOC\" version \"P2\" with mode \"L1\"\n    Then the system refuses the load with 422 and MSG-P10-001 naming check \"sample size at least 50\"\n\n  Scenario: AC14 Run facts leave as events (BR10)\n    Given the agent run of case \"RW-2026-000901\" completes\n    When the completion is written\n    Then one CloudEvents 1.0 message \"rwb.agent.AgentRunCompleted.v1\" is written to \"rwb.agent.events.v1\" keyed by the case through the outbox\n    Then no pack and no completeness list is published"
+  },
+  {
+   "old": "The identity that calls the consumed contracts is the rwb-agent service identity; its name is fixed with the deployment story and is not declared here (DP-02 is not a pattern of this key).",
+   "new": "The identity that calls the consumed contracts is the rwb-agent service identity; its name is fixed with the deployment story and is not declared here (DP-02 is not a pattern of this key).\n\nEach REST operation of this story checks the caller's right with the rwb-access authorise check (DP-08) before it runs; a refused call is answered as AC10 and TC-E2-030-10 require."
+  },
+  {
+   "old": "| TC-E2-030-10 | Access | Contract | RW-LITOFF calls POST `/admin/agent-evaluations`; refused with MSG-P4-002 |",
+   "new": "| TC-E2-030-10 | Access | Contract | RW-LITOFF calls POST `/admin/agent-evaluations`; refused with MSG-P4-002 |\n| TC-E2-030-11 | AC1, BR8; boundary of the §12.7 tables | Component | One case and one evaluation: one `agent_run` row; no write outside the §12.7 tables |\n| TC-E2-030-12 | AC11 | Component | No run for case \"RW-2026-000904\"; run \"RUNNING\"; run \"TIMED_OUT\" for case \"RW-2026-000901\" |\n| TC-E2-030-13 | AC12, BR11 | Component | Field values of case \"RW-2026-000901\" masked before the model call |\n| TC-E2-030-14 | AC13, BR9 | Component | Minimum sample 50 from the rwb-case parameters contract; a missing value refuses the load |\n| TC-E2-030-15 | AC14, BR10 | Component | Completed run of case \"RW-2026-000901\" leaves as one event through the outbox |"
+  },
+  {
+   "old": "TC-E2-030-09, TC-E2-030-10 |",
+   "new": "TC-E2-030-09, TC-E2-030-10, TC-E2-030-11, TC-E2-030-12, TC-E2-030-13, TC-E2-030-14, TC-E2-030-15 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15408",
+   "item": "DOR-RWB-P10-E2030-APP-10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for empty, in-progress and failed states of the run read; no-access state is AC10."
+  },
+  {
+   "ruling": "R-15409",
+   "item": "DOR-RWB-P10-E2030-APP-11",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added BR11 classing field values as personal data, masked before the model call, with AC12 and TC-E2-030-13."
+  },
+  {
+   "ruling": "R-15410",
+   "item": "DOR-RWB-P10-E2030-APP-12",
+   "status": "Cross-document",
+   "section": "16, 18",
+   "target": "RTM v7",
+   "change": "Align the test case lists of REQ-S4-002 and REQ-DCM-011 with section 18 of RWB-P10-E2030-APP, now TC-E2-030-01 to TC-E2-030-15.",
+   "note": "Added boundary test TC-E2-030-11 for the section 12.7 tables and listed it in section 18; RTM v7 rows still need the same list."
+  },
+  {
+   "ruling": "R-15411",
+   "item": "DOR-RWB-P10-E2030-APP-15",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Size row now states Small fits within two weeks; the squad keeps the point value at refinement."
+  },
+  {
+   "ruling": "R-15412",
+   "item": "DOR-RWB-P10-E2030-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Ready-to-start row states the gate on the unfinished RWB-P10-E1058-APP build dependency; header names 9 dependencies, not 10."
+  },
+  {
+   "ruling": "R-15413",
+   "item": "DOR-RWB-P10-E2030-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for the 403 access refusal; X7 now covered by AC10. Existing AC criteria kept."
+  },
+  {
+   "ruling": "R-15414",
+   "item": "DOR-RWB-P10-E2030-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR9 covered by AC13 and TC-E2-030-14; BR10 by AC14 and TC-E2-030-15; BR11 by AC12 and TC-E2-030-13."
+  },
+  {
+   "ruling": "R-15415",
+   "item": "DOR-RWB-P10-E2030-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 states each REST operation checks the caller's right with the rwb-access authorise check (DP-08)."
+  },
+  {
+   "ruling": "R-15416",
+   "item": "DOR-RWB-P10-E2030-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text for MSG-P10-008 is not in the sources; quoting it would invent wording."
+  },
+  {
+   "ruling": "R-22661",
+   "item": "GAP-0627",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "RWB-P5-E2025-CON",
+   "change": "Name the checklist, document-list and OCR-text operations and their members on rwb-document, one hop, 2 s budget; field values masked before the model call.",
+   "note": "Other operations sit with rwb-litigation, RWB-P10-E1062-CON and rwb-case parameters owners; story keeps its contract reads as stated."
+  }
+ ]
+}

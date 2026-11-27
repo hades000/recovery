@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "3. The user records the filing on `PATCH /legal-actions/{legalActionId}` (API-S4-004) with `LegalActionUpdate`: `status` `FILED` and `courtCaseNo`; the update is guarded by the status of the action and not by an idempotency key, because the API specification declares none for this operation.",
+   "new": "3. The user records the filing on `PATCH /legal-actions/{legalActionId}` (API-S4-004) with `LegalActionUpdate`: `status` `FILED` and `courtCaseNo`, where `courtCaseNo` is read as `legal_action.black_case_no` (GAP-2787); the update is guarded by the status of the action and not by an idempotency key, because the API specification declares none for this operation."
+  },
+  {
+   "old": "6. `FilingWriter` writes, in one `rwb_litigation` transaction, `black_case_no`, `lawsuit_no` where the lawsuit reference is present, `filed_date`, `status` `FILED` and the standard columns of the row.",
+   "new": "6. `FilingWriter` writes, in one `rwb_litigation` transaction, `black_case_no`, `lawsuit_no` where the lawsuit reference is present, `filed_date` taken from the receipt date of the firm or, where the receipt carries none, the business date (GAP-2787), `status` `FILED` and the standard columns of the row."
+  },
+  {
+   "old": "    Then nothing is released",
+   "new": "    Then nothing is released\n\n  Scenario: AC6 Replay of the same court case number (new, NEWAC-RWB-S4-E5010-APP-AC10)\n    Given the legal action \"LA-2026-001010\" is FILED with the court case number of the first filing\n    When the same court case number is filed again on the same action\n    Then the filing is written once and the stored answer is returned\n    Then the repeat is counted under R-UNI-40\n\n  Scenario: AC7 Activity retry and timeout (new, NEWAC-RWB-S4-E5010-APP-AC11)\n    Given the recordFiling activity of LitigationWorkflow times out\n    When the activity is retried\n    Then the legal action is written once\n    Then the retry count and the timeout value are Not specified in the source documents (NEWAC-RWB-S4-E5010-APP-AC11)\n\n  Scenario: AC8 Consumed call fails or does not answer (new, NEWAC-RWB-S4-E5010-APP-AC12)\n    Given the rwb-case contract mock does not answer\n    When the user acts on the screen\n    Then the platform error envelope is displayed as it is (X8)"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the decision record cannot be written"
+  },
+  {
+   "old": "| TC-E5-010-06 | Principle 5 | NFR | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E5-010-06 | Principle 5 | NFR | A forced decision record write failure stops the action with MSG-P7-003 |"
+  },
+  {
+   "old": "| TC-E5-010-09 | §12.7 tables | Boundary | Only the tables of §12.7 marked as owned are written, and no table marked not owned is written |",
+   "new": "| TC-E5-010-09 | §12.7 tables | Boundary | Only the tables of §12.7 marked as owned are written, and no table marked not owned is written |\n| TC-E5-010-10 | AC6 | Component | Replay of the filing with the same court case number; the write happens once |\n| TC-E5-010-11 | AC7 | Component | Not specified in the source documents (NEWAC-RWB-S4-E5010-APP-AC11) |\n| TC-E5-010-12 | AC8 | Component | The rwb-case call does not answer; the platform error envelope is displayed |"
+  },
+  {
+   "old": "| MSG-P1-001 | The data product of the source is stale after a late or failed batch, which is VR-S4-010-1 of the FSD; the check is the owner's (X9) | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The data product of the source is stale after a late or failed batch, which is VR-S4-010-1 of the FSD; the check is the owner's (X9) | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "| SCR-19 Litigation workspace | Pack and hearing and judgment | The same action read only for the filing slice, next to the pack and the calendar |",
+   "new": "| SCR-19 Litigation workspace | Pack and hearing and judgment | The same action read only for the filing slice, next to the pack and the calendar |\n| SCR-19 Litigation workspace | Empty | Not specified in the source documents (CG-ALL-9226) |\n| SCR-19 Litigation workspace | Error | Not specified in the source documents (CG-ALL-9226) |\n| SCR-19 Litigation workspace | No access | Not specified in the source documents (CG-ALL-9226) |"
+  },
+  {
+   "old": "| SCR-20 Enforcement workspace | Requested, seized, auctioned, closed | The filing state of the enforcement action, read only |",
+   "new": "| SCR-20 Enforcement workspace | Requested, seized, auctioned, closed | The filing state of the enforcement action, read only |\n| SCR-20 Enforcement workspace | Empty | Not specified in the source documents (CG-ALL-9227) |\n| SCR-20 Enforcement workspace | Error | Not specified in the source documents (CG-ALL-9227) |\n| SCR-20 Enforcement workspace | No access | Not specified in the source documents (CG-ALL-9227) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23437",
+   "item": "GAP-2787",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 3 reads courtCaseNo as legal_action.black_case_no; step 6 sets filed_date from receipt date or business date. Defect stays in decision inputs."
+  },
+  {
+   "ruling": "R-23438",
+   "item": "GAP-2808",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Legacy story RWB-E5-015",
+   "change": "Keep its AC2 word for word with origin tag, proven as post-condition against contract fakes; write no black_case_no and arm no hearing timer; spend states as route states, no LOV value.",
+   "note": "Spend states are not in this story. This story's AC3 keeps R-LIT-30 word for word. The E5-015 change belongs to its own story."
+  },
+  {
+   "ruling": "R-23439",
+   "item": "GAP-1744",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "Recovery Workbench Architecture v5 (event catalogue slides 42-43, Ownership Map events sheet)",
+   "change": "Add numbered rows for LawsuitFiled, JudgmentRecorded and AuctionResult on rwb.litigation.events.v1, keyed by case, consumers rwb-asset and rwb-case; EV numbers from the catalogue change.",
+   "note": "Event rows are not in this story's text; the catalogue and Ownership Map need the three events and their consumers."
+  },
+  {
+   "ruling": "R-27144",
+   "item": "CG-ALL-9222",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text now copies the standard: 'Today's load has not arrived.'"
+  },
+  {
+   "ruling": "R-27145",
+   "item": "CG-ALL-9225",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "AC1, AC4 and TC-E5-010-06 now say decision record instead of decision log; no job or job record wording remains in those lines."
+  },
+  {
+   "ruling": "R-27146",
+   "item": "CG-ALL-9226",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-19 rows added for empty, error and no access; each is Not specified in the source documents (CG-ALL-9226); loading is in the shared row."
+  },
+  {
+   "ruling": "R-27147",
+   "item": "CG-ALL-9227",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-20 rows added for empty, error and no access; each is Not specified in the source documents (CG-ALL-9227); loading is in the shared row."
+  },
+  {
+   "ruling": "R-32443",
+   "item": "NEWAC-RWB-S4-E5010-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 (replay, same court case number, written once) as the next free number, with TC-E5-010-10."
+  },
+  {
+   "ruling": "R-32444",
+   "item": "NEWAC-RWB-S4-E5010-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 (activity retry and timeout) as the next free number, with TC-E5-010-11; retry and timeout values are Not specified."
+  },
+  {
+   "ruling": "R-32445",
+   "item": "NEWAC-RWB-S4-E5010-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 (consumed call fails or does not answer) as the next free number, with TC-E5-010-12 and the X8 envelope."
+  }
+ ]
+}

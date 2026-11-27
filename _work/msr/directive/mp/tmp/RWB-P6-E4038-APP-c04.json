@@ -1,0 +1,108 @@
+{
+ "edits": [
+  {
+   "old": "| A dispute accepted while the deviation owner did not answer | The dispute in the received state with no deviation reference, the stop in force, and the pending reconciliation shown to the internal reader |",
+   "new": "| A dispute accepted while the deviation owner did not answer | The dispute in the received state with no deviation reference, the stop in force, and the pending reconciliation shown to the internal reader |\n| Empty state (no dispute to show) | The empty list of the first row of this table |\n| Loading state | Not specified in the source documents (CG-ALL-6711) |\n| Error state | Not specified in the source documents (CG-ALL-6711) |\n| No access state | Not specified in the source documents (CG-ALL-6711) |"
+  },
+  {
+   "old": "    Then the system refuses with 403, the user sees MSG-P4-002 and nothing changes",
+   "new": "    Then the system refuses with 403, the user sees MSG-P4-002 and nothing changes\n\n  Scenario: AC5 Each rule of section 8 with no criterion is checked by its test case of section 16 (new, D-RCV-60)\n    Given the rule of section 8 is in force\n    When its test case of section 16 runs\n    Then the rule holds\n\n  Scenario: AC6 A caller without valid credentials is refused with 401, and the 403 and 404 answers stay as AC3 and AC4 (new, D-RCV-60)\n    Given the caller presents no valid credentials\n    When the caller sends the dispute POST for notice \"N-0101\"\n    Then the system refuses with 401 and nothing changes\n\n  Scenario: AC7 A replay of a write with the same Idempotency-Key returns the first answer (new, D-RCV-60)\n    Given the dispute POST for notice \"N-0101\" was accepted with an Idempotency-Key\n    When the same POST is repeated with the same Idempotency-Key\n    Then the first answer is returned with status 201 and no second deviation is raised\n\n  Scenario: AC8 A failed or unanswered call to the deviation owner records no fully raised dispute (new, D-RCV-60)\n    Given the rwb-deviation contract mock fails or does not answer for notice \"N-0101\"\n    When the customer raises a dispute on notice \"N-0101\"\n    Then the dispute is written in the received state with no deviation reference, the notice is held and the answer is 202\n\n  Scenario: AC9 A status change the model does not allow is refused (new, D-RCV-60)\n    Given a dispute in the state \"received\"\n    When a status change the state model does not allow is requested\n    Then the system refuses it and nothing changes"
+  },
+  {
+   "old": "| TC-E4-038-15 | Rule | Component | BR14: a missing owner answer never records a dispute as fully raised nor answers with a deviation reference it does not hold |",
+   "new": "| TC-E4-038-15 | Rule | Component | BR14: a missing owner answer never records a dispute as fully raised nor answers with a deviation reference it does not hold |\n| TC-E4-038-16 | AC5, BR4, BR6 to BR14 | Component | The test cases TC-E4-038-06 to TC-E4-038-15 are the test of these rules |\n| TC-E4-038-17 | AC6, Access | Component | Notice `N-0101` of case `RC-2026-000321`; caller without valid credentials sends the dispute POST; refused with 401 and nothing changes |\n| TC-E4-038-18 | AC7, BR10 | Component | Dispute POST for notice `N-0101` accepted with an Idempotency-Key, then repeated with the same key; the first answer 201 is returned and no second deviation is raised |\n| TC-E4-038-19 | AC8, BR14, X6 | Component | Deviation fake for `N-0101` fails or does not answer; the dispute is in the received state with no deviation reference, the notice is held and the answer is 202 |\n| TC-E4-038-20 | AC9 | Component | Dispute in state \"received\"; a status change the state model does not allow is requested; refused and nothing changes; the refusal message is Not specified in the source documents (GAP-1117) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-26137",
+   "item": "CG-ALL-6711",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Added Empty, Loading, Error and No access state rows to the section 15 state table; the specification gives no values, so they carry the Not specified placeholder.",
+   "note": "Empty state points to the first row; other three carry Not specified in the source documents (CG-ALL-6711)."
+  },
+  {
+   "ruling": "R-28998",
+   "item": "GAP-1115",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P6 v2",
+   "change": "Correct the T8 mapping of REQ-OCC-011 from FEAT-COM-01 to FEAT-COM-04 in the next TSD version.",
+   "note": "Story already keeps the legacy rows as one conflict and does not copy them; only the TSD mapping remains."
+  },
+  {
+   "ruling": "R-29002",
+   "item": "GAP-1117",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Reference data and message list owned by the configuration owner and the message-list owner",
+   "change": "Publish the dispute reason-code list, dispute state list, decision code, rule id and refusal texts as reference data and message-list rows before the wave 3 readiness review.",
+   "note": "Story already reads these as data (BR7) and carries the section 14 placeholder; the values must be published elsewhere."
+  },
+  {
+   "ruling": "R-31355",
+   "item": "NEWAC-RWB-P6-E4038-APP-AC3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "No change; X1 Covered by already reads AC3 (TC-E4-038-04), and section 16 TC-E4-038-04 covers AC3.",
+   "note": "AC3 and TC-E4-038-04 already cover X1 in sections 5 and 16; TC-E4-038-03 covers the access half."
+  },
+  {
+   "ruling": "R-31356",
+   "item": "NEWAC-RWB-P6-E4038-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "No change; X8 Covered by already reads AC4 (TC-E4-038-05), and section 16 TC-E4-038-05 covers AC4.",
+   "note": "AC4 and TC-E4-038-05 already cover X8 in sections 5 and 16."
+  },
+  {
+   "ruling": "R-31357",
+   "item": "NEWAC-RWB-P6-E4038-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC5 to section 7 for rules with no criterion and TC-E4-038-16 to section 16 that runs the rule test cases.",
+   "note": "AC5 added; rules are checked by TC-E4-038-06 to TC-E4-038-15."
+  },
+  {
+   "ruling": "R-31358",
+   "item": "NEWAC-RWB-P6-E4038-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC6 naming 401 for an unauthenticated caller, with 403 and 404 kept as AC3 and AC4, and TC-E4-038-17 in section 16.",
+   "note": "AC6 added with 401, 403 and 404 named; TC-E4-038-17 added."
+  },
+  {
+   "ruling": "R-31359",
+   "item": "NEWAC-RWB-P6-E4038-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 for a replayed write with the same Idempotency-Key and TC-E4-038-18 in section 16.",
+   "note": "AC7 added for replay returning the first 201 answer; TC-E4-038-18 added."
+  },
+  {
+   "ruling": "R-31360",
+   "item": "NEWAC-RWB-P6-E4038-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 for a failed or unanswered deviation call with the 202 answer of X6 and TC-E4-038-19 in section 16.",
+   "note": "AC8 added from X6 and BR14; TC-E4-038-19 added."
+  },
+  {
+   "ruling": "R-31361",
+   "item": "NEWAC-RWB-P6-E4038-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 for a disallowed status change refused with nothing changed and TC-E4-038-20 in section 16.",
+   "note": "AC9 added; the refusal message is Not specified in the source documents (GAP-1117)."
+  }
+ ]
+}

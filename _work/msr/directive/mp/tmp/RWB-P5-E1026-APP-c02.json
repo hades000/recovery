@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| X9 | Role without Documents C uploads | Refused with 403; Upload button hidden | MSG-P4-002 | TC-E1-026-12 (Access) |",
+   "new": "| X9 | Role without Documents C uploads | Refused with 403; Upload button hidden | MSG-P4-002 | AC12; TC-E1-026-12 (Access) |"
+  },
+  {
+   "old": "| TC-E1-026-13 (Principle 5) |",
+   "new": "| AC13; TC-E1-026-13 (Principle 5) |"
+  },
+  {
+   "old": "| Section 13, build step 2 |",
+   "new": "| AC14; Section 13, build step 2 |"
+  },
+  {
+   "old": "    Then the system shows no document name",
+   "new": "    Then the system shows no document name\n\n  Scenario: AC12 Upload by a role without Documents C is refused (new, D-RCV-60)\n    Given user \"TEST-CO-02\" holds RW-AUDIT with Documents R only and scope over case \"RW-2026-000123\"\n    When \"TEST-CO-02\" submits an upload of \"court-notice-0007.pdf\" with type \"COURT_NOTICE\"\n    Then the response is 403 with MSG-P4-002 naming \"upload\"\n    Then the Upload button is not shown on the Documents tab\n\n  Scenario: AC13 Decision record write fails during the store (new, D-RCV-60)\n    Given the decision record write of the rwb-document store fails for the upload\n    When \"TEST-CO-01\" uploads \"court-notice-0007.pdf\" with type \"COURT_NOTICE\"\n    Then the response carries MSG-P7-003 and the upload dialog shows its text\n    Then the system stores no document\n\n  Scenario: AC14 Virus scan does not answer in time (new, D-RCV-60)\n    Given the rwb-document scan contract mock does not answer within 2 s for the uploaded file\n    When \"TEST-CO-01\" uploads \"court-notice-0007.pdf\" with type \"COURT_NOTICE\"\n    Then the response is 503 with MSG-GEN-006 naming \"Virus scan\"\n    Then the file stays in the intake container and no document row exists\n    Then the store is never called"
+  },
+  {
+   "old": "- BR7 is held by the store call, which writes the decision record through the library of DP-03 in the same transaction as the `document` row; this story adds no direct decision-log write of its own.",
+   "new": "- BR7 is held by the store call, which writes the decision record through the library of DP-03 in the same transaction as the `document` row; this story adds no direct decision-log write of its own.\n- BR7 is covered by AC13 (section 7) and by test case TC-E1-026-13 (Principle 5) in section 16."
+  },
+  {
+   "old": "The guard itself is RWB-P5-E1019-APP (DP-08); this story inherits it and adds no guard.",
+   "new": "The guard itself is RWB-P5-E1019-APP (DP-08); this story inherits it and adds no guard. Each REST operation of this story (upload, list and search, checklist) calls the rwb-access authorise check through the cached permission decision before any read or write; the check's name is Not specified in the source documents (DP-08)."
+  },
+  {
+   "old": "| MSG-GEN-006 | A service this screen calls does not answer |",
+   "new": "| MSG-GEN-006 | The malware scan does not answer inside the 2 s budget or answers with an error |"
+  },
+  {
+   "old": "The Background and the three extra Givens of this story mock the rwb-case contract, the rwb-document store and the rwb-document scan contract; every value of the legacy criteria is kept unchanged.",
+   "new": "The Background and the three extra Givens of this story mock the rwb-case contract, the rwb-document store and the rwb-document scan contract; every value of the legacy criteria is kept unchanged. The screen reads through the gateway-bff composite route over the P5 list and the P3 parameter and reference-data contracts; the upload goes through the P5 contract, and the scan is asserted only through its result on the store call."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17143",
+   "item": "DOR-RWB-P5-E1026-APP-3",
+   "status": "Not applied",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC12 to AC14 added to 7 and linked in 5. Test case rows for them in section 16 need the section 16 text, not in this chunk."
+  },
+  {
+   "ruling": "R-17144",
+   "item": "DOR-RWB-P5-E1026-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR7 now covered by AC13 and TC-E1-026-13 (Principle 5), stated in section 8."
+  },
+  {
+   "ruling": "R-17145",
+   "item": "DOR-RWB-P5-E1026-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 states the rwb-access authorise check per operation; its name is Not specified (DP-08)."
+  },
+  {
+   "ruling": "R-17146",
+   "item": "DOR-RWB-P5-E1026-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-GEN-006 row now states the scan use per FSD P5 AC-EXC-P5-001-03, matching X11; standard wording not in this chunk."
+  },
+  {
+   "ruling": "R-22034",
+   "item": "GAP-1033",
+   "status": "Cross-document",
+   "section": "10, 14",
+   "target": "RWB-P5-E1024-APP (contract part) or a new P5 CON story",
+   "change": "Publish request and response field names for Document, DocumentPage and DocumentChecklist, the rwb_document login name (DP-02) and the MSG-GEN-006 text.",
+   "note": "Story keeps Not specified markers; the contract and login name must be published elsewhere."
+  },
+  {
+   "ruling": "R-22035",
+   "item": "GAP-0351",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Section 7 now states the composite and P5 upload assertions and the scan-through-store-result assertion."
+  },
+  {
+   "ruling": "R-22036",
+   "item": "GAP-1034",
+   "status": "Cross-document",
+   "section": "5, 7",
+   "target": "RWB-P5-E1041-CON",
+   "change": "Fix the scan operation path, verb, request, response CLEAN/INFECTED and error shape.",
+   "note": "Story builds against the scan mock until RWB-P5-E1041-CON fixes the operation."
+  },
+  {
+   "ruling": "R-23067",
+   "item": "GAP-2758",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "RWB-P5-E1040-CON (S4 pack-recovery) Dependency Map",
+   "change": "Keep the two metadata rows; step D1 decides whether the three consumed rows become C dependencies or a baseline is raised.",
+   "note": "S4 pack-recovery item; this story's metadata unchanged."
+  },
+  {
+   "ruling": "R-23225",
+   "item": "GAP-2760",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "Dependency Map of the plan",
+   "change": "Carry the three consumed contracts as non-blocking rows; leave the metadata rows unchanged.",
+   "note": "Dependency Map is outside this story; section 12 text not in this chunk."
+  },
+  {
+   "ruling": "R-25739",
+   "item": "CG-ALL-5811",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the test-case trace rows of the four differing requirements (REQ-DCM-008, REQ-DCM-001 and two more) to section 18 of RWB-P5-E1026-APP.",
+   "note": "RTM v7 is another workbook; section 18 left unchanged here."
+  }
+ ]
+}

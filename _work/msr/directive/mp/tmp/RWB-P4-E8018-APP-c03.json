@@ -1,0 +1,111 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P1-001 | The data product the case is read from is stale after a late or failed ACE batch | {product} is from {date}. Today's ACE batch has not arrived. | This story, on the referral, from FSD P4 v3 A2.29 VR-P4-029-1 |",
+   "new": "| MSG-P1-001 | The data product the case is read from is stale after a late or failed ACE batch | {product} is from {date}. Today's load has not arrived. | This story, on the referral, from FSD P4 v3 A2.29 VR-P4-029-1 |"
+  },
+  {
+   "old": "| SCR-03 Case record | Referral, not recorded | The 503 of X10 with MSG-P7-003 and a retry action that reuses the same `Idempotency-Key` |",
+   "new": "| SCR-03 Case record | Referral, not recorded | The 503 of X10 with MSG-P7-003 and a retry action that reuses the same `Idempotency-Key` |\n| SCR-03 Case record | Empty | Not specified in the source documents (CG-ALL-5662) |\n| SCR-03 Case record | Loading | As in Screen Specifications v1, section SCR-03 (CG-ALL-5662) |\n| SCR-03 Case record | Error | Not specified in the source documents (CG-ALL-5662) |\n| SCR-03 Case record | No access | Not specified in the source documents (CG-ALL-5662) |"
+  },
+  {
+   "old": "those rows are the rule-version template's and are carried as a gap (GAP-0883).",
+   "new": "those rows are the rule-version template's and are carried as a gap (GAP-0883). The states of SCR-39 are empty, loading, error and no access: Not specified in the source documents (CG-ALL-5663). The states of SCR-41 are empty as in Screen Specifications v1, section SCR-41, and loading, error and no access: Not specified in the source documents (CG-ALL-5664)."
+  },
+  {
+   "old": "20. A case or a state with no referral answers 200 with an empty `items` and total 0; it is never a 404 and never names a customer, so the read cannot be used to probe for a case that has not been referred (BR14).",
+   "new": "20. A case or a state with no referral answers 200 with an empty `items` and total 0; it is never a 404 and never names a customer, so the read cannot be used to probe for a case that has not been referred (BR14).\n\nThe referral is raised by an explicit call from the case screen or by the fraud rule verdict handler of `rwb-decision`. This service declares no event, no inbox row and no Schedule for the capability."
+  },
+  {
+   "old": "    Then the state path carries the \"FAILED\" entry and then the \"SENT\" entry, in that order",
+   "new": "    Then the state path carries the \"FAILED\" entry and then the \"SENT\" entry, in that order\n\n  Scenario: AC11 The service identity of the referral path passes the same checks, and a case with no referral answers an empty page (new, D-RCV-60)\n    Given the rwb-case contract mock returns case \"RW-2026-000123\" with its fraud flag in force and product group \"MORTGAGE\"\n    And the rwb-decision contract mock returns the fraud verdict for \"RW-2026-000123\" with decision reference \"DL-2026-000981\", ruleId \"R-UNI-08\", ruleVersion \"FRAUD-2027-01\" and modelVersion \"DMN-FRAUD-3\"\n    And the source-data freshness mock answers that the product of \"RW-2026-000123\" is fresh for 2026-11-22\n    And the Aric transport fake accepts the referral and answers externalReference \"ARIC-2027-004417\"\n    When the service identity of the referral path calls POST /api/recovery/access/v1/admin/fraud-referrals for caseNo \"RW-2026-000123\" with Idempotency-Key \"k-018-13\"\n    Then the response is 201 and the entry records the identity and the role code that carried the right, and no name\n    When GET /api/recovery/access/v1/admin/fraud-referrals?caseNo=RW-2026-000123&state=FAILED is called by \"U-8184\" holding Rules and parameters R\n    Then the response is 200 with an empty items list and total 0, and never a 404\n\n  Scenario: AC12 A request without a session is refused 401, and an unknown referral id answers 404 (new, D-RCV-60)\n    Given a referral of case \"RW-2026-000123\" is in state \"SENT\"\n    When a request without a session calls GET /api/recovery/access/v1/admin/fraud-referrals/{referralId}\n    Then the response is 401 with message MSG-P4-001 and no entry is read\n    When \"U-8184\" holding Rules and parameters R calls GET /api/recovery/access/v1/admin/fraud-referrals/{unknownReferralId}\n    Then the response is 404 with a problem response whose messageId is Not specified in the source documents (NEWAC-RWB-P4-E8018-APP-AC12)"
+  },
+  {
+   "old": "| TC-E8-018-15 | BR2 | Component | A call made by the service identity of the referral path is accepted, and the entry records the identity and the role code that carried the right, with no screen involved |",
+   "new": "| TC-E8-018-15 | BR2 | Component | A call made by the service identity of the referral path is accepted, and the entry records the identity and the role code that carried the right, with no screen involved |\n| TC-E8-018-16 | AC11, BR2, BR14 | Component | The service identity of the referral path accepted 201 with its identity and role code recorded; the list with state FAILED for the case answers an empty page with total 0, never a 404 |\n| TC-E8-018-17 | AC12 | Component | A request without a session refused 401 with MSG-P4-001 and no entry read; an unknown referral id answers 404 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23059",
+   "item": "GAP-2303",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P4-E8018-CON contract baseline",
+   "change": "Publish the baseline with the two operations, both schemas, the three-state closed set, the boolean confirmation and the consumed Aric interface, marking each open value with the R9 placeholder; settle the Aric field detail, record codes and panel identifier with their owners before tagging; add missing dependencies at D1.",
+   "note": "Story BR10 and §15 list four states (SENT, RESULT_RECEIVED, CLOSED, FAILED), not three; the conflict is not resolved in this story."
+  },
+  {
+   "ruling": "R-25669",
+   "item": "CG-ALL-5659",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text in §14 now reads 'Today's load has not arrived.' as in Error and Message Standard v4."
+  },
+  {
+   "ruling": "R-25670",
+   "item": "CG-ALL-5661",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the REQ-CWC-018 test list in RTM v7 with §18 of RWB-P4-E8018-APP (TC-E8-018-03, TC-E8-018-05) in its next version.",
+   "note": "§18 of this story kept; RTM v7 traces TC-E2-036 tests for REQ-CWC-018 that are not this story's rows."
+  },
+  {
+   "ruling": "R-25671",
+   "item": "CG-ALL-5662",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-03 §15 now lists empty, loading, error and no access; states the screen specification lacks are marked Not specified."
+  },
+  {
+   "ruling": "R-25672",
+   "item": "CG-ALL-5663",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-39 §15 now states empty, loading, error and no access as Not specified in the source documents."
+  },
+  {
+   "ruling": "R-25673",
+   "item": "CG-ALL-5664",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-41 §15 now gives empty as in the specification and marks loading, error and no access as Not specified."
+  },
+  {
+   "ruling": "R-28991",
+   "item": "GAP-0883",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "§4 states the referral is raised by a case-screen call or the rwb-decision verdict handler; no event, inbox row or Schedule declared."
+  },
+  {
+   "ruling": "R-31054",
+   "item": "NEWAC-RWB-P4-E8018-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC11 added in §7 for BR2 and BR14, with test row TC-E8-018-16 in §16; no proposed test was given, so the row is written from the rules."
+  },
+  {
+   "ruling": "R-31055",
+   "item": "NEWAC-RWB-P4-E8018-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC12 added (401 MSG-P4-001, 404 unknown id) with TC-E8-018-17. §14 gives 409 MSG-GEN-004 for unknown id on results; conflict left open."
+  }
+ ]
+}

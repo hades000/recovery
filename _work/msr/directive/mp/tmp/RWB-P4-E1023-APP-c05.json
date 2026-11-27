@@ -1,0 +1,119 @@
+{
+ "edits": [
+  {
+   "old": "| X3 | The token carries no Recovery role, or no second factor | No answer is given: 401 before the policy is read; one refusal entry with the reason | MSG-P4-001 | BR3, AC10 |",
+   "new": "| X3 | The token carries no Recovery role, or no second factor | No answer is given: 401 before the policy is read; one refusal entry with the reason | MSG-P4-001 | BR3, AC10, AC16 |"
+  },
+  {
+   "old": "| X5 | The caller asks for the identity number in clear | The answer marks it `masked`, because the ACE view exposes `id_no_masked` and `id_no_last4` only | None | BR5, AC11 |",
+   "new": "| X5 | The caller asks for the identity number in clear | The answer marks it `masked`, because the ACE view exposes `id_no_masked` and `id_no_last4` only | None | BR5, AC11, AC17 |"
+  },
+  {
+   "old": "| X6 | Two roles of the caller conflict (for example RW-SECADM with a business role) | The sign-in access check refuses the session from the `role_conflict` rows this service holds; no authorise request is made | MSG-P4-006 | BR10, AC12 |",
+   "new": "| X6 | Two roles of the caller conflict (for example RW-SECADM with a business role) | The sign-in access check refuses the session from the `role_conflict` rows this service holds; no authorise request is made | MSG-P4-006 | BR10, AC12, AC18 |"
+  },
+  {
+   "old": "| X8 | The reference list of scope or capability is not available | No answer is given rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | BR10, AC13 |",
+   "new": "| X8 | The reference list of scope or capability is not available | No answer is given rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | BR10, AC13, AC19 |"
+  },
+  {
+   "old": "| X9 | The caller is an agent or a service identity, not a person | The same checks run under the service identity's roles; a service identity with no role is refused 401 | MSG-P4-001 | BR3, AC14 |",
+   "new": "| X9 | The caller is an agent or a service identity, not a person | The same checks run under the service identity's roles; a service identity with no role is refused 401 | MSG-P4-001 | BR3, AC14, AC20 |"
+  },
+  {
+   "old": "| TC-E1-023-16 | AC9, BR9 | Component | U-81 asks for RW-2026-000701 twice under PM-2026.11 and the second answer comes from cache with no second matrix read; PM-2026.12 and MASK-SIT-02 are approved and AccessPolicyChanged is published; the next ask runs under the new versions and a field with no MASK-SIT-02 row is masked |",
+   "new": "| TC-E1-023-16 | AC9, BR9 | Component | U-81 asks for RW-2026-000701 twice under PM-2026.11 and the second answer comes from cache with no second matrix read; PM-2026.12 and MASK-SIT-02 are approved and AccessPolicyChanged is published; the next ask runs under the new versions and a field with no MASK-SIT-02 row is masked |\n| TC-E1-023-17 | AC5, BR4 | Component | No MASK-SIT-01 row covers DF-PTY-008; U-81 (RW-CASEOWN, owner of RW-2026-000701) asks for DF-PTY-008 and DF-PTY-016; DF-PTY-008 is marked masked with XXXX-XX-XX and one AC-READ entry names both field IDs as masked |\n| TC-E1-023-18 | AC9, BR9 | Component | U-81 holds a cached answer for RW-2026-000701 under PM-2026.11 and MASK-SIT-01; AccessPolicyChanged is published for PM-2026.12 and MASK-SIT-02; the next ask is answered under the new versions with no deployment |\n| TC-E1-023-19 | AC16, BR3 | Component | A token with a Recovery role and no second factor asks for RW-2026-000701; 401 with MSG-P4-001, the permission matrix is not read, and one refusal entry is written |\n| TC-E1-023-20 | AC17, BR5 | Component | U-81 (RW-CASEOWN, owner of RW-2026-000701) asks for DF-PTY-007 in clear; DF-PTY-007 is marked masked and the identity values are read from id_no_masked and id_no_last4 only |\n| TC-E1-023-21 | AC18, BR10 | Component | A test user holds RW-SECADM with a conflicting business role listed in the role_conflict rows; sign-in is refused with MSG-P4-006 and no authorise request is made |\n| TC-E1-023-22 | AC19, BR10 | Component | The reference list of scope or capability is not available; U-81 asks for RW-2026-000701; 503 with MSG-GEN-006, one AC-DENY entry, and no AC-READ entry |\n| TC-E1-023-23 | AC20, BR1 | Component | A service identity holding RW-REFADM asks for RW-2026-000701 with action read the parties; 403 with MSG-P4-002 and one AC-DENY entry |\n| TC-E1-023-24 | AC21, BR3, BR8, BR9, BR10 | Component | Code review of rwb-access for literal role codes, scope names, capability areas, field IDs and version strings; boundary test of the schema reads, the no-role guard and the AccessPolicyChanged drop |\n| TC-E1-023-25 | AC22, BR3 | Component | A request to a provided operation on /api/recovery/access/v1 with no valid token; 401 with MSG-P4-001 and no case fact |"
+  },
+  {
+   "old": "    Then the answer and the decision record carry no personal value and no complete copy of the case",
+   "new": "    Then the answer and the decision record carry no personal value and no complete copy of the case\n\n  Scenario: AC16 A token with no second factor is refused before the policy is read (new, D-RCV-60)\n    Given a test user holds a token with a Recovery role and no second factor\n    When the caller asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and action \"open the case record\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n    Then the permission matrix is not read for the request and no case fact or field marker is returned\n    Then one refusal entry with the reason is written\n\n  Scenario: AC17 An identity number asked in clear is marked and read from the masked columns only (new, D-RCV-60)\n    Given test user \"U-81\" holds RW-CASEOWN and owns case \"RW-2026-000701\"\n    When \"U-81\" asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and asks for the identity number DF-PTY-007 in clear\n    Then the answer marks DF-PTY-007 \"masked\" and carries no identity number value\n    Then the read takes its identity values from \"id_no_masked\" and \"id_no_last4\" of the ACE view only\n\n  Scenario: AC18 A conflicting role pair is refused from the role_conflict rows (new, D-RCV-60)\n    Given a test user holds RW-SECADM together with a business role that conflicts with it in the role_conflict rows of this service\n    When the user signs in to the Workbench\n    Then the sign-in access check reads the conflict from the role_conflict rows and refuses the session with message MSG-P4-006\n    Then no role pair is written in code and no authorise request is made for the session\n\n  Scenario: AC19 A reference list that is not available records the refusal and reads no scope (new, D-RCV-60)\n    Given the reference list of scope or capability is not available\n    Given test user \"U-81\" holds RW-CASEOWN and owns case \"RW-2026-000701\"\n    When \"U-81\" asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and field ID DF-PTY-007\n    Then the answer is status 503 with message MSG-GEN-006 and no scope or capability is guessed\n    Then the refusal is recorded as one AC-DENY decision record and no AC-READ decision record is written\n\n  Scenario: AC20 A service identity is checked under the roles it holds (new, D-RCV-60)\n    Given a service identity holds RW-REFADM, which has no CASE_RECORD right in \"PM-2026.12\"\n    When the service identity asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and action \"read the parties\"\n    Then the answer is refused with status 403 and message MSG-P4-002 with action \"read the parties\"\n    Then the refusal is recorded as one AC-DENY decision record with area \"CASE_RECORD\" and right \"R\"\n\n  Scenario: AC21 The architecture rules hold in the code and at the boundary (new, D-RCV-60)\n    Given the rwb-access build is under code review and boundary test\n    When the review checks the source for role codes, scope names, capability areas, field IDs and version strings, and the boundary test reads the schema and the policy event\n    Then no such value is written in code and the policy pack is loaded from \"rwb_access\" and the reference lists\n    Then no table of recovery_case, case_account, case_party, interaction, document or queue is read, a session with no Recovery role is refused before the policy is read, and a cached answer is dropped when AccessPolicyChanged arrives\n\n  Scenario: AC22 Every provided operation answers 401 without a valid token (new, D-RCV-60)\n    Given the provided operations are served on base path \"/api/recovery/access/v1\"\n    When a request arrives to a provided operation with no valid token\n    Then the answer is status 401 with message MSG-P4-001\n    Then no case fact and no field marker is returned"
+  },
+  {
+   "old": "AC1 to AC15 are the criteria this story owns; the case-side criteria AC1 to AC10 of the legacy key",
+   "new": "AC1 to AC22 are the criteria this story owns; the case-side criteria AC1 to AC10 of the legacy key"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29480",
+   "item": "ACR-RWB-P4-E1023-APP-AC5",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-023-17 covering AC5 and BR4 to section 16.",
+   "note": "AC5 now has its own test case row TC-E1-023-17 in section 16 (DF-PTY-008 with no masking row is masked)."
+  },
+  {
+   "ruling": "R-29481",
+   "item": "ACR-RWB-P4-E1023-APP-AC9",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-023-18 covering AC9 and BR9 to section 16.",
+   "note": "AC9 now has its own test case row TC-E1-023-18 in section 16 for the cache drop on AccessPolicyChanged."
+  },
+  {
+   "ruling": "R-30859",
+   "item": "NEWAC-RWB-P4-E1023-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC16 and TC-E1-023-19; X3 Covered by now lists AC16.",
+   "note": "Proposed AC11 took next free number AC16 (token with no second factor). Test case TC-E1-023-19 added in section 16."
+  },
+  {
+   "ruling": "R-30860",
+   "item": "NEWAC-RWB-P4-E1023-APP-AC12",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC17 and TC-E1-023-20; X5 Covered by now lists AC17.",
+   "note": "Proposed AC12 took next free number AC17 (identity number in clear reads masked columns only). TC-E1-023-20 added."
+  },
+  {
+   "ruling": "R-30861",
+   "item": "NEWAC-RWB-P4-E1023-APP-AC13",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC18 and TC-E1-023-21; X6 Covered by now lists AC18.",
+   "note": "Proposed AC13 took next free number AC18 (conflicting role pair from role_conflict rows). TC-E1-023-21 added."
+  },
+  {
+   "ruling": "R-30862",
+   "item": "NEWAC-RWB-P4-E1023-APP-AC14",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC19 and TC-E1-023-22; X8 Covered by now lists AC19.",
+   "note": "Proposed AC14 took next free number AC19 (reference list unavailable, 503, no guess). TC-E1-023-22 added."
+  },
+  {
+   "ruling": "R-30863",
+   "item": "NEWAC-RWB-P4-E1023-APP-AC15",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC20 and TC-E1-023-23; X9 Covered by now lists AC20.",
+   "note": "Proposed AC15 took next free number AC20 (service identity checked under its own roles). TC-E1-023-23 added."
+  },
+  {
+   "ruling": "R-30864",
+   "item": "NEWAC-RWB-P4-E1023-APP-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC21 (guardrail for BR3, BR8, BR9, BR10) and TC-E1-023-24 in section 16.",
+   "note": "Proposed AC16 took next free number AC21 as one boundary and code-review criterion for the four rules. TC-E1-023-24 added."
+  },
+  {
+   "ruling": "R-30865",
+   "item": "NEWAC-RWB-P4-E1023-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC22 (401 for every provided operation without a valid token) and TC-E1-023-25 in section 16.",
+   "note": "Proposed AC17 took next free number AC22. Status code 401 is from the existing MSG-P4-001 refusal. TC-E1-023-25 added."
+  }
+ ]
+}

@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "1. The contract author fixes the two operations: method, path under `/api/recovery/decision/v1`, purpose, authorisation, paging and the error set, with owner `rwb-decision`.",
+   "new": "1. The contract author fixes the two operations: method, path under `/api/recovery/decision/v1`, purpose, authorisation, paging and the error set, with owner `rwb-decision`. The read of one entry answers 200 once the entry is sealed; that read is the confirmation a strict-mode step waits on. The sealed-entry announcement on `rwb.decision-record.v1` feeds the reporting projection."
+  },
+  {
+   "old": "5. The author fixes the consumed `DecisionRecorded` envelope: the CloudEvents attribute set, `ce_type` `rwb.decision.DecisionRecorded.v1`, the key rule, the payload fields the ledger stores, and the dedupe key (`ce_id` into `idempotency_key` and `processed_event`).",
+   "new": "5. The author fixes the consumed `DecisionRecorded` envelope: the CloudEvents attribute set, `ce_type` `rwb.decision.DecisionRecorded.v1`, the key rule, the payload fields the ledger stores, and the dedupe key (`ce_id` into `idempotency_key` and `processed_event`). Events are ordered per case as the producer emits them; the ledger assigns `chain_seq` and `prev_hash` on ingest under the chain lock; the catch-up completes within five minutes. Each service chains its own records in `chain_seq` order; the ledger chain is the chain of record and the local chain serves replay. The AsyncAPI document of `rwb.decision-record.v1` is published at the shared-topic contract review before the first SIT run."
+  },
+  {
+   "old": "6. The author fixes the owned tables: `decision_log_entry` in `rwb_decision`, plus the three library objects created there, and states explicitly what the ledger does not own.",
+   "new": "6. The author fixes the owned tables: `decision_log_entry` in `rwb_decision`, plus the three library objects created there, and states explicitly what the ledger does not own. The `case_id` column is a plain identifier with no foreign key, because `rwb_case` is P3's table; it is verified on the read through P3's case contract. The only writer of `decision_log_entry` is the ingest of `rwb.decision-record.v1`; no append operation is declared."
+  },
+  {
+   "old": "| MSG-GEN-006 | The ledger cannot be read | {system} is not available. Try again in a few minutes. | 503 in the problem body |",
+   "new": "| MSG-GEN-006 | The ledger cannot be read | {system} is not available. Your request is queued and will be retried. | 503 in the problem body |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21896",
+   "item": "GAP-2074",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 5 now states per-service chains, ledger chain as chain of record, and the local chain for replay."
+  },
+  {
+   "ruling": "R-21898",
+   "item": "GAP-0332",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 5 adds ingest ordering, chain_seq and prev_hash assignment, five-minute catch-up and the AsyncAPI publication before SIT."
+  },
+  {
+   "ruling": "R-21899",
+   "item": "GAP-1224",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 6 names ingest of rwb.decision-record.v1 as the only writer and declares no append operation. Sibling E2028 POST needs alignment."
+  },
+  {
+   "ruling": "R-21900",
+   "item": "GAP-1226",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "FSD P7 v3",
+   "change": "Withdraw FEAT-DRI-06 and its lake acceptance criteria; keep JOB-13 as continuous ingest and JOB-14 as 02:00 chain check with WORM seal; record RWB-E1-014 retirement as delivered by the ledger.",
+   "note": "Story already excludes the data lake; the FSD change is outside this story."
+  },
+  {
+   "ruling": "R-21901",
+   "item": "GAP-1227",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 1 names the sealed-entry 200 read as the strict-mode confirmation and the announcement for reporting."
+  },
+  {
+   "ruling": "R-21902",
+   "item": "GAP-1231",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 6 drops the cross-schema key; case_id is verified through P3's case contract. Legacy keys still need the Physical Schema v7 record."
+  },
+  {
+   "ruling": "R-21903",
+   "item": "GAP-1234",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "RWB-P7-E1008-OPS",
+   "change": "Set RPO zero for committed entries via ACE PITR plus seal files; RTO Not specified in the source documents (GAP-1234); make chain re-verification and append-only check mandatory restore gates.",
+   "note": "Restore and backup rules belong to the deployment story, not this contract."
+  },
+  {
+   "ruling": "R-26184",
+   "item": "CG-ALL-6844",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-GEN-006 row now uses the English text from Error and Message Standard v4."
+  },
+  {
+   "ruling": "R-26185",
+   "item": "CG-ALL-6845",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8",
+   "change": "Add rows for TC-P7-E1008-CON-01 to -06 with Given, When and Then copied from the criterion each covers.",
+   "note": "Test rows exist in section 16 of this story; the missing rows belong in Test Cases v8."
+  },
+  {
+   "ruling": "R-26186",
+   "item": "CG-ALL-6846",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the traced test lists for the three differing requirements with RWB-P7-E1008-CON section 18 in the next version.",
+   "note": "Section 18 stays as is until the RTM is aligned."
+  }
+ ]
+}

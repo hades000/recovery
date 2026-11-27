@@ -1,0 +1,93 @@
+{
+ "edits": [
+  {
+   "old": "    Given borrower P-0103 holds mortgage account A-5011 and hire purchase account A-5012, both at days_past_due 91\n    Given the rwb-source-data contract mock returns mortgage account A-5011 and hire purchase account A-5012 for borrower P-0103",
+   "new": "    Given the rwb-source-data contract mock returns mortgage account A-5011 and hire purchase account A-5012 for borrower P-0103, both at days_past_due 91"
+  },
+  {
+   "old": "    Given borrower P-0102 holds hire purchase accounts A-5003 with total_balance 300,000.00 and A-5004 with total_balance 112,350.00, both at days_past_due 95\n    Given the rwb-source-data contract mock returns account A-5003 with total_balance 300,000.00 and account A-5004 with total_balance 112,350.00 for borrower P-0102",
+   "new": "    Given the rwb-source-data contract mock returns for borrower P-0102 hire purchase accounts A-5003 with total_balance 300,000.00 and A-5004 with total_balance 112,350.00, both at days_past_due 95"
+  },
+  {
+   "old": "    Given account A-5002 is at days_past_due 92 with tdr_flag true",
+   "new": "    Given the rwb-source-data contract mock returns account A-5002 at days_past_due 92 with tdr_flag true"
+  },
+  {
+   "old": "    Given account A-5006 is at days_past_due 89 and account A-5007 at days_past_due 90, both with no exclusion",
+   "new": "    Given the rwb-source-data contract mock returns account A-5006 at days_past_due 89 and account A-5007 at days_past_due 90, both with no exclusion"
+  },
+  {
+   "old": "    Then the system writes one AC-DENY event with area \"CASE_RECORD\" and right \"R\"",
+   "new": "    Then the system writes one AC-DENY event with area \"CASE_RECORD\" and right \"R\"\n\n  Scenario: AC16 Band, cancel by rule and checksum rules (BR9, BR10, BR14)\n    Given the band table in force is the table for the business date\n    When a case is created with a total outstanding at entry\n    Then its exposure_band is the band in the band table in force that contains that total\n    Given a case was created on bad data\n    When the case is canceled by rule\n    Then the case is canceled and is not deleted\n    Given the rwb-decision contract mock returns package code \"ENTRY\" with a version whose checksum does not verify\n    When the entry rule runs\n    Then the KieBase for that version is not used\n\n  Scenario: AC17 Error answers 401 and 404 of the provided operations\n    Given a caller sends GET /cases/{caseId} without a valid credential\n    When the call is made\n    Then the system answers with status 401\n    Given a caller sends GET /cases/{caseId} for a case ID that does not exist\n    When the call is made\n    Then the system answers with status 404\n\n  Scenario: AC18 A retried or timed-out activity creates nothing twice\n    Given an activity of DailyCaseRun fails with a retryable error\n    When the activity is retried under the retry parameters in force\n    Then the retry creates no second case and issues no second case number\n    Given an activity of DailyCaseRun exceeds the timeout in force\n    When the timeout is reached\n    Then the run record lists the account as failed and the account is taken again in the next run"
+  },
+  {
+   "old": "| TC-E1-018-21 | BR14 | End to end | ENTRY version whose checksum from rwb-decision does not verify |",
+   "new": "| TC-E1-018-21 | BR14 | End to end | ENTRY version whose checksum from rwb-decision does not verify |\n| TC-E1-018-22 | AC16, BR9, BR10, BR14 | End to end | Band table in force; case created on bad data; ENTRY version whose checksum from rwb-decision does not verify |\n| TC-E1-018-23 | AC17 | Component | GET /cases/{caseId} with no valid credential and for a case ID that does not exist |\n| TC-E1-018-24 | AC18, BR4 | End to end | DailyCaseRun activity that fails and is retried, and one that times out |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29358",
+   "item": "ACR-RWB-P3-E1018-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC12 Given now reads borrower P-0103 accounts through the rwb-source-data contract mock; ACE view wording removed."
+  },
+  {
+   "ruling": "R-29359",
+   "item": "ACR-RWB-P3-E1018-APP-AC2",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC2 Given now reads account A-5002 through the rwb-source-data contract mock; no ACE view read."
+  },
+  {
+   "ruling": "R-29360",
+   "item": "ACR-RWB-P3-E1018-APP-AC3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC3 Given now reads borrower P-0102 accounts through the rwb-source-data contract mock; no ACE view read."
+  },
+  {
+   "ruling": "R-29361",
+   "item": "ACR-RWB-P3-E1018-APP-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC7 Given now reads accounts A-5006 and A-5007 through the rwb-source-data contract mock; no ACE view read."
+  },
+  {
+   "ruling": "R-30522",
+   "item": "NEWAC-RWB-P3-E1018-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 covering BR9, BR10, BR14 in section 7 and TC-E1-018-22 in section 16; test data follows TC-19 to TC-21."
+  },
+  {
+   "ruling": "R-30523",
+   "item": "NEWAC-RWB-P3-E1018-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 for 401 and 404 answers of GET /cases/{caseId} in section 7 and TC-E1-018-23 in section 16."
+  },
+  {
+   "ruling": "R-30524",
+   "item": "NEWAC-RWB-P3-E1018-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 for retried and timed-out activities in section 7 and TC-E1-018-24 in section 16; no numeric limits invented."
+  }
+ ]
+}

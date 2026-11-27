@@ -1,0 +1,108 @@
+{
+ "edits": [
+  {
+   "old": "(states Loading; plan running; cure period; broken)",
+   "new": "(states Loading; plan running; cure period; broken; empty, error and no access: Not specified in the source documents (CG-ALL-8429))"
+  },
+  {
+   "old": "The matched and unmatched receipt list stays SCR-28 with rwb-payment and is not re-cut here.",
+   "new": "The matched and unmatched receipt list stays SCR-28 with rwb-payment and is not re-cut here; its states are Loading, and empty, error and no access are Not specified in the source documents (CG-ALL-8430)."
+  },
+  {
+   "old": "**Configuration.** `CURE_PERIOD_DAYS` and `restructure.max_breaks` are parameter values in force, loaded and approved through rwb-decision and rwb-case; the design example reads 30 calendar days for MORTGAGE and `restructure.max_breaks = 2` (ASM-4488). The package code of the RES rule set is not published by any source (GAP-2706).",
+   "new": "**Configuration.** `CURE_PERIOD_DAYS` and `restructure.max_breaks` are parameter values in force, loaded and approved through rwb-decision and rwb-case; the design example reads 30 calendar days for MORTGAGE and `restructure.max_breaks = 2` (ASM-4488). The package code of the RES rule set is not published by any source (GAP-2706); the RES rule set is evaluated in rwb-treatment with the package in force from rwb-decision, and no plan event is published in wave 2 (GAP-2706). The tolerance and window values of the match stay with rwb-payment and are not read by this slice (GAP-1628). The match consequence is read through the read in RWB-P8-E2027-CON, returning for a case, plan and business date the payment code, installment due date, match type, rule ID, package code and version and shortfall (GAP-2705). The plan states on the treatment state column are PLAN_RUNNING, PLAN_CURE_PERIOD, PLAN_BROKEN and BACK_TO_ROUTE_DECISION; a breach writes outcome BROKEN and sets outcome_at, and the local decision record stamps the rule ID and package version (GAP-1880; GAP-2705). The breach decision code is Not specified in the source documents (GAP-1880). rwb-treatment publishes rwb.treatment.TreatmentClosed.v1 once for a breached plan; completed-plan closure stays with the plan story (GAP-1881). The numeric operations values, including the alert thresholds and the cache and queue limits, are Not specified in the source documents (GAP-2508); secrets and the workload identity are referenced by role (GAP-2508)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22637",
+   "item": "GAP-1628",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Tolerance and window values stay with rwb-payment and are not read by this slice; the Configuration paragraph now says so."
+  },
+  {
+   "ruling": "R-22638",
+   "item": "GAP-1880",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Matching read taken from RWB-P8-E2027-CON; plan state and outcome BROKEN with outcome_at; rule ID and package version stamped; breach decision code Not specified."
+  },
+  {
+   "ruling": "R-22639",
+   "item": "GAP-2507",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Contract baseline of rwb-decision, rwb-treatment and the shared event owners",
+   "change": "Publish RuleResult as packageCode, versionInForce, ruleId, rowOrder and outputs with NoPackageInForce; name the version-in-force read and the treatment installment-paid operation as placeholders; publish the three payload field lists; declare DecisionRecorded read-only on the shared topic with no second writer.",
+   "note": "Story cannot freeze these shapes; the contract owners must publish them before the Day-1 freeze."
+  },
+  {
+   "ruling": "R-22640",
+   "item": "GAP-2508",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Platform secret-store catalogue and the chart values files",
+   "change": "Record the names of the rwb-payment login, Kafka client credential, Temporal mTLS material, registry certificate and workload identity by role; expose numeric operations values as chart values; close DL11 before UAT.",
+   "note": "Numeric values and secret names are not in the sources; the story now references them by role and marks values Not specified."
+  },
+  {
+   "ruling": "R-22641",
+   "item": "GAP-2705",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-P8-E2027-CON",
+   "change": "Publish one read returning, for a case, a plan and a business date, the payment code, installment due date, match type, rule ID, package code and version and shortfall; name the payload members at major version 1.",
+   "note": "Plan states now listed in the story Configuration paragraph; the read operation and its payload belong to the P8 contract."
+  },
+  {
+   "ruling": "R-22642",
+   "item": "GAP-2706",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "RES set evaluated in rwb-treatment with the package in force from rwb-decision; no wave 2 plan event; package code remains Not specified."
+  },
+  {
+   "ruling": "R-22643",
+   "item": "GAP-1881",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "PAYMENT_MATCH stays with rwb-decision and rwb-payment; treatment evaluates the RES version for the breach and publishes TreatmentClosed.v1 once for a breached plan."
+  },
+  {
+   "ruling": "R-22644",
+   "item": "GAP-1291",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Dependency Map (Day-1 allocation)",
+   "change": "Record H RWB-PLT-E1027-CON, H RWB-PLT-E1072-CON, C RWB-P7-E1073-CON, H RWB-PLT-E1042-CON, C RWB-P3-E1042-CON, H RWB-PLT-E1043-CON, C RWB-P3-E1043-CON, H RWB-PLT-E1071-CON, H RWB-PLT-E1047-CON, H RWB-PLT-E1044-CON and H RWB-PLT-N001-CON as non-blocking, built against fakes.",
+   "note": "Metadata rows kept. Section 13 text is outside this chunk, so DP-04 and DP-14 visibility is not edited here."
+  },
+  {
+   "ruling": "R-26862",
+   "item": "CG-ALL-8429",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-14 now lists empty, error and no access as Not specified in the source documents; Loading and the other states are kept."
+  },
+  {
+   "ruling": "R-26863",
+   "item": "CG-ALL-8430",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-28 now states Loading and marks empty, error and no access as Not specified in the source documents."
+  }
+ ]
+}

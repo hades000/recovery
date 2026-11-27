@@ -1,0 +1,189 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The caller holds no partner portal right U, or the instruction belongs to another firm | 403 with MSG-P4-002 for the right, 404 for the firm boundary, before any write | MSG-P4-002 | TC-E7-018-03 |",
+   "new": "| X2 | The caller holds no partner portal right U, or the instruction belongs to another firm | 403 with MSG-P4-002 for the right, 404 for the firm boundary, before any write | MSG-P4-002 | AC3, TC-E7-018-03 |"
+  },
+  {
+   "old": "| X4 | A required part is absent, an upload exceeds the declared limits, or the media type is not declared | 422 with MSG-GEN-001 for a missing or unformed part, 415 for the media type, nothing written | MSG-GEN-001 | Section 17, BR8 |",
+   "new": "| X4 | A required part is absent, an upload exceeds the declared limits, or the media type is not declared | 422 with MSG-GEN-001 for a missing or unformed part, 415 for the media type, nothing written | MSG-GEN-001 | AC4, Section 17, BR8 |"
+  },
+  {
+   "old": "| X5 | rwb-document, rwb-source-data or rwb-decision does not answer inside 2 s, or its breaker is open | The transaction rolls back, the client retries the submission with the same key, and nothing is committed | None | BR5, BR10 |",
+   "new": "| X5 | rwb-document, rwb-source-data or rwb-decision does not answer inside 2 s, or its breaker is open | The transaction rolls back, the client retries the submission with the same key, and nothing is committed | None | AC5, BR5, BR10 |"
+  },
+  {
+   "old": "| X6 | The same submission arrives twice, which is the normal reconnect case of NFR-062 | One result, one document set, one ledger entry, one record and one event; the repeat answers what exists | None | BR10 |",
+   "new": "| X6 | The same submission arrives twice, which is the normal reconnect case of NFR-062 | One result, one document set, one ledger entry, one record and one event; the repeat answers what exists | None | AC6, BR10 |"
+  },
+  {
+   "old": "| X7 | A component, a statement or a test reaches a `v_ace_*` view, a `document` or `interaction` row, or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR6, BR7 |",
+   "new": "| X7 | A component, a statement or a test reaches a `v_ace_*` view, a `document` or `interaction` row, or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC7, Section 17, BR6, BR7 |"
+  },
+  {
+   "old": "| X8 | The rule in force is absent at its effective date | 503 with nothing written; the step never falls back to a rule ID or a version of the code | Not specified in the source documents (GAP-3135; ASM-5496) | BR8 |",
+   "new": "| X8 | The rule in force is absent at its effective date | 503 with nothing written; the step never falls back to a rule ID or a version of the code | Not specified in the source documents (GAP-3135; ASM-5496) | AC8, BR8 |"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the local decision record with the rule version"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Caller without right U or another firm's instruction is refused\n    Given the caller holds no partner portal right U or the instruction belongs to another firm\n    When the submission is sent\n    Then the system answers 403 with MSG-P4-002 for the right or 404 for the firm boundary and writes nothing\n\n  Scenario: AC4 A required part is absent or the media type is not declared\n    Given a required part is absent, an upload exceeds the declared limits or the media type is not declared\n    When the submission is sent\n    Then the system answers 422 with MSG-GEN-001 for a missing or unformed part or 415 for the media type and writes nothing\n\n  Scenario: AC5 A consumed service does not answer inside 2 s\n    Given rwb-document, rwb-source-data or rwb-decision does not answer inside 2 s or its breaker is open\n    When the submission is sent\n    Then the transaction rolls back, the client retries with the same key and nothing is committed\n\n  Scenario: AC6 The same submission arrives twice\n    Given the same submission arrives twice with the same key\n    When the second submission is sent\n    Then one result, one document set, one ledger entry, one record and one event exist and the repeat answers what exists\n\n  Scenario: AC7 A forbidden read or write is refused by the boundary\n    Given a component, a statement or a test reaches a v_ace_* view, a document or interaction row, or another service's schema\n    When the build runs the boundary test\n    Then the grant refuses the statement, the build fails and nothing is released\n\n  Scenario: AC8 The rule in force is absent\n    Given the rule in force is absent at its effective date\n    When the step reads the rule version\n    Then the system answers 503 with nothing written and never falls back to a rule ID or a version of the code"
+  },
+  {
+   "old": "so the check is stated and not built.",
+   "new": "so the check is stated and not built. The rwb-access authorise check (DP-08) is the guard of the operation: it tests the caller against capability area Partner portal and right U before any write. DP-08 is not in this story's pattern set and the check is recorded as a dependency gap (DOR-RWB-S9-E7018-APP-6)."
+  },
+  {
+   "old": "no write to `rwb_document`, `rwb_source_data`, `rwb_case` or any other schema, and no `document` or `interaction` row (X7).",
+   "new": "no write to any other service's schema, and no `document` or `interaction` row (X7)."
+  },
+  {
+   "old": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020.",
+   "new": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020.\n- Parameters: the parameter keys are Not specified in the source documents (DOR-RWB-S9-E7018-APP-20). The reference-data contract is DP-06 and DP-07, which are not in this story's pattern set and are recorded as a dependency gap."
+  },
+  {
+   "old": "| TC-E7-018-03 | Access | Component | A role without partner portal right U, and an instruction of another firm; 403 with MSG-P4-002 and 404 with nothing read |",
+   "new": "| TC-E7-018-03 | Access | Component | A role without partner portal right U, and an instruction of another firm; 403 with MSG-P4-002 and 404 with nothing read |\n| TC-E7-018-07 | Exception | Component | A required part absent, an oversized upload or an undeclared media type; 422 with MSG-GEN-001 or 415, nothing written |\n| TC-E7-018-08 | Exception | Component | A rwb-document, rwb-source-data or rwb-decision timeout or open breaker; transaction rolled back, retry with the same key commits nothing |\n| TC-E7-018-09 | Exception | Component | The same submission sent twice; one result, one document set, one ledger entry, one record and one event |\n| TC-E7-018-10 | Boundary | Pipeline | A v_ace_* read, a document or interaction row or another schema touched; the grant refuses and the build fails |\n| TC-E7-018-11 | Exception | Component | Rule version absent at its effective date; 503, nothing written, no fallback to a rule ID or a version of the code |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Story element | Feature | L3 process | Test cases |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-S9-009 | Field work and its evidence reach the case through the field application (Should, E7) | The result operation, the visit entry, the document claims, the record and EV-21 | TC-E7-018-01, TC-E7-018-02, TC-E7-018-05 |",
+   "new": "| REQ-S9-009 | Field work and its evidence reach the case through the field application (Should, E7) | The result operation, the visit entry, the document claims, the record and EV-21 | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-01, TC-E7-018-02, TC-E7-018-05 |"
+  },
+  {
+   "old": "| REQ-DCM-013 | Field photographs and bills reach the same intake and index as scanned documents (Should, E2) | The rwb-document claim-check intake of the photographs and the bills | TC-E7-018-01, TC-E7-018-04 |",
+   "new": "| REQ-DCM-013 | Field photographs and bills reach the same intake and index as scanned documents (Should, E2) | The rwb-document claim-check intake of the photographs and the bills | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-01, TC-E7-018-04 |"
+  },
+  {
+   "old": "| REQ-S9-008 | Partners exchange data through the partner portal and the external gateway, and not by email | The partner gateway access of the submission and the firm scope | TC-E7-018-03 |",
+   "new": "| REQ-S9-008 | Partners exchange data through the partner portal and the external gateway, and not by email | The partner gateway access of the submission and the firm scope | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-03 |"
+  },
+  {
+   "old": "| NFR-062 | The field application captures evidence with no network connection and uploads when it reconnects | The client's queue and the idempotent repeat of the submission | TC-E7-018-01 |",
+   "new": "| NFR-062 | The field application captures evidence with no network connection and uploads when it reconnects | The client's queue and the idempotent repeat of the submission | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-01 |"
+  },
+  {
+   "old": "| ADR-013 | 19 services inside ACE | rwb-partner as the owner of the instruction and its result | TC-E7-018-01 |",
+   "new": "| ADR-013 | 19 services inside ACE | rwb-partner as the owner of the instruction and its result | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-01 |"
+  },
+  {
+   "old": "| ADR-014 | Schema and login per service | `rwb_partner` and its own login | TC-E7-018-01, TC-E7-018-06 |",
+   "new": "| ADR-014 | Schema and login per service | `rwb_partner` and its own login | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-01, TC-E7-018-06 |"
+  },
+  {
+   "old": "| ADR-015 | Kafka with outbox, inbox and CloudEvents | EV-21 on `rwb.partner.events.v1` through the outbox | TC-E7-018-01 |",
+   "new": "| ADR-015 | Kafka with outbox, inbox and CloudEvents | EV-21 on `rwb.partner.events.v1` through the outbox | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-01 |"
+  },
+  {
+   "old": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The three consumed rows with their budget and breaker | TC-E7-018-01 |",
+   "new": "| ADR-020 | Contract-first REST, one hop, 2 s timeout | The three consumed rows with their budget and breaker | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-01 |"
+  },
+  {
+   "old": "| ADR-022 | Local decision record plus central ledger | The record written before the row | TC-E7-018-02, TC-E7-018-04 |",
+   "new": "| ADR-022 | Local decision record plus central ledger | The record written before the row | FEAT-PRM-15 | Not specified in the source documents (DOR-RWB-S9-E7018-APP-2) | TC-E7-018-02, TC-E7-018-04 |"
+  },
+  {
+   "old": "| Architecture decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022 |",
+   "new": "| Architecture decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022 |\n| Open decisions | DL11 is open; its assumptions ASM-0553, ASM-0703, ASM-1051 and ASM-1104 apply |"
+  },
+  {
+   "old": "| Test cases | TC-E7-018-01 to TC-E7-018-06 |",
+   "new": "| Test cases | TC-E7-018-01 to TC-E7-018-11 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21599",
+   "item": "DOR-RWB-S9-E7018-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Open decision DL11 and its four assumptions added to the trace table; the decision is still open."
+  },
+  {
+   "ruling": "R-21600",
+   "item": "DOR-RWB-S9-E7018-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to section 18; L3 process not given by sources, marked Not specified."
+  },
+  {
+   "ruling": "R-21601",
+   "item": "DOR-RWB-S9-E7018-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Parameter keys marked Not specified; DP-06 and DP-07 named as the reference-data contract and recorded as a gap."
+  },
+  {
+   "ruling": "R-21602",
+   "item": "DOR-RWB-S9-E7018-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Boundary step now refers to any other service's schema without naming rwb_case, rwb_document or rwb_source_data."
+  },
+  {
+   "ruling": "R-21603",
+   "item": "DOR-RWB-S9-E7018-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "AC3 to AC8 added for X2, X4 to X8 with test rows TC-E7-018-07 to 11; X2 uses TC-E7-018-03; section 5 Covered by updated."
+  },
+  {
+   "ruling": "R-21604",
+   "item": "DOR-RWB-S9-E7018-APP-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Each of the 11 uncovered rules needs its own criterion and test; no source gives the test values, so none written here."
+  },
+  {
+   "ruling": "R-21605",
+   "item": "DOR-RWB-S9-E7018-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 now states the rwb-access authorise check for the operation; DP-08 recorded as a dependency gap."
+  },
+  {
+   "ruling": "R-21606",
+   "item": "DOR-RWB-S9-E7018-APP-7",
+   "status": "Cross-document",
+   "section": "7, 11",
+   "target": "Logical Data Model v9",
+   "change": "Register decision_record as a PLT library object of DP-03 created in rwb_partner, or confirm it sits outside the LDM. AC1 wording now says local decision record. The ce_source name is not in the chunk text."
+  },
+  {
+   "ruling": "R-23654",
+   "item": "GAP-1842",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Functional Specification Document S9 (Partner management v3)",
+   "change": "Rewrite A2.15.4 criteria as the main success statement and write step-specific criteria with the story; the story now carries exception rows as AC2 to AC8."
+  },
+  {
+   "ruling": "R-23664",
+   "item": "GAP-1839",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Functional Specification Document S9 (Partner management v3)",
+   "change": "Treat the eight partner and instruction columns as one entity in the field catalogs; write other field lists with the story that first needs them. Story field list in section 11 is already its own."
+  }
+ ]
+}

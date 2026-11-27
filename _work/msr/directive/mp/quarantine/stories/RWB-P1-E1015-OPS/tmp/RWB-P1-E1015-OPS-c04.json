@@ -1,0 +1,50 @@
+{
+ "edits": [
+  {
+   "old": "    Then every alert links one runbook entry with the check, the owner role and the recovery step, and the capacity per environment is stated as a values entry",
+   "new": "    Then every alert links one runbook entry with the check, the owner role and the recovery step, and the capacity per environment is stated as a values entry\n\n  Scenario: AC9 The deployment meets the business rules BR1 to BR9 in section 8 (new, D-RCV-60)\n    Given the released rwb-source-data deployment in SIT\n    When each rule in section 8 is checked against the release\n    Then the release uses only the rwb_source_data login, runs its Flyway sequence in that schema and writes no other schema\n    Then every topic has a retry topic and a .dlt topic, and every Schedule and every alert follows its rule\n    Then no environment value is hard-coded and no personal data appears in a log, a series, an alert payload or the runbook\n\n  Scenario: AC10 A consumed call that fails or does not answer is not acknowledged (new, D-RCV-60)\n    Given a consumed call that is stubbed to fail or to leave without an answer\n    When the listener or the worker handles the event that carries the call\n    Then the event is not acknowledged and is retried on the retry topic\n    Then after the retries the event is moved to the .dlt topic and the failure is counted\n    Then no freshness stamp is written from that event\n\n  Scenario: AC11 A status change the model does not allow is refused (new, D-RCV-60)\n    Given a batch row whose status change is not allowed by the model\n    When the listener reads the change\n    Then the change is refused and counted and no workflow run starts for it\n    Then no freshness stamp is written from the refused change"
+  },
+  {
+   "old": "| TC-E1-015-14 | §12.7 tables (ASM-3438) | Boundary | The tables of §12.7 are read and written only at their boundary; no table owned by another service is touched |",
+   "new": "| TC-E1-015-14 | §12.7 tables (ASM-3438) | Boundary | The tables of §12.7 are read and written only at their boundary; no table owned by another service is touched |\n| TC-E1-015-15 | AC10 | NFR | A consumed call stubbed to fail and a second call stubbed to give no answer; the event is not acknowledged, goes to the retry topic and then the .dlt topic |\n| TC-E1-015-16 | AC11 | NFR | A batch row with a status change the model does not allow; the change is refused and counted and no freshness stamp is written |\n| TC-E1-015-17 | AC9; §8 BR1 to BR9 | NFR | The released deployment in SIT checked against each rule in §8 for login, schema, topics, Schedules, values, alert text, runbook link and personal data |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28918",
+   "item": "GAP-3233",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Legacy dependency trace sheet",
+   "change": "Keep the five version 4 rows visible as Not carried: RWB-E1-056 to RWB-E1-007, RWB-E1-056 to RWB-E1-015, RWB-E1-056 to RWB-E1-069, RWB-TE-009 to RWB-TE-004, RWB-TE-010 to RWB-TE-003. Add an X row only if the run books or harness waits for the named story.",
+   "note": "Story side needs no edit; the five pairs stay visible as Not carried in the trace, and a follow-up adds an X row only if a real wait exists."
+  },
+  {
+   "ruling": "R-30213",
+   "item": "NEWAC-RWB-P1-E1015-OPS-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 in section 7 (failed or unanswered call is not acknowledged, retried, then .dlt) and TC-E1-015-15 in section 16."
+  },
+  {
+   "ruling": "R-30214",
+   "item": "NEWAC-RWB-P1-E1015-OPS-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 in section 7 (disallowed status change is refused and counted, no stamp) and TC-E1-015-16 in section 16."
+  },
+  {
+   "ruling": "R-30215",
+   "item": "NEWAC-RWB-P1-E1015-OPS-AC9",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 in section 7 covering BR1 to BR9 of section 8, with TC-E1-015-17 in section 16 as the boundary-level check."
+  }
+ ]
+}

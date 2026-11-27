@@ -1,0 +1,104 @@
+{
+ "edits": [
+  {
+   "old": "Then the case is placed in the exception queue for role \"RW-TEAMMGR\" with the gap, and no default version, terms or timer is assumed",
+   "new": "Then the case is placed in the exception queue for role \"RW-TEAMMGR\" with the gap, and no default version, terms or timer is assumed\n\n  Scenario: AC10 The business rules with no criterion hold on the treatment write (new, D-RCV-60)\n    Given a restructure is proposed with 36 installments and first due date 2026-12-31\n    When the treatment is written and read back\n    Then the case holds exactly one treatment row with its type, terms, approval level, decision log entry and outcome (BR1)\n    Then installments is above zero and first_due_date is on or after the proposed date, or the write is refused (BR2)\n    Then first_due_date, installments, installment_amount, installments_paid and installment_shortfall are held and published, and no clock is written (BR3)\n    Then the cure period and the warning are read as CURE_PERIOD_DAYS and plan.warn-days and are not written in code (BR4)\n    Then a repeated key is ignored and counted on the request and on the consumed event (BR6)\n    Then no case state is moved and no timer is written by this service (BR7)\n    Then the state is one of \"APPROVED\", \"BOOKED\", \"RUNNING\", \"BROKEN\", \"COMPLETED\" or \"CANCELED\" (BR8)\n    Then no list value and no parameter is written in code or in a migration (BR10)\n\n  Scenario: AC11 A request without a valid credential or the right is refused (new, D-RCV-60)\n    Given a treatment in state \"APPROVED\"\n    When GET /api/recovery/treatment/v1/treatments/{treatmentId} is called without a valid credential\n    Then the answer is 401 and no treatment content is returned\n    When the same read is called by a role without Treatment and offer R\n    Then the answer is 403 and no treatment content is returned\n\n  Scenario: AC12 A retried or timed-out write is answered once (new, D-RCV-60)\n    Given the treatment contract fake answers the create after a timeout\n    When POST /cases/{caseId}/treatments is retried with the same Idempotency-Key\n    Then one treatment row, one decision_record row and one outbox_event row exist in rwb_treatment\n    Then the repeat is counted and the first answer is returned\n\n  Scenario: AC13 A consumed call that fails or does not answer writes nothing (new, D-RCV-60)\n    Given the parameters or reference-data read does not answer\n    When POST /cases/{caseId}/treatments is called for a restructure\n    Then no treatment row, no decision record and no outbox row are written\n    Then no default value of CURE_PERIOD_DAYS, plan.warn-days or any list is used and the failure is raised"
+  },
+  {
+   "old": "| TC-S2-E2004-APP-11 | ASM-3438 | Component | Boundary of the section 12.7 tables: migration on a PostgreSQL test container, each table present in rwb_treatment, no timer table owned |",
+   "new": "| TC-S2-E2004-APP-11 | ASM-3438 | Component | Boundary of the section 12.7 tables: migration on a PostgreSQL test container, each table present in rwb_treatment, no timer table owned |\n| TC-S2-E2004-APP-12 | AC10, BR1, BR2, BR3, BR4, BR6, BR7, BR8, BR10 | Component | Restructure, 36 installments, first due date 2026-12-31; each rule checked on the written row and the event |\n| TC-S2-E2004-APP-13 | AC11 | Component | Read without a credential; read by a role without Treatment and offer R |\n| TC-S2-E2004-APP-14 | AC12 | Component | Write answered after a forced timeout, then retried with the same Idempotency-Key |\n| TC-S2-E2004-APP-15 | AC13 | Component | Parameters or reference-data read forced not to answer; restructure write attempted |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28711",
+   "item": "GAP-0706",
+   "status": "Cross-document",
+   "section": "None",
+   "target": "rwb-case deployment values files",
+   "change": "Add provisional default values for the plan-timer projection lag, subscription lag, .dlt count, exception-queue count and DP04 freshness; confirm at UAT with the service owner and platform observability owner.",
+   "note": "Alert values belong in rwb-case values files, not this story; no value is set here."
+  },
+  {
+   "ruling": "R-28712",
+   "item": "GAP-0920",
+   "status": "Cross-document",
+   "section": "None",
+   "target": "gateway-bff route catalogue",
+   "change": "Publish the SCR-14 treatment record and SCR-03 timer panel composite routes with their field lists and confirm no personal field is on either.",
+   "note": "Route fields are published in the gateway catalogue; the masking proof here then covers that list."
+  },
+  {
+   "ruling": "R-28713",
+   "item": "GAP-0921",
+   "status": "Cross-document",
+   "section": "None",
+   "target": "Platform DB story of DP-02 (ACE team)",
+   "change": "Fix the login name, grants and schema owner for rwb-access and each service schema in the platform DB story; P4 stories reference it.",
+   "note": "Login name is not stated in any source; this story's Background already refers to its schema login."
+  },
+  {
+   "ruling": "R-28714",
+   "item": "GAP-2476",
+   "status": "Cross-document",
+   "section": "None",
+   "target": "Change Register; RWB-P7-E2004-APP",
+   "change": "Record how a running INSTALLMENT_DUE or CURE_PERIOD timer is carried into the workflow owning the wait at cut-over; remove legacy steps 7 and 14 and AC2, AC12, AC14 from the target test set.",
+   "note": "Cut-over carry-over is recorded in the Change Register; this story already builds no Quartz path (AC8)."
+  },
+  {
+   "ruling": "R-28715",
+   "item": "GAP-2688",
+   "status": "Cross-document",
+   "section": "None",
+   "target": "rwb-treatment service contract document (major version 1)",
+   "change": "Name the parameters and reference-data operations consumed, the member-level types and lengths of the TreatmentApproved payload, and the fake set.",
+   "note": "One-running-plan partial unique index is already stated in AC2; the contract document must carry the rest."
+  },
+  {
+   "ruling": "R-28716",
+   "item": "GAP-1340",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Header row already lists the twelve added dependencies; metadata rows stay as the WP fixes them. No edit needed."
+  },
+  {
+   "ruling": "R-32049",
+   "item": "NEWAC-RWB-S2-E2004-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 and TC-S2-E2004-APP-12 covering BR1, BR2, BR3, BR4, BR6, BR7, BR8, BR10.",
+   "note": "Next free story number is AC10 (not AC15); test level Component, data from the restructure example."
+  },
+  {
+   "ruling": "R-32050",
+   "item": "NEWAC-RWB-S2-E2004-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 and TC-S2-E2004-APP-13 for 401 without credential and 403 without the right.",
+   "note": "Assigned AC11 and TC-13 as the next free numbers; the item's AC16 ID is not used."
+  },
+  {
+   "ruling": "R-32051",
+   "item": "NEWAC-RWB-S2-E2004-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 and TC-S2-E2004-APP-14: a retried or timed-out write is answered once under the Idempotency-Key.",
+   "note": "Assigned AC12 and TC-14 as the next free numbers; the item's AC17 ID is not used."
+  },
+  {
+   "ruling": "R-32052",
+   "item": "NEWAC-RWB-S2-E2004-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC13 and TC-S2-E2004-APP-15: a failed consumed read writes no row, record or outbox row and uses no default.",
+   "note": "Assigned AC13 and TC-15 as the next free numbers; the item's AC18 ID is not used."
+  }
+ ]
+}

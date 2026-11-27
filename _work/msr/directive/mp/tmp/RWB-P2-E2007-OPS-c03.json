@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "### 8. Business rules",
+   "new": "AC7 (BR1): the worker polls `rwb-integration` in namespace `rwb-recovery` and carries the rwb-integration login only.\nAC8 (BR2): every worker carries the build ID of its release and worker versioning is enabled, so a new build takes new runs while the old build drains.\nAC9 (BR3): JOB-08 is started by `AceDataReady` only; no Schedule exists for it and the `job_catalog` row records the event trigger.\nAC10 (BR4): the release writes `rwb_integration` only and holds no grant on `recovery` or on another `rwb_*` schema.\nAC11 (BR5): the flag is the platform flag library's; off means a skipped run and no write.\nAC12 (BR6): the backfill and the rerun are idempotent by job, business date and `Idempotency-Key`.\nAC13 (BR7): every alert carries a message ID and the agreed text and links one runbook entry.\nAC14 (BR8): no environment value is hard-coded; values come from values files and the flag library.\nAC15 (BR9): dashboard series, alert payloads and the runbook carry no person's data and no decoded payload.\nAC16 (BR10): a failing release never replaces a working one, and a half-applied run is picked up by the next business date.\nAC17 (BR11): the package version in force is a registry value of rwb-decision and no version is pinned in a service table.\nAC18 (BR12): no data lake, lake file or lake target is deployed by this release.\n\n### 8. Business rules"
+  },
+  {
+   "old": "| TC-P2-E2007-OPS-06 | AC6 | NFR | The flag off ends the run SKIPPED with no write; the backfill handles one date once and replays the stored answer on the same key |",
+   "new": "| TC-P2-E2007-OPS-06 | AC6 | NFR | The flag off ends the run SKIPPED with no write; the backfill handles one date once and replays the stored answer on the same key |\n| TC-P2-E2007-OPS-07 | AC3 | Contract | The operations, events and activities of section 12 match the contract: `AceDataReady` starts `BookingMatchWorkflow` and the six activities are registered |\n| TC-P2-E2007-OPS-08 | AC2 | Boundary | The tables of section 12.7 hold their boundaries: only the JOB-08 row is written and no other business table is added |\n| TC-P2-E2007-OPS-09 | AC7 | NFR | Worker polls `rwb-integration` in `rwb-recovery` with the rwb-integration login only |\n| TC-P2-E2007-OPS-10 | AC8 | NFR | A new build takes new runs while the old build drains; every worker carries the build ID |\n| TC-P2-E2007-OPS-11 | AC9 | NFR | `AceDataReady` starts JOB-08; no Schedule exists; the `job_catalog` row records the event trigger |\n| TC-P2-E2007-OPS-12 | AC10 | NFR | The release is granted `rwb_integration` only; no grant on `recovery` or another `rwb_*` schema |\n| TC-P2-E2007-OPS-13 | AC11 | NFR | Flag off gives a skipped run with no write; the flag is read from the platform flag library |\n| TC-P2-E2007-OPS-14 | AC12 | NFR | Backfill and rerun on the same job, business date and `Idempotency-Key` write one record per case, task code and treatment |\n| TC-P2-E2007-OPS-15 | AC13 | NFR | An alert fired in test carries a message ID and the agreed text and links one runbook entry |\n| TC-P2-E2007-OPS-16 | AC14 | NFR | No environment value is hard-coded; values are read from the values files and the flag library |\n| TC-P2-E2007-OPS-17 | AC15 | NFR | Dashboard series, alert payloads and the runbook carry no person's data and no decoded payload |\n| TC-P2-E2007-OPS-18 | AC16 | NFR | A failing release leaves the working one in place; a half-applied run is picked up by the next business date |\n| TC-P2-E2007-OPS-19 | AC17 | NFR | The package version in force is read from the rwb-decision registry; no version is pinned in a service table |\n| TC-P2-E2007-OPS-20 | AC18 | NFR | No data lake, lake file or lake target exists after the release |"
+  },
+  {
+   "old": "| D-RCV-60 | The legacy Quartz job becomes an event-started workflow of the owning service | The worker, the registration, the catalogue row and the backfill | TC-P2-E2007-OPS-03, TC-P2-E2007-OPS-06 |",
+   "new": "| D-RCV-60 | The legacy Quartz job becomes an event-started workflow of the owning service | The worker, the registration, the catalogue row and the backfill | TC-P2-E2007-OPS-03, TC-P2-E2007-OPS-06, TC-P2-E2007-OPS-07 |"
+  },
+  {
+   "old": "| Item | Content |\n|---|---|",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Deployment values | Image digest, chart version, replica counts, resource requests and limits, probe paths and timings, log level, namespace, task queue, build ID, flag value, alert thresholds, backfill limit |",
+   "new": "| Deployment values | Image digest, chart version, replica counts, resource requests and limits, probe paths and timings, log level, namespace, task queue, build ID, flag value, alert thresholds, backfill limit | BR8 |"
+  },
+  {
+   "old": "| Task queue | `rwb-integration` in namespace `rwb-recovery`, polled by the rwb-integration worker only |",
+   "new": "| Task queue | `rwb-integration` in namespace `rwb-recovery`, polled by the rwb-integration worker only | BR1 |"
+  },
+  {
+   "old": "| Workflow | `BookingMatchWorkflow`, workflow ID prefix `booking-match-`, started by `AceDataReady`; six activities; no Schedule |",
+   "new": "| Workflow | `BookingMatchWorkflow`, workflow ID prefix `booking-match-`, started by `AceDataReady`; six activities; no Schedule | BR3 |"
+  },
+  {
+   "old": "| Job catalogue row | `job_catalog` of `rwb_integration`: job_id, job_name JOB-08 Booking confirmation, owner_role, schedule_text (the event trigger), runbook_path, expected_minutes, alert_after_minutes, first_release |",
+   "new": "| Job catalogue row | `job_catalog` of `rwb_integration`: job_id, job_name JOB-08 Booking confirmation, owner_role, schedule_text (the event trigger), runbook_path, expected_minutes, alert_after_minutes, first_release | BR3 |"
+  },
+  {
+   "old": "| Dashboard series | Treatments read; treatments booked; treatments missing; treatments differing; with the run outcome, the duration and the failed consumed calls beside them |",
+   "new": "| Dashboard series | Treatments read; treatments booked; treatments missing; treatments differing; with the run outcome, the duration and the failed consumed calls beside them | BR9 |"
+  },
+  {
+   "old": "| Alerts | Four rules: MSG-P2-011 missing-booking wave, MSG-P2-012 terms wave, MSG-P3-027 no package in force, MSG-P1-001 late or incomplete ACE batch |",
+   "new": "| Alerts | Four rules: MSG-P2-011 missing-booking wave, MSG-P2-012 terms wave, MSG-P3-027 no package in force, MSG-P1-001 late or incomplete ACE batch | BR7 |"
+  },
+  {
+   "old": "| Runbook entries | Event not received or worker not polling; missing-booking wave; terms wave; no package in force and late ACE batch |",
+   "new": "| Runbook entries | Event not received or worker not polling; missing-booking wave; terms wave; no package in force and late ACE batch | BR7 |"
+  },
+  {
+   "old": "| Secrets | The rwb-integration login secret, the Kafka client credential and the Temporal mTLS material, all from the platform secret store |",
+   "new": "| Secrets | The rwb-integration login secret, the Kafka client credential and the Temporal mTLS material, all from the platform secret store | BR1 |"
+  },
+  {
+   "old": "| Test data | The synthetic treatments `TRT-SYN-0701` to `TRT-SYN-0704`, cases `RW-2026-000701` and `RW-2026-000702` and accounts `A-0701` to `A-0705`, in DEV and SIT only |",
+   "new": "| Test data | The synthetic treatments `TRT-SYN-0701` to `TRT-SYN-0704`, cases `RW-2026-000701` and `RW-2026-000702` and accounts `A-0701` to `A-0705`, in DEV and SIT only | BR9 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15663",
+   "item": "DOR-RWB-P2-E2007-OPS-11",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Data Classification v5",
+   "change": "Name the P2 fields classed as personal data that this story does not carry and align their classification with the story. Field names are not in the source documents.",
+   "note": "Story edit not possible: detcheck field names are not given in the source documents."
+  },
+  {
+   "ruling": "R-15664",
+   "item": "DOR-RWB-P2-E2007-OPS-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "Added TC-07 contract test and TC-08 boundary test in 16; TC-07 added to D-RCV-60 in 18. Test Cases v8 and RTM v7 registration still cross-document."
+  },
+  {
+   "ruling": "R-15665",
+   "item": "DOR-RWB-P2-E2007-OPS-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 to AC18 in section 7, one per BR1 to BR12, each with a test row TC-09 to TC-20 in section 16."
+  },
+  {
+   "ruling": "R-15666",
+   "item": "DOR-RWB-P2-E2007-OPS-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Added BR Field ID column to section 11 mapped to section 8 rules. decision_record entity gap in LDM v9 and Data Classification v5 is cross-document."
+  },
+  {
+   "ruling": "R-15667",
+   "item": "DOR-RWB-P2-E2007-OPS-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 wording for MSG-P2-011, MSG-P1-001 and MSG-P3-027 is not in the source text; copying it would invent wording."
+  },
+  {
+   "ruling": "R-22303",
+   "item": "GAP-3175",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Event and Messaging next version; Kafka Topic and Event Catalog v1",
+   "change": "List LoadCompleted as the legacy alias of AceDataReady (EV-26) on rwb.source-data.events.v1.",
+   "note": "Story already uses AceDataReady; alias listing belongs in the catalogues."
+  },
+  {
+   "ruling": "R-22325",
+   "item": "GAP-2395",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P6-E1073-APP and Ownership Map v1",
+   "change": "Read the three package codes and version labels through the contract as the fixture set; prove AC1 and AC5 against them; settle rwb-comms package assignment with the rule registry owner.",
+   "note": "The gap concerns rwb-comms, not this rwb-integration story."
+  },
+  {
+   "ruling": "R-22347",
+   "item": "GAP-1713",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "FSD S2 and service contract",
+   "change": "Map each FEAT prerequisite to its owning service contract (approval to P7, case to P3, documents to P5, communications to P6, valuation to S1); carry duplicate FEAT-CHO-08 as written.",
+   "note": "Feature prerequisites sit in the FSD, not in this story."
+  },
+  {
+   "ruling": "R-22382",
+   "item": "GAP-1703",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Architecture v5 and FSD S2",
+   "change": "Record the booking reference from TreatmentBooked and the break from PaymentMissed; rwb-payment owns booking, matching and posting; the release request goes through the integration contract.",
+   "note": "Booking ownership conflict sits in the architecture and FSD."
+  },
+  {
+   "ruling": "R-22383",
+   "item": "GAP-0657",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Architecture v5; TSD P2 Integration v3; RWB-P2-E2007-CON; RWB-PLT-DB",
+   "change": "Record Arch v5 slide 44 rwb-payment JOB-08 row and TSD P2 v3 T5.2 as superseded; read ACE facts via rwb-source-data contract; fix the six consumed paths in RWB-P2-E2007-CON; allocate rwb-integration login in RWB-PLT-DB.",
+   "note": "Keeps JOB-08 with rwb-integration as this story already states; other fixes are in other documents."
+  }
+ ]
+}

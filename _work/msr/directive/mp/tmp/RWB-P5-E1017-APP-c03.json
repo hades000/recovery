@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "5. `CaseHoldClient`: reads the cases under legal hold through the P3 case contract (12.2) and builds the held-case set with the case number of each, so every document of such a case is excluded from the selection (BR3, AC3).",
+   "new": "5. `CaseHoldClient`: reads the cases under legal hold through the P3 case contract (12.2) and builds the held-case set with the case number of each, so every document of such a case is excluded from the selection (BR3, AC3). It calls the published CaseHoldQuery interface of rwb-case, casesOnLegalHold and caseNumbers, one hop with a 2 s budget, through its contract fake on Day 1; no case table is read by SQL, and the transport detail is settled with rwb-case in RWB-P1-E1017-CON."
+  },
+  {
+   "old": "7. `archiveDocuments` activity: `ArchiveWriter` writes the selected documents per rule and table to the write-once container `rwb-docs-archive` under `retention/YYYY-MM-DD/<table>/`, writes the manifest (row count and SHA-256 per file) and reads it back (BR2, BR4).",
+   "new": "7. `archiveDocuments` activity: `ArchiveWriter` writes the selected documents per rule and table to the write-once container `rwb-docs-archive` under `retention/YYYY-MM-DD/<table>/`, writes the manifest (row count and SHA-256 per file) and reads it back (BR2, BR4). The write runs under the rwb-document service identity; the container's account, credential scope, immutability policy and manifest schema are owned by RWB-PLT-TE012-APP."
+  },
+  {
+   "old": "10. `writeRunRecord` activity: records on the run the counts per product and table, the rule version, the archive location and the hold report (case numbers and counts kept), and writes the `DOCRET` decision record through the decision-record library of DP-03 in the run-record transaction (BR5, BR8).",
+   "new": "10. `writeRunRecord` activity: records on the run the counts per product and table, the rule version, the archive location and the hold report (case numbers and counts kept), and writes the `DOCRET` decision record through the decision-record library of DP-03 in the run-record transaction (BR5, BR8). The record keeps ruleId empty, carries the run reference in inputsRef, and carries the product, table, counts, hold report reference and archive location in actions and outcome; the decision code and final call are taken from LOV-DECISION through the reference-data client, and the value names are settled with the reference-data owner before the first joint environment."
+  },
+  {
+   "old": "| MSG-P2-006 | Rerun while the run is active | {job} is already running. Wait for it to finish before you rerun it. |",
+   "new": "| MSG-P2-006 | Rerun while the run is active | {job} is already running. Wait for it to finish before you run it again. |"
+  },
+  {
+   "old": "| TC-E1-017-01 | AC2, BR1, BR2, BR4 | End to end | 1,250 old and 4,800 recent synthetic document rows; run date 2026-12-06 |",
+   "new": "| TC-E1-017-01 | AC1, BR1, BR2, BR4 | End to end | 1,250 old and 4,800 recent synthetic document rows; run date 2026-12-06 |"
+  },
+  {
+   "old": "| TC-E1-017-04 | AC1, BR6 | End to end | A load row with 0 months |",
+   "new": "| TC-E1-017-04 | AC4, BR6 | End to end | A load row with 0 months |"
+  },
+  {
+   "old": "| TC-E1-017-07 | AC2, BR2 | End to end | A document at exactly 24 months, created_at 2024-12-06T00:00+07:00 |",
+   "new": "| TC-E1-017-07 | AC7, BR2 | End to end | A document at exactly 24 months, created_at 2024-12-06T00:00+07:00 |"
+  },
+  {
+   "old": "| TC-E1-017-08 | AC4, BR5 | End to end | A load row for product DP12, table decision_log_entry |",
+   "new": "| TC-E1-017-08 | AC8, BR5 | End to end | A load row for product DP12, table decision_log_entry |"
+  },
+  {
+   "old": "| TC-E1-017-09 | AC7 | End to end | A rerun posted during a running JOB-17 |",
+   "new": "| TC-E1-017-09 | AC9 | End to end | A rerun posted during a running JOB-17 |"
+  },
+  {
+   "old": "| Failed | The failed step and its message (MSG-GEN-006 or the specific check), with the rerun action enabled for a role holding Platform administration `U` |",
+   "new": "| Failed | The failed step and its message (MSG-GEN-006 or the specific check), with the rerun action enabled for a role holding Platform administration `U` |\n| Empty | Not specified in the source documents (CG-ALL-5772) |\n| Loading | Not specified in the source documents (CG-ALL-5772) |\n| Error | Not specified in the source documents (CG-ALL-5772) |\n| No access | Not specified in the source documents (CG-ALL-5772) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21970",
+   "item": "GAP-0489",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "RWB-P1-E1017-CON",
+   "change": "Fix POST /retention-runs and GET /retention-runs/{runId} on /api/recovery/source-data/v1 with the rule version, run date and rules in the request, and counts per table, rule version, archive location and held cases in the answer, field-level detail settled there.",
+   "note": "Contract change in RWB-P1-E1017-CON. Story step 9 and section 3 name /admin/retention-archive; align them with the final path there."
+  },
+  {
+   "ruling": "R-21972",
+   "item": "GAP-2426",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 10 now states ruleId empty, run reference in inputsRef, and product, table, counts, hold report and archive location in actions and outcome."
+  },
+  {
+   "ruling": "R-21973",
+   "item": "GAP-3158",
+   "status": "Resolved",
+   "section": "3, 4",
+   "target": "",
+   "change": "",
+   "note": "Story already places retention_rule and retention_action in rwb_document owned by rwb-document; P1 only reads through the contract."
+  },
+  {
+   "ruling": "R-21975",
+   "item": "GAP-0490",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 7 states the write uses the service identity and that the container contract is owned by RWB-PLT-TE012-APP; the legacy path and manifest are kept."
+  },
+  {
+   "ruling": "R-25714",
+   "item": "CG-ALL-5767",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P2-006 text now copied from the Error and Message Standard v4 wording."
+  },
+  {
+   "ruling": "R-25715",
+   "item": "CG-ALL-5768",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Covers column aligned to Test Cases v8 for TC-01, TC-04, TC-07, TC-08 and TC-09."
+  },
+  {
+   "ruling": "R-25716",
+   "item": "CG-ALL-5769",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Requirements Traceability Matrix v7",
+   "change": "Align the REQ-RDF-013 row to TC-E1-017-01 to TC-E1-017-16 as section 18 of RWB-P5-E1017-APP lists it, and drop the TC-E1-014-01 to TC-E1-014-03 entries.",
+   "note": "Story section 18 already lists TC-E1-017-01 to 16; the RTM row is the one to change in its next version."
+  },
+  {
+   "ruling": "R-25717",
+   "item": "CG-ALL-5771",
+   "status": "Not applied",
+   "section": "3, 3.1",
+   "target": "",
+   "change": "",
+   "note": "Migration file name is not in the supplied text, and the next Vnnnn number of the rwb-document sequence is not given. Needs the service's sequence."
+  },
+  {
+   "ruling": "R-25718",
+   "item": "CG-ALL-5772",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access rows added to SCR-47 states; their content is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-28497",
+   "item": "GAP-0491",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 5 names the CaseHoldQuery interface with casesOnLegalHold and caseNumbers, one hop with 2 s budget, no SQL read of case tables."
+  }
+ ]
+}

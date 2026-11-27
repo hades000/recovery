@@ -1,0 +1,63 @@
+{
+ "edits": [
+  {
+   "old": "    Then the system refuses the view with 404 and nothing changes",
+   "new": "    Then the system refuses the view with 404 and nothing changes\n\n  Scenario: AC5 Business rules of section 8 hold on the view (added for BR1 to BR14, which had no criterion)\n    Given the business rules BR1 to BR14 of section 8 are in force\n    When the caller posts the view of notice \"N-0401\"\n    Then every rule BR1 to BR14 holds on the view as stated in section 8\n\n  Scenario: AC6 Error answers of the GET channel view (added for the 403 and 404 answers of the provided operations)\n    Given the caller holds no Litigation R right\n    When the caller gets the channel view of notice \"N-0401\"\n    Then the system refuses the view with 403 and the user sees MSG-P4-002\n    Given notice \"N-0401\" is outside the scope of the caller\n    When the caller gets the channel view of notice \"N-0401\"\n    Then the system refuses the view with 404 and nothing changes\n\n  Scenario: AC7 Replay of a write with the same Idempotency-Key (added for BR12)\n    Given the view of notice \"N-0401\" was posted once with an Idempotency-Key\n    When the caller posts the view of notice \"N-0401\" again with the same Idempotency-Key\n    Then the system returns the first answer and records no second view\n\n  Scenario: AC8 A consumed call fails or does not answer (added for the failed call)\n    Given the rwb-treatment contract mock does not answer\n    When the user acts on the screen\n    Then the system answers with status code 503 of the contract of 12.1 and nothing changes\n\n  Scenario: AC9 A status change the model does not allow is refused (added for the disallowed transition)\n    Given the status change of notice \"N-0401\" to \"DELIVERED\" is not allowed by the status model in force\n    When the caller posts the view of notice \"N-0401\"\n    Then the system refuses the change with 409 and nothing changes"
+  },
+  {
+   "old": "BR11 and BR13 by TC-E4-035-14.",
+   "new": "BR11 and BR13 by TC-E4-035-14; BR1 to BR14 by AC5 and TC-E4-035-15."
+  },
+  {
+   "old": "| TC-E4-035-14 | Business rules | Component | One base, one topic and one queue are used; the answer renders the merge values and no merge value, contact point or name is written to rwb_comms (BR11, BR13) |",
+   "new": "| TC-E4-035-14 | Business rules | Component | One base, one topic and one queue are used; the answer renders the merge values and no merge value, contact point or name is written to rwb_comms (BR11, BR13) |\n| TC-E4-035-15 | AC5 (BR1 to BR14) | Component | The view checks each rule BR1 to BR14 of section 8; the rules with no runtime effect (BR4, BR9, BR11, BR14) are checked by the boundary tests TC-E4-035-10, TC-E4-035-12 and TC-E4-035-14 |\n| TC-E4-035-16 | AC6 | Component | A role without Litigation R sends the GET of the channel view and is refused with 403 and MSG-P4-002; a GET of a notice outside the scope answers 404 with nothing changed |\n| TC-E4-035-17 | AC7 | Component | Notice N-0401 is viewed once with an Idempotency-Key; the same POST repeated with the same key returns the first answer and writes no second notice_view or decision record |\n| TC-E4-035-18 | AC8 | Component | The rwb-treatment contract mock does not answer; the view answers 503 of the contract of 12.1, nothing is written and no NoticeDelivered is published |\n| TC-E4-035-19 | AC9 | Component | Notice N-0401 is in a status from which the status model in force does not allow the change to DELIVERED (status model not specified in the source documents, AC9); the POST answers 409 and nothing changes |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31331",
+   "item": "NEWAC-RWB-P6-E4035-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC5 scenario in section 7, TC-E4-035-15 in section 16, and rule coverage line in section 8 for BR1 to BR14.",
+   "note": "AC5 added for BR1 to BR14; BR4, BR9, BR11, BR14 checked by boundary tests TC-10, TC-12, TC-14 per the architecture-constraint route."
+  },
+  {
+   "ruling": "R-31332",
+   "item": "NEWAC-RWB-P6-E4035-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC6 scenario (GET 403 and 404) in section 7 and TC-E4-035-16 in section 16.",
+   "note": "AC6 covers 403 (no Litigation R, MSG-P4-002) and 404 (out of scope) on the GET, as TC-03 already states."
+  },
+  {
+   "ruling": "R-31333",
+   "item": "NEWAC-RWB-P6-E4035-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 replay scenario in section 7 and TC-E4-035-17 in section 16.",
+   "note": "AC7 replay of same Idempotency-Key returns first answer and no second view, per BR12."
+  },
+  {
+   "ruling": "R-31334",
+   "item": "NEWAC-RWB-P6-E4035-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 failed-call scenario in section 7 and TC-E4-035-18 in section 16 using the 503 code of the 12.1 list.",
+   "note": "AC8 uses 503 from the 12.1 status list; the mapping of failed calls to 503 is not stated in the source documents."
+  },
+  {
+   "ruling": "R-31335",
+   "item": "NEWAC-RWB-P6-E4035-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 disallowed-transition scenario in section 7 and TC-E4-035-19 in section 16 using the 409 code of the 12.1 list.",
+   "note": "AC9 uses 409 from the 12.1 list; the status model itself is not specified in the source documents, so TC-19 says so."
+  }
+ ]
+}

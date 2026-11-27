@@ -1,0 +1,62 @@
+{
+ "edits": [
+  {
+   "old": "| X6 | `v_ace_contact` does not answer inside 5 s or errors | 503 naming the ACE database; nothing guessed from a cache | MSG-GEN-006 | AC8 |",
+   "new": "| X6 | `v_ace_contact` does not answer inside 5 s or errors | 503 naming the ACE database; nothing guessed from a cache | MSG-GEN-006 | AC8, AC13 |"
+  },
+  {
+   "old": "| X7 | The delivery columns are missing because the letter slice of this key has not migrated | The append is refused with 503; no entry with a null reference | MSG-GEN-006 | AC9 |",
+   "new": "| X7 | The delivery columns are missing because the letter slice of this key has not migrated | The append is refused with 503; no entry with a null reference | MSG-GEN-006 | AC9, AC14 |"
+  },
+  {
+   "old": "| X8 | A caller without the right | 403, logged without a token or a reference value | MSG-P4-002 | AC10 |",
+   "new": "| X8 | A caller without the right | 403, logged without a token or a reference value | MSG-P4-002 | AC10, AC15 |"
+  },
+  {
+   "old": "    Then the log line holds neither the token nor the reference value",
+   "new": "    Then the log line holds neither the token nor the reference value\n\n  Scenario: AC13 The view v_ace_contact of party \"P-0077\" errors and is refused with 503 naming the ACE database, and nothing is guessed from a cache (new, D-RCV-60)\n    Given the v_ace_contact view of party \"P-0077\" returns an error\n    When rwb-comms calls GET /api/recovery/source-data/v1/contact-points?personKey=P-0077&channel=MOBILE\n    Then the answer is 503 with MSG-GEN-006 naming the ACE database\n    Then no cached contact point is returned\n\n  Scenario: AC14 A result append is refused with 503 while the delivery columns are missing and no entry with a null reference is written (new, D-RCV-60)\n    Given the delivery columns of interaction are missing because the letter slice of this key has not migrated\n    When rwb-comms appends the result of \"NSS-7781\" with status \"READ\" and a new Idempotency-Key\n    Then the answer is 503 with MSG-GEN-006\n    Then no interaction entry with a null external reference exists\n\n  Scenario: AC15 A caller without the right to read contact points is refused with 403 and the log holds neither the token nor the contact value (new, D-RCV-60)\n    Given a caller holds no right to read contact points in rwb-access\n    When the caller calls GET /api/recovery/source-data/v1/contact-points?personKey=P-0077&channel=MOBILE\n    Then the answer is 403 with MSG-P4-002\n    Then the log line holds no token and no contact value\n\n  Scenario: AC16 A request with no credential is refused with 401 and a caller without the right is refused with 403 on each provided operation (new, D-RCV-60)\n    Given a request to GET /api/recovery/source-data/v1/contact-points and a request to POST /api/recovery/source-data/v1/interactions carry no credential\n    When rwb-comms calls each of the two operations without a credential\n    Then the answer is 401 on each operation and no row is returned or written\n    Then a caller without the right is answered 403 on each operation as in AC10 and AC15"
+  },
+  {
+   "old": "| TC-E2-022-20 | AC10, X8; a caller without the right | Component | Caller without the right posts a message |",
+   "new": "| TC-E2-022-20 | AC10, X8; a caller without the right | Component | Caller without the right posts a message |\n| TC-E2-022-21 | AC13, X6; the view errors | Component | v_ace_contact stub returns an error |\n| TC-E2-022-22 | AC14, X7; a result append with the delivery columns missing | Component | Letter slice not migrated; no delivery columns |\n| TC-E2-022-23 | AC15, X8; a caller without the right reads contact points | Component | Caller without the right calls GET contact-points |\n| TC-E2-022-24 | AC16; 401 with no credential and 403 without the right | Contract | Each provided operation with no credential and with a caller without the right |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30307",
+   "item": "NEWAC-RWB-P1-E2022-APP-AC13",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC13 added to section 7 for v_ace_contact error (503, no cache); X6 covered by AC8, AC13; TC-E2-022-21 added in section 16 with stub data."
+  },
+  {
+   "ruling": "R-30308",
+   "item": "NEWAC-RWB-P1-E2022-APP-AC14",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC14 added to section 7 for a result append refused with 503 while delivery columns are missing; X7 covered by AC9, AC14; TC-E2-022-22 added."
+  },
+  {
+   "ruling": "R-30309",
+   "item": "NEWAC-RWB-P1-E2022-APP-AC15",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC15 added to section 7 for a caller without the right reading contact points (403, MSG-P4-002); X8 covered by AC10, AC15; TC-E2-022-23 added."
+  },
+  {
+   "ruling": "R-30310",
+   "item": "NEWAC-RWB-P1-E2022-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC16 added to section 7 for 401 with no credential and 403 without the right on the provided operations; TC-E2-022-24 added in section 16."
+  }
+ ]
+}

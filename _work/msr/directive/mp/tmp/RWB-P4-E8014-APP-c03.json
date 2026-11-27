@@ -1,0 +1,114 @@
+{
+ "edits": [
+  {
+   "old": "| BR11 | The pack version label, the personal areas, the pack row limit and the page bounds are parameter rows read through DP-06 with the version in force; no value is a constant in code | BR-P4-025; DP-06; ASM-3791 |",
+   "new": "| BR11 | The pack version label, the personal areas (access.pack.personalAreas), the pack row limit (access.pack.rowLimit) and the page bounds are parameter rows read through DP-06 with the version in force; no value is a constant in code | BR-P4-025; DP-06; ASM-3791 |"
+  },
+  {
+   "old": "When its trigger arrives",
+   "new": "When the pack is submitted through SCR-39 (request-driven, no workflow, no Schedule)"
+  },
+  {
+   "old": "- BR14 is the read: it filters by the owner role, orders on `decidedAt` then entry id, and has no 404 branch.",
+   "new": "- BR14 is the read: it filters by the owner role, orders on `decidedAt` then entry id, and has no 404 branch.\n- The check is request-driven: a submit through SCR-39 starts no workflow and owns no Temporal Schedule; the freshness of an ACE data product (VR-P4-025-1) belongs to rwb-source-data and is not implemented in rwb-access."
+  },
+  {
+   "old": "AC3 to AC7 are new under D-RCV-60",
+   "new": "AC3 to AC10 are new under D-RCV-60"
+  },
+  {
+   "old": "    Then the answer carries the returned pack \"AP-2027.06\" with its defects and not the accepted one",
+   "new": "    Then the answer carries the returned pack \"AP-2027.06\" with its defects and not the accepted one\n\n  Scenario: AC8 The defect rules read only this service's rows and the personal areas of the parameter rows in force (new, D-RCV-60)\n    Given the parameters in force name \"CASE_RECORD\" as a personal capability area\n    Given a pack \"AP-2027.08\" for ownerRole \"RW-LITOFF\" holding two SCOPE rows for role \"RW-LITOFF\" and a PERMISSION row for \"CASE_RECORD\" with no MASKING row for that role\n    When \"U-5101\" calls POST /api/recovery/access/v1/admin/pack-checks with Idempotency-Key \"k-014-11\"\n    Then the response is 201 with state \"RETURNED\" and the defects list carries one PC-SCP item and one PC-MSK item\n    Then the check reads only the role, permission and masking_rule rows and no row of delegation_limit or role_conflict\n    Then the personal areas used by the check are read from the parameter rows in force and not from code\n\n  Scenario: AC9 A path the contract does not provide answers 404 and records nothing (new, D-RCV-60)\n    When \"U-5101\" calls a path under /api/recovery/access/v1/admin/ that the contract does not provide\n    Then the response is 404 and no verdict is answered\n    Then no pack-check entry is appended and no idempotency row is written\n\n  Scenario: AC10 A consumed call that fails or does not answer leaves no verdict and no record (new, D-RCV-60)\n    Given the rwb-case contract mock does not answer the pack-check parameter rows\n    Given a pack \"AP-2027.10\" for ownerRole \"RW-LITOFF\" with one PERMISSION row for \"LITIGATION\" and one MASKING row for the same role\n    When \"U-5101\" calls POST /api/recovery/access/v1/admin/pack-checks with Idempotency-Key \"k-014-13\"\n    Then no verdict is answered and no pack-check entry is appended\n    Then the status and the message of the failed call are Not specified in the source documents (NEWAC-RWB-P4-E8014-APP-AC10)"
+  },
+  {
+   "old": "| SCR-39 Rules and parameters | List, empty | An empty `items` with total 0 and no error |",
+   "new": "| SCR-39 Rules and parameters | List, empty | An empty `items` with total 0 and no error |\n| SCR-39 Rules and parameters | Loading | Not specified in the source documents (CG-ALL-5593) |\n| SCR-39 Rules and parameters | Error | Not specified in the source documents (CG-ALL-5593) |\n| SCR-39 Rules and parameters | No access | Not specified in the source documents (CG-ALL-5593) |"
+  },
+  {
+   "old": "are the administration stories of this service and are not part of this document.",
+   "new": "are the administration stories of this service and are not part of this document.\n\nMSG-GEN-002 and MSG-GEN-004 are carried by identifier only: their text is Not specified in the source documents (GAP-2291) until the message catalogue supplies it. A defect item carries no message ID; it names the row, the field and the rule."
+  },
+  {
+   "old": "| TC-E8-014-13 | BR11 | Component | The pack row limit and the personal areas changed as parameter rows under a new version: the next check reads the changed values and no code change is made |",
+   "new": "| TC-E8-014-13 | BR11 | Component | The pack row limit and the personal areas changed as parameter rows under a new version: the next check reads the changed values and no code change is made |\n| TC-E8-014-14 | AC8, BR2, BR5, BR6, BR11 | Component | \"AP-2027.08\" with two SCOPE rows for \"RW-LITOFF\" and a PERMISSION row for \"CASE_RECORD\" with no masking row, under the personal area in the parameter rows: PC-SCP and PC-MSK defects; reads of `role`, `permission` and `masking_rule` only |\n| TC-E8-014-15 | AC9 | Contract | A path under the access admin that the contract does not provide, called by \"U-5101\": 404 with no verdict, no entry and no idempotency row |\n| TC-E8-014-16 | AC10, BR10 | Component | The rwb-case contract mock of the parameter rows does not answer: no verdict and no entry; the status and message of the failed call are Not specified in the source documents (NEWAC-RWB-P4-E8014-APP-AC10) |"
+  },
+  {
+   "old": "TC-E8-014-05 to TC-E8-014-13 are new under D-RCV-60",
+   "new": "TC-E8-014-05 to TC-E8-014-16 are new under D-RCV-60"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23217",
+   "item": "GAP-2288",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Pack, checks, operations, verdicts, 409 and DP-03 entry already in sections 7 and 8; BR11 now names the three parameter keys."
+  },
+  {
+   "ruling": "R-25639",
+   "item": "CG-ALL-5592",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists of the five requirements to section 18 of RWB-P4-E8014-APP (TC-E8-014-01 to TC-E8-014-16).",
+   "note": "Story-side §18 unchanged; the RTM is the document that differs."
+  },
+  {
+   "ruling": "R-25640",
+   "item": "CG-ALL-5593",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Loading, error and no access rows added; empty was already listed. Screen Specifications v1 lacks these states, so they are marked not specified."
+  },
+  {
+   "ruling": "R-28988",
+   "item": "GAP-2289",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "",
+   "note": "Check is request-driven via SCR-39 submit with no Schedule; VR-P4-025-1 left to rwb-source-data (AC1 trigger and BR note)."
+  },
+  {
+   "ruling": "R-28989",
+   "item": "GAP-2291",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "MSG-GEN-002 and MSG-GEN-004 carried by ID with text not specified; defect items carry no message ID."
+  },
+  {
+   "ruling": "R-31030",
+   "item": "NEWAC-RWB-P4-E8014-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 and TC-E8-014-16 added; the failed call's status and message are not specified in the sources."
+  },
+  {
+   "ruling": "R-31031",
+   "item": "NEWAC-RWB-P4-E8014-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 and TC-E8-014-14 added covering BR2, BR5, BR6 and BR11."
+  },
+  {
+   "ruling": "R-31032",
+   "item": "NEWAC-RWB-P4-E8014-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 and TC-E8-014-15 added: a path the contract does not provide answers 404 and records nothing."
+  }
+ ]
+}

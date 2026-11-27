@@ -1,0 +1,62 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Service Template Specification v1.md",
+ "unit": "N001",
+ "items": [
+  "GAP-0101",
+  "GAP-1989"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 3
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "N001-F1",
+     "finding": "GAP-0101",
+     "op": "insert_after",
+     "old": "| Decision record library | Platform team (PLT) | The local hash-linked record and DecisionRecorded |",
+     "new": "\nActivity contract jar (GAP-0101). The artefact is one activity contract jar per service, named by the service's task queue `rwb-<short>`, with the Java package root `th.co.scb.ace.workbench.recovery.<short without hyphen>` (section 4). A change to an activity signature is a new major version of the jar and a new worker deployment (Service Contract Catalog v1). The groupId and artifactId are allocated with the repositories in the service template work; their values and the rest of the versioning scheme are Not specified in the source documents (GAP-0101)."
+    },
+    {
+     "fix_id": "N001-F2",
+     "finding": "GAP-1989",
+     "op": "insert_after",
+     "old": "A service depends on the shared libraries and never copies them. The versions are pinned per service and upgraded deliberately (Arch v5 slide 23: kit versioned; workers pinned).",
+     "new": "\nThe repository and pipeline model that applies to these artefacts is in section 3.3."
+    },
+    {
+     "fix_id": "N001-F3",
+     "finding": "GAP-1989",
+     "op": "replace",
+     "old": "# 4. Naming and identifiers\n",
+     "new": "## 3.3 Repository and pipeline model\n\nThe model is one repository per service, 19 repositories for the 19 services, not one repository with 19 modules and not a mixed model. It applies the constraint \"one service, one repository\" to each of the 19 services (story RWB-PLT-NF01-OPS).\n\n| Item | Rule | Basis |\n|---|---|---|\n| Repository | Each service repository is created from the template, records the pinned template version and holds one service's code, migrations and values only | RWB-PLT-NF01-OPS |\n| Pipeline | One pipeline definition in the template, referenced by every repository and not copied. The gates are build, unit, contract, boundary, migration lint, image scan, secret scan and personal-data scan; a repository cannot disable, reorder or re-threshold a gate | RWB-PLT-NF01-OPS |\n| Code owners | Code owner validation runs in the pull request build of every service repository; the main branch of each requires a pull request with one approval from code owners, stale approvals are dismissed and the author's own approval does not count. Owners are team handles, never individuals; `@scb-ace/techx-recovery-tech-leads` is assumed for the recovery paths until DL37 and DL36 are answered. One code owners file per repository or one shared file: Not specified in the source documents (GAP-3192; ASM-5584) | RWB-TE-002 (Build Notes Technical Enablers v3) |\n| Boundary test | Runs in every service repository against that service's own schema: it fails the build on a statement, datasource, grant or join that names another service's schema, on a reference to another service's table, and on a migration file or fixture that carries another service's objects or rows (see also section 6.5) | RWB-PLT-NF01-OPS; Arch v5 slide 29 |\n\n# 4. Naming and identifiers\n"
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-0101",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "Artefact and package root stated in section 3.2; coordinates left for allocation with the repositories, no values invented."
+    },
+    {
+     "item": "GAP-1989",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2",
+      "F3"
+     ],
+     "note": "New section 3.3: repository per service, shared pipeline definition, code owners and boundary test, from NF01-OPS and RWB-TE-002."
+    }
+   ]
+  }
+ ]
+}

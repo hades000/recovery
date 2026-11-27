@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "    Given the ledger listener of rwb-source-data runs in one consumer group",
+   "new": "    Given the ledger listener of rwb-source-data runs in one consumer group\n    Given the outbox relay of each producer reads its publish retry limit from platform relay configuration with no value fixed in code"
+  },
+  {
+   "old": "| BR3 | The same event with the same key produces one entry, and the repeat is counted; the DocumentStored key is derived from the document row and carried in a CloudEvents extension attribute read from configuration | R-UNI-40; REQ-ILG-007 |",
+   "new": "| BR3 | The same event with the same key produces one entry, and the repeat is counted; the DocumentStored key is derived from the document row and carried in the CloudEvents extension attribute ce_idempotencykey read from configuration, and each event key keeps the shape of the legacy example (event code, case number, action date) | R-UNI-40; REQ-ILG-007 |"
+  },
+  {
+   "old": "| BR11 | Each producer publishes its own event type on its own topic in the CloudEvents 1.0 envelope, key caseId, with IDs and references only and the actor in a CloudEvents extension attribute; the ledger listener of rwb-source-data is an additional consumer group on the case, document and decision-record topics | DP-09; DP-03; Arch v5 slides 11, 42 and 43; ASM-0541 |",
+   "new": "| BR11 | Each producer publishes its own event type on its own topic in the CloudEvents 1.0 envelope, key caseId, with IDs and references only and the actor in the CloudEvents extension attribute ce_actor; the registry subjects of rwb.case.events.v1 and rwb.document.events.v1 and the AsyncAPI document location are held in configuration, values Not specified in the source documents (GAP-2257, GAP-1058); the ledger listener of rwb-source-data is an additional consumer group on the case, document and decision-record topics | DP-09; DP-03; Arch v5 slides 11, 42 and 43; ASM-0541 |"
+  },
+  {
+   "old": "    Then a replay of the .dlt topic after the contract version is registered adds its entry and leaves the earlier entries intact",
+   "new": "    Then a replay of the .dlt topic after the contract version is registered adds its entry and leaves the earlier entries intact\n\n  Scenario: AC10 Each entry names its producer, carries no personal data and is read only through the owner's contract within 2 s (new, D-RCV-60)\n    Given the ledger holds the 6 entries of case \"RW-2026-000301\"\n    When GET /api/recovery/source-data/v1/cases/{caseId}/interactions is read for the case\n    Then each entry names the system or person that produced it\n    Then the payload of each event carries references and codes and no personal data\n    Then the read is one hop on the owner's contract and returns within 2 s\n    Then no service other than rwb-source-data reads the ledger tables\n\n  Scenario: AC11 A consumed call fails or does not answer within its 2 s budget (new, D-RCV-60)\n    Given the ledger holds the 6 entries of case \"RW-2026-000301\"\n    When the owner's contract fails or does not answer the read of GET /api/recovery/source-data/v1/cases/{caseId}/interactions within 2 s\n    Then the caller receives a failure and no partial list of entries\n    Then the entries already in the ledger stay unchanged"
+  },
+  {
+   "old": "| TC-ITG-E1067-04 | AC9, BR5, BR6, BR12 | NFR | CaseTransferred at schema version 3; the four deliveries; the .dlt item; incident LEDGER_WRITE_FAILED; the earlier entries unchanged |",
+   "new": "| TC-ITG-E1067-04 | AC9, BR5, BR6, BR12 | NFR | CaseTransferred at schema version 3; the four deliveries; the .dlt item; incident LEDGER_WRITE_FAILED; the earlier entries unchanged |\n| TC-ITG-E1067-05 | AC10, BR2, BR7, BR9, BR10 | Integration | Six entries of case RW-2026-000301 read through the owner's contract; producer named on each entry; payload checked for personal data; 2 s budget |\n| TC-ITG-E1067-06 | AC11 | Integration | Owner's contract forced to fail or not answer within 2 s on the interactions read; failure returned; no partial list; ledger entries unchanged |"
+  },
+  {
+   "old": "the four new criteria carry `TC-ITG-E1067-01` to `-04`.",
+   "new": "the new criteria carry `TC-ITG-E1067-01` to `-06`."
+  },
+  {
+   "old": "SCR-03 Case record (Read only)",
+   "new": "SCR-03 Case record (Read only; loading as in Screen Specifications v1; empty, error and no access Not specified in the source documents (CG-ALL-433))"
+  },
+  {
+   "old": "SCR-09 Exception queue (Epic 1, state List)",
+   "new": "SCR-09 Exception queue (Epic 1, state List; loading as in Screen Specifications v1; empty, error and no access Not specified in the source documents (CG-ALL-434))"
+  },
+  {
+   "old": "this list carries only the three criteria the story owns and the four it adds.",
+   "new": "this list carries only the three criteria the story owns and the six it adds."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22270",
+   "item": "GAP-2257",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "rwb-case API and event specification",
+   "change": "Record ce_idempotencykey and ce_actor, the four event key shapes, and the registry subject of rwb.case.events.v1 derived from the platform naming library; re-test envelopes at contract level.",
+   "note": "Story BR3 and BR11 now name ce_idempotencykey, ce_actor and the key shape; the contract values sit in rwb-case spec."
+  },
+  {
+   "ruling": "R-23869",
+   "item": "CG-ALL-431",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "RTM v7",
+   "change": "Align the test case lists for REQ-ILG-005, REQ-ILG-002 and REQ-ILG-007 to section 18 of RWB-ITG-E1067-ITG, which matches its section 16 IDs.",
+   "note": "RTM v7 rows cite TC-E1-067-02 and TC-E1-066 IDs not in this story; section 18 kept."
+  },
+  {
+   "ruling": "R-23870",
+   "item": "CG-ALL-433",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-03 now carries its specification state and marks empty, error and no access Not specified in the source documents."
+  },
+  {
+   "ruling": "R-23871",
+   "item": "CG-ALL-434",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-09 now carries its specification state and marks empty, error and no access Not specified in the source documents."
+  },
+  {
+   "ruling": "R-28664",
+   "item": "GAP-2072",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "TSD P3 v3 and API Specification v4",
+   "change": "Move the interaction table and GET and POST /cases/{caseId}/interactions to P1 rwb-source-data (x-module P1); rwb-case reads through the P1 contract.",
+   "note": "Story already places the ledger with P1 (BR9, AC6); module specifications still show P3."
+  },
+  {
+   "ruling": "R-28668",
+   "item": "GAP-0508",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "contract/ledger-intake-map-v1.yaml (new)",
+   "change": "Publish one row per consumed event type with a version label field and the six rows of section 12.4 of the contract.",
+   "note": "Contract artefact does not exist yet; story needs no change."
+  },
+  {
+   "ruling": "R-28669",
+   "item": "GAP-1057",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Background now reads the outbox relay publish retry limit from platform relay configuration, with no value fixed in code."
+  },
+  {
+   "ruling": "R-28670",
+   "item": "GAP-1058",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Subject name and AsyncAPI location need the platform naming library; BR11 holds them in configuration with values not specified."
+  },
+  {
+   "ruling": "R-29868",
+   "item": "NEWAC-RWB-ITG-E1067-ITG-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 covering BR2, BR7, BR9 and BR10 with test case TC-ITG-E1067-05."
+  },
+  {
+   "ruling": "R-29869",
+   "item": "NEWAC-RWB-ITG-E1067-ITG-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for a failed or unanswered consumed call with test case TC-ITG-E1067-06."
+  }
+ ]
+}

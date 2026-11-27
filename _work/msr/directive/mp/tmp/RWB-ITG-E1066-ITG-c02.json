@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| Depends on (build) | None |",
+   "new": "| Depends on (build) | None (the three integration dependencies RWB-P3-E1018-APP, RWB-P1-E1066-APP and RWB-P3-E1066-APP are not build blockers; Template and Rules §R5.4) |"
+  },
+  {
+   "old": "| External dependencies | None |",
+   "new": "| External dependencies | None |\n| Open decisions | DL10 is still open; its assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed by the programme directive of 26 November 2026 |"
+  },
+  {
+   "old": "The module holds no service code and is not part of a deployed service.",
+   "new": "The module holds no service code and is not part of a deployed service. It owns no schema: `rwb_source_data` belongs to P1 rwb-source-data, `rwb_case` to P3 rwb-case and `rwb_decision` to P7 rwb-decision."
+  },
+  {
+   "old": "Field IDs are those in the Logical Data Model and Data Dictionary and are copied from RWB-E1-066.",
+   "new": "Field IDs are those in the Logical Data Model and Data Dictionary and are copied from RWB-E1-066. The append-only trigger `tr_interaction_append_only` (recorded in Recovery Workbench Physical Schema v7.sql) and the library table `decision_record` (DP-03) are not LDM fields or entities and have no row in this table."
+  },
+  {
+   "old": "The two new criteria carry the cross-service part the monolith never had:",
+   "new": "The four new criteria carry the cross-service part the monolith never had, with AC11 and AC12 covering BR11 and BR12:"
+  },
+  {
+   "old": "The five legacy criteria are carried verbatim in substance, with only the monolith names adapted to the target operation, schema and owner.",
+   "new": "The five legacy criteria are carried verbatim in substance, with only the monolith names adapted to the target operation, schema and owner. AC5, AC6 and AC7 are owned by RWB-P1-E1066-APP, are not written in this story's Gherkin and are re-exercised here only as exception paths X2 to X4."
+  },
+  {
+   "old": "    Then schema rwb_case holds no interaction table and no column that stores a copy of an entry",
+   "new": "    Then schema rwb_case holds no interaction table and no column that stores a copy of an entry\n\n  Scenario: AC11 Each append writes one local decision record and one outbox row in the same transaction, and the central effect is one entry (new, D-RCV-60)\n    When the case owner records an outbound call on case \"RW-2026-000201\" through POST /api/recovery/source-data/v1/cases/{caseId}/interactions\n    Then P1 rwb-source-data writes one local decision record naming the new entry and one outbox row in the same transaction in schema rwb_source_data\n    Then the relay publishes DecisionRecorded once on topic rwb.decision-record.v1\n    Then rwb-decision holds exactly one decision log entry for the event ID of that call\n\n  Scenario: AC12 Event and LOV values come through the rwb-case reference-data contract, and only P1 reads the EFS history (new, D-RCV-60)\n    When P1 rwb-source-data reads the LOV-LEDGER-EVENT values for case \"RW-2026-000201\"\n    Then the event and LOV values are read through the reference-data contract of rwb-case and no ACE view is read\n    Then no service other than P1 rwb-source-data reads an ACE view, and the 4 EFS history entries of case \"RW-2026-000201\" reach the ledger through P1 alone"
+  },
+  {
+   "old": "| TC-ITG-E1066-02 | AC10, BR8, BR10 | Integration | Entry case_seq 7 read through P1 and through the P3 timeline; the P3 statement log and rwb_case scanned for a copy |",
+   "new": "| TC-ITG-E1066-02 | AC10, BR8, BR10 | Integration | Entry case_seq 7 read through P1 and through the P3 timeline; the P3 statement log and rwb_case scanned for a copy |\n| TC-ITG-E1066-03 | AC11, BR11 | Integration | Outbound call on case RW-2026-000201; one local decision record and one outbox row per append; one central decision log entry |\n| TC-ITG-E1066-04 | AC12, BR12 | Integration | LOV-LEDGER-EVENT values read through the rwb-case contract; the 4 EFS history entries read through P1 alone |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14135",
+   "item": "DOR-RWB-ITG-E1066-ITG-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add the test cases TC-ITG-E1066-01 and TC-ITG-E1066-02 with their Given, When and Then (AC9, AC10); also TC-ITG-E1066-03 and TC-ITG-E1066-04 added here.",
+   "note": "Story §16 lists the cases; the Test Cases v8 workbook lacks their rows. Story side is complete."
+  },
+  {
+   "ruling": "R-14136",
+   "item": "DOR-RWB-ITG-E1066-ITG-15",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "INVEST text is not in the parts supplied, so no exact text to edit. Fit to two weeks needs squad sizing, which is not in the sources."
+  },
+  {
+   "ruling": "R-14137",
+   "item": "DOR-RWB-ITG-E1066-ITG-17",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Depends on (build) row now names the three integration dependencies and states they are not build blockers."
+  },
+  {
+   "ruling": "R-14138",
+   "item": "DOR-RWB-ITG-E1066-ITG-18",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Header row added: DL10 still open; assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863 confirmed by the directive."
+  },
+  {
+   "ruling": "R-14139",
+   "item": "DOR-RWB-ITG-E1066-ITG-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Deliverables now states the suite owns no schema and names the owner of rwb_source_data, rwb_case and rwb_decision."
+  },
+  {
+   "ruling": "R-14140",
+   "item": "DOR-RWB-ITG-E1066-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "§7 now names AC5, AC6 and AC7 as owned by RWB-P1-E1066-APP and re-exercised here as X2 to X4."
+  },
+  {
+   "ruling": "R-14141",
+   "item": "DOR-RWB-ITG-E1066-ITG-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for BR11 and AC12 for BR12 in §7, with test cases TC-ITG-E1066-03 and TC-ITG-E1066-04 in §16."
+  },
+  {
+   "ruling": "R-14142",
+   "item": "DOR-RWB-ITG-E1066-ITG-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "§11 now states the trigger and the library table are not LDM fields or entities and have no row in the table."
+  },
+  {
+   "ruling": "R-22258",
+   "item": "GAP-1612",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "P7 functional specification (FSD P7)",
+   "change": "Re-issue without FEAT-ILG-01 to FEAT-ILG-10 and A2.26 to A2.35; keep REQ-ILG-001 to REQ-ILG-014 traced to CAP-P1-012; confirm rwb-source-data owns the one ledger at wave 1 contract review.",
+   "note": "Ledger stays with P1 here. BR6 cites FEAT-ILG-02, which the re-issue removes; story not edited for that."
+  },
+  {
+   "ruling": "R-22259",
+   "item": "GAP-1511",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "P3 case module specification and integration module specification",
+   "change": "Remove the interaction table from the case spec (timeline reads via P1 contract); integration reads and writes the ledger through P1 contract; one writer per ledger.",
+   "note": "This service (P1 rwb-source-data) owns the ledger tables and write path, as this story already states."
+  }
+ ]
+}

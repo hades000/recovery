@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "3. For each receipt it resolves the case: the case reference carried by the auction, broker or LED remittance when there is one, otherwise the open case of the account, read on rwb-case's contract (one hop, 2 s; GAP-2518).",
+   "new": "3. For each receipt it resolves the case: the case reference carried by the auction, broker or LED remittance when there is one, otherwise the open case of the account, read on rwb-case's contract, operation Not specified in the source documents (GAP-2518) (one hop, 2 s)."
+  },
+  {
+   "old": "4. It evaluates the match rules in force for the proceeds sources and records the rule ID and version with the answer. Every threshold, window, grace and priority that the decision uses is a rule row of rwb-decision, never a constant (BR-P8-004; GAP-2519).",
+   "new": "4. It evaluates the match rules in force for the proceeds sources and records the rule ID and version with the answer. The proceeds arm of the payment match package is read on rwb-decision; its package code and rule IDs are Not specified in the source documents (GAP-2519; GAP-2518). Every threshold, window, grace and priority that the decision uses is a rule row of rwb-decision, never a constant (BR-P8-004; GAP-2519). The rules are read as governed rule rows of rwb-decision on its contract; payment_match_rule is not declared as a table of this service until the Ownership Map gives it an owner (GAP-1373)."
+  },
+  {
+   "old": "7. `ProceedsMatched` is written to the outbox in the same transaction and published by the relay to `rwb.payment.events.v1` with the case as the key; the case router of rwb-case consumes it (EV-25; DP-09).",
+   "new": "7. `ProceedsMatched` is written to the outbox in the same transaction and published by the relay to `rwb.payment.events.v1` with the case as the key; the case router of rwb-case consumes it (EV-25; DP-09). TreatmentBooked, PaymentMissed and ProceedsMatched follow the CloudEvents 1.0 envelope with the event id and the case key; every further element of their payloads is Not specified in the source documents until the event owner publishes the AsyncAPI document (GAP-1376)."
+  },
+  {
+   "old": "8. The manual path: the Credit Administration officer opens an unmatched receipt on SCR-28 and posts the match to a case and an account with `POST /proceeds/{proceedsId}/match`, under an `Idempotency-Key`; the same record-then-change transaction and the same event follow.",
+   "new": "8. The manual path: the Credit Administration officer opens an unmatched receipt on SCR-28 and posts the match to a case and an account with `POST /proceeds/{proceedsId}/match`, under an `Idempotency-Key` header. The MatchRequest carries the case reference and `matched_to` from `LOV-MATCH`; every further element of MatchRequest is Not specified in the source documents (GAP-1371). The same record-then-change transaction and the same event follow."
+  },
+  {
+   "old": "Given the data and the rule version this feature needs are in place",
+   "new": "Given a case with an account, a receipt of source AUCTION or LED on the business date with its amount, and the rule version of the proceeds arm are in place"
+  },
+  {
+   "old": "writes the result to the decision log with the rule version",
+   "new": "writes the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "Today's ACE batch has not arrived. (VR-P8-004-1)",
+   "new": "Today's load has not arrived. (VR-P8-004-1)"
+  },
+  {
+   "old": "Today's ACE batch has not arrived. | The payment data product is stale (VR-P8-004-1)",
+   "new": "Today's load has not arrived. | The payment data product is stale (VR-P8-004-1)"
+  },
+  {
+   "old": "Today's ACE batch has not arrived. | Not specified in the source documents (DOR-RWB-P8-E4044-APP-4)",
+   "new": "Today's load has not arrived. | Not specified in the source documents (DOR-RWB-P8-E4044-APP-4)"
+  },
+  {
+   "old": "| SCR-28 Proceeds matching | Loading | The receipts of the business date are being read; a skeleton, no partial totals |",
+   "new": "| SCR-28 Proceeds matching | Loading | The receipts of the business date are being read; a skeleton, no partial totals |\n| SCR-28 Proceeds matching | Empty | No receipts for the business date |\n| SCR-28 Proceeds matching | Error | Not specified in the source documents (CG-ALL-7651) |\n| SCR-28 Proceeds matching | No access | A caller without the right of the manual match gets the refusal of TC-E4-044-03 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23135",
+   "item": "GAP-1371",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 8 declares MatchRequest with case reference, matched_to from LOV-MATCH and Idempotency-Key; other elements recorded as unspecified."
+  },
+  {
+   "ruling": "R-23136",
+   "item": "GAP-1373",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 4 reads match rules as rwb-decision rule rows; payment_match_rule not declared as a table of this service until an owner is set."
+  },
+  {
+   "ruling": "R-23137",
+   "item": "GAP-1376",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 7 sets CloudEvents 1.0 envelope, event id and case key; further payload elements unspecified until AsyncAPI is published."
+  },
+  {
+   "ruling": "R-23138",
+   "item": "GAP-2517",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "FSD P8 v3, 'Requirements served' table (A2.4.4.1)",
+   "change": "Add the requirement row of FEAT-PAY-04 to the 'Requirements served' table in the next version. AC1 Given now carries the proceeds data set; section 16 test rows still need the data column."
+  },
+  {
+   "ruling": "R-23139",
+   "item": "GAP-2518",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "API Specification and Service Contract Catalog (rwb-case, rwb-decision, API-P8-002)",
+   "change": "Publish the rwb-case case read and the rwb-decision rule-package read with package code; enumerate MatchRequest elements on API-P8-002. Story step 3 and 4 placeholders stay until then."
+  },
+  {
+   "ruling": "R-23140",
+   "item": "GAP-2519",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Rule registry (rwb-decision proceeds arm) and Ownership Map (payment_match_rule)",
+   "change": "Publish the proceeds payment match package with package code, rule IDs and values; record in the Ownership Map whether payment_match_rule is a rwb-decision rule row or a rwb-case reference-data row."
+  },
+  {
+   "ruling": "R-23141",
+   "item": "GAP-2520",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Workflow and Activity Catalog v1",
+   "change": "Name the JOB-07 workflow and its matching activity, state whether the trigger is EV-26 batch completion or a Schedule, and publish the activity input and output."
+  },
+  {
+   "ruling": "R-26503",
+   "item": "CG-ALL-7646",
+   "status": "Resolved",
+   "section": "5, 8, 14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4 ('load') in section 5, section 8 and section 14 rows."
+  },
+  {
+   "ruling": "R-26504",
+   "item": "CG-ALL-7650",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 Then and AC2 Given now use decision record wording; section 16 test lines with legacy wording not in this chunk."
+  },
+  {
+   "ruling": "R-26505",
+   "item": "CG-ALL-7651",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, Error and No access states added to SCR-28; Error marked Not specified as the screen specification lacks it."
+  }
+ ]
+}

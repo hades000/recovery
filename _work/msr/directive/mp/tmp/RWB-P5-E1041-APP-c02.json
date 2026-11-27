@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "The decision record is written before the change takes effect and in the same transaction as the `retention_action` row and the event row, so a failure leaves all three unchanged (R-UNI-39).",
+   "new": "The decision record is written before the change takes effect and in the same transaction as the `retention_action` row and the event row, so a failure leaves all three unchanged (R-UNI-39).\n\nScreen states (DP-19): SCR-44 and SCR-47 show no rows when the run results or scan alerts are empty; while the composite route answers they show loading; a failed read shows MSG-GEN-006 with the system name \"Document storage\"; a role without the right sees MSG-P4-002. SCR-30 states: Not specified in the source documents (DOR-RWB-P5-E1041-APP-10)."
+  },
+  {
+   "old": "| X7 | The decision record write fails for an archive | The document stays as it is; picked up by the next run; incident raised (R-UNI-39) | MSG-P7-003 | TC-E1-041-12 (Principle 5) |",
+   "new": "| X7 | The decision record write fails for an archive | The document stays as it is; picked up by the next run; incident raised (R-UNI-39) | MSG-P7-003 | AC11 |"
+  },
+  {
+   "old": "| X8 | A role without Reference data C loads retention classes | Refused with 403 | MSG-P4-002 | TC-E1-041-11 (Access) |",
+   "new": "| X8 | A role without Reference data C loads retention classes | Refused with 403 | MSG-P4-002 | AC12 |"
+  },
+  {
+   "old": "| X9 | The `rwb-case` contract does not answer within 2 s, or the breaker is open | The document is counted as an exception of the run and is not archived; the next run picks it up; the failure names the case service | MSG-GEN-006 | TC-E1-041-05 (target path) |",
+   "new": "| X9 | The `rwb-case` contract does not answer within 2 s, or the breaker is open | The document is counted as an exception of the run and is not archived; the next run picks it up; the failure names the case service | MSG-GEN-006 | AC13 |"
+  },
+  {
+   "old": "| X11 | The relay is down when an action commits | The action row, the decision record and the event row are committed; the relay publishes both when it recovers, once, with no duplicate action | None | TC-E1-041-03 (target path) |",
+   "new": "| X11 | The relay is down when an action commits | The action row, the decision record and the event row are committed; the relay publishes both when it recovers, once, with no duplicate action | None | AC14 |"
+  },
+  {
+   "old": "Every Given, When and Then line above is the legacy line unchanged;",
+   "new": "Every Given, When and Then line of AC1 to AC10 is the legacy line unchanged, and AC11 to AC14 are new (D-RCV-60);"
+  },
+  {
+   "old": "Then the system archives the document , because its expiry date equals the run date",
+   "new": "Then the system archives the document , because its expiry date equals the run date\n\n  Scenario: AC11 A decision record write failure leaves the archive undone (new, D-RCV-60)\n    Given an appraisal report of class \"GENERAL05Y\" stored on 1 November 2021 on case \"RW-2026-000123\" with no legal hold\n    Given the rwb-decision contract mock fails to record the decision code \"DOCRET\"\n    When JOB-17 runs on 6 December 2026\n    Then the document stays in its state and its blob is not moved to the archive tier\n    Then the next run picks the document up, the run log holds MSG-P7-003 and an incident is raised\n\n  Scenario: AC12 A role without Reference data C is refused a class load (new, D-RCV-60)\n    Given the case owner role RW-CASEOWN has Reference data R only\n    When the case owner loads table \"RETENTION_CLASS\"\n    Then the system refuses the load with 403 and MSG-P4-002\n\n  Scenario: AC13 Case contract timeout holds the archive (new, D-RCV-60)\n    Given an appraisal report of class \"GENERAL05Y\" stored on 1 November 2021 on case \"RW-2026-000789\"\n    Given the rwb-case contract mock does not answer within 2 s\n    When JOB-17 runs on 6 December 2026\n    Then the document is counted as an exception of the run and is not archived\n    Then the failure names \"Case service\" in MSG-GEN-006\n\n  Scenario: AC14 Relay down at commit publishes once (new, D-RCV-60)\n    Given an appraisal report of class \"GENERAL05Y\" stored on 1 November 2021 on case \"RW-2026-000123\" with legal_hold false\n    Given the relay is down when the archive commits\n    When JOB-17 runs on 6 December 2026\n    Then the action row, the decision record and the event row are committed\n    Then the relay publishes both once when it recovers, with no duplicate action"
+  },
+  {
+   "old": "| MSG-P3-027 | Retention class load fails a check | The {table} load was refused: {error} at row {row}. The version in force is unchanged. |",
+   "new": "| MSG-P3-027 | Retention class load fails a check | The {table} load was refused: {check}. The version in force is unchanged. |"
+  },
+  {
+   "old": "For MSG-P3-027 the {table} value is RETENTION_CLASS, {error} names the failing check and {row} the row number.",
+   "new": "For MSG-P3-027 the {table} value is RETENTION_CLASS and {check} names the failing check."
+  },
+  {
+   "old": "| TC-E1-041-10 | AC10, BR8 | End to end | Appraisal report stored 6 December 2021 |",
+   "new": "| TC-E1-041-10 | AC10, BR8 | End to end | Appraisal report stored 6 December 2021 |\n| TC-E1-041-13 | Section 12 operations, events and activities | Contract | Contract test of the eight operations of 12.1, the event rwb.document.RetentionApplied.v1 and the activities of section 12 |\n| TC-E1-041-14 | ASM-3438 (section 12.7 tables) | Component | Boundary test of each table of 12.7: the unique (document_id, run_month) key on retention_action and the validity dates of retention_rule |\n| TC-E1-041-15 | AC11, BR7, Principle 5 | NFR | Decision record write forced to fail during an archive; the document unchanged, MSG-P7-003 in the run log, incident raised |\n| TC-E1-041-16 | AC12, Access | Component | Case owner (RW-CASEOWN, Reference data R only) loads RETENTION_CLASS; refused with 403 and MSG-P4-002 |\n| TC-E1-041-17 | AC13 | End to end | Case contract stub with no answer within 2 s on an appraisal report of class GENERAL05Y |\n| TC-E1-041-18 | AC14 | NFR | Relay down when an archive commits; both rows committed and published once on recovery |"
+  },
+  {
+   "old": "| ADR-020 | Contract-first REST, one hop, 2 s timeout |",
+   "new": "| ADR-020 | Contract-first REST, one hop, 2 s timeout |\n\nOpen decisions apply and each is still open, with its assumptions: DL01 (ASM-0189, ASM-1230, ASM-1770, ASM-1988); DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863); DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355); DL27 (ASM-1771, ASM-2532, ASM-2709, ASM-2716)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-06169",
+   "item": "DOR-RWB-P5-E1041-APP-8",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "rwb-document.yaml (P1 API); Kafka Catalog v1",
+   "change": "Make the action field a reference to LOV-RETENTION-ACTION, not a closed enum; add rwb.document.RetentionApplied.v1 to Kafka Catalog v1.",
+   "note": "Contract fix sits in P1 yaml and Kafka Catalog; story already reads LOV-RETENTION-ACTION as data."
+  },
+  {
+   "ruling": "R-10864",
+   "item": "CG-ALL-5878",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P3-027 text set to the Error and Message Standard v4 text with {table} and {check}; delivery shape aligned.",
+   "note": "Text copied from standard; the use matches the standard's trigger, so no new message ID."
+  },
+  {
+   "ruling": "R-17203",
+   "item": "DOR-RWB-P5-E1041-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Empty, loading, error and no-access states added for SCR-44 and SCR-47 in section 4.",
+   "note": "SCR-30 states not specified in the source documents; left as marked."
+  },
+  {
+   "ruling": "R-17204",
+   "item": "DOR-RWB-P5-E1041-APP-11",
+   "status": "Cross-document",
+   "section": "4, 12",
+   "target": "P2 Fields (personal data classification)",
+   "change": "Align P2 personal-data classing of its Fields with the no-personal-data statement for the event in section 4, or amend that statement.",
+   "note": "Conflict sits between P2 classification and the story; the story side is not changed here."
+  },
+  {
+   "ruling": "R-17205",
+   "item": "DOR-RWB-P5-E1041-APP-12",
+   "status": "Cross-document",
+   "section": "12, 16, 18",
+   "target": "RTM v7",
+   "change": "Align its test-case lists for RWB-P5-E1041-APP with section 16 (TC-E1-041-01 to TC-E1-041-18) and section 18.",
+   "note": "Contract test TC-13 and boundary test TC-14 added; RTM v7 content not in the story."
+  },
+  {
+   "ruling": "R-17206",
+   "item": "DOR-RWB-P5-E1041-APP-15",
+   "status": "Not applied",
+   "section": "Metadata",
+   "target": "",
+   "change": "",
+   "note": "Fitting two weeks needs a size, which is not specified in the sources (DOR-RWB-P5-E1041-APP-16)."
+  },
+  {
+   "ruling": "R-17207",
+   "item": "DOR-RWB-P5-E1041-APP-17",
+   "status": "Resolved",
+   "section": "Metadata",
+   "target": "",
+   "change": "",
+   "note": "Ready to start row names RWB-P5-E1024-APP and RWB-P5-E1049-APP; closing them is outside this story."
+  },
+  {
+   "ruling": "R-17208",
+   "item": "DOR-RWB-P5-E1041-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Open decisions DL01, DL10, DL26, DL27 with their assumptions listed after the decision table in section 18.",
+   "note": "Each open decision and its assumptions now stated in the story."
+  },
+  {
+   "ruling": "R-17209",
+   "item": "DOR-RWB-P5-E1041-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "AC11 to AC14 added for X7, X8, X9 and X11; section 5 Covered by points to them; test rows TC-E1-041-15 to 18 added.",
+   "note": "Each exception now covered by a criterion and its test row."
+  },
+  {
+   "ruling": "R-17210",
+   "item": "DOR-RWB-P5-E1041-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "BR7 covered by AC11 and test row TC-E1-041-15 (BR7 tag).",
+   "note": "All eight rules now covered by a criterion or test case."
+  }
+ ]
+}

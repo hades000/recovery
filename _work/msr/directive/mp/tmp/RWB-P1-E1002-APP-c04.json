@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P1-001 | The ACE batch for the business date is not complete, list not built | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The ACE batch for the business date is not complete, list not built | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "1. `rwb.source-data.AceDataReady.v1` arrives on `rwb.source-data.events.v1` for the business date, or the `DailyCaseList` Schedule fires at 07:15 Asia/Bangkok when the event has not arrived.",
+   "new": "1. `rwb.source-data.AceDataReady.v1` arrives on `rwb.source-data.events.v1` for the business date, or the `DailyCaseList` Schedule fires at 07:15 Asia/Bangkok when the event has not arrived. The 07:15 time is read from `caselist.allocation.wait.until`; the Schedule overlap policy is SKIP and its catch-up window is one business date."
+  },
+  {
+   "old": "SCR-02 Case list (Loading; empty; list; filtered)",
+   "new": "SCR-02 Case list (Loading; empty; list; filtered; error: Not specified in the source documents (CG-ALL-2025); no access: Not specified in the source documents (CG-ALL-2025))"
+  },
+  {
+   "old": "    Then the system builds the list with the owner and queue as they are at 07:15",
+   "new": "    Then the system builds the list with the owner and queue as they are at 07:15 on 2026-11-30"
+  },
+  {
+   "old": "    Then the system refuses the call with status 403 and MSG-P4-002",
+   "new": "    Then the system refuses the call with status 403 and MSG-P4-002\n\n  Scenario: AC12 Source not complete at the cut-off (new, NEWAC-RWB-P1-E1002-APP-AC12)\n    Given a source the case list reads is not COMPLETED for 2026-11-30 at the cut-off\n    When the case list step runs\n    Then the daily completeness gate of RWB-P1-E1015-APP holds the workflow\n    Then the system writes no case_list_row for 2026-11-30\n    Then the last released date stays the one that is served\n    Then the message MSG-P1-001 is raised and the data steward and team managers are alerted\n\n  Scenario: AC13 Case account with no ACE row (new, NEWAC-RWB-P1-E1002-APP-AC13)\n    Given case account ACC0000456 has no v_ace_account row for 2026-11-30\n    When the case list step runs\n    Then the row for the case account is written with empty balance and days past due\n    Then REC-05 lists the account key for the data steward and the ACE team\n    Then the case and the link are unchanged\n\n  Scenario: AC14 Data read only through the contracts and views (new, NEWAC-RWB-P1-E1002-APP-AC14)\n    Given the case list for 2026-11-30 is built\n    When the workflow reads case data and ACE data\n    Then case data is read only through the rwb-case contracts\n    Then ACE data is read only through recovery.v_ace_* views\n\n  Scenario: AC15 Error answers of the provided operations (new, NEWAC-RWB-P1-E1002-APP-AC15)\n    Given a caller calls GET /case-list/dates/{businessDate} or GET /case-list/rows\n    When a call is refused under the condition Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC15)\n    Then the system answers status 401 or 404 with the problem envelope"
+  },
+  {
+   "old": "**Ownership.** AC1, AC3, AC4, AC5 and AC10 are owned and run by RWB-ITG-E1002-ITG, not by this story. This story owns AC2, AC6, AC7, AC8, AC9 and AC11, which are the six Gherkin scenarios above; the X1 and X6 links in section 5 point to that owner.",
+   "new": "**Ownership.** AC1, AC3, AC4, AC5 and AC10 are owned and run by RWB-ITG-E1002-ITG, not by this story. This story owns AC2, AC6, AC7, AC8, AC9, AC11, AC12, AC13, AC14 and AC15, which are the ten Gherkin scenarios above; the X1 and X6 links in section 5 point to AC12 and AC13 in this story."
+  },
+  {
+   "old": "the 403 with MSG-P4-002 now comes from the guard library of rwb-access, so the refusal is identical in every service.",
+   "new": "the 403 with MSG-P4-002 now comes from the guard library of rwb-access, so the refusal is identical in every service.\n- **AC12 to AC15.** These four criteria are new, not legacy lines: they carry no legacy origin tag, and their test cases are TC-E1-002-14 to TC-E1-002-17 in section 16."
+  },
+  {
+   "old": "| X1 | A source the case list reads is not COMPLETED at the cut-off | The daily completeness gate of RWB-P1-E1015-APP holds the workflow; no `case_list_row` is written; the last released date stays the one that is served; the data steward and team managers are alerted | MSG-P1-001 | AC5 (RWB-ITG-E1002-ITG) |",
+   "new": "| X1 | A source the case list reads is not COMPLETED at the cut-off | The daily completeness gate of RWB-P1-E1015-APP holds the workflow; no `case_list_row` is written; the last released date stays the one that is served; the data steward and team managers are alerted | MSG-P1-001 | AC12 |"
+  },
+  {
+   "old": "| X6 | A case account has no `v_ace_account` row for the business date | The row is written with empty balance and days past due; REC-05 lists the key for the data steward and the ACE team; the case and the link are unchanged | None (REC-05) | AC10 (RWB-ITG-E1002-ITG) |",
+   "new": "| X6 | A case account has no `v_ace_account` row for the business date | The row is written with empty balance and days past due; REC-05 lists the key for the data steward and the ACE team; the case and the link are unchanged | None (REC-05) | AC13 |"
+  },
+  {
+   "old": "| TC-E1-002-13 | §12.7 boundary | Integration | Reads and writes only on the tables of §12.7 for one business date; no other table read (DP-01); boundary per ASM-3438 |",
+   "new": "| TC-E1-002-13 | §12.7 boundary | Integration | Reads and writes only on the tables of §12.7 for one business date; no other table read (DP-01); boundary per ASM-3438 |\n| TC-E1-002-14 | AC12, BR3 | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC12) | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC12) |\n| TC-E1-002-15 | AC13, BR10 | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC13) | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC13) |\n| TC-E1-002-16 | AC14, BR8 | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC14) | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC14) |\n| TC-E1-002-17 | AC15 | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC15) | Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC15) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-24291",
+   "item": "CG-ALL-2021",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text set to the standard v4 wording: '{product} is from {date}. Today's load has not arrived.'",
+   "note": "Copied the English text from Error and Message Standard v4 MSG-P1-001; story use matches the stale-data case, so no new ID."
+  },
+  {
+   "ruling": "R-24292",
+   "item": "CG-ALL-2022",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Rows TC-E1-002-01, 03, 04, 05 and 10 already carry 'run in RWB-ITG-E1002-ITG'; no further edit needed."
+  },
+  {
+   "ruling": "R-24293",
+   "item": "CG-ALL-2023",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists of REQ-RDF-007, REQ-RDF-009 and REQ-DRI-007 with section 18 of RWB-P1-E1002-APP in the next RTM version.",
+   "note": "RTM v7 is another workbook; section 18 of this story is not changed here."
+  },
+  {
+   "ruling": "R-24294",
+   "item": "CG-ALL-2025",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "SCR-02 states now list error and no access, each marked Not specified in the source documents.",
+   "note": "Screen Specifications v1 lacks error and no access; story marks both as not specified."
+  },
+  {
+   "ruling": "R-28446",
+   "item": "GAP-0487",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Step 1 names the 07:15 time read from caselist.allocation.wait.until, Schedule overlap SKIP and a one-business-date catch-up window.",
+   "note": "Workflow name and workflow ID rule were already in section 4; RWB-P1-E1002-CON and -OPS still need the same names."
+  },
+  {
+   "ruling": "R-29327",
+   "item": "ACR-RWB-P1-E1002-APP-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "The first Then of AC6 now names the value: 07:15 on 2026-11-30.",
+   "note": "AC6 had no should, correctly or as expected. The quoted legacy report text is kept exact because it is a legacy line."
+  },
+  {
+   "ruling": "R-30170",
+   "item": "NEWAC-RWB-P1-E1002-APP-AC12",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC12 scenario, X1 covered-by set to AC12, and TC-E1-002-14.",
+   "note": "Test level and data are Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC12)."
+  },
+  {
+   "ruling": "R-30171",
+   "item": "NEWAC-RWB-P1-E1002-APP-AC13",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC13 scenario, X6 covered-by set to AC13, and TC-E1-002-15.",
+   "note": "Test level and data are Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC13)."
+  },
+  {
+   "ruling": "R-30172",
+   "item": "NEWAC-RWB-P1-E1002-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 scenario for BR8 and TC-E1-002-16.",
+   "note": "Test level and data are Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC14)."
+  },
+  {
+   "ruling": "R-30173",
+   "item": "NEWAC-RWB-P1-E1002-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 scenario for 401 and 404 error answers and TC-E1-002-17.",
+   "note": "The trigger condition and test are Not specified in the source documents (NEWAC-RWB-P1-E1002-APP-AC15)."
+  }
+ ]
+}

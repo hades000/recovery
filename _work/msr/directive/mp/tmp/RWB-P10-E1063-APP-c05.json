@@ -1,0 +1,59 @@
+{
+ "edits": [
+  {
+   "old": "    Then the loading state of SCR-46 is Not specified in the source documents (DOR-RWB-P10-E1063-APP-10)",
+   "new": "    Then the loading state of SCR-46 is Not specified in the source documents (DOR-RWB-P10-E1063-APP-10)\n\n  Scenario: AC9 Feed, schedule, tables and aggregate shape (new; BR7, BR8, BR10, BR11)\n    Given the Schedule AgentRunDailyRollup runs for business date 2026-12-01\n    When the rollup completes\n    Then the reporting feed is built from rwb.agent.AgentRunCompleted.v1 on rwb.agent.events.v1 with no lake table, extract or lake credential written\n    Then the daily aggregate holds agent, policy version, prompt version, model version, business date, runs, answered, fallback, fallback rate, latency p50, latency p95, tokens, cost and the latest evaluation score\n    Then only agent_alert and the daily aggregate rows of the business date are written in rwb_agent\n\n  Scenario: AC10 Error answers 401, 403 and 404 of the provided operations (new)\n    Given a request to the metric read arrives without a valid credential\n    When the route receives the read\n    Then the route answers 401 with the message Not specified in the source documents (NEWAC-RWB-P10-E1063-APP-AC10)\n    Given a role without the reporting read opens the dashboard\n    When the route receives the read\n    Then the route refuses the read with 403 and MSG-P4-002\n    Given a metric read names an agent that does not exist\n    When the route receives the read\n    Then the route answers 404 with the message Not specified in the source documents (NEWAC-RWB-P10-E1063-APP-AC10)\n\n  Scenario: AC11 Activity retry and timeout (new)\n    Given the aggregateAgentRuns activity fails once with a retryable error for 2026-12-01\n    When the workflow retries the activity\n    Then the daily rows for 2026-12-01 are replaced, not added, and no second alert exists\n    Given the aggregateAgentRuns activity runs longer than its timeout of Not specified in the source documents (NEWAC-RWB-P10-E1063-APP-AC11)\n    When the timeout fires\n    Then the rollup run reports failed and the business date is started again by hand through the same workflow ID\n\n  Scenario: AC12 A disallowed status change is refused (new)\n    Given an alert row for \"SCREENING\" has sent_at set\n    When a change sets sent_at back to empty\n    Then the change is refused and sent_at keeps its value"
+  },
+  {
+   "old": "| TC-E1-063-12 | BR8, BR11 | Component | The Schedule AgentRunDailyRollup for 2026-12-01 in rwb-recovery on rwb-agent with overlap SKIP; the aggregate holds agent, policy version, prompt version, model version, business date, runs, answered, fallback, fallback rate, latency p50, latency p95, tokens, cost and the latest evaluation score |",
+   "new": "| TC-E1-063-12 | BR8, BR11 | Component | The Schedule AgentRunDailyRollup for 2026-12-01 in rwb-recovery on rwb-agent with overlap SKIP; the aggregate holds agent, policy version, prompt version, model version, business date, runs, answered, fallback, fallback rate, latency p50, latency p95, tokens, cost and the latest evaluation score |\n| TC-E1-063-13 | AC9, BR7, BR8, BR10, BR11 | Component | The feed from rwb.agent.AgentRunCompleted.v1 on rwb.agent.events.v1; the Schedule AgentRunDailyRollup for 2026-12-01; only agent_alert and the daily rows written in rwb_agent |\n| TC-E1-063-14 | AC10 | Contract | A read without a valid credential answers 401; RW-CASEOWN without the reporting read is refused with 403 and MSG-P4-002; an unknown agent answers 404 |\n| TC-E1-063-15 | AC11 | Component | aggregateAgentRuns fails once with a retryable error and is retried; a timeout ends the run failed |\n| TC-E1-063-16 | AC12 | Component | A sent alert row whose sent_at is set back to empty; the change is refused and the value is kept |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30358",
+   "item": "NEWAC-RWB-P10-E1063-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added in section 7 for 401, 403 and 404; TC-E1-063-14 added. 401 and 404 messages not specified; 404 trigger inferred as unknown agent."
+  },
+  {
+   "ruling": "R-30359",
+   "item": "NEWAC-RWB-P10-E1063-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for activity retry and timeout; TC-E1-063-15 added. Timeout value not specified in the source documents."
+  },
+  {
+   "ruling": "R-30360",
+   "item": "NEWAC-RWB-P10-E1063-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added: a sent alert cannot return to unsent; TC-E1-063-16 added. Full transition list not specified in the source documents."
+  },
+  {
+   "ruling": "R-30361",
+   "item": "NEWAC-RWB-P10-E1063-APP-AC8",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X6 Covered by already lists AC8 and TC-E1-063-08; AC8 scenario checks 403 and MSG-P4-002. No edit needed."
+  },
+  {
+   "ruling": "R-30362",
+   "item": "NEWAC-RWB-P10-E1063-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added covering BR7, BR8, BR10, BR11; TC-E1-063-13 added in section 16."
+  }
+ ]
+}

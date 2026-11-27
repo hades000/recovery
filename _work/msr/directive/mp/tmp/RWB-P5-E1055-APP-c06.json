@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "and the timer is rwb-case's (legacy BR2)",
+   "new": "and the timer is rwb-case's (legacy BR2); one running NOTICE_PERIOD timer per notice is kept by the partial unique index and the idempotency key of notice and delivered date, and a second delivered fact for the same notice is a repeat counted under R-UNI-40 (GAP-2247)"
+  },
+  {
+   "old": "| MSG-P1-001 | The WIN batch is late or not COMPLETE for the business date of a receipt | {product} is from {date}. Today's load has not arrived. |",
+   "new": "| MSG-P1-001 | The WIN batch is late or not COMPLETE for the business date of a receipt | {product} is from {date}. Today's ACE batch has not arrived. |"
+  },
+  {
+   "old": "And the notice state, the sent date and the delivered date are read-only facts of rwb-comms in this slice",
+   "new": "And the notice state, the sent date and the delivered date are read-only facts of rwb-comms in this slice\n\n  Scenario: AC8 The retention class, the write-once flag and the field list come from the type in force, and rwb-document writes only its own tables (new, D-RCV-60; BR8, BR9, BR11, BR12, BR13)\n    Given type \"DEMAND_LETTER\" has write_once true and retention class \"LEGAL10Y\" in version \"DOCTYPE-2026.11\"\n    When a store request for type \"DEMAND_LETTER\" on case \"RC-2026-000123\" carries write_once false and retention class \"GENERAL05Y\" from the caller\n    Then the document row carries write_once true and retention class \"LEGAL10Y\" from the version in force, and the caller's values are not written\n    And a document_field fact outside the field list of type \"DEMAND_LETTER\" is refused and no document_field row is written for it\n    And the store writes no retention action, no expiry and no disposal, these being held by RWB-P5-E1052-APP\n    And the store reads no v_ace_* view, no public table and no other service's table, writes no interaction-ledger entry and starts no timer\n\n  Scenario: AC9 A request without a valid login, without a Documents right or for an unknown document is answered 401, 403 or 404 (new, D-RCV-60)\n    Given the provided operations of rwb-document are called through the gateway-bff route\n    When a request without a valid login, a request from a role that holds no Documents right, and a request for a documentId that does not exist are sent to GET /api/recovery/document/v1/documents/{documentId}\n    Then the request without a valid login is answered 401, the request from a role that holds no Documents right is answered 403 with MSG-P4-002 as in AC4, and the unknown documentId is answered 404\n    And no answer carries document metadata, a field value or file content\n\n  Scenario: AC10 A consumed call that fails or does not answer stores no partial document (new, D-RCV-60)\n    Given the rwb-comms contract mock does not answer the PDF request of notice \"N-0001\"\n    When rwb-document stores the notice PDF on case \"RC-2026-000123\" through POST /api/recovery/document/v1/cases/{caseId}/documents with source \"GENERATED\"\n    Then the store is answered as a failure with the answer code Not specified in the source documents (NEWAC-RWB-P5-E1055-APP-AC14)\n    And no document row, no document_field row and no outbox row is written"
+  },
+  {
+   "old": "The seven criteria above are new",
+   "new": "The ten criteria above are new"
+  },
+  {
+   "old": "| TC-E1-055-14 | Section 12.7 tables owned (boundary test) | Component | Every table of section 12.7 checked: only document and document_field are written; document_custody, retention_action, document_intake and document_text are not written; no cross-schema read |",
+   "new": "| TC-E1-055-14 | Section 12.7 tables owned (boundary test) | Component | Every table of section 12.7 checked: only document and document_field are written; document_custody, retention_action, document_intake and document_text are not written; no cross-schema read |\n| TC-E1-055-15 | AC8, BR8, BR9, BR11, BR12, BR13 (new, D-RCV-60) | Component | Type \"DEMAND_LETTER\" in DOCTYPE-2026.11 with write_once true and retention class \"LEGAL10Y\"; store request carrying write_once false and \"GENERAL05Y\"; document_field fact outside the type's field list; boundary test on schema and login |\n| TC-E1-055-16 | AC9 (new, D-RCV-60) | Contract | GET documents/{documentId} without a valid login, from a role with no Documents right, and for an unknown documentId; answers 401, 403 and 404 |\n| TC-E1-055-17 | AC10 (new, D-RCV-60) | Component | rwb-comms contract mock does not answer the PDF request of notice \"N-0001\"; no document, document_field or outbox row written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28628",
+   "item": "GAP-2247",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR2 now keeps one running NOTICE_PERIOD timer per notice via the partial unique index and idempotency key; a repeat is counted under R-UNI-40. Revisit at wave 3."
+  },
+  {
+   "ruling": "R-28629",
+   "item": "GAP-0581",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 uses FSD wording; product is the catalog name and the date the last complete business date. Fixture values are test data; OQ-P1-07 governs the standard."
+  },
+  {
+   "ruling": "R-28630",
+   "item": "GAP-1045",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "FSD P5 (A2 proof of delivery) and TSD P5 (T3.1 field_definitions)",
+   "change": "Name the four receipt fields (barcode, callback date, delivery status, sent type) in the receipt type's field_definitions and state the receipt granularity in the proof-of-delivery section A2. Names not in sources.",
+   "note": "Receipt field names and granularity are not in any source read; the story placeholders stay until those documents name them."
+  },
+  {
+   "ruling": "R-28631",
+   "item": "GAP-1046",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Message catalogue (FSD P5 message list)",
+   "change": "Add the text of MSG-P5-016 (malware found) to the message catalogue. Text Not specified in the source documents (GAP-1046).",
+   "note": "The story cannot quote MSG-P5-016 text; no invented text added."
+  },
+  {
+   "ruling": "R-28632",
+   "item": "GAP-1104",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-comms values files and the alert runbook",
+   "change": "Set the alert thresholds, the reviewed late-batch time and the Schedule state per environment, confirmed at UAT. Values Not specified in the source documents (GAP-1104).",
+   "note": "No threshold, window or time is in the sources, so none is set here."
+  },
+  {
+   "ruling": "R-28633",
+   "item": "GAP-1105",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Logical Data Model and reference lists (hold_reason)",
+   "change": "Publish hold_reason as a versioned reference list with TEMPLATE_WITHDRAWN as first row; other values Not specified in the source documents (GAP-1105).",
+   "note": "Only TEMPLATE_WITHDRAWN is named in the sources; other hold reasons need the business owner."
+  },
+  {
+   "ruling": "R-28634",
+   "item": "GAP-2246",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Logical Data Model and rwb-case ownership map",
+   "change": "Allocate the Data Dictionary field ID for the nullable notice reference column on the timer table and add it to the ownership map. ID Not specified in the source documents (GAP-2246).",
+   "note": "No field ID is allocated in any source; the column, type and index stand as written."
+  },
+  {
+   "ruling": "R-31173",
+   "item": "NEWAC-RWB-P5-E1055-APP-AC12",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 in section 7 covering BR8, BR9, BR11, BR12, BR13, with test case TC-E1-055-15 in section 16."
+  },
+  {
+   "ruling": "R-31174",
+   "item": "NEWAC-RWB-P5-E1055-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 for 401, 403 and 404 answers of the provided operations, with test case TC-E1-055-16."
+  },
+  {
+   "ruling": "R-31175",
+   "item": "NEWAC-RWB-P5-E1055-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for a failed or unanswered consumed call storing no partial document, with test case TC-E1-055-17."
+  }
+ ]
+}

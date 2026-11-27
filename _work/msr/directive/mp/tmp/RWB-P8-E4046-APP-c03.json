@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "**No personal data.** The rows this story writes carry identifiers, codes, amounts, dates and a rule version. No name, address, contact value or identity number enters `rwb_payment`, the decision record, the manifest, the `TreatmentBooked` payload, a log or a workflow input, and the fixture data of the tests is synthetic.",
+   "new": "**No personal data.** The rows this story writes carry identifiers, codes, amounts, dates and a rule version. No name, address, contact value or identity number enters `rwb_payment`, the decision record, the manifest, the `TreatmentBooked` payload, a log or a workflow input, and the fixture data of the tests is synthetic. The fields of this section that Data Classification v5 classes as personal data are Not specified in the source documents (DOR-RWB-P8-E4046-APP-11); none of them is written here, and `primary_person_key` is read only on the rwb-case contract."
+  },
+  {
+   "old": "| X2 | The treatment is not an accepted settlement, or its state is not the one R-SET-10 allows | The step does not fire, nothing is written and nothing leaves | None | TC-E4-046-01 |",
+   "new": "| X2 | The treatment is not an accepted settlement, or its state is not the one R-SET-10 allows | The step does not fire, nothing is written and nothing leaves | None | AC3, TC-E4-046-06 |"
+  },
+  {
+   "old": "| X3 | The ACE data product is stale after a late or failed batch | The read-back holds, writes nothing, shows the data date and resumes on the next fresh answer | MSG-P1-001 | TC-E4-046-01 |",
+   "new": "| X3 | The ACE data product is stale after a late or failed batch | The read-back holds, writes nothing, shows the data date and resumes on the next fresh answer | MSG-P1-001 | AC4, TC-E4-046-07 |"
+  },
+  {
+   "old": "| X4 | The rwb-treatment, rwb-source-data, rwb-integration or rwb-case contract does not answer inside 2 s, or its breaker is open | The activity retries on the workflow's own backoff; nothing is written and no event is published | None | TC-E4-046-01 |",
+   "new": "| X4 | The rwb-treatment, rwb-source-data, rwb-integration or rwb-case contract does not answer inside 2 s, or its breaker is open | The activity retries on the workflow's own backoff; nothing is written and no event is published | None | AC5, TC-E4-046-08 |"
+  },
+  {
+   "old": "| X5 | The outbound item reaches `EXCEPTION`, or the interface row is not in force | No read-back and no `TreatmentBooked`; the exception queue and the owner task are rwb-integration's, and the case stays with operations | MSG-P2-001 (P2's) | TC-E4-046-01 |",
+   "new": "| X5 | The outbound item reaches `EXCEPTION`, or the interface row is not in force | No read-back and no `TreatmentBooked`; the exception queue and the owner task are rwb-integration's, and the case stays with operations | MSG-P2-001 (P2's) | AC6, TC-E4-046-09 |"
+  },
+  {
+   "old": "| X6 | The booked position or the settlement payment does not match the accepted terms | No `TreatmentBooked`; one task for the case owner and the difference recorded | None | TC-E4-046-01 |",
+   "new": "| X6 | The booked position or the settlement payment does not match the accepted terms | No `TreatmentBooked`; one task for the case owner and the difference recorded | None | AC7, TC-E4-046-10 |"
+  },
+  {
+   "old": "| X7 | The same `TreatmentApproved` or the same `Idempotency-Key` arrives twice | The stored answer is returned, no second item, no second event, the repeat counted | None | TC-E4-046-01 |",
+   "new": "| X7 | The same `TreatmentApproved` or the same `Idempotency-Key` arrives twice | The stored answer is returned, no second item, no second event, the repeat counted | None | AC8, TC-E4-046-11 |"
+  },
+  {
+   "old": "| X8 | A component, a statement or a test reads a `v_ace_*` view, another `rwb_*` schema or a `recovery_*` table | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR5, BR7 |",
+   "new": "| X8 | A component, a statement or a test reads a `v_ace_*` view, another `rwb_*` schema or a `recovery_*` table | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC9, TC-E4-046-05 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Not an accepted settlement (exception X2)\n    Given treatment \"T-0001\" is not an accepted settlement, or its state is not the one R-SET-10 allows\n    When the booking step is triggered by TreatmentApproved for \"T-0001\"\n    Then nothing is written, no outbound request leaves and no event is published\n\n  Scenario: AC4 Stale ACE data (exception X3)\n    Given the ACE data product for business date 2027-02-26 is stale after a late or failed batch\n    When the read-back runs\n    Then the read-back holds, nothing is written, the data date is shown and MSG-P1-001 is raised\n\n  Scenario: AC5 Contract does not answer (exception X4)\n    Given the rwb-treatment contract does not answer inside 2 s or its breaker is open\n    When the activity is called\n    Then the activity retries on the workflow's own backoff, nothing is written and no event is published\n\n  Scenario: AC6 Outbound item in exception (exception X5)\n    Given the outbound item reaches EXCEPTION or the interface row is not in force\n    When the read-back is due\n    Then there is no read-back and no TreatmentBooked, and the case stays with operations\n\n  Scenario: AC7 Booked position does not match (exception X6)\n    Given the booked position or the settlement payment does not match the accepted terms of \"T-0001\"\n    When the read-back runs\n    Then no TreatmentBooked is published, one task for the case owner is raised and the difference is recorded\n\n  Scenario: AC8 Repeated treatment or key (exception X7)\n    Given the same TreatmentApproved or the same Idempotency-Key arrives twice\n    When the second arrival is processed\n    Then the stored answer is returned, no second item and no second event are created, and the repeat is counted\n\n  Scenario: AC9 Forbidden read or write (exception X8)\n    Given a component, a statement or a test reads a v_ace_* view, another rwb_* schema or a recovery_* table\n    When the boundary test runs\n    Then the grant refuses the statement, the boundary test fails the build and nothing is released"
+  },
+  {
+   "old": "The rule rows behind the booking — R-SET-10, R-SET-13 with R-RES-22 and R-RES-23 around them — are governed in rwb-decision and named here, never declared here.",
+   "new": "The rule rows behind the booking — R-SET-10, R-SET-13 with R-RES-22 and R-RES-23 around them — are governed in rwb-decision and named here, never declared here.\n\nRule coverage: BR1 and BR7 by AC6 and TC-E4-046-09; BR2 by AC3, AC4, TC-E4-046-06 and TC-E4-046-07; BR3 by AC2; BR4 by AC3 and TC-E4-046-06; BR5, BR6, BR9 and BR11 by AC9 and TC-E4-046-05; BR8 by AC7 and TC-E4-046-10; BR10 by AC8 and TC-E4-046-11; VR-P8-006-1 by AC4 and TC-E4-046-07; BR-P8-006 by TC-E4-046-01. VR-P8-006-1 and BR-P8-006 carry no BR ID in the source: Not specified in the source documents (DOR-RWB-P8-E4046-APP-4)."
+  },
+  {
+   "old": "| `RulePackageInForce` (EV-30) | `rwb.decision.events.v1` | `rwb-payment.settlement-booking.v1` | The package code and the version in force; deduped in the inbox | On the outbox relay of rwb-decision, and at every step start from the package read |",
+   "new": "| `RulePackageInForce` (EV-30) | `rwb.decision.events.v1` | `rwb-payment.settlement-booking.v1` | The package code and the version in force; deduped in the inbox | On the outbox relay of rwb-decision, and at every step start from the package read |\n\nThe owner of each consumed event is the producer named in its topic: rwb-treatment for `rwb.treatment.events.v1`, rwb-source-data for `rwb.source-data.events.v1` and rwb-decision for `rwb.decision.events.v1`."
+  },
+  {
+   "old": "10. The boundary test: no statement outside `rwb_payment`, no `v_ace_*` read, no write to `rwb_case`, `rwb_treatment`, `rwb_integration` or `rwb_decision`, and no Schedule (X8, BR5, BR6, BR7).",
+   "new": "10. The boundary test: no statement outside `rwb_payment`, no `v_ace_*` read, no write to `rwb_case`, `rwb_treatment`, `rwb_integration` or `rwb_decision`, and no Schedule (X8, BR5, BR6, BR7). The four schemas named are those of the services that own the tables of the same names, rwb-case, rwb-treatment, rwb-integration and rwb-decision; this step reads or writes none of them."
+  },
+  {
+   "old": "- No parameter is named in the sources for the step itself; the 2 s budget and the single hop are the platform rule of ADR-020.",
+   "new": "- No parameter is named in the sources for the step itself; the 2 s budget and the single hop are the platform rule of ADR-020.\n- Reference-data contract (DP-06, DP-07): the route set is read through the reference-data contract of rwb-decision and the interface values through that of rwb-integration; the parameter keys of both are Not specified in the source documents (DOR-RWB-P8-E4046-APP-20)."
+  },
+  {
+   "old": "| TC-E4-046-04 | Principle 5 | NFR | A forced decision-log write failure at the moment of the confirmation; no record, no event, no answer, and the repeat publishes once when the library recovers |",
+   "new": "| TC-E4-046-04 | Principle 5 | NFR | A forced decision-log write failure at the moment of the confirmation; no record, no event, no answer, and the repeat publishes once when the library recovers |\n| TC-E4-046-05 | AC9 (X8); BR5, BR6, BR7, BR9, BR11; the tables of 12.7 | Component | Boundary test over the build: a statement reads `v_ace_*`, another `rwb_*` schema or a `recovery_*` table, or writes `rwb_case`, `rwb_treatment`, `rwb_integration` or `rwb_decision`; the build fails |\n| TC-E4-046-06 | AC3 (X2); BR2, BR4 | Component | Treatment `T-0001` not an accepted settlement, or its state outside R-SET-10; nothing written, no request, no event |\n| TC-E4-046-07 | AC4 (X3); BR2, VR-P8-006-1 | Component | ACE data product stale for business date 2027-02-26; read-back holds, nothing written, MSG-P1-001 shown |\n| TC-E4-046-08 | AC5 (X4) | NFR | rwb-treatment contract silent beyond 2 s or breaker open; activity retries on backoff, nothing written, no event |\n| TC-E4-046-09 | AC6 (X5); BR1, BR7 | Component | Outbound item in `EXCEPTION` on rwb-integration; no read-back, no `TreatmentBooked`, case stays with operations |\n| TC-E4-046-10 | AC7 (X6); BR8 | Component | Booked position differs from the accepted terms of `T-0001`; no `TreatmentBooked`, one task for the case owner, difference recorded |\n| TC-E4-046-11 | AC8 (X7); BR10 | Component | Same `TreatmentApproved` and same `Idempotency-Key` twice; stored answer returned, one item, one event, repeat counted |"
+  },
+  {
+   "old": "| MSG-P1-001 | The ACE data product is stale after a late or failed batch (VR-P8-006-1) | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The ACE data product is stale after a late or failed batch (VR-P8-006-1) | {product} is from {date}. Today's ACE batch has not arrived. |\n| MSG-P2-001 | The outbound item reaches EXCEPTION or the interface row is not in force (X5) | Not specified in the source documents (DOR-RWB-P8-E4046-APP-9) |"
+  },
+  {
+   "old": "no message is reworded and no new one is added.",
+   "new": "no message is reworded; MSG-P2-001 is P2's message, listed for X5 with its text Not specified in the source documents (DOR-RWB-P8-E4046-APP-9)."
+  },
+  {
+   "old": "| Test cases | TC-E4-046-01 to TC-E4-046-04, with the `-ITG` copies in the wave 3 harness |",
+   "new": "| Test cases | TC-E4-046-01 to TC-E4-046-11, with the `-ITG` copies in the wave 3 harness |"
+  },
+  {
+   "old": "| Architecture decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022 |",
+   "new": "| Architecture decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022 |\n| Feature | FEAT-PAY-06 Post a settlement booking to ALS |\n| L3 process | Not specified in the source documents (DOR-RWB-P8-E4046-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18343",
+   "item": "DOR-RWB-P8-E4046-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "§11 states which fields Data Classification v5 classes as personal data is not specified; none written here, primary_person_key read only on rwb-case contract."
+  },
+  {
+   "ruling": "R-18344",
+   "item": "DOR-RWB-P8-E4046-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add rows TC-E4-046-01 to TC-E4-046-11 under tab Story test cases; the story now has boundary row TC-E4-046-05 and criteria AC3 to AC9.",
+   "note": "Story side done: boundary test TC-E4-046-05 and rows 06 to 11 added in §16. TC-01 to 04 are not yet in v8."
+  },
+  {
+   "ruling": "R-18345",
+   "item": "DOR-RWB-P8-E4046-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Trace item table now carries Feature and L3 process rows; L3 process is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-18346",
+   "item": "DOR-RWB-P8-E4046-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Reference-data contract named under DP-06 and DP-07 for route set and interface values; parameter keys Not specified in the source documents."
+  },
+  {
+   "ruling": "R-18347",
+   "item": "DOR-RWB-P8-E4046-APP-24",
+   "status": "Resolved",
+   "section": "12.4, 13",
+   "target": "",
+   "change": "",
+   "note": "Event owners derived from producer topics under 12.4; §13 schemas stated as those of the owning services, read or written by none."
+  },
+  {
+   "ruling": "R-18348",
+   "item": "DOR-RWB-P8-E4046-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Criteria AC3 to AC9 added for exceptions X2 to X8 with test rows TC-E4-046-06 to 11; §5 Covered by updated to name them."
+  },
+  {
+   "ruling": "R-18349",
+   "item": "DOR-RWB-P8-E4046-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "",
+   "note": "Rule coverage paragraph maps BR1 to BR11, VR-P8-006-1 and BR-P8-006 to criteria or tests; BR IDs Not specified in the source documents."
+  },
+  {
+   "ruling": "R-18350",
+   "item": "DOR-RWB-P8-E4046-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD (data load from COLLINS) with the Write-off and posting U right as §10 states.",
+   "note": "Role SY-DATALOAD is absent from Users Roles and Permissions v5; no story edit needed."
+  },
+  {
+   "ruling": "R-18351",
+   "item": "DOR-RWB-P8-E4046-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add decision_record as an entity with its §11 fields, or confirm it as a PLT library object, and classify it in Data Classification v5.",
+   "note": "AC2 legacy decision-log wording kept word for word by rule, so the P3 wording part is Not applied."
+  },
+  {
+   "ruling": "R-18352",
+   "item": "DOR-RWB-P8-E4046-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Provide MSG-P1-001 wording as the standard holds it so §14 and VR-P8-006-1 can copy it; MSG-P2-001 text is Not specified in the source documents.",
+   "note": "MSG-P2-001 row added in §14 with text Not specified. MSG-P1-001 text difference needs the standard's wording."
+  }
+ ]
+}

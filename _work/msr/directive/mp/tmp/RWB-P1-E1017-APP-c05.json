@@ -1,0 +1,95 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E1-017-12 | 12.7 tables, ASM-3438 | Component | One row per table of 12.7 at the age-basis boundary of the rule |",
+   "new": "| TC-E1-017-12 | 12.7 tables, ASM-3438 | Component | One row per table of 12.7 at the age-basis boundary of the rule |\n| TC-E1-017-13 | AC10 | End to end | Legal-hold contract fake answering after the 2 s budget; run date 2026-12-06 |\n| TC-E1-017-14 | AC11 | Contract | Same Idempotency-Key posted with a body that differs from rule version \"RET-2026.11\" |\n| TC-E1-017-15 | AC12, BR8 | Component | Rule for product \"DP05\" naming a table this story does not own; load refused in full |\n| TC-E1-017-16 | AC13, BR8 | Component | Rule for product \"DP05\" with table \"v_ace_efs_action\"; load refused in full |\n| TC-E1-017-17 | AC14 | Contract | No credential, a caller without the right to start a run, and an unknown runId; answers 401, 403 and 404 |\n| TC-E1-017-18 | AC15 | Component | An archive activity of RetentionRunWorkflow that times out and is retried |\n| TC-E1-017-19 | AC16 | End to end | Legal-hold contract fake returns an error; run date 2026-12-06 |"
+  },
+  {
+   "old": "    Then the system refuses the load in full with MSG-P1-002 and check \"v_ace_efs_action is ACE data; ACE applies its own retention\"",
+   "new": "    Then the system refuses the load in full with MSG-P1-002 and check \"v_ace_efs_action is ACE data; ACE applies its own retention\"\n\n  Scenario: AC14 An error answer of a provided operation carries its status (new, error answers)\n    Given a caller presents no credential to POST /retention-runs\n    When the caller posts a retention run\n    Then the system answers 401\n    Given a caller without the right to start a run\n    When the caller posts a retention run\n    Then the system answers 403\n    Given a runId that does not exist\n    When the caller gets GET /retention-runs/{runId}\n    Then the system answers 404\n\n  Scenario: AC15 An activity of the run is retried or times out (new, activity retry and timeout)\n    Given an archive activity of RetentionRunWorkflow times out before its answer\n    When the activity is retried\n    Then the retry repeats the unit\n    Then no row is deleted before the archive copy is checked\n\n  Scenario: AC16 A consumed call fails or does not answer (new, consumed call)\n    Given the rwb-case legal-hold contract mock returns an error for the run\n    When JOB-17 runs\n    Then the run ends \"FAILED\" before any selection\n    Then the system archives no row and deletes no row"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28505",
+   "item": "GAP-2429",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "No edit: metadata rows kept as the Work Package fixes them",
+   "note": "Five H rows and RWB-P3-E1043-CON already in Depends on (build) and Contract dependencies; metadata kept as fixed."
+  },
+  {
+   "ruling": "R-29083",
+   "item": "GAP-3234",
+   "status": "Cross-document",
+   "section": "Header",
+   "target": "Story dependencies v5 (Dependency classes sheet)",
+   "change": "Record on the check row X that platform technical-enabler work is team-type work, tracked and never blocking; keep X on the ten rows.",
+   "note": "Reading belongs to the dependency workbook; no story edit."
+  },
+  {
+   "ruling": "R-30223",
+   "item": "NEWAC-RWB-P1-E1017-APP-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added TC-E1-017-13 to section 16 for AC10 (X8); AC10 already exists in section 7.",
+   "note": "AC10 scenario exists; test case row added with data from the Given."
+  },
+  {
+   "ruling": "R-30224",
+   "item": "NEWAC-RWB-P1-E1017-APP-AC11",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-017-14 to section 16 for AC11 (X9); AC11 already exists in section 7.",
+   "note": "AC11 scenario exists; test case row added."
+  },
+  {
+   "ruling": "R-30225",
+   "item": "NEWAC-RWB-P1-E1017-APP-AC12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-017-15 to section 16 for AC12 (X10); AC12 already exists in section 7.",
+   "note": "AC12 scenario exists; test case row added."
+  },
+  {
+   "ruling": "R-30226",
+   "item": "NEWAC-RWB-P1-E1017-APP-AC13",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-017-16 to section 16 for AC13 (BR8); AC13 already exists in section 7.",
+   "note": "AC13 scenario exists; test case row added for BR8."
+  },
+  {
+   "ruling": "R-30227",
+   "item": "NEWAC-RWB-P1-E1017-APP-AC14",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC14 scenario (401, 403, 404 of the provided operations) to section 7 and TC-E1-017-17 to section 16.",
+   "note": "New criterion with status codes named in the item; test row added."
+  },
+  {
+   "ruling": "R-30228",
+   "item": "NEWAC-RWB-P1-E1017-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC15 scenario (activity retry and timeout) to section 7 and TC-E1-017-18 to section 16.",
+   "note": "New criterion for retried or timed-out activity; test row added."
+  },
+  {
+   "ruling": "R-30229",
+   "item": "NEWAC-RWB-P1-E1017-APP-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC16 scenario (consumed call fails or does not answer) to section 7 and TC-E1-017-19 to section 16.",
+   "note": "New criterion for a failed consumed call; test row added."
+  }
+ ]
+}

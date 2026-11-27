@@ -1,0 +1,54 @@
+{
+ "edits": [
+  {
+   "old": "| BR5 | No environment value is hard-coded: replicas, resources, thresholds, probe paths and timings and the flag come from values files and parameters | Template and Rules §R7.2 s17 |",
+   "new": "| BR5 | No environment value is hard-coded: replicas, resources, thresholds, probe paths and timings and the flag come from a named chart value set per environment and from parameters; the fixture owner is named at the wave 2 entry check (GAP-0513) | Template and Rules §R7.2 s17 |"
+  },
+  {
+   "old": "    Then the previous chart version and its build ID serve the queue and the smoke run passes on it",
+   "new": "    Then the previous chart version and its build ID serve the queue and the smoke run passes on it\n\n  Scenario: AC7 A retried or timed-out activity follows its chart-set policy and writes no duplicate (new, D-RCV-60)\n    Given the deployed worker and the four activities of Stage2ProductWorkflow\n    When an activity of the build fails and is retried, or exceeds its timeout\n    Then the retry policy and the timeout come from the values file of the environment and are not hard-coded\n    Then a retried activity runs again for the same business date and writes no duplicate row\n    Then a timed-out activity is recorded as a failed execution and raises the workflow failure alert with MSG-GEN-006\n\n  Scenario: AC8 A status change the model does not allow is refused (new, D-RCV-60)\n    Given the deployed worker and a product of rwb_source_data at its current status\n    When a status change that the model does not allow is submitted\n    Then the change is refused and the status stays as it was\n    Then no product row changes as a result of the refused change\n\n  Scenario: AC9 A failing release never replaces the working build, and the deployment writes no stamp (new, D-RCV-60)\n    Given the previous build in force and a release whose tests or smoke run fail\n    When the release is promoted\n    Then the previous build stays in force until the new build passes its tests and its smoke run\n    When the row count of a business date matches\n    Then the stamp of that date is present and was written by the freshness story, not by this deployment"
+  },
+  {
+   "old": "| TC-P1-E2010-OPS-08 | AC1 | NFR | The migration applies the tables of section 12.7 and no other; a table outside the scope is refused | The three tables of section 12.7 and one table of another service as the foreign target |",
+   "new": "| TC-P1-E2010-OPS-08 | AC1 | NFR | The migration applies the tables of section 12.7 and no other; a table outside the scope is refused | The three tables of section 12.7 and one table of another service as the foreign target |\n| TC-P1-E2010-OPS-09 | AC7 | NFR | A synthetic activity failure and a synthetic timeout are retried under the chart-set policy; no duplicate row is written |\n| TC-P1-E2010-OPS-10 | AC8 | NFR | A status change the model does not allow is submitted; it is refused and no product row changes |\n| TC-P1-E2010-OPS-11 | AC9 | NFR | A failing release keeps the previous build in force; a matching count shows the stamp written by the freshness story |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28757",
+   "item": "GAP-0513",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR5 now names a chart value set per environment for all deployment values and the fixture owner named at the wave 2 entry check."
+  },
+  {
+   "ruling": "R-30296",
+   "item": "NEWAC-RWB-P1-E2010-OPS-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 (retry and timeout under the chart-set policy) and test row TC-P1-E2010-OPS-09."
+  },
+  {
+   "ruling": "R-30297",
+   "item": "NEWAC-RWB-P1-E2010-OPS-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 (disallowed status change refused, no row changes) and test row TC-P1-E2010-OPS-10."
+  },
+  {
+   "ruling": "R-30298",
+   "item": "NEWAC-RWB-P1-E2010-OPS-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 covering BR8 (previous build stays in force) and BR9 (stamp not written by deployment), with test row TC-P1-E2010-OPS-11."
+  }
+ ]
+}

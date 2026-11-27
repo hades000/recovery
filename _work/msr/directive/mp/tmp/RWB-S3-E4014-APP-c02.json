@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "| ACE view fixture | `v_ace_account` and `v_ace_batch_status` | A guaranteed contract with its balance; a product dated yesterday; a claim with no unpaid share; an unreachable view |",
+   "new": "| rwb-source-data contract fake (ACE views) | `v_ace_account` and `v_ace_batch_status` | A guaranteed contract with its balance; a product dated yesterday; a claim with no unpaid share; an unreachable view |"
+  },
+  {
+   "old": "The view fixture and the case-signal fake are the Day-1 unblockers:",
+   "new": "The rwb-source-data contract fake and the case-signal fake are the Day-1 unblockers:"
+  },
+  {
+   "old": "3. `readAccountFacts` against the view fixture, with the batch-date test and MSG-P1-001 (AC1, X1).",
+   "new": "3. `readAccountFacts` against the rwb-source-data contract fake (ACE views), with the batch-date test and MSG-P1-001 (AC1, X1)."
+  },
+  {
+   "old": "Given the data and the rule version this feature needs are in place",
+   "new": "Given the rwb-source-data contract fake serves the data and the rule version this feature needs"
+  },
+  {
+   "old": "9. The officer sees the `submitted` state, the filing date and the claim result on SCR-17 through the gateway-bff composite route, which composes the case read and the claim read in one hop each (DP-19).",
+   "new": "9. The officer sees the `submitted` state, the filing date and the claim result on SCR-17 through the gateway-bff composite route, which composes the case read and the claim read in one hop each (DP-19). SCR-17 has four states: empty, when no claim is yet filed and nothing is shown; loading, while the composite read is in progress; error, when the composite read fails and no claim data is shown, the message text not specified in the source documents (DOR-RWB-S3-E4014-APP-10); and no access, when the role lacks the right, with MSG-P4-002 as in X4 and no data shown."
+  },
+  {
+   "old": "| X4 | A role without the right in the capability area tries the action | 403 from the access guard on the operation, and nothing changes | MSG-P4-002 | Section 10 |",
+   "new": "| X4 | A role without the right in the capability area tries the action | 403 from the access guard on the operation, and nothing changes | MSG-P4-002 | Section 10; AC5 |"
+  },
+  {
+   "old": "| X5 | The TCG claim channel holds no interface in any source | The officer files on the channel and the step records the filing; no call is made and the gap stays open | None | GAP-2711; ASM-4504 |",
+   "new": "| X5 | The TCG claim channel holds no interface in any source | The officer files on the channel and the step records the filing; no call is made and the gap stays open | None | GAP-2711; ASM-4504; AC6 |"
+  },
+  {
+   "old": "| X6 | A second case signal arrives while the branch is running | The inbox dedupes by the cloud event id and the branch is idempotent on the claim, the rule version and the status, so no second filing is written | None | Section 12.5 |",
+   "new": "| X6 | A second case signal arrives while the branch is running | The inbox dedupes by the cloud event id and the branch is idempotent on the claim, the rule version and the status, so no second filing is written | None | Section 12.5; AC7 |"
+  },
+  {
+   "old": "| X7 | The claim is already in `FILED` and a second submission is asked for | The update answers 409 of the contract; the stage reports nothing new and the case does not move twice | None | ASM-4509 |",
+   "new": "| X7 | The claim is already in `FILED` and a second submission is asked for | The update answers 409 of the contract; the stage reports nothing new and the case does not move twice | None | ASM-4509; AC8 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 A role without the right in the capability area is refused (new, D-RCV-60)\n    Given a user whose role has no right C on the create or no right U on the update\n    When the officer asks to submit the claim\n    Then the access guard answers 403, nothing changes and the user sees MSG-P4-002\n\n  Scenario: AC6 The TCG claim channel has no interface and no outbound call is made (new, D-RCV-60)\n    Given claim \"GCL-SYN-0414\" is in state CLAIM_APPROVAL\n    When the officer files the claim on the TCG channel\n    Then the step records the filing, makes no outbound call, file or queue, and GAP-2711 stays open\n\n  Scenario: AC7 A second case signal writes no second filing (new, D-RCV-60)\n    Given the submit branch is running for the claim\n    When a second case signal arrives with the same cloud event id\n    Then the inbox dedupes the signal and no second filing is written\n\n  Scenario: AC8 A second submission of a claim in FILED is refused (new, D-RCV-60)\n    Given claim \"GCL-SYN-0414\" is in state FILED\n    When a second submission is asked for\n    Then the update answers 409, the stage reports nothing new and the case does not move twice\n\n  Scenario: AC9 The rules and timers are read from governed rows (new, D-RCV-60)\n    When the step reads its rules and timers\n    Then every rule ID, condition, timer and message text comes from a governed row with a version and none is written in code"
+  },
+  {
+   "old": "BR10 is the `security` section of the two operations the contract publishes.",
+   "new": "BR10 is the `security` section of the two operations the contract publishes.\n\n**Covered by.** BR1 AC9, TC-E4-014-13; BR2 AC2 and AC3, TC-E4-014-02 and TC-E4-014-03; BR3 AC3, TC-E4-014-03; BR4 AC1, TC-E4-014-01; BR5 AC4, TC-E4-014-04; BR6 AC2 and AC3, TC-E4-014-02 and TC-E4-014-03; BR7 AC1, TC-E4-014-01; BR8 AC1, TC-E4-014-01; BR9 AC6, TC-E4-014-10; BR10 AC5, TC-E4-014-09."
+  },
+  {
+   "old": "Until INT-29 is available, the guarantee officer's entry of the submission reference, the submission date and the channel used is the submission event, and this story makes no outside call (GAP-1718).",
+   "new": "Until INT-29 is available, the guarantee officer's entry of the submission reference, the submission date and the channel used is the submission event, and this story makes no outside call (GAP-1718). Reference data is read through the reference-data contract (DP-06, DP-07): the list LOV-CLAIM-STATUS (BR4) and the rule package `GUA` in force; the parameters read are not named in the source documents (DOR-RWB-S3-E4014-APP-20)."
+  },
+  {
+   "old": "| TC-E4-014-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E4-014-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E4-014-07 | Section 12 | Contract | The operations, events and activities of section 12 against the RWB-S3-E4014-CON claim fake |\n| TC-E4-014-08 | Section 12.7 tables (ASM-3438) | Component | Boundary of the guarantee_claim and decision_record writes in rwb_guarantee |\n| TC-E4-014-09 | AC5 | Component | A role without the right is refused with MSG-P4-002 and nothing changes |\n| TC-E4-014-10 | AC6 | Component | The officer files on the channel; no outbound call is made |\n| TC-E4-014-11 | AC7 | Component | A second case signal writes no second filing |\n| TC-E4-014-12 | AC8 | Component | A second submission of a claim in FILED answers 409 |\n| TC-E4-014-13 | AC9 | Component | Rules and timers are read from governed rows |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12405",
+   "item": "CG-ALL-8845",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1, Activities sheet",
+   "change": "Add activity recordSubmission on task queue rwb-guarantee, with the contract element of section 12.5 (pack and claim row in; GuaranteeClaimUpdate out).",
+   "note": "Activity is named in section 12.5 but absent from the catalog. Catalog change needed; story name kept."
+  },
+  {
+   "ruling": "R-12406",
+   "item": "CG-ALL-8847",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows TC-E4-014-01 to TC-E4-014-13 with Given, When and Then copied from AC1 to AC9 in section 7 (next version).",
+   "note": "Story rows TC-E4-014-01 to -06 and new -07 to -13 are not in Test Cases v8; the next version must carry them."
+  },
+  {
+   "ruling": "R-12408",
+   "item": "CG-ALL-8849",
+   "status": "Resolved",
+   "section": "7; 12.8; 13",
+   "target": "",
+   "change": "",
+   "note": "Given and test-data lines now name the rwb-source-data contract fake. Section 4 view reads stay as DP-05 allows."
+  },
+  {
+   "ruling": "R-19570",
+   "item": "DOR-RWB-S3-E4014-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 9 now names the empty, loading, error and no access states of SCR-17. Error message text is marked not specified."
+  },
+  {
+   "ruling": "R-19571",
+   "item": "DOR-RWB-S3-E4014-APP-11",
+   "status": "Not applied",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "The personal-data field the detcheck names is not identified and no source names it. A field list is needed before any edit."
+  },
+  {
+   "ruling": "R-19572",
+   "item": "DOR-RWB-S3-E4014-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E4-014-07 contract test for section 12 and TC-E4-014-08 boundary test for section 12.7. Test Cases v8 gap sits with CG-ALL-8847."
+  },
+  {
+   "ruling": "R-19573",
+   "item": "DOR-RWB-S3-E4014-APP-18",
+   "status": "Not applied",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "DL10 and its four assumptions are not in the story text and no decision text is given. Recording it would invent content."
+  },
+  {
+   "ruling": "R-19574",
+   "item": "DOR-RWB-S3-E4014-APP-20",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "Reference data now named through DP-06 and DP-07 (LOV-CLAIM-STATUS, rule package GUA). Parameter names marked not specified."
+  },
+  {
+   "ruling": "R-19575",
+   "item": "DOR-RWB-S3-E4014-APP-3",
+   "status": "Resolved",
+   "section": "5; 7; 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 to AC8 for X4 to X7 with TC-E4-014-09 to -12, and updated the Covered by cells in section 5."
+  },
+  {
+   "ruling": "R-19576",
+   "item": "DOR-RWB-S3-E4014-APP-4",
+   "status": "Resolved",
+   "section": "7; 8; 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 for BR1 and a Covered by paragraph in section 8 mapping BR1 to BR10 to criteria and test cases."
+  }
+ ]
+}

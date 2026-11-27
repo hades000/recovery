@@ -1,0 +1,176 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The caller's role does not hold Treatment and offer U on the claim operation | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | TC-E4-015-05 |",
+   "new": "| X2 | The caller's role does not hold Treatment and offer U on the claim operation | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC5, TC-E4-015-05, TC-E4-015-07 |"
+  },
+  {
+   "old": "| X3 | The claim ID names no row in the caller's scope | 404 with the problem body; nothing is written and no breach is raised | None | Section 12.1 |",
+   "new": "| X3 | The claim ID names no row in the caller's scope | 404 with the problem body; nothing is written and no breach is raised | None | AC6, Section 12.1, TC-E4-015-08 |"
+  },
+  {
+   "old": "| X8 | A component, a statement or a test reaches another `rwb_*` schema, a `v_ace_*` view or an ACE table | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR3, BR4 |",
+   "new": "| X8 | A component, a statement or a test reaches another `rwb_*` schema, a `v_ace_*` view or an ACE table | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC7, Section 17, BR3, BR4, TC-E4-015-09 |"
+  },
+  {
+   "old": "so none of them is a constant of this story (GAP-2715; ASM-4513).",
+   "new": "so none of them is a constant of this story (GAP-2715; ASM-4513): the business owner fixes them as versioned rule and reference rows before the wave 3 tag, and this story reads them and changes in no code."
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the decision record cannot be written"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Role without the right (target X2)\n    Given a caller whose role does not hold Treatment and offer U on the claim operation\n    When the caller reads or patches the claim\n    Then the request is refused with 403 before any read or write\n    Then nothing changes, no decision record is written and the user sees MSG-P4-002\n\n  Scenario: AC6 Claim outside the caller's scope (target X3)\n    Given the claim ID names no row in the caller's scope\n    When the caller reads or patches the claim\n    Then the request is refused with 404 and the problem body\n    Then nothing is written and no breach is raised\n\n  Scenario: AC7 Boundary breach (target X8)\n    Given a component, a statement or a test that reaches another rwb_* schema, a v_ace_* view or an ACE table\n    When the pipeline runs the boundary test\n    Then the grant refuses the statement and the build fails\n    Then nothing is released"
+  },
+  {
+   "old": "| R-GUA-05 | Guarantee claim |",
+   "new": "| BR11 (R-GUA-05) | Guarantee claim |"
+  },
+  {
+   "old": "| R-GUA-09 | Guarantee claim |",
+   "new": "| BR12 (R-GUA-09) | Guarantee claim |"
+  },
+  {
+   "old": "| R-GUA-12 | Guarantee claim |",
+   "new": "| BR13 (R-GUA-12) | Guarantee claim |"
+  },
+  {
+   "old": "| BR10 | A claim row exists only with its decision record, and a claim never leaves a state without its record and its reported outcome | DP-03; REQ-S3-002 |",
+   "new": "| BR10 | A claim row exists only with its decision record, and a claim never leaves a state without its record and its reported outcome | DP-03; REQ-S3-002 |\n| BR11 | Rule R-GUA-05: from DEADLINE_TIMER_RUNNING on CLAIM_DEADLINE_MISSED, with claim_deadline passed and status not submitted, record the lost claim, the reason and the amount, report the breach and move to DEADLINE_MISSED | Business Rules and Routing Logic v4; AC2 |\n| BR12 | Rule R-GUA-09: from CLAIM_PREPARATION on CLAIM_DEADLINE_MISSED, with claim_deadline passed before submission, record the lost claim and the reason, report the breach and move to DEADLINE_MISSED | Business Rules and Routing Logic v4; AC3 |\n| BR13 | Rule R-GUA-12: the claim is submitted through the TCG claim channel once the guarantee officer verifies it at D6.5; the submission is RWB-S3-E4014-APP's and is not executed here | Business Rules and Routing Logic v4; section 8 |"
+  },
+  {
+   "old": "| rwb-access (P4) | Owns the roles, the rights and the scope data the guard answers with |",
+   "new": "| rwb-access (P4) | Owns the roles, the rights and the scope data the guard answers with; the authorise check on Treatment and offer U is the one the guard calls on it (DP-08), and its operation name is not specified in the source documents (DOR-RWB-S3-E4015-APP-6) |"
+  },
+  {
+   "old": "| DF-REF-001 to DF-REF-015 | rule_row (P7, `rwb_decision`) | id, rule_id, rule_version, route_set, from_state, event_code and 9 more | Not read directly: the evaluated package returns the row outputs and their version |",
+   "new": "| DF-REF-001 to DF-REF-015 | rule_row (P7, `rwb_decision`) | id, rule_id, rule_version, route_set, from_state, event_code and 9 more | Not read directly: the evaluated package returns the row outputs and their version |\n| Parameters and reference data | LOV-CLAIM-STATUS, LOV-CLAIM-TYPE; the GUARANTEE package and its rule and reference rows (BR6) | Reference-data contract and parameter keys not specified in the source documents (DOR-RWB-S3-E4015-APP-20) | Read: the two lists in force and the package version, read once (GAP-2716) |"
+  },
+  {
+   "old": "| DF-TRT-022 | guarantee_claim (S3) | status | Write, a value of LOV-CLAIM-STATUS |",
+   "new": "| DF-TRT-022 | guarantee_claim (S3) | status | Write, a value of LOV-CLAIM-STATUS |\n| Lost-claim reason and lost amount | guarantee_claim (S3) | Field identifier not specified in the source documents (GAP-2719); a column is added only if the S3 data owner confirms it | Write on the lost-claim action (R-GUA-05, R-GUA-09) |"
+  },
+  {
+   "old": "| MSG-P7-003 | The decision record cannot be written before the claim changes (X1, AC4) | The action was not taken because the decision could not be recorded. Try again in a few minutes. |",
+   "new": "| MSG-P7-003 | The decision record cannot be written before the claim changes (X1, AC4) | The action was not taken because the decision could not be recorded. Try again in a few minutes. |\n| MSG-P7-009 | A decision record write runs outside the claim transaction and the library refuses it | Not specified in the source documents (DOR-RWB-S3-E4015-APP-9) |"
+  },
+  {
+   "old": "The four texts are the legacy and FSD wording carried unchanged;",
+   "new": "The five texts are the legacy and FSD wording carried unchanged, except MSG-P7-009, whose text is not specified in the source documents (DOR-RWB-S3-E4015-APP-9);"
+  },
+  {
+   "old": "Every legacy line is kept character for character, including the legacy repetition of",
+   "new": "Every legacy line is kept character for character except the decision-log wording of AC1 and AC4, which names the decision record (DP-03), including the legacy repetition of"
+  },
+  {
+   "old": "BR4 is the child-workflow return and the parent.",
+   "new": "BR4 is the child-workflow return and the parent, the boundary that stands in for the rwb-case operation until it is published (GAP-2714)."
+  },
+  {
+   "old": "BR5 is the payment client and the absent grant.",
+   "new": "BR5 is the payment client, built against a fixture until P1 publishes the read (GAP-2717), and the absent grant."
+  },
+  {
+   "old": "| TC-E4-015-05 | Access | Component | A role without the right is refused with MSG-P4-002 |",
+   "new": "| TC-E4-015-05 | Access | Component | A role without the right is refused with MSG-P4-002 |\n| TC-E4-015-07 | Access | Component | AC5: a role without Treatment and offer U is refused with 403 before any read or write, and MSG-P4-002 is shown |\n| TC-E4-015-08 | Access | Component | AC6: a claim ID outside the caller's scope is refused with 404 and the problem body, and nothing is written |\n| TC-E4-015-09 | Boundary | Pipeline | AC7: a statement or test reaching another rwb_* schema, a v_ace_* view or an ACE table is refused and the build fails |\n| TC-E4-015-10 | Data | Component | BR1: the claim is one guarantee_claim row, written on that row only |\n| TC-E4-015-11 | Decision | Component | BR2: the decision is written before the row changes, and a failed write changes nothing |\n| TC-E4-015-12 | Timer | Component | BR3: the deadline is a durable timer of GuaranteeClaimWorkflow, with no timer row, Quartz job or Schedule |\n| TC-E4-015-13 | Case | Component | BR4: the target state and the breach are reported to the parent, and no case row or column is written here |\n| TC-E4-015-14 | Payment | Boundary | BR5: no v_ace_* view, ACE table or account table is read; the payment arrives on the owner's contract |\n| TC-E4-015-15 | Reference | Component | BR6: claim status and claim type take only LOV-CLAIM-STATUS and LOV-CLAIM-TYPE values; the stall, warning and escalation values are read, never coded |\n| TC-E4-015-16 | Access | Component | BR7: the read and the patch need Treatment and offer, answered by the platform guard |\n| TC-E4-015-17 | Idempotency | Component | BR8: the same request or the same Idempotency-Key twice writes once, raises one breach and counts the repeat |\n| TC-E4-015-18 | Privacy | Component | BR9: the row, the record, the breach, the log and every call carry no personal data |\n| TC-E4-015-19 | Transaction | Component | BR10: a claim row never exists without its decision record, and never leaves a state without its reported outcome |\n| TC-E4-015-20 | Rule | Component | BR13: R-GUA-12 submission is not executed by this story; it belongs to RWB-S3-E4014-APP |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19596",
+   "item": "DOR-RWB-S3-E4015-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Parameter keys and the reference-data contract named in section 11; the contract key is not in the sources and is marked as not specified."
+  },
+  {
+   "ruling": "R-19597",
+   "item": "DOR-RWB-S3-E4015-APP-3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "X2, X3 and X8 now covered by AC5, AC6 and AC7 with TC-E4-015-07 to 09; section 5 Covered by column updated."
+  },
+  {
+   "ruling": "R-19598",
+   "item": "DOR-RWB-S3-E4015-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR11 to BR13 added to the three rule rows; BR1 to BR10 covered by TC-E4-015-10 to 19 and BR11, BR12 by AC2, AC3. TC IDs 07 to 20 assumed free."
+  },
+  {
+   "ruling": "R-19599",
+   "item": "DOR-RWB-S3-E4015-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "rwb-access authorise check on Treatment and offer U named as the guard's call; its operation name is not in the sources."
+  },
+  {
+   "ruling": "R-19600",
+   "item": "DOR-RWB-S3-E4015-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Add decision_record as an entity or field of the PLT library, and add it to Data Classification v5. claim_status is not in this chunk; legacy wording fixed in AC1 and AC4.",
+   "note": "decision_record is not in LDM v9 or Data Classification v5. AC1 and AC4 now say decision record. claim_status is not in this chunk."
+  },
+  {
+   "ruling": "R-19601",
+   "item": "DOR-RWB-S3-E4015-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P7-009 added with text not specified in sources. MSG-P1-001 not aligned: Error and Message Standard v4 wording is not in the source read."
+  },
+  {
+   "ruling": "R-23394",
+   "item": "GAP-2714",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR4 names the child-workflow return as the boundary standing in for the rwb-case operation until it is published."
+  },
+  {
+   "ruling": "R-23395",
+   "item": "GAP-2715",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Section 5 states the business owner fixes the values as versioned rule and reference rows; the story reads them and changes no code."
+  },
+  {
+   "ruling": "R-23396",
+   "item": "GAP-2717",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR5 states the client is built against a fixture until P1 publishes the payment-fact read; no view is read."
+  },
+  {
+   "ruling": "R-23397",
+   "item": "GAP-2719",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Row added to section 11 for the lost-claim reason and amount; field identifier not specified, column added only if the S3 data owner confirms it."
+  }
+ ]
+}

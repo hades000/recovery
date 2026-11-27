@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "Scenario: AC12 Durable timers replace JOB-05",
+   "new": "Scenario: AC12 Durable timers replace TimerCheckJob"
+  },
+  {
+   "old": "Then JOB-05 and its 5-minute Quartz schedule are absent from the deployment",
+   "new": "Then TimerCheckJob and its 5-minute Quartz schedule are absent from the deployment"
+  },
+  {
+   "old": "The decision log unavailable at expiry",
+   "new": "The decision record unavailable at expiry"
+  },
+  {
+   "old": "the first run after the decision log is available",
+   "new": "the first run after the decision record is available"
+  },
+  {
+   "old": "| None | AC13 |",
+   "new": "| None | AC13, AC14 |"
+  },
+  {
+   "old": "Then the pipeline scan fails any change that adds such a client",
+   "new": "Then the pipeline scan fails any change that adds such a client\n\n  Scenario: AC14 A suite step that reads a service schema directly fails the pipeline scan (new, D-RCV-60)\n    Given a suite change adds a step that reads a service schema directly\n    When the pipeline scans that change\n    Then the pipeline scan fails the change and no service schema is read\n\n  Scenario: AC15 The legal hold, durable clock, projection, event and data rules hold on the wave 1 services (new, D-RCV-60)\n    Given a hire purchase case has a RUNNING SERVICE_LEVEL timer and a legal hold is set on the case\n    When the timer is read through GET /api/recovery/case/v1/cases/{caseId}/timers\n    Then both clocks keep running while the legal hold is set and the hold is visible on the timer read\n    Then the timer is a durable timer inside CaseWorkflow and the timer row is its P3 projection\n    Then the breach is produced by rwb-case on rwb.case.events.v1 with gateway-bff as the inbox consumer\n    Then each cross-service call is one hop with a 2 s timeout\n    Then no TimerDue event is produced and no event, workflow history, log or evidence carries personal data\n\n  Scenario: AC16 A retried or timed-out RecordAndApply activity writes nothing partial and raises the breach once (new, D-RCV-60)\n    Given RecordAndApply fails as one unit during the breach of a SERVICE_LEVEL timer\n    When the activity is retried or times out\n    Then the decision record, the timer projection and the outbox row are either all written or none is written\n    Then the breach is raised once"
+  },
+  {
+   "old": "SCR-03 Case record (read only; on hold)",
+   "new": "SCR-03 Case record (read only; on hold; loading as in Screen Specifications v1; empty, error and no access: Not specified in the source documents (CG-ALL-301))"
+  },
+  {
+   "old": "SCR-09 Exception queue (Loading; list)",
+   "new": "SCR-09 Exception queue (Loading; list; empty, error and no access: Not specified in the source documents (CG-ALL-302))"
+  },
+  {
+   "old": "| TC-E1-028-14-ITG | AC12, BR10 | Contract | A class outside the P3 timer boundary writes the timer row directly; the boundary test of RWB-P3-E1028-APP fails and no row changes at run time; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-028-14-ITG | AC12, BR10 | Contract | A class outside the P3 timer boundary writes the timer row directly; the boundary test of RWB-P3-E1028-APP fails and no row changes at run time; end-to-end: real services on the wave 1 contracts |\n| TC-E1-028-15-ITG | AC14 | Integration | Not specified in the source documents (NEWAC-RWB-ITG-E1028-ITG-AC14) |\n| TC-E1-028-16-ITG | AC15, BR7, BR11, BR12, BR13, BR14, BR15, BR16 | Integration | Not specified in the source documents (NEWAC-RWB-ITG-E1028-ITG-AC15) |\n| TC-E1-028-17-ITG | AC16 | Integration | Not specified in the source documents (NEWAC-RWB-ITG-E1028-ITG-AC16) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23801",
+   "item": "CG-ALL-300",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "AC9 now says decision record; AC12 names TimerCheckJob instead of JOB-05; scenario titles aligned to the workflow and record wording."
+  },
+  {
+   "ruling": "R-23802",
+   "item": "CG-ALL-301",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-03 now lists loading as in Screen Specifications v1; empty, error and no access marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-23803",
+   "item": "CG-ALL-302",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-09 keeps loading and list; empty, error and no access marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-28551",
+   "item": "GAP-2203",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Logical Data Model and Data Dictionary; event catalogue (event 19 TimerBreached)",
+   "change": "Add escalated_to_role and escalated_at with type, length and optionality, and the TimerBreached payload fields; settle the detail at the baseline review of RWB-P3-E1028-CON.",
+   "note": "Story side needs no edit; the two columns and the payload fields are owned by the logical model and the event catalogue."
+  },
+  {
+   "ruling": "R-28552",
+   "item": "GAP-0022",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Story names no owner for TimerDue (BR14 retires it). Ownership Map keeps EV-18 with PLT and TimerBreached EV-19 with P3; no story edit."
+  },
+  {
+   "ruling": "R-28553",
+   "item": "GAP-0986",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "API specification (authorise request for timer and case reads) and TSD P4 T-A; policy pack (matrix version in force at the release date)",
+   "change": "Fix the authorise attribute set for a case read and a timer read, with escalatedToRole and escalatedAt; name the matrix version in force at 30 November 2026; state the escalation grant scope with reason ESCALATED_TO_ROLE, no wider than the caller's role row.",
+   "note": "Values are not in the story; the answer scope rule belongs to the API specification and TSD P4 T-A."
+  },
+  {
+   "ruling": "R-28554",
+   "item": "GAP-2204",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "rwb-case values files and the runbook entry each alert links",
+   "change": "Set the poll window, catch-up window, breach band and record-failure rate, confirm them at UAT and record the agreed values in the runbook. Values Not specified in the source documents (GAP-2204).",
+   "note": "No operational value exists in the source documents; the story cannot hold one without inventing it."
+  },
+  {
+   "ruling": "R-29812",
+   "item": "NEWAC-RWB-ITG-E1028-ITG-AC14",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC14 added to section 7 for the direct schema read; X15 Covered by now AC13, AC14; TC-E1-028-15-ITG added with test data Not specified."
+  },
+  {
+   "ruling": "R-29813",
+   "item": "NEWAC-RWB-ITG-E1028-ITG-AC15",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "AC15 added to section 7 covering BR7, BR11 to BR16; TC-E1-028-16-ITG added with test data Not specified in the source documents."
+  },
+  {
+   "ruling": "R-29814",
+   "item": "NEWAC-RWB-ITG-E1028-ITG-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC16 added to section 7 for a retried or timed-out RecordAndApply; TC-E1-028-17-ITG added with test data Not specified."
+  }
+ ]
+}

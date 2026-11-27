@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| Patterns applied | DP01, DP02, DP03, DP05, DP06, DP07, DP10, DP11, DP14, DP15, DP17, DP19 |",
+   "new": "| Patterns applied | DP01, DP02, DP03, DP05, DP06, DP07, DP08, DP10, DP11, DP14, DP15, DP17, DP19 |"
+  },
+  {
+   "old": "| X8 | The parameters contract or the rwb-source-data contract returns an error mid-run | No result is written for the date; the run state is FAILED with the system named; the rerun writes every row | MSG-GEN-006 | TC-E1-011-09 |",
+   "new": "| X8 | The parameters contract or the rwb-source-data contract returns an error mid-run | No result is written for the date; the run state is FAILED with the system named; the rerun writes every row | MSG-GEN-006 | AC11 |"
+  },
+  {
+   "old": "| X10 | A caller reads a path outside `/api/recovery/case/v1`, a cross-schema read appears, or an extract file or lake path is written | The build fails the boundary test and nothing is released | None | BR11 |",
+   "new": "| X10 | A caller reads a path outside `/api/recovery/case/v1`, a cross-schema read appears, or an extract file or lake path is written | The build fails the boundary test and nothing is released | None | AC12 |"
+  },
+  {
+   "old": "    Then a token with no Recovery Workbench role is refused with 401 and message MSG-P4-001",
+   "new": "    Then a token with no Recovery Workbench role is refused with 401 and message MSG-P4-001\n\n  Scenario: AC11 A consumed contract fails mid-run (new, D-RCV-60)\n    Given the rwb-source-data contract mock fails after its first read for 2026-11-30\n    When the quality run of 2026-11-30 runs\n    Then the run writes no quality result for 2026-11-30 and its state is FAILED with rwb-source-data named\n    Then the data steward, platform administrator and team manager groups receive MSG-GEN-006 \"rwb-source-data is not available. Your request is queued and will be retried.\"\n    When the rerun of 2026-11-30 is requested\n    Then the run writes all nine rows for 2026-11-30 and no row of the failed run\n\n  Scenario: AC12 A read outside the service boundary (new, D-RCV-60)\n    Given a caller reads a path outside `/api/recovery/case/v1`, or a cross-schema read or an extract file or lake path write appears in the build\n    When the boundary test of rwb-case runs\n    Then the build fails the boundary test and nothing is released"
+  },
+  {
+   "old": "| BR6 | A result is BREAK when the variance percent is above the tolerance and PASS when it is equal to or below it; the boundary value is a PASS; the two REC-05 checks are PASS only at zero | Legacy AC3 and BR6; parameter recon.tolerance.pct, 0.00 assumed (DL25) |",
+   "new": "| BR6 | A result is BREAK when the variance percent is above the tolerance and PASS when it is equal to or below it; the boundary value is a PASS; the two REC-05 checks are PASS only at zero | Legacy AC3 and BR6; parameter recon.tolerance.pct, 0.00 assumed (DL25, still open; ASM-0728, ASM-0735, ASM-0743, ASM-2602, confirmed by the programme directive) |"
+  },
+  {
+   "old": "DP-08 is not in the patterns applied to this story: the declared area and right are enforced at gateway-bff for the screen path, and where a local guard is required on the operation itself the guard and its story are not named in the sources.",
+   "new": "DP-08 applies to this story: the declared area and right are enforced at gateway-bff for the screen path, and every REST operation of this story calls the rwb-access authorise check before it reads or writes; the operation path of that check is Not specified in the source documents (DOR-RWB-P3-E1011-APP-6)."
+  },
+  {
+   "old": "| TC-E1-011-09 | AC4, BR5, BR12 | NFR | The rwb-source-data contract forced to fail after the first read; MSG-GEN-006 naming the system; the rerun writes all nine rows |",
+   "new": "| TC-E1-011-09 | AC4, BR5, BR12 | NFR | The rwb-source-data contract forced to fail after the first read; MSG-GEN-006 naming the system; the rerun writes all nine rows |\n| TC-E1-011-10 | BR9, BR11 | Contract | Every operation, event and activity of section 12 against the consumed rwb-source-data operations and the reads of section 12.1; no event is published |\n| TC-E1-011-11 | BR9, BR11 | Component | Reads and writes of the ten tables of section 12.7 only; no table of another service is read; ASM-3438 |\n| TC-E1-011-12 | AC11, BR10, BR12 | NFR | rwb-source-data forced to fail after its first read; MSG-GEN-006 naming rwb-source-data; the state FAILED; the rerun writes all nine rows |\n| TC-E1-011-13 | AC12, BR11 | Component | A read outside `/api/recovery/case/v1` and a cross-schema read in the build; the boundary test fails and nothing is released |"
+  },
+  {
+   "old": "| The job monitor | SCR-44 shows the run of the date with its state and its three checks |",
+   "new": "| The job monitor | SCR-44 shows the run of the date with its state and its three checks; empty, the date shows NOT_RUN with the last load date as the reason (X3); loading, Not specified in the source documents (DOR-RWB-P3-E1011-APP-10); error, MSG-GEN-006; no access, MSG-P4-002 |\n| SCR-45 | Empty, the same reason as SCR-44; loading, Not specified in the source documents (DOR-RWB-P3-E1011-APP-10); error, MSG-GEN-006; no access, MSG-P4-002 |"
+  },
+  {
+   "old": "| DP-07 | The product groups, exclusion reasons, queue codes and result values are reference data with a version |",
+   "new": "| DP-07 | The product groups, exclusion reasons, queue codes and result values are reference data with a version |\n| DP-08 | Every REST operation calls the rwb-access authorise check; the area and right are declared in section 10 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10195",
+   "item": "CG-ALL-3404",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity writeQualityFacts to the Activities sheet: type Activity, task queue rwb-case, as named in section 12.5 of RWB-P3-E1011-APP.",
+   "note": "Story already names writeQualityFacts; the catalog row is missing and belongs to Temporal Catalog v1."
+  },
+  {
+   "ruling": "R-10196",
+   "item": "CG-ALL-3407",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows TC-E1-011-08 and TC-E1-011-09 with Given, When and Then copied from AC7, AC9 and AC4 of section 7.",
+   "note": "Story test case IDs are unchanged; the rows are missing from Test Cases v8 and must be added in the next version."
+  },
+  {
+   "ruling": "R-15767",
+   "item": "DOR-RWB-P3-E1011-APP-10",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added SCR-44 and SCR-45 states (empty, loading, error, no access) to the traceability table.",
+   "note": "Loading state for both screens is Not specified in the source documents; the other three states are now written."
+  },
+  {
+   "ruling": "R-15768",
+   "item": "DOR-RWB-P3-E1011-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "RTM v7",
+   "change": "Align the test case lists of the REQ rows with section 16 and section 18 of RWB-P3-E1011-APP, including TC-E1-011-10 to TC-E1-011-13.",
+   "note": "Story added contract test TC-10, boundary test TC-11 and TC-12/TC-13 for new ACs; RTM v7 list still differs."
+  },
+  {
+   "ruling": "R-15769",
+   "item": "DOR-RWB-P3-E1011-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR6 cites ASM-0728, ASM-0735, ASM-0743 and ASM-2602 against open decision DL25.",
+   "note": "DL25 is the only open decision; its four assumptions are now cited and confirmed by the programme directive."
+  },
+  {
+   "ruling": "R-15770",
+   "item": "DOR-RWB-P3-E1011-APP-3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC11 (X8, consumed contract fails mid-run) and AC12 (X10, read outside the service boundary); section 5 now covers X8 by AC11 and X10 by AC12; TC rows added.",
+   "note": "Section 7 now holds 12 owned criteria; test rows TC-E1-011-12 and TC-E1-011-13 added in section 16."
+  },
+  {
+   "ruling": "R-15771",
+   "item": "DOR-RWB-P3-E1011-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR11 is covered by AC12 and TC-E1-011-13 in sections 5, 7 and 16.",
+   "note": "The only rule without a criterion or test case, BR11, is now covered; all 14 rules have coverage."
+  },
+  {
+   "ruling": "R-15772",
+   "item": "DOR-RWB-P3-E1011-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "DP-08 added to patterns applied; every REST operation calls the rwb-access authorise check; DP-08 row added to section 18.",
+   "note": "Operation path of the authorise check is Not specified in the source documents (DOR-RWB-P3-E1011-APP-6)."
+  },
+  {
+   "ruling": "R-15773",
+   "item": "DOR-RWB-P3-E1011-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add case_quality_run, case_quality_result and case_quality_break as rwb_case tables owned by rwb-case, per section 12.7 of RWB-P3-E1011-APP.",
+   "note": "The three table names are not in LDM v9 or Data Classification v5; story side already states they carry no field ID."
+  },
+  {
+   "ruling": "R-15774",
+   "item": "DOR-RWB-P3-E1011-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text for MSG-P1-001 and MSG-P1-012 is not in this story; cannot align without inventing wording."
+  }
+ ]
+}

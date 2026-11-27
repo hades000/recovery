@@ -1,0 +1,85 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E1-046-09 | Access | Component | RW-LITOFF calls POST /admin/reference-loads; refused with MSG-P4-002 |",
+   "new": "| TC-E1-046-09 | AC9, Access | Component | RW-LITOFF calls POST /admin/reference-loads; refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E1-046-11 | Section 12.7 tables (ASM-3438) | Component | Tables of section 12.7 at their boundary values |",
+   "new": "| TC-E1-046-11 | Section 12.7 tables (ASM-3438) | Component | Tables of section 12.7 at their boundary values |\n| TC-E1-046-12 | AC10 | Not specified in the source documents (NEWAC-RWB-P6-E1046-APP-AC10) | rwb-source-data data-dictionary mock does not answer within 2 s |\n| TC-E1-046-13 | AC11 | Not specified in the source documents (NEWAC-RWB-P6-E1046-APP-AC11) | Provided operations of section 12 asked by callers without credentials, without right and with an unknown identifier |\n| TC-E1-046-14 | AC12 | Not specified in the source documents (NEWAC-RWB-P6-E1046-APP-AC12) | Write of section 12 sent again with the same idempotency key |\n| TC-E1-046-15 | AC13 | Not specified in the source documents (NEWAC-RWB-P6-E1046-APP-AC13) | rwb-case reference-data contract mock fails or does not answer during a catalog load |"
+  },
+  {
+   "old": "    Then no row is stored and no version is created",
+   "new": "    Then no row is stored and no version is created\n\n  Scenario: AC11 A provided operation answers 401, 403 and 404 as the contract declares (new, D-RCV-60)\n    Given a caller without valid credentials asks for a provided operation of section 12\n    When the operation is asked\n    Then the operation answers with status 401\n    Then a caller holding no right gets status 403 and a request for an unknown identifier gets status 404\n\n  Scenario: AC12 A replayed write with the same idempotency key does not repeat the write (new, D-RCV-60)\n    Given a write of section 12 has completed with its idempotency key\n    When the same write is sent again with the same idempotency key\n    Then the operation does not repeat the write and no row is changed again\n\n  Scenario: AC13 A consumed call that fails or does not answer refuses the load (new, D-RCV-60)\n    Given the rwb-case reference-data contract mock fails or does not answer\n    When a catalog load file is loaded\n    Then the system refuses the load with MSG-GEN-006 naming the system that failed\n    Then no row is stored and no version is created"
+  },
+  {
+   "old": "AC9 and AC10 are new in this story for exceptions X8 and X9 and carry the tag new, D-RCV-60.",
+   "new": "AC9 and AC10 are new in this story for exceptions X8 and X9 and carry the tag new, D-RCV-60. AC11, AC12 and AC13 are new in this story and carry the tag new, D-RCV-60."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28595",
+   "item": "GAP-2344",
+   "status": "Cross-document",
+   "section": "Header",
+   "target": "Split plan (Work Package dependency rows) and RWB-P5-E2026-CON",
+   "change": "Add the rwb-case reference-data contract and the platform contract stories to this slice's dependency rows; RWB-P5-E2026-CON to name GenerateRequest and RegenerateRequest fields, the regenerate reason field, the refused-document error body, index ix_document_template and the Flyway step name.",
+   "note": "Plan and P5 contract hold the dependency rows and the field names; the story cannot name them without invention."
+  },
+  {
+   "ruling": "R-28597",
+   "item": "GAP-2346",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Split plan (Work Package)",
+   "change": "Record one owning story per legacy criterion and mark RWB-P5-E1046-APP as test-case-bearing and criterion-free.",
+   "note": "Ownership and traceability rules sit in the split plan, not in this story."
+  },
+  {
+   "ruling": "R-31260",
+   "item": "NEWAC-RWB-P6-E1046-APP-AC10",
+   "status": "Resolved",
+   "section": "5, 16",
+   "target": "",
+   "change": "Section 16 gains TC-E1-046-12 covering AC10; X9 already names AC10.",
+   "note": "Level left as Not specified in the source documents; the proposed test was not given."
+  },
+  {
+   "ruling": "R-31261",
+   "item": "NEWAC-RWB-P6-E1046-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 (401, 403, 404) to section 7 and TC-E1-046-13 to section 16.",
+   "note": "Level left as Not specified in the source documents; no message ID was given for these answers."
+  },
+  {
+   "ruling": "R-31262",
+   "item": "NEWAC-RWB-P6-E1046-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 (replay with the same idempotency key) to section 7 and TC-E1-046-14 to section 16.",
+   "note": "Level left as Not specified in the source documents; the proposed test was not given."
+  },
+  {
+   "ruling": "R-31263",
+   "item": "NEWAC-RWB-P6-E1046-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC13 (failed or silent consumed call, MSG-GEN-006) to section 7 and TC-E1-046-15 to section 16.",
+   "note": "Level left as Not specified in the source documents; the proposed test was not given."
+  },
+  {
+   "ruling": "R-31264",
+   "item": "NEWAC-RWB-P6-E1046-APP-AC9",
+   "status": "Resolved",
+   "section": "5, 16",
+   "target": "",
+   "change": "TC-E1-046-09 Covers now names AC9; AC9 already exists in section 7 and X8 already names it.",
+   "note": "Coverage gap closed by the test case row."
+  }
+ ]
+}

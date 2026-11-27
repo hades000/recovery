@@ -1,0 +1,164 @@
+{
+ "edits": [
+  {
+   "old": "| Method | Path | Used for | Answers |\n|---|---|---|---|",
+   "new": "| Method | Path | Used for | Answers | Owner / service |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| POST | `/admin/rule-packages/{packageCode}/versions` | The multipart load of a workbook with `validFrom` (AC1, AC4, AC10, AC11, AC12, AC13, AC15) | 201, 401, 403, 404, 409, 422, 503 |",
+   "new": "| POST | `/admin/rule-packages/{packageCode}/versions` | The multipart load of a workbook with `validFrom` (AC1, AC4, AC10, AC11, AC12, AC13, AC15) | 201, 401, 403, 404, 409, 422, 503 | P7 rwb-decision |"
+  },
+  {
+   "old": "| GET | `/admin/rule-packages/{packageCode}/versions` | The version list, the status of each version and the checksum of the one in force (AC1, AC2, AC8, AC9) | 200, 401, 403, 404, 503 |",
+   "new": "| GET | `/admin/rule-packages/{packageCode}/versions` | The version list, the status of each version and the checksum of the one in force (AC1, AC2, AC8, AC9) | 200, 401, 403, 404, 503 | P7 rwb-decision |"
+  },
+  {
+   "old": "| POST | `/admin/rule-package-versions/{versionId}/approve` | The four-eyes approval and its refusal (AC1, AC8) | 200, 401, 403, 404, 409, 503 |",
+   "new": "| POST | `/admin/rule-package-versions/{versionId}/approve` | The four-eyes approval and its refusal (AC1, AC8) | 200, 401, 403, 404, 409, 503 | P7 rwb-decision |"
+  },
+  {
+   "old": "| POST | `/admin/rule-package-versions/{versionId}/rollback` | The one-call rollback with a required reason (AC4, AC9) | 200, 401, 403, 404, 409, 422, 503 |",
+   "new": "| POST | `/admin/rule-package-versions/{versionId}/rollback` | The one-call rollback with a required reason (AC4, AC9) | 200, 401, 403, 404, 409, 422, 503 | P7 rwb-decision |"
+  },
+  {
+   "old": "| GET | `/admin/rule-package-versions/{versionId}/dry-run` | The dry-run counts a load records for the approver (AC1) | 200, 401, 403, 404, 409, 503 |",
+   "new": "| GET | `/admin/rule-package-versions/{versionId}/dry-run` | The dry-run counts a load records for the approver (AC1) | 200, 401, 403, 404, 409, 503 | P7 rwb-decision |"
+  },
+  {
+   "old": "| GET | `/rule-models/{packageCode}/{version}` | The compiled model, its version label and its SHA-256, on the fetch that verifies the checksum | 200, 401, 403, 404, 503 |",
+   "new": "| GET | `/rule-models/{packageCode}/{version}` | The compiled model, its version label and its SHA-256, on the fetch that verifies the checksum | 200, 401, 403, 404, 503 | P7 rwb-decision |"
+  },
+  {
+   "old": "| GET | `/rule-catalog/{ruleId}?packageVersion=` | `action_text`, `owner_role`, `timer_spec`, `target_queue_code` and `outputs` of one row by rule ID and version | 200, 401, 403, 404, 503 |",
+   "new": "| GET | `/rule-catalog/{ruleId}?packageVersion=` | `action_text`, `owner_role`, `timer_spec`, `target_queue_code` and `outputs` of one row by rule ID and version | 200, 401, 403, 404, 503 | P7 rwb-decision |"
+  },
+  {
+   "old": "    Then a later download of the workbook gives the same checksum",
+   "new": "    Then a later download of the workbook gives the same checksum\n\n  Scenario: AC16 No version in force on the business date (new, DOR-RWB-P3-E1073-APP-3; exception X13)\n    Given no version of package ALLOCATION is in force on the business date 2026-12-10 in the rwb-decision contract mock\n    Given a case is open on package ALLOCATION with no version in force\n    When EvaluateRules runs for the case\n    Then EvaluateRules fails at once with NoPackageInForce, which is not retryable\n    Then no decision_log_entry is written and no case state changes\n    Then the stuck-case scan raises the case with MSG-P3-027\n\n  Scenario: AC17 Authoring refused for a role without rights (new, DOR-RWB-P3-E1073-APP-3; exception X14)\n    Given the rwb-decision contract mock returns 403 with MSG-P4-002 for the load call from a role without Rules and parameters\n    Given RW-CASEOWN does not hold Rules and parameters\n    When RW-CASEOWN calls the load of ALLOCATION\n    Then the system refuses the call with 403 and MSG-P4-002\n    Then nothing changes\n\n  Scenario: AC18 Registry does not answer inside the budget (new, DOR-RWB-P3-E1073-APP-3; exception X15)\n    Given the rwb-decision contract mock does not answer inside the 2 s budget on the model fetch\n    Given the model of package ALLOCATION version \"ALLOC-2026.11\" is cached and in force\n    When EvaluateRules reads the model\n    Then the call answers 503 to the reader\n    Then the evaluation is retried on the activity retry policy\n    Then the cached model in force stays in use\n\n  Scenario: AC19 Load refused in full on any failed check (new, DOR-RWB-P3-E1073-APP-4; BR2)\n    Given the rwb-decision contract mock returns the load refused with MSG-P3-027 for a failed check\n    Given a workbook for package ALLOCATION version \"ALLOC-2026.12\" has a failed check\n    When U-41 loads it\n    Then the system refuses the whole load with MSG-P3-027\n    Then no partial version reaches rwb-case and version \"ALLOC-2026.11\" stays in force"
+  },
+  {
+   "old": "These fifteen criteria are the legacy acceptance of the whole authoring journey",
+   "new": "The new criteria AC16 to AC19 cover exceptions X13 to X15 and rule BR2 (DOR-RWB-P3-E1073-APP-3 and -4). These fifteen criteria are the legacy acceptance of the whole authoring journey"
+  },
+  {
+   "old": "and the decision log entry of the case allocated under version 7 keeping rule version",
+   "new": "and the decision_log_entry of the case allocated under version 7 keeping rule version"
+  },
+  {
+   "old": "on its decision log entry",
+   "new": "on its decision_log_entry"
+  },
+  {
+   "old": "| BR10, TC-E1-073-01 |",
+   "new": "| AC16, BR10, TC-E1-073-01 |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E1-073-16 |",
+   "new": "| MSG-P4-002 | AC17, TC-E1-073-16 |"
+  },
+  {
+   "old": "stays cached | None | BR11 |",
+   "new": "stays cached | None | AC18, BR11 |"
+  },
+  {
+   "old": "Field IDs are those of the Logical Data Model and Data Dictionary.",
+   "new": "Field IDs are those of the Logical Data Model and Data Dictionary. The case read that feeds the dry run is taken through RWB-P3-E1073-CON as given, and the fake answers both ways until that contract states whether it publishes the case reads (GAP-1330)."
+  },
+  {
+   "old": "| TC-E1-073-16 | Access; BR13 | Component | RW-CASEOWN calls the load of ALLOCATION; refused with MSG-P4-002 |",
+   "new": "| TC-E1-073-16 | Access; BR13 | Component | RW-CASEOWN calls the load of ALLOCATION; refused with MSG-P4-002 |\n| TC-E1-073-21 | AC16; BR14; X13 | Component | No version of ALLOCATION is in force on the business date; EvaluateRules fails with NoPackageInForce |\n| TC-E1-073-22 | AC17; X14 | Component | RW-CASEOWN without the Rules and parameters right calls the load of ALLOCATION; refused with 403 and MSG-P4-002 |\n| TC-E1-073-23 | AC18; BR11; X15 | Component | The model fetch does not answer inside 2 s; 503 to the reader and the cached model in force stays in use |\n| TC-E1-073-24 | AC19; BR2 | Component | A load with a failed check is refused in full with MSG-P3-027; no partial version reaches rwb-case |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16048",
+   "item": "DOR-RWB-P3-E1073-APP-24",
+   "status": "Resolved",
+   "section": "12.2",
+   "target": "",
+   "change": "",
+   "note": "Owner / service column added to 12.2 table; every row set to P7 rwb-decision."
+  },
+  {
+   "ruling": "R-16049",
+   "item": "DOR-RWB-P3-E1073-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC16 to AC19 added for X13 to X15 and BR2; X13 to X15 Covered by set to ACs; TC-E1-073-21 to -24 added."
+  },
+  {
+   "ruling": "R-16050",
+   "item": "DOR-RWB-P3-E1073-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR2 covered by AC19 and TC-24; BR14 by AC16 and TC-21. R-ALLOC-014 is not in the parts given; not edited."
+  },
+  {
+   "ruling": "R-16051",
+   "item": "DOR-RWB-P3-E1073-APP-7",
+   "status": "Resolved",
+   "section": "7, 11",
+   "target": "",
+   "change": "",
+   "note": "AC4 now uses decision_log_entry, matching section 11. No legacy job wording in the parts given; 21 data rows unchanged."
+  },
+  {
+   "ruling": "R-16052",
+   "item": "DOR-RWB-P3-E1073-APP-8",
+   "status": "Not applied",
+   "section": "not in chunk",
+   "target": "",
+   "change": "",
+   "note": "CaseWorkflow ID not in the parts given; choosing between the two source forms needs the source text."
+  },
+  {
+   "ruling": "R-16053",
+   "item": "DOR-RWB-P3-E1073-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text for MSG-P3-027 is not in the parts given; no message text invented."
+  },
+  {
+   "ruling": "R-22089",
+   "item": "GAP-2414",
+   "status": "Cross-document",
+   "section": "not in chunk",
+   "target": "RWB-P7-E2041-APP story record (metadata)",
+   "change": "Set build dependency H to None plus RWB-PLT-E1027-CON, RWB-PLT-E1072-CON, RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-E1037-CON, RWB-PLT-E1047-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON; set contract C to RWB-P3-E2041-CON plus RWB-P7-E1073-CON, RWB-P3-E1042-CON, RWB-P3-E1043-CON, RWB-P4-E1037-CON.",
+   "note": "Evidence concerns the RWB-P7-E2041-APP record, not this story's header; metadata change sits there."
+  },
+  {
+   "ruling": "R-22285",
+   "item": "GAP-1615",
+   "status": "Cross-document",
+   "section": "not in chunk",
+   "target": "TSD P7; TSD P3; TSD P4; API Specification v4",
+   "change": "Re-issue TSD P7 with T3.1 entries for the four rule tables and appendix T-A rule operations; remove them from TSD P3 and TSD P4; correct x-module of the nine rule paths to P7.",
+   "note": "Registry ownership fix sits in technical specifications and the API spec; story already states P7 ownership."
+  },
+  {
+   "ruling": "R-22286",
+   "item": "GAP-1993",
+   "status": "Cross-document",
+   "section": "not in chunk",
+   "target": "TSD P3 v3; TSD P4 v3",
+   "change": "Remove ownership of rule_package, rule_package_version, rule_row and rule_test_case; build the registry in rwb-decision and read through the P7 contract (DP-04).",
+   "note": "Story already reads the package through the P7 contract (BR13, section 11); the stale claims are in the TSDs."
+  },
+  {
+   "ruling": "R-22287",
+   "item": "GAP-1330",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now states the case read goes through RWB-P3-E1073-CON as given and the fake answers both ways until that contract settles it."
+  }
+ ]
+}

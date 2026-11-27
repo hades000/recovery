@@ -1,0 +1,54 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E1-024-16 | AC16 | End to end | Outbox relay stopped when a court notice is stored for case RW-2026-000123; relay restarted |",
+   "new": "| TC-E1-024-16 | AC16, X13 | End to end | Outbox relay stopped when a court notice is stored for case RW-2026-000123; relay restarted |"
+  },
+  {
+   "old": "Then the screen shows the no-access state and the system refuses the request with 403 and MSG-P4-002",
+   "new": "Then the screen shows the no-access state and the system refuses the request with 403 and MSG-P4-002\n\n  Scenario: AC21 Decision record and store commit together (new in rwb-document; BR8)\n    Given the decision record write is forced to fail inside the store transaction\n    When a court notice is stored for case \"RW-2026-000123\"\n    Then no document row, no document_field row and no outbox row exists for the notice\n\n  Scenario: AC22 Unknown document returns 404 (new in rwb-document)\n    Given no document exists with the requested document ID on case \"RW-2026-000123\"\n    When the caller requests GET content for that document ID\n    Then the system answers 404 and returns no content\n\n  Scenario: AC23 Copy activity retried or timed out (new in rwb-document; X8)\n    Given the copyPending activity of DocumentIntakeWorkflow fails on its first attempt or does not complete within its activity timeout\n    When the activity is retried\n    Then the file is copied once, the row moves from COPY_PENDING to STORED and no second copy is written"
+  },
+  {
+   "old": "| TC-E1-024-19 | §12.7 tables (ASM-3438) | Component | Boundary test on the tables document, document_field, document_type and document_hub_parameter at their limits |",
+   "new": "| TC-E1-024-19 | §12.7 tables (ASM-3438) | Component | Boundary test on the tables document, document_field, document_type and document_hub_parameter at their limits |\n| TC-E1-024-20 | AC21, BR8 | Component | Decision record write forced to fail inside the store transaction; no document, document_field or outbox row exists |\n| TC-E1-024-21 | AC22 | Component | GET content for an unknown document ID on case RW-2026-000123; 404 answered |\n| TC-E1-024-22 | AC23, X8 | Component | copyPending activity fails on first attempt or exceeds its activity timeout; file copied once, row ends STORED |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31088",
+   "item": "NEWAC-RWB-P5-E1024-APP-AC16",
+   "status": "Resolved",
+   "section": "5, 16",
+   "target": "",
+   "change": "X13 added to Covers of TC-E1-024-16, which tests AC16 (covered by AC16).",
+   "note": "AC16 already exists in section 7 with TC-E1-024-16. X13 now traces to that test; no new criterion needed."
+  },
+  {
+   "ruling": "R-31089",
+   "item": "NEWAC-RWB-P5-E1024-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC21 (BR8 commit guardrail) and TC-E1-024-20.",
+   "note": "Label AC17 is taken by the SCR-30 empty state, so next free ID AC21 used. BR8 guarded by a component test of the store transaction."
+  },
+  {
+   "ruling": "R-31090",
+   "item": "NEWAC-RWB-P5-E1024-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC22 (unknown document returns 404 on GET content) and TC-E1-024-21.",
+   "note": "Label AC18 is taken; next free ID AC22 used. The 404 operation and message are the only status code given; no message code invented."
+  },
+  {
+   "ruling": "R-31091",
+   "item": "NEWAC-RWB-P5-E1024-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC23 (copyPending retried or timed out, copied once) and TC-E1-024-22.",
+   "note": "Label AC19 is taken; next free ID AC23 used. Activity timeout value not specified in the source documents, so none is written."
+  }
+ ]
+}

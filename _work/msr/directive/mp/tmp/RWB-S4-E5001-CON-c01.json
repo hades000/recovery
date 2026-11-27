@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "| `LitigationWorkflow` | Workflow, one execution per case per stage, the child of `CaseWorkflow`, continues-as-new | `rwb-litigation` in namespace `rwb-recovery` | The stage that hosts the notice step; its inputs, its signals, its one durable timer of 1 working day and its outcome for the parent are declared, not built |",
+   "new": "| `LitigationWorkflow` | Workflow, one execution per case per stage, the child of `CaseWorkflow`, continues-as-new | `rwb-litigation` | The stage that hosts the notice step; its inputs, its signals, its one durable timer of 1 working day and its outcome for the parent are declared, not built |"
+  },
+  {
+   "old": "| Build status | Not started |",
+   "new": "| Build status | Not started |\n| Size | Set by the squad at refinement; not specified in the source documents (DOR-RWB-S4-E5001-CON-16) |\n| Contract version | v1 on `/api/recovery/litigation/v1` (served) and on `/api/recovery/comms/v1` (consumed) |"
+  },
+  {
+   "old": "| Wave | 3 |",
+   "new": "| Wave | 3 |\n| Notice slice | Slice 2.1: the notice contract, its fake and its schema, published before wave 3 (GAP-1741); the rest of the capability is built in wave 3 against the same contract |"
+  },
+  {
+   "old": "Every row is one hop with a 2 s timeout, a GET retried once with jitter and a breaker per downstream (ADR-020). Both rows are contract dependencies of class C that the plan's C row does not carry, and the absence is recorded as GAP-2743 with ASM-4558 and ASM-4559.",
+   "new": "Every row is one hop with a 2 s timeout, a GET retried once with jitter and a breaker per downstream (ADR-020). Both rows are contract dependencies of class C that the plan's C row does not carry, and the absence is recorded as GAP-2743 with ASM-4558 and ASM-4559.\n\nThe notice ownership split (GAP-1740): this service decides that a notice is due, approves it and owns the notice period; rwb-comms owns the template, the merge fields, the delivery and the proof of delivery, and returns the served result as `NoticeDelivered`. The notice period starts from the `delivered_at` that rwb-comms returns, and the notice state on the case is written by this service only."
+  },
+  {
+   "old": "The baseline also fixes the naming the checks require: schema `rwb_litigation`, base `/api/recovery/litigation/v1`, topic `rwb.litigation.events.v1` with retry and `.dlt` topics, task queue `rwb-litigation` in namespace `rwb-recovery` and Java package `th.co.scb.ace.workbench.recovery.litigation` (Architecture v5 slide 41 notes). It records that the service holds no grant on another `rwb_*` schema and no `v_ace_*` grant (Architecture v5 slide 29), so the notice and the template are consumed on the owner's contract only and never copied into `rwb_litigation`.",
+   "new": "The baseline also fixes the naming the checks require: schema `rwb_litigation`, base `/api/recovery/litigation/v1`, topic `rwb.litigation.events.v1` with retry and `.dlt` topics, task queue `rwb-litigation` in namespace `rwb-recovery` and Java package `th.co.scb.ace.workbench.recovery.litigation` (Architecture v5 slide 41 notes). It records that the service holds no grant on another `rwb_*` schema and no `v_ace_*` grant (Architecture v5 slide 29), so the notice and the template are consumed on the owner's contract only and never copied into `rwb_litigation`. No view and no ACE table is read by this service: source data comes only through the rwb-source-data contract (P1), which returns the FSD field names as source field names; its contract fields, the LIT view names and the freshness response are confirmed with P1 before the wave 2 notice test (GAP-1736)."
+  },
+  {
+   "old": "The activity name is a target design choice and the trigger of the step is read as the opening of the litigation stage for route R4, which is the event `ROUTE_APPROVED` of R-LIT-01, because the legacy story says the step runs with no person in the path while the FSD declares no background event (GAP-2743; ASM-4561). No activity is registered by this story.",
+   "new": "The activity name is a target design choice and the trigger of the step is read as the opening of the litigation stage for route R4, which is the event `ROUTE_APPROVED` of R-LIT-01, because the legacy story says the step runs with no person in the path while the FSD declares no background event (GAP-2743; ASM-4561). No activity is registered by this story. The workflow ID form and start rule of `LitigationWorkflow` are not specified in the source documents (DOR-RWB-S4-E5001-CON-8). The activity `issueDemandAndRecallNotices` is not in Temporal Catalog v1; that catalog entry is a cross-document change. The rule set of this story is the thirty-two R-LIT rules the FSD names; the other forty-seven are authoring work for the litigation rule package, whose package code, version label and owner are recorded in rwb-decision before the wave 3 release (GAP-1742)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-02275",
+   "item": "CG-ALL-9005",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "API Specification v5 yaml",
+   "change": "Declare the REST base /api/recovery/comms/v1 for rwb-comms, using the provider's base from the Document Index service table.",
+   "note": "Story already uses the path in 12.2; the yaml must declare the base."
+  },
+  {
+   "ruling": "R-02276",
+   "item": "CG-ALL-9006",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Task queue in the 12.5 table set to rwb-litigation; namespace rwb-recovery stays in the baseline naming line.",
+   "note": "Matches the Temporal catalog task queue."
+  },
+  {
+   "ruling": "R-07913",
+   "item": "DOR-RWB-S4-E5001-CON-14",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "Epic design record",
+   "change": "Record the signed epic design sign-off for this story's epic; no source document holds it.",
+   "note": "No sign-off exists in the story or sources; cannot be invented here."
+  },
+  {
+   "ruling": "R-07914",
+   "item": "DOR-RWB-S4-E5001-CON-16",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Added Size row to the header table: set by the squad at refinement.",
+   "note": "No size value in sources; row records the refinement rule."
+  },
+  {
+   "ruling": "R-07915",
+   "item": "DOR-RWB-S4-E5001-CON-23",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Added Contract version row: v1 on the litigation path and on the consumed comms path.",
+   "note": "Version taken from the /v1 paths already in the story."
+  },
+  {
+   "ruling": "R-07916",
+   "item": "DOR-RWB-S4-E5001-CON-8",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Added workflow ID and start rule not specified, and the catalog gap for issueDemandAndRecallNotices as cross-document.",
+   "note": "Task queue fixed by CG-ALL-9006; yaml base is CG-ALL-9005."
+  },
+  {
+   "ruling": "R-09213",
+   "item": "GAP-1740",
+   "status": "Resolved",
+   "section": "12.2",
+   "target": "",
+   "change": "Added ownership split: this service decides, approves and owns the notice period; rwb-comms owns template, delivery and proof of delivery.",
+   "note": "Notice period starts from delivered_at returned by rwb-comms."
+  },
+  {
+   "ruling": "R-09214",
+   "item": "GAP-1741",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Added Notice slice row: slice 2.1 contract, fake and schema published before wave 3; rest built in wave 3.",
+   "note": "Header Wave and release dates unchanged."
+  },
+  {
+   "ruling": "R-09242",
+   "item": "GAP-1736",
+   "status": "Resolved",
+   "section": "2",
+   "target": "",
+   "change": "Added: no view or ACE table is read; source data only via rwb-source-data contract, confirmed with P1 before the wave 2 notice test.",
+   "note": "Field names carried from the FSD."
+  },
+  {
+   "ruling": "R-09243",
+   "item": "GAP-1742",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Added: requirement set is the thirty-two FSD-named R-LIT rules; the other forty-seven are package authoring work with owner in rwb-decision.",
+   "note": "No rule restated; no values invented."
+  }
+ ]
+}

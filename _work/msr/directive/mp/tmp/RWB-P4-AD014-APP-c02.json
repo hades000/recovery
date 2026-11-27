@@ -1,0 +1,232 @@
+{
+ "edits": [
+  {
+   "old": "| Path | What happens | Message |\n|---|---|---|",
+   "new": "| Path | What happens | Message | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| No right in the capability area | Refused before the handler runs; nothing stored and no file read | 403, MSG-P4-002 \"You cannot {action} here. Your role does not include it.\" |",
+   "new": "| No right in the capability area | Refused before the handler runs; nothing stored and no file read | 403, MSG-P4-002 \"You cannot {action} here. Your role does not include it.\" | TC-AD-014-03 |"
+  },
+  {
+   "old": "| Unknown overflow queue | The file is refused whole, naming the row and `overflow_queue_code` | 422, MSG-P1-002 |",
+   "new": "| Unknown overflow queue | The file is refused whole, naming the row and `overflow_queue_code` | 422, MSG-P1-002 | AC2; TC-AD-014-02 |"
+  },
+  {
+   "old": "| Unknown role code, unknown team code, assignment method not in LOV-ASSIGN, cap above the parameter | Each is a finding on its own row; the file is refused whole | 422, MSG-P1-002 |",
+   "new": "| Unknown role code, unknown team code, assignment method not in LOV-ASSIGN, cap above the parameter | Each is a finding on its own row; the file is refused whole | 422, MSG-P1-002 | AC3; TC-AD-014-07 |"
+  },
+  {
+   "old": "| Decision record cannot be written | The check stops; the owner is never called; no acceptance exists | 503, MSG-P7-003 \"The action was not taken because the decision could not be recorded. Try again in a few minutes.\" |",
+   "new": "| Decision record cannot be written | The check stops; the owner is never called; no acceptance exists | 503, MSG-P7-003 \"The action was not taken because the decision could not be recorded. Try again in a few minutes.\" | AC4; TC-AD-014-08 |"
+  },
+  {
+   "old": "| Owner unreachable, slow or answering an error | The check stays VALIDATED with its hand-off pending, and the screen says so; a repeated POST with the same Idempotency-Key returns the same check | 503 or the owner's code, mapped to the envelope; no queue version is claimed |",
+   "new": "| Owner unreachable, slow or answering an error | The check stays VALIDATED with its hand-off pending, and the screen says so; a repeated POST with the same Idempotency-Key returns the same check | 503 or the owner's code, mapped to the envelope; no queue version is claimed | AC5; TC-AD-014-09 |"
+  },
+  {
+   "old": "| Duplicate upload of the same file and date | The idempotency key returns the first check; a different file for the same date is a conflict | 200 with the same `checkId`; 409 |",
+   "new": "| Duplicate upload of the same file and date | The idempotency key returns the first check; a different file for the same date is a conflict | 200 with the same `checkId`; 409 | AC6; TC-AD-014-10 |\n| Screen states of SCR-42 and SCR-43 | Empty and loading states: Not specified in the source documents (DOR-RWB-P4-AD014-APP-10); the error state is the owner-unreachable row and the no-access state is the 403 row; SCR-43 states: Not specified in the source documents (DOR-RWB-P4-AD014-APP-10) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-10) | DOR-RWB-P4-AD014-APP-10 |"
+  },
+  {
+   "old": "    Then the system refuses the load",
+   "new": "    Then the system refuses the load\n\n  Scenario: AC3 A role, team, method or cap not known is refused (new, D-RCV-60)\n    Given the rwb-case list fake returns LOV-ASSIGN and LOV-TEAM, and the rwb-case parameters fake returns the cap maximum\n    And a queue file with a role_code, team_code, assignment_method or capacity_cap that is not known\n    When it is checked\n    Then the file is refused whole with 422 and MSG-P1-002, naming each row\n\n  Scenario: AC4 A decision record that cannot be written stops the check (new, D-RCV-60)\n    Given the decision-record fake is forced to fail\n    And a queue file that passes every check\n    When it is checked\n    Then the check stops with 503 and MSG-P7-003, and the owner is never called\n\n  Scenario: AC5 An owner that does not answer keeps the check VALIDATED with its hand-off pending (new, D-RCV-60)\n    Given the rwb-case queue fake answers the reference load with an error\n    When the accepted file is handed off\n    Then the state stays VALIDATED with its hand-off pending, the screen says so, and no queue version is claimed\n\n  Scenario: AC6 A different file for the same date is a conflict (new, D-RCV-60)\n    Given a check exists for a file and date\n    When a different file is uploaded for the same date\n    Then the answer is 409 and the first check is kept"
+  },
+  {
+   "old": "The six checks below are this story's own names for the rules the sources state in words; they are not source rule identifiers (GAP-2273; ASM-3755).",
+   "new": "The seven rules below carry this story's own rule IDs, QFC-1 to QFC-7, for the rules the sources state in words; they are not source BR identifiers (GAP-2273; ASM-3755)."
+  },
+  {
+   "old": "| Independent | Builds against five published contract faces and needs no other story to be finished; C dependencies are mocked from Day 1 |",
+   "new": "| Independent | Builds against five published contract faces and needs no other story to be finished; C dependencies are mocked from Day 1. Result: met |"
+  },
+  {
+   "old": "| Negotiable | The finding codes and the two paths are this run's; the checks themselves are fixed by the legacy criteria and the FSD rules |",
+   "new": "| Negotiable | The finding codes and the two paths are this run's; the checks themselves are fixed by the legacy criteria and the FSD rules. Result: met |"
+  },
+  {
+   "old": "| Valuable | It is the difference between one repaired file and two half-loaded queue versions |",
+   "new": "| Valuable | It is the difference between one repaired file and two half-loaded queue versions. Result: met |"
+  },
+  {
+   "old": "| Estimable | Six checks, one parser, one owner client and one record writer; no workflow and no event of its own |",
+   "new": "| Estimable | Six checks, one parser, one owner client and one record writer; no workflow and no event of its own. Result: met |"
+  },
+  {
+   "old": "| Small | One service, two operations, no table of its own beyond a check record in `rwb_access` |",
+   "new": "| Small | One service, two operations, no table of its own beyond a check record in `rwb_access`. Result: met |"
+  },
+  {
+   "old": "| Testable | Both legacy criteria are expressed as a check answer, a finding list and a state, all observable through the two operations |",
+   "new": "| Testable | Both legacy criteria are expressed as a check answer, a finding list and a state, all observable through the two operations. Result: met |"
+  },
+  {
+   "old": "| Contract | Operation | Used for |\n|---|---|---|",
+   "new": "| Contract | Operation | Used for | Owner or service |\n|---|---|---|---|"
+  },
+  {
+   "old": "| RWB-P3-E1019-CON | The reference-load operation of rwb-case (`POST /api/recovery/case/v1/admin/reference-loads`) | Storing the accepted queue version under the owner |",
+   "new": "| RWB-P3-E1019-CON | The reference-load operation of rwb-case (`POST /api/recovery/case/v1/admin/reference-loads`) | Storing the accepted queue version under the owner | rwb-case |"
+  },
+  {
+   "old": "| RWB-P3-E1019-CON | The approve operation of rwb-case (`POST /api/recovery/case/v1/admin/reference-loads/{loadId}/approve`) | The second pair of eyes; the gate only reports its answer |",
+   "new": "| RWB-P3-E1019-CON | The approve operation of rwb-case (`POST /api/recovery/case/v1/admin/reference-loads/{loadId}/approve`) | The second pair of eyes; the gate only reports its answer | rwb-case |"
+  },
+  {
+   "old": "| RWB-P3-E1019-CON | The queue read of rwb-case (`GET /api/recovery/case/v1/queues`) | The queues in force, for QFC-1 |",
+   "new": "| RWB-P3-E1019-CON | The queue read of rwb-case (`GET /api/recovery/case/v1/queues`) | The queues in force, for QFC-1 | rwb-case |"
+  },
+  {
+   "old": "| RWB-P3-E1043-CON | The list read of rwb-case (`GET /api/recovery/case/v1/admin/lists/{listCode}`) | LOV-ASSIGN and LOV-TEAM, for QFC-3 and QFC-4 |",
+   "new": "| RWB-P3-E1043-CON | The list read of rwb-case (`GET /api/recovery/case/v1/admin/lists/{listCode}`) | LOV-ASSIGN and LOV-TEAM, for QFC-3 and QFC-4 | rwb-case |"
+  },
+  {
+   "old": "| RWB-P3-E1042-CON | The parameters read of rwb-case (`GET /api/recovery/case/v1/admin/parameters`) | The cap maximum and the file and row limits, for QFC-5 |",
+   "new": "| RWB-P3-E1042-CON | The parameters read of rwb-case (`GET /api/recovery/case/v1/admin/parameters`) | The cap maximum and the file and row limits, for QFC-5 | rwb-case |"
+  },
+  {
+   "old": "| Table | Access | Note |\n|---|---|---|",
+   "new": "| Table | Access | Note | Owner or service |\n|---|---|---|---|"
+  },
+  {
+   "old": "| rwb_access.role | Read | The role catalogue at the version in force; written by RWB-P4-E1019-APP |",
+   "new": "| rwb_access.role | Read | The role catalogue at the version in force; written by RWB-P4-E1019-APP | rwb-access |"
+  },
+  {
+   "old": "| rwb_access.permission | Read | The right of the caller in Reference data; written by RWB-P4-E1019-APP |",
+   "new": "| rwb_access.permission | Read | The right of the caller in Reference data; written by RWB-P4-E1019-APP | rwb-access |"
+  },
+  {
+   "old": "| No queue table | — | `queue` and `queue_member` are rwb-case's; the check record is held in `rwb_access` under this key's migration (GAP-2273; ASM-3748) |",
+   "new": "| No queue table | — | `queue` and `queue_member` are rwb-case's; the check record is held in `rwb_access` under this key's migration (GAP-2273; ASM-3748) | rwb-case |"
+  },
+  {
+   "old": "| ACE view stub | `v_ace_iam_group` rows for the roles of the test files, and an absent group for the refusal |",
+   "new": "| rwb-source-data contract fake (in place of the ACE view stub) | `v_ace_iam_group` rows for the roles of the test files, and an absent group for the refusal |"
+  },
+  {
+   "old": "| TC-AD-014-04 | Principle 5 | NFR | The decision-record fake forced to fail; the owner fake asserted as never called |",
+   "new": "| TC-AD-014-04 | Principle 5 | NFR | The decision-record fake forced to fail; the owner fake asserted as never called |\n| TC-AD-014-05 | §12.2 | Contract | Each operation of §12.2 answered by the rwb-case queue, list and parameters fakes with its contract shape |\n| TC-AD-014-06 | §12.7 | Boundary | The rwb_access.role and rwb_access.permission rows at the version in force, at the edge of the file and row limits; no queue table written |\n| TC-AD-014-07 | AC3 | Component | A queue file whose role_code, team_code, assignment_method or capacity_cap is not known; the list and parameters fakes in force |\n| TC-AD-014-08 | AC4 | Component | The decision-record fake forced to fail; the owner fake asserted as never called |\n| TC-AD-014-09 | AC5 | Component | The rwb-case queue fake answering the reference load with an error; the screen shows the hand-off pending |\n| TC-AD-014-10 | AC6 | Component | The same file and date uploaded twice, then a different file for the same date |"
+  },
+  {
+   "old": "| Source | Reference |\n|---|---|",
+   "new": "| Source | Reference | Feature | L3 process |\n|---|---|---|---|"
+  },
+  {
+   "old": "| Legacy story | RWB-AD-014 Configure queues, module P4, epic E8, priority Must, decision DL23, depends on RWB-E1-019; AC1 and AC2 carried with their origin tags; TC-AD-014-01 to TC-AD-014-04 carried |",
+   "new": "| Legacy story | RWB-AD-014 Configure queues, module P4, epic E8, priority Must, decision DL23, depends on RWB-E1-019; AC1 and AC2 carried with their origin tags; TC-AD-014-01 to TC-AD-014-04 carried; open decision DL23 remains open, with assumptions ASM-1232, ASM-1237, ASM-1259 and ASM-1560 | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) |"
+  },
+  {
+   "old": "| FSD P4 | A2.3 (hold roles as data, its load and approval), A2.17 (the administration screens), AC-P4-003-01, AC-ALT-P4-003-01, AC-ALT-P4-003-02, AC-EXC-P4-003-01, AC-EXC-P4-003-02, AC-EXC-P4-003-07, AC-EXC-P4-003-08; SCR-42 |",
+   "new": "| FSD P4 | A2.3 (hold roles as data, its load and approval), A2.17 (the administration screens), AC-P4-003-01, AC-ALT-P4-003-01, AC-ALT-P4-003-02, AC-EXC-P4-003-01, AC-EXC-P4-003-02, AC-EXC-P4-003-07, AC-EXC-P4-003-08; SCR-42 | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) |"
+  },
+  {
+   "old": "| TSD P4 | T6.1 (the RBAC matrix), T6.2 (each endpoint declares its area and right), T-A.1 (API-P4-005, API-P4-006, API-P4-009, API-P4-010) |",
+   "new": "| TSD P4 | T6.1 (the RBAC matrix), T6.2 (each endpoint declares its area and right), T-A.1 (API-P4-005, API-P4-006, API-P4-009, API-P4-010) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) |"
+  },
+  {
+   "old": "| Requirements | REQ-ACA-002, REQ-ACA-003, REQ-ACA-013 |",
+   "new": "| Requirements | REQ-ACA-002, REQ-ACA-003, REQ-ACA-013 | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) |"
+  },
+  {
+   "old": "| Rules | R-UNI-38 (a version applies from its date), R-UNI-39 (no change without its record) |",
+   "new": "| Rules | R-UNI-38 (a version applies from its date), R-UNI-39 (no change without its record) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) |"
+  },
+  {
+   "old": "| Patterns | DP-03, DP-05, DP-06, DP-07, DP-13, DP-19 of §R5.5 |",
+   "new": "| Patterns | DP-03, DP-05, DP-06, DP-07, DP-13, DP-19 of §R5.5 | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) | Not specified in the source documents (DOR-RWB-P4-AD014-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10598",
+   "item": "CG-ALL-4786",
+   "status": "Resolved",
+   "section": "12.8",
+   "target": "",
+   "change": "",
+   "note": "ACE view stub row in 12.8 is relabelled as the rwb-source-data contract fake answering the Entra group rows."
+  },
+  {
+   "ruling": "R-16527",
+   "item": "DOR-RWB-P4-AD014-APP-10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Screen states row added for SCR-42 and SCR-43; unsourced empty, loading and SCR-43 states marked Not specified."
+  },
+  {
+   "ruling": "R-16528",
+   "item": "DOR-RWB-P4-AD014-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-AD-014-05 contract test for 12.2 operations and TC-AD-014-06 boundary test for 12.7 tables added."
+  },
+  {
+   "ruling": "R-16529",
+   "item": "DOR-RWB-P4-AD014-APP-15",
+   "status": "Resolved",
+   "section": "6",
+   "target": "",
+   "change": "",
+   "note": "Each INVEST letter now carries a Result: met entry."
+  },
+  {
+   "ruling": "R-16530",
+   "item": "DOR-RWB-P4-AD014-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Legacy row states DL23 is open with assumptions ASM-1232, ASM-1237, ASM-1259 and ASM-1560."
+  },
+  {
+   "ruling": "R-16531",
+   "item": "DOR-RWB-P4-AD014-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to traceability; unsourced values marked Not specified."
+  },
+  {
+   "ruling": "R-16532",
+   "item": "DOR-RWB-P4-AD014-APP-24",
+   "status": "Resolved",
+   "section": "12.2, 12.7",
+   "target": "",
+   "change": "",
+   "note": "Owner or service column added to 12.2 and 12.7 tables, using owners stated in the source text."
+  },
+  {
+   "ruling": "R-16533",
+   "item": "DOR-RWB-P4-AD014-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to 5; new AC3 to AC6 in 7 with TC-AD-014-07 to TC-AD-014-10 in 16."
+  },
+  {
+   "ruling": "R-16534",
+   "item": "DOR-RWB-P4-AD014-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Rules use the story's QFC-1 to QFC-7 rule IDs; the count is corrected to seven. No source BR identifier exists."
+  },
+  {
+   "ruling": "R-16535",
+   "item": "DOR-RWB-P4-AD014-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "LDM v9 and Data Classification v5",
+   "change": "Add `overflow_queue_code` as a field or entity.",
+   "note": "Field is missing from LDM v9 and Data Classification v5; no story edit requested."
+  }
+ ]
+}

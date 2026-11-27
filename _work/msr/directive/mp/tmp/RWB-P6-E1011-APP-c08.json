@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "| BR14 | The person keys of a case's notices are answered by this service for the REC-05 resolution that rwb-source-data runs; the resolution itself and every orphan decision are the enterprise reconciliation's and stay with rwb-source-data | Legacy RWB-E1-011 BR5; Architecture v5 slide 17 (rwb-comms IN: GET /cases/{id}/notices); RWB-ITG-E1011-ITG |",
+   "new": "| BR14 | The person keys of a case's notices are answered by this service for the REC-05 resolution that rwb-source-data runs; the resolution itself and every orphan decision are the enterprise reconciliation's and stay with rwb-source-data | Legacy RWB-E1-011 BR5; Architecture v5 slide 17 (rwb-comms IN: GET /cases/{id}/notices); RWB-ITG-E1011-ITG |\n| BR15 | The quality run is started by one Schedule of this service with overlap SKIP and a catch-up window, its cron is set at deployment, the three alert groups of MSG-P1-012 are configuration, and the feature flag is rwb.p3.case-quality-run; rwb-reporting reads the case-side result through GET /quality-runs and GET /quality-results for the report of the date | GAP-2238; DP-17 |"
+  },
+  {
+   "old": "**Owner.** REC-09 and the two checks of this story are answered by the rwb-comms service on its own schema `rwb_comms` and its login (ADR-014), with the three quality tables of section 12.7 as its Workbench side.",
+   "new": "**Owner.** REC-09 and the two checks of this story are answered by the rwb-comms service on its own schema `rwb_comms` and its login (ADR-014), with the three quality tables of section 12.7 as its Workbench side. The legacy term 'the case exceptions' is read as the reconciliation breaks written to reconciliation_result; no case_entry_exclusion is written by this story."
+  },
+  {
+   "old": "    Then each notice of the case is answered with its person key and the call writes nothing",
+   "new": "    Then each notice of the case is answered with its person key and the call writes nothing\n\n  Scenario: AC14 Error answers of the provided operations (new, D-RCV-60)\n    Given a business date with no quality run\n    When a caller with the Platform administration right reads GET /quality-runs/{business date} for that date\n    Then the response is 404 and nothing is written\n    Then a call without a token gets 401 as in AC12, and a call from a role without the right gets 403 as in AC10\n\n  Scenario: AC15 Activity retry and timeout (new, D-RCV-60)\n    Given the reconciliation activity of the quality run of 2026-11-30 fails once and is retried\n    When the retry completes\n    Then comms_quality_result holds one row per check and business date and no row is written twice\n    Given the reconciliation activity of the quality run of 2026-11-30 exceeds its timeout\n    When the timeout is reached\n    Then no quality result is written for 2026-11-30 and the run state of 2026-11-30 is FAILED with the system named"
+  },
+  {
+   "old": "| TC-E1-011-12 | AC13, BR14 | Component | A case with its notices; GET /cases/{caseId}/notices called by rwb-source-data; each person key answered; no write |",
+   "new": "| TC-E1-011-12 | AC13, BR14 | Component | A case with its notices; GET /cases/{caseId}/notices called by rwb-source-data; each person key answered; no write |\n| TC-E1-011-13 | AC10, BR13 | Component | Caller without Platform administration R reads GET /quality-runs/2026-11-30 and the break rows; 403 with MSG-P4-002; nothing written |\n| TC-E1-011-14 | AC11 | Boundary | Build runs the boundary test; caller reads a path outside /api/recovery/comms/v1; cross-schema read; extract file or lake path write; the build fails and nothing is released |\n| TC-E1-011-15 | AC12 | Component | Token with no Workbench role calls GET /quality-runs/2026-11-30; 401 with MSG-P4-001; nothing written |\n| TC-E1-011-16 | AC14 | Component | Business date with no quality run; GET /quality-runs/{business date}; 404; no token gives 401; role without the right gives 403 |\n| TC-E1-011-17 | AC15 | NFR | Reconciliation activity fails once and is retried, then exceeds its timeout; no duplicate row; run state FAILED with the system named |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28476",
+   "item": "GAP-2238",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR15 added: one SKIP Schedule with catch-up window (cron at deployment), three alert groups as configuration, flag rwb.p3.case-quality-run, read via GET operations."
+  },
+  {
+   "ruling": "R-28477",
+   "item": "GAP-3169",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Owner paragraph reads 'the case exceptions' as reconciliation breaks in reconciliation_result; no case_entry_exclusion written."
+  },
+  {
+   "ruling": "R-28478",
+   "item": "GAP-3172",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Build Notes v6",
+   "change": "State the wave 1 delivery of rwb-asset in the service epic and the wave plan; the rwb-asset service wave governs its later stories.",
+   "note": "This story is rwb-comms wave 1 and is unaffected; the wave conflict belongs to the build notes."
+  },
+  {
+   "ruling": "R-28479",
+   "item": "GAP-1457",
+   "status": "Cross-document",
+   "section": "",
+   "target": "BRD v4",
+   "change": "Renumber section 3 headings by service epic in a later BRD version, keeping every requirement key unchanged.",
+   "note": "Section 3 headings are in BRD v4; no story edit needed."
+  },
+  {
+   "ruling": "R-31244",
+   "item": "NEWAC-RWB-P6-E1011-APP-AC10",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-011-13 (Component) for AC10 and BR13 with the 403 and MSG-P4-002 data from the criterion."
+  },
+  {
+   "ruling": "R-31245",
+   "item": "NEWAC-RWB-P6-E1011-APP-AC11",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-011-14 (Boundary) for AC11 with the path, cross-schema and extract write attempts."
+  },
+  {
+   "ruling": "R-31246",
+   "item": "NEWAC-RWB-P6-E1011-APP-AC12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-011-15 (Component) for AC12 with a token without a Workbench role and MSG-P4-001."
+  },
+  {
+   "ruling": "R-31247",
+   "item": "NEWAC-RWB-P6-E1011-APP-AC13",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "BR13 now covered by TC-E1-011-13 and BR14 by TC-E1-011-12; both rules have a test in section 16."
+  },
+  {
+   "ruling": "R-31248",
+   "item": "NEWAC-RWB-P6-E1011-APP-AC14",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 scenario for 404, 401 and 403 of the provided operations and TC-E1-011-16 in section 16."
+  },
+  {
+   "ruling": "R-31249",
+   "item": "NEWAC-RWB-P6-E1011-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 scenario for activity retry and timeout, and TC-E1-011-17 in section 16; no timeout value invented."
+  }
+ ]
+}

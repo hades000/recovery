@@ -1,0 +1,236 @@
+{
+ "edits": [
+  {
+   "old": "| Exception | Answer | What is left unchanged |\n|---|---|---|",
+   "new": "| Exception | Answer | What is left unchanged | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| Nothing is read, nothing is written |",
+   "new": "| Nothing is read, nothing is written | AC7 |"
+  },
+  {
+   "old": "| No entry of a read; one refusal entry |",
+   "new": "| No entry of a read; one refusal entry | AC2 |"
+  },
+  {
+   "old": "| The rollup is not started and one refusal entry is written |",
+   "new": "| The rollup is not started and one refusal entry is written | AC6 |"
+  },
+  {
+   "old": "| A date filter absent, or `from` after `to` | 422 with MSG-GEN-001 or MSG-GEN-003 | No page is answered |",
+   "new": "| A date filter absent, or `from` after `to` | 422 with MSG-GEN-001 or MSG-GEN-003 | No page is answered | AC8; AC4 |"
+  },
+  {
+   "old": "| A page bound outside the declared range | 422 with MSG-GEN-001 | No page is answered |",
+   "new": "| A page bound outside the declared range | 422 with MSG-GEN-001 | No page is answered | AC9 |"
+  },
+  {
+   "old": "| The list in force is untouched |",
+   "new": "| The list in force is untouched | AC10 |"
+  },
+  {
+   "old": "| Fail closed: no read is served |",
+   "new": "| Fail closed: no read is served | AC11 |"
+  },
+  {
+   "old": "| The read is not served and is not recorded |",
+   "new": "| The read is not served and is not recorded | AC12 |"
+  },
+  {
+   "old": "| The breaker per downstream trips and no entry of a partial read is written |",
+   "new": "| The breaker per downstream trips and no entry of a partial read is written | AC13 |"
+  },
+  {
+   "old": "| The grant itself is RWB-P4-E1039-APP's |",
+   "new": "| The grant itself is RWB-P4-E1039-APP's | AC14 |"
+  },
+  {
+   "old": "| Letter | Finding |\n|---|---|",
+   "new": "| Letter | Finding | Result |\n|---|---|---|"
+  },
+  {
+   "old": "waits for no in-lane story (H is None) |",
+   "new": "waits for no in-lane story (H is None) | Met |"
+  },
+  {
+   "old": "are contract values and data rows, not code |",
+   "new": "are contract values and data rows, not code | Met |"
+  },
+  {
+   "old": "and the record is reviewable |",
+   "new": "and the record is reviewable | Met |"
+  },
+  {
+   "old": "one route step and one migration step |",
+   "new": "one route step and one migration step | Met |"
+  },
+  {
+   "old": "no screen of its own, one package |",
+   "new": "no screen of its own, one package | Met |"
+  },
+  {
+   "old": "on fixed roles, one agent and three business dates |",
+   "new": "on fixed roles, one agent and three business dates | Met |"
+  },
+  {
+   "old": "Then a caller holding only RW-RISK is refused with 403 and MSG-P4-002, and one access entry with result \"REFUSED\" is written",
+   "new": "Then a caller holding only RW-RISK is refused with 403 and MSG-P4-002, and one access entry with result \"REFUSED\" is written\n\n  Scenario: AC7 A request with no session is refused (new, D-RCV-60)\n    Given the caller holds no session\n    When the route asks GET /api/recovery/access/v1/me/session for that caller\n    Then the route answers 401 with MSG-P4-001\n    Then nothing is read and nothing is written\n\n  Scenario: AC8 An absent date filter is refused (new, D-RCV-60)\n    Given a caller holding RW-RISK, whose Reporting letter is R\n    When it opens the agent monitor with no date filter\n    Then the route answers 422 with MSG-GEN-001\n    Then no page is answered\n\n  Scenario: AC9 A page bound outside the declared range is refused (new, D-RCV-60)\n    Given a caller holding RW-RISK, whose Reporting letter is R\n    When it asks a page bound outside the declared range\n    Then the route answers 422 with MSG-GEN-001\n    Then no page is answered and the range is read from a data row\n\n  Scenario: AC10 An event code not in the list in force is refused (new, D-RCV-60)\n    Given the list in force holds the event codes of the access-event list\n    When a caller asks an event code that is not in that list\n    Then the route answers 422 with MSG-GEN-001\n    Then the filter offers only the values of the list in force\n\n  Scenario: AC11 Unavailable parameters or lists fail closed (new, D-RCV-60)\n    Given the parameters or the lists read is unavailable\n    When the caller of AC1 opens the dashboard\n    Then the route answers 503\n    Then no filter value and no event code comes from code and no read is served\n\n  Scenario: AC12 A failed decision-record append serves no metric row (new, D-RCV-60)\n    Given the decision-record append of the access entry fails\n    When the caller of AC1 opens the dashboard\n    Then the route answers 503 with MSG-P7-003 and no metric row is answered\n    Then the read is not served and is not recorded\n\n  Scenario: AC13 A timed-out metric read shows no partial screen (new, D-RCV-60)\n    Given the rwb-agent contract mock times out on the metric read\n    When the caller of AC1 opens the dashboard\n    Then the route answers 503 for that part of the composite\n    Then the answer alone is not shown as the screen and no entry of a partial read is written\n\n  Scenario: AC14 An active break-glass grant is shown and recorded (new, D-RCV-60)\n    Given a break-glass grant is active for the caller of AC1\n    When the caller opens the dashboard\n    Then the read is allowed and the access entry carries the grant reference\n    Then the MSG-P4-004 banner is shown\n\n  Scenario: AC15 An agent service identity is held to the same role rows (new, D-RCV-60)\n    Given a service identity of the rwb-agent login (DP-02) holding no Reporting letter\n    When it opens the agent monitor\n    Then the route answers 403 with MSG-P4-002 naming the action \"open the agent monitor\"\n    Then one access entry is written with area \"REPORTING\", right \"R\" and result \"REFUSED\""
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "FSD P4 AC-P4-001-01; legacy X6 |",
+   "new": "FSD P4 AC-P4-001-01; legacy X6 | AC1, AC2; TC-E1-063-01, TC-E1-063-08 |"
+  },
+  {
+   "old": "FSD P4 AC-EXC-P4-001-05; legacy X6 |",
+   "new": "FSD P4 AC-EXC-P4-001-05; legacy X6 | AC2; TC-E1-063-08 |"
+  },
+  {
+   "old": "REQ-ACA-006; NFR-042; ASM-3880 |",
+   "new": "REQ-ACA-006; NFR-042; ASM-3880 | AC3, AC12; TC-E1-063-01, TC-E1-063-15 |"
+  },
+  {
+   "old": "Legacy section 17; REQ-ACA-005 |",
+   "new": "Legacy section 17; REQ-ACA-005 | AC3; TC-E1-063-01 |"
+  },
+  {
+   "old": "Legacy BR1; DP-01, DP-17 |",
+   "new": "Legacy BR1; DP-01, DP-17 | AC1; TC-E1-063-01 |"
+  },
+  {
+   "old": "Legacy section 10 and section 12; TSD P4 T6.1 |",
+   "new": "Legacy section 10 and section 12; TSD P4 T6.1 | AC6; TC-E1-063-04 |"
+  },
+  {
+   "old": "FSD P4 VR-P4-004-1; DP-06, DP-07 |",
+   "new": "FSD P4 VR-P4-004-1; DP-06, DP-07 | AC1, AC9, AC10; TC-E1-063-12, TC-E1-063-13 |"
+  },
+  {
+   "old": "REQ-ACA-010; TSD P4 T6.2 |",
+   "new": "REQ-ACA-010; TSD P4 T6.2 | AC15; TC-E1-063-18 |"
+  },
+  {
+   "old": "FSD P4 A2.8; REQ-ACA-006 |",
+   "new": "FSD P4 A2.8; REQ-ACA-006 | AC3, AC4; TC-E1-063-01, TC-E1-063-19 |"
+  },
+  {
+   "old": "Try again in a few minutes. |",
+   "new": "Try again in a few minutes. |\n| MSG-P1-001 | A held business date is shown with the banner (AC5) | Not specified in the source documents (DOR-RWB-P4-E1063-APP-9) |\n| MSG-P4-004 | A break-glass grant is active for the caller (section 5) | Not specified in the source documents (DOR-RWB-P4-E1063-APP-9) |"
+  },
+  {
+   "old": "MSG-P10-004 and MSG-P1-001 stay with the agent and communications slices and are not sent by this story.",
+   "new": "MSG-P10-004 stays with the agent slice and is not sent by this story; MSG-P1-001 and MSG-P4-004 are banners shown here and listed above."
+  },
+  {
+   "old": "RW-CASEOWN opens the agent monitor |",
+   "new": "RW-CASEOWN opens the agent monitor |\n| TC-E1-063-09 | Boundary of §12.7 (ASM-3438); AC3 — the entry lands only on the local decision-record table and the reads of role, permission and masking_rule write nothing | Component | One dashboard read by RW-RISK |\n| TC-E1-063-10 | AC7 — no session is refused with 401 and MSG-P4-001, and nothing is read or written | Component | A request with no session |\n| TC-E1-063-11 | AC8 — a dashboard request with no date filter is refused with 422 and MSG-GEN-001 | Component | No date filter on the request |\n| TC-E1-063-12 | AC9 — a page bound outside the declared range is refused with 422 and MSG-GEN-001; the range is read from a data row | Component | A page bound outside the declared range |\n| TC-E1-063-13 | AC10 — an event code not in the list in force is refused with 422 and the filter offers only list values | Component | An event code absent from the list in force |\n| TC-E1-063-14 | AC11 — the parameters or the lists read is unavailable: 503 and no read is served | Contract | The parameters service unavailable |\n| TC-E1-063-15 | AC12 — a failed decision-record append answers 503 with MSG-P7-003 and no metric row | Component | The append fails for one read by RW-RISK |\n| TC-E1-063-16 | AC13 — a timed-out metric read answers 503 for that part and writes no partial entry | Component | The metric read of rwb-agent times out |\n| TC-E1-063-17 | AC14 — an active break-glass grant allows the read, carries the grant reference and shows MSG-P4-004 | End to end | A break-glass grant active for RW-RISK |\n| TC-E1-063-18 | AC15 — a service identity of the rwb-agent login (DP-02) holding no Reporting letter is refused as a person is | Component | The rwb-agent login (DP-02) with no Reporting letter |\n| TC-E1-063-19 | AC4 — the access log answers the dashboard entries in time order with the total, and a from date after the to date is refused with MSG-GEN-003 | Contract | Three entries for INTAKE and one for SCREENING on 2026-12-01 read by RW-AUDIT |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Element in this story | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Element in this story | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| TC-E1-063-01, TC-E1-063-02, TC-E1-063-03 |",
+   "new": "| TC-E1-063-01, TC-E1-063-02, TC-E1-063-03 | FEAT-AGT-06 | Not specified in the source documents (DOR-RWB-P4-E1063-APP-2) |\n| REQ-ACA-006 | Not specified in the source documents (DOR-RWB-P4-E1063-APP-2) | Every read of the dashboard is recorded and answered back from the access log (BR3, BR9, AC3, AC4) | TC-E1-063-01, TC-E1-063-03, TC-E1-063-19 | FEAT-AGT-06 | Not specified in the source documents (DOR-RWB-P4-E1063-APP-2) |\n| REQ-ACA-010 | Not specified in the source documents (DOR-RWB-P4-E1063-APP-2) | The dashboard is read only under the role rows of the caller, service identities included (BR8, AC15) | TC-E1-063-08, TC-E1-063-18 | FEAT-AGT-06 | Not specified in the source documents (DOR-RWB-P4-E1063-APP-2) |"
+  },
+  {
+   "old": "and are not restated as rows here.",
+   "new": "and are restated as rows above for REQ-ACA-006 and REQ-ACA-010; REQ-ACA-005 stays in section 8."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16724",
+   "item": "DOR-RWB-P4-E1063-APP-12",
+   "status": "Resolved",
+   "section": "12.7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "Boundary test TC-E1-063-09 added for the §12.7 tables. The P3 §18 vs RTM v7 difference is in another document and is not edited here."
+  },
+  {
+   "ruling": "R-16725",
+   "item": "DOR-RWB-P4-E1063-APP-15",
+   "status": "Resolved",
+   "section": "6",
+   "target": "",
+   "change": "",
+   "note": "Result column added to the INVEST check; each of the six letters is marked Met on its finding."
+  },
+  {
+   "ruling": "R-16726",
+   "item": "DOR-RWB-P4-E1063-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added (FEAT-AGT-06, L3 unspecified); REQ-ACA-006 and REQ-ACA-010 rows added."
+  },
+  {
+   "ruling": "R-16727",
+   "item": "DOR-RWB-P4-E1063-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to §5; AC7 to AC14 added for uncovered exception paths, tested by TC-E1-063-10 to TC-E1-063-17."
+  },
+  {
+   "ruling": "R-16728",
+   "item": "DOR-RWB-P4-E1063-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to §8; BR1, BR7, BR8, BR9 now tied to AC1 to AC4, AC9, AC10, AC15 and TC rows 01, 12, 13, 18, 19."
+  },
+  {
+   "ruling": "R-16729",
+   "item": "DOR-RWB-P4-E1063-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 and MSG-P4-004 listed in §14; their wording is not in the sources and is marked as not specified."
+  },
+  {
+   "ruling": "R-22210",
+   "item": "GAP-0644",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P10-E1058-APP",
+   "change": "Keep the three legacy admin operations on /api/recovery/agent/v1; leave report and configuration operations there; route reads via gateway-bff on that path; read LOV-DOC-TYPE from the rwb-case reference-data contract; read scores only through the evaluation read.",
+   "note": "Values belong to the rwb-agent extraction story, not this slice. The rwb-agent login is named in AC15 of this story."
+  },
+  {
+   "ruling": "R-22224",
+   "item": "GAP-0629",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Agent monitoring dashboard v2 app story (not named in this story)",
+   "change": "Place the drift step in the v1 Schedule workflow; read segment from the run row; read overrides via rwb-decision with the agent-version filter and three added elements; hold policy values in watch_measures; migration V10_007 with legacy index and one agent_feedback index; range limits as configuration; login rwb-agent (DP-02); route under RWB-PLT-N001-CON; right of API-P10-009 per its proposed fix.",
+   "note": "The nine values concern the v2 app slice, not this v1 story, and none appears here."
+  },
+  {
+   "ruling": "R-22225",
+   "item": "GAP-0617",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P10-E1063-CON",
+   "change": "Fix the query on /api/recovery/agent/v1 with the five parameters, a declared page size and cursor, the aggregate element, held-date status members, Schedule AgentRunDailyRollup in rwb-recovery on the rwb-agent queue with SKIP overlap, and the notification operation per its proposed fix.",
+   "note": "Contract values belong to the rwb-agent contract slice; this story reads them only through the mock."
+  },
+  {
+   "ruling": "R-22226",
+   "item": "GAP-2332",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P4-E1039-CON",
+   "change": "Publish the two dashboard-read access-event codes, the entry field list and the page bounds in the next access-log contract version; name the read index in the rwb_access physical schema; register the Flyway step and the two parameter codes in the service's own sequence and parameter set.",
+   "note": "Contract and schema lines belong to rwb-access; this story keeps the read index name unspecified in §12.7 until then."
+  }
+ ]
+}

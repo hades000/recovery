@@ -1,0 +1,52 @@
+{
+ "stage": "audit",
+ "story": "RWB-ITG-E1070-ITG",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 2
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-14159",
+     "item": "DOR-RWB-ITG-E1070-ITG-12",
+     "status": "Resolved",
+     "section": "12, 16",
+     "target": "",
+     "change": "",
+     "note": "Section 16 now has ten test cases. TC-E1-070-08-ITG covers the section 12 contract, and TC-E1-070-09-ITG and TC-E1-070-10-ITG cover AC8 and AC9."
+    }
+   ],
+   "edits": [
+    {
+     "old": "The eight test cases of section 16 pass in SIT",
+     "new": "The ten test cases of section 16 pass in SIT"
+    },
+    {
+     "old": "    Given the smoke run has started the activity RecordAndApply on task queue rwb-case under the workflow ID platform-smoke-20261116\n    When the first attempt of the activity times out\n    Then the activity is retried on the same task queue rwb-case under the same workflow ID and no second run is started\n    When the retried attempt completes\n    Then the write is recorded once and the history holds one completed activity for the step\n    When the activity EvaluateRules on task queue rwb-decision times out\n    Then the run does not write and the workflow ID stays the key of the run",
+     "new": "    Given the smoke run has started the activity EvaluateRules on task queue rwb-decision under the workflow ID platform-smoke-20261116\n    When an attempt of the activity EvaluateRules times out\n    Then the run does not write while EvaluateRules has not completed and the workflow ID stays the key of the run\n    When EvaluateRules has completed and the first attempt of the activity RecordAndApply on task queue rwb-case times out\n    Then the activity is retried on the same task queue rwb-case under the same workflow ID and no second run is started\n    When the retried attempt completes\n    Then the write is recorded once and the history holds one completed activity for the step"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-14159",
+     "kind": "wrong",
+     "issue": "Section 16 has ten test cases (01-07 plus new 08, 09, 10), but 'Done when' and the disposition note say eight."
+    },
+    {
+     "ruling": "R-29874",
+     "kind": "wrong",
+     "issue": "AC9 times out EvaluateRules after RecordAndApply has already written, then says the run does not write. The step order contradicts itself."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 2
+}

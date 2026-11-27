@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "| Ready to start | Day 1 |",
+   "new": "| Ready to start | Day 1 |\n| Open decisions | DL10 is ruled by D-RCV-60 (recommended resolution accepted); assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed |"
+  },
+  {
+   "old": "BR1 is the start signal and the first step of the branch.",
+   "new": "BR1 is the start signal and the first step of the branch: the check is a step of `TreatmentWorkflow` started by rwb-case on the route approval, driven by the events of the services that own the fact, and no Schedule or batch trigger starts it (GAP-1702)."
+  },
+  {
+   "old": "so they travel in the answer and in the decision record (GAP-2674; ASM-4396).",
+   "new": "so they travel in the answer and in the decision record (GAP-2674; ASM-4396). The names `encumbrance_status`, `decision_record` and `encumbrance_unresolved` used by the rules are a value of the ACE read, a library object of RWB-PLT-E1027-CON and a reason code of R-DIL-06; none is a field or entity in LDM v9 or Data Classification v5, and none adds a column. The ACE views are read under DP-05 as the source of the read, and no LDM field name for them is given in the source documents (DOR-RWB-S2-E3013-APP-7)."
+  },
+  {
+   "old": "BR8 is the reason the read is a SELECT against the views and no ACE object is written.",
+   "new": "BR8 is the reason the read is a SELECT against the views and no ACE object is written.\n\n**Reference data.** The hold limit and the three clocks are parameters read from the rule set of the DEEDINLIEU and SETTLEMENT packages under the reference-data contract (DP-06, DP-07), with their package version. Their parameter keys are not specified in the source documents (DOR-RWB-S2-E3013-APP-20).\n\n**External calls.** The asset take-on is requested from rwb-asset (S5) through its contract, and the CCMS collateral release and the Land Office title check through the rwb-integration contract. The reference each returns is recorded in the decision record (GAP-1705).\n\n**Working read of the check answer (GAP-2674, GAP-2675).** The readiness answer is an optional section of the treatment read of RWB-S2-E3001-CON. The encumbrance and title statuses are values of the ACE read, never a column of `rwb_treatment` and never derived in code. The three view ranges are read only. The title-set task is raised by the parent CaseWorkflow on the reported request, with the 5 working-day clock of R-SET-22, and the case states are moved by the parent. The decision code is the rule ID and version returned by the evaluated package. The contract v1 publishes the readiness section with checkType, encumbranceStatus, registrationStatus, titleSetStatus, checkedAt, ruleId, ruleVersion, holdUntil, collateralNo and assetKey as an optional addition to GET /treatments/{treatmentId} at the same major version; TitleSetTaskRequest as an element of the stage outcome with R-SET-22, its version, the 5 working-day clock and its reason code, which is not specified in the source documents (GAP-2675); and the errors 401, 403 with MSG-P4-002, 404, 422 with MSG-GEN-001 and 503.\n\n**Boundary and timers (GAP-0736).** This service owns the encumbrance and title check. The parent CaseWorkflow in rwb-case owns the case state, the title-set task, its due date and the decision record. The case-side columns check_ref, check_outcome_code and decision_record_id are added by the P3 migration and not by this story; their field IDs are not specified in the source documents (GAP-0736). The timer is taken from the check answer, and until a parameter is named the platform one-hop default of 2 s applies. The requirement ID of this slice is not specified in the source documents (GAP-0736)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19442",
+   "item": "DOR-RWB-S2-E3013-APP-18",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Open decisions row added to the header table: DL10 ruled by D-RCV-60 with assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863 confirmed.",
+   "note": "DL10 and its four assumptions now recorded in the header; the directive is the ruling."
+  },
+  {
+   "ruling": "R-19443",
+   "item": "DOR-RWB-S2-E3013-APP-20",
+   "status": "Resolved",
+   "section": "9",
+   "target": "",
+   "change": "Reference data paragraph added naming the hold limit and three clocks, the rule set of DEEDINLIEU and SETTLEMENT, and the DP-06 and DP-07 contract.",
+   "note": "Parameters and reference-data contract now named; parameter keys stated as not specified in the source documents."
+  },
+  {
+   "ruling": "R-19444",
+   "item": "DOR-RWB-S2-E3013-APP-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Coverage needs section 7 criteria and section 16 test case rows, which are outside this chunk; exact rows cannot be added safely from this text."
+  },
+  {
+   "ruling": "R-19445",
+   "item": "DOR-RWB-S2-E3013-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Sentence added stating encumbrance_status, decision_record and encumbrance_unresolved are not LDM fields or entities and are not new columns; ACE views are DP-05 sources only.",
+   "note": "Non-field names explained; views identified as DP-05 read sources; no LDM field name exists in the sources."
+  },
+  {
+   "ruling": "R-22740",
+   "item": "GAP-1702",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR1 now states the check is a TreatmentWorkflow step started by rwb-case on route approval and by owning-service events, with no Schedule or batch trigger.",
+   "note": "Trigger fixed to rwb-case and owning-service events; no schedule or batch added."
+  },
+  {
+   "ruling": "R-22753",
+   "item": "GAP-1705",
+   "status": "Cross-document",
+   "section": "9",
+   "target": "Architecture v5 connection matrix",
+   "change": "Add the two cells from rwb-treatment to rwb-asset (asset take-on, S5) and from rwb-treatment to rwb-integration (CCMS release and Land Office title check).",
+   "note": "Story side done: External calls paragraph requests both through contracts and records the returned references."
+  },
+  {
+   "ruling": "R-22754",
+   "item": "GAP-2674",
+   "status": "Resolved",
+   "section": "9",
+   "target": "",
+   "change": "Working read added: readiness answer as optional section of RWB-S2-E3001-CON treatment read; statuses are ACE values never columns; parent raises the task with 5-day R-SET-22 clock.",
+   "note": "Working read recorded in story; status values never stored or derived; decision code is the returned rule ID and version."
+  },
+  {
+   "ruling": "R-22755",
+   "item": "GAP-2675",
+   "status": "Resolved",
+   "section": "9",
+   "target": "",
+   "change": "Published shape added: readiness section properties, TitleSetTaskRequest element, read-only view ranges, and errors 401, 403 MSG-P4-002, 404, 422 MSG-GEN-001, 503.",
+   "note": "Contract v1 shape recorded in story; the TitleSetTaskRequest reason code is stated as not specified."
+  },
+  {
+   "ruling": "R-22756",
+   "item": "GAP-0425",
+   "status": "Not applied",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "Interface codes, SIT harness, seeding values, fake responses and evidence format are not in the sources; adding them would invent values."
+  },
+  {
+   "ruling": "R-22757",
+   "item": "GAP-0736",
+   "status": "Resolved",
+   "section": "9",
+   "target": "",
+   "change": "Boundary paragraph added: S2 owns check, P3 owns state, task, decision record; timer from answer; 2 s one-hop default; requirement ID and field IDs stated as not specified.",
+   "note": "Boundary and timer fixed in text; requirement ID and three column field IDs remain not specified in sources."
+  }
+ ]
+}

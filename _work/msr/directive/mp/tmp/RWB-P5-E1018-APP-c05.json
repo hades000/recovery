@@ -1,0 +1,63 @@
+{
+ "edits": [
+  {
+   "old": "    Then no document row is written and no field row is written\n```",
+   "new": "    Then no document row is written and no field row is written\n\n  Scenario: AC16 The case ID is the key of the case documents index and of every event published for the case (new, D-RCV-60)\n    Given a document \"notice-0001.pdf\" of type \"COURT_NOTICE\" is held against case \"RW-2026-000123\"\n    When the case documents index is written for that document\n    Then the index row is keyed by case_id \"RW-2026-000123\", document_type \"COURT_NOTICE\" and created_at\n    Then every event published for the document carries case \"RW-2026-000123\" as its Kafka key\n\n  Scenario: AC17 A consumed case call that fails or does not answer stores nothing (new, D-RCV-60)\n    Given the rwb-case contract call for case \"RW-2026-000123\" fails or does not answer within the 2 s budget\n    When a document of type \"COURT_NOTICE\" is stored for case \"RW-2026-000123\"\n    Then the store is refused with a failure message whose ID is Not specified in the source documents (AC17)\n    Then no document row, no document_field row and no DocumentStored event is written\n    Then the refusal names no case number and no account\n```"
+  },
+  {
+   "old": "The six criteria above are new",
+   "new": "The eight criteria above are new"
+  },
+  {
+   "old": "| TC-E1-018-18 | BR8: the case ID is the key of the case documents index that SCR-30 and SCR-03 read, keyed `(case_id, document_type, created_at)` | Component | Case `RW-2026-000123` with document `notice-0001.pdf` of type COURT_NOTICE; the case documents read by case ID |",
+   "new": "| TC-E1-018-18 | BR8: the case ID is the key of the case documents index that SCR-30 and SCR-03 read, keyed `(case_id, document_type, created_at)` | Component | Case `RW-2026-000123` with document `notice-0001.pdf` of type COURT_NOTICE; the case documents read by case ID |\n| TC-E1-018-19 | AC16, BR8: the case ID is the key of the case documents index and of the event published for the case | Component | Case `RW-2026-000123` with document `notice-0001.pdf` of type COURT_NOTICE; the index row and the published event read by case ID |\n| TC-E1-018-20 | AC17, BR6: a case call that fails or does not answer leaves nothing behind and names no case | NFR | rwb-case contract fake forced to fail or to not answer within 2 s for case `RW-2026-000123`; document `notice-0001.pdf` of type COURT_NOTICE; no document row and no event |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28511",
+   "item": "GAP-0677",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Deployment topology and environment values for rwb-case (platform template; not in the sources read)",
+   "change": "Publish the rwb-case cluster, node pool, replica, resource, zone spread, ingress class and probe values as values files, not chart defaults",
+   "note": "The story names no topology value, so no story edit. The platform template must supply the values."
+  },
+  {
+   "ruling": "R-28512",
+   "item": "GAP-1038",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P3-E1018-CON",
+   "change": "Publish the not-found message ID and the GET /cases/{caseId} request and response field names; the rwb_document login belongs in its DB story",
+   "note": "AC2 keeps its placeholder until RWB-P3-E1018-CON publishes the ID. The login name is set in the rwb_document DB story."
+  },
+  {
+   "ruling": "R-28513",
+   "item": "GAP-2438",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-PLT-DB",
+   "change": "Fix the rwb-decision login name in the secret store, with migration and application roles kept apart",
+   "note": "This story names no rwb-decision login, so no story edit. Every P7 story must reference the login once RWB-PLT-DB fixes it."
+  },
+  {
+   "ruling": "R-31081",
+   "item": "NEWAC-RWB-P5-E1018-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC16 (case ID is the key of the index and the event) to section 7 and TC-E1-018-19 to section 16",
+   "note": "No proposed test was given, so the test is written from the BR8 wording. Section 7 summary changed from six to eight criteria."
+  },
+  {
+   "ruling": "R-31082",
+   "item": "NEWAC-RWB-P5-E1018-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC17 (a failed or silent case call stores nothing) to section 7 and TC-E1-018-20 to section 16",
+   "note": "No proposed test was given, so the test is written from the BR6 and TC-E1-018-14 wording. The failure message ID is left as Not specified."
+  }
+ ]
+}

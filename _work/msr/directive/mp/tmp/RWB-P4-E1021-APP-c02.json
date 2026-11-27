@@ -1,0 +1,153 @@
+{
+ "edits": [
+  {
+   "old": "As a **team manager, a capacity planner, a litigation officer or a legal counsel who moves a case between queues or puts a case on legal hold**",
+   "new": "As a **team manager (RW-TEAMMGR), a capacity planner (RW-CAPACITY), a litigation officer (RW-LITOFF) or a legal counsel (RW-LEGAL) who moves a case between queues or puts a case on legal hold**"
+  },
+  {
+   "old": "| MSG-GEN-006 | BR3, BR9 |",
+   "new": "| MSG-GEN-006 | AC9, BR3, BR9 |"
+  },
+  {
+   "old": "| MSG-P4-006 | BR6 |",
+   "new": "| MSG-P4-006 | AC10, BR6 |"
+  },
+  {
+   "old": "| None | BR1, BR4 |",
+   "new": "| None | AC11, BR1, BR4 |"
+  },
+  {
+   "old": "| None | BR3 |",
+   "new": "| None | AC12, BR3 |"
+  },
+  {
+   "old": "so no transfer and no hold is ever unlogged (BR4, BR5).",
+   "new": "so no transfer and no hold is ever unlogged (BR4, BR5).\n\nScreen SCR-03 states: the no access state is the refusal of MSG-P4-001 or MSG-P4-002 with no case fact; the not-found state is the 404 of MSG-P4-003 with no case fact; the error state is the 503 of MSG-P7-003 with nothing changed; the empty state and the loading state are Not specified in the source documents (DOR-RWB-P4-E1021-APP-10)."
+  },
+  {
+   "old": "AC1 to AC8 are the criteria this story owns, and all eight are new under D-RCV-60",
+   "new": "AC1 to AC12 are the criteria this story owns, and all twelve are new under D-RCV-60"
+  },
+  {
+   "old": "    Then an incident is raised to the platform administrator queue",
+   "new": "    Then an incident is raised to the platform administrator queue\n\n  Scenario: AC9 An answer that needs the transfer reason list is not guessed when the list is not available (new, D-RCV-60)\n    Given test user \"U-7402\" holds RW-TEAMMGR with default scope \"TEAM\" in team \"TDR-BKK\"\n    Given the read of LOV-TRANSFER-REASON through DP-07 is not available\n    When \"U-7402\" asks for case \"RW-2026-000301\", area \"QUEUE_AND_ALLOCATION\", right \"U\", action \"transfer the case\" and transfer reason \"R03\"\n    Then the call answers 503 with message MSG-GEN-006 and no guessed answer is given\n    Then one AC-DENY decision record is written with no case fact\n\n  Scenario: AC10 Two conflicting roles of one caller refuse the session before any authorise request (new, D-RCV-60)\n    Given test user \"U-7402\" holds RW-TEAMMGR and RW-SECADM together, a role pair held in the role_conflict rows of this service\n    When \"U-7402\" signs in and the sign-in access check runs\n    Then the session is refused with message MSG-P4-006\n    Then no POST /api/recovery/access/v1/authorise request is made\n\n  Scenario: AC11 One call that asks about both areas gets one answer and one record per area and right (new, D-RCV-60)\n    Given test user \"U-7402\" holds RW-TEAMMGR, which has QUEUE_AND_ALLOCATION \"U\" and no CASE_RECORD right\n    When \"U-7402\" asks for case \"RW-2026-000301\" in area \"QUEUE_AND_ALLOCATION\" with right \"U\" and action \"transfer the case\", and in area \"CASE_RECORD\" with right \"U\" and action \"place a legal hold\", in one call\n    Then the QUEUE_AND_ALLOCATION \"U\" answer is granted with scope \"TEAM\"\n    Then the CASE_RECORD \"U\" answer is refused with status 403 and message MSG-P4-002\n    Then one AC-READ and one AC-DENY decision record are written, one per area and right\n\n  Scenario: AC12 A transfer reason outside the list is reported as not a member and withholds no right (new, D-RCV-60)\n    Given test user \"U-7402\" holds RW-TEAMMGR with default scope \"TEAM\" in team \"TDR-BKK\"\n    When \"U-7402\" asks for case \"RW-2026-000301\", area \"QUEUE_AND_ALLOCATION\", right \"U\", action \"transfer the case\" and a transfer reason code that is not one of R01 to R06\n    Then the answer is granted with scope \"TEAM\" under matrix version \"PM-2026.11\"\n    Then the answer names the reason list version \"TRF-REASON-2026.11\" and reports the presented code as not a member of the list\n    Then the answer withholds no right, and the MSG-P3-001 refusal is left to the case service"
+  },
+  {
+   "old": "REQ-WKM-003; DL23; DP-07 |",
+   "new": "REQ-WKM-003; DL23 (open; assumptions ASM-1232, ASM-1237, ASM-1259, ASM-1560); DP-07 |"
+  },
+  {
+   "old": "the Thai text follows DL10.",
+   "new": "the Thai text follows DL10 (open; assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863)."
+  },
+  {
+   "old": "| MSG-GEN-006 | A list the answer needs is not available | {system} is not available. Your request is queued and will be retried. | This story, on the LOV-TRANSFER-REASON read of X5 |",
+   "new": "| MSG-GEN-006 | A list the answer needs is not available | {system} is not available. Your request is queued and will be retried. | This story, on the LOV-TRANSFER-REASON read of X5 |\n| MSG-P3-001 | A transfer reason is missing or unknown | Not specified in the source documents (DOR-RWB-P4-E1021-APP-9) | The case service, not this story, on a missing or unknown transfer reason (BR3, X9) |"
+  },
+  {
+   "old": "| TC-E1-021-17 | AC3 |",
+   "new": "| TC-E1-021-17 | AC3, BR2 |"
+  },
+  {
+   "old": "| TC-E1-021-18 | AC4 |",
+   "new": "| TC-E1-021-18 | AC4, BR6 |"
+  },
+  {
+   "old": "| TC-E1-021-19 | AC7 |",
+   "new": "| TC-E1-021-19 | AC7, BR9 |"
+  },
+  {
+   "old": "| TC-E1-021-21 | The tables of section 12.7 | Component | Reads limited to the owner's tables in rwb_access; no read of rwb_case, rwb_decision or rwb_source_data |",
+   "new": "| TC-E1-021-21 | The tables of section 12.7 | Component | Reads limited to the owner's tables in rwb_access; no read of rwb_case, rwb_decision or rwb_source_data |\n| TC-E1-021-22 | AC9, BR3, BR9 | Component | LOV-TRANSFER-REASON not available through DP-07 on a transfer by U-7402 of case RW-2026-000301; 503 MSG-GEN-006, no guessed answer, one AC-DENY entry with no case fact |\n| TC-E1-021-23 | AC10, BR6 | Component | U-7402 holding RW-TEAMMGR and RW-SECADM together, a role pair in the role_conflict rows; refused MSG-P4-006 before any authorise request |\n| TC-E1-021-24 | AC11, BR1, BR4 | Component | U-7402 asks QUEUE_AND_ALLOCATION U and CASE_RECORD U in one call on case RW-2026-000301; one answer and one record per area and right |\n| TC-E1-021-25 | AC12, BR3 | Component | U-7402 transfers case RW-2026-000301 with a reason code that is not one of R01 to R06; reported as not a member, no right withheld |\n| TC-E1-021-26 | BR8, BR10 | Component | Code review of the transfer authority module: no read of delegation_limit, and no role code, area name, scope name, reason code or version string in a constant |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-05644",
+   "item": "DOR-RWB-P4-E1021-APP-8",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-access.yaml; Kafka Catalog v1",
+   "change": "rwb-access.yaml: event type of the decision record as rwb.decision.DecisionRecorded.v1; defaultScope reads LOV-SCOPE as data, not a closed enum; AccessPolicyChanged payload aligned with the catalog (CG-ALL-4928)",
+   "note": "Story already names rwb.decision.DecisionRecorded.v1 in 12.3; the yaml and catalog side are not in this story."
+  },
+  {
+   "ruling": "R-10637",
+   "item": "CG-ALL-4928",
+   "status": "Cross-document",
+   "section": "12.3",
+   "target": "Kafka Catalog v1",
+   "change": "Specify the payload of rwb.access.AccessPolicyChanged.v1 in the Events row (gap-0127; asm-0204), then align section 12.3 to it",
+   "note": "Catalog payload is not specified in the source documents, so the story payload cannot be aligned yet."
+  },
+  {
+   "ruling": "R-10638",
+   "item": "CG-ALL-4930",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for the role-conflict refusal text '{role} may not be held together with {role}.'; the story cites it once it exists",
+   "note": "A new ID is needed from the standard; MSG-P4-006 stays in the story until then."
+  },
+  {
+   "ruling": "R-10639",
+   "item": "CG-ALL-4931",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E1-021-17, -18 and -19 already cover AC3, AC4 and AC7 in section 16; no row added."
+  },
+  {
+   "ruling": "R-16616",
+   "item": "DOR-RWB-P4-E1021-APP-1",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "Role codes RW-TEAMMGR, RW-CAPACITY, RW-LITOFF and RW-LEGAL added beside the role names in the persona",
+   "note": "Codes are the ones used in the section 7 matrix; confirm they match Users Roles and Permissions v5."
+  },
+  {
+   "ruling": "R-16617",
+   "item": "DOR-RWB-P4-E1021-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Screen SCR-03 states paragraph added: no access, not found, error, with empty and loading marked not specified",
+   "note": "Empty and loading states are not specified in the source documents; the other states use existing messages."
+  },
+  {
+   "ruling": "R-16618",
+   "item": "DOR-RWB-P4-E1021-APP-18",
+   "status": "Resolved",
+   "section": "8, 14",
+   "target": "",
+   "change": "DL10 and DL23 now name their assumptions in section 14 and BR3; both stay open",
+   "note": "DL10 carries ASM-2250, ASM-2357, ASM-2377, ASM-2863; DL23 carries ASM-1232, ASM-1237, ASM-1259, ASM-1560."
+  },
+  {
+   "ruling": "R-16619",
+   "item": "DOR-RWB-P4-E1021-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "change": "AC9 to AC12 added for X5, X6, X8, X9 with TC-E1-021-22 to -25; section 5 Covered by column updated",
+   "note": "Exception paths X5, X6, X8 and X9 now each have a criterion; section 7 holds twelve criteria."
+  },
+  {
+   "ruling": "R-16620",
+   "item": "DOR-RWB-P4-E1021-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "change": "Test cases TC-17, -18, -19 now list BR2, BR6, BR9; TC-22, -25 cover BR3; new TC-26 covers BR8 and BR10",
+   "note": "All ten rules now have a criterion or test case reference."
+  },
+  {
+   "ruling": "R-16621",
+   "item": "DOR-RWB-P4-E1021-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "change": "MSG-P3-001 row added to section 14 with produced-by set to the case service",
+   "note": "Message text is not specified in the source documents; MSG-P4-006 meaning stays in CG-ALL-4930."
+  }
+ ]
+}

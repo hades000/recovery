@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "(message id Not specified in the source documents (DOR-RWB-P4-E2019-APP-8))",
+   "new": "(message id Not specified in the source documents (CG-ALL-5256))"
+  },
+  {
+   "old": "The partner portal screens are rwb-partner's and the gateway's; this story fixes the facts behind them and renders nothing.",
+   "new": "The partner portal screens are rwb-partner's and the gateway's; this story fixes the facts behind them and renders nothing. This story owns no screen of its own; none of the screens named above is a rwb-access screen."
+  },
+  {
+   "old": "| X3 | `amr` holds `pwd` only | The resolution is refused with 401 and no role is answered; the refusal is recorded | MSG-P4-005 | RWB-ITG-E2019-ITG |",
+   "new": "| X3 | `amr` holds `pwd` only | The resolution is refused with 401 and no role is answered; the refusal is recorded | MSG-P4-005 | AC10 |"
+  },
+  {
+   "old": "| X4 | The claims name no partner role, or an unknown role code, or a role of class `BANK_USER` | The resolution is refused with 401; no role is answered | MSG-P4-001 | RWB-ITG-E2019-ITG |",
+   "new": "| X4 | The claims name no partner role, or an unknown role code, or a role of class `BANK_USER` | The resolution is refused with 401; no role is answered | MSG-P4-001 | AC11 |"
+  },
+  {
+   "old": "| X5 | The claims name two partner roles, or a partner role and a bank role | The resolution is refused with 403, both codes are named, and one record carries reason `ROLE_CONFLICT` | MSG-P4-006 | RWB-ITG-E2019-ITG |",
+   "new": "| X5 | The claims name two partner roles, or a partner role and a bank role | The resolution is refused with 403, both codes are named, and one record carries reason `ROLE_CONFLICT` | MSG-P4-006 | AC12 |"
+  },
+  {
+   "old": "| X6 | The firm state claim is `SUSPENDED` or `EXITED`, or the contract end is before today | The resolution is refused with 403 and one record carries reason `PARTNER_NOT_ACTIVE` | MSG-P4-008 | RWB-ITG-E2019-ITG |",
+   "new": "| X6 | The firm state claim is `SUSPENDED` or `EXITED`, or the contract end is before today | The resolution is refused with 403 and one record carries reason `PARTNER_NOT_ACTIVE` | MSG-P4-008 | AC13 |"
+  },
+  {
+   "old": "| X7 | The claim asserts no active binding of the identity to a firm | The resolution is refused with 401 and one record carries reason `NO_PARTNER_BINDING` | MSG-P4-001 | RWB-ITG-E2019-ITG |",
+   "new": "| X7 | The claim asserts no active binding of the identity to a firm | The resolution is refused with 401 and one record carries reason `NO_PARTNER_BINDING` | MSG-P4-001 | AC14 |"
+  },
+  {
+   "old": "Then one entry with decision code \"AC-DENY\" and reason \"BANK_IDENTITY_ON_PARTNER_ROUTE\" is written",
+   "new": "Then one entry with decision code \"AC-DENY\" and reason \"BANK_IDENTITY_ON_PARTNER_ROUTE\" is written\n\n  Scenario: AC10 A partner identity with no second factor gets no role (exception X3, BR1)\n    Given the claims of \"P-5101\" for \"LF-0012\" carry \"amr\" holding \"pwd\" only on the partner route\n    When the gateway calls the resolution for \"P-5101\"\n    Then the call returns status 401 with message MSG-P4-005 and no role is answered\n    Then one entry with decision code \"AC-DENY\" is written\n\n  Scenario: AC11 A claim with no usable partner role is refused (exception X4, BR2)\n    Given the claims of \"P-5101\" name a role code that no role row holds, or a role of class \"BANK_USER\"\n    When the gateway calls the resolution for \"P-5101\"\n    Then the call returns status 401 with message MSG-P4-001 and no role is answered\n\n  Scenario: AC12 Two partner roles, or a partner role with a bank role, are refused (exception X5, BR3)\n    Given the claims of \"P-5101\" name \"PT-LAWFIRM\" and \"PT-VALUER\"\n    When the gateway calls the resolution for \"P-5101\"\n    Then the call returns status 403 with message MSG-P4-006 naming both codes\n    Then one entry with decision code \"AC-DENY\" and reason \"ROLE_CONFLICT\" is written\n\n  Scenario: AC13 A firm that is not active is refused (exception X6, BR5)\n    Given the claim gives the firm state \"SUSPENDED\" for \"LF-0012\"\n    When the gateway calls the resolution for \"P-5101\"\n    Then the call returns status 403 with message MSG-P4-008\n    Then one entry with decision code \"AC-DENY\" and reason \"PARTNER_NOT_ACTIVE\" is written\n\n  Scenario: AC14 An identity with no active binding to a firm is refused (exception X7, BR11)\n    Given the claims of \"P-5101\" assert no active binding to a firm\n    When the gateway calls the resolution for \"P-5101\"\n    Then the call returns status 401 with message MSG-P4-001\n    Then one entry with decision code \"AC-DENY\" and reason \"NO_PARTNER_BINDING\" is written\n\n  Scenario: AC15 A partner user is answered at the versions in force, as a bank user is (BR6)\n    Given masking version \"MASK-SIT-01\" is in force\n    When the gateway calls the resolution for \"P-5101\" signed in for \"LF-0012\" as \"PT-LAWFIRM\"\n    Then the answer carries matrix version \"PM-2026.11\" and masking version \"MASK-SIT-01\"\n\n  Scenario: AC16 The resolution reads no partner table (BR8)\n    Given the rwb-partner contract mock returns partner \"LF-0012\" as a LAW_FIRM with panel status \"ACTIVE\"\n    When the gateway calls the resolution for \"P-5101\" signed in for \"LF-0012\" as \"PT-LAWFIRM\"\n    Then the answer is built from the claims and the rows of role, permission and masking_rule only\n\n  Scenario: AC17 A personal field or a credential in the claims is refused (exception X11, BR9, BR10)\n    Given the claims of \"P-5101\" carry a personal field or a token\n    When the gateway calls the resolution for \"P-5101\"\n    Then the field is rejected before any read with the field named and no role is answered\n    Then the request is logged with the field name only and never its value\n\n  Scenario: AC18 No answer is served after its expiry (exception X8, BR12)\n    Given \"P-5101\" was resolved and the token expiry the gateway supplied has passed\n    When the partner calls the resolution again\n    Then the call returns status 401 with message MSG-P4-001 and no stale role is served\n\n  Scenario: AC19 The resolution stays behind the feature flag (BR13)\n    Given the feature flag \"rwb.access.partner-signin\" is off\n    When the gateway calls the resolution for \"P-5101\"\n    Then the operation answers status 404 and no partner session resolves"
+  },
+  {
+   "old": "and no part of them is restated here.",
+   "new": "and no part of them is restated here. AC10 to AC19 state the refusals of exceptions X3 to X7 and the rules BR1 to BR3 and BR5 to BR13 in this slice's own terms; they copy no legacy body."
+  },
+  {
+   "old": "The partner, the binding and the instruction stay in `rwb_partner` and are never read here",
+   "new": "The partner, the binding and the instruction stay in `rwb_partner`, the schema of rwb-partner (S9), and are never read here"
+  },
+  {
+   "old": "**Feature flag.** `rwb.access.partner-signin`, read as a parameter. Off, the operation answers 404 and no partner session resolves in that environment, so a switch-off never opens an unchecked partner path.",
+   "new": "**Feature flag.** `rwb.access.partner-signin`, read as a parameter. Off, the operation answers 404 and no partner session resolves in that environment, so a switch-off never opens an unchecked partner path.\n\n**Open decisions.** DL03 (assumptions ASM-0189, ASM-0193, ASM-0578, ASM-2567), DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863), DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355) and DL40 (ASM-0422, ASM-2705) apply to this story and are still open. Each assumption is held as confirmed by the directive of 26 November 2026, and each decision stays open until it closes."
+  },
+  {
+   "old": "| Ready to start | After RWB-P4-E1022-APP, RWB-P4-E1039-APP |",
+   "new": "| Ready to start | After RWB-P4-E1022-APP, RWB-P4-E1039-APP and RWB-P4-E2019-INF; all three are not done yet |"
+  },
+  {
+   "old": "| TC-E2-019-11 | Principle 5 (resilience) | NFR | The decision log write forced to fail during a partner sign-in |",
+   "new": "| TC-E2-019-11 | Principle 5 (resilience) | NFR | The decision log write forced to fail during a partner sign-in |\n| TC-E2-019-12 | §12.1 operation, events and activities | Contract | POST `/api/recovery/access/v1/partner-identities/resolve` against RWB-P4-E2019-CON: claim set and answer schema; statuses 400, 401, 403 and 503 with their message IDs; the `AC-SIGN` publish to `rwb.decision-record.v1`; an `Idempotency-Key` replay answers the first answer and writes no second record |\n| TC-E2-019-13 | §12.7 tables; ASM-3438 | Component | Boundary of `role`, `permission`, `masking_rule` and `role_conflict` at matrix version `PM-2026.11`: a role code not held at that version is refused; a pair in `role_conflict` refuses at its edge; no table of `rwb_partner` is read |\n| TC-E2-019-14 | AC10, X3, BR1 | Component | `P-5101` for `LF-0012` with `amr` holding `pwd` only on the partner route; 401 with MSG-P4-005; no role answered; one `AC-DENY` record |\n| TC-E2-019-15 | AC11, X4, BR2 | Component | Claim naming a role code no role row holds, and a claim naming a role of class `BANK_USER`; each answers 401 with MSG-P4-001 and no role |\n| TC-E2-019-16 | AC12, X5, BR3 | Component | Claims naming `PT-LAWFIRM` and `PT-VALUER`, and a partner role with a bank role; 403 with MSG-P4-006 naming both codes; one `AC-DENY` record with reason `ROLE_CONFLICT` |\n| TC-E2-019-17 | AC13, X6, BR5 | Component | Firm state `SUSPENDED` for `LF-0012` in the claim, and a contract end before today; each answers 403 with MSG-P4-008; one record with reason `PARTNER_NOT_ACTIVE` |\n| TC-E2-019-18 | AC14, X7, BR11 | Component | Claim asserting no active binding of `P-5101` to a firm; 401 with MSG-P4-001; one `AC-DENY` record with reason `NO_PARTNER_BINDING` |\n| TC-E2-019-19 | AC15, BR6 | Component | `P-5101` signed in for `LF-0012` as `PT-LAWFIRM`; the answer carries matrix version `PM-2026.11` and masking version `MASK-SIT-01`, as for a bank user |\n| TC-E2-019-20 | AC16, BR8 | Component | Resolution run with the rwb-partner contract fake; the answer is built from the claims and the rows of `role`, `permission` and `masking_rule` only |\n| TC-E2-019-21 | AC17, X11, BR9, BR10 | Component | Claim set carrying a personal field and a credential; the call is refused before any read with the field named; the log holds the field name only |\n| TC-E2-019-22 | AC18, X8, BR12 | Component | Call by `P-5101` after the token expiry has passed; refused 401 with MSG-P4-001; no stale role is served |\n| TC-E2-019-23 | AC19, BR13 | Component | Flag `rwb.access.partner-signin` off; the operation answers 404 and no partner session resolves |"
+  },
+  {
+   "old": "TC-E2-019-06, TC-E2-019-09, TC-E2-019-10, TC-E2-019-11 |",
+   "new": "TC-E2-019-01 to TC-E2-019-23 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09208",
+   "item": "GAP-1844",
+   "status": "Cross-document",
+   "section": "Header",
+   "target": "split_plan.json",
+   "change": "Keep RWB-S9-E2019-APP in wave 2 as the partner identity and portal contract slice; publish the partner_user binding and the FAPI 2.0 route before panel work starts",
+   "note": "Story is already wave 2 with the partner identity part only; the wave ordering of the S9 slices sits in the split plan."
+  },
+  {
+   "ruling": "R-10732",
+   "item": "CG-ALL-5256",
+   "status": "Not applied",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "Standard v4 message ID for the 400 wrong-shape claim set is not in the sources; 401, 403 and 503 already mapped. BA to confirm; placeholder now cites CG-ALL-5256."
+  },
+  {
+   "ruling": "R-10733",
+   "item": "CG-ALL-5259",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8 (next version), Story test cases",
+   "change": "Add rows TC-E2-019-01 to TC-E2-019-11 with Given, When and Then copied from the criterion each covers",
+   "note": "Rows belong in the test-case workbook; the story already names the range in section 16."
+  },
+  {
+   "ruling": "R-16801",
+   "item": "DOR-RWB-P4-E2019-APP-10",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 now states that the story owns no screen; the named screens belong to rwb-partner and the gateway."
+  },
+  {
+   "ruling": "R-16802",
+   "item": "DOR-RWB-P4-E2019-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-019-12 contract and TC-E2-019-13 boundary tests; section 18 now matches section 16. RTM v7 is outside this story."
+  },
+  {
+   "ruling": "R-16803",
+   "item": "DOR-RWB-P4-E2019-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Ready to start now names RWB-P4-E1022-APP, RWB-P4-E1039-APP and RWB-P4-E2019-INF as not done yet; 13 dependencies stay listed."
+  },
+  {
+   "ruling": "R-16804",
+   "item": "DOR-RWB-P4-E2019-APP-18",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Open decisions DL03, DL10, DL26 and DL40 added with their assumptions; each stays open until it closes."
+  },
+  {
+   "ruling": "R-16805",
+   "item": "DOR-RWB-P4-E2019-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "The rwb_partner schema is now stated as the schema of rwb-partner (S9) in the DP-01 row."
+  },
+  {
+   "ruling": "R-16806",
+   "item": "DOR-RWB-P4-E2019-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 to AC14 for exceptions X3 to X7 with TC-E2-019-14 to -18; section 5 Covered by now cites them."
+  },
+  {
+   "ruling": "R-16807",
+   "item": "DOR-RWB-P4-E2019-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 to AC19 and TC-E2-019-14 to -23 covering BR1 to BR3 and BR5 to BR13; BR4 and BR7 remain under AC6 and AC9."
+  }
+ ]
+}

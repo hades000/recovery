@@ -1,0 +1,111 @@
+{
+ "edits": [
+  {
+   "old": "they are not written here.",
+   "new": "they are not written here. Scope: this story holds rule package versions only (ALLOCATION, RESTRUCTURE, PAYMENT_MATCH); the reference-data checklist and its report stay with RWB-E1-043. The retention of the audit read in AC1 and AC9 follows the retention of the decision-record entries it summarises."
+  },
+  {
+   "old": "When GET /api/recovery/access/v1/rule-authority is called for personReference \"U-7103\", action \"APPROVE\", the versionId of \"ALLOC-2026.12\" and onDate 2 December 2026",
+   "new": "When GET /api/recovery/access/v1/rule-authority is called for personReference \"U-7103\", action \"APPROVE\", the versionId of \"ALLOC-2026.12\" and onDate 9 December 2026"
+  },
+  {
+   "old": "Then one decision-record entry is appended with decision code \"AC-READ\", the version label, the author reference, the caller reference and the matrix version",
+   "new": "Then one decision-record entry is appended with decision code \"AC-READ\", version label \"ALLOC-2026.12\", author reference \"U-7101\", caller reference \"U-7103\" and matrix version \"PM-2026.11\""
+  },
+  {
+   "old": "Then the approval of the version and its move to \"APPROVED\" on 2026-12-02 are the registry's, and this service answers only that the caller may approve",
+   "new": "Then the approval of the version and its move to \"APPROVED\" on 2026-12-09 are the registry's, and this service answers only mayApprove true"
+  },
+  {
+   "old": "Then when the registry cannot be read for an approval the same 503 is answered, because an authority whose version cannot be confirmed is not given",
+   "new": "Then when the registry cannot be read for an approval the same 503 is answered, because an authority whose version cannot be confirmed is not given\n\n  Scenario: AC11 The letters are the union of the roles held, a dash is refused and a replayed export key writes once (new, D-RCV-60)\n    Given test user \"U-7101\" holds RW-COE with \"CRUD\" and RW-RISK with \"RA\" in \"RULES_AND_PARAMETERS\"\n    When GET /api/recovery/access/v1/rule-authority is called for personReference \"U-7101\", action \"PREPARE\" and onDate 1 December 2026\n    Then the response is 200 with letters \"CRUDA\", mayPrepare true and matrixVersion \"PM-2026.11\"\n    When GET /api/recovery/access/v1/rule-authority is called for personReference \"U-7111\", action \"PREPARE\" and onDate 1 December 2026\n    Then the response is 200 with letters \"-\", mayPrepare false, authorised false and refusalReason \"NO_LETTER\"\n    When POST /api/recovery/access/v1/rule-report-exports is called for \"U-AUD-01\" with from 2026-12-01, to 2026-12-31, packageCode \"ALLOCATION\", format \"csv\" and Idempotency-Key \"k-e2041-1\" a second time\n    Then the response is the first answer with the same exportId and no second decision-record entry is appended\n\n  Scenario: AC12 A request without a session is 401 and a route the contract does not provide is 404 (new, D-RCV-60)\n    Given the request carries no session\n    When GET /api/recovery/access/v1/rule-authority is called for personReference \"U-AUD-01\", action \"READ_REPORT\" and onDate 15 December 2026\n    Then the response is 401 and no decision-record entry is appended\n    When GET /api/recovery/access/v1/rule-report-exports is called for any exportId\n    Then the response is 404 and no decision-record entry is appended"
+  },
+  {
+   "old": "| TC-E2-041-15 | BR12 | Component | A new role code and a new letter added as rows of a new matrix version: the authority answer changes with no build |",
+   "new": "| TC-E2-041-15 | BR12 | Component | A new role code and a new letter added as rows of a new matrix version: the authority answer changes with no build |\n| TC-E2-041-16 | AC11, BR1, BR2, BR3, BR11 | Component | U-7101 with RW-COE \"CRUD\" and RW-RISK \"RA\" answers \"CRUDA\"; U-7111 with \"-\" is refused with NO_LETTER; a replayed `Idempotency-Key` \"k-e2041-1\" writes no second entry |\n| TC-E2-041-17 | AC12 | Contract | A request with no session answers 401 with no entry; a route the contract does not provide answers 404; the 404 condition for the provided operations is Not specified in the source documents (NEWAC-RWB-P4-E2041-APP-AC12) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28856",
+   "item": "GAP-1302",
+   "status": "Resolved",
+   "section": "none",
+   "target": "",
+   "change": "No edit in this chunk: DF-REF-276, DF-REF-293, MSG-P3-015 and the flag switch-off answer are not named in the parts of the story held here.",
+   "note": "The values are not referenced in sections 7, 8 or 16 of this story; no value invented, nothing to place here."
+  },
+  {
+   "ruling": "R-28857",
+   "item": "GAP-0203",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map v1, sheet Tables",
+   "change": "Add row payment_match_rule with owning service P7 and target schema rwb_decision, keep all 13 fields, and record that the table is retired by D-RCV-36 T10 and the rule lives in the PAYMENT_MATCH rule package.",
+   "note": "Ownership Map is another workbook; this story does not hold the entity."
+  },
+  {
+   "ruling": "R-28858",
+   "item": "GAP-0720",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "rwb-decision contract README",
+   "change": "State a deprecation window for a published field; the window length is Not specified in the source documents (GAP-0720).",
+   "note": "Story side done in section 16: audit read retention follows decision-record retention. README is another document."
+  },
+  {
+   "ruling": "R-28859",
+   "item": "GAP-2415",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Run Change Register",
+   "change": "Record the split: checklist, two amended operations and change report to rwb-decision; audit read and impact count to rwb-case; screens and rights to rwb-access; legacy flag rwb.p3.rule-change-report read as a rwb-decision parameter.",
+   "note": "Legacy story is not edited; the rename is recorded in the run Change Register instead."
+  },
+  {
+   "ruling": "R-28860",
+   "item": "GAP-2416",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC4 now reads load 2026-12-08, verify date 2026-12-08, approval 2026-12-09 (APPROVE onDate 9 December 2026); AC1 2026-12-02 approval stays with RWB-P3-E2041-APP.",
+   "note": "AC5 reading applied so verify is before approval. Confirm with the business analyst before SIT whether two ALLOCATION versions were intended."
+  },
+  {
+   "ruling": "R-28861",
+   "item": "GAP-0719",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Section 16 now records the rule package scope (ALLOCATION, RESTRUCTURE, PAYMENT_MATCH) and that the reference-data checklist and its report stay with RWB-E1-043.",
+   "note": "Scope recorded in the story; the FSD example is not copied."
+  },
+  {
+   "ruling": "R-29537",
+   "item": "ACR-RWB-P4-E2041-APP-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC4 Then lines name values: mayApprove true, approval on 2026-12-09, and the decision-record entry lists version, author, caller and matrix version.",
+   "note": "Vague 'may approve' replaced with a named flag and values; approval date aligned with GAP-2416."
+  },
+  {
+   "ruling": "R-30983",
+   "item": "NEWAC-RWB-P4-E2041-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC11 added to section 7 and TC-E2-041-16 to section 16 covering BR1, BR2, BR3 and BR11.",
+   "note": "BR6, BR10 are in AC2 and TC-13; BR7, BR9 in AC9 and TC-14; BR12 in TC-15. Test data given from the story."
+  },
+  {
+   "ruling": "R-30984",
+   "item": "NEWAC-RWB-P4-E2041-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC12 added (401 without session, 404 on an unprovided route) and TC-E2-041-17 added to section 16.",
+   "note": "The 404 condition for provided operations is Not specified in the source documents; recorded in TC-17 data."
+  }
+ ]
+}

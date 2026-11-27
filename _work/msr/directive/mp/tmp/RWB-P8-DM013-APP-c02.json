@@ -1,0 +1,252 @@
+{
+ "edits": [
+  {
+   "old": "| # | Situation | What happens |\n|---|---|---|",
+   "new": "| # | Situation | What happens | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| X1 | The handover for the cutover business date is absent, unreadable, or its row count or checksum does not match | The load is refused whole before any row is written; the load report names the file and the date |",
+   "new": "| X1 | The handover for the cutover business date is absent, unreadable, or its row count or checksum does not match | The load is refused whole before any row is written; the load report names the file and the date | AC7 |"
+  },
+  {
+   "old": "| X2 | A handover row carries no id, no case, no `source` or no `matched_to`, or a value outside `LOV-MATCH` or `LOV-PROCEEDS-SRC` | The row is refused and listed with its entity and its field; the other rows of the batch are not held back (MSG-GEN-001) |",
+   "new": "| X2 | A handover row carries no id, no case, no `source` or no `matched_to`, or a value outside `LOV-MATCH` or `LOV-PROCEEDS-SRC` | The row is refused and listed with its entity and its field; the other rows of the batch are not held back (MSG-GEN-001) | AC8 |"
+  },
+  {
+   "old": "| X3 | A row's payment reference carries no resolution stamp | The row is not loaded and is listed once for the data steward with its payment reference; it is never repaired in place (AC5) |",
+   "new": "| X3 | A row's payment reference carries no resolution stamp | The row is not loaded and is listed once for the data steward with its payment reference; it is never repaired in place (AC5) | AC5 |"
+  },
+  {
+   "old": "| X4 | The same row is written twice, or a second run starts for a cutover date already loaded | The business key refuses the duplicate and the run is a no-op; no second row and no error (AC4) |",
+   "new": "| X4 | The same row is written twice, or a second run starts for a cutover date already loaded | The business key refuses the duplicate and the run is a no-op; no second row and no error (AC4) | AC4 |"
+  },
+  {
+   "old": "| X5 | The handover carries an ACE amount, a GL amount or a posting body | No ACE row and no GL posting is created; the posting reference is kept as the reference string only (AC3) |",
+   "new": "| X5 | The handover carries an ACE amount, a GL amount or a posting body | No ACE row and no GL posting is created; the posting reference is kept as the reference string only (AC3) | AC3 |"
+  },
+  {
+   "old": "| X6 | The version is applied in an environment where the `proceeds` baseline is absent | The version fails before the load runs; nothing is loaded and the report names the baseline |",
+   "new": "| X6 | The version is applied in an environment where the `proceeds` baseline is absent | The version fails before the load runs; nothing is loaded and the report names the baseline | AC9 |"
+  },
+  {
+   "old": "| X7 | The caller holds no Platform administration right | Refused with MSG-P4-002 before the file is read; nothing is read and nothing is written (AC6) |",
+   "new": "| X7 | The caller holds no Platform administration right | Refused with MSG-P4-002 before the file is read; nothing is read and nothing is written (AC6) | AC6 |"
+  },
+  {
+   "old": "| Letter | Check | How this story meets it |\n|---|---|---|",
+   "new": "| Letter | Check | How this story meets it | Result |\n|---|---|---|---|"
+  },
+  {
+   "old": "| I | Independent | No H, C, I or X row; built against the handover fixture, the baseline fixture and the authorise fake |",
+   "new": "| I | Independent | No H, C, I or X row; built against the handover fixture, the baseline fixture and the authorise fake | Met |"
+  },
+  {
+   "old": "| N | Negotiable | Field mapping, refusal list and idempotency are stated; the file format and the command stay open (ASM-4186; ASM-4187) |",
+   "new": "| N | Negotiable | Field mapping, refusal list and idempotency are stated; the file format and the command stay open (ASM-4186; ASM-4187) | Met |"
+  },
+  {
+   "old": "| V | Valuable | Money already received stays matched to its case at go-live, with no copied payment and no copied GL posting |",
+   "new": "| V | Valuable | Money already received stays matched to its case at go-live, with no copied payment and no copied GL posting | Met |"
+  },
+  {
+   "old": "| E | Estimable | Nine fields, one table, one version and four fixtures; no volume rests on an unknown |",
+   "new": "| E | Estimable | Nine fields, one table, one version and four fixtures; no volume rests on an unknown | Met |"
+  },
+  {
+   "old": "| S | Small | One reader, one mapper, one writer, one gate, one report |",
+   "new": "| S | Small | One reader, one mapper, one writer, one gate, one report | Met |"
+  },
+  {
+   "old": "| T | Testable | Six criteria and four test cases, each with a fixture and a Level in section 16 |",
+   "new": "| T | Testable | Nine criteria and seven test cases, each with a fixture and a Level in section 16 | Met |"
+  },
+  {
+   "old": "And nothing is read and nothing is written",
+   "new": "And nothing is read and nothing is written\n\n  Scenario: AC7 The load is refused whole when the handover is absent or does not match (new, D-RCV-60)\n    Given the rwb-source-data cutover handover for the cutover business date is absent, unreadable, or its row count or checksum does not match\n    When the load runs for the cutover business date\n    Then the load is refused before any row is written\n    And the load report names the file and the date\n\n  Scenario: AC8 A handover row with a missing field or an invalid value is refused and listed (new, D-RCV-60)\n    Given a handover row with no matched_to, or with a value outside LOV-MATCH or LOV-PROCEEDS-SRC, and the other rows of the handover are valid\n    When the load runs for the cutover business date\n    Then the row is refused and listed with its entity and its field under MSG-GEN-001\n    And the other rows of the handover are loaded\n\n  Scenario: AC9 The version fails when the proceeds baseline is absent (new, D-RCV-60)\n    Given the environment where the proceeds baseline is absent\n    When the version is applied\n    Then the version fails before the load runs\n    And nothing is loaded and the report names the baseline"
+  },
+  {
+   "old": "carries six criteria of its own",
+   "new": "carries nine criteria of its own"
+  },
+  {
+   "old": "an unresolved key is listed, and a caller without the right is refused.",
+   "new": "an unresolved key is listed, an absent handover is refused whole, a row missing a field or a value is refused and listed, an absent baseline fails the version, and a caller without the right is refused."
+  },
+  {
+   "old": "The closure date, the closure reason and the write-off decision stay with their owners: rwb-case and rwb-writeoff.",
+   "new": "The closure date, the closure reason and the write-off decision stay with their owners: rwb-case and rwb-writeoff. P1 extracts the proceeds rows, the closures and the write-off decisions and hands each to its owner: proceeds to rwb-payment, the write-off decisions to rwb-writeoff and the closures to rwb-case; this story copies no payment and no GL posting."
+  },
+  {
+   "old": "this story copies no payment and no GL posting.",
+   "new": "this story copies no payment and no GL posting.\n\nThe load reads the lists `LOV-MATCH` and `LOV-PROCEEDS-SRC` through the reference-data contract applied as DP-06 and DP-07; the parameter keys are Not specified in the source documents (DOR-RWB-P8-DM013-APP-20)."
+  },
+  {
+   "old": "| MSG-P1-001 | Warning | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | Warning | Text as in the Error and Message Standard v4; not specified in the source documents (DOR-RWB-P8-DM013-APP-9) |"
+  },
+  {
+   "old": "| MSG-P1-012 | Warning | The case list for {date} does not reconcile to ACE for {product}: a difference of {variance} accounts, {pct} percent. |",
+   "new": "| MSG-P1-012 | Warning | Text as in the Error and Message Standard v4; not specified in the source documents (DOR-RWB-P8-DM013-APP-9) |"
+  },
+  {
+   "old": "These are the four messages of the legacy key and they are copied unchanged.",
+   "new": "These are the four messages of the legacy key. MSG-GEN-001 and MSG-P4-002 are copied unchanged; the texts of MSG-P1-001 and MSG-P1-012 are taken from the Error and Message Standard v4, not from the legacy text."
+  },
+  {
+   "old": "| TC-DM-013-04 | AC6; BR1 | Component | A caller whose Platform administration right R is absent in the authorise fake, starting the load; a second call with the right present for the contrast; the row count of `proceeds` before and after the refusal |",
+   "new": "| TC-DM-013-04 | AC6; BR1 | Component | A caller whose Platform administration right R is absent in the authorise fake, starting the load; a second call with the right present for the contrast; the row count of `proceeds` before and after the refusal |\n| TC-DM-013-05 | AC7 | Component | The handover for the cutover business date absent in one run and with a row count that does not match in a second run; the load report of each run; the row count of `proceeds` before and after each run |\n| TC-DM-013-06 | AC8 | Component | The handover with one row whose `matched_to` is outside `LOV-MATCH` and one row with no `matched_to`, the other rows valid; the refused-row list of the load report; the row count of `proceeds` before and after |\n| TC-DM-013-07 | AC9 | Component | The version applied where the `proceeds` baseline is absent and then with the baseline present; the version result and the load report; the row count of `proceeds` before and after |"
+  },
+  {
+   "old": "TC-DM-013-02 and TC-DM-013-04 are Component because each exercises one gate at the boundary of the load.",
+   "new": "TC-DM-013-02, TC-DM-013-04, TC-DM-013-05, TC-DM-013-06 and TC-DM-013-07 are Component because each exercises one gate at the boundary of the load."
+  },
+  {
+   "old": "No test case of this story claims legacy AC2: its full reconciliation across the three owners is the ITG slice.",
+   "new": "No test case of this story claims legacy AC2: its full reconciliation across the three owners is the ITG slice.\n\nThe cutover reconciliation harness (fixture layout, break-list fields, report shape, evidence retention and the pass or fail gate) is agreed at the wave 4 entry check and held as configuration rather than code; the harness environment, its base hosts and the synthetic data set are Not specified in the source documents (GAP-0453)."
+  },
+  {
+   "old": "| Legacy RWB-DM-013 item | Value (verbatim) | Where it lands |\n|---|---|---|",
+   "new": "| Legacy RWB-DM-013 item | Value (verbatim) | Where it lands | Feature | L3 process |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| Decision | DL25 | BR7, BR9: the cutover gate and the per-service sequence |",
+   "new": "| Decision | DL25 | BR7, BR9: the cutover gate and the per-service sequence; open, with assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602 |"
+  },
+  {
+   "old": "| Decision | DL25 | BR7, BR9: the cutover gate and the per-service sequence; open, with assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602 |",
+   "new": "| Decision | DL25 | BR7, BR9: the cutover gate and the per-service sequence; open, with assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602 | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Module | P1 Recovery data engine | The payment part lands in rwb-payment, epic RWB-SVC-P8; the extract stays in P1 and the write-off part in S7 |",
+   "new": "| Module | P1 Recovery data engine | The payment part lands in rwb-payment, epic RWB-SVC-P8; the extract stays in P1 and the write-off part in S7 | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Epic | E2, release 31 December 2026 | Wave 4 tag from EP08 (the Arch v5 service row is wave 2); release 31 December 2026 (tentative) |",
+   "new": "| Epic | E2, release 31 December 2026 | Wave 4 tag from EP08 (the Arch v5 service row is wave 2); release 31 December 2026 (tentative) | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Depends on | RWB-E1-001, RWB-E1-069 | The `proceeds` baseline of `RWB-P8-E2008-CON` as a deploy order, and the handover of `RWB-P1-DM013-APP` |",
+   "new": "| Depends on | RWB-E1-001, RWB-E1-069 | The `proceeds` baseline of `RWB-P8-E2008-CON` as a deploy order, and the handover of `RWB-P1-DM013-APP` | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Data | `recovery_case` DF-CAS-001 to DF-CAS-055; `proceeds` DF-FIN-001 to DF-FIN-009; `write_off` DF-FIN-010 to DF-FIN-020 | Section 2 quotation; section 11; AC1 |",
+   "new": "| Data | `recovery_case` DF-CAS-001 to DF-CAS-055; `proceeds` DF-FIN-001 to DF-FIN-009; `write_off` DF-FIN-010 to DF-FIN-020 | Section 2 quotation; section 11; AC1 | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Endpoints | \"No endpoint in this story.\" | Section 12.1; the two operations of the service belong to `RWB-P8-E2008-CON` |",
+   "new": "| Endpoints | \"No endpoint in this story.\" | Section 12.1; the two operations of the service belong to `RWB-P8-E2008-CON` | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Screen and states | SCR-45 Data quality: Loading; breaks | Section 15; the screen is a gateway-bff composite route |",
+   "new": "| Screen and states | SCR-45 Data quality: Loading; breaks | Section 15; the screen is a gateway-bff composite route | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Permission checks | Platform administration R for RW-COE, RW-DATASTEW, RW-AUDIT, RW-COMPLY, RW-PLATADM, RW-SECADM | Section 10; AC6 |",
+   "new": "| Permission checks | Platform administration R for RW-COE, RW-DATASTEW, RW-AUDIT, RW-COMPLY, RW-PLATADM, RW-SECADM | Section 10; AC6 | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| Guardrails | A migrated record keeps its source and its migration date, and never a copy of an ACE row. | BR4, BR5; AC3; section 17 |",
+   "new": "| Guardrails | A migrated record keeps its source and its migration date, and never a copy of an ACE row. | BR4, BR5; AC3; section 17 | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| AC1 and AC3 | Copied and owned by `RWB-P1-DM013-APP` | Not copied here; the cutover gate it counts is read in section 9 |",
+   "new": "| AC1 and AC3 | Copied and owned by `RWB-P1-DM013-APP` | Not copied here; the cutover gate it counts is read in section 9 | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  },
+  {
+   "old": "| AC2 | Copied and owned by `RWB-ITG-DM013-ITG` | Not copied here; its orphan rule is kept in BR8 and AC5 |",
+   "new": "| AC2 | Copied and owned by `RWB-ITG-DM013-ITG` | Not copied here; its orphan rule is kept in BR8 and AC5 | FEAT-PAY-04, FEAT-PAY-10 (FSD P8 v3) | Not specified in the source documents (DOR-RWB-P8-DM013-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18223",
+   "item": "DOR-RWB-P8-DM013-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8",
+   "change": "Add TC-DM-013-01 to TC-DM-013-04, and TC-DM-013-05 to TC-DM-013-07 (added by this story for AC7 to AC9), as test case rows.",
+   "note": "Story side: TC-DM-013-05 to -07 added in section 16 for new AC7 to AC9. The four existing rows must be added to Test Cases v8."
+  },
+  {
+   "ruling": "R-18224",
+   "item": "DOR-RWB-P8-DM013-APP-15",
+   "status": "Resolved",
+   "section": "6",
+   "target": "",
+   "change": "",
+   "note": "Added a Result column to the INVEST table; each letter has a result. The T row now reflects nine criteria and seven test cases."
+  },
+  {
+   "ruling": "R-18225",
+   "item": "DOR-RWB-P8-DM013-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "DL25 row now states the decision is open and lists its assumptions ASM-0728, ASM-0735, ASM-0743 and ASM-2602."
+  },
+  {
+   "ruling": "R-18226",
+   "item": "DOR-RWB-P8-DM013-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to the legacy traceability table; L3 process is marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-18227",
+   "item": "DOR-RWB-P8-DM013-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 names the lists LOV-MATCH and LOV-PROCEEDS-SRC, the DP-06 and DP-07 contract, and marks parameter keys Not specified."
+  },
+  {
+   "ruling": "R-18228",
+   "item": "DOR-RWB-P8-DM013-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to section 5; new AC7 to AC9 added for X1, X2 and X6, with test cases TC-DM-013-05 to -07."
+  },
+  {
+   "ruling": "R-18229",
+   "item": "DOR-RWB-P8-DM013-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add account_payment_id (field on proceeds) and flyway_schema_history (the P1 library history entity in rwb_payment) as fields or entities.",
+   "note": "No story edit; the two names are not yet in LDM v9 or Data Classification v5."
+  },
+  {
+   "ruling": "R-18230",
+   "item": "DOR-RWB-P8-DM013-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 and MSG-P1-012 now defer to the Error and Message Standard v4 text, which is not quoted in the sources."
+  },
+  {
+   "ruling": "R-21836",
+   "item": "GAP-0453",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Section 16 records the harness gate, layout, fields, report, evidence and retention agreed at wave 4 entry as configuration; environment values are Not specified."
+  },
+  {
+   "ruling": "R-21837",
+   "item": "GAP-0543",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states P1 hands proceeds to rwb-payment, write-off decisions to rwb-writeoff and closures to rwb-case; no payment or GL posting is copied."
+  }
+ ]
+}

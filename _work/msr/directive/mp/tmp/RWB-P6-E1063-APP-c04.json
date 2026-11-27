@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E1-063-04 | AC5, BR2 |",
+   "new": "| TC-E1-063-04 | AC4, BR2 |"
+  },
+  {
+   "old": "| TC-E1-063-05 | AC4 |",
+   "new": "| TC-E1-063-05 | AC5 |"
+  },
+  {
+   "old": "| TC-E1-063-08 | Access, BR9 |",
+   "new": "| TC-E1-063-08 | AC8, Access, BR9 |"
+  },
+  {
+   "old": "| X7 | A reader without the right asks for the cost-alert notice | The read is refused at gateway-bff; nothing is returned | MSG-P4-002 | TC-E1-063-08 |",
+   "new": "| X7 | A reader without the right asks for the cost-alert notice | The read is refused at gateway-bff; nothing is returned | MSG-P4-002 | AC8, TC-E1-063-08 |"
+  },
+  {
+   "old": "    Then the scan finds no national ID number, phone number, name or account number",
+   "new": "    Then the scan finds no national ID number, phone number, name or account number\n\n  Scenario: AC8 A reader without the right is refused the cost-alert notice (new, D-RCV-60)\n    Given RW-CASEOWN holds no right for the cost-alert notice\n    When the reader calls GET /api/recovery/comms/v1/notices/{noticeId}\n    Then the read is refused at gateway-bff with MSG-P4-002\n    Then no field of the notice is returned\n\n  Scenario: AC9 The notice service writes only its own rows and reads other services only through their contracts (new, D-RCV-60)\n    Given the daily step of 2026-12-01 runs with the rwb-agent contract mock and the parameter rows of the rwb-case contract\n    When the step completes\n    Then the only rows written are notice rows in schema rwb_comms and no agent_run_daily table or lake schema is created\n    Then no table of another service is read directly\n    Then the template code, the channel, the cap and the alert role are read at run time and no value is held in code\n    Then a withdrawn template holds the notice with hold_reason \"TEMPLATE_WITHDRAWN\" and no message leaves\n    Then the delivery time is measured against the 15 minute target and no timeout of 15 minutes is written in code\n\n  Scenario: AC10 An error answer of a provided operation is 401, 403 or 404 and returns no field (new, D-RCV-60)\n    Given calls to GET /api/recovery/comms/v1/notices/{noticeId} without a session, without the right and for an unknown noticeId\n    When each call is answered with an error\n    Then the answer is 401 for the call without a session, 403 for the call without the right and 404 for the unknown noticeId\n    Then no field of a notice is returned\n\n  Scenario: AC11 A replay of a write with the same idempotency key returns the first answer and writes nothing new (new, D-RCV-60)\n    Given a write for the \"COST_CAP\" alert of \"SCREENING\" on 2026-12-01 was answered under its idempotency key\n    When the same write is sent again with the same idempotency key\n    Then the first answer is returned and no second notice is written\n    Then no second message reaches the ACE notification path\n\n  Scenario: AC12 A status change the model does not allow is refused (new, D-RCV-60)\n    Given a notice is in state SENT with sent_at set\n    When a change of its state to GENERATED is requested\n    Then the change is refused with the message Not specified in the source documents (NEWAC-RWB-P6-E1063-APP-AC12)\n    Then the state stays SENT and sent_at is unchanged"
+  },
+  {
+   "old": "| The agent monitor screen SCR-46 | Not built here; it comes in RWB-E2-031 and reads the P9 and P10 contracts | None in this story |",
+   "new": "| The agent monitor screen SCR-46 | Not built here; it comes in RWB-E2-031 and reads the P9 and P10 contracts | Empty, loading, error and no access: Not specified in the source documents (CG-ALL-6454) |"
+  },
+  {
+   "old": "| TC-E1-063-07 | AC7, BR9 | NFR | The notice, the two events and the log lines of 2026-12-01 scanned for national ID number, phone number, name and account number patterns |",
+   "new": "| TC-E1-063-07 | AC7, BR9 | NFR | The notice, the two events and the log lines of 2026-12-01 scanned for national ID number, phone number, name and account number patterns |\n| TC-E1-063-09 | AC9, BR6, BR7, BR8, BR10, BR11, BR12 | Component | Daily step of 2026-12-01 with the rwb-agent contract mock; rwb_comms tables, schema list and code scanned for another service's table, a business value or a lake table; withdrawn template holds the notice |\n| TC-E1-063-10 | AC10 | Component | Calls to the notice read without a session, without the right and for an unknown noticeId; answers 401, 403 and 404 with no field returned |\n| TC-E1-063-11 | AC11, BR2 | Component | Write for the \"COST_CAP\" alert of \"SCREENING\" on 2026-12-01 sent again under the same idempotency key; first answer returned and no second notice or message |\n| TC-E1-063-12 | AC12 | Component | Notice in state SENT; change to GENERATED refused and state stays SENT; refusal message Not specified in the source documents (NEWAC-RWB-P6-E1063-APP-AC12) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-26028",
+   "item": "CG-ALL-6452",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "TC-E1-063-04 now covers AC4 and TC-E1-063-05 covers AC5, as in Test Cases v8.",
+   "note": "Aligned to v8. Sections 5 X2 and X8 still cite AC5 with TC-E1-063-04; not in this item's scope."
+  },
+  {
+   "ruling": "R-26029",
+   "item": "CG-ALL-6453",
+   "status": "Not applied",
+   "section": "3, 3.1",
+   "target": "",
+   "change": "",
+   "note": "Migration file name is outside this chunk, and the next number of the rwb_comms Flyway sequence is not stated in the sources, so it is not invented."
+  },
+  {
+   "ruling": "R-26030",
+   "item": "CG-ALL-6454",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "SCR-46 states now list empty, loading, error and no access, each Not specified in the source documents (CG-ALL-6454).",
+   "note": "Screen Specifications v1 lacks these four states, so they are recorded as not specified."
+  },
+  {
+   "ruling": "R-28649",
+   "item": "GAP-0618",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "rwb-agent deployment story (not in this chunk)",
+   "change": "Expose topology values as chart values; register the schedule, topic, grants, gateway route and four alerts as GAP-0618 proposes; invent no value.",
+   "note": "The deployment content belongs to the rwb-agent deployment story, not to this notification story."
+  },
+  {
+   "ruling": "R-28651",
+   "item": "GAP-1212",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "_work/msr/wp/B-P6-05.md (story line RWB-P6-E1063-APP)",
+   "change": "Add to H list RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON; add to C list RWB-P3-E1042-CON, RWB-P3-E1043-CON.",
+   "note": "Plan dependency lists sit in the work package file. The eight DP-added rows are listed for the story line."
+  },
+  {
+   "ruling": "R-31287",
+   "item": "NEWAC-RWB-P6-E1063-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 scenario (401, 403, 404) and TC-E1-063-10.",
+   "note": "Proposed test was not specified; the test row uses the codes the title names and keeps the source's not-specified wording."
+  },
+  {
+   "ruling": "R-31288",
+   "item": "NEWAC-RWB-P6-E1063-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 scenario (replay with same idempotency key) and TC-E1-063-11.",
+   "note": "Grounded in BR2 and the rwb_comms idempotency library. Proposed test was not specified."
+  },
+  {
+   "ruling": "R-31289",
+   "item": "NEWAC-RWB-P6-E1063-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 scenario (SENT to GENERATED refused) and TC-E1-063-12; refusal message not specified.",
+   "note": "Transition uses the notice states in section 15. Refusal message is Not specified in the source documents (NEWAC-RWB-P6-E1063-APP-AC12)."
+  },
+  {
+   "ruling": "R-31290",
+   "item": "NEWAC-RWB-P6-E1063-APP-AC8",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC8 scenario; X7 Covered by now AC8 and TC-E1-063-08; TC-08 covers AC8.",
+   "note": "AC8 is the access criterion for X7, covered by the existing TC-E1-063-08 row."
+  },
+  {
+   "ruling": "R-31291",
+   "item": "NEWAC-RWB-P6-E1063-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 scenario covering BR6, BR7, BR8, BR10, BR11, BR12 and TC-E1-063-09.",
+   "note": "Section 8 rows left unchanged. Proposed test was not specified; the row is a component boundary test."
+  }
+ ]
+}

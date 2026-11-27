@@ -1,0 +1,98 @@
+{
+ "edits": [
+  {
+   "old": "States of SCR-03 (CG-ALL-8344): empty: Not specified in the source documents (CG-ALL-8344); loading: as Screen Specifications v1 section SCR-03; error: Not specified in the source documents (CG-ALL-8344); no access: Not specified in the source documents (CG-ALL-8344).",
+   "new": "States of SCR-03 (CG-ALL-8344): empty: Not specified in the source documents (CG-ALL-8344); loading: as Screen Specifications v1 section SCR-03; error: Not specified in the source documents (CG-ALL-8344); no access: Not specified in the source documents (CG-ALL-8344).\n\nStates of SCR-14 (CG-ALL-8345): empty: Not specified in the source documents (CG-ALL-8345); loading: Not specified in the source documents (CG-ALL-8345); error: Not specified in the source documents (CG-ALL-8345); no access: Not specified in the source documents (CG-ALL-8345).\n\nStates of SCR-45 (CG-ALL-8346): empty: Not specified in the source documents (CG-ALL-8346); loading: as Screen Specifications v1 section SCR-45; error: Not specified in the source documents (CG-ALL-8346); no access: Not specified in the source documents (CG-ALL-8346)."
+  },
+  {
+   "old": "No table of another service is read, and `dp_treatment`, `dp_guarantee_claim` and `data_product_load` are not created, read or written here (DP-01).",
+   "new": "No table of another service is read, and `dp_treatment`, `dp_guarantee_claim` and `data_product_load` are not created, read or written here (DP-01). The dated copy `dp_treatment` is P1's data engine: it is built from this service's events and read only for reporting, never as the source of a treatment; the live `treatment` row of `rwb_treatment` is the only treatment record this story reads (GAP-1716)."
+  },
+  {
+   "old": "and `TreatmentWorkflow` on queue `rwb-treatment` belongs to RWB-S2-E2004-APP (DP-10).",
+   "new": "and `TreatmentWorkflow` on queue `rwb-treatment` belongs to RWB-S2-E2004-APP (DP-10). The workflow is `Stage2ProductWorkflow` on queue `rwb-source-data` in namespace `rwb-recovery`, with activities `snapshot(page)`, `writeDp04Page`, `checkActiveCount` and `stampDp04`, started by `rwb.source-data.AceDataReady.v1` (GAP-0510). The DP04 expected-by time is 08:00, carried from decision log row DL11 until the data steward records it in the `data_product` row (GAP-0511). Every deployment value, threshold and timing is a named chart value set per environment, and the fixture owner is named at the wave 2 entry check (GAP-0513)."
+  },
+  {
+   "old": "    Then the consumer's step fails on its own side, where MSG-GEN-006 names system \"Treatment\"",
+   "new": "    Then the consumer's step fails on its own side, where MSG-GEN-006 names system \"Treatment\"\n\n  Scenario: AC9 The two reads hold no write statement, no outbox write and no publish (new, D-RCV-60)\n    Given the code of the two reads and a scan of the code of this service\n    When the guardrail scan runs\n    Then no INSERT, UPDATE, DELETE or MERGE statement is found in the code of the two reads\n    Then no outbox row is written and no event is published on rwb.treatment.events.v1 by either read\n    Then the guardrail fails a build that declares any of them\n\n  Scenario: AC10 A call without a valid credential, or to a path no operation provides, is answered 401 or 404 (new, D-RCV-60)\n    Given a caller presents no valid credential, or a path under /api/recovery/treatment/v1 that no operation provides\n    When the caller calls that path\n    Then the answer is 401 for the missing credential and 404 for the unknown path, with no items\n    Then no treatment of the window is returned with either answer"
+  },
+  {
+   "old": "| TC-S2-E2010-APP-09 | AC8, BR8 | Component | Both reads run twice on one window; row counts of treatment, decision records and outbox are unchanged after each read |",
+   "new": "| TC-S2-E2010-APP-09 | AC8, BR8 | Component | Both reads run twice on one window; row counts of treatment, decision records and outbox are unchanged after each read |\n| TC-S2-E2010-APP-10 | AC9, BR8 | Component | Not specified in the source documents (NEWAC-RWB-S2-E2010-APP-AC9) |\n| TC-S2-E2010-APP-11 | AC10 | Component | A call without a valid credential and a call to a path no operation provides; answers 401 and 404 with no items |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-26838",
+   "item": "CG-ALL-8345",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-14 states added to section 15; spec lacks each state, so each is Not specified in the source documents."
+  },
+  {
+   "ruling": "R-26839",
+   "item": "CG-ALL-8346",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-45 states added to section 15; loading taken from the spec, the other three marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-28754",
+   "item": "GAP-1716",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "",
+   "note": "Story states dp_treatment is P1's copy, read only for reporting; live treatment row in rwb_treatment is the only record read."
+  },
+  {
+   "ruling": "R-28755",
+   "item": "GAP-0510",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "Stage2ProductWorkflow, queue, namespace, activities and starting event added to section 12.5 as the target design."
+  },
+  {
+   "ruling": "R-28756",
+   "item": "GAP-0511",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "DP04 expected-by time 08:00 carried from DL11 in section 12.5 until the data steward records it."
+  },
+  {
+   "ruling": "R-28757",
+   "item": "GAP-0513",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "",
+   "note": "Deployment values carried as named chart value sets per environment; fixture owner named at wave 2 entry check."
+  },
+  {
+   "ruling": "R-32065",
+   "item": "NEWAC-RWB-S2-E2010-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added to section 7 for 401 and 404; TC-S2-E2010-APP-11 added to section 16."
+  },
+  {
+   "ruling": "R-32066",
+   "item": "NEWAC-RWB-S2-E2010-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added to section 7 as a guardrail for BR8 no-write rule; TC-S2-E2010-APP-10 added with test data Not specified."
+  }
+ ]
+}

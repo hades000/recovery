@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "3. The service reads the notice from `rwb_comms` and checks that it is in a state that accepts a self-service payment; the eligible states are a parameter, not code, and a notice outside it answers 409.",
+   "new": "3. The service reads the notice from `rwb_comms` and checks that it is in a state that accepts a self-service payment; the eligible states are a parameter (Not specified in the source documents (DOR-RWB-P6-E4037-APP-20)) read through the reference-data contract of DP-06 and DP-07, not code, and a notice outside it answers 409."
+  },
+  {
+   "old": "5. The service validates the request: `target` and `channel` are required and `channel` is a value of LOV-CHANNEL; a missing or unknown value answers 422 with MSG-GEN-001 naming the field.",
+   "new": "5. The service validates the request: `target` and `channel` are required and `channel` is a value of LOV-CHANNEL read through the reference-data contract of DP-06 and DP-07; a missing or unknown value answers 422 with MSG-GEN-001 naming the field."
+  },
+  {
+   "old": "12. A decision record that cannot be written stops the flow at step 6: the notice and the intent rows are unchanged, no call is made to rwb-payment, the answer is 503 with MSG-P7-003 and an incident is raised under R-UNI-39.",
+   "new": "12. A decision record that cannot be written stops the flow at step 6: the notice and the intent rows are unchanged, no call is made to rwb-payment, the answer is 503 with MSG-P7-003 and an incident is raised under R-UNI-39.\n13. The self-service screen SCR-33 shows four states: empty (Not specified in the source documents (DOR-RWB-P6-E4037-APP-10)); loading (Not specified in the source documents (DOR-RWB-P6-E4037-APP-10)); error (the 409 answers of steps 4 and 3 and the 503 answer of step 12 are shown with their message IDs); no access (the 403 answer with MSG-P4-002 of step 11 is shown)."
+  },
+  {
+   "old": "Errors: 401 no session; 403 the caller lacks the right (MSG-P4-002); 404 the notice is absent or the case is outside the scope; 409 the notice is not eligible, a contact stop is in force, the channel carries no consent or the owner reports nothing to pay against (MSG-P6-001, MSG-P6-002); 422 a field fails validation (MSG-GEN-001); 503 the decision was not recorded (MSG-P7-003) or an owner did not answer.",
+   "new": "Errors: 401 no session (Not specified in the source documents (CG-ALL-6684)); 403 the caller lacks the right (MSG-P4-002); 404 the notice is absent or the case is outside the scope (Not specified in the source documents (CG-ALL-6684)); 409 the notice is not eligible, a contact stop is in force, the channel carries no consent or the owner reports nothing to pay against (MSG-P6-001, MSG-P6-002); 422 a field fails validation (MSG-GEN-001); 503 the decision was not recorded (MSG-P7-003) or an owner did not answer."
+  },
+  {
+   "old": "| TC-E4-037-04 | Principle 5 | NFR | The decision log write is forced to fail on 10 intents; no call reaches rwb-payment, no row is written and an incident is raised under R-UNI-39 |",
+   "new": "| TC-E4-037-04 | Principle 5 | NFR | The decision log write is forced to fail on 10 intents; no call reaches rwb-payment, no row is written and an incident is raised under R-UNI-39 |\n| TC-E4-037-05 | 12.1 | Contract | Both operations of 12.1 are answered by the contract fakes of 12.8 in the shapes of RWB-P6-E4037-CON; POST answers 201 with the PaymentIntent and GET answers 200 with the PaymentIntent list, newest first |\n| TC-E4-037-06 | 12.7 | Component | Writes and reads of the tables of 12.7 stay inside their owner's boundary; only payment_intent and the local decision record are written here and no money table exists (ASM-3438) |"
+  },
+  {
+   "old": "| Legacy feature | FEAT-COM-03 Pay in self-service (FSD P6 A2.16), prerequisite FEAT-COM-01 View the offer on LINE and web |",
+   "new": "| Legacy feature | FEAT-COM-03 Pay in self-service (FSD P6 A2.16), prerequisite FEAT-COM-01 View the offer on LINE and web |\n| L3 process | Not specified in the source documents (DOR-RWB-P6-E4037-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-06558",
+   "item": "DOR-RWB-P6-E4037-APP-8",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "rwb-comms.yaml",
+   "change": "Add paths POST and GET /notices/{noticeId}/payment-intents; make deliveryStatus match LOV-DELIVERY reference data; the two 401 and 404 message IDs are placeholders in 12.1 (CG-ALL-6684).",
+   "note": "Contract paths and deliveryStatus enum are in rwb-comms.yaml. Story side: 401 and 404 message placeholders written in 12.1."
+  },
+  {
+   "ruling": "R-11099",
+   "item": "CG-ALL-6681",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add the payment_intent entity as a new object of RWB-P6-E4037-APP (rwb_comms, P6) with its fields, or record it in the owning document.",
+   "note": "Story already states the row has no LDM field ID yet (section 18 gap). No story edit made."
+  },
+  {
+   "ruling": "R-11100",
+   "item": "CG-ALL-6684",
+   "status": "Not applied",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "No message ID for 401 or 404 in the sources. Placeholder written in 12.1 for BA to confirm against Error and Message Standard v4."
+  },
+  {
+   "ruling": "R-11101",
+   "item": "CG-ALL-6688",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx (next version)",
+   "change": "Add rows TC-E4-037-01 to TC-E4-037-04 to tab Story test cases, with Given, When and Then copied from the criteria they cover.",
+   "note": "Story section 16 names the four IDs and their data. No story edit beyond the new rows."
+  },
+  {
+   "ruling": "R-17743",
+   "item": "DOR-RWB-P6-E4037-APP-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add a role code or role name for customer (borrower), or confirm the existing role it maps to.",
+   "note": "Role 'customer (borrower)' has no entry in Users Roles and Permissions v5. Story text unchanged."
+  },
+  {
+   "ruling": "R-17744",
+   "item": "DOR-RWB-P6-E4037-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 13 names SCR-33 empty, loading, error and no-access states. Empty and loading text is a placeholder pending the sources."
+  },
+  {
+   "ruling": "R-17745",
+   "item": "DOR-RWB-P6-E4037-APP-11",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Detail does not name the field classed as personal data, so the story statement cannot be aligned without guessing."
+  },
+  {
+   "ruling": "R-17746",
+   "item": "DOR-RWB-P6-E4037-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx (next version)",
+   "change": "Add the rows of TC-E4-037-01 to TC-E4-037-04 to Story test cases (CG-ALL-6688).",
+   "note": "Added contract test TC-E4-037-05 and boundary test TC-E4-037-06 to section 16. Test Cases v8 rows still missing."
+  },
+  {
+   "ruling": "R-17747",
+   "item": "DOR-RWB-P6-E4037-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Legacy feature row names FEAT-COM-03. Added L3 process row as a placeholder; the sources do not name the L3 process."
+  },
+  {
+   "ruling": "R-17748",
+   "item": "DOR-RWB-P6-E4037-APP-20",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Steps 3 and 5 now name DP-06 and DP-07 reference-data contract. Parameter name is a placeholder; sources do not name it."
+  }
+ ]
+}

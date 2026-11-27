@@ -1,0 +1,109 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P10-E2030-APP",
+ "unit": "u01",
+ "rulings": [
+  "R-04656",
+  "R-09919",
+  "R-15416",
+  "R-30383",
+  "R-30384",
+  "R-30386"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 6
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-04656",
+     "item": "DOR-RWB-P10-E2030-APP-14",
+     "status": "Not applied",
+     "section": "",
+     "target": "",
+     "change": "",
+     "note": "No signed epic design record found: searched requirements .md files, 23 Document Gaps, top-level file names and the DoR review of this story."
+    },
+    {
+     "ruling": "R-09919",
+     "item": "CG-ALL-2748",
+     "status": "Not applied",
+     "section": "12.1",
+     "target": "",
+     "change": "",
+     "note": "Error and Message Standard v4 §4: no fitting ID for no session, unknown record or store down. MSG-GEN-006 says the request is queued and retried; MSG-P4-005 is for a missing second factor."
+    },
+    {
+     "ruling": "R-15416",
+     "item": "DOR-RWB-P10-E2030-APP-9",
+     "status": "Resolved",
+     "section": "14",
+     "target": "",
+     "change": "",
+     "note": "Section 14 text of MSG-P10-008 already matches Error and Message Standard v4 §4 character for character; no edit needed."
+    },
+    {
+     "ruling": "R-30383",
+     "item": "NEWAC-RWB-P10-E2030-APP-AC12",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Added as AC16 (AC12 is taken) with TC-E2-030-18, from §12.1 Errors line; 403 is already in AC10."
+    },
+    {
+     "ruling": "R-30384",
+     "item": "NEWAC-RWB-P10-E2030-APP-AC13",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Added as AC17 with TC-E2-030-19, from PRD PLT Platform v1 FR-PLT-012."
+    },
+    {
+     "ruling": "R-30386",
+     "item": "NEWAC-RWB-P10-E2030-APP-AC15",
+     "status": "Resolved",
+     "section": "7, 12.1, 14, 16",
+     "target": "",
+     "change": "",
+     "note": "AC18, TC-E2-030-20. 409 MSG-GEN-004 from E1061-CON AC; text from Message Standard v4, which differs from the text E1061-CON quotes."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then no second run is made for case \"RW-2026-000901\" and the evaluation\n",
+     "new": "    Then no second run is made for case \"RW-2026-000901\" and the evaluation\n\n  Scenario: AC16 No session or an unknown version or evaluation (new, D-RCV-60)\n    Given a caller with no session\n    When the caller calls GET `/admin/agent-evaluations`\n    Then the system refuses the call with 401\n    Given user \"coe.user01\" with a session and an evaluation ID that does not exist\n    When the user calls GET `/admin/agent-evaluations/{evaluationId}/report`\n    Then the operation answers 404\n    Given a user with role \"RW-RISK\" and a version ID that does not exist\n    When the user calls POST `/admin/agent-configs/{versionId}/approve`\n    Then the operation answers 404 and no policy row changes\n\n  Scenario: AC17 A repeated write with the same idempotency key (new, D-RCV-60)\n    Given POST `/admin/agent-evaluations` was accepted with an Idempotency-Key\n    When the same request is sent again with the same Idempotency-Key\n    Then the stored answer of the first request is returned\n    Then no second evaluation run is created and no other state changes\n    When a request with a different body reuses that Idempotency-Key\n    Then the request is rejected and nothing changes\n\n  Scenario: AC18 An approved version cannot be approved again (new, D-RCV-60)\n    Given policy \"LEGAL_DOC\" version \"P2\" is in status APPROVED\n    When RW-RISK approves version \"P2\" again with a new Idempotency-Key\n    Then the system refuses the approval with 409 and MSG-GEN-004\n    Then the status, the approver and the approval date of version \"P2\" do not change\n"
+    },
+    {
+     "old": "200 with status APPROVED, approvedBy and validFrom; 409 MSG-P7-002 on a self-approval |",
+     "new": "200 with status APPROVED, approvedBy and validFrom; 409 MSG-P7-002 on a self-approval; 409 MSG-GEN-004 on a version already APPROVED |"
+    },
+    {
+     "old": "409 a self-approval (MSG-P7-002) or a second evaluation",
+     "new": "409 a self-approval (MSG-P7-002), an approval of a version already APPROVED (MSG-GEN-004) or a second evaluation"
+    },
+    {
+     "old": "| MSG-P4-002 | A role without the right | You cannot {action} here. Your role does not include it. |",
+     "new": "| MSG-P4-002 | A role without the right | You cannot {action} here. Your role does not include it. |\n| MSG-GEN-004 | An approval of a version that is already APPROVED | Someone else changed this record. Reload it to see their change. |"
+    },
+    {
+     "old": "quoted because the operation the story uses owns them. The story adds no message.",
+     "new": "quoted because the operation the story uses owns them. MSG-GEN-004 is quoted from the Error and Message Standard v4. The story adds no message."
+    },
+    {
+     "old": "| TC-E2-030-17 | AC15, X8 | Component | The model does not answer inside 60 seconds for case \"RW-2026-000901\"; run TIMED_OUT with fallback true; no second run |",
+     "new": "| TC-E2-030-17 | AC15, X8 | Component | The model does not answer inside 60 seconds for case \"RW-2026-000901\"; run TIMED_OUT with fallback true; no second run |\n| TC-E2-030-18 | AC16 | Component | A call with no session answers 401; an unknown evaluation report and an unknown version approval answer 404; no row changes |\n| TC-E2-030-19 | AC17 | Component | POST `/admin/agent-evaluations` repeated with the same Idempotency-Key returns the stored answer with one evaluation run; the key reused with a different body is rejected |\n| TC-E2-030-20 | AC18 | Component | A second approval of APPROVED version \"P2\" with a new Idempotency-Key; 409 with MSG-GEN-004; the policy row is unchanged |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

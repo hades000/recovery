@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| External dependencies | RWB-P4-E1022-DB |",
+   "new": "| External dependencies | RWB-P4-E1022-DB (build dependency not yet done) |\n| Open decisions | DL01 (ASM-0189, ASM-1230, ASM-1770, ASM-1988); DL02 (ASM-0189, ASM-0324, ASM-5687); DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863); DL39 (ASM-1617, ASM-2705); DL40 (ASM-0422, ASM-2705). Each decision is open; each listed assumption applies until the decision is taken |"
+  },
+  {
+   "old": "| BR2 | A session is refused unless the token carries a second factor | NFR-049; FEAT-ACA-02 |",
+   "new": "| BR2 | A session is refused unless the token carries a second factor; the amr check is enforced at gateway-bff before any owner call and repeated by rwb-access when it resolves the session | NFR-049; FEAT-ACA-02 |"
+  },
+  {
+   "old": "| BR5 | A role pair listed in the role conflict table may not be held in one session | Separation of duty sheet, roles.txt; role conflict table (new) |",
+   "new": "| BR5 | A role pair listed in the role conflict table may not be held in one session; the refusal rides the refusal fact with reason code ROLE_CONFLICT | Separation of duty sheet, roles.txt; role conflict table (new) |"
+  },
+  {
+   "old": "| BR7 | A session keeps the matrix and conflict versions it resolved at sign-in until it ends | Admin and access model, section 4.2 |",
+   "new": "| BR7 | A session keeps the matrix and conflict versions it resolved at sign-in until it ends; rwb-access resolves per call and hands the role set, the scope and the two version labels to the edge for its session record | Admin and access model, section 4.2 |"
+  },
+  {
+   "old": "### 12. Contract",
+   "new": "### 12. Contract\n\nThe two operations of this story are POST /api/recovery/access/v1/authorise and GET /api/recovery/access/v1/me/permissions, under the base of section R4 and DP-13. The request and answer payloads are those the contract of RWB-P4-E1022-CON publishes, and each answer carries the two version labels."
+  },
+  {
+   "old": "| Session claim (no field ID) | The verified claims handed over by gateway-bff | the `groups` claim, the `amr` claim, the user reference | Read in memory only; never stored, never logged with a value |",
+   "new": "| Session claim (no field ID) | The verified claims handed over by gateway-bff | the `groups` claim, the `amr` claim, the user reference (Entra ID object reference), the session ID | Read in memory only; never stored, never logged with a value; the amr check runs at gateway-bff before any owner call and is repeated here |"
+  },
+  {
+   "old": "| Team and region of the caller (no field ID) | The roles-and-teams contract of rwb-case (P3) | team code, region code | Read through the contract for a TEAM or REGION scope; no local row |",
+   "new": "| Team and region of the caller (no field ID) | The roles-and-teams operation of RWB-P3-E1019-CON (rwb-case, P3) | team code, region code | Read through the operation for a TEAM or REGION scope; no local row |"
+  },
+  {
+   "old": "| TC-E1-022-10 | Access (legacy RWB-E1-022 TC-E1-022-10), BR4 | Component | A role without the right is refused with MSG-P4-002 |",
+   "new": "| TC-E1-022-10 | Access (legacy RWB-E1-022 TC-E1-022-10), BR4 | Component | A role without the right is refused with MSG-P4-002 |\n| TC-E1-022-11 | Contract of the operations, events and activities of section 12 | Contract | The two operations of section 12 checked against the fakes of RWB-P4-E1022-CON; the answer and refusal shapes as published |\n| TC-E1-022-12 | Boundary of the tables of section 12.7 (ASM-3438) | Component | Reads of role, permission and role_conflict in rwb_access only; a cross-schema reference fails the boundary test |\n| TC-E1-022-13 | BR1 | Component | Test user in the RW-LITOFF group only, with no local account; the role comes from group membership alone |\n| TC-E1-022-14 | BR9 | Component | Reference contract unreachable; the resolution is refused and no value is assumed (2 s timeout, breaker open) |\n| TC-E1-022-15 | BR10 | Component | Unmapped group gives no role; the group name is written on the sign-in fact as a name only |\n| TC-E1-022-16 | BR11 | Component | A recorded fact carries identifier, area, right and reason code; no name, contact value or credential |\n| TC-E1-022-17 | BR12 | Component | Role rows, letters and conflict pairs read in rwb_access; team codes read through RWB-P3-E1019-CON; nothing copied |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16623",
+   "item": "DOR-RWB-P4-E1022-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-022-11 contract test for section 12 and TC-E1-022-12 boundary test for section 12.7. RTM v7 alignment of P3 section 18 not in this story."
+  },
+  {
+   "ruling": "R-16624",
+   "item": "DOR-RWB-P4-E1022-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "External dependency RWB-P4-E1022-DB now marked as a build dependency not yet done."
+  },
+  {
+   "ruling": "R-16625",
+   "item": "DOR-RWB-P4-E1022-APP-18",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Added Open decisions row listing DL01, DL02, DL10, DL39, DL40 with their assumptions; each remains open."
+  },
+  {
+   "ruling": "R-16626",
+   "item": "DOR-RWB-P4-E1022-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-022-13 to -17 covering BR1, BR9, BR10, BR11, BR12. Section 7 criteria are not in this excerpt, so no AC row was added."
+  },
+  {
+   "ruling": "R-16627",
+   "item": "DOR-RWB-P4-E1022-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9",
+   "change": "Add DF-REF-039 (role.entra_group) to the role entity so the field ID exists in LDM v9 with all role fields.",
+   "note": "DF-REF-039 is not in LDM v9; story row unchanged."
+  },
+  {
+   "ruling": "R-22017",
+   "item": "GAP-3103",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Technical Solution Design S9 (T3.1) and Recovery Workbench PRD S9",
+   "change": "Publish the partner_user fields in the T3.1 catalogue and the PRD; name the contract-end Schedule and its clock; decide whether a recall is announced by an event.",
+   "note": "Partner user and trigger facts belong to the S9 documents; owner: business analyst S9 with solution architect."
+  },
+  {
+   "ruling": "R-22018",
+   "item": "GAP-1568",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "API Specification v4 and TSD P4 appendix T-A",
+   "change": "Publish POST /authorise, GET /me/permissions, GET /doa-limits and /masking-policies with request and answer schemas, refusal and not-found codes, version fields and masking marker vocabulary.",
+   "note": "Operation schemas are absent from the API specification; owner: solution architect."
+  },
+  {
+   "ruling": "R-22019",
+   "item": "GAP-0347",
+   "status": "Resolved",
+   "section": "8, 11",
+   "target": "",
+   "change": "",
+   "note": "Session claim row now names Entra ID object reference and session ID; amr check at gateway-bff with repeat in rwb-access added to BR2 and section 11."
+  },
+  {
+   "ruling": "R-22020",
+   "item": "GAP-0776",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Section 12 now names POST authorise and GET me/permissions under the R4 base and DP-13; payloads stated as those of RWB-P4-E1022-CON."
+  },
+  {
+   "ruling": "R-22021",
+   "item": "GAP-0775",
+   "status": "Resolved",
+   "section": "8, 11",
+   "target": "",
+   "change": "",
+   "note": "BR5 carries ROLE_CONFLICT refusal fact; BR7 states per-call resolution and hand-off of version labels; team and region read via RWB-P3-E1019-CON."
+  }
+ ]
+}

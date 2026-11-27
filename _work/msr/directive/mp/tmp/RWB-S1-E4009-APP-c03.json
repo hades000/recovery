@@ -1,0 +1,236 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The role does not hold the right of the operation (U to submit, RA to answer) | 403 before any read or write, no item is raised and no record is written | MSG-P4-002 | TC-E4-009-03 |",
+   "new": "| X2 | The role does not hold the right of the operation (U to submit, RA to answer) | 403 before any read or write, no item is raised and no record is written | MSG-P4-002 | AC3, TC-E4-009-03, TC-S1-E4009-APP-03 |"
+  },
+  {
+   "old": "| X3 | The case is not at `ROUTE_D6`, or the amount or the recommended route is absent | The branch does not run, nothing is escalated and the missing element is named | MSG-GEN-001 | TC-E4-009-01 |",
+   "new": "| X3 | The case is not at `ROUTE_D6`, or the amount or the recommended route is absent | The branch does not run, nothing is escalated and the missing element is named | MSG-GEN-001 | AC4, TC-E4-009-01, TC-S1-E4009-APP-04 |"
+  },
+  {
+   "old": "| X4 | No delegation row covers the product, the decision and the amount, or the row is stale | The branch holds, names the missing value and raises a task; no item is escalated on an unknown limit | MSG-GEN-001 | TC-E4-009-01, TC-S1-E4009-APP-02 |",
+   "new": "| X4 | No delegation row covers the product, the decision and the amount, or the row is stale | The branch holds, names the missing value and raises a task; no item is escalated on an unknown limit | MSG-GEN-001 | AC5, TC-E4-009-01, TC-S1-E4009-APP-02, TC-S1-E4009-APP-05 |"
+  },
+  {
+   "old": "| X5 | rwb-decision, rwb-case or rwb-access does not answer inside 2 s, or its breaker is open | The branch waits and retries on the workflow's schedule; nothing is written and the caller sees 503 with the platform envelope | None | TC-E4-009-01 |",
+   "new": "| X5 | rwb-decision, rwb-case or rwb-access does not answer inside 2 s, or its breaker is open | The branch waits and retries on the workflow's schedule; nothing is written and the caller sees 503 with the platform envelope | None | AC6, TC-E4-009-01, TC-S1-E4009-APP-06 |"
+  },
+  {
+   "old": "| X6 | The amount is at or below the limit | The branch ends and the inside-limit story applies; no committee item and no escalation | None | TC-E4-009-01 |",
+   "new": "| X6 | The amount is at or below the limit | The branch ends and the inside-limit story applies; no committee item and no escalation | None | AC7, TC-E4-009-01, TC-S1-E4009-APP-07 |"
+  },
+  {
+   "old": "| X7 | The committee refuses | The refusal and its coded reason are recorded and the case returns to `ROUTE_D6_REOPEN` under R-UNI-41 | None | TC-E4-009-01 |",
+   "new": "| X7 | The committee refuses | The refusal and its coded reason are recorded and the case returns to `ROUTE_D6_REOPEN` under R-UNI-41 | None | AC8, TC-E4-009-01, TC-S1-E4009-APP-08 |"
+  },
+  {
+   "old": "| X8 | The item or the submission is repeated with the same `Idempotency-Key` | One record, one item, and the stored answer is returned; the repeat is counted | None | TC-S1-E4009-APP-02 |",
+   "new": "| X8 | The item or the submission is repeated with the same `Idempotency-Key` | One record, one item, and the stored answer is returned; the repeat is counted | None | AC9, TC-S1-E4009-APP-02, TC-S1-E4009-APP-09 |"
+  },
+  {
+   "old": "| X9 | The recommendation changes while the item is open | The open item is withdrawn with its reason, the withdrawal is recorded and the case returns to `ROUTE_D6_REOPEN` | None | TC-S1-E4009-APP-02 |",
+   "new": "| X9 | The recommendation changes while the item is open | The open item is withdrawn with its reason, the withdrawal is recorded and the case returns to `ROUTE_D6_REOPEN` | None | AC10, TC-S1-E4009-APP-02, TC-S1-E4009-APP-10 |"
+  },
+  {
+   "old": "| X10 | A component, a statement or a test reaches `recovery_case`, `delegation_limit`, another service's schema or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | s17, BR8, BR10, TC-S1-E4009-APP-01 |",
+   "new": "| X10 | A component, a statement or a test reaches `recovery_case`, `delegation_limit`, another service's schema or a `v_ace_*` view | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC11, s17, BR8, BR10, TC-S1-E4009-APP-01, TC-S1-E4009-APP-11 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 A role without the right is refused (exception X2)\n    Given the rwb-access contract mock returns no right of the operation for the caller\n    When the caller submits the route command\n    Then the response is 403 with MSG-P4-002 before any read or write\n    Then no item is raised and no record is written\n\n  Scenario: AC4 A case that is not at ROUTE_D6 or has no amount or no recommended route runs no branch (exception X3)\n    Given the rwb-case contract mock returns a case state other than ROUTE_D6, or no amount, or no recommended route\n    When the branch starts\n    Then the branch does not run and nothing is escalated\n    Then the missing element is named with MSG-GEN-001\n\n  Scenario: AC5 No delegation row holds the branch (exception X4)\n    Given the rwb-decision contract mock returns no delegation row for the product, the decision and the amount, or a stale row\n    When the branch checks the delegation\n    Then the branch holds, names the missing value with MSG-GEN-001 and raises a task\n    Then no item is escalated on an unknown limit\n\n  Scenario: AC6 A contract answer beyond 2 s is retried and not written (exception X5)\n    Given the rwb-decision, rwb-case or rwb-access contract mock does not answer inside 2 s, or its breaker is open\n    When the branch reads the answer\n    Then the branch waits and retries on the workflow's schedule\n    Then nothing is written and the caller sees 503 with the platform envelope\n\n  Scenario: AC7 An amount at or below the limit is not escalated (exception X6)\n    Given the rwb-decision contract mock returns the delegation-of-authority limit in force, with the amount at or below it\n    When the branch checks the delegation\n    Then the branch ends and the inside-limit story applies\n    Then no committee item and no escalation are raised\n\n  Scenario: AC8 A committee refusal returns the case (exception X7)\n    Given the committee refuses the item with a coded reason\n    When the refusal is recorded\n    Then the refusal and its coded reason are recorded\n    Then the case returns to ROUTE_D6_REOPEN under R-UNI-41\n\n  Scenario: AC9 A repeated submission is answered once (exception X8)\n    Given the same Idempotency-Key is sent twice for one case\n    When the repeat arrives\n    Then one record and one item exist and the stored answer is returned\n    Then the repeat is counted\n\n  Scenario: AC10 A changed recommendation withdraws the open item (exception X9)\n    Given the recommendation changes while the item is open\n    When the change is received\n    Then the open item is withdrawn with its reason and the withdrawal is recorded\n    Then the case returns to ROUTE_D6_REOPEN\n\n  Scenario: AC11 A boundary statement fails the build (exception X10)\n    Given a component, a statement or a test reaches recovery_case, delegation_limit, another service's schema or a v_ace_* view\n    When the build runs the boundary scan\n    Then the grant refuses the statement and the boundary test fails the build\n    Then nothing is released"
+  },
+  {
+   "old": "Neither criterion carries a limit, a level or a clock: those are data in force of their owners (GAP-2634; GAP-2635).",
+   "new": "Neither criterion carries a limit, a level or a clock: those are data in force of their owners (GAP-2634; GAP-2635). AC3 to AC11 are the criteria of the exception paths X2 to X10 of section 5, each with its own test case row in section 16; they add no legacy wording."
+  },
+  {
+   "old": "| VR-S1-009-1 | Required field empty | MSG-GEN-001 Enter {field}. |",
+   "new": "| BR12 (VR-S1-009-1) | Required field empty | MSG-GEN-001 Enter {field}. |"
+  },
+  {
+   "old": "| BR-S1-009 | No value a business person may change is written in code; it is read from reference data with its version | None |",
+   "new": "| BR13 (BR-S1-009) | No value a business person may change is written in code; it is read from reference data with its version | None |"
+  },
+  {
+   "old": "| R-UNI-14 | An authorized user overrides the route inside the delegation: record the coded reason, move the case to the chosen route | None |",
+   "new": "| BR14 (R-UNI-14) | An authorized user overrides the route inside the delegation: record the coded reason, move the case to the chosen route | None |"
+  },
+  {
+   "old": "| R-UNI-15 | The override is outside the user's limit: refuse the change and raise the request to the approver named in the matrix, one working day | None |",
+   "new": "| BR15 (R-UNI-15) | The override is outside the user's limit: refuse the change and raise the request to the approver named in the matrix, one working day | None |"
+  },
+  {
+   "old": "| R-UNI-38 | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |",
+   "new": "| BR16 (R-UNI-38) | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |"
+  },
+  {
+   "old": "| R-UNI-39 | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |",
+   "new": "| BR17 (R-UNI-39) | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |"
+  },
+  {
+   "old": "| R-UNI-40 | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |",
+   "new": "| BR18 (R-UNI-40) | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |"
+  },
+  {
+   "old": "| R-UNI-41 | A person decides and names the missing data: return the case to the route decision and log the rule gap | None |",
+   "new": "| BR19 (R-UNI-41) | A person decides and names the missing data: return the case to the route decision and log the rule gap | None |"
+  },
+  {
+   "old": "| BR11 | No person name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log or a workflow input; the record names the decider's role, and the decider's identity stays with the case and the access layer | Template and Rules v1 §R7.2 (s17) |",
+   "new": "| BR11 | No person name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log or a workflow input; the record names the decider's role, and the decider's identity stays with the case and the access layer | Template and Rules v1 §R7.2 (s17) |\n\n**Coverage of the rules.** Each rule has a criterion or a test case: BR1 by AC1 and TC-E4-009-01; BR2 by AC5 and TC-S1-E4009-APP-02; BR3 by AC11 and TC-S1-E4009-APP-01; BR4 by AC3 and TC-E4-009-03; BR5 by AC2, TC-E4-009-02 and TC-E4-009-04; BR6 by AC9 and TC-S1-E4009-APP-02; BR7 by TC-S1-E4009-APP-13; BR8 by TC-E4-009-01; BR9 by TC-S1-E4009-APP-12 and TC-E4-009-01; BR10 by AC11 and TC-S1-E4009-APP-01; BR11 by TC-S1-E4009-APP-12; BR12 (VR-S1-009-1) by AC4; BR13 (BR-S1-009) by AC5; BR14 (R-UNI-14) by AC7; BR15 (R-UNI-15) by AC1 and TC-E4-009-01; BR16 (R-UNI-38) by TC-S1-E4009-APP-02; BR17 (R-UNI-39) by AC2; BR18 (R-UNI-40) by AC9; BR19 (R-UNI-41) by AC8 and AC10."
+  },
+  {
+   "old": "**No personal data.** The rows this story reads and writes carry identifiers, codes, amounts, dates, levels and versions. No name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log, a workflow input or an answer; the decider is a role on the record, and the decider's identity stays with the case and the access layer.",
+   "new": "**Reference data read.** The branch reads its reference data under the reference-data contract of DP-06 and DP-07: the delegation-of-authority limit with its level and boundaries, the rule id and rule version in force, and the route set. Each is read with its version and held as a value of its owner, never as a build constant. The route set is carried as route codes of the versioned reference data, and no route number is printed while the sources disagree (GAP-1688). The parameter keys are Not specified in the source documents (DOR-RWB-S1-E4009-APP-20).\n\n**No personal data.** The rows this story reads and writes carry identifiers, codes, amounts, dates, levels and versions. No name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log, a workflow input or an answer; the decider is a role on the record, and the decider's identity stays with the case and the access layer."
+  },
+  {
+   "old": "| TC-S1-E4009-APP-02 | The delegation edge: the version, the level and the gap on the record; the withdrawal of an open item; the duplicate submission | Component | Two matrix versions of the same product, an amount between them, a recommendation that changes while the item is open, and the same `Idempotency-Key` twice |",
+   "new": "| TC-S1-E4009-APP-02 | The delegation edge: the version, the level and the gap on the record; the withdrawal of an open item; the duplicate submission | Component | Two matrix versions of the same product, an amount between them, a recommendation that changes while the item is open, and the same `Idempotency-Key` twice |\n| TC-S1-E4009-APP-03 | AC3: a role without the right is refused with MSG-P4-002 before any read or write, and no item or record is made | Component | An officer role without U, and a role without RA answering the item; 403 before any read |\n| TC-S1-E4009-APP-04 | AC4: a case not at `ROUTE_D6`, or with no amount or no recommended route, runs no branch, escalates nothing and names the missing element with MSG-GEN-001 | Component | Case `RC-2027-000409` at another state; the same case with the amount absent; the same case with the recommended route absent |\n| TC-S1-E4009-APP-05 | AC5: no delegation row for the product, the decision and the amount, or a stale row, holds the branch, names the missing value and raises a task | Component | A product with no delegation row, and a stale row of `DOA-2026.11` |\n| TC-S1-E4009-APP-06 | AC6: an rwb-decision, rwb-case or rwb-access answer after 2 s, or an open breaker, writes nothing and returns 503 with the platform envelope | Component | The rwb-decision fake with no answer beyond 2 s, and with its breaker open |\n| TC-S1-E4009-APP-07 | AC7: an amount at or below the limit ends the branch with no committee item and no escalation | Component | Case `RC-2027-000409` with an amount at the limit and one with an amount below it |\n| TC-S1-E4009-APP-08 | AC8: a committee refusal records its coded reason and returns the case to `ROUTE_D6_REOPEN` under R-UNI-41 | Component | The committee fake refusing with a coded reason |\n| TC-S1-E4009-APP-09 | AC9: a repeated submission with the same `Idempotency-Key` gives one record and one item, returns the stored answer and counts the repeat | Component | The same `Idempotency-Key` sent twice for one case |\n| TC-S1-E4009-APP-10 | AC10: a recommendation that changes while the item is open withdraws the item with its reason and returns the case to `ROUTE_D6_REOPEN` | Component | A recommendation changed while the item is open |\n| TC-S1-E4009-APP-11 | AC11: a statement that reaches `recovery_case`, `delegation_limit`, another service's schema or a `v_ace_*` view is refused and fails the build | Component | The build scan of step 10 with one such statement planted |\n| TC-S1-E4009-APP-12 | Contract: the operation, the events and the activities of §12 match the published contract; no event is declared; the answer and the record carry no personal-data element | Contract | The contract of `POST /cases/{caseId}/route` at base `/api/recovery/valuation/v1`, the activities of §12.5 and an empty event set |\n| TC-S1-E4009-APP-13 | Boundary: only the tables of §12.7 that the story writes are written, and no table outside §12.7 is read or written | Component | The build scan of step 10 against the table list of §12.7 |"
+  },
+  {
+   "old": "| Source | Reference | Used in |\n|---|---|---|",
+   "new": "| Source | Reference | Used in | Feature | L3 process |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| Legacy story | RWB-E4-009, disposition Split (rework); AC1 and AC2 owned word for word by this story | 1, 7, 16 |",
+   "new": "| Legacy story | RWB-E4-009, disposition Split (rework); AC1 and AC2 owned word for word by this story | 1, 7, 16 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Feature | FEAT-VAL-09 Approve a route above the limit at committee, module S1, epic E4, depends on FEAT-APD-05 | 1, 2, 3 |",
+   "new": "| Feature | FEAT-VAL-09 Approve a route above the limit at committee, module S1, epic E4, depends on FEAT-APD-05 | 1, 2, 3 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| FSD S1 v3 | A1.4 preconditions; A2.9.2 steps and integration points; A2.9.3.1 VR-S1-009-1 and BR-S1-009; A2.9.3.3 roles; A2.9.4.3 exception flows; requirements REQ-S1-001 to REQ-S1-008, REQ-S1-006 in particular; SCR-13 | 2, 3, 4, 5, 8, 14, 15 |",
+   "new": "| FSD S1 v3 | A1.4 preconditions; A2.9.2 steps and integration points; A2.9.3.1 VR-S1-009-1 and BR-S1-009; A2.9.3.3 roles; A2.9.4.3 exception flows; requirements REQ-S1-001 to REQ-S1-008, REQ-S1-006 in particular; SCR-13 | 2, 3, 4, 5, 8, 14, 15 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T3.2 lists; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights, including RW-CREDCOMM RA; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12, 13, 16 |",
+   "new": "| TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T3.2 lists; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights, including RW-CREDCOMM RA; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12, 13, 16 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Epics 3 to 8 Specification v3 | The feature row of FEAT-VAL-09 with its role and its dependency on FEAT-APD-05 | 1, 2, 3, 8 |",
+   "new": "| Epics 3 to 8 Specification v3 | The feature row of FEAT-VAL-09 with its role and its dependency on FEAT-APD-05 | 1, 2, 3, 8 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Logical data model | DF-CAS-001 to DF-CAS-023, DF-WRK-009 to DF-WRK-016, DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-ACE-187 to DF-ACE-195, DF-EXT-036 to DF-EXT-049 | 11 |",
+   "new": "| Logical data model | DF-CAS-001 to DF-CAS-023, DF-WRK-009 to DF-WRK-016, DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-ACE-187 to DF-ACE-195, DF-EXT-036 to DF-EXT-049 | 11 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Routing logic | R-UNI-14, R-UNI-15, R-UNI-38, R-UNI-39, R-UNI-40 and R-UNI-41; no D6 route-decision rule row is published | 4, 5, 8, 9, 14 |",
+   "new": "| Routing logic | R-UNI-14, R-UNI-15, R-UNI-38, R-UNI-39, R-UNI-40 and R-UNI-41; no D6 route-decision rule row is published | 4, 5, 8, 9, 14 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Architecture v5 | Slide 3, the route decision D6 and the delegation of authority; slide 8, the schema, base, topic and queue of the service | 2, 3 |",
+   "new": "| Architecture v5 | Slide 3, the route decision D6 and the delegation of authority; slide 8, the schema, base, topic and queue of the service | 2, 3 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Sibling stories | RWB-S1-E4008-APP and -CON, which split the same operation on the limit; RWB-S1-E4001-APP and -CON, which own the appraisal branch and the element set the route answer starts from | 1, 2, 3, 9, 12 |",
+   "new": "| Sibling stories | RWB-S1-E4008-APP and -CON, which split the same operation on the limit; RWB-S1-E4001-APP and -CON, which own the appraisal branch and the element set the route answer starts from | 1, 2, 3, 9, 12 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Patterns | DP-03, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 |",
+   "new": "| Patterns | DP-03, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Gaps and assumptions | GAP-2633 to -5; ASM-4337 to -6 | 1, 3, 4, 7, 8, 9, 11, 12, 13, 14, 16 |",
+   "new": "| Gaps and assumptions | GAP-2633 to -5; ASM-4337 to -6 | 1, 3, 4, 7, 8, 9, 11, 12, 13, 14, 16 | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  },
+  {
+   "old": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | all |",
+   "new": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | all | FEAT-VAL-09 | Not specified in the source documents (DOR-RWB-S1-E4009-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19058",
+   "item": "DOR-RWB-S1-E4009-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add to tab Story test cases the rows TC-E4-009-01 to TC-E4-009-04 and TC-S1-E4009-APP-01 to TC-S1-E4009-APP-13 as listed in section 16 of the story",
+   "note": "Story adds contract test APP-12 and table boundary APP-13; the six existing IDs must be added to Test Cases v8."
+  },
+  {
+   "ruling": "R-19059",
+   "item": "DOR-RWB-S1-E4009-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to section 18; feature FEAT-VAL-09; L3 process placeholder for all 12 rows."
+  },
+  {
+   "ruling": "R-19060",
+   "item": "DOR-RWB-S1-E4009-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Reference-data paragraph names limit, rule version, route set under DP-06 and DP-07; parameter keys are placeholders."
+  },
+  {
+   "ruling": "R-19061",
+   "item": "DOR-RWB-S1-E4009-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC3 to AC11 added for X2 to X10; section 5 Covered by lists them; test rows TC-S1-E4009-APP-03 to -11 added."
+  },
+  {
+   "ruling": "R-19062",
+   "item": "DOR-RWB-S1-E4009-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR12 to BR19 assigned to the eight source rows; coverage paragraph maps all 19 rules to criteria and test cases."
+  },
+  {
+   "ruling": "R-19063",
+   "item": "DOR-RWB-S1-E4009-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Register decision_record as an entity of the PLT decision-record library, created in rwb_valuation (DP-03); legacy decision-log wording stays as mapped in section 7",
+   "note": "decision_record is not in LDM v9 or Data Classification v5; the story side is unchanged."
+  },
+  {
+   "ruling": "R-23339",
+   "item": "GAP-1681",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-S1-E4009-CON",
+   "change": "Fix one path for the read and the command as Architecture v5 slide 18 states, recording POST /cases/{caseId}/route as the same command published by API Specification v4",
+   "note": "Contract story must fix the path before wave 3 system test; this story keeps the route path until then."
+  },
+  {
+   "ruling": "R-23340",
+   "item": "GAP-1688",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Story prints no route number; route codes carried as versioned reference data per the section 11 paragraph."
+  },
+  {
+   "ruling": "R-23344",
+   "item": "GAP-2634",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Ownership Map (delegation_limit row) and RWB-S1-E4008-APP",
+   "change": "P4 rwb-access and P7 rwb-decision owners confirm the publishing service of the delegation row; the baseline reads that one row with its version",
+   "note": "Owner read two ways is not resolvable in this story; no limit value enters any document."
+  },
+  {
+   "ruling": "R-23345",
+   "item": "GAP-2633",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-S1-E4009-CON and TSD S1 T-A.2",
+   "change": "Agree one element set for RouteRequest and Approval and the committee elements across the three slices; publish a schema replacing the declared compacts in a minor version",
+   "note": "Element sets are not published in any source; story keeps the GAP-2633 and ASM-4337 references."
+  }
+ ]
+}

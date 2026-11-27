@@ -1,0 +1,208 @@
+{
+ "edits": [
+  {
+   "old": "| ID | Condition | Result |\n|---|---|---|",
+   "new": "| ID | Condition | Result | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| X1 | The legacy dump is absent, unreadable, or holds no version for a table code the Workbench owns | The run stops before any load call, the cutover record names the table code, and nothing is handed over |",
+   "new": "| X1 | The legacy dump is absent, unreadable, or holds no version for a table code the Workbench owns | The run stops before any load call, the cutover record names the table code, and nothing is handed over | AC1 |"
+  },
+  {
+   "old": "| X2 | A version row has no table code, no version number, no valid from date or no approver | The file for that table code is refused whole; the other table codes may proceed |",
+   "new": "| X2 | A version row has no table code, no version number, no valid from date or no approver | The file for that table code is refused whole; the other table codes may proceed | AC1 |"
+  },
+  {
+   "old": "| X3 | A file would carry a row of `v_ace_efs_action_code`, `v_ace_product`, `v_ace_branch` or `v_ace_holiday` | The ACE-list guard refuses the file and names the view; no ACE row is copied or written |",
+   "new": "| X3 | A file would carry a row of `v_ace_efs_action_code`, `v_ace_product`, `v_ace_branch` or `v_ace_holiday` | The ACE-list guard refuses the file and names the view; no ACE row is copied or written | AC1 |"
+  },
+  {
+   "old": "| X4 | `POST reference-loads` answers 409 because an approved version already has this valid from | The load is not repeated; the existing version stays in force and the break is recorded |",
+   "new": "| X4 | `POST reference-loads` answers 409 because an approved version already has this valid from | The load is not repeated; the existing version stays in force and the break is recorded | AC2 |"
+  },
+  {
+   "old": "| X5 | The verify operation answers a failed check, or the read-back differs from the file in row count, content hash, approver or valid from date | The version is not approved; the difference is listed and never repaired in place |",
+   "new": "| X5 | The verify operation answers a failed check, or the read-back differs from the file in row count, content hash, approver or valid from date | The version is not approved; the difference is listed and never repaired in place | AC2 |"
+  },
+  {
+   "old": "| X6 | A rule row carries no test case | That file is refused whole at the pre-handover check; the rule table is not handed over |",
+   "new": "| X6 | A rule row carries no test case | That file is refused whole at the pre-handover check; the rule table is not handed over | AC2 |"
+  },
+  {
+   "old": "| X7 | The count of clean dates is broken by a BREAK result or a new REC-05 orphan | The count resets to zero and the gate stays closed |",
+   "new": "| X7 | The count of clean dates is broken by a BREAK result or a new REC-05 orphan | The count resets to zero and the gate stays closed | AC3 |"
+  },
+  {
+   "old": "| X8 | A caller without the platform-administration right tries to run or re-run the cutover | The action is refused with MSG-P4-002 |",
+   "new": "| X8 | A caller without the platform-administration right tries to run or re-run the cutover | The action is refused with MSG-P4-002 | AC3 |"
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| BR1 | No value a business person may change is written in code; it is read from reference data with its version | BR-P1-001, BR-P1-002; legacy guardrails |",
+   "new": "| BR1 | No value a business person may change is written in code; it is read from reference data with its version | BR-P1-001, BR-P1-002; legacy guardrails | AC1; TC-DM-014-01 |"
+  },
+  {
+   "old": "| BR2 | A version takes effect only after an approver who is not the author approves it | Reference-data contract BR4; ADR-012 |",
+   "new": "| BR2 | A version takes effect only after an approver who is not the author approves it | Reference-data contract BR4; ADR-012 | AC2; TC-DM-014-02 |"
+  },
+  {
+   "old": "| BR3 | No list that ACE holds is re-loaded; the four views are the only read path for them | Legacy AC1; DP-05 |",
+   "new": "| BR3 | No list that ACE holds is re-loaded; the four views are the only read path for them | Legacy AC1; DP-05 | AC1; TC-DM-014-01 |"
+  },
+  {
+   "old": "| BR4 | Every rule row names the test case that proves it, or the file is refused whole | Legacy AC2 |",
+   "new": "| BR4 | Every rule row names the test case that proves it, or the file is refused whole | Legacy AC2 | AC2; TC-DM-014-02 |"
+  },
+  {
+   "old": "| BR5 | The legacy tables stay read-only for their retention period, and the records are served from `rwb_case` | Legacy AC3 |",
+   "new": "| BR5 | The legacy tables stay read-only for their retention period, and the records are served from `rwb_case` | Legacy AC3 | AC3; TC-DM-014-03 |"
+  },
+  {
+   "old": "| BR6 | A repeated load of the same table, valid from date and content hash writes nothing and returns the first load | Reference-data contract BR5 |",
+   "new": "| BR6 | A repeated load of the same table, valid from date and content hash writes nothing and returns the first load | Reference-data contract BR5 | AC2; TC-DM-014-02 |"
+  },
+  {
+   "old": "No reference table, no list table and no copy of an ACE row exists in `rwb_source_data` after this story.",
+   "new": "No reference table, no list table and no copy of an ACE row exists in `rwb_source_data` after this story. The three tables land in the schema of their owner, `rwb_case`, as BR5 states. The load into that schema is the owner's Flyway step under `RWB-PLT-E1044-CON`, run by the owner's migrator login created by `RWB-PLT-N011-DB`; this story never writes another schema."
+  },
+  {
+   "old": "| MSG-P4-002 | Error | You cannot {action} here. Your role does not include it. |",
+   "new": "| MSG-P4-002 | Error | You cannot {action} here. Your role does not include it. |\n| MSG-P3-027 | Not specified in the source documents (DOR-RWB-P1-DM014-APP-9) | Not specified in the source documents (DOR-RWB-P1-DM014-APP-9) |"
+  },
+  {
+   "old": "| Legacy item (RWB-DM-014) | Where it is kept | Proved by |\n|---|---|---|",
+   "new": "| Legacy item (RWB-DM-014) | Feature | L3 process | Where it is kept | Proved by |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| Story line | Section 1 | AC1 to AC3 |",
+   "new": "| Story line | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 1 | AC1 to AC3 |"
+  },
+  {
+   "old": "| AC1 Extract the Workbench records | Section 7, verbatim | TC-DM-014-01, TC-DM-014-02 |",
+   "new": "| AC1 Extract the Workbench records | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 7, verbatim | TC-DM-014-01, TC-DM-014-02 |"
+  },
+  {
+   "old": "| AC2 Reconcile the versions | Section 7, verbatim with the mocked Given | TC-DM-014-02 |",
+   "new": "| AC2 Reconcile the versions | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 7, verbatim with the mocked Given | TC-DM-014-02 |"
+  },
+  {
+   "old": "| AC3 Cut over | Section 7, verbatim | TC-DM-014-03 |",
+   "new": "| AC3 Cut over | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 7, verbatim | TC-DM-014-03 |"
+  },
+  {
+   "old": "| Data table (three entities) | Section 11, verbatim | TC-DM-014-01 |",
+   "new": "| Data table (three entities) | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 11, verbatim | TC-DM-014-01 |"
+  },
+  {
+   "old": "| Permission table | Section 10, verbatim | TC-DM-014-04 |",
+   "new": "| Permission table | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 10, verbatim | TC-DM-014-04 |"
+  },
+  {
+   "old": "| Validation table | Section 14, verbatim | TC-DM-014-03, TC-DM-014-04 |",
+   "new": "| Validation table | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 14, verbatim | TC-DM-014-03, TC-DM-014-04 |"
+  },
+  {
+   "old": "| Guardrails | Section 17 | TC-DM-014-01 |",
+   "new": "| Guardrails | Migrate reference data | Not specified in the source documents (DOR-RWB-P1-DM014-APP-2) | Section 17 | TC-DM-014-01 |"
+  },
+  {
+   "old": "and the rule registry stays with rwb-decision. Every candidate gap",
+   "new": "and the rule registry stays with rwb-decision. The owner-side Flyway load is `RWB-PLT-E1044-CON`, run in the same cutover step as this story; no story ID is created for it. Every candidate gap"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14940",
+   "item": "DOR-RWB-P1-DM014-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Six dependencies are named in the Depends on and Contract dependencies rows; the two unbuilt builds gate start via Ready to start. No edit."
+  },
+  {
+   "ruling": "R-14941",
+   "item": "DOR-RWB-P1-DM014-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature column added (Migrate reference data, from section 7) and L3 process column added; its value is not specified in the source documents."
+  },
+  {
+   "ruling": "R-14942",
+   "item": "DOR-RWB-P1-DM014-APP-3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to section 5; each exception path is tied to AC1, AC2 or AC3. Section 7 unchanged."
+  },
+  {
+   "ruling": "R-14943",
+   "item": "DOR-RWB-P1-DM014-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to section 8 with AC IDs and the existing TC-DM-014 IDs from section 18 for BR1 to BR6."
+  },
+  {
+   "ruling": "R-14944",
+   "item": "DOR-RWB-P1-DM014-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Record flyway_schema_history as a Flyway-managed technical table of rwb_source_data, outside the business entities.",
+   "note": "Story section 11 unchanged; the table is Flyway bookkeeping, not a business entity, so it is not a section 11 field."
+  },
+  {
+   "ruling": "R-14945",
+   "item": "DOR-RWB-P1-DM014-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Align the MSG-P1-001 text with the standard; the standard's text is not in this chunk.",
+   "note": "MSG-P3-027 row added to section 14 with text not specified in source. MSG-P1-001 text left unchanged pending the standard's text."
+  },
+  {
+   "ruling": "R-21796",
+   "item": "GAP-0240",
+   "status": "Cross-document",
+   "section": "Header",
+   "target": "plan/split_plan.json",
+   "change": "Set the schema cutover of each migrated table to the wave of its owning service; keep the migration story releases as the latest date.",
+   "note": "Story wave and releases unchanged; the cutover wave belongs in the plan."
+  },
+  {
+   "ruling": "R-21800",
+   "item": "GAP-0236",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Owner-side Flyway load recorded as RWB-PLT-E1044-CON in the same cutover step as this story; no story ID created."
+  },
+  {
+   "ruling": "R-21801",
+   "item": "GAP-0237",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "P1 keeps extract, key mapping and reconciliation; the load is the owner's Flyway step run by the owner's migrator login from RWB-PLT-N011-DB."
+  },
+  {
+   "ruling": "R-22950",
+   "item": "GAP-0235",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Migrated reference tables named as landing in rwb_case, the owner schema per BR5. Other tables stay with Ownership Map v1 Tables."
+  }
+ ]
+}

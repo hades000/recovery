@@ -1,0 +1,45 @@
+{
+ "edits": [
+  {
+   "old": "    Then one entry exists with decision code \"D5\" and final call \"approved\"",
+   "new": "    Then one entry exists with decision code \"D5\" and final call \"approved\"\n\n  Scenario: AC14 No code of this story calls NLEADS (new, D-RCV-60)\n    Then the code of this story has no call to NLEADS and no outbound interface to NLEADS\n\n  Scenario: AC15 A call without a valid credential or without the right is refused with 401 or 403 (new, D-RCV-60)\n    When a caller calls a recording or read operation with no valid credential\n    Then the response is 401\n    When a caller without the Decision log right calls a recording or read operation\n    Then the response is 403\n\n  Scenario: AC16 A timed-out recording activity is retried without a second entry, and a timeout before commit writes nothing (new, D-RCV-60)\n    Given the record-result activity for treatment \"TRT-SYN-0610\" timed out before it committed\n    When the activity is retried with the same Idempotency-Key\n    Then one entry exists after the retry and the approval holds its decision log id\n    When the record-result activity times out before it commits\n    Then no entry and no outbox row are written and the approval stays \"WAITING\""
+  },
+  {
+   "old": "| BR4 | NLEADS has no interface; the officer submits and records the result | INT-26; DL12 | No call to NLEADS from any code of this story |",
+   "new": "| BR4 | NLEADS has no interface; the officer submits and records the result | INT-26; DL12 | No call to NLEADS from any code of this story (AC14) |"
+  },
+  {
+   "old": "| TC-E2-006-18 | AC13; BR4 | Component | Result recorded at level L5; no call to NLEADS |",
+   "new": "| TC-E2-006-18 | AC13; BR4 | Component | Result recorded at level L5; no call to NLEADS |\n| TC-E2-006-19 | AC14; BR4 | Boundary | Code of this story scanned for any call to NLEADS |\n| TC-E2-006-20 | AC15; §12 operations | Contract | Call with no credential and call without the Decision log right against the recording and read operations |\n| TC-E2-006-21 | AC16 | NFR | Record-result activity timed out before commit and retried with the same Idempotency-Key |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31477",
+   "item": "NEWAC-RWB-P7-E2006-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 as a boundary check that no code of this story calls NLEADS, traced in section 8 BR4 and test row TC-E2-006-19."
+  },
+  {
+   "ruling": "R-31478",
+   "item": "NEWAC-RWB-P7-E2006-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for 401 without a valid credential and 403 without the Decision log right; contract test row TC-E2-006-20 added."
+  },
+  {
+   "ruling": "R-31479",
+   "item": "NEWAC-RWB-P7-E2006-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 covering a retried timed-out activity (one entry) and a timeout before commit (nothing written); NFR test row TC-E2-006-21 added."
+  }
+ ]
+}

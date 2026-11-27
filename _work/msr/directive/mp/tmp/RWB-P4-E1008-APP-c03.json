@@ -1,0 +1,104 @@
+{
+ "edits": [
+  {
+   "old": "| DF-REF-034 to DF-REF-039 | `role` | `role_code`, `role_class`, `default_scope`; the scope of an entry's test | Read |",
+   "new": "| DF-REF-034 to DF-REF-038 | `role` | `role_code`, `role_class`, `default_scope`; the scope of an entry's test (DF-REF-039 is not in the Logical Data Model v9: Not specified in the source documents (DOR-RWB-P4-E1008-APP-7)) | Read |"
+  },
+  {
+   "old": "No row of `case`, `document`, `assignment` or `rule_package` is read, and no foreign key crosses a schema (DP-01). The case reference in an entry is a value the writer recorded, not a join, and it is used for the scope test only. No ACE row and no view column is read or copied: the store holds IDs, codes, references, hashes and times only (BR12).",
+   "new": "No row of `case`, `document`, `assignment` or `rule_package` is read, and no foreign key crosses a schema (DP-01). The case reference in an entry is a value the writer recorded, not a join, and it is used for the scope test only. No ACE row and no view column is read or copied: the store holds IDs, codes, references, hashes and times only (BR12). The table `decision_record` and the trigger `tr_declog_append_only` are local objects of this story (DP-03); they are not fields or entities of the Logical Data Model and Data Dictionary v9 or of Data Classification v5, and they are named here (DOR-RWB-P4-E1008-APP-7). The case reference and the trace ID of an entry are carried in its inputs reference, `inputsRef` (GAP-2068). The chain is this service's own chain, ordered by `chain_seq`, and its first row carries a `prev_hash` of 64 zeros; the chain of record is the central ledger of `rwb-decision` (P7), and this chain serves replay (GAP-2074). This story declares no append operation on `decision_log_entry`: the central ledger is written only by the ingest of `rwb.decision-record.v1` (GAP-1224). The strict-mode confirmation that a call waits on is the read `GET /api/recovery/decision/v1/decision-log/{entryId}`, which returns 200 once the entry is sealed, and the sealed entry is also announced on `rwb.decision-record.v1` for the reporting projection (GAP-1227). The case reference is verified through the case contract of P3, not by a key, and no foreign key of the decision log crosses a schema (GAP-1231)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16591",
+   "item": "DOR-RWB-P4-E1008-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "DF-REF-039 removed from the range and marked not in LDM v9; decision_record and trigger named as local objects of DP-03.",
+   "note": "The ACE-view wording in criteria and test data sits outside section 11 and is not changed here."
+  },
+  {
+   "ruling": "R-16592",
+   "item": "DOR-RWB-P4-E1008-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The message standard's meaning for MSG-P4-001 is not in the source documents; a new ID or text would be invented, so the ID is kept (DOR-RWB-P4-E1008-APP-9)."
+  },
+  {
+   "ruling": "R-21842",
+   "item": "GAP-0975",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P4-E1037-APP; RWB-P4-E1037-CON",
+   "change": "Read every 'rwb_access baseline' reference as the version applied by RWB-P4-E1001-APP; RWB-P4-E1037-CON keeps the contract stub and creates no table.",
+   "note": "This story creates only decision_record; the five authority tables are outside its scope, so no text here changes."
+  },
+  {
+   "ruling": "R-21895",
+   "item": "GAP-2068",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Local table decision_record created by this story's migration; case reference and trace ID carried in inputsRef.",
+   "note": "Column mapping of entry_id and case_id to the ten source fields is covered by the inputs-reference rule in this story."
+  },
+  {
+   "ruling": "R-21896",
+   "item": "GAP-2074",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Per-service chain ordered by chain_seq, first prev_hash 64 zeros; central ledger of rwb-decision is the chain of record.",
+   "note": "Local chain serves replay; the ledger chain and WORM daily fingerprint are P7's."
+  },
+  {
+   "ruling": "R-21898",
+   "item": "GAP-0332",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "AsyncAPI document for rwb.decision-record.v1 (shared-topic contract)",
+   "change": "Publish the DecisionRecorded payload and ingest rule: CloudEvents id as dedupe key in processed_event, per-case order from producer, chain_seq and prev_hash assigned by rwb-decision under the chain lock, catch-up within five minutes, before the first SIT run.",
+   "note": "Contract review is owned by the solution architect; the story has no payload to add."
+  },
+  {
+   "ruling": "R-21899",
+   "item": "GAP-1224",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "sibling P7 story E2028 (declares POST /decision-log)",
+   "change": "Remove the POST /decision-log declaration; the Ownership Map does not own it and the ledger is written only by the ingest of rwb.decision-record.v1.",
+   "note": "This story now declares no append operation on decision_log_entry, in section 11."
+  },
+  {
+   "ruling": "R-21900",
+   "item": "GAP-1226",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "FSD module P7 (next version)",
+   "change": "Withdraw FEAT-DRI-06 and its lake acceptance criteria; keep JOB-13 as continuous ingest and JOB-14 as the 02:00 chain check with the WORM seal; record RWB-E1-014 retired by the ledger.",
+   "note": "No JOB-13 or FEAT-DRI-06 reference exists in this story; the lake-copy scan is already in place."
+  },
+  {
+   "ruling": "R-21901",
+   "item": "GAP-1227",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P7-E1008-CON; integration harness of wave 1",
+   "change": "Publish the read GET /api/recovery/decision/v1/decision-log/{entryId} returning 200 once sealed as the strict-mode confirmation, and the sealed-entry announcement on rwb.decision-record.v1.",
+   "note": "This story adopts the confirmation in section 11; publication sits in the P7 contract and the harness."
+  },
+  {
+   "ruling": "R-21902",
+   "item": "GAP-1231",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P7-E1008-DB (Physical Schema v7, rwb_decision)",
+   "change": "Drop fk_decision_log_entry_case_id; keep case_id as a plain uuid verified through P3's case contract; record the same ruling for every legacy cross-module key of the decision log.",
+   "note": "This story creates no cross-schema key; section 11 already states that no foreign key crosses a schema."
+  }
+ ]
+}

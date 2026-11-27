@@ -1,0 +1,50 @@
+{
+ "edits": [
+  {
+   "old": "    Then the answer is 200 with the markers of the fields asked",
+   "new": "    Then the answer is 200 with the markers of the fields asked\n\n  Scenario: AC9 The data, boundary and version rules of this slice hold (new, D-RCV-60)\n    Given matrix version \"PM-2026.11\" is in force in \"permission\" and the reference lists are read with the version in force\n    When the caller calls GET /api/recovery/access/v1/admin/roles and POST /api/recovery/access/v1/authorise for area \"CASE_RECORD\", right \"R\", productCode \"DP02\" and caseId \"RW-2026-000102\"\n    Then every role, permission row and masking exception is read from \"role\", \"permission\" and \"masking_rule\" as data, and no role code, capability area, letter, scope value or field ID is written in Java\n    And no field dictionary row of \"sys_objects\" or \"sys_fields\" is copied into \"rwb_access\"\n    And no access entry is written and no event is published\n    And the reference-loads and list endpoints of the administration surface are not answered by this service\n\n  Scenario: AC10 A call without a credential is answered 401 by each provided operation (new, D-RCV-60)\n    Given the caller presents no credential\n    When the caller calls GET /api/recovery/access/v1/admin/roles, POST /api/recovery/access/v1/authorise for area \"CASE_RECORD\", right \"R\", productCode \"DP02\" and caseId \"RW-2026-000102\", and GET /api/recovery/access/v1/masking-policies with role \"RW-COMPLY\" and field IDs \"DF-ACE-074\"\n    Then each answer is 401\n    And no role row, no permission row, no masking exception, no allowed flag and no field marker is returned"
+  },
+  {
+   "old": "| TC-E1-016-15 | BR12, BR13, BR15 | Component | Masking version MASK-SIT-01 read at its valid-from date with no deployment; no access entry written and no event published; `/admin/reference-loads` answered by P3, not by this service |",
+   "new": "| TC-E1-016-15 | BR12, BR13, BR15 | Component | Masking version MASK-SIT-01 read at its valid-from date with no deployment; no access entry written and no event published; `/admin/reference-loads` answered by P3, not by this service |\n| TC-E1-016-16 | AC9, BR1, BR11, BR12, BR13, BR14, BR15 | Component | Role, permission and masking rows as data at matrix PM-2026.11 and masking fixture MASK-SIT-01; LOV values through the reference-data fake with their versions; no field dictionary row copied |\n| TC-E1-016-17 | AC10 | Component | No credential presented; GET `/admin/roles`, POST `/authorise` and GET `/masking-policies` called |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28496",
+   "item": "GAP-1028",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P5-E1016-APP (WP B-P5-03) story and its API yaml",
+   "change": "Accept six new criteria as P5 deliverable and record the split; publish GET /api/recovery/document/v1/retention-classes and .../{classCode} with RetentionClass shape of RWB-P5-AD021-CON; consume P4, P3, P1 operations as published contracts with fakes; inherit guard library and gateway route; no H dependency; login per proposed fix",
+   "note": "Fix lies in the P5 story, not this P4 story. This story holds no P5 contract and is unchanged for this item."
+  },
+  {
+   "ruling": "R-30837",
+   "item": "NEWAC-RWB-P4-E1016-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 in section 7 for BR1, BR11 to BR15 and test row TC-E1-016-16 in section 16."
+  },
+  {
+   "ruling": "R-30838",
+   "item": "NEWAC-RWB-P4-E1016-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 in section 7: no credential answers 401 on the three provided operations; test row TC-E1-016-17 in section 16."
+  },
+  {
+   "ruling": "R-30839",
+   "item": "NEWAC-RWB-P4-E1016-APP-AC14",
+   "status": "Not applied",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Story has no write operation (BR13) and no idempotency key. Naming a key or write would invent values, so no criterion was added."
+  }
+ ]
+}

@@ -1,0 +1,67 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E1013-ITG",
+ "unit": "u03",
+ "rulings": [
+  "R-21950",
+  "R-21953",
+  "R-28491"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 3
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-21950",
+     "item": "GAP-2573",
+     "status": "Resolved",
+     "section": "12.6",
+     "target": "",
+     "change": "",
+     "note": "12.6 now has one 01:30 Asia/Bangkok Schedule with no Airflow call; 12.8 stub no longer triggers the JOB-15 run path."
+    },
+    {
+     "ruling": "R-21953",
+     "item": "GAP-2569",
+     "status": "Resolved",
+     "section": "12.4",
+     "target": "",
+     "change": "",
+     "note": "12.4 records the conflict and the no-event declaration of the three P9 E1013 stories. This suite's consumption of ReportPublished is left unchanged."
+    },
+    {
+     "ruling": "R-28491",
+     "item": "GAP-2580",
+     "status": "Resolved",
+     "section": "12.4",
+     "target": "",
+     "change": "",
+     "note": "Assumptions Register v1 ASM-4256 to 4259 fix variance, ceiling, event and default. Only ASM-4258 (event) applies here; the others sit in RWB-P9-E6037-CON/APP."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| JOB-15 measures | Daily at 01:30, Airflow trigger, no data lake | Registered by the rwb-reporting release and triggered once by the harness through the P9 run path with the same input the cadence uses | JOB-15 Reporting extract |",
+     "new": "| JOB-15 measures | One Temporal Schedule, daily at 01:30 Asia/Bangkok; no Airflow call is wired to the run; no data lake | Registered by the rwb-reporting release and triggered once by the harness through the P9 run path with the same input the cadence uses. Whether any report extract trigger returns, and what it calls, is settled in the batch and scheduling work (GAP-2573) | JOB-15 Reporting extract |"
+    },
+    {
+     "old": "| Airflow trigger stub | The bank scheduler | Calls `POST /api/recovery/source-data/v1/business-days/{date}/ready` and the P9 run path; it holds no business rule |",
+     "new": "| Airflow trigger stub | The bank scheduler | Calls `POST /api/recovery/source-data/v1/business-days/{date}/ready` only; it does not trigger JOB-15, which the harness runs through the P9 run path; it holds no business rule |"
+    },
+    {
+     "old": "All three are consumed in the CloudEvents 1.0 envelope, keyed caseId,",
+     "new": "`rwb.reporting.ReportPublished.v1` is the publish marker of the Epic 1 measure run and not an event of the benefit realisation view, which publishes no event type of its own on `rwb.reporting.events.v1` (GAP-2580; ASM-4258). The Ownership Map gives rwb-reporting no event row, and RWB-P9-E1013-APP, RWB-P9-E1013-CON and RWB-P9-E1013-OPS declare no event. The topic stays platform-provisioned. The owner of the reporting read model decides whether a freshness event is published; if it is, it is raised as its own story with the outbox library row RWB-PLT-TE006-CON (GAP-2569; ASM-4235).\n\nAll three are consumed in the CloudEvents 1.0 envelope, keyed caseId,"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

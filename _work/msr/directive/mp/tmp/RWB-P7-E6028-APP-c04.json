@@ -1,0 +1,110 @@
+{
+ "edits": [
+  {
+   "old": "The request and answer shape of the raise is Not specified in the source documents (GAP-1311; ASM-2321), and until the contract lands the P7 slice is built against its fake",
+   "new": "The raise is `POST /approvals` on the decision base, with a body carrying caseId, decisionCode, regulationItem, capabilityArea, productGroup, amount, sourceType, sourceRef, ruleId, ruleVersion and an Idempotency-Key, and the answer carries the approval reference and the record reference (GAP-1311; ASM-2321); until the contract lands the P7 slice is built against its fake"
+  },
+  {
+   "old": "The escalation of an overdue item is the sixth transition of the item and is the escalation slice's.",
+   "new": "The escalation of an overdue item is carried inside WAITING through escalation_level, not as a sixth status, and is the escalation slice's (GAP-1311)."
+  },
+  {
+   "old": "the four legacy screen states are S7's and are not restated as this item's.",
+   "new": "the four legacy screen states are S7's and are not restated as this item's. The empty, loading, error and no access states of SCR-27 are Not specified in the source documents (CG-ALL-7468), because Screen Specifications v1 gives none of them."
+  },
+  {
+   "old": "| BR12 | The two ledger reads and the approval read are served under the Decision log right and the caller's scope; this service holds no role, no scope and no masking rule of its own | TSD P7 v2 T-A.1 and T6.2; FSD P7 v3 A2.23; the authorise dependency is carried in GAP-1312 |",
+   "new": "| BR12 | The approval read and the three decisions are served under the Decision log right A and the caller's scope, and the two ledger reads under the read right R; the approval operations also require the capability area WRITE_OFF_AND_POSTING, and both are required in the authorise answer; this service holds no role, no scope and no masking rule of its own | TSD P7 v2 T-A.1 and T6.2; FSD P7 v3 T6.1 (read right only) and A2.23; the authorise dependency is carried in GAP-1312 and the role holders in GAP-1314 |"
+  },
+  {
+   "old": "- No build dependency. Day 1, against the write-off fake and the two platform contracts, which are platform CON stories and block nothing.",
+   "new": "- No build dependency. Day 1, against the write-off fake and the two platform contracts, which are platform CON stories and block nothing.\n- The hand-over of a charged-off population to the debt sale route (R-WO-32 where the placement type is sale; R-WO-50 and R-WO-51 closing on the buyer's settlement and remittance) is carried here as product behaviour with the population, the route and the approval recorded; the call type and the direction between this service and S6 rwb-debtsale are an open question with the S6 owner, to be closed before the wave 4 system test (GAP-1799).\n- The two platform H dependencies, RWB-PLT-E1027-CON (DP-03) and RWB-PLT-N001-CON (DP-19), are non-blocking platform contracts of wave 0; the four consumed contracts of the delegation answer, the authorise answer, the case read and the reference-data lists are published contracts of P3 and P4, built against their fakes; the metadata rows are left as the plan gives them (GAP-1312)."
+  },
+  {
+   "old": "Then the single read of each entry carries its final call, its approver where it has one, its decided time, its previous hash and its entry hash",
+   "new": "Then the single read of each entry carries its final call, its approver where it has one, its decided time, its previous hash and its entry hash\n\n  Scenario: AC9 The approval, the record, the event and the log carry no personal data and reach no case, task, timer or delegation row (new, D-RCV-60)\n    Given the approval of case \"RW-2027-000730\" is \"WAITING\" at level \"L6\"\n    When \"approver.user01\" approves it\n    Then the approval, the decision record, the outbox row and the log line hold only case and write-off identifiers, a decision code, a rule id and version, a level, an amount, a status, a reason and a user reference\n    Then no write reaches a case, task, timer or delegation row\n\n  Scenario: AC10 A call without a valid credential is refused with 401 on each provided operation (new, D-RCV-60)\n    Given no valid credential is sent with the call\n    When the caller sends a call to each provided operation of this service\n    Then each answer is 401 and nothing is read or written"
+  },
+  {
+   "old": "These eight criteria are new for the `rwb-decision` slice",
+   "new": "These ten criteria are new for the `rwb-decision` slice"
+  },
+  {
+   "old": "| TC-E6-028-08 | BR7, BR8 | Component | A return reason at the 1,000-character limit of BR7 accepted and one character over it refused, with each record written once in `decision_log_entry` and `approval` |",
+   "new": "| TC-E6-028-08 | BR7, BR8 | Component | A return reason at the 1,000-character limit of BR7 accepted and one character over it refused, with each record written once in `decision_log_entry` and `approval` |\n| TC-E6-028-09 | AC9, BR13, BR14 | Component | The approval, the decision record, the outbox row and the log line of case `RW-2027-000730` checked for personal data fields, and any write to the case, task, timer or delegation row |\n| TC-E6-028-10 | AC10 | Component | A call to each provided operation with no valid credential, answered 401 with nothing read or written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22837",
+   "item": "GAP-1311",
+   "status": "Cross-document",
+   "section": "3, 15",
+   "target": "TSD P7 v2 T-A.1",
+   "change": "Publish POST /approvals on the decision base with the section 3 body fields and an Idempotency-Key; publish the action, page and decision-log shapes; list the decision code and final calls as LOV-DECISION and final-call reference data.",
+   "note": "Story side done: raise shape in section 3, escalation inside WAITING via escalation_level in section 15. TSD must publish the raise and shapes."
+  },
+  {
+   "ruling": "R-22839",
+   "item": "GAP-1314",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Users Roles and Permissions (P4 role model)",
+   "change": "Add RW-CREDCOMM to the holders of the WRITE_OFF_AND_POSTING capability right, or record why R-WO-12 routes to a role that cannot decide, before the wave 4 entry check.",
+   "note": "Story BR12 now separates right A on approval operations from right R on ledger reads and requires the capability area in authorise."
+  },
+  {
+   "ruling": "R-22841",
+   "item": "GAP-1799",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Hand-over carried as product behaviour in section 3; call type and direction open with the S6 owner, to close before wave 4 system test."
+  },
+  {
+   "ruling": "R-22842",
+   "item": "GAP-1312",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "Dependency Map",
+   "change": "Carry RWB-PLT-E1027-CON and RWB-PLT-N001-CON as non-blocking wave 0 platform contracts, and the four consumed contracts as P3 and P4 published contracts, built against their fakes.",
+   "note": "Section 3 bullet added. Section 13 citation not made: its text is not in this chunk. Metadata rows unchanged."
+  },
+  {
+   "ruling": "R-26447",
+   "item": "CG-ALL-7467",
+   "status": "Not applied",
+   "section": "3, 3.1",
+   "target": "",
+   "change": "",
+   "note": "The migration name is not in this chunk, and the service's next Flyway number is Not specified in the source documents (CG-ALL-7467)."
+  },
+  {
+   "ruling": "R-26448",
+   "item": "CG-ALL-7468",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access states of SCR-27 stated as Not specified in the source documents, since the screen spec lacks them."
+  },
+  {
+   "ruling": "R-31556",
+   "item": "NEWAC-RWB-P7-E6028-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 (401 on each provided operation) and TC-E6-028-10; criteria count in section 7 updated to ten."
+  },
+  {
+   "ruling": "R-31557",
+   "item": "NEWAC-RWB-P7-E6028-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 covering BR13 and BR14 with TC-E6-028-09 in section 16."
+  }
+ ]
+}

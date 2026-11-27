@@ -1,0 +1,102 @@
+{
+ "edits": [
+  {
+   "old": "The real lot and account records are loaded by P1's own cutover migration on its own Flyway sequence (DP-15), and the reconciliation that produces the breaks is RWB-P1-DM009-APP's.",
+   "new": "The real lot and account rows are loaded by rwb-debtsale on its own Flyway sequence (DP-15), from the records that RWB-P1-DM009-APP extracts and maps, and the reconciliation that produces the breaks is RWB-P1-DM009-APP's. RWB-P1-DM009-APP reads v_ace_account and v_ace_payment and writes no other service's schema. The cutover extract is read once through the cutover run from the legacy dump and lands nothing in rwb_source_data; one package per cutover business date goes to rwb-debtsale; the ten clean days are counted from the reconciliation_result rows of the migrated records, and the count and the sign-off are held in the cutover record of the release pipeline. The package layout, the cutover record format and the evidence location are agreed at the cutover rehearsal and recorded in the cutover procedure. The field list beyond the AC1 wording and the legacy dump layout, file name and read identity are Not specified in the source documents (GAP-0538; GAP-2173)."
+  },
+  {
+   "old": "| MSG-P1-001 | Warning | Text as in Error and Message Standard v4 (MSG-P1-001) |",
+   "new": "| MSG-P1-001 | Warning | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "The SCR-45 Data quality console that the legacy story names is not part of this legacy key: it is the screen of RWB-AD-019 and this story neither builds it nor reads it.",
+   "new": "The SCR-45 Data quality console that the legacy story names is not part of this legacy key: it is the screen of RWB-AD-019 and this story neither builds it nor reads it. Its states are loading and breaks, as the legacy story names them; its empty, error and no access states are Not specified in the source documents (CG-ALL-1034)."
+  },
+  {
+   "old": "What the wave entry check looks at instead is the run report, whose environment, layout and retention are Not specified in the source documents (GAP-0449; ASM-0641).",
+   "new": "The wave 4 entry check agrees the harness pack: the SIT environment and base hosts per hop; a cutover extract fixture with lot LOT-SYN-0009, its two account links with the orphan ACC-SYN-000917, and source and migrated_at; a reconciliation extract with one row per orphan and its reason; one run report per business date; a retention that matches the wave evidence; and a gate that fails on any unresolved key, any stored balance or payment, or a suppressed break. The environment, the base hosts, the data seeding set and the retention period are Not specified in the source documents (GAP-0449; ASM-0641)."
+  },
+  {
+   "old": "    And no table of another service's schema is read",
+   "new": "    And no table of another service's schema is read\n\n  Scenario: AC6 Each business rule of section 8 is asserted on the migrated records (new, D-RCV-60)\n    Given the migrated records for business date \"2026-11-30\"\n    When the reconciliation run reads them and their ACE rows\n    Then every business key on a migrated record resolves to an ACE view row before the lot is offered, awarded or transferred\n    And no break is suppressed and every break carries its reason\n    And one unresolved key holds the wave open\n    And no balance and no payment is stored on the migrated record\n    And the migrated record keeps its source and its migration date\n    And a sale in flight keeps its accounts, its reserve price and its buyer\n    And each service applies its own Flyway sequence in its own schema\n\n  Scenario: AC7 A consumed call that fails or does not answer stops the run at that hop (new, D-RCV-60)\n    Given the rwb-source-data contract does not answer for account_key \"ACC-SYN-000909\"\n    When the harness runs the reconciliation for business date \"2026-11-30\"\n    Then the run fails at the hop that did not answer\n    And the run report names that hop and its contract version"
+  },
+  {
+   "old": "| TC-DM-009-05-ITG | ITG AC5 | Integration | Synthetic lot LOT-SYN-0009 read through the rwb-debtsale and rwb-case contracts only |",
+   "new": "| TC-DM-009-05-ITG | ITG AC5 | Integration | Synthetic lot LOT-SYN-0009 read through the rwb-debtsale and rwb-case contracts only |\n| TC-DM-009-06-ITG | ITG AC6 (section 8 rules BR1 to BR7) | Integration | Synthetic lot LOT-SYN-0009 with its two account links and the orphan ACC-SYN-000917 |\n| TC-DM-009-07-ITG | ITG AC7 | Component | Stub of rwb-source-data that does not answer for account_key ACC-SYN-000909 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21823",
+   "item": "GAP-0449",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 now lists the harness pack agreed at the wave 4 entry check, with the gate; environment, hosts, seeding and retention stay Not specified.",
+   "note": "Harness pack and pass or fail gate agreed at wave 4 entry check. Environment, hosts, seeding and retention marked Not specified (GAP-0449)."
+  },
+  {
+   "ruling": "R-21824",
+   "item": "GAP-0537",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "rwb-debtsale loads the lot and account rows on its own Flyway sequence; P1 extracts and maps and writes no other schema.",
+   "note": "rwb-debtsale loads rows on its own Flyway sequence. P1 reads v_ace_account and v_ace_payment and writes no other service's schema."
+  },
+  {
+   "ruling": "R-21825",
+   "item": "GAP-0538",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "Story now states the extract source, the package hand-over, clean-day count and sign-off location; field list beyond AC1 stays Not specified.",
+   "note": "Extract read once from legacy dump, lands nothing in rwb_source_data, one package per date to rwb-debtsale, count and sign-off in release cutover record."
+  },
+  {
+   "ruling": "R-21826",
+   "item": "GAP-2173",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "Story records that package layout, cutover record format and evidence location are agreed at cutover rehearsal and recorded in cutover procedure.",
+   "note": "Package layout, cutover record format and evidence location agreed at cutover rehearsal and recorded in cutover procedure. Legacy dump layout stays Not specified."
+  },
+  {
+   "ruling": "R-23705",
+   "item": "CG-ALL-1031",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text copied from Error and Message Standard v4.",
+   "note": "MSG-P1-001 text now copied from Error and Message Standard v4: '{product} is from {date}. Today's load has not arrived.'"
+  },
+  {
+   "ruling": "R-23706",
+   "item": "CG-ALL-1034",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 states SCR-45 states as loading and breaks; empty, error and no access marked Not specified.",
+   "note": "SCR-45 states stated as loading and breaks. Empty, error and no access are not in Screen Specifications v1, so marked Not specified."
+  },
+  {
+   "ruling": "R-29724",
+   "item": "NEWAC-RWB-ITG-DM009-ITG-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC6 to section 7 covering rules BR1 to BR7, and TC-DM-009-06-ITG to section 16.",
+   "note": "Added AC6 (AC5 already in use) covering BR1 to BR7 and TC-DM-009-06-ITG. Proposed test wording came from the rules, not a source value."
+  },
+  {
+   "ruling": "R-29725",
+   "item": "NEWAC-RWB-ITG-DM009-ITG-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 to section 7 for a consumed call that fails or does not answer, and TC-DM-009-07-ITG to section 16.",
+   "note": "Added AC7 (AC6 used above) for a consumed call that fails or does not answer, with TC-DM-009-07-ITG. Stops at the hop and names it in the report."
+  }
+ ]
+}

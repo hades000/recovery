@@ -1,0 +1,67 @@
+{
+ "edits": [
+  {
+   "old": "- The masking call is inside the step and not a separate hop: a masking failure stops the item before the model call and the item keeps `ocr_status` DONE with no `predicted_type`, so the next run retries it and no unmasked text is ever sent (X3 is not used for a masking failure, because no model call was made).",
+   "new": "- The masking call is inside the step and not a separate hop: a masking failure stops the item before the model call and the item keeps `ocr_status` DONE with no `predicted_type`, so the next run retries it and no unmasked text is ever sent (X3 is not used for a masking failure, because no model call was made).\n- The decision record for each applied classification is a local row in the rwb_case decision-record table created by the service baseline; no DecisionRecorded event is published and no platform dependency is claimed."
+  },
+  {
+   "old": "    Then the response is 403 with message MSG-P4-002",
+   "new": "    Then the response is 403 with message MSG-P4-002\n\n  Scenario: AC12 Error answers of the provided operations carry status 401, 403 or 404 (new, D-RCV-60)\n    Given a request to GET /api/recovery/document/v1/documents/{documentId} without a valid session\n    When the request is sent\n    Then the response is 401\n    Then a user without Documents R over the scope of the document is answered 403 with message MSG-P4-002\n    Then a request for a document that does not exist is answered 404"
+  },
+  {
+   "old": "| TC-E1-050-11 | Access | Component | Capacity and workforce planner (RW-CAPACITY, no Documents right) calls `GET /api/recovery/document/v1/documents/{documentId}` on a classified document; refused with MSG-P4-002 |",
+   "new": "| TC-E1-050-11 | Access, AC11 | Component | Capacity and workforce planner (RW-CAPACITY, no Documents right) calls `GET /api/recovery/document/v1/documents/{documentId}` on a classified document; refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E1-050-13 | §12.7 tables (ASM-3438) | Component | Each table in §12.7 read or written within its stated use; no foreign-schema table read |",
+   "new": "| TC-E1-050-13 | §12.7 tables (ASM-3438) | Component | Each table in §12.7 read or written within its stated use; no foreign-schema table read |\n| TC-E1-050-14 | AC12 | Component | Provided operations of the document API called without a valid session, by a user without Documents R, and for a documentId that does not exist |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28603",
+   "item": "GAP-0766",
+   "status": "Cross-document",
+   "section": "5",
+   "target": "parameter-catalog.csv",
+   "change": "Add one boolean parameter key for the rwb-case classification handler, agreed with RW-COE, and a daily classification re-drive time outside the case-creation and allocation windows.",
+   "note": "The switch key and re-drive time are data in the parameter catalog; no story key value is invented here."
+  },
+  {
+   "ruling": "R-28604",
+   "item": "GAP-0767",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Decision record written as a local rwb_case row; no DecisionRecorded event and no platform dependency claimed, per note added in section 5."
+  },
+  {
+   "ruling": "R-31151",
+   "item": "NEWAC-RWB-P5-E1050-APP-AC11",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC11 already in section 7; TC-E1-050-11 Covers now lists AC11 so the criterion has its test case row."
+  },
+  {
+   "ruling": "R-31152",
+   "item": "NEWAC-RWB-P5-E1050-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for 401, 403 and 404 answers in section 7 and test case TC-E1-050-14 in section 16."
+  },
+  {
+   "ruling": "R-31153",
+   "item": "NEWAC-RWB-P5-E1050-APP-AC13",
+   "status": "Not applied",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "No allowed or disallowed status transition set is named in the source documents; a refusal criterion would need an invented transition."
+  }
+ ]
+}

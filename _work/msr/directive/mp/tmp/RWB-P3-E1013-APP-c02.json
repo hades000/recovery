@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "`measure_definition`, `measure_snapshot` and `measure_publish` are P9's, `queue_measure` is P3's from RWB-P3-E1030-APP and is not touched here, and no `v_ace_*` view is read (DP-05).",
+   "new": "`measure_definition`, `measure_snapshot` and `measure_publish` are P9's, `queue_measure` is P3's from RWB-P3-E1030-APP and is not touched here, and no `v_ace_*` view is read (DP-05).\n\nNo screen is built in this story, so SCR-37 and SCR-44 have no state here. The states of the facts read are: empty, X4 (200 with an empty page); no access, X1 (403, refused with MSG-P4-002); error, X5 (503 with the problem envelope of the service template). The service holds no loading state."
+  },
+  {
+   "old": "The role codes are rows of the role model (legacy section 10) and are not fixed in code. The authorisation decision is the cached permission decision the service template's guard already holds; this story adds no guard, no endpoint of its own and no access entry.",
+   "new": "The role codes are rows of the role model (legacy section 10) and are not fixed in code. The authorisation decision is the cached permission decision the service template's guard already holds; this story adds no guard, no endpoint of its own and no access entry. The read operation GET /api/recovery/case/v1/cases/facts is authorised by the rwb-access authorise check (DP-08) before any fact is built."
+  },
+  {
+   "old": "- BR8 is executed by what is absent: no file writer, no lake client and no outbound batch exists in the service.",
+   "new": "- BR8 is executed by what is absent: no file writer, no lake client and no outbound batch exists in the service.\n- DL25 is an open decision: BR5 holds a release on a count difference. Its assumptions are ASM-0728, ASM-0735, ASM-0743 and ASM-2602; the decision is still open, so no outcome is assumed here."
+  },
+  {
+   "old": "| X4 | The business date has no case | 200 with an empty page, the business date, the as-of time and the reference version; no decision record is written | None | TC-E1-013-02 |",
+   "new": "| X4 | The business date has no case | 200 with an empty page, the business date, the as-of time and the reference version; no decision record is written | None | AC8 |"
+  },
+  {
+   "old": "    Then the release of that business date is held, no answer is released from the held read, and the case behind the difference is listed for the data steward RW-DATASTEW with the business date",
+   "new": "    Then the release of that business date is held, no answer is released from the held read, and the case behind the difference is listed for the data steward RW-DATASTEW with the business date\n\n  Scenario: AC8 An empty business date answers an empty page and records nothing (new, D-RCV-60)\n    Given a business date that has no case in recovery_case\n    When the reporting reader calls GET /api/recovery/case/v1/cases/facts for that business date\n    Then the answer is 200 with an empty page and carries the business date, the as-of time and the reference version\n    Then no decision record and no DecisionRecorded is written for that business date"
+  },
+  {
+   "old": "The seven criteria above are new and test only this deliverable: the case facts read, the band version, the release record, the removal of the lake path and the boundary against the measures. The legacy criteria of RWB-E1-013 are owned elsewhere: AC1, AC3, AC4, AC5, AC7 and AC8 by rwb-reporting (RWB-P9-E1013-APP); AC2 and AC6 end to end by RWB-ITG-E1013-ITG, with the payments half of AC2 in rwb-source-data (RWB-P1-E1013-APP) and the completeness gate behind AC6 in the same service.",
+   "new": "The eight criteria above are new and test only this deliverable: the case facts read, the band version, the release record, the removal of the lake path, the boundary against the measures and the empty business date. The legacy criteria of RWB-E1-013 are owned elsewhere: AC1, AC3, AC4, AC5, AC7 and AC8 by rwb-reporting (RWB-P9-E1013-APP); AC2 and AC6 end to end by RWB-ITG-E1013-ITG, with the payments half of AC2 in rwb-source-data (RWB-P1-E1013-APP) and the completeness gate behind AC6 in the same service."
+  },
+  {
+   "old": "| TC-E1-013-09 | AC6, BR6: a role without Reporting R reads neither the facts nor the count; refused with MSG-P4-002 | Component | RW-BIANAL reads the facts; RW-CASEOWN is refused with MSG-P4-002 |",
+   "new": "| TC-E1-013-09 | AC6, BR6: a role without Reporting R reads neither the facts nor the count; refused with MSG-P4-002 | Component | RW-BIANAL reads the facts; RW-CASEOWN is refused with MSG-P4-002 |\n| TC-E1-013-10 | AC1, BR1, BR8: boundary of the tables of section 12.7 (ASM-3438); the facts read writes only the decision record | Component | The 2026-11-27 read with a write probe on `recovery_case`, `queue`, `reference_version` and `reference_row`; one decision-record row written and no other row |\n| TC-E1-013-11 | AC8: an empty business date answers an empty page and writes no record | Integration | A business date with no case; the reference version in force; the empty answer and the absent decision record |\n| TC-E1-013-12 | BR4: the facts read calls neither the completeness gate nor the payments of rwb-source-data | Component | The 2026-11-27 read with the gate and the payments stubbed; no call to either |"
+  },
+  {
+   "old": "| REQ-RDF-012 | Baseline measures published with definitions agreed by the Tribe | Business Requirements Epic 1, sections 3.8 and 4 | FEAT-RDF-19, FEAT-RPT-01 | 15 Manage performance, data and AI | None; control CTL-02 applies | TC-E1-013-01 to TC-E1-013-09 |",
+   "new": "| REQ-RDF-012 | Baseline measures published with definitions agreed by the Tribe | Business Requirements Epic 1, sections 3.8 and 4 | FEAT-RDF-19, FEAT-RPT-01 | 15 Manage performance, data and AI | None; control CTL-02 applies | TC-E1-013-01 to TC-E1-013-12 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09176",
+   "item": "GAP-1646",
+   "status": "Cross-document",
+   "section": "",
+   "target": "FSD P9",
+   "change": "Read Power BI and data lake destinations of A2.1, A2.3, A2.4, A2.5, A2.7 and A2.8 as the rwb-reporting read model on gateway-bff; lake deliveries as files delivered by rwb-integration; restate AC-ALT-P9-001-02, AC-EXC-P9-001-03, AC-P9-004-01 and AC-ALT-P9-004-01.",
+   "note": "This story already has no lake or Power BI feed. FSD P9 integration points and tests need rewording. Owner: Solution architect."
+  },
+  {
+   "ruling": "R-15775",
+   "item": "DOR-RWB-P3-E1013-APP-10",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "Added a screen-state note after 12.7: no screen here; empty state X4, no access X1, error X5; no loading state held.",
+   "note": "SCR-37 and SCR-44 are not built in this story; their states map to X1, X4 and X5."
+  },
+  {
+   "ruling": "R-15776",
+   "item": "DOR-RWB-P3-E1013-APP-12",
+   "status": "Resolved",
+   "section": "16, 18",
+   "target": "",
+   "change": "Added TC-E1-013-10 boundary row for the section 12.7 tables (ASM-3438); section 18 test range now TC-E1-013-01 to TC-E1-013-12.",
+   "note": "Test Cases v8 and RTM v7 still need the TC-E1-013-10 to 12 rows."
+  },
+  {
+   "ruling": "R-15777",
+   "item": "DOR-RWB-P3-E1013-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added DL25 open-decision bullet after BR8 naming ASM-0728, ASM-0735, ASM-0743 and ASM-2602.",
+   "note": "DL25 stays open; the story names its assumptions and assumes no outcome."
+  },
+  {
+   "ruling": "R-15778",
+   "item": "DOR-RWB-P3-E1013-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "X4 now covered by new AC8 (empty business date) in Gherkin; added TC-E1-013-11 row; criteria count now eight.",
+   "note": "TC-E1-013-02 still tests the empty page; AC8 is the owned criterion for X4."
+  },
+  {
+   "ruling": "R-15779",
+   "item": "DOR-RWB-P3-E1013-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E1-013-12 covering BR4: the facts read calls neither the completeness gate nor the payments.",
+   "note": "BR4 now has a test case; all eight rules are covered."
+  },
+  {
+   "ruling": "R-15780",
+   "item": "DOR-RWB-P3-E1013-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Added the rwb-access authorise check (DP-08) on GET /api/recovery/case/v1/cases/facts before any fact is built.",
+   "note": "Authority names the authorise check for the one REST read; the eight roles are unchanged."
+  },
+  {
+   "ruling": "R-21906",
+   "item": "GAP-1499",
+   "status": "Cross-document",
+   "section": "",
+   "target": "FSD P1",
+   "change": "Drop the lake copy and INT-19 extract from A2.12, A2.19 and A2.20; serve reconciliation results and freshness to rwb-reporting through snapshot activity and read model; move the six quality measures to rwb-reporting.",
+   "note": "rwb-case publishes no lake or extract; its reconciliation is served as facts. Owner: Solution architect."
+  },
+  {
+   "ruling": "R-21932",
+   "item": "GAP-2579",
+   "status": "Not applied",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Measure set, monthly day, month key, screen and requirement ID are in no source and need a value no document gives (GAP-2579). Not in this story."
+  },
+  {
+   "ruling": "R-21933",
+   "item": "GAP-0251",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Version 3 (Facts tab)",
+   "change": "Replace the data-lake star schema with the rwb_reporting read model fed from service topics, served through GET /dashboards/{id} and GET /reports/{id} behind gateway-bff; drop the Power BI lake load.",
+   "note": "This story holds no fact table; rwb-reporting owns the read model. Owner: Data architecture team."
+  }
+ ]
+}

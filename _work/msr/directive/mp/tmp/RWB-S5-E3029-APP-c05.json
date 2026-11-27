@@ -1,0 +1,68 @@
+{
+ "edits": [
+  {
+   "old": "    Then the case does not move to LISTING_LIVE and the channel is shown as not published after X5",
+   "new": "    Then the case does not move to LISTING_LIVE and the channel is shown as not published after X5\n\n  Scenario: AC7 A status change the model does not allow is refused (NEWAC-RWB-S5-E3029-APP-AC11)\n    Given a case in state LISTING_LIVE for \"RC-2026-000512\"\n    When the publication of the listing of asset \"AST-2026-000512\" is requested\n    Then the request is refused with 409 and nothing is written\n\n  Scenario: AC8 Rules BR1 to BR10 hold on the publication (NEWAC-RWB-S5-E3029-APP-AC6)\n    Given a case in state FLOOR_APPROVED for \"RC-2026-000512\"\n    When the publication of the listing of asset \"AST-2026-000512\" is sent\n    Then the listing rows, the decision record and the case move are written on rwb_asset only, the payload carries the start price and the schedule and not the floor, and no person name, address, contact value or identity number is written\n\n  Scenario: AC9 Error answers 401, 403 and 404 of the provided operations (NEWAC-RWB-S5-E3029-APP-AC7)\n    Given a request to the publish operation without an authenticated identity, from a role without the Asset and disposal right, or for a case id that does not exist\n    When the publish operation is called\n    Then the answer is 401 without an identity, 403 with MSG-P4-002 for the role, or 404 for the unknown case, and nothing is written in any of the three\n\n  Scenario: AC10 A replayed write with the same Idempotency-Key (NEWAC-RWB-S5-E3029-APP-AC8)\n    Given the same Idempotency-Key arrives twice for the publication of the listing of asset \"AST-2026-000512\"\n    When the second request is processed\n    Then one row set, one publication set and one case-move answer exist, the repeat is counted and no second decision record is written\n\n  Scenario: AC11 A retried or timed-out activity (NEWAC-RWB-S5-E3029-APP-AC9)\n    Given the rwb-case contract mock does not answer inside 2 s for case \"RC-2026-000512\"\n    When the publication step runs\n    Then nothing is written, no case move is answered, the caller sees 503 and the step retries on the workflow's own schedule"
+  },
+  {
+   "old": "| TC-E3-029-11 | AC6 | Component | A consumed rwb-integration call that does not answer on its fake; the listing rows, the case move and the channel-not-published state asserted |",
+   "new": "| TC-E3-029-11 | AC6 | Component | A consumed rwb-integration call that does not answer on its fake; the listing rows, the case move and the channel-not-published state asserted |\n| TC-E3-029-12 | AC7 | Component | A case in `LISTING_LIVE` asked to publish; 409 asserted on the fakes and nothing written |\n| TC-E3-029-13 | AC8, BR1 to BR10 | Component | The publication of case `RC-2026-000512` asserted against each of rules BR1 to BR10; the detail of each rule is in TC-E3-029-07 to TC-E3-029-10 |\n| TC-E3-029-14 | AC9, X2 | Component | A request without an identity, a role without the Asset and disposal right and an unknown case id; 401, 403 with MSG-P4-002 and 404 asserted, nothing written |\n| TC-E3-029-15 | AC10, X7, BR9 | Component | The same `Idempotency-Key` sent twice; one row set, one publication set and one answer asserted, no second decision record |\n| TC-E3-029-16 | AC11, X5, X6 | Component | A consumed rwb-case call that does not answer inside 2 s; 503 asserted, nothing written and the step retry asserted |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32651",
+   "item": "NEWAC-RWB-S5-E3029-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7: a status change not allowed from LISTING_LIVE is refused with 409 and nothing written (X3); test row TC-E3-029-12 added."
+  },
+  {
+   "ruling": "R-32652",
+   "item": "NEWAC-RWB-S5-E3029-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X8 row already names AC5 and TC-E3-029-08, and AC5 is the boundary scenario in section 7; no new criterion added."
+  },
+  {
+   "ruling": "R-32653",
+   "item": "NEWAC-RWB-S5-E3029-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 covering BR1 to BR10 with test row TC-E3-029-13; the detailed rule tests remain TC-E3-029-07 to -10."
+  },
+  {
+   "ruling": "R-32654",
+   "item": "NEWAC-RWB-S5-E3029-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 for 401, 403 (MSG-P4-002 per X2) and 404 with test row TC-E3-029-14; no message code for 401 or 404 in the sources."
+  },
+  {
+   "ruling": "R-32655",
+   "item": "NEWAC-RWB-S5-E3029-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for a replayed Idempotency-Key per X7 and BR9, with test row TC-E3-029-15."
+  },
+  {
+   "ruling": "R-32656",
+   "item": "NEWAC-RWB-S5-E3029-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for a call that does not answer inside 2 s, 503 and retry per X5 and X6, with test row TC-E3-029-16."
+  }
+ ]
+}

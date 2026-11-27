@@ -1,0 +1,155 @@
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-reporting (Reporting)"
+  version: 5.0.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-reporting (Reporting, module P9, service wave 1)
+    under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16 November
+    2026) by the D-RCV-60 microservice realignment.
+    This document holds 1 operations under REST base /api/recovery/reporting/v1; schema rwb_reporting; topic
+    rwb.reporting.events.v1; Temporal task queue rwb-reporting in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-reporting.asyncapi.yaml.
+servers:
+- url: "/api/recovery/reporting/v1"
+  description: "Relative to the rwb-reporting service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Reporting"
+x-service:
+  code: "P9"
+  service: "rwb-reporting"
+  name: "Reporting"
+  wave: 1
+  schema: "rwb_reporting"
+  rest-base: "/api/recovery/reporting/v1"
+  topic: "rwb.reporting.events.v1"
+  task-queue: "rwb-reporting"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-reporting.asyncapi.yaml"
+  operations: 1
+paths:
+  /reports/measures:
+    get:
+      tags:
+      - Reporting
+      summary: Read the business measures by product, route and period
+      description: >-
+        Architecture v5 names the report resource GET /reports/{id}; for the measure report it is read as this path,
+        GET /reports/measures, so the identifier segment is measures (GAP-1648). The identifier is still to be
+        confirmed. Other values of {id}: Not specified in the source documents (GAP-1648).
+      operationId: getReportsMeasures
+      x-module: P9
+      x-owner: "P9"
+      x-capability:
+        area: Reporting
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: measure
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: product
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: route
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Measure'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Measure:
+      type: object
+      properties:
+        measure:
+          type: string
+        product:
+          type: string
+        route:
+          type: string
+        period:
+          type: string
+        value:
+          type: number
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        messageCode:
+          type: string
+        messageTh:
+          type: string
+        field:
+          type: string
+        traceId:
+          type: string

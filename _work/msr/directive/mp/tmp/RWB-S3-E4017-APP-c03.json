@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P4-002 | TC-E4-017-03 |",
+   "new": "| MSG-P4-002 | AC3, TC-E4-017-03, TC-E4-017-05 |"
+  },
+  {
+   "old": "| MSG-GEN-001 | TC-E4-017-01, TC-S3-E4017-CON-01 |",
+   "new": "| MSG-GEN-001 | AC4, TC-E4-017-01, TC-S3-E4017-CON-01, TC-E4-017-06 |"
+  },
+  {
+   "old": "| MSG-P7-009 | TC-S3-E4017-CON-04 |",
+   "new": "| MSG-P7-009 | AC5, TC-S3-E4017-CON-04, TC-E4-017-07 |"
+  },
+  {
+   "old": "(GAP-2725) | Not specified in the source documents (GAP-2725; ASM-4524) | TC-S3-E4017-CON-03 |",
+   "new": "(GAP-2725) | Not specified in the source documents (GAP-2725; ASM-4524) | AC6, TC-S3-E4017-CON-03, TC-E4-017-08 |"
+  },
+  {
+   "old": "did not move | Not specified in the source documents (GAP-2725; ASM-4524) | TC-S3-E4017-CON-03 |",
+   "new": "did not move | Not specified in the source documents (GAP-2725; ASM-4524) | AC7, TC-S3-E4017-CON-03, TC-E4-017-09 |"
+  },
+  {
+   "old": "| MSG-P1-001 | TC-S3-E4017-CON-02 |",
+   "new": "| MSG-P1-001 | AC8, TC-S3-E4017-CON-02, TC-E4-017-10 |"
+  },
+  {
+   "old": "| None | TC-E4-017-01 |",
+   "new": "| None | AC9, TC-E4-017-01, TC-E4-017-11 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Role without the right is refused (X1)\n    Given a role without the right U or C in capability area Treatment and offer\n    When it calls the notice form of the claim\n    Then the request is refused with 403 before any read of the claim\n    Then the user sees MSG-P4-002\n\n  Scenario: AC4 Incomplete notice fact is refused before dispatch (X2)\n    Given a notice cycle with no addressee, no template code or no notice due date\n    When the notice cycle starts\n    Then it is refused before any dispatch with the missing field named\n    Then the user sees MSG-GEN-001 and nothing changes\n\n  Scenario: AC5 Record field refused by the library (X4)\n    Given the record library refuses a field of the decision record\n    When the notice outcome is applied\n    Then nothing changes and the field is named\n    Then no demand leaves and the refusal is logged with MSG-P7-009\n\n  Scenario: AC6 Refused for one addressee (X5, BR4)\n    Given rwb-comms answers refused for one addressee because the template is not current or the party cannot be reached\n    When the dispatch set completes\n    Then the refusal is recorded with its reason code on the decision record\n    Then the other addressees are issued\n    Then the refused addressee is named on SCR-17\n\n  Scenario: AC7 Refused for every addressee (X6)\n    Given rwb-comms answers refused for every addressee\n    When the dispatch set completes\n    Then no notice-period timer is armed\n    Then the stage stays in DEADLINE_TIMER_RUNNING\n    Then the officer is told the state did not move\n\n  Scenario: AC8 Stale data product holds the notice (X7, BR11)\n    Given a data product the notice rests on is stale after a late or failed ACE batch\n    When the notice cycle is run\n    Then the notice is held\n    Then the user sees MSG-P1-001 naming the product and its date\n\n  Scenario: AC9 Retried cycle answers the first result (X8)\n    Given a notice cycle has already run for a case\n    When the same cycle is retried or the signal is redelivered\n    Then one activity per addressee, one decision record and one timer exist\n    Then the workflow answers the first result\n\n  Scenario: AC10 Rule fires and one dispatch per addressee (BR1, BR2)\n    Given the stage reports DEADLINE_TIMER_RUNNING with GUARANTOR_NOTICE_DUE\n    And guarantee_type is a personal guarantor, a co-borrower or a corporate guarantor\n    When R-GUA-06 fires\n    Then one notice is dispatched per addressee on the queue rwb-comms\n    Then the stage moves to GUARANTOR_NOTICE\n\n  Scenario: AC11 No move without a qualifying type or addressee (BR1, BR3)\n    Given guarantee_type is not one of the three, or no addressee is found among the parties of the case signal\n    When R-GUA-06 is evaluated\n    Then the stage does not move and the answer is recorded\n    Then only parties whose role is a guarantor or a co-borrower are addressees\n\n  Scenario: AC12 Template is the current approved one (BR4)\n    Given the template code and the notice type are passed to rwb-comms\n    When the notice is dispatched\n    Then this service passes no wording, no name and no address\n    Then rwb-comms checks that the template is current for the product and the notice type\n\n  Scenario: AC13 Notice values come from the values in force (BR5)\n    Given the notice period by product, the notice type list, the party roles and the template code are in force\n    When the notice cycle is built\n    Then each value is read from the parameters, the rule package or the reference data\n    Then no period, role list or template code appears as a literal\n\n  Scenario: AC14 Notice clock is a durable timer (BR6)\n    Given the stage reports DEADLINE_TIMER_RUNNING\n    When the notice clock is armed\n    Then a durable Temporal timer is armed inside GuaranteeClaimWorkflow\n    Then the timer is cancelled by any earlier stage end and no timer row is written\n\n  Scenario: AC15 Notice recorded in one transaction (BR7, BR8)\n    Given the notice outcome is applied\n    When the decision record is written\n    Then the record holds the rule id, the rule version, the template code, the addressee count and the dispatch references\n    Then the record is written in the same transaction as the stage outcome and no guarantee_claim column changes\n\n  Scenario: AC16 Case status and events are not moved here (BR9, BR10)\n    Given the stage reports the outcome of R-GUA-06\n    When the outcome is reported\n    Then the outcome goes to the parent CaseWorkflow and the stage writes no case status\n    Then no event for the demand is published on rwb.guarantee.events.v1\n\n  Scenario: AC17 No personal value crosses the boundary (BR12)\n    Given a notice cycle runs for an addressee\n    When the workflow input, the activity payload and the log are written\n    Then they carry party references and codes only\n    Then no name or address appears in them"
+  },
+  {
+   "old": "The access check is the platform guard library's and is declared here as the capability area and the right only (ASM-4525; TSD S3 T6.1).",
+   "new": "The access check is the platform guard library's, exercised through the rwb-access authorise check of DP-08 before any read, and is declared here as the capability area and the right only (ASM-4525; TSD S3 T6.1; DP-08)."
+  },
+  {
+   "old": "the payload is the `GuarantorNotice` of RWB-S3-E4017-CON",
+   "new": "the payload is the `GuarantorNotice` on the claim update operation of base `/api/recovery/guarantee/v1` (DP-13; RWB-S3-E4017-CON)"
+  },
+  {
+   "old": "{product} is from {date}. Today's ACE batch has not arrived.",
+   "new": "{product} is from {date}. Today's load has not arrived."
+  },
+  {
+   "old": "The five texts are the legacy and FSD texts carried unchanged:",
+   "new": "The five texts are the legacy and FSD texts carried unchanged, except MSG-P1-001, which takes the Error and Message Standard v4 text:"
+  },
+  {
+   "old": "| TC-E4-017-03 | Access | Component | A role without the right is refused with MSG-P4-002 |",
+   "new": "| TC-E4-017-03 | Access | Component | A role without the right is refused with MSG-P4-002 |\n| TC-E4-017-05 | AC3 | Component | A role without the right U or C is refused with 403 before any read |\n| TC-E4-017-06 | AC4 | Component | An incomplete notice fact is refused before dispatch with MSG-GEN-001 |\n| TC-E4-017-07 | AC5 | Component | A record field refused by the library changes nothing and sends no demand |\n| TC-E4-017-08 | AC6 | Integration | One addressee refused: the others are issued and the refusal is recorded |\n| TC-E4-017-09 | AC7 | Integration | Every addressee refused: no timer is armed and the stage stays in DEADLINE_TIMER_RUNNING |\n| TC-E4-017-10 | AC8 | Component | A stale data product holds the notice and names the product and its date |\n| TC-E4-017-11 | AC9 | Component | A retried notice cycle answers the first result |\n| TC-E4-017-12 | AC10 | End to end | R-GUA-06 fires for each addressee and the stage moves to GUARANTOR_NOTICE |\n| TC-E4-017-13 | AC11 | Component | No move without a qualifying type or addressee |\n| TC-E4-017-14 | AC12 | Integration | The template code and notice type are passed and no wording is passed |\n| TC-E4-017-15 | AC13 | Component | Notice values are read from parameters, the rule package and reference data |\n| TC-E4-017-16 | AC14 | Component | The notice clock is a durable timer inside the workflow |\n| TC-E4-017-17 | AC15 | Component | The decision record holds the notice facts in one commit |\n| TC-E4-017-18 | AC16 | Component | The outcome goes to the parent and no demand event is published |\n| TC-E4-017-19 | AC17 | Component | No personal value crosses the workflow input, payload or log |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19634",
+   "item": "DOR-RWB-S3-E4017-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC3 to AC9 for X1, X2, X4, X5, X6, X7 and X8 with TC-E4-017-05 to TC-E4-017-11; section 5 Covered by cells now name the criteria.",
+   "note": "Each exception path now has a criterion in section 7 and a test case row in section 16."
+  },
+  {
+   "ruling": "R-19635",
+   "item": "DOR-RWB-S3-E4017-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 to AC17 covering BR1 to BR12 with TC-E4-017-12 to TC-E4-017-19; BR rule IDs are named in each scenario title.",
+   "note": "Every business rule in section 8 is now covered by a criterion and a test case row."
+  },
+  {
+   "ruling": "R-19636",
+   "item": "DOR-RWB-S3-E4017-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Section 10 now names the rwb-access authorise check of DP-08 as the access check exercised before any read.",
+   "note": "The access check is named in section 10, with its capability area and right declared."
+  },
+  {
+   "ruling": "R-19637",
+   "item": "DOR-RWB-S3-E4017-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Resolve or rename the names recovery_svc, guarantee_type and decision_record as fields or entities; the legacy AC wording stays verbatim.",
+   "note": "Three names are not in LDM v9 or Data Classification v5; the story's legacy job and decision-log wording is kept."
+  },
+  {
+   "ruling": "R-19638",
+   "item": "DOR-RWB-S3-E4017-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 now uses the Error and Message Standard v4 text and the section 14 paragraph notes that one text differs from the source.",
+   "note": "MSG-P1-001 copies the Error and Message Standard v4 text and section 14 is aligned."
+  },
+  {
+   "ruling": "R-23392",
+   "item": "GAP-2726",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-S3-E4013-CON",
+   "change": "Publish GuarantorNotice with seven properties on the claim update operation, the approved-template accepted and refused answers, the rwb-comms activity input, the notice-period key, the DP-03 record rule, and v1 fakes with a drift test; record unnamed values as the working read of the assumption.",
+   "note": "The notice payload, its required set, the operation it rides and the delivery answers are published by the contract owner."
+  },
+  {
+   "ruling": "R-23403",
+   "item": "GAP-1721",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Ownership Map Tables and the S3 DB story",
+   "change": "State the guarantee, guarantor pursuit and subrogation groups named after Arch v5 slide 18, give guarantee_claim only the confirmed fields, fix the physical table set, and add the S3 Ownership Map rows.",
+   "note": "The S3 guarantee, pursuit and subrogation records have no owned entity groups or Ownership Map rows; the data architect adds them."
+  },
+  {
+   "ruling": "R-23405",
+   "item": "GAP-1722",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "FSD S3 v3 (A2.5.3)",
+   "change": "Write the notice rules from R-GUA-06 and R-GUA-28 to R-GUA-32 with the recipient set, the template, the period from proof of delivery, the answer to the route decision, and a field catalog.",
+   "note": "The FSD lacks the notice rules and field catalog; the business analyst adds them to A2.5.3 with the P6 owner."
+  },
+  {
+   "ruling": "R-23406",
+   "item": "GAP-2725",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Step 6 now names the GuarantorNotice on the claim update operation of base /api/recovery/guarantee/v1 (DP-13); the Notify activity, case-signal addressees, timer and decision record are already in the story.",
+   "note": "The demand's operation and base are named in step 6; the rest of the cycle was already in the story."
+  },
+  {
+   "ruling": "R-27037",
+   "item": "CG-ALL-8907",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text now reads Today's load has not arrived, copied from Error and Message Standard v4.",
+   "note": "MSG-P1-001 copies the standard's English text; the Raised when condition is unchanged."
+  }
+ ]
+}

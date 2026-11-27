@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| VR-P8-009-1 | Data product stale after a late or failed ACE batch for its source (`v_ace_batch_status`) raises MSG-P1-001 `{product} is from {date}. Today's ACE batch has not arrived.` | FSD P8 A2.9.3.1, copied character for character |",
+   "new": "| BR12 (VR-P8-009-1) | Data product stale after a late or failed ACE batch for its source (`v_ace_batch_status`) raises MSG-P1-001 `{product} is from {date}. Today's ACE batch has not arrived.` | FSD P8 A2.9.3.1, copied character for character |"
+  },
+  {
+   "old": "| BR-P8-009 | No value a business person may change is written in code; it is read from reference data with its version | FSD P8 A2.9.3.1, copied character for character |",
+   "new": "| BR13 (BR-P8-009) | No value a business person may change is written in code; it is read from reference data with its version | FSD P8 A2.9.3.1, copied character for character |"
+  },
+  {
+   "old": "| rwb-access (P4) | Owns the rights, the roles and the scope data; this story calls no guard of its own and holds no role row |",
+   "new": "| rwb-access (P4) | Owns the rights, the roles and the scope data; each operation calls rwb-access's authorise check (DP-08) for the right it declares, and this story holds no role row |"
+  },
+  {
+   "old": "is not a column of this schema.",
+   "new": "is not a column of this schema. The rental amount, the debit day and the arrears threshold are read from rwb-treatment's rental terms and from reference data in force, and are never held as constants in code; the NPA and asset manager confirm their value set before the wave 3 test entry."
+  },
+  {
+   "old": "Base `/api/recovery/payment/v1` (DP-13), topic `rwb.payment.events.v1` (DP-14 is the naming library's), queue `rwb-payment`, schema `rwb_payment`, Java package as section 1.",
+   "new": "Base `/api/recovery/payment/v1` (DP-13), topic `rwb.payment.events.v1` (DP-14 is the naming library's), queue `rwb-payment`, schema `rwb_payment`, Java package as section 1.\n\nReference data read: the `payment_match_rule` parameters of DF-REF-261 to DF-REF-273 in force for the business date, read on the reference-data contract (DP-06, DP-07); the contract's operation names are Not specified in the source documents (DOR-RWB-P8-E4048-APP-20)."
+  },
+  {
+   "old": "| Event | Topic | Used for |\n|---|---|---|\n| `AceDataReady` (EV-26) | `rwb.source-data.events.v1` | Starts the JOB-07 run of the business date and source; the inbox deduplicates on the event id |\n| `TreatmentApproved` (EV-10) | `rwb.treatment.events.v1` | Names the deed in lieu treatment that carries the buy-back rental, so the rental read of the date has an arrangement to match |\n| `RulePackageInForce` (EV-30) | `rwb.decision.events.v1` | The package and version in force for the business date |",
+   "new": "| Event | Topic | Used for | Owner |\n|---|---|---|---|\n| `AceDataReady` (EV-26) | `rwb.source-data.events.v1` | Starts the JOB-07 run of the business date and source; the inbox deduplicates on the event id | rwb-source-data (P1) |\n| `TreatmentApproved` (EV-10) | `rwb.treatment.events.v1` | Names the deed in lieu treatment that carries the buy-back rental, so the rental read of the date has an arrangement to match | rwb-treatment (S2) |\n| `RulePackageInForce` (EV-30) | `rwb.decision.events.v1` | The package and version in force for the business date | rwb-decision (P7) |"
+  },
+  {
+   "old": "| TC-E4-048-04 | Legacy Principle 5 (BR4); a forced record failure stops the action with MSG-P7-003 and leaves no row and no event | NFR | The record store stopped during the run of 2026-12-15 |",
+   "new": "| TC-E4-048-04 | Legacy Principle 5 (BR4); a forced record failure stops the action with MSG-P7-003 and leaves no row and no event | NFR | The record store stopped during the run of 2026-12-15 |\n| TC-E4-048-05 | Contract of section 12: the operation POST /proceeds/{proceedsId}/match and the base /api/recovery/payment/v1 (DP-13), with the schemas of rwb_payment | Component | The contract document and its schemas |\n| TC-E4-048-06 | Event envelope of section 12: topic rwb.payment.events.v1 with the .retry and .dlt topics, key caseId, CloudEvents 1.0 binary, ce_source /rwb-payment; the events of section 12.4 consumed through the inbox | Component | The published event and the consumed events of section 12.4 |\n| TC-E4-048-07 | Boundary of the section 12.7 tables: each table is written only by its owner, and the DDL template applies in rwb_payment | Component | The rwb_payment schema and its DDL template |\n| TC-E4-048-08 | BR5; the receipt is read only on rwb-source-data's contract, and no v_ace_* view or ACE table is read | Component | An ACE receipt stub on the owner's contract |\n| TC-E4-048-09 | BR6; the rental, its amount and its debit day are read only, and no rental, debit or arrears rule is evaluated | Component | A rental stub from rwb-treatment with an arrears limit |\n| TC-E4-048-10 | BR7; no task, case state or notice is written and no notice is sent | Component | A matched rental on a case in scope |\n| TC-E4-048-11 | BR9; a repeated fact or Idempotency-Key writes once, records once and publishes once, and the repeat is counted | Component | The same receipt posted twice with one Idempotency-Key |\n| TC-E4-048-12 | BR10; no cross-schema join and no foreign key is held in rwb_payment | Component | The rwb_payment schema after a run |\n| TC-E4-048-13 | BR11; the auto-debit instruction is not written by this story, which collects, matches and follows up | Component | A rental whose auto-debit instruction sits in rwb-treatment |"
+  },
+  {
+   "old": "Every legacy test case of RWB-E4-048 appears once.",
+   "new": "Every legacy test case of RWB-E4-048 appears once. Origin tag: the legacy criteria AC1 and AC2 of RWB-E4-048 and the four legacy test case IDs are kept here verbatim as placeholder text (GAP-1377, GAP-1380) and are read against this flow; the business analyst replaces the placeholder with named values in a later legacy master version. AC1: the data and the rule version are in place, the trigger arrives and the rental is taken by auto-debit. AC2: the decision log cannot be written and the user sees MSG-P7-003. The contract is tested by TC-E4-048-05 to TC-E4-048-07."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18364",
+   "item": "DOR-RWB-P8-E4048-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8",
+   "change": "Register TC-E4-048-01 to TC-E4-048-07 (legacy 01 to 04 and new contract and boundary cases 05 to 07)",
+   "note": "Story side: contract and section 12.7 boundary cases added to section 16."
+  },
+  {
+   "ruling": "R-18365",
+   "item": "DOR-RWB-P8-E4048-APP-20",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "payment_match_rule parameters and reference-data contract DP-06, DP-07 named in section 12; operation names flagged."
+  },
+  {
+   "ruling": "R-18366",
+   "item": "DOR-RWB-P8-E4048-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Owner column added to 12.4 with the producing service of each event."
+  },
+  {
+   "ruling": "R-18367",
+   "item": "DOR-RWB-P8-E4048-APP-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR12, BR13 and TC-08 to TC-13 added; BR5 to BR11 criteria in section 7 are outside this chunk and cannot be added."
+  },
+  {
+   "ruling": "R-18368",
+   "item": "DOR-RWB-P8-E4048-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD (data load identity, right U on the match operation)",
+   "note": "rwb-access authorise check (DP-08) now named in section 10."
+  },
+  {
+   "ruling": "R-18369",
+   "item": "DOR-RWB-P8-E4048-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add entity decision_record (PLT library, rwb_payment), field account_payment_id of proceeds, and event attribute ce_source",
+   "note": "No story edit needed; the three names are used as the story states them."
+  },
+  {
+   "ruling": "R-18370",
+   "item": "DOR-RWB-P8-E4048-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text and meanings are not in this chunk; copying them would invent wording."
+  },
+  {
+   "ruling": "R-23145",
+   "item": "GAP-1377",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Legacy AC1, AC2 and four test case IDs kept verbatim with origin tag; placeholder fix owned by business analyst."
+  },
+  {
+   "ruling": "R-23146",
+   "item": "GAP-1378",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Amount, debit day and arrears threshold read from rwb-treatment and reference data; value set confirmed by NPA and asset manager."
+  },
+  {
+   "ruling": "R-23147",
+   "item": "GAP-1380",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Legacy IDs 01 to 04 kept; contract cases 05 to 07 added for document, schemas, event envelope and DDL template."
+  }
+ ]
+}

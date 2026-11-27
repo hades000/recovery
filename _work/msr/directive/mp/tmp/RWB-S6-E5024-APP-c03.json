@@ -1,0 +1,188 @@
+{
+ "edits": [
+  {
+   "old": "**Configuration and reference data.**",
+   "new": "**Configuration and reference data.** Parameters read here: the four LOV lists, the minimum lot size, the tiered buyer terms and the reserve policy. Reference-data contract (DP-06, DP-07): Not specified in the source documents (DOR-RWB-S6-E5024-APP-20)."
+  },
+  {
+   "old": "9. The boundary test: no statement outside `rwb_debtsale`, no `v_ace_*` read, no model binary and no write to `rwb_case`, `rwb_agent` or `rwb_decision` (X8, BR3, BR5).",
+   "new": "9. The boundary test: no statement outside `rwb_debtsale`, no `v_ace_*` read, no model binary and no write to any other service's schema (X8, BR3, BR5)."
+  },
+  {
+   "old": "DP-08 is not in this story's pattern set: the capability area and the right are declared per operation and the access guard is a service-template capability.",
+   "new": "Each operation calls the rwb-access authorise check for the capability area \"Debt sale\" and its right through the access guard before any read or write; the access guard is a service-template capability."
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E5-024-03 |",
+   "new": "| MSG-P4-002 | AC3, TC-E5-024-03 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR3, BR4, BR6 |",
+   "new": "| None (pipeline log) | AC4, Section 17, BR3, BR4, BR6 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Role without the Debt sale right is refused\n    Given the role does not hold the Debt sale right of the operation\n    When the operation is called\n    Then the system answers 403 with MSG-P4-002 and nothing is read or written\n\n  Scenario: AC4 No ACE data tier, case row or foreign schema is reached\n    Given the build is tested by the boundary test\n    When a statement, a test or a component reaches the ACE data tier, a recovery_case row or another service's schema\n    Then the grant refuses the statement and the build fails; nothing is released"
+  },
+  {
+   "old": "The two criteria are the legacy criteria of RWB-E5-024 word for word",
+   "new": "The first two criteria (AC1 and AC2) are the legacy criteria of RWB-E5-024 word for word"
+  },
+  {
+   "old": "ledger of rwb-decision behind it.",
+   "new": "ledger of rwb-decision behind it. AC3 and AC4 are new, with no legacy text: AC3 is the Debt sale right of X2 and AC4 is the boundary of X8."
+  },
+  {
+   "old": "| Rule | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer |\n|---|---|---|---|---|---|---|---|---|---|---|",
+   "new": "| BR ID | Rule | Route set | Decision | From state | Event | Condition | Action | To state | Owner | Systems | Timer |\n|---|---|---|---|---|---|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| R-DS-05 | Debt sale | D8.4 | LOT_BUILT | LOT_TOO_THIN |",
+   "new": "| BR10 | R-DS-05 | Debt sale | D8.4 | LOT_BUILT | LOT_TOO_THIN |"
+  },
+  {
+   "old": "| R-DS-04 | Debt sale | D8.4 | LOT_BUILT | LOT_PRICED |",
+   "new": "| BR11 | R-DS-04 | Debt sale | D8.4 | LOT_BUILT | LOT_PRICED |"
+  },
+  {
+   "old": "| BR9 | The lot status vocabulary is closed: a priced lot is still `BUILDING`; `OFFERED` arrives with the committee approval and no other value is written here | TSD S6 T3.2; ASM-4896 |",
+   "new": "| BR9 | The lot status vocabulary is closed: a priced lot is still `BUILDING`; `OFFERED` arrives with the committee approval and no other value is written here | TSD S6 T3.2; ASM-4896 |\n\nCoverage: BR1 by TC-S6-E5024-APP-05; BR2 by AC2, TC-E5-024-02, TC-E5-024-04; BR3 by AC4, TC-S6-E5024-APP-03; BR4 by AC4; BR5 by TC-S6-E5024-APP-03; BR6 by AC4, TC-S6-E5024-APP-05; BR7 by TC-E5-024-01, TC-S6-E5024-APP-01; BR8 by TC-S6-E5024-APP-06; BR9 by TC-E5-024-01; BR10 by AC1, TC-S6-E5024-APP-01; BR11 by AC1, TC-E5-024-01."
+  },
+  {
+   "old": "`primary_person_key` is P3's and is never copied here.",
+   "new": "`primary_person_key` is P3's and is never copied here.\n\n`account_count` is counted at the step from the account rows of the lot and is not stored. `account_id` is the identifier of the other service's fact and `decision_record` is the library object of DP-03; their field and entity IDs are Not specified in the source documents (DOR-RWB-S6-E5024-APP-7)."
+  },
+  {
+   "old": "The three `TC-S6-E5024-APP-nn` cases are new and test only this build.",
+   "new": "The six `TC-S6-E5024-APP-nn` cases are new and test only this build."
+  },
+  {
+   "old": "| TC-E5-024-03 | Access | Component |",
+   "new": "| TC-E5-024-03 | Access, AC3 | Component |"
+  },
+  {
+   "old": "| TC-S6-E5024-APP-03 | AC1, X8 | Component | An estimate answer without a model version, refused; a build that reads a `v_ace_*` view or loads a model binary fails |",
+   "new": "| TC-S6-E5024-APP-03 | AC1, AC4, X8 | Component | An estimate answer without a model version, refused; a build that reaches the ACE data tier by any grant or loads a model binary fails |\n| TC-S6-E5024-APP-04 | AC1, section 12 contract | Component | The operations, events and activities of section 12 called on the fakes of their owners; each request and answer matched to its published contract, and the no-event rule of 12.3 asserted |\n| TC-S6-E5024-APP-05 | AC4, BR1, BR6, section 12.7 | Component | The tables of section 12.7 on the schema of `rwb_debtsale`: the owned tables written, no foreign key and no join out of the schema, no read of an unowned table (ASM-3438) |\n| TC-S6-E5024-APP-06 | AC1, X7, BR8 | Component | The same trigger and the same `Idempotency-Key` sent twice; one priced lot, one set of prices, one record and one fact, and the repeat counted |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Story element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Story element | Feature | L3 process | Test cases |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| The grouping, the estimate and the lot and price rows | TC-E5-024-01, TC-E5-024-04, TC-S6-E5024-APP-01 |",
+   "new": "| The grouping, the estimate and the lot and price rows | FEAT-DBS-02 | Not specified in the source documents (DOR-RWB-S6-E5024-APP-2) | TC-E5-024-01, TC-E5-024-04, TC-S6-E5024-APP-01 |"
+  },
+  {
+   "old": "| rwb-debtsale as the owner of the lot and the price | TC-E5-024-01 |",
+   "new": "| rwb-debtsale as the owner of the lot and the price | FEAT-DBS-02 | Not specified in the source documents (DOR-RWB-S6-E5024-APP-2) | TC-E5-024-01 |"
+  },
+  {
+   "old": "| `rwb_debtsale` and its own login | TC-S6-E5024-APP-03 |",
+   "new": "| `rwb_debtsale` and its own login | FEAT-DBS-02 | Not specified in the source documents (DOR-RWB-S6-E5024-APP-2) | TC-S6-E5024-APP-03 |"
+  },
+  {
+   "old": "| The DS package read at its version | TC-E5-024-01 |",
+   "new": "| The DS package read at its version | FEAT-DBS-02 | Not specified in the source documents (DOR-RWB-S6-E5024-APP-2) | TC-E5-024-01 |"
+  },
+  {
+   "old": "| The four consumed rows with their budget and breaker | TC-E5-024-01, TC-S6-E5024-APP-02 |",
+   "new": "| The four consumed rows with their budget and breaker | FEAT-DBS-02 | Not specified in the source documents (DOR-RWB-S6-E5024-APP-2) | TC-E5-024-01, TC-S6-E5024-APP-02 |"
+  },
+  {
+   "old": "| The record written before the change | TC-E5-024-02, TC-E5-024-04 |",
+   "new": "| The record written before the change | FEAT-DBS-02 | Not specified in the source documents (DOR-RWB-S6-E5024-APP-2) | TC-E5-024-02, TC-E5-024-04 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20568",
+   "item": "DOR-RWB-S6-E5024-APP-11",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Fields classed as personal data are not named in the story or the source given; the classification cannot be applied without them."
+  },
+  {
+   "ruling": "R-20569",
+   "item": "DOR-RWB-S6-E5024-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Tab Story test cases: add rows for TC-E5-024-01 to TC-E5-024-04, TC-S6-E5024-APP-01 to TC-S6-E5024-APP-06.",
+   "note": "Story rows TC-S6-E5024-APP-04 to -06 added in section 16 with contract and boundary cover; v8 needs rows for all ten IDs."
+  },
+  {
+   "ruling": "R-20570",
+   "item": "DOR-RWB-S6-E5024-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature column (FEAT-DBS-02) and L3 process column added; L3 process marked Not specified in the source documents. Rows unchanged."
+  },
+  {
+   "ruling": "R-20571",
+   "item": "DOR-RWB-S6-E5024-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Reference parameters named in section 13; reference-data contract for DP-06 and DP-07 marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-20572",
+   "item": "DOR-RWB-S6-E5024-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Build step 9 now names any other service's schema generically; rwb_agent, rwb_case and rwb_decision removed from section 13."
+  },
+  {
+   "ruling": "R-20573",
+   "item": "DOR-RWB-S6-E5024-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC3 (X2) and AC4 (X8) added to section 7 with section 16 rows; section 5 Covered by updated; TC-E5-024-03 covers AC3."
+  },
+  {
+   "ruling": "R-20574",
+   "item": "DOR-RWB-S6-E5024-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR10 (R-DS-05) and BR11 (R-DS-04) IDs added; coverage of BR1 to BR11 mapped; TC-S6-E5024-APP-06 added for BR8."
+  },
+  {
+   "ruling": "R-20575",
+   "item": "DOR-RWB-S6-E5024-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 now states the rwb-access authorise check through the access guard for the Debt sale capability area and right."
+  },
+  {
+   "ruling": "R-20576",
+   "item": "DOR-RWB-S6-E5024-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "account_count stated as derived; account_id and decision_record flagged Not specified; ACE view wording removed from TC-S6-E5024-APP-03. Prohibition rules keep the name."
+  },
+  {
+   "ruling": "R-20577",
+   "item": "DOR-RWB-S6-E5024-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text for MSG-P1-001 is not in the source given; the wording cannot be changed without it."
+  }
+ ]
+}

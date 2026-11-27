@@ -1,0 +1,99 @@
+{
+ "edits": [
+  {
+   "old": "    And the composite decision route hides the approve and reject actions\n```",
+   "new": "    And the composite decision route hides the approve and reject actions\n\n  Scenario: AC6 A decision that cannot be written to the decision log does not take effect (new, D-RCV-60)\n    Given approver \"U-9212\" holds RW-LITOFF and did not prepare \"N-0201\"\n    When the decision log write is forced to fail and \"U-9212\" approves \"A-0201\" at 10:00 on 14 December 2026\n    Then the response is 503 with MSG-P7-003\n    And no decision record exists for \"A-0201\"\n    And notice \"N-0201\" stays \"Generated\" and approval \"A-0201\" stays \"WAITING\"\n\n  Scenario: AC7 A redelivered approval event does not write a second decision record (new, D-RCV-60)\n    Given the approval event for \"A-0201\" was consumed once and its decision record exists\n    When the same approval event for \"A-0201\" is delivered again\n    Then one decision record exists for \"A-0201\"\n    And notice \"N-0201\" stays \"Approved\"\n```"
+  },
+  {
+   "old": "These five criteria are new for the ITG harness",
+   "new": "These seven criteria are new for the ITG harness"
+  },
+  {
+   "old": "| TC-E2-014-12-ITG | Principle 5; ITG AC4 | NFR | The decision log write forced to fail during an approval; the notice stays Generated |",
+   "new": "| TC-E2-014-12-ITG | Principle 5; ITG AC4 | NFR | The decision log write forced to fail during an approval; the notice stays Generated |\n| TC-E2-014-13-ITG | ITG AC6, BR8 | Integration | Decision log write forced to fail during an approval |\n| TC-E2-014-14-ITG | ITG AC7 | Integration | Approval event for A-0201 delivered twice |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28766",
+   "item": "GAP-1263",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "TSD P7 v2 (traceability table T8)",
+   "change": "Correct the REQ-APD-002 row to FEAT-APD-08 with RWB-E2-014 (screen) and the REQ-APD-006 row to FEAT-APD-01 with RWB-E2-013 (routing).",
+   "note": "Story BR1 and BR2 already cite the intended sources; only the TSD traceability table needs correcting."
+  },
+  {
+   "ruling": "R-28767",
+   "item": "GAP-1621",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Edge and gateway design (gateway-bff composition)",
+   "change": "Decide which of SCR-10, SCR-11, SCR-12 and SCR-38 gateway-bff composes from this service and which this service owns; record the four screen contracts there, not in this PRD.",
+   "note": "Story AC1 already routes the composite decision screen through gateway-bff; no story edit needed."
+  },
+  {
+   "ruling": "R-28771",
+   "item": "GAP-1262",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Architecture v5 (slides 14, 41, 42, 43)",
+   "change": "Publish the decided outcome on rwb.decision-record.v1 via the local library (DP-03); retire ApprovalDecided from the slide 14 and slide 41 topic lines or add it to the catalogue with its consumers.",
+   "note": "Story names no ApprovalDecided event; AC2 uses the shared decision record, so no story edit is needed."
+  },
+  {
+   "ruling": "R-28772",
+   "item": "GAP-1266",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-P7-E2014-CON",
+   "change": "Set the queue page size default to 20 and the maximum to 100; publish field types for the screen model and the ApprovalPage response; confirm with front end and route owner.",
+   "note": "Story text names no paging defaults; the values belong in the contract."
+  },
+  {
+   "ruling": "R-28773",
+   "item": "GAP-1271",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Platform observability configuration for the approval screen (ADR-023)",
+   "change": "Alert on any 5xx in five minutes, on route p95 above the registered budget, on a failed record write and on an empty D7.1 queue for 24 hours; review thresholds with the platform observability owner.",
+   "note": "Section 14 text is not in this chunk, so thresholds are not placed in the story here."
+  },
+  {
+   "ruling": "R-28774",
+   "item": "GAP-2391",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "rwb-case reference data (LOV register) and feature-flag configuration",
+   "change": "Add LOV-HOLD-REASON with REFUSED_BY_APPROVER and TEMPLATE_WITHDRAWN; keep switch key rwb.decision.notice-approval read by rwb-comms and rwb-decision until the platform feature-flag owner renames it.",
+   "note": "Story AC3 and AC4 already use both values; no story edit needed."
+  },
+  {
+   "ruling": "R-28775",
+   "item": "GAP-2389",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Plan split slice RWB-P6-E2014-APP (next plan revision)",
+   "change": "Keep H empty; add to C list: RWB-PLT-E1027-CON, RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-N001-CON, RWB-P3-E1042-CON, RWB-P3-E1043-CON.",
+   "note": "Plan change only; the story build dependencies come from the plan slice."
+  },
+  {
+   "ruling": "R-29909",
+   "item": "NEWAC-RWB-ITG-E2014-ITG-AC11",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "Added AC6 in section 7 for BR8 (decision log write forced to fail; no decision takes effect) and TC-E2-014-13-ITG in section 16.",
+   "note": "BR8 now has a criterion and a test; proposed test source not specified, so level is Integration as for other ITG tests."
+  },
+  {
+   "ruling": "R-29910",
+   "item": "NEWAC-RWB-ITG-E2014-ITG-AC12",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "Added AC7 in section 7 for a redelivered approval event and TC-E2-014-14-ITG in section 16.",
+   "note": "Redelivery of the consumed event now has a criterion and test; the event name is not specified in the source documents."
+  }
+ ]
+}

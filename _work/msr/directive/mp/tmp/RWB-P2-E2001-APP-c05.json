@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "7. `HandoverService`: for each candidate calls the inbox key `handover:<account_key>:<D>`; a repeat is skipped and counted in the run summary (AC2).",
+   "new": "7. `HandoverService`: for each candidate calls the inbox key `handover:<account_key>:<D>`; a repeat is skipped and counted in the run summary (AC2). The count is the repeat meter of rwb-decision read by the run summary; the mechanism is confirmed at the RWB-P2-E2001-CON contract review."
+  },
+  {
+   "old": "5. `readParameters`: reads `case.entry.dpd_threshold` (90) and `handover.hold_until` (09:00) through the rwb-case parameter contract, and the product code to product group map through the rwb-case reference-data contract, each with the version in force.",
+   "new": "5. `readParameters`: reads `case.entry.dpd_threshold` (90) and `handover.hold_until` (09:00) through the rwb-case parameter contract, and the product code to product group map through the rwb-case reference-data contract, each with the version in force. An unmapped product code is answered as unresolved and no product group is guessed."
+  },
+  {
+   "old": "13. `recordRunDecision`: writes one local decision record with decision code \"D6 entry\", the business date, the freshness answer of DP01 and DP05, the counts and the outcome, in `rwb_integration`, and the library publishes `DecisionRecorded` on `rwb.decision-record.v1`; the record write and the run summary commit together, and a failed record write fails the run with MSG-P7-003 and an incident.",
+   "new": "13. `recordRunDecision`: writes one local decision record with decision code \"D6 entry\", the business date, the freshness answer of DP01 and DP05, the counts and the outcome, in `rwb_integration`, and the library publishes `DecisionRecorded` on `rwb.decision-record.v1`; the record write and the run summary commit together, and a failed record write fails the run with MSG-P7-003 and an incident. The DecisionRecorded payload fields are fixed in RWB-PLT-E1027-CON and confirmed with the hand-over contract owner before the wave 2 build."
+  },
+  {
+   "old": "| MSG-P1-001 | A data product is stale at the business date of the run | {product} is from {date}. Today's data is not yet complete. |",
+   "new": "| MSG-P1-001 | A data product is stale at the business date of the run | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "MSG-P1-001 uses the wording of FSD P2 Integration v3 (the legacy story carries an older wording of the same message); the divergence is recorded and not repaired here (GAP-0651; ASM-1093). Every other text is the legacy text unchanged. An alert and a run record carry counts, business dates, data product codes and message ids only, never an account holder, a contact point or an amount.",
+   "new": "MSG-P1-001 uses the wording of the Error and Message Standard v4 (the legacy story carries an older wording of the same message). Every other text is the legacy text unchanged. An alert and a run record carry counts, business dates, data product codes and message ids only, never an account holder, a contact point or an amount."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22316",
+   "item": "GAP-2260",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "TSD P3 v3 (T3.1 interaction object) and the P3 ledger story",
+   "change": "Re-scope the P3 ledger story to the P1 contract and mark the TSD P3 interaction object as owned by rwb-source-data under DP-18.",
+   "note": "Story already writes the ledger only through the rwb-source-data contract (step 11). P3 documents need the re-scope."
+  },
+  {
+   "ruling": "R-22317",
+   "item": "GAP-2463",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "RWB-P7-E2005-CON and RWB-P2-E2001-CON",
+   "change": "Keep the repeat count as a meter of rwb-decision, exposed on the service dashboard and in the record submission response header, read by the rwb-integration run summary; confirm at the RWB-P2-E2001-CON contract review.",
+   "note": "Step 7 now names the source of the repeat count. Mechanism confirmation sits with the contract review."
+  },
+  {
+   "ruling": "R-22318",
+   "item": "GAP-2466",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Change Register (RWB workbook)",
+   "change": "Record the move of the EFS history append from recovery.decision.api to the rwb-source-data interaction ledger under DP-18; history items stay on the P7 entry as evidence.",
+   "note": "Step 11 already calls the rwb-source-data interaction append. Only the register entry is missing."
+  },
+  {
+   "ruling": "R-22319",
+   "item": "GAP-2464",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P7-E2005-CON",
+   "change": "Fix GET /decision-log parameters caseId, decision, ruleId, ruleVersion, approver, from, to, page and size; page size 1 to 500; order by decided_at.",
+   "note": "This story does not call GET /decision-log. RWB-P7-E2005-APP implements and tests the contract."
+  },
+  {
+   "ruling": "R-22320",
+   "item": "GAP-1332",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "RWB-PLT-E1027-CON and AsyncAPI rwb.decision-record.v1",
+   "change": "Fix the DecisionRecorded payload and inputs snapshot with business date, queue and owner identifiers, hand-over reference, actions and composite idempotency key; confirm with the hand-over contract owner before wave 2 build.",
+   "note": "Step 13 now points to RWB-PLT-E1027-CON for the payload fields. The element names are not in any source."
+  },
+  {
+   "ruling": "R-22321",
+   "item": "GAP-2462",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P7-E2005-CON and RWB-PLT-E1027-CON",
+   "change": "Add the element list of decision_log_entry actions and outcome to the DecisionLogEntry resource and the record shape at the contract review.",
+   "note": "Tests assert counts, source system and action codes until the element list is published."
+  },
+  {
+   "ruling": "R-22322",
+   "item": "GAP-0593",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 5 says an unmapped product code is unresolved, not guessed. H RWB-PLT-E1043-CON and C RWB-P3-E1043-CON are already listed."
+  },
+  {
+   "ruling": "R-22323",
+   "item": "GAP-2262",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "RWB-PLT-E1047-CON and RWB-PLT-TE006-CON",
+   "change": "Fix the rwb.case.events.v1 envelope and retry settings; limit the CaseCreated payload to caseId, caseNo, productGroup, personKey, businessDate, accountKeys, entryDate and dpdAtEntry.",
+   "note": "The event is published by rwb-case. The held-run resume is not in any source and is not fixed here."
+  },
+  {
+   "ruling": "R-22324",
+   "item": "GAP-2261",
+   "status": "Resolved",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "Header Depends on (build) already lists the six platform CON dependencies; the assembler applies them to the lane and Day-1 allocation."
+  },
+  {
+   "ruling": "R-24680",
+   "item": "CG-ALL-3020",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 row and note now use the Error and Message Standard v4 text."
+  }
+ ]
+}

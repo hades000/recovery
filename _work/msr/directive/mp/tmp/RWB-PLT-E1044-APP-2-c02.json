@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "No business field. The story writes the Flyway tool table `flyway_schema_history` inside each service's own schema; that table is not in the Logical Data Model. It reads the object list of the service's own schema from `information_schema` for the drift gate, and it reads nothing from another schema.",
+   "new": "No business field. The story writes the Flyway tool table `flyway_schema_history` inside each service's own schema; that table is not in the Logical Data Model. It reads the object list of the service's own schema from `information_schema` for the drift gate, and it reads nothing from another schema.\n\n| Object | Type | Schema | Use | In LDM v9 |\n|---|---|---|---|---|\n| `flyway_schema_history` | Flyway tool table | Own service schema `rwb_<name>` | Migration history of the service | No; tool table outside the LDM |\n| `information_schema` | Database catalog, read only | Own service schema | Object list for the drift gate | No; catalog view outside the LDM |"
+  },
+  {
+   "old": "The fields of the migration-run record that each service reports are Not specified in the source documents (GAP-1421; ASM-2489); the legacy `Job` response of RWB-E1-044 is the shape used until the register closes the point. The order of the baselines and the sequence start across the 19 services are part of the same open point.",
+   "new": "The migration-run record carries the service and the schema as its keys; its other fields are the legacy `Job` response of RWB-E1-044 until RWB-PLT-E1044-CON publishes the field list. Each service starts its sequence at `V0001` in its own folder `db/migration/<service>`; the 19 baselines have no cross-service order and no service waits for another service's baseline. A failed run raises one alert per service, as set in RWB-PLT-E1044-OPS. The drift feature flag `rwb.p3.migration-drift-gate` is owned by the platform library owner after the split; its values stay on in SIT, UAT and PROD and off in DEV."
+  },
+  {
+   "old": "Field IDs are those in the Logical Data Model and Data Dictionary.",
+   "new": "Field IDs are those in the Logical Data Model and Data Dictionary.\n\nThe migration contract document and the Flyway configuration module are owned by the platform template in its own repository, next to the module. Each service keeps only its folder `db/migration/<service>` and its `V0001` baseline."
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| BR1 | One Flyway sequence per service, in the service's own schema; the files live in the service's own folder `db/migration/<service>` and run in its own pipeline | ADR-021; DP-15; Arch v5 slide 29 |",
+   "new": "| BR1 | One Flyway sequence per service, in the service's own schema; the files live in the service's own folder `db/migration/<service>` and run in its own pipeline | ADR-021; DP-15; Arch v5 slide 29 | AC1; TC-PLT-E1044-APP2-01 |"
+  },
+  {
+   "old": "| BR2 | Each service has one login that owns `rwb_<name>` and holds no grant on another schema; the migration account is that service's login | Arch v5 slide 29; DP-02 |",
+   "new": "| BR2 | Each service has one login that owns `rwb_<name>` and holds no grant on another schema; the migration account is that service's login | Arch v5 slide 29; DP-02 | AC1, AC6; TC-PLT-E1044-APP2-01, TC-PLT-E1044-APP2-06 |"
+  },
+  {
+   "old": "| BR3 | The schema is referenced only as `${schema}` and fed by `RWB_SCHEMA`; no migration file carries a literal schema name | DP-01; Arch v5 slide 29 |",
+   "new": "| BR3 | The schema is referenced only as `${schema}` and fed by `RWB_SCHEMA`; no migration file carries a literal schema name | DP-01; Arch v5 slide 29 | AC3; TC-PLT-E1044-APP2-03 |"
+  },
+  {
+   "old": "| BR4 | The history table is Flyway's default `flyway_schema_history` inside the service's own schema; no shared history table across services | ADR-021; Arch v5 slide 29 |",
+   "new": "| BR4 | The history table is Flyway's default `flyway_schema_history` inside the service's own schema; no shared history table across services | ADR-021; Arch v5 slide 29 | AC1, AC6; TC-PLT-E1044-APP2-01, TC-PLT-E1044-APP2-06 |"
+  },
+  {
+   "old": "| BR5 | Each service has one `V0001` baseline that creates its own objects and is applied once per environment | DP-15 |",
+   "new": "| BR5 | Each service has one `V0001` baseline that creates its own objects and is applied once per environment | DP-15 | AC1; TC-PLT-E1044-APP2-01 |"
+  },
+  {
+   "old": "| BR6 | No cross-schema join, view or foreign key; a cross-schema reference fails the boundary test in every build | Arch v5 slide 29 notes |",
+   "new": "| BR6 | No cross-schema join, view or foreign key; a cross-schema reference fails the boundary test in every build | Arch v5 slide 29 notes | AC2; TC-PLT-E1044-APP2-02 |"
+  },
+  {
+   "old": "| BR7 | One migration file per story per service, named `V<seq>__<story>_<name>.sql` with line 1 `-- Story: <story key>` | RWB-E1-044 build rule (D-RCV-28); RWB-PLT-E1044-CON |",
+   "new": "| BR7 | One migration file per story per service, named `V<seq>__<story>_<name>.sql` with line 1 `-- Story: <story key>` | RWB-E1-044 build rule (D-RCV-28); RWB-PLT-E1044-CON | AC4; TC-PLT-E1044-APP2-04 |"
+  },
+  {
+   "old": "| BR8 | Forward only in PROD and no edit of an applied file; the drift gate runs before SIT, UAT and PROD | RWB-E1-044 BR4, BR5, BR7; RWB-PLT-E1044-OPS |",
+   "new": "| BR8 | Forward only in PROD and no edit of an applied file; the drift gate runs before SIT, UAT and PROD | RWB-E1-044 BR4, BR5, BR7; RWB-PLT-E1044-OPS | AC5; TC-PLT-E1044-APP2-05 |"
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Contract element | Test cases |\n|---|---|---|---|",
+   "new": "| Requirement ID | Requirement (short) | Contract element | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| REQ-RDF-001 | Recovery data held in 14 data products in the ACE database | Per-service schema `rwb_<name>`, per-service `V0001` baseline, per-service history table | TC-PLT-E1044-APP2-01, TC-PLT-E1044-APP2-03 |",
+   "new": "| REQ-RDF-001 | Recovery data held in 14 data products in the ACE database | Per-service schema `rwb_<name>`, per-service `V0001` baseline, per-service history table | TC-PLT-E1044-APP2-01, TC-PLT-E1044-APP2-03 | Not specified in the source documents (DOR-RWB-PLT-E1044-APP-2-2) | Not specified in the source documents (DOR-RWB-PLT-E1044-APP-2-2) |"
+  },
+  {
+   "old": "| REQ-RDF-014 | Stage 2 data products exist before the first treatment goes live | Per-service baseline applied in each environment before the service starts | TC-PLT-E1044-APP2-01, TC-PLT-E1044-APP2-05 |",
+   "new": "| REQ-RDF-014 | Stage 2 data products exist before the first treatment goes live | Per-service baseline applied in each environment before the service starts | TC-PLT-E1044-APP2-01, TC-PLT-E1044-APP2-05 | Not specified in the source documents (DOR-RWB-PLT-E1044-APP-2-2) | Not specified in the source documents (DOR-RWB-PLT-E1044-APP-2-2) |"
+  },
+  {
+   "old": "| ADR-021 | Per-service Flyway and migration ownership | One sequence, one login and one history table per service; boundary test on every build | TC-PLT-E1044-APP2-02, TC-PLT-E1044-APP2-04, TC-PLT-E1044-APP2-06 |",
+   "new": "| ADR-021 | Per-service Flyway and migration ownership | One sequence, one login and one history table per service; boundary test on every build | TC-PLT-E1044-APP2-02, TC-PLT-E1044-APP2-04, TC-PLT-E1044-APP2-06 | Not specified in the source documents (DOR-RWB-PLT-E1044-APP-2-2) | Not specified in the source documents (DOR-RWB-PLT-E1044-APP-2-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11643",
+   "item": "CG-ALL-1499",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "03 Requirements and specifications/PRD/Recovery Workbench PRD PLT Platform v1.md",
+   "change": "Renumber the duplicate FR-PLT-006 row in the next PRD version.",
+   "note": "Duplicate FR-PLT-006 sits in the PRD; the story PRD reference is unchanged until the PRD is renumbered."
+  },
+  {
+   "ruling": "R-11644",
+   "item": "CG-ALL-1500",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "03 Requirements and specifications/PRD/Recovery Workbench PRD PLT Platform v1.md",
+   "change": "Renumber the duplicate FR-PLT-007 row in the next PRD version.",
+   "note": "Duplicate FR-PLT-007 sits in the PRD; the story PRD reference is unchanged until the PRD is renumbered."
+  },
+  {
+   "ruling": "R-18596",
+   "item": "DOR-RWB-PLT-E1044-APP-2-10",
+   "status": "Not applied",
+   "section": "n/a",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no-access states for SCR-44 need the screen's states, which no source document gives. Not applied."
+  },
+  {
+   "ruling": "R-18597",
+   "item": "DOR-RWB-PLT-E1044-APP-2-12",
+   "status": "Cross-document",
+   "section": "16, 18",
+   "target": "Test Cases v8; RTM v7",
+   "change": "Register TC-PLT-E1044-APP2-01 to TC-PLT-E1044-APP2-06 in Test Cases v8; align the section 18 test lists with RTM v7.",
+   "note": "The six test cases are in section 16 but not in Test Cases v8; the RTM v7 lists differ. Both are other documents."
+  },
+  {
+   "ruling": "R-18598",
+   "item": "DOR-RWB-PLT-E1044-APP-2-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Added Feature and L3 process columns with placeholders. FR duplicates are tracked under CG-ALL-1499 and CG-ALL-1500."
+  },
+  {
+   "ruling": "R-18599",
+   "item": "DOR-RWB-PLT-E1044-APP-2-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added Covered by column mapping BR1 to BR8 to AC1 to AC6 and their section 16 test cases, from the test data already written."
+  },
+  {
+   "ruling": "R-18600",
+   "item": "DOR-RWB-PLT-E1044-APP-2-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Added a data table for flyway_schema_history and information_schema, stated as outside the LDM v9 tool scope."
+  },
+  {
+   "ruling": "R-23188",
+   "item": "GAP-1421",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states V0001 per service folder, no cross-service baseline order, and service and schema keys on the run record. RWB-PLT-E1044-CON must publish the same."
+  },
+  {
+   "ruling": "R-23189",
+   "item": "GAP-1422",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 names the platform template as owner of the contract and Flyway module; the service keeps folder and V0001 only. Contract path is for the template owner to publish."
+  },
+  {
+   "ruling": "R-23190",
+   "item": "GAP-1423",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 sets one alert per failed run per service, the platform library owner for the drift flag, and legacy values unchanged. Field list goes to RWB-PLT-E1044-CON."
+  }
+ ]
+}

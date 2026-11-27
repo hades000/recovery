@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "- Writes `decision_log_entry`, the local decision record of the append and the library objects, all in schema `rwb_decision`; reads no other schema (DP-01).",
+   "new": "- Writes `decision_log_entry`, the local decision record of the append and the library objects, all in schema `rwb_decision`; reads no other schema (DP-01). The schemas `rwb_case`, `rwb_document`, `rwb_litigation` and `rwb_treatment` belong to `rwb-case`, `rwb-document`, `rwb-litigation` and `rwb-treatment`; this story names them only to refuse a write or a read."
+  },
+  {
+   "old": "with the trigger `tr_declog_append_only` that refuses",
+   "new": "with the physical trigger `tr_declog_append_only` (a database object, not a data field or entity of LDM v9 or Data Classification v5) that refuses"
+  },
+  {
+   "old": "| BR15 | The log is append only and hash chained: an entry is never changed or deleted, a correction is a new entry naming the one it corrects, and every `entry_hash` is the SHA-256 of the entry's canonical form | FEAT-DRI-01; REQ-DRI-002; REQ-DRI-003; FSD P7 v3 AC-P7-001-01 and AC-ALT-P7-001-01 |",
+   "new": "| BR15 | The log is append only and hash chained: an entry is never changed or deleted, a correction is a new entry naming the one it corrects, and every `entry_hash` is the SHA-256 of the entry's canonical form | FEAT-DRI-01; REQ-DRI-002; REQ-DRI-003; FSD P7 v3 AC-P7-001-01 and AC-ALT-P7-001-01 |\n\nOpen decisions DL10, DL11, DL19 and DL26 remain open. The directive of 26 November 2026 confirms their assumptions, so the story applies each one as named: DL10 on ASM-2250, ASM-2357, ASM-2377 and ASM-2863; DL11 on ASM-0553, ASM-0703, ASM-1051 and ASM-1104; DL19 on ASM-1051, ASM-1164, ASM-1809 and ASM-1810; DL26 on ASM-0247, ASM-0264, ASM-0275 and ASM-0355."
+  },
+  {
+   "old": "Then the response is 404 with MSG-P4-003 and no entry is returned",
+   "new": "Then the response is 404 with MSG-P4-003 and no entry is returned\n\n  Scenario: AC9 An entry with an unknown decision code or a rule with no version is refused (new, D-RCV-60)\n    Given a decision code that is not in the decision code list in force on 2026-12-31\n    When the extraction decision of document DOC-0602 is composed with that decision code\n    Then the entry is refused with MSG-P7-009 naming decisionCode and no entry is written\n    Given the field judgment_amount of document DOC-0602 has a rule or pattern identifier with no version\n    When the extraction decision of judgment_amount is composed\n    Then the entry is refused with MSG-P7-009 naming ruleVersion and no entry is written"
+  },
+  {
+   "old": "These eight criteria are new for the `rwb-decision` slice",
+   "new": "These nine criteria are new for the `rwb-decision` slice"
+  },
+  {
+   "old": "No screen is built in this story.",
+   "new": "No screen is built in this story. The empty, loading, error and no-access states of SCR-30, SCR-31 and SCR-38 are not defined in the source documents (DOR-RWB-P7-E2025-APP-10) and are not this story's."
+  },
+  {
+   "old": "| TC-E2-025-15 | AC7, BR10 | Component | Reads and writes on `document`, `document_field`, `document_type`, `recovery_case`, `task` and `timer` are each refused, and no foreign key crosses the schema (DP-01) |",
+   "new": "| TC-E2-025-15 | AC7, BR10 | Component | Reads and writes on `document`, `document_field`, `document_type`, `recovery_case`, `task` and `timer` are each refused, and no foreign key crosses the schema (DP-01) |\n| TC-E2-025-16 | AC1, BR9 | Component | Document DOC-0601 with contract_amount and contract_date accepted; one entry per decision, and no entry for a decision whose append fails |\n| TC-E2-025-17 | AC9, BR11 | Unit | A decision code outside the list in force, and a field whose rule or pattern has no version; each is refused with MSG-P7-009 naming decisionCode or ruleVersion and no entry is written |\n| TC-E2-025-18 | AC1, BR13 | Component | Append fails after the chain position is taken; no entry, no chain position and no outbox row exist, and the fact is redelivered |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11318",
+   "item": "CG-ALL-7292",
+   "status": "Not applied",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "No 401 message ID is in the sources. Mapping needs an ID from the Error and Message Standard v4, so none is invented."
+  },
+  {
+   "ruling": "R-11319",
+   "item": "CG-ALL-7294",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a message ID for an entry with no rule or pattern version or a decision code outside the list in force; MSG-P7-009 keeps its decision-log meaning. The story cites it once it exists.",
+   "note": "The new ID is a standard change. The story cannot cite it until it exists, so no story edit is made."
+  },
+  {
+   "ruling": "R-11320",
+   "item": "CG-ALL-7296",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E2-025-13 covers AC4 and TC-E2-025-14 covers AC5; both rows already exist in section 16."
+  },
+  {
+   "ruling": "R-18141",
+   "item": "DOR-RWB-P7-E2025-APP-10",
+   "status": "Cross-document",
+   "section": "15",
+   "target": "RWB-P5-E2025-APP (SCR-30, SCR-31); decision-log query story (SCR-38)",
+   "change": "Define the empty, loading, error and no-access states for SCR-30, SCR-31 and SCR-38.",
+   "note": "Section 15 now states these states are not this story's and are not defined in the sources."
+  },
+  {
+   "ruling": "R-18142",
+   "item": "DOR-RWB-P7-E2025-APP-11",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "The sources do not say which fields Data Classification v5 classes as personal data. Identifying them needs that list, so none is assumed."
+  },
+  {
+   "ruling": "R-18143",
+   "item": "DOR-RWB-P7-E2025-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 now states that DL10, DL11, DL19 and DL26 remain open and applies each assumption the directive confirms."
+  },
+  {
+   "ruling": "R-18144",
+   "item": "DOR-RWB-P7-E2025-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "The database section names each owner of rwb_case, rwb_document, rwb_litigation and rwb_treatment and states they are not written or read here."
+  },
+  {
+   "ruling": "R-18145",
+   "item": "DOR-RWB-P7-E2025-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 and TC-E2-025-16 to -18 for BR9, BR11 and BR13; BR10, BR14 and BR15 are covered by TC-15, TC-14 and TC-13."
+  },
+  {
+   "ruling": "R-18146",
+   "item": "DOR-RWB-P7-E2025-APP-7",
+   "status": "Cross-document",
+   "section": "11, 13",
+   "target": "Logical Data Model v9",
+   "change": "Add review_only as a field of the document type field definition, or confirm it is rwb-document's type-table attribute. The trigger tr_declog_append_only is marked as a physical object in section 13.",
+   "note": "review_only is not in LDM v9 or Data Classification v5. The trigger is now named as a database object, not a data field."
+  },
+  {
+   "ruling": "R-18147",
+   "item": "DOR-RWB-P7-E2025-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a message ID for an entry with no rule or pattern version or a decision code outside the list in force, as in CG-ALL-7294; MSG-P7-009 keeps its standard meaning.",
+   "note": "The story cannot cite a new message ID until the standard holds it, so no story text changes."
+  }
+ ]
+}

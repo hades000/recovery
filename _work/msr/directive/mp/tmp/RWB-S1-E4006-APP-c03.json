@@ -1,0 +1,240 @@
+{
+ "edits": [
+  {
+   "old": "3. The freshness gate runs: VR-S1-006-1 reads `v_ace_batch_status` for the account product and, when the product is from an earlier date, the step stops with MSG-P1-001 and writes nothing.",
+   "new": "3. The freshness gate runs: VR-S1-006-1 reads the account product's batch status through the rwb-source-data contract (DP-05) and, when the product is from an earlier date, the step stops with MSG-P1-001 and writes nothing."
+  },
+  {
+   "old": "10. A repeated request with the same `Idempotency-Key` returns the first answer and writes no second record.",
+   "new": "10. A repeated request with the same `Idempotency-Key` returns the first answer and writes no second record.\n11. The screen states of SCR-13 Route decision: no access shows MSG-P4-002 (X1); stale data shows MSG-P1-001 (X2); a failed read shows the platform problem body (X8); the empty and loading states are Not specified in the source documents (DOR-RWB-S1-E4006-APP-10)."
+  },
+  {
+   "old": "| X1 | A role without right U in Treatment and offer, or a case outside the scope | 403 before any read; the refusal is the guard library's answer and the log carries the role and the operation, never a personal field | MSG-P4-002 | Section 10; TC-E4-006-03 |",
+   "new": "| X1 | A role without right U in Treatment and offer, or a case outside the scope | 403 before any read; the refusal is the guard library's answer and the log carries the role and the operation, never a personal field | MSG-P4-002 | AC3; TC-S1-E4006-APP-05; Section 10; TC-E4-006-03 |"
+  },
+  {
+   "old": "| X2 | The account data product is stale for the business date | The step stops before a balance is used: nothing is calculated, nothing is written | MSG-P1-001 | TC-S1-E4006-APP-02 |",
+   "new": "| X2 | The account data product is stale for the business date | The step stops before a balance is used: nothing is calculated, nothing is written | MSG-P1-001 | AC4; TC-S1-E4006-APP-06; TC-S1-E4006-APP-02 |"
+  },
+  {
+   "old": "| X4 | The account of the case has no row in the ACE account product | No payoff is computed, the range is not offered, and the screen states that no balance is held; nothing is invented | None | R-SET-25; TC-S1-E4006-APP-01 |",
+   "new": "| X4 | The account of the case has no row in the ACE account product | No payoff is computed, the range is not offered, and the screen states that no balance is held; nothing is invented | None | AC5; TC-S1-E4006-APP-07; R-SET-25; TC-S1-E4006-APP-01 |"
+  },
+  {
+   "old": "| X5 | `payoff_as_at` is older than the freshness limit | R-SET-03 blocks the calculation at PAYOFF_AND_RANGE_SET and a fresh payoff is requested through rwb-integration; this service writes nothing | None | TC-S1-E4006-APP-02 |",
+   "new": "| X5 | `payoff_as_at` is older than the freshness limit | R-SET-03 blocks the calculation at PAYOFF_AND_RANGE_SET and a fresh payoff is requested through rwb-integration; this service writes nothing | None | AC6; TC-S1-E4006-APP-08; TC-S1-E4006-APP-02 |"
+  },
+  {
+   "old": "| X6 | The rule set in force carries no floor, or no range for the route set | The calculation holds as UNMATCHED_EXCEPTION, names the missing value and raises a task for the case owner (R-SET-25) | MSG-GEN-001 | TC-S1-E4006-APP-01 |",
+   "new": "| X6 | The rule set in force carries no floor, or no range for the route set | The calculation holds as UNMATCHED_EXCEPTION, names the missing value and raises a task for the case owner (R-SET-25) | MSG-GEN-001 | AC7; TC-S1-E4006-APP-09; TC-S1-E4006-APP-01 |"
+  },
+  {
+   "old": "| X7 | A required element of the request is absent or outside its list | 422 with MSG-GEN-001 naming the field; the transaction never opens | MSG-GEN-001 | Section 12.1 |",
+   "new": "| X7 | A required element of the request is absent or outside its list | 422 with MSG-GEN-001 naming the field; the transaction never opens | MSG-GEN-001 | AC8; TC-S1-E4006-APP-10; Section 12.1 |"
+  },
+  {
+   "old": "| X8 | The rwb-source-data read or the rule read does not answer inside 2 s | 503 with the platform problem body; nothing is written and the workflow retries on its own schedule | None | Section 12.2 |",
+   "new": "| X8 | The rwb-source-data read or the rule read does not answer inside 2 s | 503 with the platform problem body; nothing is written and the workflow retries on its own schedule | None | AC9; TC-S1-E4006-APP-11; Section 12.2 |"
+  },
+  {
+   "old": "    Given the rwb-source-data contract mock returns total balance 1240000, past due amount 86000 and collections fee 4500 for account \"A-0001\" at the ACE batch date 2026-12-14\n    Given v_ace_account holds total balance 1240000, past due amount 86000 and collections fee 4500 for account \"A-0001\" at the ACE batch date 2026-12-14",
+   "new": "    Given the rwb-source-data contract mock returns total balance 1240000, past due amount 86000 and collections fee 4500 for account \"A-0001\" at the ACE batch date 2026-12-14"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Refuse a role without the Treatment and offer right (exception X1)\n    Given the rwb-access authorise fake refuses right U in Treatment and offer for the role\n    When the role prepares the route decision\n    Then the operation returns 403 with MSG-P4-002 and no account is read\n\n  Scenario: AC4 Stale account data product stops the step (exception X2)\n    Given the rwb-source-data freshness fake returns the account product from an earlier date than the business date\n    When the case owner prepares the route decision\n    Then the step stops with MSG-P1-001 and nothing is calculated or written\n\n  Scenario: AC5 Account with no balance row (exception X4)\n    Given the rwb-source-data account and balance fake holds no row for account \"A-0001\"\n    When the case owner prepares the route decision\n    Then no payoff is computed, no range is offered and the screen states that no balance is held\n\n  Scenario: AC6 Payoff older than the freshness limit (exception X5)\n    Given payoff_as_at is older than the freshness limit in force\n    When the case owner prepares the route decision\n    Then R-SET-03 blocks the calculation at PAYOFF_AND_RANGE_SET, a fresh payoff is requested through rwb-integration and this service writes nothing\n\n  Scenario: AC7 Settlement route set with no floor (exception X6)\n    Given the rwb-decision rule-set fake returns a settlement route set with no floor\n    When the case owner prepares the route decision\n    Then the calculation holds as UNMATCHED_EXCEPTION, names the missing value and raises a task for the case owner\n\n  Scenario: AC8 Required element of the request absent (exception X7)\n    Given a RouteRequest with a required element absent\n    When the request is sent to POST /cases/{caseId}/route\n    Then the operation returns 422 with MSG-GEN-001 naming the field and the transaction never opens\n\n  Scenario: AC9 Contract read does not answer within 2 s (exception X8)\n    Given the rwb-source-data account and balance fake gives no answer beyond 2 s\n    When the case owner prepares the route decision\n    Then the operation returns 503 with the platform problem body and nothing is written"
+  },
+  {
+   "old": "the repeated `Then`, `v_ace_account`, `the case owner prepares the route decision`",
+   "new": "the repeated `Then`, `the case owner prepares the route decision`"
+  },
+  {
+   "old": "and that added line is the only addition to the criterion.",
+   "new": "and that line replaces the legacy `v_ace_account` Given, so it is the only change to the criterion's Givens."
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| BR1 | The payoff is computed from the balances ACE holds for the account and is never read from a copy, a staging table or a balance of this service | legacy RWB-E4-006 story; D-RCV-35 U1; ADR-010; DP-05 |",
+   "new": "| BR1 | The payoff is computed from the balances ACE holds for the account and is never read from a copy, a staging table or a balance of this service | legacy RWB-E4-006 story; D-RCV-35 U1; ADR-010; DP-05 | AC1; TC-S1-E4006-APP-01 |"
+  },
+  {
+   "old": "| BR2 | The three balances used are `total_balance`, `past_due_amount` and `collections_fee` at the ACE batch date; no other balance is added and no balance is stored | legacy RWB-E4-006 AC1; Physical Schema v7 DF-ACE-020, DF-ACE-022 and DF-ACE-024 |",
+   "new": "| BR2 | The three balances used are `total_balance`, `past_due_amount` and `collections_fee` at the ACE batch date; no other balance is added and no balance is stored | legacy RWB-E4-006 AC1; Physical Schema v7 DF-ACE-020, DF-ACE-022 and DF-ACE-024 | AC1; TC-E4-006-01 |"
+  },
+  {
+   "old": "| BR3 | The settlement range and the floor are values of the rule set in force, read with the rule id and version; the floor is applied to the range and no amount below it leaves unflagged | legacy RWB-E4-006 AC1; R-SET-01, R-SET-05; BR-S1-006 |",
+   "new": "| BR3 | The settlement range and the floor are values of the rule set in force, read with the rule id and version; the floor is applied to the range and no amount below it leaves unflagged | legacy RWB-E4-006 AC1; R-SET-01, R-SET-05; BR-S1-006 | AC1; AC7; TC-E4-006-01; TC-S1-E4006-APP-09 |"
+  },
+  {
+   "old": "| BR4 | A stale account data product stops the step with MSG-P1-001 and nothing is calculated | VR-S1-006-1; FSD S1 A2.6.3.1 |",
+   "new": "| BR4 | A stale account data product stops the step with MSG-P1-001 and nothing is calculated | VR-S1-006-1; FSD S1 A2.6.3.1 | AC4; TC-S1-E4006-APP-06 |"
+  },
+  {
+   "old": "| BR5 | `payoff_as_at` older than the freshness limit blocks the calculation and a fresh payoff is requested through rwb-integration | R-SET-02, R-SET-03 |",
+   "new": "| BR5 | `payoff_as_at` older than the freshness limit blocks the calculation and a fresh payoff is requested through rwb-integration | R-SET-02, R-SET-03 | AC6; TC-S1-E4006-APP-08 |"
+  },
+  {
+   "old": "| BR6 | A missing payoff or a missing floor holds the calculation as UNMATCHED_EXCEPTION, names the missing field and raises a task for the case owner | R-SET-25 |",
+   "new": "| BR6 | A missing payoff or a missing floor holds the calculation as UNMATCHED_EXCEPTION, names the missing field and raises a task for the case owner | R-SET-25 | AC7; TC-S1-E4006-APP-09 |"
+  },
+  {
+   "old": "| BR7 | The result is recorded in the local decision record with the rule id and version before the answer is composed, and a result that cannot be recorded does not proceed | legacy RWB-E4-006 AC1, AC2; DP-03; REQ-S1-004 |",
+   "new": "| BR7 | The result is recorded in the local decision record with the rule id and version before the answer is composed, and a result that cannot be recorded does not proceed | legacy RWB-E4-006 AC1, AC2; DP-03; REQ-S1-004 | AC1; AC2; TC-E4-006-01; TC-E4-006-02 |"
+  },
+  {
+   "old": "| BR8 | No value a business person may change is written in code: the formula, the range bounds, the floor, the freshness limit and the lists are values in force read with their version | BR-S1-006; FSD S1 A2.6.3.1 |",
+   "new": "| BR8 | No value a business person may change is written in code: the formula, the range bounds, the floor, the freshness limit and the lists are values in force read with their version through the reference-data contract (DP-06, DP-07) | BR-S1-006; FSD S1 A2.6.3.1; DP-06; DP-07 | TC-S1-E4006-APP-01 |"
+  },
+  {
+   "old": "| BR9 | The step needs right U in the capability area Treatment and offer; the check is the platform guard library's and no role list is written here | TSD S1 T6.1; legacy permission checks |",
+   "new": "| BR9 | The step needs right U in the capability area Treatment and offer; the check is the platform guard library's and no role list is written here | TSD S1 T6.1; legacy permission checks | AC3; TC-S1-E4006-APP-05; TC-E4-006-03 |"
+  },
+  {
+   "old": "| BR10 | This service writes no case table, no treatment row and no rule row, and reads no table of another service | DP-01; GAP-2615 |",
+   "new": "| BR10 | This service writes no case table, no treatment row and no rule row, and reads no table of another service | DP-01; GAP-2615 | TC-S1-E4006-APP-04 |"
+  },
+  {
+   "old": "| TC-S1-E4006-APP-02 | Freshness: a stale account product stops with MSG-P1-001 and a `payoff_as_at` older than the limit blocks under R-SET-03 | Component | The freshness fake in both states and the `payoff_as_at` limit in force |",
+   "new": "| TC-S1-E4006-APP-02 | Freshness: a stale account product stops with MSG-P1-001 and a `payoff_as_at` older than the limit blocks under R-SET-03 | Component | The freshness fake in both states and the `payoff_as_at` limit in force |\n| TC-S1-E4006-APP-03 | Contract: the operations, events and activities of section 12 are carried by the rwb-source-data and rwb-decision contracts | Contract | The rwb-source-data contract fake and the rwb-decision rule-set fake; the operations, events and activities of section 12 |\n| TC-S1-E4006-APP-04 | Boundary: each table of section 12.7 is tested at its boundary and no table of another owner is written (ASM-3438) | Component | The `decision_record` and `idempotency_key` tables of `rwb_valuation`; a write attempt on each table owned by another service |\n| TC-S1-E4006-APP-05 | AC3: exception X1, a role without the Treatment and offer right is refused before any read | Component | A role without Treatment and offer U; 403 with MSG-P4-002 and no read |\n| TC-S1-E4006-APP-06 | AC4: exception X2, a stale account product stops the step with MSG-P1-001 and nothing is written | Component | The freshness fake at an earlier date than the business date |\n| TC-S1-E4006-APP-07 | AC5: exception X4, an account with no row in the ACE account product holds no payoff and no range | Component | The account and balance fake with no row for account `A-0001` |\n| TC-S1-E4006-APP-08 | AC6: exception X5, a `payoff_as_at` older than the freshness limit blocks at PAYOFF_AND_RANGE_SET under R-SET-03 | Component | A `payoff_as_at` older than the freshness limit in force |\n| TC-S1-E4006-APP-09 | AC7: exception X6, a settlement route set with no floor holds as UNMATCHED_EXCEPTION | Component | A rule set with no floor |\n| TC-S1-E4006-APP-10 | AC8: exception X7, a required element of the request absent returns 422 with MSG-GEN-001 and opens no transaction | Component | A `RouteRequest` with a required element absent |\n| TC-S1-E4006-APP-11 | AC9: exception X8, a read that does not answer inside 2 s returns 503 and writes nothing | Component | The account and balance fake with no answer beyond 2 s |"
+  },
+  {
+   "old": "| Source | Reference | Used in |\n|---|---|---|",
+   "new": "| Feature | L3 process | Source | Reference | Used in |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| Legacy story | RWB-E4-006, disposition Split (rework); AC1 and AC2 are owned by this story, verbatim; TC-E4-006-01 to -04 map onto this deliverable | 1, 5, 7, 14, 16 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Legacy story | RWB-E4-006, disposition Split (rework); AC1 and AC2 are owned by this story, verbatim; TC-E4-006-01 to -04 map onto this deliverable | 1, 5, 7, 14, 16 |"
+  },
+  {
+   "old": "| Feature | FEAT-VAL-06 Calculate the payoff and settlement range, module S1, epic E4, depends on FEAT-DRI-07 | 1, 2, 3 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Feature | FEAT-VAL-06 Calculate the payoff and settlement range, module S1, epic E4, depends on FEAT-DRI-07 | 1, 2, 3 |"
+  },
+  {
+   "old": "| FSD S1 v3 | A2.6.1 intent and metric; A2.6.2 steps and integration points ALS and GL and the Rules component; A2.6.3.1 VR-S1-006-1 and BR-S1-006; A2.6.3.3 roles; A2.6.4.1 AC-S1-006-01 and A2.6.4.3 AC-EXC-S1-006-01 and -02; REQ-S1-004; SCR-13 | 2, 3, 5, 8, 12, 15 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | FSD S1 v3 | A2.6.1 intent and metric; A2.6.2 steps and integration points ALS and GL and the Rules component; A2.6.3.1 VR-S1-006-1 and BR-S1-006; A2.6.3.3 roles; A2.6.4.1 AC-S1-006-01 and A2.6.4.3 AC-EXC-S1-006-01 and -02; REQ-S1-004; SCR-13 | 2, 3, 5, 8, 12, 15 |"
+  },
+  {
+   "old": "| TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T5.2 cross-module interfaces; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T5.2 cross-module interfaces; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12 |"
+  },
+  {
+   "old": "| Epics 3 to 8 Specification v3 | E4 S1 FEAT-VAL-06 row; FEAT-VAL-07 depends on it; FEAT-TRT-02 depends on it | 1, 3 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Epics 3 to 8 Specification v3 | E4 S1 FEAT-VAL-06 row; FEAT-VAL-07 depends on it; FEAT-TRT-02 depends on it | 1, 3 |"
+  },
+  {
+   "old": "| Routing logic v4 | R-SET-01, R-SET-02, R-SET-03, R-SET-04 and R-SET-05 (D6.4); R-SET-25 | 3, 8, 9 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Routing logic v4 | R-SET-01, R-SET-02, R-SET-03, R-SET-04 and R-SET-05 (D6.4); R-SET-25 | 3, 8, 9 |"
+  },
+  {
+   "old": "| Logical data model and Physical Schema | DF-ACE-001 to DF-ACE-042 and DF-ACE-020, DF-ACE-022, DF-ACE-024; DF-DEC-001 to DF-DEC-018; DF-REF-001 to DF-REF-015; DF-TRT-001 to DF-TRT-014 | 11 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Logical data model and Physical Schema | DF-ACE-001 to DF-ACE-042 and DF-ACE-020, DF-ACE-022, DF-ACE-024; DF-DEC-001 to DF-DEC-018; DF-REF-001 to DF-REF-015; DF-TRT-001 to DF-TRT-014 | 11 |"
+  },
+  {
+   "old": "| Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 |"
+  },
+  {
+   "old": "| Gaps and assumptions | GAP-2615 to -5; ASM-4317 to -5 and -7 | 1, 3, 5, 7, 11, 12, 13 |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Gaps and assumptions | GAP-2615 to -5; ASM-4317 to -5 and -7 | 1, 3, 5, 7, 11, 12, 13 |"
+  },
+  {
+   "old": "| Decisions | ADR-010, ADR-013, ADR-014, ADR-020, ADR-022; D-RCV-35 U1; D-RCV-60 | all |",
+   "new": "| FEAT-VAL-06 | Not specified in the source documents (DOR-RWB-S1-E4006-APP-2) | Decisions | ADR-010, ADR-013, ADR-014, ADR-020, ADR-022; D-RCV-35 U1; D-RCV-60 | all |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12039",
+   "item": "CG-ALL-8072",
+   "status": "Resolved",
+   "section": "4, 7",
+   "target": "",
+   "change": "",
+   "note": "Step 3 reads the freshness through rwb-source-data; the v_ace_account Given in AC1 is replaced by the contract mock line."
+  },
+  {
+   "ruling": "R-19006",
+   "item": "DOR-RWB-S1-E4006-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 11 maps no access, stale and failed read states; empty and loading states are not specified in the source documents."
+  },
+  {
+   "ruling": "R-19007",
+   "item": "DOR-RWB-S1-E4006-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Tab Story test cases: add rows for TC-E4-006-01 to -04, TC-S1-E4006-APP-01, -02 and the story rows -03 to -11 added in section 16.",
+   "note": "Story rows added: contract test -03 and boundary test -04. The v8 workbook must carry all rows."
+  },
+  {
+   "ruling": "R-19008",
+   "item": "DOR-RWB-S1-E4006-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added; L3 process is not specified in the source documents."
+  },
+  {
+   "ruling": "R-19009",
+   "item": "DOR-RWB-S1-E4006-APP-20",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR8 names the parameters read in force and the reference-data contract DP-06 and DP-07."
+  },
+  {
+   "ruling": "R-19010",
+   "item": "DOR-RWB-S1-E4006-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Criteria AC3 to AC9 added for X1, X2, X4 to X8 with test rows; section 5 Covered by column updated."
+  },
+  {
+   "ruling": "R-19011",
+   "item": "DOR-RWB-S1-E4006-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to section 8; each of BR1 to BR10 now names a criterion or test case."
+  },
+  {
+   "ruling": "R-19012",
+   "item": "DOR-RWB-S1-E4006-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical data model v9 and Data Classification v5",
+   "change": "Add as fields or entities: decision_record, payoff_as_at, settlement_range_low, settlement_range_high and the two further names in the detcheck (not specified in the source documents).",
+   "note": "Story section 11 unchanged; the names are the story's own fields and need listing in LDM v9 or Data Classification v5."
+  },
+  {
+   "ruling": "R-19013",
+   "item": "DOR-RWB-S1-E4006-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text for MSG-P1-001 is not in the source documents; the story text cannot be aligned without inventing it."
+  },
+  {
+   "ruling": "R-22774",
+   "item": "GAP-1689",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Program BRD v4 section 8 and Arch v5 release plan",
+   "change": "Publish the valuation and payoff contract with its fake before wave 3 so E3 can build against it; release FEAT-VAL-01 and FEAT-VAL-06 with S1 in wave 3.",
+   "note": "Ruling accepted; the contract story is the only E3 dependency this service creates. No story text change needed."
+  }
+ ]
+}

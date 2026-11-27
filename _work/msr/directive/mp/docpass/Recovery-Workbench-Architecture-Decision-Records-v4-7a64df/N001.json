@@ -1,0 +1,86 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Architecture Decision Records v4.md",
+ "unit": "N001",
+ "items": [
+  "GAP-0009",
+  "GAP-0090",
+  "GAP-0091",
+  "GAP-0104"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 4
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "N001-F1",
+     "finding": "GAP-0009",
+     "op": "replace",
+     "old": "While ACE ingestion is still on Control-M, rwb-source-data polls the ACE batch record as the fallback.",
+     "new": "While ACE ingestion is still on Control-M, rwb-source-data polls the ACE batch record as the fallback. Airflow is recorded at Recovery's edges only, and the Control-M poll stays as the fallback until a new ADR replaces the BRD's ADF and Control-M wording (GAP-0009)."
+    },
+    {
+     "fix_id": "N001-F2",
+     "finding": "GAP-0091",
+     "op": "replace",
+     "old": "Version 1.30 or later, because Nexus and Worker Versioning are needed, on the pinned release SCB IT approves at build.",
+     "new": "Version 1.30 or later, because Nexus and Worker Versioning are needed, on the pinned release SCB IT approves at build. One release of 1.30 or later is pinned in Wave 0 and recorded in this ADR and in the Temporal Workflow and Activity Catalog v1; the exact release number is Not specified in the source documents (GAP-0091)."
+    },
+    {
+     "fix_id": "N001-F3",
+     "finding": "GAP-0104",
+     "op": "insert_after",
+     "old": "- The call type is chosen by four questions in order: a person waiting is REST; a fact others may react to is an event; a step another service must perform with a result is a Temporal activity or child workflow; bulk data or a party outside the bank is a file through rwb-integration. ACE data is asked of rwb-source-data, in REST for a screen and as an activity in a workflow.",
+     "new": "- The Architecture v5 rule that route services reach shared capabilities through Temporal, never REST, covers the five shared capabilities: decision, document, payment, partner and comms. The route services' reference reads from rwb-source-data stay REST, one hop and cached (GAP-0104)."
+    },
+    {
+     "fix_id": "N001-F4",
+     "finding": "GAP-0090",
+     "op": "replace",
+     "old": "The amendment to T1 and T2 of D-RCV-36 is recorded here by reference to the mapping in Template and Rules §R8.4; the Change Register text itself is Not specified in the source documents (GAP-0090; ASM-0152).",
+     "new": "The amendment to T1 and T2 of D-RCV-36 follows the mapping in Template and Rules §R8.4. The text being amended, from the Temporal and Drools Change Register v1 (GAP-0090), is:\n\n- T1: \"Temporal, hybrid. Case data stays the system of record in the ACE DB recovery schema. Temporal runs the case lifecycle from Epic 3: one workflow per case, plus durable timers, retries and automated multi-step chains. Self-hosted on the shared ACE AKS clusters in the ACE namespace.\"\n- T2: \"Quartz and Spring Batch stay for every Epic 1 and Epic 2 scheduled job (JOB-03 allocation, JOB-04 reconciliation, JOB-05 timer check, JOB-06 rebalance, JOB-07, JOB-08 and the rest). JOB-05 runs behind a new TimerScheduler port so that Epic 3 can swap in Temporal durable timers without changing callers. Temporal Schedules are not used in Epics 1 and 2.\""
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-0009",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "ADR-016 already placed Airflow at the edges with the Control-M fallback; added that the fallback stays until a new ADR replaces the BRD wording."
+    },
+    {
+     "item": "GAP-0091",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "Wave 0 pin recorded in ADR-016; exact release number not invented. The Temporal Workflow and Activity Catalog v1 needs the same entry."
+    },
+    {
+     "item": "GAP-0104",
+     "status": "Resolved",
+     "fix_ids": [
+      "F3"
+     ],
+     "note": "Reading of the rule added to the ADR-020 Decision."
+    },
+    {
+     "item": "GAP-0090",
+     "status": "Resolved",
+     "fix_ids": [
+      "F4"
+     ],
+     "note": "T1 and T2 quoted verbatim in ADR-017 from folder 16 Change Register v1, section 2."
+    }
+   ]
+  }
+ ]
+}

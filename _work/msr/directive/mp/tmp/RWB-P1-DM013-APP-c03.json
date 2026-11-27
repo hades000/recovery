@@ -1,0 +1,101 @@
+{
+ "edits": [
+  {
+   "old": "| 5 | The run | Writes the three parts with their checksums and their row counts | Records the run, its counts and its orphans in the cutover record; writes nothing to `rwb_source_data` |",
+   "new": "| 5 | The run | Writes the three parts as handover files with their checksums, row counts and a resolution stamp per row, each to its owning service (rwb-payment, rwb-writeoff, rwb-case) | Records the run, its counts and its orphans in the cutover record, with the load command's run record; writes nothing to `rwb_source_data` |"
+  },
+  {
+   "old": "| 6 | Data steward | Reads the count of clean days and, at ten, signs off | The legacy tables stay read-only for their retention period and the migrated records are served from the three new schemas |",
+   "new": "| 6 | Data steward | Reads the count of clean days, each a PASS result on `reconciliation_result`, and at ten signs off in the cutover record of the release pipeline | The legacy tables stay read-only for their retention period and the migrated records are served from the three new schemas |"
+  },
+  {
+   "old": "| MSG-P1-001 | Warning | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | Warning | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "| MSG-P1-012 | Warning | The case list for {date} does not reconcile to ACE for {product}: a difference of {variance} accounts, {pct} percent. |",
+   "new": "| MSG-P1-012 | Warning | The case list for {date} does not reconcile to ALS for {product}: a difference of {variance} accounts, {pct} percent. |"
+  },
+  {
+   "old": "| MSG-GEN-006 | Error | {system} is unavailable. The action was not taken. Try again. |",
+   "new": "| MSG-GEN-006 | Error | {system} is not available. Your request is queued and will be retried. |"
+  },
+  {
+   "old": "| Signed off | The count of ten, the sign-off in the cutover record, and the legacy tables read-only for their retention period |",
+   "new": "| Signed off | The count of ten, the sign-off in the cutover record, and the legacy tables read-only for their retention period |\n| Empty | Not specified in the source documents (CG-ALL-1986) |\n| Error | Not specified in the source documents (CG-ALL-1986) |\n| No access | Not specified in the source documents (CG-ALL-1986) |"
+  },
+  {
+   "old": "    And the migrated records are served from the new schema",
+   "new": "    And the migrated records are served from the new schema\n\n  Scenario: AC4 A status change the model does not allow is refused (new, D-RCV-60)\n    Given a status change the model does not allow\n    When the migration applies that status change\n    Then the change is refused and the row counts of `rwb_source_data` are unchanged"
+  },
+  {
+   "old": "| TC-DM-013-04 | Access refusal; BR4 | Component | A caller whose Platform administration right is absent in the authorise fake, starting the run and reading the result; a second call with the right present for the contrast; the row counts of `rwb_source_data` before and after the refusal |",
+   "new": "| TC-DM-013-04 | Access refusal; BR4 | Component | A caller whose Platform administration right is absent in the authorise fake, starting the run and reading the result; a second call with the right present for the contrast; the row counts of `rwb_source_data` before and after the refusal |\n| TC-DM-013-05 | AC4 | Component | Not specified in the source documents (NEWAC-RWB-P1-DM013-APP-AC4) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21838",
+   "item": "GAP-2178",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Flow rows 5 and 6 name the three owning services, the handover files with checksum and resolution stamp, and the sign-off in the cutover record.",
+   "note": "Split accepted: rwb-payment, rwb-writeoff and rwb-case load their parts; the data steward signs off in the cutover record; ten clean days are PASS results."
+  },
+  {
+   "ruling": "R-21839",
+   "item": "GAP-2533",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Data Migration Approach and the proceeds schema (LDM)",
+   "change": "Publish the handover file's count, checksum and resolution stamp format, location and retention; name the load command and its run record and rights; add a provenance and migration-date column to the next proceeds schema version; record the DP-15 split in the split plan.",
+   "note": "Story side names the handover files and run record in flow row 5; the file format, command name, schema column and split plan need the other documents."
+  },
+  {
+   "ruling": "R-24278",
+   "item": "CG-ALL-1981",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4."
+  },
+  {
+   "ruling": "R-24279",
+   "item": "CG-ALL-1982",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-012 text copied from Error and Message Standard v4; reconciles to ALS."
+  },
+  {
+   "ruling": "R-24280",
+   "item": "CG-ALL-1983",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-GEN-006 text copied from Error and Message Standard v4."
+  },
+  {
+   "ruling": "R-24281",
+   "item": "CG-ALL-1986",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, error and no access states added; the screen specification lacks them, so each is marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-30164",
+   "item": "NEWAC-RWB-P1-DM013-APP-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC4 added for a disallowed status change, with TC-DM-013-05; the test data is Not specified in the source documents."
+  }
+ ]
+}

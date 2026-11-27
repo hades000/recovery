@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "Field IDs are those of TSD P8 T3.1 and the Logical Data Model v8. `proceeds` is the only business table this story writes, and it writes one optional column of it; no column, key, join or view leaves `rwb_payment` (DP-01). The receipt facts of `recovery_case`, `treatment`, `interaction` and `decision_log_entry` that the legacy data table names are the owners' and are read on their contracts or not at all: `treatment` and `interaction` are not needed by this step and are named here only to close the legacy table.",
+   "new": "Field IDs are those of TSD P8 T3.1 and the Logical Data Model v8. `proceeds` is the only business table this story writes, and it writes one optional column of it; no column, key, join or view leaves `rwb_payment` (DP-01). The receipt facts of `recovery_case`, `treatment`, `interaction` and `decision_log_entry` that the legacy data table names are the owners' and are read on their contracts or not at all: `treatment` and `interaction` are not needed by this step and are named here only to close the legacy table.\n\nLists read: LOV-PROCEEDS-SRC (DF-FIN-005) and LOV-MATCH (DF-FIN-008). Parameters read: the interface row values of rwb-integration (transport, layout, result codes and retry schedule), read per item (X4; BR5). Reference-data contract: DP-06 and DP-07."
+  },
+  {
+   "old": "| DF-ACE-043 to DF-ACE-054 | not held | the payment record of `v_ace_payment` and its `payment_code` | Read on rwb-source-data's contract |",
+   "new": "| DF-ACE-043 to DF-ACE-054 | not held | the payment record and its `payment_code` | Read on rwb-source-data's contract |"
+  },
+  {
+   "old": "| Event | Read or topic | Payload used | When |\n|---|---|---|---|\n| `AceDataReady` (EV-26) | `recovery.v_ace_batch_status` through rwb-source-data, not delivered on a topic | `source_system`, `business_date`, `status`, `completed_at` | Starts the `confirmBookings` run of a business date when the batch of the source is COMPLETED |",
+   "new": "| Event | Read or topic | Owner | Payload used | When |\n|---|---|---|---|---|\n| `AceDataReady` (EV-26) | `recovery.v_ace_batch_status` through rwb-source-data, not delivered on a topic | rwb-source-data | `source_system`, `business_date`, `status`, `completed_at` | Starts the `confirmBookings` run of a business date when the batch of the source is COMPLETED |"
+  },
+  {
+   "old": "| X2 | The rule row of the route is not readable, or no version is in force | The step stops before building anything; nothing is sent and nothing changes | MSG-P7-003 | TC-E4-047-01 |",
+   "new": "| X2 | The rule row of the route is not readable, or no version is in force | The step stops before building anything; nothing is sent and nothing changes | MSG-P7-003 | AC3, TC-E4-047-05 |"
+  },
+  {
+   "old": "| X3 | The outbound interface refuses the manifest or no interface row is in force at the business date | No item is created; the receipt stays unposted; the refusal is returned to the run | MSG-GEN-001 | TC-E4-047-01 |",
+   "new": "| X3 | The outbound interface refuses the manifest or no interface row is in force at the business date | No item is created; the receipt stays unposted; the refusal is returned to the run | MSG-GEN-001 | AC4, TC-E4-047-06 |"
+  },
+  {
+   "old": "| X4 | The interface row has been changed since the last item | The next item obeys the new version: transport, layout, result codes and retry are read per item, so a change is data and needs no release | None | TC-E4-047-01 |",
+   "new": "| X4 | The interface row has been changed since the last item | The next item obeys the new version: transport, layout, result codes and retry are read per item, so a change is data and needs no release | None | AC5, TC-E4-047-07 |"
+  },
+  {
+   "old": "| X5 | The item is delivered but the ledger rejects the posting | The item is held on rwb-integration's exception queue with its task; the receipt keeps no posting reference and shows as unposted; a corrected cause is re-sent from that queue | MSG-P2-001 (P2's row) | TC-E4-047-01 |",
+   "new": "| X5 | The item is delivered but the ledger rejects the posting | The item is held on rwb-integration's exception queue with its task; the receipt keeps no posting reference and shows as unposted; a corrected cause is re-sent from that queue | MSG-P2-001 (P2's row) | AC6, TC-E4-047-08 |"
+  },
+  {
+   "old": "| X6 | The ACE batch of the source has not arrived, or the product is stale | The confirmation run does not read a reference and the receipts stay unposted; the product shows its date | MSG-P1-001 | TC-E4-047-01 |",
+   "new": "| X6 | The ACE batch of the source has not arrived, or the product is stale | The confirmation run does not read a reference and the receipts stay unposted; the product shows its date | MSG-P1-001 | AC7, TC-E4-047-09 |"
+  },
+  {
+   "old": "| X7 | The same proceeds is posted twice with the same `Idempotency-Key` | One item, one record and one reference; the repeat returns the stored answer and is counted | None | TC-E4-047-01 |",
+   "new": "| X7 | The same proceeds is posted twice with the same `Idempotency-Key` | One item, one record and one reference; the repeat returns the stored answer and is counted | None | AC8, TC-E4-047-10 |"
+  },
+  {
+   "old": "| X8 | The same proceeds is posted with a new key after a confirmation | The second posting is refused with 409: one receipt carries one posting reference, and an overwrite would break the record chain | None | TC-E4-047-01 |",
+   "new": "| X8 | The same proceeds is posted with a new key after a confirmation | The second posting is refused with 409: one receipt carries one posting reference, and an overwrite would break the record chain | None | AC9, TC-E4-047-11 |"
+  },
+  {
+   "old": "| X9 | A caller without the right tries the read, or a case outside its scope | Refused, nothing changes; the read answers 404 for an object outside scope | MSG-P4-002 | TC-E4-047-03 |",
+   "new": "| X9 | A caller without the right tries the read, or a case outside its scope | Refused, nothing changes; the read answers 404 for an object outside scope | MSG-P4-002 | AC10, TC-E4-047-03 |"
+  },
+  {
+   "old": "| X10 | rwb-source-data, rwb-decision or the interface does not answer inside 2 s | The step of that receipt stops and retries; the breaker opens per downstream; no partial posting is kept | HTTP 503 | TC-E4-047-01 |",
+   "new": "| X10 | rwb-source-data, rwb-decision or the interface does not answer inside 2 s | The step of that receipt stops and retries; the breaker opens per downstream; no partial posting is kept | HTTP 503 | AC11, TC-E4-047-12 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Rule row not readable or no version in force (exception X2)\n    Given the rule row of the route is not readable or no version is in force\n    When the posting step is taken\n    Then the step stops before building anything, nothing is sent and nothing changes\n\n  Scenario: AC4 Interface refuses the manifest or no interface row is in force (exception X3)\n    Given the outbound interface refuses the manifest or no interface row is in force at the business date\n    When the posting step is taken\n    Then no item is created, the receipt stays unposted and the refusal is returned to the run\n\n  Scenario: AC5 Interface row changed since the last item (exception X4)\n    Given the interface row has been changed since the last item\n    When the next item is posted\n    Then the item obeys the new version: transport, layout, result codes and retry are read per item\n\n  Scenario: AC6 Ledger rejects a delivered item (exception X5)\n    Given the item is delivered and the ledger rejects the posting\n    When the rejection is received\n    Then the item is held on the exception queue of rwb-integration and the receipt keeps no posting reference and shows as unposted\n\n  Scenario: AC7 Stale or absent ACE batch (exception X6, BR6)\n    Given the ACE batch of the source has not arrived or the product is stale\n    When the confirmation run reads the reference\n    Then no reference is read, the receipts stay unposted and the product shows its date\n\n  Scenario: AC8 Same proceeds posted twice with the same key (exception X7, BR9)\n    Given the same proceeds is posted twice with the same Idempotency-Key\n    When the repeat arrives\n    Then one item, one record and one reference exist, and the repeat returns the stored answer and is counted\n\n  Scenario: AC9 Same proceeds posted with a new key after a confirmation (exception X8)\n    Given a receipt already carries a posting reference\n    When the same proceeds is posted with a new key\n    Then the second posting is refused with 409 and no overwrite is made\n\n  Scenario: AC10 Caller without the right or case outside scope (exception X9)\n    Given a caller without the right or a case outside its scope\n    When the caller tries the read\n    Then the request is refused, nothing changes and the read answers 404 for an object outside scope\n\n  Scenario: AC11 Downstream does not answer inside 2 s (exception X10)\n    Given rwb-source-data, rwb-decision or the interface does not answer inside 2 s\n    When the step of a receipt runs\n    Then the step stops and retries, the breaker opens per downstream and no partial posting is kept\n\n  Scenario: AC12 Every posting leaves as an outbound item (BR1)\n    Given a posting is requested\n    When the sender runs\n    Then the posting leaves as an outbound item on the interface of rwb-integration and nothing is written to the ledger directly\n\n  Scenario: AC13 Settlement and sale proceeds are posted (BR2)\n    Given a settlement payment clears the settlement amount, or sale proceeds are applied to the case and the loan account\n    When the posting step runs\n    Then the payment is posted once, the final installment is posted the same way, and the sale proceeds is posted once\n\n  Scenario: AC14 Posting reference on one receipt (BR3)\n    Given a receipt has an item reference from the ledger\n    When the confirmation runs\n    Then the reference is recorded on that one proceeds row and an unposted receipt carries none\n\n  Scenario: AC15 Parameters read from configuration (BR5)\n    Given the posting type mapping, the entry set, the interface values and the retry schedule are held as data\n    When the step runs\n    Then no such value is written in code and each is read from the interface configuration or the ledger\n\n  Scenario: AC16 ACE facts read on contract (BR7)\n    Given the payment, batch and write-off facts are held by rwb-source-data\n    When the service reads them\n    Then the read is made on rwb-source-data's contract and the service holds no v_ace grant and no ACE table\n\n  Scenario: AC17 Owned state is not written (BR8)\n    Given the case, route state, tasks, timers, central ledger and rights are held by other services\n    When the posting step runs\n    Then none of them is written by this story\n\n  Scenario: AC18 Attestation rate (BR10)\n    Given receipts were matched on a business date\n    When the rate of receipts matched the same day is read\n    Then it is read from the decision records and the Workbench records, and no target value is set in this story"
+  },
+  {
+   "old": "BR1 runs in the sender, BR2 in the builder, BR3 and BR6 in the confirmation, BR4 in the writer that commits with the change, BR7 and BR8 at the boundary, and BR9 in the inbox and the idempotency table.",
+   "new": "BR1 runs in the sender, BR2 in the builder, BR3 and BR6 in the confirmation, BR4 in the writer that commits with the change, BR7 and BR8 at the boundary, and BR9 in the inbox and the idempotency table.\n\nCriterion coverage: BR1 AC12; BR2 AC13; BR3 AC14 and AC7; BR4 AC2; BR5 AC15; BR6 AC7; BR7 AC16; BR8 AC17; BR9 AC8; BR10 AC18."
+  },
+  {
+   "old": "| TC-E4-047-03 | Access: a role without the right is refused with MSG-P4-002, and a case outside scope answers 404 | Component | A caller without Write-off and posting R on `GET /proceeds` |",
+   "new": "| TC-E4-047-03 | Access: a role without the right is refused with MSG-P4-002, and a case outside scope answers 404 | Component | A caller without Write-off and posting R on `GET /proceeds` |\n| TC-E4-047-05 | AC3 as the component check of X2: an unreadable rule row or no version in force stops the step before any item is built | Component | The rwb-decision rule-in-force fake with a route that has no rule in force |\n| TC-E4-047-06 | AC4 as the component check of X3: a refused manifest or no interface row in force creates no item and returns the refusal | Component | The rwb-integration outbound-interface fake with one manifest refused |\n| TC-E4-047-07 | AC5 as the component check of X4: the next item uses a changed interface row | Component | The rwb-integration outbound-interface fake with a changed interface row |\n| TC-E4-047-08 | AC6 as the component check of X5: a rejected item is held on the exception queue and the receipt stays unposted | Component | The rwb-integration outbound-interface fake with one item delivered but rejected by the ledger |\n| TC-E4-047-09 | AC7 as the component check of X6 and BR6: a stale or absent batch produces no reference | Component | The rwb-source-data posting-reference fake with a batch that is not complete |\n| TC-E4-047-10 | AC8 as the component check of X7 and BR9: the same key twice gives one item, one record and one reference | Component | Receipt `PAY-90001` posted twice with the same `Idempotency-Key` |\n| TC-E4-047-11 | AC9 as the component check of X8: a second posting with a new key after confirmation is refused with 409 | Component | Receipt `PAY-90001` with a confirmed posting reference posted with a new key |\n| TC-E4-047-12 | AC11 as the component check of X10: a downstream that does not answer inside 2 s leaves no partial posting | Component | A rwb-decision fake that does not answer inside 2 s |\n| TC-E4-047-13 | AC12 as the component check of BR1: every posting leaves as an outbound item on rwb-integration | Component | The rwb-integration outbound-interface fake |\n| TC-E4-047-14 | AC13 as the component check of BR2: settlement and sale proceeds are posted once each | Component | The settlement receipt `PAY-90001` for 12,500.00 THB and the sale proceeds of case `RC-2026-000555` |\n| TC-E4-047-15 | AC14 as the component check of BR3: the reference is on one receipt and an unposted receipt carries none | Component | `PAY-90001` with a reference and `PAY-90002` with none |\n| TC-E4-047-16 | AC15 as the component check of BR5: parameters are read from configuration, not code | Component | The interface configuration with a changed retry schedule |\n| TC-E4-047-17 | AC16 as the component check of BR7: no v_ace grant and ACE facts read on contract | Component | The grant check of the service role on the ACE schema |\n| TC-E4-047-18 | AC17 as the component check of BR8: owned state is not written | Component | The rwb-case, rwb-decision and rwb-access fakes |\n| TC-E4-047-19 | AC18 as the component check of BR10: the attestation rate is read from the records | Component | The decision records and Workbench records of the same business date |"
+  },
+  {
+   "old": "| MSG-P1-001 | Error | {product} is from {date}. Today's ACE batch has not arrived. | The batch of the source is late or failed (VR-P8-007-1, X6) |",
+   "new": "| MSG-P1-001 | Error | Not specified in the source documents (DOR-RWB-P8-E4047-APP-9) | The batch of the source is late or failed (VR-P8-007-1, X6) |"
+  },
+  {
+   "old": "| Legacy test cases TC-E4-047-01 to -04 | Section 16 |",
+   "new": "| Legacy test cases TC-E4-047-01 to -04 | Section 16 |\n| Wave 3 harness and general ledger values (GAP-0436; GAP-0433) | Agreed at the wave 3 entry check with the integration, finance and QA leads; no value is set in this story |"
+  },
+  {
+   "old": "The posting step itself is called in the run that matched the receipt, so it subscribes to no topic. A repeat of a business date or of an event is deduped in `processed_event` of `rwb_payment` on (source, business date) and on the event id (R-UNI-40).",
+   "new": "The posting step itself is called in the run that matched the receipt, so it subscribes to no topic. It has no Schedule and no month-end window of its own: it is posted at the match in the calling run, and the reference is confirmed on the completion of the source batch. A repeat of a business date or of an event is deduped in `processed_event` of `rwb_payment` on (source, business date) and on the event id (R-UNI-40)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18357",
+   "item": "DOR-RWB-P8-E4047-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 now names the lists read (LOV-PROCEEDS-SRC, LOV-MATCH), the interface parameters read per item, and the reference-data contract DP-06 and DP-07.",
+   "note": "Lists and parameters named in section 11 with DP-06 and DP-07 as the reference-data contract."
+  },
+  {
+   "ruling": "R-18358",
+   "item": "DOR-RWB-P8-E4047-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Owner column added to the 12.4 table; AceDataReady owner is rwb-source-data.",
+   "note": "Owner column added to section 12.4 with rwb-source-data for AceDataReady."
+  },
+  {
+   "ruling": "R-18359",
+   "item": "DOR-RWB-P8-E4047-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Criteria AC3 to AC11 added for exceptions X2 to X10; section 5 Covered by cells point to them; test rows TC-E4-047-05 to -12 added; X9 keeps TC-E4-047-03.",
+   "note": "Criteria AC3 to AC11 added for X2 to X10, with test cases TC-E4-047-05 to -12 and TC-03 for X9."
+  },
+  {
+   "ruling": "R-18360",
+   "item": "DOR-RWB-P8-E4047-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Criteria AC12 to AC18 added for BR1, BR2, BR3, BR5, BR7, BR8, BR10; coverage line added; BR4, BR6 and BR9 map to AC2, AC7 and AC8. Test rows TC-E4-047-13 to -19 added.",
+   "note": "Each of the ten rules now maps to a criterion and test rows; BR4, BR6 and BR9 map to existing criteria."
+  },
+  {
+   "ruling": "R-18361",
+   "item": "DOR-RWB-P8-E4047-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add decision_record as the local platform-library entity of rwb_payment (DP-03) to the entity list of both documents.",
+   "note": "Story ACE view naming removed from section 11; decision_record entity still missing from LDM v9 and Data Classification v5."
+  },
+  {
+   "ruling": "R-18362",
+   "item": "DOR-RWB-P8-E4047-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Confirm the MSG-P1-001 text and state whether MSG-P2-001 keeps its meaning; the standard text is not in the sources read.",
+   "note": "MSG-P1-001 text set to placeholder; standard v4 text needed; MSG-P2-001 meaning to confirm against the standard."
+  },
+  {
+   "ruling": "R-22766",
+   "item": "GAP-0436",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Row added to section 18 recording that the wave 3 harness values are agreed at the wave 3 entry check; no value set in the story.",
+   "note": "Harness values recorded as agreed at the wave 3 entry check; none invented in the story."
+  },
+  {
+   "ruling": "R-22789",
+   "item": "GAP-0433",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Row added to section 18 recording that the general ledger interface and entry set are agreed at the wave 3 entry check.",
+   "note": "General ledger values recorded as agreed at the wave 3 entry check; none invented in the story."
+  },
+  {
+   "ruling": "R-22791",
+   "item": "GAP-2554",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Section 12.4 states no Schedule and no month-end window: posting at the match in the calling run, confirmation on source batch completion.",
+   "note": "Posting at the match in the calling run, confirmed on source batch completion; no schedule or window."
+  },
+  {
+   "ruling": "R-22792",
+   "item": "GAP-2555",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "P1 contract epic (rwb-source-data posting-reference read)",
+   "change": "Publish the posting-reference read with payment code, business date, reference and batch status; confirm the DF-FIN-009 mapping with the solution architect.",
+   "note": "Posting-reference read is not in any contract; the P1 contract epic must publish it."
+  }
+ ]
+}

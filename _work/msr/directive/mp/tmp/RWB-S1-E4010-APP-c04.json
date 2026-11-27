@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "AC2: the decision log cannot be written",
+   "new": "AC2: the decision record cannot be written"
+  },
+  {
+   "old": "the result is written \"to the decision log with the rule version\"",
+   "new": "the result is written \"to the decision record with the rule version\""
+  },
+  {
+   "old": "`the decision log cannot be written`",
+   "new": "`the decision record cannot be written`"
+  },
+  {
+   "old": "| X9 | The review date arrives while the case has already moved to a decided route | `liftHold` records the obsolete wake, writes no lift record and raises no task | None | AC10, TC-E4-010-01 |",
+   "new": "| X9 | The review date arrives while the case has already moved to a decided route | `liftHold` records the obsolete wake, writes no lift record and raises no task | None | AC10, TC-E4-010-01, TC-S1-E4010-APP-12 |"
+  },
+  {
+   "old": "| SCR-13 Route decision | Loading; recommendation; overridden; submitted |",
+   "new": "| SCR-13 Route decision | Loading; recommendation; overridden; submitted; empty, error and no access (Not specified in the source documents (CG-ALL-8189)) |"
+  },
+  {
+   "old": "refused on a case that already holds a decided route |",
+   "new": "refused on a case that already holds a decided route; empty, error and no access are Not specified in the source documents (CG-ALL-8189) |"
+  },
+  {
+   "old": "Then no name, address, contact value or identity number is written to the decision record, a log or a workflow input",
+   "new": "Then no name, address, contact value or identity number is written to the decision record, a log or a workflow input\n\n  Scenario: AC13 Error answers of the route operation (section 12.2)\n    Given the route command for the case \"RC-2026-000410\" is sent without a valid credential, without the right or for a case out of scope\n    When the route operation answers\n    Then the answer carries 401, 403 or 404 in the platform envelope\n    Then nothing is written\n\n  Scenario: AC14 Replay of a write with the same Idempotency-Key (section 5, X8)\n    Given the hold for the case \"RC-2026-000410\" has been answered with an Idempotency-Key\n    When the same hold is replayed with the same Idempotency-Key\n    Then the stored answer is returned and no second record or move is made\n\n  Scenario: AC15 Activity retried or timed out (section 12.5)\n    Given the holdRouteDecision or recordHold activity is retried or times out before its answer is returned\n    When the workflow runs the retry on its own schedule\n    Then the record is written at most once under the Idempotency-Key and no second move is made\n\n  Scenario: AC16 Consumed call fails or does not answer (section 5, X7)\n    Given the rwb-decision contract mock fails the call or does not answer\n    When the caller submits the hold for the case \"RC-2026-000410\"\n    Then the step waits and retries on the workflow's own schedule\n    Then nothing is written and the caller sees 503 in the platform envelope"
+  },
+  {
+   "old": "| TC-S1-E4010-APP-14 | AC12: no name, address, contact value or identity number is written to the decision record, a log or a workflow input | Component | A hold command carrying only the caller identifier, with synthetic fixtures |",
+   "new": "| TC-S1-E4010-APP-14 | AC12: no name, address, contact value or identity number is written to the decision record, a log or a workflow input | Component | A hold command carrying only the caller identifier, with synthetic fixtures |\n| TC-S1-E4010-APP-15 | AC13: the route operation answers 401, 403 and 404 in the platform envelope and nothing is written | Contract | The route command for case `RC-2026-000410` against the published contract, with the statuses 401, 403 and 404 |\n| TC-S1-E4010-APP-16 | AC14: a replay of the hold with the same Idempotency-Key returns the stored answer and makes no second record or move | Component | The same command replayed after its answer was returned |\n| TC-S1-E4010-APP-17 | AC15: a retried or timed-out activity writes its record at most once under the Idempotency-Key | Component | A recordHold attempt retried after a timeout |\n| TC-S1-E4010-APP-18 | AC16: a failed or unanswered rwb-decision call returns 503 in the platform envelope and nothing is written | Component | rwb-decision not answering |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-26791",
+   "item": "CG-ALL-8188",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC1, AC2, TC-E4-010-02 and the wording paragraph now use decision record in place of decision log."
+  },
+  {
+   "ruling": "R-26792",
+   "item": "CG-ALL-8189",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Loading kept; empty, error and no access marked Not specified in the source documents (CG-ALL-8189) as the screen specification lacks them."
+  },
+  {
+   "ruling": "R-29100",
+   "item": "GAP-2640",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Recovery Workbench FSD S1, FEAT-VAL-10 field catalog (A2.10.3.2)",
+   "change": "Add the hold reason (coded, read with its version), the review date and a hold flag to the field catalog, and publish the reason code list. The story already records these as reference data with no bound.",
+   "note": "Story already records reason as coded reference data and review date with no bound; the catalog entry stays open with the data owner."
+  },
+  {
+   "ruling": "R-31997",
+   "item": "NEWAC-RWB-S1-E4010-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 now also covered by existing AC10 and test TC-S1-E4010-APP-12."
+  },
+  {
+   "ruling": "R-31998",
+   "item": "NEWAC-RWB-S1-E4010-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X10 already covered by AC11 and TC-S1-E4010-APP-13 with s17, BR8 and BR9; no edit needed."
+  },
+  {
+   "ruling": "R-31999",
+   "item": "NEWAC-RWB-S1-E4010-APP-AC12",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR1 to BR10 each have a Covered by mapping to existing criteria or test rows in section 8; no new criterion added."
+  },
+  {
+   "ruling": "R-32000",
+   "item": "NEWAC-RWB-S1-E4010-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 added for 401, 403 and 404 error answers, with test row TC-S1-E4010-APP-15."
+  },
+  {
+   "ruling": "R-32001",
+   "item": "NEWAC-RWB-S1-E4010-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC14 added for replay with the same Idempotency-Key returning the stored answer; test row TC-S1-E4010-APP-16."
+  },
+  {
+   "ruling": "R-32002",
+   "item": "NEWAC-RWB-S1-E4010-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC15 added for retried or timed-out activity writing at most once; test row TC-S1-E4010-APP-17. Timeout value Not specified in the source documents."
+  },
+  {
+   "ruling": "R-32003",
+   "item": "NEWAC-RWB-S1-E4010-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC16 added for failed or unanswered rwb-decision call returning 503 with nothing written; test row TC-S1-E4010-APP-18."
+  }
+ ]
+}

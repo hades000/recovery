@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "    Then the operation returns 503 with the platform problem body and nothing is written",
+   "new": "    Then the operation returns 503 with the platform problem body and nothing is written\n\n  Scenario: AC10 Business rules BR1 to BR10 hold in the build (section 8)\n    Given the build scan of the service and the rwb-decision rule-set fake\n    When the boundary and rule checks run\n    Then no balance is copied or stored, no table of another service or case table is written and no value a business person may change is written in code\n\n  Scenario: AC11 Error answers 403 and 404 of the provided operation\n    Given the rwb-access authorise fake refuses right U in Treatment and offer for a role, and a caseId that names no case in the scope\n    When the RouteRequest is sent to POST /cases/{caseId}/route\n    Then the operation returns 403 for the role without the right and 404 for the caseId that names no case, and no account is read\n\n  Scenario: AC12 Replay of a write with the same idempotency key\n    Given a RouteRequest whose Idempotency-Key is already recorded in the idempotency row of the decision record\n    When the same RouteRequest is sent again with the same Idempotency-Key\n    Then no second decision record is written and the answer of the first call is returned\n\n  Scenario: AC13 Activity retried after a timeout writes once\n    Given the calculatePayoffAndRange activity times out after the rwb-source-data read has gone unanswered\n    When the workflow retries the activity with the same Idempotency-Key\n    Then the decision record is written once and the answer is returned once\n\n  Scenario: AC14 Consumed call fails or does not answer\n    Given the rwb-decision rule-set fake fails the call\n    When the case owner prepares the route decision\n    Then the operation returns 503 with the platform problem body and nothing is written\n\n  Scenario: AC15 Status change the model does not allow is refused\n    Given the calculation state is absent\n    When a status change is requested that the calculation model does not allow\n    Then the change is refused and nothing is written"
+  },
+  {
+   "old": "| BR1 | The payoff is computed from the balances ACE holds for the account and is never read from a copy, a staging table or a balance of this service | legacy RWB-E4-006 story; D-RCV-35 U1; ADR-010; DP-05 | AC1; TC-S1-E4006-APP-01 |",
+   "new": "| BR1 | The payoff is computed from the balances ACE holds for the account and is never read from a copy, a staging table or a balance of this service | legacy RWB-E4-006 story; D-RCV-35 U1; ADR-010; DP-05 | AC1; AC10; TC-S1-E4006-APP-01; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR2 | The three balances used are `total_balance`, `past_due_amount` and `collections_fee` at the ACE batch date; no other balance is added and no balance is stored | legacy RWB-E4-006 AC1; Physical Schema v7 DF-ACE-020, DF-ACE-022 and DF-ACE-024 | AC1; TC-E4-006-01 |",
+   "new": "| BR2 | The three balances used are `total_balance`, `past_due_amount` and `collections_fee` at the ACE batch date; no other balance is added and no balance is stored | legacy RWB-E4-006 AC1; Physical Schema v7 DF-ACE-020, DF-ACE-022 and DF-ACE-024 | AC1; AC10; TC-E4-006-01; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR3 | The settlement range and the floor are values of the rule set in force, read with the rule id and version; the floor is applied to the range and no amount below it leaves unflagged | legacy RWB-E4-006 AC1; R-SET-01, R-SET-05; BR-S1-006 | AC1; AC7; TC-E4-006-01; TC-S1-E4006-APP-09 |",
+   "new": "| BR3 | The settlement range and the floor are values of the rule set in force, read with the rule id and version; the floor is applied to the range and no amount below it leaves unflagged | legacy RWB-E4-006 AC1; R-SET-01, R-SET-05; BR-S1-006 | AC1; AC7; AC10; TC-E4-006-01; TC-S1-E4006-APP-09; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR4 | A stale account data product stops the step with MSG-P1-001 and nothing is calculated | VR-S1-006-1; FSD S1 A2.6.3.1 | AC4; TC-S1-E4006-APP-06 |",
+   "new": "| BR4 | A stale account data product stops the step with MSG-P1-001 and nothing is calculated | VR-S1-006-1; FSD S1 A2.6.3.1 | AC4; AC10; TC-S1-E4006-APP-06; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR5 | `payoff_as_at` older than the freshness limit blocks the calculation and a fresh payoff is requested through rwb-integration | R-SET-02, R-SET-03 | AC6; TC-S1-E4006-APP-08 |",
+   "new": "| BR5 | `payoff_as_at` older than the freshness limit blocks the calculation and a fresh payoff is requested through rwb-integration | R-SET-02, R-SET-03 | AC6; AC10; TC-S1-E4006-APP-08; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR6 | A missing payoff or a missing floor holds the calculation as UNMATCHED_EXCEPTION, names the missing field and raises a task for the case owner | R-SET-25 | AC7; TC-S1-E4006-APP-09 |",
+   "new": "| BR6 | A missing payoff or a missing floor holds the calculation as UNMATCHED_EXCEPTION, names the missing field and raises a task for the case owner | R-SET-25 | AC7; AC10; TC-S1-E4006-APP-09; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR7 | The result is recorded in the local decision record with the rule id and version before the answer is composed, and a result that cannot be recorded does not proceed | legacy RWB-E4-006 AC1, AC2; DP-03; REQ-S1-004 | AC1; AC2; TC-E4-006-01; TC-E4-006-02 |",
+   "new": "| BR7 | The result is recorded in the local decision record with the rule id and version before the answer is composed, and a result that cannot be recorded does not proceed | legacy RWB-E4-006 AC1, AC2; DP-03; REQ-S1-004 | AC1; AC2; AC10; TC-E4-006-01; TC-E4-006-02; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR8 | No value a business person may change is written in code: the formula, the range bounds, the floor, the freshness limit and the lists are values in force read with their version through the reference-data contract (DP-06, DP-07) | BR-S1-006; FSD S1 A2.6.3.1; DP-06; DP-07 | TC-S1-E4006-APP-01 |",
+   "new": "| BR8 | No value a business person may change is written in code: the formula, the range bounds, the floor, the freshness limit and the lists are values in force read with their version through the reference-data contract (DP-06, DP-07) | BR-S1-006; FSD S1 A2.6.3.1; DP-06; DP-07 | AC10; TC-S1-E4006-APP-01; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR9 | The step needs right U in the capability area Treatment and offer; the check is the platform guard library's and no role list is written here | TSD S1 T6.1; legacy permission checks | AC3; TC-S1-E4006-APP-05; TC-E4-006-03 |",
+   "new": "| BR9 | The step needs right U in the capability area Treatment and offer; the check is the platform guard library's and no role list is written here | TSD S1 T6.1; legacy permission checks | AC3; AC10; TC-S1-E4006-APP-05; TC-E4-006-03; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| BR10 | This service writes no case table, no treatment row and no rule row, and reads no table of another service | DP-01; GAP-2615 | TC-S1-E4006-APP-04 |",
+   "new": "| BR10 | This service writes no case table, no treatment row and no rule row, and reads no table of another service | DP-01; GAP-2615 | AC10; TC-S1-E4006-APP-04; TC-S1-E4006-APP-12 |"
+  },
+  {
+   "old": "| TC-S1-E4006-APP-11 | AC9: exception X8, a read that does not answer inside 2 s returns 503 and writes nothing | Component | The account and balance fake with no answer beyond 2 s |",
+   "new": "| TC-S1-E4006-APP-11 | AC9: exception X8, a read that does not answer inside 2 s returns 503 and writes nothing | Component | The account and balance fake with no answer beyond 2 s |\n| TC-S1-E4006-APP-12 | AC10: business rules BR1 to BR10 of section 8 hold in the build | Component | The build scan, the rwb-decision rule-set fake and the rules BR1 to BR10 of section 8 |\n| TC-S1-E4006-APP-13 | AC11: the provided operation answers 403 and 404, and no account is read | Component | A role without Treatment and offer U; a caseId that names no case |\n| TC-S1-E4006-APP-14 | AC12: a replay with the same Idempotency-Key returns the first answer and writes no second record | Component | A RouteRequest already recorded in the idempotency row |\n| TC-S1-E4006-APP-15 | AC13: a retried or timed-out activity writes once | Component | The calculatePayoffAndRange activity timed out and retried with the same Idempotency-Key |\n| TC-S1-E4006-APP-16 | AC14: a consumed call that fails or does not answer returns 503 and writes nothing | Component | The rwb-decision rule-set fake failing the call |\n| TC-S1-E4006-APP-17 | AC15: a status change the model does not allow is refused and writes nothing | Component | The calculation state absent and a status change the model does not list |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31928",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC10",
+   "status": "Resolved",
+   "section": "7; 8; 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added to section 7 with test TC-S1-E4006-APP-12; Covered by cells of BR1 to BR10 now cite AC10."
+  },
+  {
+   "ruling": "R-31929",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC11",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added to section 7 for 403 and 404 of POST /cases/{caseId}/route; test TC-S1-E4006-APP-13 added."
+  },
+  {
+   "ruling": "R-31930",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC12",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added to section 7 for a replay with the same Idempotency-Key; test TC-S1-E4006-APP-14 added."
+  },
+  {
+   "ruling": "R-31931",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC13",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 added to section 7 for a retried or timed-out activity; test TC-S1-E4006-APP-15 added."
+  },
+  {
+   "ruling": "R-31932",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC14",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "AC14 added to section 7 for a consumed call that fails or does not answer; test TC-S1-E4006-APP-16 added."
+  },
+  {
+   "ruling": "R-31933",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC15",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "AC15 added to section 7 for a disallowed status change refused; test TC-S1-E4006-APP-17 added."
+  },
+  {
+   "ruling": "R-31934",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X1 row already cites AC3 and TC-S1-E4006-APP-05 besides Section 10 and TC-E4-006-03; no edit needed."
+  },
+  {
+   "ruling": "R-31935",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X2 row already cites AC4 and TC-S1-E4006-APP-06 besides TC-S1-E4006-APP-02; no edit needed."
+  },
+  {
+   "ruling": "R-31936",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X4 row already cites AC5 and TC-S1-E4006-APP-07 besides R-SET-25 and TC-S1-E4006-APP-01; no edit needed."
+  },
+  {
+   "ruling": "R-31937",
+   "item": "NEWAC-RWB-S1-E4006-APP-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X5 row already cites AC6 and TC-S1-E4006-APP-08 besides TC-S1-E4006-APP-02; no edit needed."
+  }
+ ]
+}

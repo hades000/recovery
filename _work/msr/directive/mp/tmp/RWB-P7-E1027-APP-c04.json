@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "the chain is verified by the store story at 02:00 | Architecture v5 slide 28; Temporal and Drools Design slide 16; RWB-P7-E1008-APP |",
+   "new": "the chain is verified by the store story at 02:00; an entry the central ledger has not yet acknowledged is shown as not yet sealed by the audit search, which reads the ledger only; the ledger completeness target is five minutes, the ingest lag is a metric of RWB-PLT-OBS with the threshold as a parameter, and the gap alert goes to RW-PLATADM; this story writes the sealed entry and no alert; strict mode waits for the ledger acknowledgement of its own record | Architecture v5 slide 28; Temporal and Drools Design slide 16; RWB-P7-E1008-APP; GAP-2075; GAP-2465 |"
+  },
+  {
+   "old": "| X8 | A record carries an approver without an approval level | Refused with the field `approvalLevel` named | MSG-P7-009 | AC8, BR4 |",
+   "new": "| X8 | A record carries an approver without an approval level | Refused with the field `approvalLevel` named | MSG-P7-009 | AC8, BR4, TC-E1-027-12 |"
+  },
+  {
+   "old": "Then the gateway and the service guard refuse the call with message MSG-P4-002 before the writer is reached",
+   "new": "Then the gateway and the service guard refuse the call with message MSG-P4-002 before the writer is reached\n\n  Scenario: AC10 Rules BR4 and BR8 to BR13 hold on each write (no legacy origin tag)\n    Given a record for case \"RW-2026-000123\" with an approver \"U-7101\" and an approval level from LOV-APPROVAL-LEVEL\n    When it is written in the caller's transaction\n    Then the approval level is stored on the same record as the approver\n    Then the entry, the change and the outbox row are stored in one transaction\n    Then the entry is chained in chain_seq order through prev_hash and entry_hash\n    Then DecisionRecorded leaves on topic \"rwb.decision-record.v1\" in CloudEvents 1.0 binary mode, keyed by caseId and carrying no personal data\n    Then the writer does not retry and does not open a transaction\n    Then the record shape, the append and the envelope are those of RWB-P7-E1027-CON and RWB-PLT-E1027-CON, with no second record type or event\n    Then no data-lake copy is written\n\n  Scenario: AC11 Error answers 401, 403 and 404 of the provided operations (no legacy origin tag)\n    Given a caller without a credential\n    When it calls a provided operation under the /v1 path\n    Then the operation answers with status 401\n    Given a caller with a credential but without the right of the capability area\n    When it calls the writer through an operation\n    Then the operation answers with status 403 and message MSG-P4-002\n    Given a read request for an entry ID that does not exist under the /v1 path\n    When it is sent\n    Then the read answers with status 404\n\n  Scenario: AC12 A retried or timed-out activity leaves at most one entry per event (no legacy origin tag)\n    Given an activity that calls the writer for case \"RW-2026-000123\" and the write fails\n    When the activity is retried under its own retry policy\n    Then the writer does not retry itself and a rolled-back attempt stores no entry\n    Then the retried event with the same idempotency key leaves one entry\n    Given an activity that calls the writer and runs past its timeout\n    When the activity times out\n    Then the transaction of that attempt is rolled back and nothing is stored for it"
+  },
+  {
+   "old": "AC8 and AC9 are this story's own criteria for exceptions X8 and X9 and carry no legacy origin tag.",
+   "new": "AC8 and AC9 are this story's own criteria for exceptions X8 and X9, AC10 is its own criterion for the rules BR4 and BR8 to BR13, and AC11 and AC12 are its own criteria for error answers and for retried or timed-out activities; they carry no legacy origin tag."
+  },
+  {
+   "old": "| TC-E1-027-17 | BR13 | Component | Reporting reads the events; no data-lake copy is written |",
+   "new": "| TC-E1-027-17 | BR13 | Component | Reporting reads the events; no data-lake copy is written |\n| TC-E1-027-18 | AC10, BR4, BR8, BR9, BR10, BR11, BR12, BR13 | Component | Record with approver and approval level written in a transaction; entry, change, outbox row and event checked |\n| TC-E1-027-19 | AC11 | Component | Caller without a credential, caller without the right, and a read of an entry ID that does not exist |\n| TC-E1-027-20 | AC12, BR5, BR6, BR11 | Component | Writer call fails and the activity is retried; the activity runs past its timeout |"
+  },
+  {
+   "old": "TC-E1-027-10 to TC-E1-027-17 are added by this story for the section 12 contract, the 12.7 tables, the criteria AC8 and AC9, and the rules BR8 to BR13 that no legacy case covers",
+   "new": "TC-E1-027-10 to TC-E1-027-20 are added by this story for the section 12 contract, the 12.7 tables, the criteria AC8 to AC12, and the rules BR8 to BR13 that no legacy case covers"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28458",
+   "item": "GAP-1622",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Event and messaging design",
+   "change": "Add a contract version to the DecisionRecorded event, record it on the ledger entry, and have the consumer accept known versions and dead-letter unknown ones.",
+   "note": "Change belongs to the event and messaging design. BR10 names only the topic rwb.decision-record.v1, so no story text changed."
+  },
+  {
+   "ruling": "R-28459",
+   "item": "GAP-1617",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "parameter-catalog.csv",
+   "change": "Add reference-data rows: completeness target and gap alert threshold at 5 minutes (Architecture v5); strict-mode wait bound Not specified in the source documents (GAP-1617), to confirm at ADR-022 sign-off.",
+   "note": "The 5-minute target is stated in BR9. The wait bound has no value in the sources, so no value is written."
+  },
+  {
+   "ruling": "R-28461",
+   "item": "GAP-2075",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR9 now states that the audit search reads the ledger only and shows unacknowledged entries as not yet sealed, and that strict mode waits for the ledger acknowledgement of its own record.",
+   "note": "Wording uses ledger acknowledgement rather than JOB-13 collection, because JOB-13 is retired to continuous ingest (GAP-1240)."
+  },
+  {
+   "ruling": "R-28548",
+   "item": "GAP-1240",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Batch and Scheduling",
+   "change": "In the next version, mark JOB-13 as retired; keep JOB-14 (02:00 chain check) as the only P7 Schedule; ingest stays continuous in RWB-P7-E1008-APP.",
+   "note": "Change belongs to the Batch and Scheduling document. This story declares no Schedule and references no JOB-13."
+  },
+  {
+   "ruling": "R-28549",
+   "item": "GAP-1239",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "P7 module specification (FSD)",
+   "change": "Delete A2.6 and its acceptance criteria (AC-P7-006-01 to AC-EXC-P7-006-04) in the next version; move the reporting need to the rwb-reporting projection from events.",
+   "note": "BR13 already states no data-lake copy and that reporting reads events, so no story change is needed."
+  },
+  {
+   "ruling": "R-28697",
+   "item": "GAP-2465",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR9 states the five-minute completeness target, the ingest lag as an RWB-PLT-OBS metric with a parameter threshold, the gap alert to RW-PLATADM, and that this story writes the sealed entry and no alert.",
+   "note": "Registering the metric in RWB-PLT-OBS is outside this story. The threshold value is not in the sources and is not written."
+  },
+  {
+   "ruling": "R-31433",
+   "item": "NEWAC-RWB-P7-E1027-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 scenario covering BR4 and BR8 to BR13, and TC-E1-027-18 covering AC10 with those rules.",
+   "note": "Added AC10 to section 7 and TC-E1-027-18 to section 16. Section 7 note updated to name AC10."
+  },
+  {
+   "ruling": "R-31434",
+   "item": "NEWAC-RWB-P7-E1027-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 scenario for 401 (no credential), 403 (no right, MSG-P4-002) and 404 (unknown entry ID) under /v1; TC-E1-027-19 covers AC11.",
+   "note": "Added AC11 to section 7 and TC-E1-027-19 to section 16. Section 7 note updated to name AC11."
+  },
+  {
+   "ruling": "R-31435",
+   "item": "NEWAC-RWB-P7-E1027-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 scenario for a retried and a timed-out activity (no retry in the writer, rolled-back attempt stores nothing, same idempotency key gives one entry); TC-E1-027-20 covers it.",
+   "note": "Added AC12 to section 7 and TC-E1-027-20 to section 16. Section 7 note updated to name AC12."
+  },
+  {
+   "ruling": "R-31436",
+   "item": "NEWAC-RWB-P7-E1027-APP-AC8",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X8 Covered by now reads AC8, BR4, TC-E1-027-12.",
+   "note": "Covered-by cell for X8 now names AC8 and its test case TC-E1-027-12 as well as BR4."
+  }
+ ]
+}

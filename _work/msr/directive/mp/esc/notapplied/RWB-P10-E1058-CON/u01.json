@@ -1,0 +1,125 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P10-E1058-CON",
+ "unit": "u01",
+ "rulings": [
+  "R-04562",
+  "R-04566",
+  "R-09824",
+  "R-15279",
+  "R-15280",
+  "R-22200",
+  "R-22201",
+  "R-22202"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 5
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-04562",
+     "item": "DOR-RWB-P10-E1058-CON-14",
+     "status": "Not applied",
+     "section": "",
+     "target": "",
+     "change": "",
+     "note": "Searched source exports: only Decision Log v12 DT05 (epic design signed in the month before build); no signed design record for this epic found. A sign-off cannot be stated."
+    },
+    {
+     "ruling": "R-04566",
+     "item": "DOR-RWB-P10-E1058-CON-8",
+     "status": "Cross-document",
+     "section": "12.1",
+     "target": "rwb-case and rwb-access published contracts",
+     "change": "Publish the consumed paths named in the item: case parameters/{key} and reference-data/{lovCode}; access authorise and masking-policies (CG-ALL-2512 to 2515).",
+     "note": "Story side done: all five POSTs carry Idempotency-Key (Kafka Topic and Event Catalog v1, idempotency_key row)."
+    },
+    {
+     "ruling": "R-09824",
+     "item": "CG-ALL-2516",
+     "status": "Cross-document",
+     "section": "12.1",
+     "target": "Recovery Workbench Error and Message Standard v4",
+     "change": "Add message IDs for 401 no session, 404 unknown version, evaluation, run or case, and 503 store or consumed contract unavailable, or confirm the platform code alone.",
+     "note": "Story now states platform code only. Standard section 4 has no fitting message; MSG-GEN-006 promises a queued retry."
+    },
+    {
+     "ruling": "R-15279",
+     "item": "DOR-RWB-P10-E1058-CON-10",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "",
+     "note": "No access from Screen Specifications v1 SCR-46 (MSG-P4-002); empty, loading and error marked Not specified."
+    },
+    {
+     "ruling": "R-15280",
+     "item": "DOR-RWB-P10-E1058-CON-11",
+     "status": "Resolved",
+     "section": "12.3",
+     "target": "",
+     "change": "",
+     "note": "Field is outcome (detcheck X10 against Data Classification v5); its handling rule is now stated."
+    },
+    {
+     "ruling": "R-22200",
+     "item": "GAP-0606",
+     "status": "Resolved",
+     "section": "12",
+     "target": "",
+     "change": "",
+     "note": "Already in story: flow step 7, section 8 identity text, 12.2, 12.7 sample key and V10_001, section 15 route. No further edit."
+    },
+    {
+     "ruling": "R-22201",
+     "item": "GAP-0607",
+     "status": "Resolved",
+     "section": "12",
+     "target": "",
+     "change": "",
+     "note": "Already in story: 12.3 EV-28 only member, 12.7 element names, sample key and agent_run_daily left out, pass-through route. No further edit."
+    },
+    {
+     "ruling": "R-22202",
+     "item": "GAP-0608",
+     "status": "Resolved",
+     "section": "19",
+     "target": "",
+     "change": "",
+     "note": "Contract side already records INT-23 values as Not specified and leaves provisioning to RWB-P10-E1058-INF. No further edit."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| Method | Path | Purpose | Rights |\n|---|---|---|---|\n| GET | `/admin/agent-runs` | List agent runs with fallbacks: query agent, from, to; 200 AgentRun[] | Platform administration R, scope applied |\n| GET | `/admin/agent-configs` | List prompt and policy versions per agent: query agent, kind, status; 200 AgentConfigVersion[] | Rules and parameters R |\n| POST | `/admin/agent-configs` | Load a new prompt or policy version from a checked file; 201 AgentConfigVersion in status LOADED | Rules and parameters C |\n| POST | `/admin/agent-configs/{versionId}/approve` | Approve a loaded version with If-Match on the row version; 200 AgentConfigVersion in status APPROVED | Rules and parameters A |\n| POST | `/admin/agent-samples` | Load a labeled evaluation sample; 201 AgentSample with the sample version and the row count | Rules and parameters C |\n| POST | `/admin/agent-evaluations` | Start the evaluation harness for an agent on a labeled sample; 202 AgentEvaluationRun in status RUNNING | Rules and parameters C |\n| GET | `/admin/agent-evaluations` | List evaluation runs with their score rows; query agent, from, to; 200 AgentEvaluationRun[] | Rules and parameters R |\n| GET | `/admin/agent-evaluations/{evaluationId}/report` | Read the report of one evaluation run; 200 AgentEvaluationReport | Rules and parameters R |\n| GET | `/admin/agent-metrics` | Read agent measures per agent, version, segment and day for the monitor; query agent, segment, version, from, to; 200 AgentMetric[] | Rules and parameters R |\n| GET | `/cases/{caseId}/agent-outputs` | Read the recorded agent outputs of a case; 200 AgentOutput[] | Case record R, scope applied |\n| POST | `/agent-runs/{runId}/feedback` | Record a person's verdict on an item of an L1 agent output; 200 AgentOutput | Case record U, scope applied |",
+     "new": "| Method | Path | Purpose | Rights | Idempotency |\n|---|---|---|---|---|\n| GET | `/admin/agent-runs` | List agent runs with fallbacks: query agent, from, to; 200 AgentRun[] | Platform administration R, scope applied | Read only; writes nothing |\n| GET | `/admin/agent-configs` | List prompt and policy versions per agent: query agent, kind, status; 200 AgentConfigVersion[] | Rules and parameters R | Read only; writes nothing |\n| POST | `/admin/agent-configs` | Load a new prompt or policy version from a checked file; 201 AgentConfigVersion in status LOADED | Rules and parameters C | Idempotency-Key header; a repeat returns the stored response |\n| POST | `/admin/agent-configs/{versionId}/approve` | Approve a loaded version with If-Match on the row version; 200 AgentConfigVersion in status APPROVED | Rules and parameters A | Idempotency-Key header; a repeat returns the stored response |\n| POST | `/admin/agent-samples` | Load a labeled evaluation sample; 201 AgentSample with the sample version and the row count | Rules and parameters C | Idempotency-Key header; a repeat returns the stored response. A new load creates the next sample version |\n| POST | `/admin/agent-evaluations` | Start the evaluation harness for an agent on a labeled sample; 202 AgentEvaluationRun in status RUNNING | Rules and parameters C | Idempotency-Key header; a repeat returns the stored response. One RUNNING evaluation per agent, sample and sample version |\n| GET | `/admin/agent-evaluations` | List evaluation runs with their score rows; query agent, from, to; 200 AgentEvaluationRun[] | Rules and parameters R | Read only; writes nothing |\n| GET | `/admin/agent-evaluations/{evaluationId}/report` | Read the report of one evaluation run; 200 AgentEvaluationReport | Rules and parameters R | Read only; writes nothing |\n| GET | `/admin/agent-metrics` | Read agent measures per agent, version, segment and day for the monitor; query agent, segment, version, from, to; 200 AgentMetric[] | Rules and parameters R | Read only; writes nothing |\n| GET | `/cases/{caseId}/agent-outputs` | Read the recorded agent outputs of a case; 200 AgentOutput[] | Case record R, scope applied | Read only; writes nothing |\n| POST | `/agent-runs/{runId}/feedback` | Record a person's verdict on an item of an L1 agent output; 200 AgentOutput | Case record U, scope applied | Idempotency-Key header; a repeat returns the stored response |"
+    },
+    {
+     "old": "Idempotency: the two loads and the approve carry an Idempotency-Key header; the sample load creates the next sample version;",
+     "new": "The 401, 404 and 503 answers carry the platform code and no message ID, because the Error and Message Standard v4 gives none that fits; MSG-GEN-006 is not used, since its text says the request is queued and will be retried (CG-ALL-2516). Idempotency: every POST carries an Idempotency-Key header; the sample load creates the next sample version;"
+    },
+    {
+     "old": "the consumers of the record event are rwb-decision's ledger and rwb-reporting.",
+     "new": "the consumers of the record event are rwb-decision's ledger and rwb-reporting.\n\nData Classification v5 classes a field named `outcome` as Customer data, Confidential, on the deviation, treatment, hearing and decision_log_entry entities. Wherever an `outcome` member is carried in these payloads, its handling rule applies: a business fact only (a code, an amount or a date), never beside a direct identifier; in logs, a code or an id only, never the customer value."
+    },
+    {
+     "old": "the agent monitor screen SCR-46 of RWB-E2-031",
+     "new": "the agent monitor screen SCR-46 (no access: refused with MSG-P4-002; empty, loading and error: Not specified in the source documents, DOR-RWB-P10-E1058-CON-10) of RWB-E2-031"
+    },
+    {
+     "old": "The states of SCR-46 are empty, loading, error and no access; each is Not specified in the source documents (CG-ALL-2530).",
+     "new": "Screen Specifications v1 gives SCR-46 the states Shadow, live and paused, with access by Platform administration checked on every request; it describes no empty, loading or error state (CG-ALL-2530)."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

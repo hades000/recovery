@@ -1,0 +1,142 @@
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+asyncapi: 3.0.0
+info:
+  title: "Recovery Workbench events - shared decision record topic"
+  version: 5.1.0
+  description: >-
+    AsyncAPI 3.0 contract for the shared Kafka topic rwb.decision-record.v1. Every service writes its
+    DecisionRecorded event to the local decision-record library and this topic (DP-03, ASM-0163); the
+    topic is read by rwb-decision, which holds the central ledger, and by rwb-reporting (Arch v5 slides 42 and
+    14).
+    One document covers the topic for all 19 services, so that the shared topic is not repeated in 19 documents;
+    every service document names this file in its x-shared-topics list.
+    Events carry IDs and facts, never personal data (Arch v5 slide 42 notes).
+    A read is not a decision: reads and authorise checks go to the access log only and publish no DecisionRecorded
+    (RD-P1-072). rwb-decision owns chain_seq and prev_hash; a producer sets no chain field. Pending: fields that carry
+    the rule, versions and legacy hashes of a migrated entry, owner rwb-decision contract owner with compliance,
+    tracked as GAP-3547; migrated entries are not published until then (RD-P1-068).
+x-topic:
+  name: "rwb.decision-record.v1"
+  partitions: 12
+  replication-factor: 3
+  retention: "7 days"
+  key: "caseId"
+  mode: "CloudEvents 1.0 Kafka binding, binary mode (ce_* headers)"
+  retry: "retry topics 1 min, 10 min, 1 h, then .dlt with alert"
+  schema-registry: "JSON Schema registry, BACKWARD compatibility"
+  fallback: "Event Hubs Premium"
+  source: "Arch v5 slide 35 (Kafka line) and slide 42 notes"
+  ingest-rule: "Dedupe key: CloudEvents id in processed_event. Per-case order from the producer (key caseId). chain_seq and prev_hash assigned by rwb-decision under the chain lock. Catch-up within five minutes. Publish before the first SIT run."
+defaultContentType: "application/cloudevents+json"
+channels:
+  "rwb.decision-record.v1":
+    address: "rwb.decision-record.v1"
+    title: "rwb.decision-record.v1"
+    messages:
+      DecisionRecorded:
+        $ref: '#/components/messages/DecisionRecorded'
+operations:
+  publishDecisionRecorded:
+    action: send
+    channel:
+      $ref: '#/channels/rwb.decision-record.v1'
+    summary: "Publish DecisionRecorded (EV-08) to rwb.decision-record.v1"
+    messages:
+    - $ref: '#/channels/rwb.decision-record.v1/messages/DecisionRecorded'
+components:
+  messages:
+    DecisionRecorded:
+      name: "rwb.decision.DecisionRecorded.v1"
+      title: "DecisionRecorded"
+      summary: "EV-08 DecisionRecorded"
+      description: "Produced by every service through the decision-record library (DP-03); type owner rwb-decision; consumers: rwb-decision, rwb-reporting, rwb-source-data"
+      x-consumers: ["rwb-decision", "rwb-reporting", "rwb-source-data"]
+      contentType: "application/cloudevents+json"
+      headers:
+        $ref: '#/components/schemas/CloudEventsHeaders'
+      payload:
+        $ref: '#/components/schemas/DecisionRecordedEvent'
+  schemas:
+    CloudEventsHeaders:
+      type: object
+      description: "CloudEvents 1.0 Kafka binding in binary mode; ce_* headers (Arch v5 slide 35)"
+      properties:
+        ce_specversion:
+          type: string
+        ce_id:
+          type: string
+          description: "Event ID; also the idempotency key (Event and Messaging Design v4, sheet Rules)"
+        ce_source:
+          type: string
+        ce_type:
+          type: string
+        ce_time:
+          type: string
+          format: date-time
+        ce_subject:
+          type: string
+          description: "Kafka key: caseId (Arch v5 slide 35)"
+        ce_idempotencykey:
+          type: string
+          maxLength: 120
+          description: "Business key <code>-<caseNo>-<yyyyMMdd>-<actionId> (RD-P1-007, RD-P1-009)"
+        ce_actor:
+          type: string
+          maxLength: 74
+          description: "USER:<userId>, SERVICE:<service name> or PARTNER:<partnerCode> (RD-P1-009)"
+        ce_datacontenttype:
+          type: string
+      required: [ce_idempotencykey, ce_actor]
+    DecisionRecordedEvent:
+      allOf:
+      - $ref: '#/components/schemas/CloudEventEnvelope'
+      - type: object
+        properties:
+          type:
+            const: "rwb.decision.DecisionRecorded.v1"
+          data:
+            type: object
+            description: "EV-08 DecisionRecorded payload; field names entryId, caseId, decisionCode and approver from Event and Messaging Design v4 (sheet Events); documentId, intakeItemId, matchMethod, classifierVersion, confidence, approverUserId, finalCall, messageId and inputsRef from the GAP-3134 proposed fix; no OCR text, file or account number; a fact without documentId is refused; property types, required flags and formats are not specified in the source documents (GAP-0096; ASM-0160)"
+            properties:
+              entryId: {}
+              caseId: {}
+              decisionCode: {}
+              approver: {}
+              documentId: {}
+              intakeItemId: {}
+              matchMethod: {}
+              classifierVersion: {}
+              confidence: {}
+              approverUserId: {}
+              finalCall: {}
+              messageId: {}
+              inputsRef: {}
+    CloudEventEnvelope:
+      type: object
+      description: "CloudEvents 1.0 envelope (specversion, id, source, type, time, subject, data); Kafka binary mode carries the attributes in ce_* headers (Arch v5 slide 35)"
+      required: [specversion, id, source, type, time, subject, data]
+      properties:
+        specversion:
+          type: string
+          const: "1.0"
+        id:
+          type: string
+        source:
+          type: string
+        type:
+          type: string
+        time:
+          type: string
+          format: date-time
+        subject:
+          type: string
+        datacontenttype:
+          type: string
+        data:
+          type: object

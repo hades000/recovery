@@ -1,0 +1,59 @@
+{
+ "edits": [
+  {
+   "old": "    Then the change is refused and nothing is written",
+   "new": "    Then the change is refused and nothing is written\n\n  Scenario: AC8 The business rules BR1 to BR8 hold on every call (new, D-RCV-60)\n    Given the rwb-document and rwb-case contract mocks answer \"RC-2026-000604\"\n    When the pack is composed and a decision is recorded\n    Then the pack is derived and no pack row or pack column is written (BR1)\n    Then the decision record is written before anything is presented or announced (BR2)\n    Then the case states are announced and not written (BR3)\n    Then the notice and the template status are read and never written (BR4)\n    Then the same request or the same Idempotency-Key twice writes one record (BR5)\n    Then no v_ace_* view, no ACE table and no other rwb_* schema is read (BR6)\n    Then no personal data enters the pack, the record, the log or any call (BR7)\n    Then no business value is written in code (BR8)\n\n  Scenario: AC9 A call without valid authentication, without the Litigation right or for an out-of-scope case is answered 401, 403 or 404 (new, D-RCV-60)\n    Given a call to one of the three operations of rwb-litigation for \"RC-2026-000604\"\n    When the call is made without valid authentication\n    Then the answer is 401\n    When the call is made by a role without the Litigation right\n    Then the answer is 403 with MSG-P4-002\n    When the call is made for a case outside the caller's scope\n    Then the answer is 404\n\n  Scenario: AC10 A replay of a write with the same Idempotency-Key is answered from the first result (new, D-RCV-60)\n    Given a write for \"RC-2026-000604\" has been answered under an Idempotency-Key\n    When the same request is replayed with the same Idempotency-Key\n    Then no second decision record is written, no second pack is presented and no second announcement is sent; the repeat is counted\n\n  Scenario: AC11 A retried or timed-out activity writes no second record (new, D-RCV-60)\n    Given the decision record of \"RC-2026-000604\" is written and the task raise to the litigation officer fails\n    When the task raise is retried with the same Idempotency-Key, or the activity times out and is retried\n    Then the task raise is retried with the same Idempotency-Key and no second decision record is written"
+  },
+  {
+   "old": "| TC-E5-004-20 | AC7 | Component | A legal action status change the model does not allow: refused and nothing written |",
+   "new": "| TC-E5-004-20 | AC7 | Component | A legal action status change the model does not allow: refused and nothing written |\n| TC-E5-004-21 | AC8 | Component | The rules BR1 to BR8 checked on one call; see TC-E5-004-10 to TC-E5-004-17 |\n| TC-E5-004-22 | AC9 | Component | A call without valid authentication answered 401; a role without the Litigation right answered 403 with MSG-P4-002; an out-of-scope case answered 404 |\n| TC-E5-004-23 | AC10 | Component | A replayed write with the same Idempotency-Key: one decision record, one presentation, one announcement; the repeat counted |\n| TC-E5-004-24 | AC11 | Component | The task raise retried with the same Idempotency-Key after a failure, and a timed-out activity retried: no second decision record |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32394",
+   "item": "NEWAC-RWB-S4-E5004-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC5 already exists in section 7 and X11 Covered by reads AC5; TC-E5-004-09 is its test. No edit needed."
+  },
+  {
+   "ruling": "R-32395",
+   "item": "NEWAC-RWB-S4-E5004-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 (BR1 to BR8) to section 7 and TC-E5-004-21 to section 16. AC6 is already in use, so the next free number is taken.",
+   "note": "BR1 to BR8 now have a criterion AC8 and test row TC-E5-004-21; TC-E5-004-10 to -17 remain the component tests."
+  },
+  {
+   "ruling": "R-32396",
+   "item": "NEWAC-RWB-S4-E5004-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 (401, 403, 404) to section 7 and TC-E5-004-22 to section 16.",
+   "note": "AC9 names 401, 403 (MSG-P4-002) and 404 for the provided operations; test row TC-E5-004-22 added."
+  },
+  {
+   "ruling": "R-32397",
+   "item": "NEWAC-RWB-S4-E5004-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 (replay with same Idempotency-Key) to section 7 and TC-E5-004-23 to section 16.",
+   "note": "AC10 covers the replay of a write; test row TC-E5-004-23 added; consistent with BR5."
+  },
+  {
+   "ruling": "R-32398",
+   "item": "NEWAC-RWB-S4-E5004-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 (retried or timed-out activity) to section 7 and TC-E5-004-24 to section 16.",
+   "note": "AC11 covers activity retry and timeout with the same Idempotency-Key; test row TC-E5-004-24 added."
+  }
+ ]
+}

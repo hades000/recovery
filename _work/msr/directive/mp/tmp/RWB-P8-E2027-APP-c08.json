@@ -1,0 +1,103 @@
+{
+ "edits": [
+  {
+   "old": "| X5 | A payment above the installment by more than the tolerance | Unmatched; exception list | MSG-P8-001 | AC8 (owned by RWB-P8-E2008-APP) |",
+   "new": "| X5 | A payment above the installment by more than the tolerance | Unmatched; exception list | MSG-P8-001 | AC13 (legacy AC8, owned by RWB-P8-E2008-APP; the row is evaluated here) |"
+  },
+  {
+   "old": "| X6 | Two rows would match | The row with the lower row order decides; one record only | None | AC9 (owned by RWB-P8-E2008-APP) |",
+   "new": "| X6 | Two rows would match | The row with the lower row order decides; one record only | None | AC14 (legacy AC9, owned by RWB-P8-E2008-APP; one record written here) |"
+  },
+  {
+   "old": "    Then the run summary names \"PAY-91002\" with MSG-P8-001",
+   "new": "    Then the run summary names \"PAY-91002\" with MSG-P8-001\n\n  Scenario: AC13 Payment above the installment by more than the tolerance (exception X5)\n    Given payment \"PAY-91007\" of 13,000.00 THB is received against the installment of 12,500.00 THB\n    When \"PAY-91007\" is matched\n    Then \"PAY-91007\" is unmatched and held on the exception list\n    Then the run summary names \"PAY-91007\" with MSG-P8-001\n\n  Scenario: AC14 Two rows match one payment (exception X6)\n    Given payment \"PAY-91008\" is matched by two rows of PAYMENT_MATCH version \"PM-2026.12\"\n    When \"PAY-91008\" is matched\n    Then the row with the lower row order decides\n    Then the system writes one decision record for \"PAY-91008\"\n\n  Scenario: AC17 Matching reads the evaluated model only and the registers carry no personal data (BR10 to BR14)\n    Given the fetched PAYMENT_MATCH model of \"PM-2026.12\" has a checksum mismatch\n    When JOB-07 runs for business date 2026-12-15\n    Then the last good model of the version in force is kept and no match is taken on the unverified model\n    Then the match record of \"PAY-91001\" holds no personal data field\n\n  Scenario: AC18 Caller without a valid credential gets 401\n    When the caller sends GET /api/recovery/payment/v1/proceeds without a valid credential\n    Then the response is status 401\n\n  Scenario: AC18 Caller without the role of the operation gets 403\n    When the caller sends GET /api/recovery/payment/v1/proceeds without the role of the operation\n    Then the response is status 403\n\n  Scenario: AC18 Payment with no proceeds row gets 404\n    When the caller sends GET /api/recovery/payment/v1/proceeds for a payment that has no proceeds row\n    Then the response is status 404\n\n  Scenario: AC19 Replay of a write with the same idempotency key\n    Given the match of \"PAY-91001\" has been written once with an idempotency key\n    When the same write is replayed with the same idempotency key\n    Then the system writes no second proceeds row for \"PAY-91001\"\n\n  Scenario: AC20 Duplicate delivery of a consumed event\n    Given a consumed event has been processed once\n    When the same event ID is delivered again\n    Then the inbox dedupes the event and no second side effect is written\n\n  Scenario: AC21 Activity retry and timeout follow the kit policy\n    Given the rwb-treatment contract does not answer within 2 s for \"PAY-91002\" on the first attempt\n    When the activity retries on the kit policy\n    Then \"PAY-91002\" is matched at most once"
+  },
+  {
+   "old": "| TC-E2-027-18 | AC12 — new in this story for exception X10; owned here | Component | rwb-treatment contract silent past 2 s for PAY-91002 |",
+   "new": "| TC-E2-027-18 | AC12 — new in this story for exception X10; owned here | Component | rwb-treatment contract silent past 2 s for PAY-91002 |\n| TC-E2-027-19 | AC13 — new in this story for exception X5; owned here | Component | PAY-91007 13,000.00 against installment 12,500.00 |\n| TC-E2-027-20 | AC14 — new in this story for exception X6; owned here | Component | PAY-91008 matched by two rows |\n| TC-E2-027-21 | AC17, BR10, BR11, BR12, BR13, BR14 — new in this story; owned here | Component | PM-2026.12 model with checksum mismatch; PAY-91001 match record inspected for personal data fields |\n| TC-E2-027-22 | AC18 — new in this story; owned here | Contract | GET /api/recovery/payment/v1/proceeds without a valid credential, without the role of the operation, and for a payment with no proceeds row; expected 401, 403 and 404 |\n| TC-E2-027-23 | AC19 — new in this story; owned here | Component | Match of PAY-91001 written twice with the same idempotency key |\n| TC-E2-027-24 | AC20 — new in this story; owned here | Component | Consumed event delivered twice with the same event ID |\n| TC-E2-027-25 | AC21 — new in this story; owned here | Component | rwb-treatment contract silent past 2 s for PAY-91002 on the first attempt |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31583",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC13",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC13 scenario (X5, PAY-91007) to section 7, TC-E2-027-19 to section 16; X5 Covered by now names AC13.",
+   "note": "Legacy AC8 is not in this story; AC13 added here for X5 and its test row created."
+  },
+  {
+   "ruling": "R-31584",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC14",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC14 scenario (X6, PAY-91008) to section 7, TC-E2-027-20 to section 16; X6 Covered by now names AC14.",
+   "note": "Legacy AC9 is not in this story; AC14 added here for X6 and its test row created."
+  },
+  {
+   "ruling": "R-31585",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC15",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 already covered in this story by AC11 and TC-E2-027-17 (section 5); item's TC-E2-027-01 reference is stale. No new AC added."
+  },
+  {
+   "ruling": "R-31586",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC16",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X10 already covered in this story by AC12 and TC-E2-027-18 (section 5); no new AC added."
+  },
+  {
+   "ruling": "R-31587",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC17 scenario covering BR10 to BR14 to section 7; TC-E2-027-21 to section 16.",
+   "note": "Criterion and test row added for BR10 to BR14; existing TC-15, TC-14 and TC-16 remain as component evidence."
+  },
+  {
+   "ruling": "R-31588",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC18 scenarios for 401, 403 and 404 on GET /api/recovery/payment/v1/proceeds to section 7; TC-E2-027-22 to section 16.",
+   "note": "Criterion and test row added for the 401, 403 and 404 answers of the provided read operation."
+  },
+  {
+   "ruling": "R-31589",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC19 replay scenario to section 7; TC-E2-027-23 to section 16.",
+   "note": "Criterion and test row added for replay of a write with the same idempotency key."
+  },
+  {
+   "ruling": "R-31590",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC20",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC20 duplicate-delivery scenario to section 7; TC-E2-027-24 to section 16.",
+   "note": "Criterion and test row added for duplicate delivery of a consumed event."
+  },
+  {
+   "ruling": "R-31591",
+   "item": "NEWAC-RWB-P8-E2027-APP-AC21",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC21 retry and timeout scenario to section 7; TC-E2-027-25 to section 16.",
+   "note": "Criterion and test row added for activity retry and timeout under the kit policy."
+  }
+ ]
+}

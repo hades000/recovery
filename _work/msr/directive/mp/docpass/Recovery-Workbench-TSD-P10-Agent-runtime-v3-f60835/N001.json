@@ -1,0 +1,62 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench Technical Specifications by Module v6/Recovery Workbench TSD P10 Agent runtime v3.md",
+ "unit": "N001",
+ "items": [
+  "GAP-0075",
+  "GAP-0076"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 3
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "N001-F1",
+     "finding": "GAP-0076",
+     "op": "insert_after",
+     "old": "No case state machine of its own; the module acts on events from P3 and writes through the decision log.",
+     "new": "\nThe 60-second limit applies to the whole AgentRunWorkflow, not to the model call alone (GAP-0076; NFR-010). The timer starts when the workflow starts, so the tool reads, the model call and the guardrail check all run inside it. A run that has not passed its guardrails at 60 s falls back and the rule result is used. The agent policy row (`agent_policy`) publishes the split of this time into a tool budget and a model budget. The budget values and their field names: Not specified in the source documents (GAP-0076)."
+    },
+    {
+     "fix_id": "N001-F2",
+     "finding": "GAP-0076",
+     "op": "replace",
+     "old": "| P5 rwb-document, S1 rwb-valuation, S8 rwb-deviation | Runs on rwb-agent |",
+     "new": "| P5 rwb-document, S1 rwb-valuation, S8 rwb-deviation | Runs on rwb-agent; the 60 s covers the whole workflow, from its start to passed guardrails (T4) |"
+    },
+    {
+     "fix_id": "N001-F3",
+     "finding": "GAP-0075",
+     "op": "insert_after",
+     "old": "Every operation of T5.2.1 is authorised through the `rwb-access` authorise contract with the role, the scope and the delegation limit of T6.1 (DP-08; C RWB-P4-E1037-CON); the caller caches the answer and refreshes it on AccessPolicyChanged and DoaLimitChanged.",
+     "new": "\nA change to a prompt or a policy (the writes Architecture v5 names `/agent-policies`, published here as POST `/admin/agent-configs` and POST `/admin/agent-configs/{versionId}/approve`) is authorised through the `rwb-access` authorise contract (DP-08) and takes effect only with a maker-checker approval from P7 (GAP-0075). The run row (`agent_run`) records the approving role. The center of excellence owns prompts, policies and evaluation sets and proposes changes; the roles that make and approve a change are to be named with the center of excellence. Those role codes, the P7 approval contract and the `agent_run` field that holds the approving role: Not specified in the source documents (GAP-0075)."
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-0076",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2"
+     ],
+     "note": "60 s set on the whole AgentRunWorkflow in T4 and T5.2.1. Tool/model budget values and field names are not given by the sources and are marked as such."
+    },
+    {
+     "item": "GAP-0075",
+     "status": "Resolved",
+     "fix_ids": [
+      "F3"
+     ],
+     "note": "T6.2 states DP-08 authorise plus P7 maker-checker and the approving role on the run row. Role codes, P7 contract and field name are still to be named."
+    }
+   ]
+  }
+ ]
+}

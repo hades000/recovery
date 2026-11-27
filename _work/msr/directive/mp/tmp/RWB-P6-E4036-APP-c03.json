@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| X13 | The role lacks the right of the operation | Refused with 403; nothing changes | MSG-P4-002 | TC-E4-036-03 |",
+   "new": "| X13 | The role lacks the right of the operation | Refused with 403; nothing changes | MSG-P4-002 | AC3 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 A role without the right is refused (new, D-RCV-60)\n    Given the role lacks the right of the operation: Litigation C for the POST, Litigation R for the GET\n    When the role sends the POST or the GET of the response\n    Then the request is refused with 403 and the user sees MSG-P4-002 and nothing changes"
+  },
+  {
+   "old": "The two criteria run against the fakes of 12.8 and answer on the two operations of 12.1.",
+   "new": "AC1 and AC2 run against the fakes of 12.8 and answer on the two operations of 12.1; AC3 (new, D-RCV-60) runs on the same two operations and covers X13, which is refused with 403 before any change."
+  },
+  {
+   "old": "| TC-E4-036-03 | Access | Component | A role without the right sends the POST and the GET and is refused with 403 and MSG-P4-002; a notice outside the scope answers 404. Legacy test: A role without the right is refused with MSG-P4-002 |",
+   "new": "| TC-E4-036-03 | Access | Component | A role without the right sends the POST and the GET and is refused with 403 and MSG-P4-002; a notice outside the scope answers 404. Legacy test: A role without the right is refused with MSG-P4-002 |\n| TC-E4-036-04 | Access | Component | A role without the right of the operation is refused with 403 and MSG-P4-002 and nothing changes (AC3) | New criterion, D-RCV-60 |"
+  },
+  {
+   "old": "| BR9 | The base is `/api/recovery/comms/v1` and the answer reaches the case record through the gateway-bff composite route | DP-13, DP-19 |",
+   "new": "| BR9 | The base is `/api/recovery/comms/v1` and the answer reaches the case record through the gateway-bff composite route; this service serves the two operations and no screen, and the customer surface is reached through the same composite route | DP-13, DP-19; GAP-1111 |"
+  },
+  {
+   "old": "| BR14 | No personal data leaves the service: a response carries identifiers, a channel code, a response code, a rule id, a rule version and timestamps, and no name, address, identity number, account number or contact value | Template and Rules §R7.2 s17; TSD P6 T6.2 (masking) |",
+   "new": "| BR14 | No personal data leaves the service: a response carries identifiers, a channel code, a response code, a rule id, a rule version and timestamps, and no name, address, identity number, account number or contact value | Template and Rules §R7.2 s17; TSD P6 T6.2 (masking) |\n\nCoverage (DOR-RWB-P6-E4036-APP-4): BR1, BR2, BR3, BR4, BR5, BR7, BR8, BR9, BR11, BR12 and BR13 are run by AC1; BR6 by AC2; BR10 by AC1 for the repeat and the second distinct response (X11, X12); BR14 by AC1, whose response row carries identifiers and codes only."
+  },
+  {
+   "old": "Field IDs are those of the Logical Data Model and Data Dictionary.",
+   "new": "Field IDs are those of the Logical Data Model and Data Dictionary.\n\nThe decision code, the response-code list and the rule version in force are reference data read with the version in force (BR11); no value of them is a literal in code and each stays the placeholder until the reference data is published (GAP-1110). The channel of a HOME.SCB response has no LOV-CHANNEL code in the source documents, so its mapping carries Not specified in the source documents (GAP-1111; ASM-2059) until the reference data is published."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17732",
+   "item": "DOR-RWB-P6-E4036-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "X13 now covered by new AC3 in section 7; TC-E4-036-04 row added in section 16; AC1 and AC2 kept.",
+   "note": "X13 covered by AC3 (new, D-RCV-60) and TC-E4-036-04 added; the existing TC-E4-036-03 row is kept."
+  },
+  {
+   "ruling": "R-17733",
+   "item": "DOR-RWB-P6-E4036-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Coverage paragraph added under section 8 mapping BR1 to BR14 to AC1, AC2 and AC3.",
+   "note": "Each rule now names its criterion. No separate test case row per rule was added; rule coverage runs through the AC rows."
+  },
+  {
+   "ruling": "R-17734",
+   "item": "DOR-RWB-P6-E4036-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add entity notice_response (new table in rwb_comms, P6) and field party_id of notice to LDM v9 and Data Classification v5.",
+   "note": "notice_response and party_id are not in LDM v9 or Data Classification v5; the story rows keep the placeholder until those documents add them."
+  },
+  {
+   "ruling": "R-23080",
+   "item": "GAP-1106",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P6-E4036-CON",
+   "change": "Declare POST and GET /notices/{noticeId}/responses under /api/recovery/comms/v1 with Idempotency-Key on POST and statuses 401, 403, 404, 409, 422, 503.",
+   "note": "Path conflicts with GAP-2369 proposal (/cases/{caseId}/offer-acceptances); CON must carry one path set for the two operations."
+  },
+  {
+   "ruling": "R-23081",
+   "item": "GAP-1107",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P6-E4036-CON",
+   "change": "Declare notice_response with id, notice_id, case_id, response_code, channel, responded_at, decision_record_id and standard columns; fix names, types and required flags.",
+   "note": "Story migration and section 11 rows already name the table and the index; CON must fix the types and flags."
+  },
+  {
+   "ruling": "R-23082",
+   "item": "GAP-1108",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P6-E4036-CON",
+   "change": "Declare capability area Litigation with right C on POST and right R on GET, scope applied, enforced at gateway-bff; role lists stay rwb-access data.",
+   "note": "AC3 in section 7 already names Litigation C and R; the operation rights are declared in CON."
+  },
+  {
+   "ruling": "R-23083",
+   "item": "GAP-1109",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P6-E4036-CON",
+   "change": "Declare treatment, case and contact-point shapes and events TreatmentApproved and CaseStateChanged as consumed and faked; paths as placeholders; add C rows when owners plan contracts.",
+   "note": "No owner contract story is named in this key; CON carries the consumed and faked declarations until the owner C rows exist."
+  },
+  {
+   "ruling": "R-23084",
+   "item": "GAP-1110",
+   "status": "Resolved",
+   "section": "8, 11",
+   "target": "",
+   "change": "Section 11 carries decision code, response-code list and rule version as reference data; BR1 and BR11 name R-RES-16 and R-RES-17.",
+   "note": "Decision code and response-code values stay placeholders until reference data is published; rule ids are named in the story."
+  },
+  {
+   "ruling": "R-23085",
+   "item": "GAP-1111",
+   "status": "Resolved",
+   "section": "8, 11",
+   "target": "",
+   "change": "BR9 states two operations and no screen, reached through the composite route; section 11 carries the HOME.SCB channel placeholder; BR10 keeps one response per notice.",
+   "note": "Refusal texts and channel mapping stay placeholders until the message list and reference data are published."
+  },
+  {
+   "ruling": "R-23086",
+   "item": "GAP-2369",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P6-E4036-CON",
+   "change": "Fix POST and GET /cases/{caseId}/offer-acceptances with capability area Case record (right C POST, right R GET); declare consumed rows; no acceptance event; fix refusal texts.",
+   "note": "Conflicts with GAP-1106 response path; the two path proposals must be reconciled in CON before build."
+  }
+ ]
+}

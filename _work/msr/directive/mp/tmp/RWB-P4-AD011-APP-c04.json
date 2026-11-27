@@ -1,0 +1,41 @@
+{
+ "edits": [
+  {
+   "old": "    Then no second version is stored",
+   "new": "    Then no second version is stored\n\n  Scenario: AC6 A 448-row RESTRUCTURE workbook with an extra ignored column is accepted, the minimum is read from its parameter and the author cannot approve (new, D-RCV-60)\n    Given \"U-7101\" posts a 448-row RESTRUCTURE workbook with one extra column that the registry ignores\n    When the load is made\n    Then the workbook is accepted and the scenario minimum 50 is read from the parameter rules.testcases.min\n    Then route sets and version states are read as values of LOV-ROUTE-SET and LOV-VERSION-STATUS and never as code\n    Then the caller reference is recorded with no personal data, the grant id is recorded where a break-glass grant is active, and no decision-record row is written\n    Then \"U-7101\" holding RW-COE cannot approve the version, and the approval is the registry's\n\n  Scenario: AC7 A call with no session, a caller without the right or an unknown version is answered 401, 403 or 404 and nothing is stored (new, D-RCV-60)\n    Given no session is presented on POST /api/recovery/access/v1/admin/rule-version-loads\n    When the call is made\n    Then the response is 401 with message Not specified in the source documents (NEWAC-RWB-P4-AD011-APP-AC7) and the workbook is not parsed\n    Given \"U-7110\" holds RW-CASEOWN with the R letter only in Rules and parameters\n    When \"U-7110\" posts the RESTRUCTURE workbook\n    Then the response is 403 with message MSG-P4-002 and no parse is done\n    Given a versionId that does not exist\n    When GET /api/recovery/access/v1/admin/rule-version-loads/{versionId} is called\n    Then the response is 404 with message Not specified in the source documents (NEWAC-RWB-P4-AD011-APP-AC7)"
+  },
+  {
+   "old": "| TC-AD-011-07 | BR3, BR6, BR7, BR9, BR12, BR13 | Component | A 448-row RESTRUCTURE workbook with one extra column the registry ignores, accepted; scenario minimum read from `rules.testcases.min`, 50 in force; an RW-COE author cannot approve; caller reference recorded with no personal data; no decision-record row written |",
+   "new": "| TC-AD-011-07 | AC6, BR3, BR6, BR7, BR9, BR12, BR13 | Component | A 448-row RESTRUCTURE workbook with one extra column the registry ignores, accepted; scenario minimum read from `rules.testcases.min`, 50 in force; an RW-COE author cannot approve; caller reference recorded with no personal data; no decision-record row written |\n| TC-AD-011-08 | AC7 | Component | Unauthenticated POST answered 401 with its message not specified in the source documents; RW-CASEOWN caller with R only answered 403 with MSG-P4-002 and no parse; unknown `versionId` on GET answered 404 with its message not specified in the source documents |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28969",
+   "item": "GAP-2271",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Work Package plan for B-P4-04 and B2-P4-006 (split_plan.json generator and checks/run_all.py)",
+   "change": "Keep one Work Package per slice: remove RWB-AD-012 from B-P4-04 fanout or retire B2-P4-006; number CG and ASM IDs once at D1; add plan-uniqueness check that fails on duplicate Write-only output paths.",
+   "note": "Plan-generator fix outside this story. No story edit; the four artefacts and the plan generator are changed in the Work Package plan."
+  },
+  {
+   "ruling": "R-30810",
+   "item": "NEWAC-RWB-P4-AD011-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC6 added in section 7 covering BR3, BR6, BR7, BR9, BR12, BR13; TC-AD-011-07 Covers now lists AC6."
+  },
+  {
+   "ruling": "R-30811",
+   "item": "NEWAC-RWB-P4-AD011-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC7 added for 401, 403 and 404 with TC-AD-011-08. Messages for 401 and 404 are not specified in the source documents."
+  }
+ ]
+}

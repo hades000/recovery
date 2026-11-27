@@ -1,0 +1,88 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-43 Roles and access | Not recorded | The 503 of X9 with MSG-P7-003 and a retry action that reuses the same `Idempotency-Key` |",
+   "new": "| SCR-43 Roles and access | Not recorded | The 503 of X9 with MSG-P7-003 and a retry action that reuses the same `Idempotency-Key` |\n| SCR-43 Roles and access | Empty | Not specified in the source documents (CG-ALL-5694) |\n| SCR-43 Roles and access | Loading | Not specified in the source documents (CG-ALL-5694) |\n| SCR-43 Roles and access | Error | Not specified in the source documents (CG-ALL-5694) |\n| SCR-43 Roles and access | No access | Not specified in the source documents (CG-ALL-5694) |"
+  },
+  {
+   "old": "Given the data and the rule version this feature needs are in place",
+   "new": "Given the matrix in force is \"PM-2026.11\""
+  },
+  {
+   "old": "Then reviews and sets what each role and each agent may read and do, and reports the matrix",
+   "new": "Then the response is 200 with state \"APPLIED\" and matrixVersion \"PM-2027.01\" and the letters set for each role and each agent"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then one decision-record entry is appended with the role, the capability area, the letters before and after, both matrix versions and the parameter version"
+  },
+  {
+   "old": "| TC-E8-019-10 | AC6, BR3 | Component | RW-COE with `C` and RW-RISK with `A` on the Rules and parameters check of AC6, from the authorise fake; a role without the right refused with MSG-P4-002; the target right is carried in GAP-0888 |",
+   "new": "| TC-E8-019-10 | AC6, BR3 | Component | U-8105 holding RW-CASEOWN with `-` in PLATFORM_ADMINISTRATION: the read and the set refused with MSG-P4-002, no row answered, no change stored, no decision-record entry and no event published; the authorise fake as in GAP-0888 |"
+  },
+  {
+   "old": "Then the page bound in force applies to the answer and no build is needed",
+   "new": "Then the page bound in force applies to the answer and no build is needed\n\n  Scenario: AC12 A call without an authenticated session is answered 401 on each operation (new, D-RCV-60)\n    When an unauthenticated caller calls GET /api/recovery/access/v1/admin/access-matrix\n    Then the response is 401 and no row is answered\n    When an unauthenticated caller calls PATCH /api/recovery/access/v1/admin/access-matrix/RW-CASEOWN with If-Match \"PM-2026.11\" and the body capabilityArea \"CASE_RECORD\", letters \"RU\" and reason \"Own case edit\"\n    Then the response is 401 and no change is stored and no rwb.access.AccessPolicyChanged.v1 is published\n    When an unauthenticated caller calls POST /api/recovery/access/v1/admin/access-matrix/SY-AGENT/approve with the changeId of the pending change\n    Then the response is 401 and the change stays \"PENDING_APPROVAL\"\n    When an unauthenticated caller calls GET /api/recovery/access/v1/admin/access-matrix/report?version=PM-2027.01\n    Then the response is 401 and no row is answered\n\n  Scenario: AC13 A failed group mapping call leaves the matrix answered without its group block (new, D-RCV-60)\n    Given the rwb-source-data contract mock answers 503 for GET /api/recovery/source-data/v1/iam-groups\n    When \"U-8101\" calls GET /api/recovery/access/v1/admin/access-matrix\n    Then the response is 200 with matrixVersion \"PM-2026.11\" and the group block absent, with a note that the mapping is not available and no error"
+  },
+  {
+   "old": "| TC-E8-019-13 | AC11, BR15 | Component | The parameters fake with the page bound and the second-approval switch changed without a build; the report answered with the page bound in force |",
+   "new": "| TC-E8-019-13 | AC11, BR15 | Component | The parameters fake with the page bound and the second-approval switch changed without a build; the report answered with the page bound in force |\n| TC-E8-019-14 | AC12 | Component | A caller with no authenticated session calls each of the four operations: 401 on each, no row answered, no change stored, no decision-record entry and no event published |\n| TC-E8-019-15 | AC13 | Component | The rwb-source-data fake answering 503 for the group mapping: the matrix of PM-2026.11 answered 200 with the group block absent and the note that the mapping is not available, and no error |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25686",
+   "item": "CG-ALL-5694",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Four rows added for SCR-43 empty, loading, error and no access, each marked Not specified in the source documents (CG-ALL-5694).",
+   "note": "The screen specification lacks these states, so each is recorded as Not specified in the source documents."
+  },
+  {
+   "ruling": "R-29578",
+   "item": "ACR-RWB-P4-E8019-APP-AC1",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Given and Then lines of AC1 rewritten with named values, state, matrix versions and decision-record fields.",
+   "note": "Vague wording removed; the Then lines now name the 200 answer, state APPLIED, PM-2027.01 and the record fields."
+  },
+  {
+   "ruling": "R-29579",
+   "item": "ACR-RWB-P4-E8019-APP-AC6",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "TC-E8-019-10 data rewritten to the AC6 case: U-8105 refused with MSG-P4-002 on read and set, no change stored.",
+   "note": "A row covered AC6 but its data described a different check; it now matches AC6 Platform administration refusal."
+  },
+  {
+   "ruling": "R-31058",
+   "item": "NEWAC-RWB-P4-E8019-APP-AC10",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "No edit. BR3 is covered by AC6 and TC-E8-019-10, BR9 by AC10 and TC-E8-019-12, BR15 by AC11 and TC-E8-019-13.",
+   "note": "BR3, BR9 and BR15 already have a criterion and a test row, so no new criterion is added."
+  },
+  {
+   "ruling": "R-31059",
+   "item": "NEWAC-RWB-P4-E8019-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC12 added: unauthenticated calls to the four operations answer 401; TC-E8-019-14 added.",
+   "note": "Numbered AC12 because AC11 is taken; the 401 answer is the item's own wording. Proposed test derived from the criterion."
+  },
+  {
+   "ruling": "R-31060",
+   "item": "NEWAC-RWB-P4-E8019-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "New AC13 added: a 503 from the group mapping call leaves the matrix answered without its group block; TC-E8-019-15 added.",
+   "note": "Numbered AC13 because AC12 is taken by the 401 criterion; uses the 503 case already named in TC-E8-019-05."
+  }
+ ]
+}

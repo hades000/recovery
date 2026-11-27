@@ -1,0 +1,45 @@
+{
+ "edits": [
+  {
+   "old": "AC9, TC-E1-062-18; Section 17, BR1, BR6 |",
+   "new": "AC9, AC13, TC-E1-062-18, TC-E1-062-19; Section 17, BR1, BR6 |"
+  },
+  {
+   "old": "    Then nothing is released",
+   "new": "    Then nothing is released\n\n  Scenario: AC13 The database refuses a statement outside rwb_deviation at run time (new, D-RCV-60)\n    Given the service runs as its own login on rwb_deviation and holds no grant on recovery_case, rwb_case, v_ace_* or another service's schema\n    When the login issues a statement on a recovery_case row, on a rwb_case table or on a v_ace_* view\n    Then the database refuses the statement\n    Then the refusal fails the boundary test and nothing is released\n\n  Scenario: AC14 The read rules of section 8 hold on the answer, the build and the log (new, D-RCV-60)\n    Given a synthetic personal value is placed in handler_user_id and in a free-text column of a deviation row\n    When \"SY-AGENT\" reads the deviation of that case twice on the same rows and the same package version\n    Then the serialised answer, the log and the span attributes hold no such value (BR1, BR2)\n    Then the two answers are the same and no row is written (BR8)\n    Then the agent holds no call to the write operations of the service (BR8)\n    Then the build check finds no code, owner role or rule constant in the source (BR5)\n    Then no ledger table, no Drools event, no outbox write and no outbound call to rwb-source-data is in the build (BR6, BR7)\n    Then a raise naming \"SCREENING_AGENT\" is refused while the mode in force is \"SHADOW\" (BR4)\n\n  Scenario: AC15 A call without a valid credential is refused with 401 on every provided operation (new, D-RCV-60)\n    Given the calling identity carries no valid credential\n    When the identity calls any operation of rwb-deviation, for example GET /api/recovery/deviation/v1/deviations with case \"RW-2026-000403\"\n    Then the call is refused with status 401\n    Then no deviation and no owner role is returned"
+  },
+  {
+   "old": "| TC-E1-062-18 | AC9: a statement on a recovery_case row, a rwb_case table, a v_ace_* view or another service's schema fails the build | Component | The build check run on each statement in turn |",
+   "new": "| TC-E1-062-18 | AC9: a statement on a recovery_case row, a rwb_case table, a v_ace_* view or another service's schema fails the build | Component | The build check run on each statement in turn |\n| TC-E1-062-19 | AC13: a statement on a recovery_case row, a rwb_case table or a v_ace_* view is refused by the database grant at run time | Component | The SY-AGENT login issues a statement on recovery_case, on rwb_case and on a v_ace_* view |\n| TC-E1-062-20 | AC14: the rules BR1, BR2 and BR4 to BR8 of section 8 hold on the answer, the build and the log | Component | A synthetic personal value in handler_user_id and in a free-text column; the read run twice on the same rows and package version; the build check run on the service source |\n| TC-E1-062-21 | AC15: a call without a valid credential to a provided operation answers 401 | Contract | GET /deviations for case RW-2026-000403 with no credential; each further provided operation of rwb-deviation.yaml with no credential |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-33048",
+   "item": "NEWAC-RWB-S8-E1062-APP-AC13",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 (database refusal at run time) with TC-E1-062-19; X7 Covered by now names AC13 and TC-E1-062-19."
+  },
+  {
+   "ruling": "R-33049",
+   "item": "NEWAC-RWB-S8-E1062-APP-AC14",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 covering BR1, BR2, BR4 to BR8 with TC-E1-062-20 (component level) in section 16."
+  },
+  {
+   "ruling": "R-33050",
+   "item": "NEWAC-RWB-S8-E1062-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 asserting 401 without credential on each provided operation, with contract test TC-E1-062-21 in section 16."
+  }
+ ]
+}

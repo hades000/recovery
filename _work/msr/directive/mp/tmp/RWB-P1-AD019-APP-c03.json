@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-GEN-006 naming the case list step | Component test |",
+   "new": "| MSG-GEN-006 naming the case list step | AC4; TC-AD-019-05 |"
+  },
+  {
+   "old": "| None | BR4; component test |",
+   "new": "| None | AC5; BR4; TC-AD-019-06 |"
+  },
+  {
+   "old": "| MSG-P1-012 | Business rule BR6; component test |",
+   "new": "| MSG-P1-012 | AC6; BR6; TC-AD-019-07 |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-AD-019-04 |",
+   "new": "| MSG-P4-002 | AC7; TC-AD-019-04 |"
+  },
+  {
+   "old": "| MSG-GEN-001 | Component test |",
+   "new": "| MSG-GEN-001 | AC8; TC-AD-019-08 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | Business rule BR8 |",
+   "new": "| MSG-GEN-006 | AC9; BR8; TC-AD-019-09 |"
+  },
+  {
+   "old": "    Then it shows as stale with its last complete ACE business date",
+   "new": "    Then it shows as stale with its last complete ACE business date\n\n  Scenario: AC4 A business date with no case list row\n    Given no case_list_row exists for the business date\n    When the reconciliation run of that date waits its retry window\n    Then the run ends FAILED, no reconciliation_result row is written for the date, no break is shown as zero, and MSG-GEN-006 names the case list step\n\n  Scenario: AC5 A redelivered AceDataReady event\n    Given AceDataReady arrives twice with the same event id\n    When the inbox dedupes the second delivery\n    Then the workflow starts once and no second reconciliation_result row is written\n\n  Scenario: AC6 A result over the tolerance holds the case list\n    Given a REC-01 or REC-02 result of the business date is BREAK over the tolerance\n    When the run completes\n    Then the case list of the date is HELD, MSG-P1-012 names the date, the product, the variance and the percent, and no case is changed\n\n  Scenario: AC7 A caller without Platform administration R\n    Given the caller's Platform administration R is absent\n    When the caller asks for GET /admin/reconciliation/results\n    Then the call is refused before any read with MSG-P4-002, no row is returned and nothing is written\n\n  Scenario: AC8 A malformed query date\n    Given the query carries a malformed from or to date\n    When the caller asks for GET /admin/reconciliation/results\n    Then the call is refused before any read and MSG-GEN-001 names the field\n\n  Scenario: AC9 A parameter read that does not answer\n    Given the parameter read of the baseline does not answer\n    When the reconciliation run starts\n    Then the run ends FAILED, no reconciliation_result row is written with a default tolerance, and MSG-GEN-006 is shown\n\n  Scenario: AC10 A REC-05 orphan\n    Given a business key on a Workbench row has no view row\n    When REC-05 resolves the business keys\n    Then the result for that product group is BREAK, the orphan is listed with its table, its column and its key, and the Workbench row and the ACE rows are unchanged"
+  },
+  {
+   "old": "| TC-AD-019-04 | The access refusal; BR13 | Component | A caller without Platform administration R asking `GET /admin/reconciliation/results`, refused with MSG-P4-002 before any read, with a second call with the right present for the contrast |",
+   "new": "| TC-AD-019-04 | The access refusal; BR13; AC7 | Component | A caller without Platform administration R asking `GET /admin/reconciliation/results`, refused with MSG-P4-002 before any read, with a second call with the right present for the contrast |\n| TC-AD-019-05 | AC4; X2 | Component | No case_list_row for the business date: the run waits its retry window, ends FAILED with MSG-GEN-006 naming the case list step, and writes no row |\n| TC-AD-019-06 | AC5; X3; BR4 | Component | AceDataReady delivered twice with the same event id: one workflow start and one reconciliation_result row |\n| TC-AD-019-07 | AC6; X6; BR6; BR9 | Component | A REC-01 or REC-02 BREAK over the tolerance: the case list is HELD, MSG-P1-012 names the date, product, variance and percent, and no case is changed |\n| TC-AD-019-08 | AC8; X8 | Component | A malformed from or to date: refused before any read with MSG-GEN-001 naming the field |\n| TC-AD-019-09 | AC9; X10; BR8 | Component | The parameter read does not answer: the run ends FAILED, no result is written and no default tolerance is assumed |\n| TC-AD-019-10 | AC10; X5; BR5 | Component | A Workbench business key with no view row: REC-05 BREAK, orphan listed with table, column and key, no Workbench or ACE row changed |\n| TC-AD-019-11 | BR1; BR2 | Component | The run starts once per business date from AceDataReady, never when the ALS batch is not COMPLETE, and reads one business date only |\n| TC-AD-019-12 | BR3; BR10; BR14 | Component | One reconciliation_result row per check and product group with the DF-OPS-118 to DF-OPS-129 fields; the variance and percent are served as the run wrote them |"
+  },
+  {
+   "old": "and JOB-05 is retired). It reads `v_ace_account`",
+   "new": "and JOB-05 is retired). The P1 slice runs no Temporal Schedule of its own for the console; the 15-minute freshness Schedule stays with rwb-case. It reads `v_ace_account`"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14794",
+   "item": "DOR-RWB-P1-AD019-APP-3",
+   "status": "Resolved",
+   "section": "5; 7; 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC4 to AC9 in section 7 for X2, X3, X6, X7, X8, X10, linked each exception in section 5, and added TC-AD-019-05 to 09 in section 16."
+  },
+  {
+   "ruling": "R-14795",
+   "item": "DOR-RWB-P1-AD019-APP-4",
+   "status": "Resolved",
+   "section": "8; 16",
+   "target": "",
+   "change": "",
+   "note": "BR1, BR2 covered by TC-AD-019-11; BR3, BR10, BR14 by TC-AD-019-12; BR4, BR5, BR6, BR8, BR9 by AC5, AC10, AC6, AC9 and TC-AD-019-07."
+  },
+  {
+   "ruling": "R-14796",
+   "item": "DOR-RWB-P1-AD019-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 wording is not in the inputs; copying it would invent text. Message texts left unchanged."
+  },
+  {
+   "ruling": "R-21789",
+   "item": "GAP-0447",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "gateway-bff contract and P1 reconciliation operations publication",
+   "change": "Specify the cutover harness pack: environment and base hosts, synthetic extract fixture and layout, SCR-45 route and break-list fields, extract format and retention, gate, seeding set.",
+   "note": "Story unchanged; values are not in the source documents."
+  },
+  {
+   "ruling": "R-21790",
+   "item": "GAP-0441",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "rwb-source-data contract and gateway-bff contract",
+   "change": "Publish reconciliation, key-resolution and freshness reads with paths, paging and field shapes; SCR-45 composite route with merge rules and timeouts; refresh cadence; unreachable-read problem response.",
+   "note": "Story unchanged; the shapes are not in the source documents."
+  },
+  {
+   "ruling": "R-21791",
+   "item": "GAP-0519",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "P1 service contract (API-P1-003)",
+   "change": "Publish response fields, paging and break-row shape of GET /admin/reconciliation/results from reconciliation_result DF-OPS-118 to DF-OPS-129 and REC-05 orphan rows.",
+   "note": "BR14 already follows the result schema; the contract shape is still open."
+  },
+  {
+   "ruling": "R-21792",
+   "item": "GAP-0520",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Section 1 now states the P1 slice runs no Temporal Schedule for the console; the freshness Schedule stays with rwb-case."
+  },
+  {
+   "ruling": "R-21793",
+   "item": "GAP-0728",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "rwb-case service contract, rwb-source-data contract, RWB-PLT-N001-CON",
+   "change": "Publish the three console reads under rwb-case; name the rwb-case login with ACE DB owners; fix the SCR-45 composite route; add GET reconciliation, key-resolution and freshness operations to the rwb-source-data contract.",
+   "note": "Story names no login or route; those values belong to the other contracts."
+  },
+  {
+   "ruling": "R-21904",
+   "item": "GAP-0268",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Reconciliations sheet of the reconciliation workbook v3",
+   "change": "Give each reconciliation row an owner from the Ownership Map Tables sheet, with the service that holds its Workbench side and its per-service reconciliation.",
+   "note": "Workbook change; the story has no reconciliation sheet."
+  },
+  {
+   "ruling": "R-21905",
+   "item": "GAP-0269",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Reconciliations and Quality measures sheets of the reconciliation workbook v3",
+   "change": "Append Owner and Per-service reconciliation columns to Reconciliations and an Owner service column to Quality measures, values taken from the Ownership Map Tables sheet.",
+   "note": "Workbook change; the story carries no owner values."
+  }
+ ]
+}

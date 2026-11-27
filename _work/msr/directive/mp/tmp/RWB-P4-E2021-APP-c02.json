@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| Contract dependencies | RWB-P4-E1037-CON (operations in 12.1); RWB-P6-E2021-CON |",
+   "new": "| Contract dependencies | RWB-P4-E1037-CON (operations in 12.1); RWB-P6-E2021-CON; built against REST major version `v1` (path `/api/recovery/access/v1`); the contract version identifier is Not specified in the source documents (DOR-RWB-P4-E2021-APP-23) |"
+  },
+  {
+   "old": "| POST | `/api/recovery/access/v1/authorise` | The role, scope and right decision for one capability area and right on a notice or a case, with the field markers | The caller's own session; the answer is the decision | 401; 403 MSG-P4-002; 404 MSG-P4-003; 422; 503 MSG-P7-003 |",
+   "new": "| POST | `/api/recovery/access/v1/authorise` | The role, scope and right decision for one capability area and right on a notice or a case, with the field markers | The caller's own session; the answer is the decision; `Idempotency-Key` header, a repeated key returns the first answer (TC-E2-021-10) | 401; 403 MSG-P4-002; 404 MSG-P4-003; 422; 503 MSG-P7-003 |"
+  },
+  {
+   "old": "| External dependencies | None |",
+   "new": "| External dependencies | RWB-ACE-001 Section B view `v_ace_pod` for proof of delivery (DL43 open, GAP-1608): proof-of-delivery capture stays behind its feature flag until the view is available; fallback is proof entered by hand against the barcode, to be agreed with the litigation business owner before wave 2 |"
+  },
+  {
+   "old": "| Integration dependencies | None |",
+   "new": "| Integration dependencies | INT-14 WIN daily dispatch file, consumed through RWB-P6-E2021-CON; the file layout is Not specified in the source documents (GAP-1602); the versioned interface definition is owned by `rwb-integration` and the dispatch is built against its fake until the layout is agreed |"
+  },
+  {
+   "old": "As a **litigation officer who requests a notice, reads it on SCR-18 and follows it through the WIN dispatch and the proof of delivery, and the recovery service identity that runs JOB-10**",
+   "new": "As a **litigation officer (role `RW-LITOFF`) who requests a notice, reads it on SCR-18 and follows it through the WIN dispatch and the proof of delivery, or the recovery service identity that runs JOB-10 (role class `NON_HUMAN_ACTOR`; role code Not specified in the source documents (DOR-RWB-P4-E2021-APP-1; GAP-0948))**"
+  },
+  {
+   "old": "- The slice builds no screen. The notice approval panel SCR-18 and the case timeline SCR-04 are served through the gateway-bff composite route of DP-19, the notice is `rwb-comms`'s, the case facts and the case ownership are `rwb-case`'s, and the central ledger entry of a decision is `rwb-decision`'s.",
+   "new": "- The slice builds no screen. The notice approval panel SCR-18 and the case timeline SCR-04 are served through the gateway-bff composite route of DP-19, the notice is `rwb-comms`'s, the case facts and the case ownership are `rwb-case`'s, and the central ledger entry of a decision is `rwb-decision`'s.\n- Screen states of SCR-04 and SCR-18 served by the gateway-bff composite route: no access is the 403 answer with MSG-P4-002 (AC2) and the 404 answer with MSG-P4-003 (AC4); error is the 503 answer with MSG-P7-003 (AC10); empty and loading states are Not specified in the source documents (DOR-RWB-P4-E2021-APP-10)."
+  },
+  {
+   "old": "| TC-E2-021-14 | AC10, BR7, BR8 | NFR | The decision-record write forced to fail on 10 unserved results; no answer is served and no notice changes |",
+   "new": "| TC-E2-021-14 | AC10, BR7, BR8 | NFR | The decision-record write forced to fail on 10 unserved results; no answer is served and no notice changes |\n| TC-E2-021-15 | AC5 | Component | Service identity running JOB-10 with role class `NON_HUMAN_ACTOR` and scope `ALL`; `N-0101` of case `RC-2026-000321` at 16:00 on 2026-12-14; the answer and the entry are this story's assertion, the job is `rwb-comms`'s |\n| TC-E2-021-16 | AC6 | Component | Field with no masking row in `MASK-SIT-01`; `U-4103` asks GET /api/recovery/access/v1/masking-policies for it; the answer is masked with no value and no format |\n| TC-E2-021-17 | AC8 | Component | Cached answer for `LIT-0101` holds `MASK-SIT-01`; a later masking version is committed and `rwb.access.AccessPolicyChanged.v1` is published; the next authorise call answers with the later version and the matrix version stays `PM-2026.12` |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-05841",
+   "item": "DOR-RWB-P4-E2021-APP-23",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Header names REST major version v1 and its path; minor contract version is not in the sources and is marked Not specified."
+  },
+  {
+   "ruling": "R-05842",
+   "item": "DOR-RWB-P4-E2021-APP-8",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "rwb-access.yaml",
+   "change": "Add POST /api/recovery/access/v1/authorise, GET /api/recovery/access/v1/me/permissions and GET /api/recovery/access/v1/masking-policies; hold defaultScope as LOV-SCOPE data, not a closed enum; resolve the two further detcheck findings.",
+   "note": "Story side done: Idempotency-Key added to the authorise row in 12.1. Yaml paths and defaultScope remain in rwb-access.yaml."
+  },
+  {
+   "ruling": "R-09187",
+   "item": "GAP-1608",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "External dependency names v_ace_pod and DL43, holds proof capture behind its flag, and states the barcode fallback to agree before wave 2."
+  },
+  {
+   "ruling": "R-09188",
+   "item": "GAP-1602",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "rwb-integration interface definition of INT-14 WIN dispatch file",
+   "change": "Publish the WIN dispatch file layout as a versioned interface definition: record set, fields and order, envelope, naming, encoding, barcode and sent-date return.",
+   "note": "Story Integration dependencies row now names the layout gap and the build against the fake; layout itself is with rwb-integration."
+  },
+  {
+   "ruling": "R-10735",
+   "item": "CG-ALL-5270",
+   "status": "Cross-document",
+   "section": "11, 12.7, 17",
+   "target": "LDM v9",
+   "change": "Record contact_point as a named P1 object or map the story to its dictionary name; nearest dictionary names are contact_point_ext, contact_at and contract_no.",
+   "note": "Story keeps contact_point in three places pending a dictionary ruling; no story edit made without one."
+  },
+  {
+   "ruling": "R-10736",
+   "item": "CG-ALL-5275",
+   "status": "Cross-document",
+   "section": "12.3",
+   "target": "Kafka Catalog v1",
+   "change": "Add the payload of rwb.access.AccessPolicyChanged.v1 to the Events row, matching RWB-P4-E2021-APP section 12.3 (gap-0127; asm-0204).",
+   "note": "Catalog has no payload for this event; story section 12.3 already states the payload the catalog must match."
+  },
+  {
+   "ruling": "R-10737",
+   "item": "CG-ALL-5278",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-021-15 (AC5), TC-E2-021-16 (AC6) and TC-E2-021-17 (AC8) to section 16."
+  },
+  {
+   "ruling": "R-16822",
+   "item": "DOR-RWB-P4-E2021-APP-1",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Story names RW-LITOFF and role class NON_HUMAN_ACTOR; service identity role code is Not specified (GAP-0948)."
+  },
+  {
+   "ruling": "R-16823",
+   "item": "DOR-RWB-P4-E2021-APP-10",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Added state mapping for SCR-04 and SCR-18: no access (403, 404), error (503); empty and loading marked Not specified."
+  },
+  {
+   "ruling": "R-16824",
+   "item": "DOR-RWB-P4-E2021-APP-15",
+   "status": "Not applied",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Fit to a two-week iteration needs the squad's estimate at refinement; no value in the sources, so the Size row is left unchanged."
+  }
+ ]
+}

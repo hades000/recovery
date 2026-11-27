@@ -1,0 +1,108 @@
+{
+ "edits": [
+  {
+   "old": "    Then the transaction rolls back",
+   "new": "    Then the transaction rolls back\n\n  Scenario: AC14 Rules with no criterion (target, BR3, BR4, BR6, BR9, BR10, BR11, BR12, BR13)\n    Given a run for business date 2026-11-27 whose gate answer is not COMPLETE\n    When JOB-15 runs for business date 2026-11-27\n    Then no measure is published as the baseline\n    Then the decision record is written before the snapshot rows commit, with the definition version, the business date, the row count and the gate answer\n    Then a repeated run for the same business date, definition version and dimension writes once and counts the repeat\n    Then no person name, address, contact value or identity number enters rwb_reporting, the record, a log or a workflow input\n    Then no v_ace_* read, no ACE table and no ACE batch rerun is made by this service\n\n  Scenario: AC15 Provided operation answers 401, 403 or 404 (target)\n    Given a request to a provided operation without a valid token\n    Given the same operation called with a role that lacks its right\n    Given the same operation called for a case or run that does not exist\n    When the request is made\n    Then the answer is 401 for the request without a valid token\n    Then the answer is 403 for the role that lacks its right\n    Then the answer is 404 for the resource that does not exist\n\n  Scenario: AC16 Activity retried once and timed out at 2 s (target, ADR-020)\n    Given the rwb-case contract mock does not answer inside 2 s for a read\n    When the activity runs\n    Then the read is retried once with jitter\n    Then the activity stops at the 2 s timeout and the run waits"
+  },
+  {
+   "old": "| TC-E1-013-16 | AC13, BR6 | Component | A frozen row updated or deleted; the trigger refuses the statement and the transaction rolls back |",
+   "new": "| TC-E1-013-16 | AC13, BR6 | Component | A frozen row updated or deleted; the trigger refuses the statement and the transaction rolls back |\n| TC-E1-013-17 | AC14, BR3, BR4, BR6, BR9, BR10, BR11, BR12, BR13 | Component | A run whose gate answer is not COMPLETE; the decision record written first, a repeat counted once, no personal data and no ACE read |\n| TC-E1-013-18 | AC15, §12.2 | Component | A provided operation called without a valid token, by a role without its right and for a missing resource; answers 401, 403 and 404 |\n| TC-E1-013-19 | AC16, §12.2 | Component | A read not answering inside 2 s; one retry with jitter; the activity stops at the 2 s timeout and the run waits |"
+  },
+  {
+   "old": "- The record is written before the snapshot commits; a build that publishes a measure without its decision record fails the review (DP-03).",
+   "new": "- The record is written before the snapshot commits; a build that publishes a measure without its decision record fails the review (DP-03).\n- Schema migration: the three tables, their unique keys and the frozen-row trigger are carried in `V1013__measures.sql` in this service's own Flyway sequence (DP-15); the deployment story of this key replays the same sequence and no DB story is raised (GAP-2575)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28490",
+   "item": "GAP-2575",
+   "status": "Resolved",
+   "section": "17",
+   "target": "",
+   "change": "",
+   "note": "Tables, unique keys and frozen-row trigger carried in V1013__measures.sql of this service; deployment story replays the sequence; no DB story raised."
+  },
+  {
+   "ruling": "R-31686",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X6 already covered by AC9 and TC-E1-013-12 in sections 5 and 16; no new criterion needed."
+  },
+  {
+   "ruling": "R-31687",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X7 already covered by AC10, section 12.2 and TC-E1-013-13 in sections 5 and 16; no new criterion needed."
+  },
+  {
+   "ruling": "R-31688",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC12",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X8 already covered by AC11, section 17 and TC-E1-013-14 in sections 5 and 16; no new criterion needed."
+  },
+  {
+   "ruling": "R-31689",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC13",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 already covered by AC12, section 17 and TC-E1-013-15 in sections 5 and 16; no new criterion needed."
+  },
+  {
+   "ruling": "R-31690",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC14",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X10 already covered by AC13, BR6 and TC-E1-013-16 in sections 5, 7 and 16; no new criterion needed."
+  },
+  {
+   "ruling": "R-31691",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 in section 7 for BR3, BR4, BR6, BR9 to BR13 and TC-E1-013-17 in section 16. Architecture-constraint rules remain in guardrails."
+  },
+  {
+   "ruling": "R-31692",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for 401, 403 and 404 answers of provided operations and TC-E1-013-18 in section 16."
+  },
+  {
+   "ruling": "R-31693",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for one retry with jitter and the 2 s timeout (ADR-020) and TC-E1-013-19 in section 16."
+  },
+  {
+   "ruling": "R-31694",
+   "item": "NEWAC-RWB-P9-E1013-APP-AC9",
+   "status": "Cross-document",
+   "section": "5",
+   "target": "RWB-ITG-E1013-ITG",
+   "change": "Own AC6 for the HOLD answer of the baseline date (X3): no baseline row written, run waits, product and date named; with TC-E1-013-06-ITG.",
+   "note": "AC6 is owned by the ITG story; this story's X3 row already names it, so no story edit."
+  }
+ ]
+}

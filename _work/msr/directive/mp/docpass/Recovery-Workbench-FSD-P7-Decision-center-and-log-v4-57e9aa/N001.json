@@ -1,0 +1,62 @@
+{
+ "target": "03 Requirements and specifications/Recovery Workbench Functional Specifications by Module v7/Recovery Workbench FSD P7 Decision center and log v4.md",
+ "unit": "N001",
+ "items": [
+  "GAP-1613"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "tries": [
+    {
+     "ok": true,
+     "fixes": 4
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "N001-F1",
+     "finding": "GAP-1613",
+     "op": "insert_after",
+     "old": "The extracts, feeds and copies this document addresses to a data lake are removed by Architecture v5: reporting reads events into `rwb-reporting` (DP-17, ADR-018). The wording of those extracts is kept as written and carried by GAP-1861.",
+     "new": "\nAs an exception to the two paragraphs above, FEAT-DRI-06 (A2.6) with its acceptance criteria and REQ-DRI-009 are retired with story RWB-E1-014 and removed from this document (GAP-1613). The section number A2.6 is not reused. The audit path is the population query of the decision log in this service (REQ-DRI-012)."
+    },
+    {
+     "fix_id": "N001-F2",
+     "finding": "GAP-1613",
+     "op": "replace",
+     "old": "| P7 | FEAT-DRI-06 | Stream the decision log to the data lake | System | Publishes decision entries to the lake for reporting, audit and model feedback. | E1 | A2.6 |\n",
+     "new": ""
+    },
+    {
+     "fix_id": "N001-F3",
+     "finding": "GAP-1613",
+     "op": "replace",
+     "old": "### A2.6 Stream the decision log to the data lake\n\n#### A2.6.1 Intent\n\n**Business objective.** Publishes decision entries to the lake for reporting, audit and model feedback.\n\n**Problem.** Why a route was chosen, who approved it and on what figures is spread across emails and files.\n\n| Metric | Target | Measurement | Review |\n|---|---|---|---|\n| Decisions within the delegation of authority | 100 percent | Decision log and Workbench records | Monthly |\n\n#### A2.6.2 Description\n\n**Functional overview.** Publishes decision entries to the lake for reporting, audit and model feedback.\n\n| Step | Actor | Action | System response |\n|---|---|---|---|\n| 1 | System | Receives its trigger: a completed ACE batch, an event or a timer | Reads the version of the rules in force |\n| 2 | System | Stream the decision log to the data lake | Applies the rules |\n| 3 | System | Records the result | Writes the decision log entry; raises a task where a person is needed |\n\n**Integration points.** Data lake\n\n**Prerequisites.** FEAT-DRI-01\n\n#### A2.6.3 Business rules and structure\n\n##### A2.6.3.1 Validation rules, business rules and constraints\n\n| Rule ID | Rule | Message |\n|---|---|---|\n| VR-P7-006-1 | Approver prepared the decision | MSG-P7-002 You prepared this decision, so you cannot approve it. |\n| VR-P7-006-2 | Decision log write failed (principle 5) | MSG-P7-003 The action was not taken because the decision could not be recorded. Try again in a few minutes. |\n| VR-P7-006-3 | A decision input is past its age limit | MSG-P7-006 {input} is {days} days old, past its limit. Refresh it before you decide. |\n| BR-P7-006 | No value a business person may change is written in code; it is read from reference data with its version | None |\n\n##### A2.6.3.3 Roles and permissions\n\n| Role | Use |\n|---|---|\n| None; runs unattended | Primary |\n| Reporting and BI analyst, Internal audit | Also uses |\n\n#### A2.6.4 Acceptance criteria\n\n##### A2.6.4.1 Main success flow\n\n| AC ID | Scenario | Given | When | Then | Story |\n|---|---|---|---|---|---|\n| AC-P7-006-01 | Daily copy | 380 entries were written on business date 2026-11-30 | JOB-13 runs at 01:00 on 2026-12-01 | the partition \"business_date=2026-11-30\" holds 380 rows And the manifest shows cumulative count 12,480 and last hash \"a3f1...09c2\" And the data lake copy has the same row count and the same last hash as the live log And the watermark moves to 12,480 and \"a3f1...09c2\" | RWB-E1-014 |\n\n##### A2.6.4.2 Alternate flows\n\n| AC ID | Scenario | Given | When | Then | Story |\n|---|---|---|---|---|---|\n| AC-ALT-P7-006-01 | Retention rule | lake partitions for business dates 2024-11-29 and 2024-11-30 exist | the retention step of JOB-13 runs on 2026-12-01 | the partition \"business_date=2024-11-29\" moves to the archive tier And the job run records 1 partition archived under rule version \"RET-2026.11\" | RWB-E1-014 |\n| AC-ALT-P7-006-02 | Two runs at the same time | JOB-13 is running for 2026-11-30 | a platform administrator posts a rerun of JOB-13 | the rerun is refused with status 409 and MSG-P2-006 And one run continues | RWB-E1-014 |\n\n##### A2.6.4.3 Exception flows\n\n| AC ID | Scenario | Given | When | Then | Story |\n|---|---|---|---|---|---|\n| AC-EXC-P7-006-01 | A copy that does not match is not published | the lake write for 2026-11-30 stops after 379 of 380 rows | the reconciliation step compares the copy with the live log | the partition is not marked complete And the watermark stays at 12,100 and \"77be...41d0\" And the job run shows check \"REC-08\" failed with MSG-P1-019 | RWB-E1-014 |\n| AC-EXC-P7-006-02 | A repeat run for the same date writes no duplicates | JOB-13 completed for 2026-11-30 with 380 rows | JOB-13 is rerun for 2026-11-30 | the partition \"business_date=2026-11-30\" still holds 380 rows And the cumulative count stays 12,480 | RWB-E1-014 |\n| AC-EXC-P7-006-03 | The decision log interface is unavailable | DecisionLogExport returns an error for every call | JOB-13 runs for 2026-11-30 | the job run ends with status \"FAILED\" and MSG-GEN-006 for system \"Decision log\" And the watermark and the previous partitions are unchanged | RWB-E1-014 |\n| AC-EXC-P7-006-04 | A day with no new decisions | no entry was written after \"77be...41d0\" | JOB-13 runs for 2026-11-30 | the partition holds 0 rows and the manifest shows cumulative count 12,100 And check \"REC-08\" passes | RWB-E1-014 |\n| AC-EXC-P7-006-05 | Role without the right | A user without the right in the capability area | They try the action | Refused with MSG-P4-002; nothing changes | All |\n| AC-EXC-P7-006-06 | Decision cannot be recorded | The decision log store is unavailable | The action is taken | Nothing changes; MSG-P7-003; incident raised | All |\n\n##### A2.6.4.4 System background events\n\n| AC ID | Event | Trigger | How often | What happens | Expected result | Why |\n|---|---|---|---|---|---|---|\n| AC-BG-P7-006-01 | Hash chain check | Schedule | Nightly | Checks the decision log chain | Break reported the same day | The log can be relied on in audit |\n",
+     "new": "### A2.6 Retired\n\nRetired under Architecture v5, which has no data lake (ADR-018, DP-17; GAP-1613). The section number is kept so that later sections keep their numbers.\n"
+    },
+    {
+     "fix_id": "N001-F4",
+     "finding": "GAP-1613",
+     "op": "replace",
+     "old": "| REQ-DRI-009 | The decision log is copied to the data lake copy daily for reporting, with row counts matched. | Must | E1 |\n",
+     "new": ""
+    }
+   ],
+   "disposition": [
+    {
+     "item": "GAP-1613",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2",
+      "F3",
+      "F4"
+     ],
+     "note": "FEAT-DRI-06, its ACs and REQ-DRI-009 removed; audit path noted. The DecisionRecorded read-model statement belongs in the P9 PRD; BRD REQ-DRI-009 retirement belongs in the BRD."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,84 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | A caller without the right calls the read or the append | 403, and the refusal is logged without a key value | MSG-P4-002 | AC9 |",
+   "new": "| X2 | A caller without the right calls the read or the append | 403, and the refusal is logged without a key value | MSG-P4-002 | AC9, AC14 |"
+  },
+  {
+   "old": "| X3 | A view, `contact_point_ext` or the stamp does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database; no row is guessed from a cache | MSG-GEN-006 | AC10 |",
+   "new": "| X3 | A view, `contact_point_ext` or the stamp does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database; no row is guessed from a cache | MSG-GEN-006 | AC10, AC15 |"
+  },
+  {
+   "old": "| X6 | The case of the append does not exist or is outside the caller's scope | 404 as the case check of the writer answers it, passed on unchanged; no entry is written | MSG-P4-003 | AC11 |",
+   "new": "| X6 | The case of the append does not exist or is outside the caller's scope | 404 as the case check of the writer answers it, passed on unchanged; no entry is written | MSG-P4-003 | AC11, AC16 |"
+  },
+  {
+   "old": "| X8 | The ledger cannot be written | The transaction rolls back, the caller receives 503, and no entry exists | MSG-P1-022 | AC12 |",
+   "new": "| X8 | The ledger cannot be written | The transaction rolls back, the caller receives 503, and no entry exists | MSG-P1-022 | AC12, AC17 |"
+  },
+  {
+   "old": "    Then no notice-period timer, no notice-period end date and no case task is written here",
+   "new": "    Then no notice-period timer, no notice-period end date and no case task is written here\n\n  Scenario: AC14 A caller without the right is refused with 403 on the append and the refusal is logged without a key value (new, D-RCV-60)\n    Given the caller's role carries no right on the append to case \"RC-2026-000321\"\n    When the dispatch loop appends the letter of notice \"N-0101\" to case \"RC-2026-000321\" with conduct check \"PASSED\" and Idempotency-Key \"a1b2c3d4-0001\"\n    Then the answer is status 403 with MSG-P4-002\n    Then the refusal is logged with no key value\n    Then no entry is written to the ledger\n\n  Scenario: AC15 A contact_point_ext or DP02 stamp that does not answer inside 5 s, or answers an error, gives 503 and no guessed row (new, D-RCV-60)\n    Given contact_point_ext or the DP02 stamp does not answer inside 5 s or answers an error for case \"RC-2026-000321\"\n    When the dispatch loop calls GET /api/recovery/source-data/v1/data-products/DP02/records?caseId=RC-2026-000321\n    Then the answer is status 503 with MSG-GEN-006 naming the ACE database\n    Then no row is answered from a cache or guessed\n\n  Scenario: AC16 An append to a case outside the caller's scope gives the same 404 as a case that does not exist (new, D-RCV-60)\n    Given the case \"RC-2026-000321\" is outside the scope of the caller\n    When the dispatch loop appends the letter of notice \"N-0101\" to case \"RC-2026-000321\" with conduct check \"PASSED\" and a valid Idempotency-Key\n    Then the answer is status 404 with MSG-P4-003, the same answer as for a case that does not exist\n    Then no entry is written to the ledger\n\n  Scenario: AC17 An append rolled back on an unwritable ledger writes one entry when the same key is retried (new, D-RCV-60)\n    Given the append of the letter of \"RR223344556TH\" with Idempotency-Key \"a1b2c3d4-0001\" was rolled back because the interaction ledger could not be written\n    When the same append is sent again with Idempotency-Key \"a1b2c3d4-0001\" once the interaction ledger can be written\n    Then the answer is status 201 with the stored entry\n    Then the ledger of case \"RC-2026-000321\" holds one LETTER entry for \"RR223344556TH\"\n\n  Scenario: AC18 The DP02 read selects no contact value and starts no notice-period timer (new, D-RCV-60)\n    When the dispatch loop calls GET /api/recovery/source-data/v1/data-products/DP02/records?caseId=RC-2026-000321\n    Then the SELECT of the read names neither contact_value nor contact_value_masked\n    Then no notice-period timer and no notice-period end date is written here\n\n  Scenario: AC19 A call without a session is refused with 401, and a case outside scope is refused with 404 on the case read (new, D-RCV-60)\n    Given the caller has no session\n    When the dispatch loop calls GET /api/recovery/source-data/v1/data-products/DP02/records?caseId=RC-2026-000321\n    Then the answer is status 401 with a problem body\n    Then the same 401 is answered for the append and for GET /api/recovery/source-data/v1/cases/RC-2026-000321/interactions\n    Then a case outside the caller's scope is refused with status 404 and MSG-P4-003 on the case read"
+  },
+  {
+   "old": "| TC-E2-021-16 | 12.7 | Component | Boundary of the tables of §12.7 (ASM-3438) |",
+   "new": "| TC-E2-021-16 | 12.7 | Component | Boundary of the tables of §12.7 (ASM-3438) |\n| TC-E2-021-17 | AC14 | Component | Caller with no right on the append to `RC-2026-000321`; 403 with MSG-P4-002 and no key value logged |\n| TC-E2-021-18 | AC15 | NFR | `contact_point_ext` or the DP02 stamp not answering inside 5 s or answering an error; 503 with MSG-GEN-006 and no guessed row |\n| TC-E2-021-19 | AC16 | Component | Append to `RC-2026-000321` outside the caller's scope; 404 with MSG-P4-003, the same answer as for a case that does not exist |\n| TC-E2-021-20 | AC17 | NFR | Append rolled back on a ledger that cannot be written; the same `Idempotency-Key` retried once writable gives one entry |\n| TC-E2-021-21 | AC18, BR6, BR8 | Component | DP02 read; the SELECT names no `contact_value` or `contact_value_masked`; no notice-period timer is written here |\n| TC-E2-021-22 | AC19 | Component | No session on the DP02 read, the append and the case read; 401 with a problem body; out-of-scope case read 404 with MSG-P4-003 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30300",
+   "item": "NEWAC-RWB-P1-E2021-APP-AC14",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC14 added in section 7 (403 on append, logged without key value); TC-E2-021-17 added; X2 covered-by now AC9, AC14."
+  },
+  {
+   "ruling": "R-30301",
+   "item": "NEWAC-RWB-P1-E2021-APP-AC15",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC15 added in section 7 (503 MSG-GEN-006 for contact_point_ext or stamp); TC-E2-021-18 added; X3 covered-by now AC10, AC15."
+  },
+  {
+   "ruling": "R-30302",
+   "item": "NEWAC-RWB-P1-E2021-APP-AC16",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC16 added in section 7 (out-of-scope append gives same 404 as missing case); TC-E2-021-19 added; X6 covered-by now AC11, AC16."
+  },
+  {
+   "ruling": "R-30303",
+   "item": "NEWAC-RWB-P1-E2021-APP-AC17",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC17 added in section 7 (rolled-back append writes one entry on retry); TC-E2-021-20 added; X8 covered-by now AC12, AC17."
+  },
+  {
+   "ruling": "R-30304",
+   "item": "NEWAC-RWB-P1-E2021-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC18 added in section 7 covering BR6 and BR8 (no value in SELECT, no timer); TC-E2-021-21 added with Covers AC18, BR6, BR8."
+  },
+  {
+   "ruling": "R-30305",
+   "item": "NEWAC-RWB-P1-E2021-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC19 added in section 7 (401 without session; 404 MSG-P4-003 on out-of-scope case read); TC-E2-021-22 added."
+  }
+ ]
+}

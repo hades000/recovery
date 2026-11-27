@@ -1,0 +1,80 @@
+{
+ "edits": [
+  {
+   "old": "And the alarm reaches the operations channel and the alerts consumer of the event",
+   "new": "And the alarm reaches the operations channel named in the catalogue entry of the service and the alerts consumer of the event"
+  },
+  {
+   "old": "And a build rule fails a class of the service that names a data-lake endpoint, the INT-19 identification or a lake container",
+   "new": "And a build rule fails a class of the service that names a data-lake endpoint, the INT-19 identification or a lake container\n\n  Scenario: AC9 The rules BR6, BR8, BR9, BR10, BR11, BR12, BR13 and BR14 of section 8 are held by build guardrails and component tests (new, D-RCV-60)\n    Given the build of rwb-source-data is checked against the rules of section 8\n    When a class of the service reads or writes measure_definition or measure_snapshot\n    Then the build fails\n    When a class of the service names a data-lake endpoint or writes an extract file\n    Then the build fails\n    When a message text is written as a literal in code instead of being raised by its ID from the message standard\n    Then the build fails\n    When a data job for a business date is started before the ALS batch of that date is COMPLETE\n    Then the job is refused and no data job starts\n    When a repeat readiness call for a business date is made\n    Then it answers 202, publishes nothing and starts nothing\n\n  Scenario: AC10 The provided operations answer 401 for a call without a caller identity, 403 for a caller without the role of the operation and 404 for a business date with no readiness record (new, D-RCV-60)\n    When GET /api/recovery/source-data/v1/payments?accountId=ACC0000017 is called without a caller identity\n    Then the call answers 401 and no payment row is returned\n    When the same call is made by a caller who does not hold case record read\n    Then the call answers 403 and no payment row is returned\n    When GET /api/recovery/source-data/v1/business-days/{businessDate}/status is called for a business date for which no readiness record exists\n    Then the call answers 404\n\n  Scenario: AC11 A status change the state model does not allow is refused and leaves the readiness record unchanged (new, D-RCV-60)\n    Given the readiness record of business date 2026-11-27 holds the state DONE\n    When a status change that the state model does not allow is requested for 2026-11-27\n    Then the change is refused and the state DONE is unchanged\n    And no event is written to the outbox and no workflow is started"
+  },
+  {
+   "old": "The seven criteria above are new",
+   "new": "The ten criteria above (AC1 to AC7 and AC9 to AC11) are new"
+  },
+  {
+   "old": "are what they are enforced on.",
+   "new": "are what they are enforced on. The DDL of measure_definition, measure_snapshot and measure_publish, with their unique keys and the frozen-row trigger, is carried in V1013__measures.sql of this service in its per-service Flyway sequence (DP-15; GAP-2575); the deployment story replays the same sequence, and BR13 still holds for every read and write."
+  },
+  {
+   "old": "| TC-E1-013-19 | BR14 | Component | Repeat readiness call for the same business date |",
+   "new": "| TC-E1-013-19 | BR14 | Component | Repeat readiness call for the same business date |\n| TC-E1-013-20 | AC9, BR6, BR8, BR9, BR10, BR11, BR12, BR13, BR14 | Component | Build guardrail checks and component rows of the rules of section 8 |\n| TC-E1-013-21 | AC10 | Component | Call without a caller identity, call by a caller without the operation role, and call for a business date with no readiness record |\n| TC-E1-013-22 | AC11 | Component | Readiness record in state DONE and a status change the state model does not allow |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28488",
+   "item": "GAP-2571",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "RWB-P9-E1013-CON",
+   "change": "Declare measure_definition.approved_by as uuid and approved_at as timestamptz per TSD P9 T3.1, carry TRB-0001 as a comment on the element; the story fixture of TC-E1-013-01 already holds TRB-0001",
+   "note": "Type is set by the CON per TSD; the data steward confirms which reference a definition row stores. No story text changed."
+  },
+  {
+   "ruling": "R-28489",
+   "item": "GAP-2574",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC4 alarm channel now read from the catalogue entry of the service; no threshold, channel or run-book value invented."
+  },
+  {
+   "ruling": "R-28490",
+   "item": "GAP-2575",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 now carries the DDL of the three measure tables in V1013__measures.sql in the per-service sequence; deployment story replays it."
+  },
+  {
+   "ruling": "R-30194",
+   "item": "NEWAC-RWB-P1-E1013-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for 401, 403 and 404 of the provided operations, with test row TC-E1-013-21."
+  },
+  {
+   "ruling": "R-30195",
+   "item": "NEWAC-RWB-P1-E1013-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for a disallowed status change being refused, with test row TC-E1-013-22."
+  },
+  {
+   "ruling": "R-30196",
+   "item": "NEWAC-RWB-P1-E1013-APP-AC9",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "AC9 added as build guardrail and component criterion for BR6 and BR8 to BR14, with test row TC-E1-013-20."
+  }
+ ]
+}

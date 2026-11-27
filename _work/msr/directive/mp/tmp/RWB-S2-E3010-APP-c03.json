@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, which is open: assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 apply until it closes."
+  },
+  {
+   "old": "| BR4 | No value a business person may change is written in code: the schedule basis, the due dates and the timer values are read as values in force with their version | FSD A2.10.3.1 BR-S2-010; ASM-4380 |",
+   "new": "| BR4 | No value a business person may change is written in code: the schedule basis, the due dates and the timer values are read as values in force with their version, through the reference-data contract (DP-06, DP-07); the parameter keys are Not specified in the source documents (DOR-RWB-S2-E3010-APP-20) | FSD A2.10.3.1 BR-S2-010; ASM-4380; DP-06; DP-07 |"
+  },
+  {
+   "old": "| BR7 | Booking in ALS and NLEADS is operations' act: the FSD keeps it out of scope and the TSD records it as booked by the officer. This service sends the instruction through the one outbound path it has, the ACE common module by Temporal Nexus, and confirms from the ACE read | GAP-2667; ASM-4382; FSD S2 A1.1; TSD S2 T5.1 INT-03, INT-26 |",
+   "new": "| BR7 | Booking in ALS and NLEADS is operations' act: the FSD keeps it out of scope and the TSD records it as booked by the officer. This service sends the instruction through the one outbound path it has, the ACE common module by Temporal Nexus, and confirms from the ACE read. Booking, payment matching and posting are rwb-payment's (Architecture v5 slide 41); this service records the booking reference from TreatmentBooked and the break from PaymentMissed, and the release request leaves through the integration contract. | GAP-2667; ASM-4382; FSD S2 A1.1; TSD S2 T5.1 INT-03, INT-26; GAP-1703 |"
+  },
+  {
+   "old": "| BR8 | The plan timers are durable timers inside `TreatmentWorkflow` and a schedule row is not a clock; no `timer` row and no Schedule is created | ASM-4380; DP-10; Architecture v5 slide 42 event 18 |",
+   "new": "| BR8 | The plan timers are durable timers inside `TreatmentWorkflow` and a schedule row is not a clock; no `timer` row and no Schedule is created. No Quartz table, job or connection is used; a breach is reported to the parent on the case timer path that rwb-case owns. | ASM-4380; DP-10; Architecture v5 slide 42 event 18; GAP-1701 |"
+  },
+  {
+   "old": "not a local status write (ASM-3062).",
+   "new": "not a local status write (ASM-3062). The package code, label and owner of BOOKING_MATCH, RESTRUCTURE and PAYMENT_MATCH are Not specified in the source documents (GAP-1707); each treatment records the package and rule version it was decided under."
+  },
+  {
+   "old": "not a Workbench copy of the plan or the payments (DP-05; D-RCV-35; ADR-010).",
+   "new": "not a Workbench copy of the plan or the payments (DP-05; D-RCV-35; ADR-010). The criteria name the views only as the source of each fact; the test data for those facts is seeded in the wave 2 harness (GAP-0424), and no criterion reads the views as test data."
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Exception X1 (legacy RWB-E3-010 guard path)\n    Given a role without the right in capability area Treatment and offer\n    When the role reads the booked schedule\n    Then the request is refused with 403 before any read of the treatment\n    Then the user sees MSG-P4-002\n\n  Scenario: AC6 Exception X3 (stale ACE batch)\n    Given the ACE data behind v_ace_plan or v_ace_payment is older than the freshness rule VR-S2-010-1\n    Given a case in state WITH_OPS_BOOKING\n    When booking confirmed\n    Then the confirmation is refused and the case stays in WITH_OPS_BOOKING\n    Then the user sees MSG-P1-001 naming the date\n\n  Scenario: AC7 Exception X4 (NLEADS or ALS not acknowledged)\n    Given a case in state WITH_OPS_BOOKING\n    Given ALS or NLEADS has not both acknowledged\n    When booking confirmed\n    Then R-RES-22 does not fire and the case stays in WITH_OPS_BOOKING\n    Then the booking stays with operations\n\n  Scenario: AC8 Exception X5 (first_due_date absent)\n    Given a case in state BOOKED_IN_ALS_NLEADS\n    Given first_due_date is absent from the plan facts\n    When schedule set\n    Then R-RES-25 does not fire and the case stays in BOOKED_IN_ALS_NLEADS\n    Then no clock starts\n\n  Scenario: AC9 Exception X6 (booking facts disagree)\n    Given a case in state WITH_OPS_BOOKING\n    Given the booking facts disagree with the agreed terms\n    When booking confirmed\n    Then booking_difference records the difference\n    Then the booking is held in WITH_OPS_BOOKING for operations\n\n  Scenario: AC10 Exception X7 (EV-11 redelivered or duplicated)\n    Given EV-11 TreatmentBooked is redelivered or two events for one booking arrive\n    When the inbox receives them\n    Then the inbox dedupes by cloud event id\n    Then one schedule, one decision record and one timer set exist\n\n  Scenario: AC11 Exception X8 (field refused by the library)\n    Given the record library refuses a field\n    When the action is taken\n    Then nothing changes and the case stays where it was\n    Then the field is named with MSG-P7-009"
+  },
+  {
+   "old": "| X1 | A role without the right in capability area Treatment and offer reads the booked schedule | 403 before any read of the treatment; the refusal is the guard library's and is logged by it | MSG-P4-002 | TC-E3-010-05 |",
+   "new": "| X1 | A role without the right in capability area Treatment and offer reads the booked schedule | 403 before any read of the treatment; the refusal is the guard library's and is logged by it | MSG-P4-002 | AC5, TC-E3-010-05 |"
+  },
+  {
+   "old": "| X3 | The ACE data behind `v_ace_plan` or `v_ace_payment` is older than the freshness rule | The confirmation is refused, the case stays in `WITH_OPS_BOOKING` and the date is named | MSG-P1-001 | TC-S2-E3010-CON-04 |",
+   "new": "| X3 | The ACE data behind `v_ace_plan` or `v_ace_payment` is older than the freshness rule | The confirmation is refused, the case stays in `WITH_OPS_BOOKING` and the date is named | MSG-P1-001 | AC6, TC-S2-E3010-CON-04 |"
+  },
+  {
+   "old": "| X4 | ALS or NLEADS has not both acknowledged | R-RES-22 does not fire; the case stays in `WITH_OPS_BOOKING` and the booking stays with operations | None | TC-S2-E3010-CON-03 |",
+   "new": "| X4 | ALS or NLEADS has not both acknowledged | R-RES-22 does not fire; the case stays in `WITH_OPS_BOOKING` and the booking stays with operations | None | AC7, TC-S2-E3010-CON-03 |"
+  },
+  {
+   "old": "| X5 | `first_due_date` is absent from the plan facts | R-RES-25 does not fire; the case stays in `BOOKED_IN_ALS_NLEADS` and no clock starts | None | TC-S2-E3010-CON-02 |",
+   "new": "| X5 | `first_due_date` is absent from the plan facts | R-RES-25 does not fire; the case stays in `BOOKED_IN_ALS_NLEADS` and no clock starts | None | AC8, TC-S2-E3010-CON-02 |"
+  },
+  {
+   "old": "| X6 | The booking facts disagree with the agreed terms | `booking_difference` records the difference and the booking is held in `WITH_OPS_BOOKING` for operations | None | TC-S2-E3010-CON-01 |",
+   "new": "| X6 | The booking facts disagree with the agreed terms | `booking_difference` records the difference and the booking is held in `WITH_OPS_BOOKING` for operations | None | AC9, TC-S2-E3010-CON-01 |"
+  },
+  {
+   "old": "| X7 | EV-11 is redelivered, or two events for one booking arrive | The inbox dedupes by cloud event id: one schedule, one decision record and one timer set | None | TC-E3-010-02 |",
+   "new": "| X7 | EV-11 is redelivered, or two events for one booking arrive | The inbox dedupes by cloud event id: one schedule, one decision record and one timer set | None | AC10, TC-E3-010-02 |"
+  },
+  {
+   "old": "| X8 | A field of the record is refused by the library | Nothing changes and the field is named; the case stays where it was | MSG-P7-009 | TC-S2-E3010-CON-05 |",
+   "new": "| X8 | A field of the record is refused by the library | Nothing changes and the field is named; the case stays where it was | MSG-P7-009 | AC11, TC-S2-E3010-CON-05 |"
+  },
+  {
+   "old": "| TC-E3-010-05 | Access | Component | A role without the right is refused with MSG-P4-002 |",
+   "new": "| TC-E3-010-05 | Access | Component | A role without the right is refused with MSG-P4-002 |\n| TC-E3-010-07 | AC5 | Component | Exception X1: a role without the right is refused with 403 and MSG-P4-002 before any read |\n| TC-E3-010-08 | AC6 | Component | Exception X3: a stale ACE batch date refuses the confirmation and MSG-P1-001 names the date |\n| TC-E3-010-09 | AC7 | Component | Exception X4: without both acknowledgements R-RES-22 does not fire and the case stays in WITH_OPS_BOOKING |\n| TC-E3-010-10 | AC8 | Component | Exception X5: an absent first_due_date leaves R-RES-25 unfired and starts no clock |\n| TC-E3-010-11 | AC9 | Component | Exception X6: the booking difference is recorded and the booking is held in WITH_OPS_BOOKING |\n| TC-E3-010-12 | AC10 | Component | Exception X7: a redelivered EV-11 yields one schedule, one decision record and one timer set |\n| TC-E3-010-13 | AC11 | Component | Exception X8: a library refusal changes nothing and names the field with MSG-P7-009 |\n| TC-E3-010-14 | BR1 | Component | Booking confirmed with both acknowledgements records the reference and sets the schedule |\n| TC-E3-010-15 | BR2 | Component | first_due_date set starts the plan timers and reports R-RES-25 |\n| TC-E3-010-16 | BR3 | Component | Booking facts are read from the three ACE views and nothing is copied into rwb_treatment |\n| TC-E3-010-17 | BR4 | Component | Schedule basis, due dates and timer values are read as values in force with their version |\n| TC-E3-010-18 | BR5 | Component | The decision record and the schedule columns are committed together or neither is stored |\n| TC-E3-010-19 | BR6 | Component | The stage reports R-RES-22 and R-RES-25 and writes no case table |\n| TC-E3-010-20 | BR7 | Component | Booking in ALS and NLEADS is not performed here; confirmation comes from the ACE read |\n| TC-E3-010-21 | BR8 | Component | The plan clock is a durable timer inside TreatmentWorkflow with no timer row and no Schedule |\n| TC-E3-010-22 | BR9 | Component | The schedule is written only on the seven treatment columns of section 11 |\n| TC-E3-010-23 | BR10 | Component | EV-11 redelivery through the inbox yields one schedule, one record and one timer set |"
+  },
+  {
+   "old": "**Done when.** The tests in section 16 pass,",
+   "new": "**Done when.** The interface, harness, seeding and evidence values are attached to GAP-0424 before this story is reported Done; the tests in section 16 pass,"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19385",
+   "item": "DOR-RWB-S2-E3010-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Section 14 names open decision DL10 and its assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863.",
+   "note": "DL10 stays open; its four assumptions now apply until it closes."
+  },
+  {
+   "ruling": "R-19386",
+   "item": "DOR-RWB-S2-E3010-APP-20",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR4 names the reference-data contract DP-06 and DP-07 and states that the parameter keys are not specified in the sources.",
+   "note": "Parameter keys are not in the source documents; the placeholder cites this item."
+  },
+  {
+   "ruling": "R-19387",
+   "item": "DOR-RWB-S2-E3010-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC5 to AC11 for exceptions X1, X3 to X8 with TC-E3-010-07 to -13; section 5 Covered by now cites them.",
+   "note": "Each exception now has a criterion and a test case row."
+  },
+  {
+   "ruling": "R-19388",
+   "item": "DOR-RWB-S2-E3010-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "Added TC-E3-010-14 to -23 covering BR1 to BR10 in section 16.",
+   "note": "Every business rule now has a test case row."
+  },
+  {
+   "ruling": "R-19389",
+   "item": "DOR-RWB-S2-E3010-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9",
+   "change": "Add nleads_ref (DF-TRT-023) to the treatment entity; add callback_age as a field or entity used by Routing Logic v4 R-RES-24; declare decision_record in LDM v9 or Data Classification v5 as the RWB-PLT-E1027-CON library object.",
+   "note": "Story side: section 5 criteria now name the views as fact sources and the test data is seeded (GAP-0424)."
+  },
+  {
+   "ruling": "R-19390",
+   "item": "DOR-RWB-S2-E3010-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The Error and Message Standard v4 text for MSG-P1-001 is not in the story sources, so the wording cannot be aligned without inventing text."
+  },
+  {
+   "ruling": "R-22382",
+   "item": "GAP-1703",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR7 states that booking, payment matching and posting are rwb-payment's; this service records the booking reference from TreatmentBooked and the break from PaymentMissed; the release request uses the integration contract.",
+   "note": "FSD S2 A2.10, A2.11 and A2.17 still need amending by the solution architect with the P8 owner."
+  },
+  {
+   "ruling": "R-22739",
+   "item": "GAP-1707",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "rwb-decision rule registry (P7 Ownership Map rule_package)",
+   "change": "Name the codes, labels and owners of RESTRUCTURE, PAYMENT_MATCH and BOOKING_MATCH and register them before wave 3 release.",
+   "note": "Story now requires each treatment to record the package and rule version it was decided under."
+  },
+  {
+   "ruling": "R-22748",
+   "item": "GAP-1701",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR8 states that no Quartz table, job or connection is used and that a breach is reported on the rwb-case timer path.",
+   "note": "Plan clock stays a durable timer inside TreatmentWorkflow; FSD A2.7 and A2.10 still name Workbench."
+  },
+  {
+   "ruling": "R-22749",
+   "item": "GAP-0424",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Done-when now requires the NLEADS and ALS interface values, harness, seeding and evidence gate to be attached to GAP-0424 before Done.",
+   "note": "Values themselves come from P2 owners and the QA lead; none are invented here."
+  }
+ ]
+}

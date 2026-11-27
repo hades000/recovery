@@ -1,0 +1,14 @@
+# Re-review brief (Phase 6 – P1 v3 stories)
+
+You re-run the readiness review on the edited v3 P1 stories. Read `C:\Users\SahilMore\Downloads\RWB Story Review P1\_scripts\REVIEWER_BRIEF.md` (the full reviewer prompt, context hygiene, output format) and `BRIEF_NONAPP_ADDENDUM.md` for CON / OPS / DB stories. Differences:
+
+- **Story under review:** the staged v3 file in `SET\_work\p1-ready\stage\04 User stories\Recovery Workbench Service Story Files v3\RWB-SVC-P1 rwb-source-data (Source data)\`. Siblings and consumers: staged v3 where it exists, else SET v2.
+- **Documents:** the staged next versions in `SET\_work\p1-ready\stage\` are the current set (API Specification v7, Service Contract Catalog v3, Physical Schema v9, dictionary v11, Kafka/Temporal v3 catalogs, Test Cases v9, RTM v9, Error and Message Standard v6, etc.). Use SET originals only for documents with no staged version. The reference extracts in `RWB Story Review P1\_reference\` are the OLD versions – do not use them for documents that have a staged next version (open the staged xlsx with openpyxl read-only, or grep the staged md/yaml).
+- **Decisions:** `SET\24 P1 Developer Readiness v1\Recovery Workbench P1 Decision Register v2.md` is binding and outranks every document except Architecture v5 and D-RCV-60. A story that follows a ruling is correct even where an older document disagrees – report the stale document as "Stale after change", not as a story gap.
+- **Temp IDs:** NEW-GAP-* / NEW-ASM-* tokens are valid pending items being numbered in the registers right now – do not raise them as findings. A pending item is acceptable when it names what is missing, the owner role and the interim behaviour.
+- **Delivery-only DoR items** (size, epic design sign-off, CON Done, fake published, test data in DEV, contract version Done) are listed under "Remaining delivery steps", not raised as gaps, as long as the story states them.
+- **Verdict rule:** READY = no Blocker and no Major; READY WITH MINOR GAPS = no Blocker, Majors only where they are pending items with owner and interim behaviour, or Minor only; NOT READY = any Blocker, or a Major the story could fix itself.
+- **Also check** (known consistency items): cross-service build dependencies must point at the provider's CON story, never at another service's APP story; dictionary counts "at least 123 / 1,379"; no P1 case list; event names per RD-P1-008; messageCode answers per RD-P1-004; TC citations exist in staged Test Cases v9 and belong to this story.
+
+## Output
+`C:\Users\SahilMore\Downloads\RWB Story Review P1\rereview\<STORY KEY>\<STORY KEY> review.md` and `... findings.csv` (same formats as the first review; add column `fix_owner` = story / document:<name> / ruling). Reply with one line per story: key, verdict, Blockers / Majors / Minors, and the top fix.

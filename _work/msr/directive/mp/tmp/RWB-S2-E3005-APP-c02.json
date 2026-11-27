@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| None | Section 8 |",
+   "new": "| None | AC5 |"
+  },
+  {
+   "old": "| MSG-P7-009 | Section 12.8 |",
+   "new": "| MSG-P7-009 | AC6 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | Section 12.4 |",
+   "new": "| MSG-GEN-006 | AC7 |"
+  },
+  {
+   "old": "| MSG-S2-002 | Section 4 |",
+   "new": "| MSG-S2-002 | AC8 |"
+  },
+  {
+   "old": "| None | Section 12.5 |",
+   "new": "| None | AC9 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Calculator answers fail (new, D-RCV-60)\n    Given the ACE Common contract mock returns an affordability result of fail\n    When affordability is calculated\n    Then R-RES-07 does not fire and the stage reports AFFORDABILITY_FAILED\n    Then the parent applies R-RES-08 with reason affordability_failed and no offer is built\n\n  Scenario: AC6 Record refused for a missing field (new, D-RCV-60)\n    Given the decision record is refused for a missing field\n    When the action is taken\n    Then nothing is written, the missing field is named and the stage stays where it was\n    Then the incident names MSG-P7-009\n\n  Scenario: AC7 Rule package not in force (new, D-RCV-60)\n    Given the RESTRUCTURE package is not in force or its checksum does not match\n    When the affordability step runs\n    Then EvaluateRules answers NoPackageInForce and the workflow does not retry\n    Then the step does not call the calculator and MSG-GEN-006 is shown\n\n  Scenario: AC8 Stale payoff figure (new, D-RCV-60)\n    Given the payoff figure on the case is stale\n    When the affordability step runs\n    Then MSG-S2-002 warns and a fresh figure is requested\n    Then the calculator is not called until a figure inside the age is on the case\n\n  Scenario: AC9 Second request while waiting (new, D-RCV-60)\n    Given a second AFFORDABILITY_REQUIRED arrives while the branch is waiting on the calculator\n    When the case signal arrives\n    Then the inbox dedupes by the cloud event id and no second calculator call is made"
+  },
+  {
+   "old": "and the result is read there through the treatment read of RWB-S2-E3001-APP (DP-13).",
+   "new": "and the result is read there through the treatment read of RWB-S2-E3001-APP (DP-13). The step is started by rwb-case on the case signal, and by no Schedule and no batch trigger: the job map holds no S2 job and AceDataReady of rwb-source-data does not reach this service (GAP-1702). The screen states of SCR-14 and SCR-15 are: empty, with no affordability result on the treatment yet, so no plan and no offer are shown; loading, while the step waits on the calculator, so the stage AFFORDABILITY_IN_ACE is shown with no plan; error, when the treatment read fails, with the message code Not specified in the source documents (DOR-RWB-S2-E3005-APP-10); and no access, where a role without the right gets 403 and MSG-P4-002 (X5). Open decision DL10 is closed on the directive of 26 November 2026: its recommended resolution is accepted and the assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed."
+  },
+  {
+   "old": "it is the only legacy warning this story raises of its own.",
+   "new": "it is the only legacy warning this story raises of its own.\n\n**Rule coverage.** BR1 is covered by AC2 and TC-E3-005-02; BR2 by AC3 and TC-E3-005-03; BR3 by AC5 and TC-E3-005-09; BR4 by AC1 and TC-E3-005-07; BR5 by AC1 and TC-E3-005-01; BR6 by AC4 and TC-E3-005-04; BR7 by AC1 and TC-E3-005-01; BR8 by AC8 and TC-E3-005-12."
+  },
+  {
+   "old": "they arrive on the case signal the parent forwards (ASM-3062).",
+   "new": "they arrive on the case signal the parent forwards (ASM-3062). Reference data is read under DP-06 and DP-07: the rule package in force and the case's allowed payoff age are the parameters read, and their parameter keys are Not specified in the source documents (DOR-RWB-S2-E3005-APP-20)."
+  },
+  {
+   "old": "| TC-E3-005-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E3-005-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E3-005-07 | Section 12 operations, events and activities | Contract | Nexus `calculateRestructurePlan`, event `rwb.decision.RulePackageInForce.v1` and activity `calculateAffordability`, against the fakes of section 12.8 |\n| TC-E3-005-08 | Section 12.7 tables (ASM-3438) | Component | Boundary of `treatment` and `decision_record` in `rwb_treatment` |\n| TC-E3-005-09 | AC5 | End to end | Calculator answers fail |\n| TC-E3-005-10 | AC6 | End to end | Record refused for a missing field |\n| TC-E3-005-11 | AC7 | End to end | Rule package not in force |\n| TC-E3-005-12 | AC8 | End to end | Stale payoff figure |\n| TC-E3-005-13 | AC9 | End to end | Second request while waiting |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12234",
+   "item": "CG-ALL-8539",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx (next version), tab Story test cases",
+   "change": "Add rows for TC-E3-005-01 to -06 with Given, When and Then copied from AC1 to AC4 and the Access and Principle 5 criteria; also add TC-E3-005-07 to -13 added in section 16.",
+   "note": "Story side has no gap; the missing Test Cases v8 rows are a change in the workbook."
+  },
+  {
+   "ruling": "R-19291",
+   "item": "DOR-RWB-S2-E3005-APP-10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access states for SCR-14 and SCR-15 added to the target reading in section 7."
+  },
+  {
+   "ruling": "R-19292",
+   "item": "DOR-RWB-S2-E3005-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E3-005-07 (contract) and TC-E3-005-08 (boundary for 12.7 tables, ASM-3438). The v8 gap is CG-ALL-8539."
+  },
+  {
+   "ruling": "R-19293",
+   "item": "DOR-RWB-S2-E3005-APP-18",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "DL10 closed on the 26 Nov 2026 directive; ASM-2250, ASM-2357, ASM-2377 and ASM-2863 confirmed in section 7."
+  },
+  {
+   "ruling": "R-19294",
+   "item": "DOR-RWB-S2-E3005-APP-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 names reference data under DP-06 and DP-07; parameter keys are not in the sources and are marked as such."
+  },
+  {
+   "ruling": "R-19295",
+   "item": "DOR-RWB-S2-E3005-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 to AC9 for X2, X4, X6, X7, X8 with TC-E3-005-09 to -13; section 5 Covered by now names those criteria."
+  },
+  {
+   "ruling": "R-19296",
+   "item": "DOR-RWB-S2-E3005-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Rule coverage paragraph added under section 8 mapping BR1 to BR8 to criteria and test cases."
+  },
+  {
+   "ruling": "R-19297",
+   "item": "DOR-RWB-S2-E3005-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add or map decision_record (PLT library object, DP-03), affordability_result, affordability_failed and payoff_date so each name resolves to an entry.",
+   "note": "The four names are not in LDM v9 or Data Classification v5; the story text needs no change."
+  },
+  {
+   "ruling": "R-19298",
+   "item": "DOR-RWB-S2-E3005-APP-8",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity calculateAffordability, the affordability branch activity of TreatmentWorkflow on rwb-treatment, with its Nexus call to calculateRestructurePlan.",
+   "note": "The activity is named in the story but absent from Temporal Catalog v1."
+  },
+  {
+   "ruling": "R-22740",
+   "item": "GAP-1702",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Section 7 target reading: steps started by rwb-case on the case signal, with no Schedule or batch trigger; AceDataReady does not reach this service."
+  }
+ ]
+}

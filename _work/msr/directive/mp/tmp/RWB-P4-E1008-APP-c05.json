@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "    Given a class \"th.co.scb.ace.workbench.recovery.access.record.DecisionRecordReader\" with a query on \"recovery.v_ace_customer\"",
+   "new": "    Given a class \"th.co.scb.ace.workbench.recovery.access.record.DecisionRecordReader\" that reads source data only through the rwb-source-data contract (DP-01, DP-05)"
+  },
+  {
+   "old": "    When the pipeline runs the boundary rule of the rwb-access build\n    Then the build fails with boundary rule BND-6, the class name and \"recovery.v_ace_customer\"",
+   "new": "    When the pipeline runs the boundary rule of the rwb-access build\n    Then the build passes\n    When the same class adds a query on \"recovery.v_ace_customer\"\n    Then the build fails with boundary rule BND-6, the class name and \"recovery.v_ace_customer\""
+  },
+  {
+   "old": "    And a statement by the rwb-access login against \"recovery.v_ace_customer\" and against \"public.customer\" fails with SQLSTATE 42501",
+   "new": "    And a statement by the rwb-access login against \"recovery.v_ace_customer\" and against \"public.customer\" fails with SQLSTATE 42501\n\n  Scenario: AC10 Each provided operation answers 401 without a valid credential (new, D-RCV-60)\n    Given a request to GET /api/recovery/access/v1/admin/access-log and a request to POST /api/recovery/access/v1/authorise carry no valid credential\n    When each request is sent\n    Then each answer is 401 and no entry of the store is returned or changed\n\n  Scenario: AC11 A replay of a write with the same idempotency key appends no second entry (new, D-RCV-60)\n    Given an entry is appended through the store with an idempotency key\n    When the same write is replayed with the same idempotency key\n    Then the replay appends no second entry and returns the entry of the first write\n    And chain_seq and entry_hash of the store are unchanged by the replay"
+  },
+  {
+   "old": "The eight criteria above are new",
+   "new": "The criteria above are new"
+  },
+  {
+   "old": "| TC-E1-008-14 | §12.7 tables, ASM-3438 | Component | Boundary test of the tables of section 12.7; data not specified in the source documents (DOR-RWB-P4-E1008-APP-12) |",
+   "new": "| TC-E1-008-14 | §12.7 tables, ASM-3438 | Component | Boundary test of the tables of section 12.7; data not specified in the source documents (DOR-RWB-P4-E1008-APP-12) |\n| TC-E1-008-15 | AC10 | Contract | Not specified in the source documents (NEWAC-RWB-P4-E1008-APP-AC10) |\n| TC-E1-008-16 | AC11 | Component | Not specified in the source documents (NEWAC-RWB-P4-E1008-APP-AC11) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28463",
+   "item": "GAP-1233",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "rwb-decision deployment configuration (DevOps lead)",
+   "change": "Adopt consumer group rwb-decision-ledger; alert at 5 minutes of lag and at the first dead letter; run the append-only verification job one hour before the 02:00 chain check; agree a per-environment WORM path with the storage owner.",
+   "note": "No story text names these values; they belong to rwb-decision deployment configuration."
+  },
+  {
+   "ruling": "R-28464",
+   "item": "GAP-1229",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-P7-E2005-CON",
+   "change": "Publish page 1, size 50, maximum 200, and an RFC 9457 problem body with type, title, status, detail and message identifier for the decision-log reads.",
+   "note": "Paging and problem body belong to the rwb-decision read contract; the story has no paging text to change."
+  },
+  {
+   "ruling": "R-28465",
+   "item": "GAP-0984",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-PLT-E1027-CON (shared library specification)",
+   "change": "Publish the decision_record column set, physical types and canonical-form rule; add DECISION_LOG to the TSD P4 RBAC matrix; fix per-service login names in the platform DB story; state the local verifier behaviour in the Temporal and Drools design.",
+   "note": "Column set, canonical form and verifier behaviour sit outside this story; listed for the owning documents."
+  },
+  {
+   "ruling": "R-28466",
+   "item": "GAP-1228",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "Work Package line for RWB-P7-E1008-APP",
+   "change": "State that the DP-09 library objects are created by RWB-P7-E1008-DB and the consumer is built against the published template, or add DP09 and RWB-PLT-TE006-CON to the H row.",
+   "note": "The ledger consumer belongs to RWB-P7-E1008-APP; the working read is applied in the Work Package, not this story."
+  },
+  {
+   "ruling": "R-28467",
+   "item": "GAP-1232",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-PLT-TE006-CON",
+   "change": "Publish the rwb-<short>_app login convention and an owner role; keep the migration account separate from the runtime login; name the template version of the three library objects.",
+   "note": "Login names and library-object template version belong to the platform DB work and RWB-PLT-TE006-CON."
+  },
+  {
+   "ruling": "R-29459",
+   "item": "ACR-RWB-P4-E1008-APP-AC6",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC6 is covered by TC-E1-008-11 (case scope, 404 MSG-P4-003) in section 16; no edit needed."
+  },
+  {
+   "ruling": "R-29460",
+   "item": "ACR-RWB-P4-E1008-APP-AC7",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC7 is covered by TC-E1-008-12 in section 16; no edit needed."
+  },
+  {
+   "ruling": "R-29461",
+   "item": "ACR-RWB-P4-E1008-APP-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC8 Given now reads source data through the rwb-source-data contract (DP-01, DP-05); TC-E1-008-13 covers AC8."
+  },
+  {
+   "ruling": "R-30834",
+   "item": "NEWAC-RWB-P4-E1008-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 (401 on the provided operations) and TC-E1-008-15; proposed test data not specified in sources."
+  },
+  {
+   "ruling": "R-30835",
+   "item": "NEWAC-RWB-P4-E1008-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 (replay with the same idempotency key) and TC-E1-008-16; proposed test data not specified in sources."
+  }
+ ]
+}

@@ -1,0 +1,1269 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-decision (Decision and rules)"
+  version: 5.1.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-decision (Decision and rules, module P7, service
+    wave 1) under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16
+    November 2026) by the D-RCV-60 microservice realignment.
+    This document holds 15 operations under REST base /api/recovery/decision/v1; schema rwb_decision; topic
+    rwb.decision.events.v1; Temporal task queue rwb-decision in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: GET /admin/rule-packages (x-module P3, owner P7); GET
+    /admin/rule-packages/{packageCode}/versions (x-module P3, owner P7); POST
+    /admin/rule-packages/{packageCode}/versions (x-module P3, owner P7); POST
+    /admin/rule-package-versions/{versionId}/approve (x-module P3, owner P7); POST
+    /admin/rule-package-versions/{versionId}/rollback (x-module P3, owner P7); GET
+    /admin/rule-package-versions/{versionId}/dry-run (x-module P3, owner P7); GET
+    /admin/rule-packages/change-report (x-module P3, owner P7).
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-decision.asyncapi.yaml.
+servers:
+- url: "/api/recovery/decision/v1"
+  description: "Relative to the rwb-decision service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Decisions"
+- name: "Rules and parameters"
+x-service:
+  code: "P7"
+  service: "rwb-decision"
+  name: "Decision and rules"
+  wave: 1
+  schema: "rwb_decision"
+  rest-base: "/api/recovery/decision/v1"
+  topic: "rwb.decision.events.v1"
+  task-queue: "rwb-decision"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-decision.asyncapi.yaml"
+  operations: 15
+paths:
+  /cases/{caseId}/recommendation:
+    get:
+      tags:
+      - Decisions
+      summary: Read the current recommendation with reasons and the expected return by route
+      operationId: getCasesCaseidRecommendation
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: R
+      x-first-release: E4
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: decision
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recommendation'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /approvals:
+    get:
+      tags:
+      - Decisions
+      summary: List decisions waiting for the caller's approval level
+      operationId: getApprovals
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: A
+      x-first-release: E2
+      parameters:
+      - name: decision
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: product
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      description: 'Authorization: Decision log A is held by no role. Check the A right in the capability area of each decision (see gaps); list
+        only decisions the caller may approve.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /approvals/{approvalId}/approve:
+    post:
+      tags:
+      - Decisions
+      summary: Approve a decision within the caller's limit
+      operationId: postApprovalsApprovalidApprove
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: A
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalAction'
+      parameters:
+      - name: approvalId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: 'Authorization as for GET /approvals, plus the level holder, substitute or route role. ApprovalAction adds reasonCode (LOV-OVERRIDE-REASON),
+        changes (array of ApprovalTerm, for example templateCode) and membersPresent (array of uuid, committee levels L1 to L3). New 409 cases:
+        MSG-P7-006 stale input, MSG-P6-003 template withdrawn.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionLogEntry'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /approvals/{approvalId}/return:
+    post:
+      tags:
+      - Decisions
+      summary: Return a decision to the preparer with a reason
+      operationId: postApprovalsApprovalidReturn
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: A
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalAction'
+      parameters:
+      - name: approvalId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: Authorization as for GET /approvals; ApprovalAction changes as for approve.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Approval'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /approvals/{approvalId}/refuse:
+    post:
+      tags:
+      - Decisions
+      summary: Refuse a decision with a reason
+      operationId: postApprovalsApprovalidRefuse
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: A
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalAction'
+      parameters:
+      - name: approvalId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: Authorization as for GET /approvals; ApprovalAction changes as for approve.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionLogEntry'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /decision-log:
+    get:
+      tags:
+      - Decisions
+      summary: Search the decision log by case, rule, approver and date
+      operationId: getDecisionLog
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: caseId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: decision
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: ruleId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: approver
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      description: Add query parameters caseIds (comma separated, at most 500) and ruleVersion; size 1 to 500; accept text/csv for export. DecisionLogEntry
+        adds chainVerified (boolean); the page carries MSG-P7-012 when an entry fails the chain. Errors add 422 (MSG-GEN-002, MSG-GEN-003) and
+        503 when the access event cannot be written (MSG-P7-003).
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionLogPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /decision-log/{entryId}:
+    get:
+      tags:
+      - Decisions
+      summary: Read one decision log entry with its inputs and versions
+      operationId: getDecisionLogEntryid
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: entryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionLogEntry'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/rule-packages:
+    get:
+      tags:
+      - Rules and parameters
+      summary: List rule packages with owner role, hit policy and the versions in force
+      operationId: getAdminRulePackages
+      x-module: P3
+      x-owner: "P7"
+      x-owner-note: "API Specification v4 x-module P3; owner P7 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0040"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      description: Reads rule_package (DF-REF-274 to 278). A package with no version in force is returned with its current status, so an author sees the gap before a case holds (MSG-P3-027).
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RulePackage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/rule-packages/{packageCode}/versions:
+    get:
+      tags:
+      - Rules and parameters
+      summary: List the versions of one rule package with status and valid-from dates
+      operationId: getAdminRulePackagesPackagecodeVersions
+      x-module: P3
+      x-owner: "P7"
+      x-owner-note: "API Specification v4 x-module P3; owner P7 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0040"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      description: Reads rule_package_version (DF-REF-279 to 295). Exactly one version is IN_FORCE on a business date; open cases keep the version they were decided under (R-UNI-38).
+      parameters:
+      - name: packageCode
+        in: path
+        required: true
+        schema:
+          type: string
+          maxLength: 30
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - LOADED
+          - APPROVED
+          - IN_FORCE
+          - SUPERSEDED
+          - ROLLED_BACK
+          - REFUSED
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RulePackageVersion'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+    post:
+      tags:
+      - Rules and parameters
+      summary: Upload an XLS decision table as a new rule package version
+      operationId: postAdminRulePackagesPackagecodeVersions
+      x-module: P3
+      x-owner: "P7"
+      x-owner-note: "API Specification v4 x-module P3; owner P7 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0040"
+      x-capability:
+        area: Rules and parameters
+        right: C
+      x-first-release: E1
+      description: Multipart upload of the Drools XLS workbook and validFrom (D-RCV-36 T4). The workbook is compiled, checked against the LOVs, checked for overlap and unreachable rows, and run against the
+        Tests tab and a dry run over open cases. A compile failure returns 422 with MSG-P3-027 and check compile. The row is stored LOADED with the workbook in Blob (DF-REF-283), the DRL (DF-REF-284) and
+        the checksum (DF-REF-285).
+      parameters:
+      - name: packageCode
+        in: path
+        required: true
+        schema:
+          type: string
+          maxLength: 30
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RulePackageVersionRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulePackageVersion'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/rule-package-versions/{versionId}/approve:
+    post:
+      tags:
+      - Rules and parameters
+      summary: Approve a loaded rule package version, which comes into force on its valid-from date
+      operationId: postAdminRulePackageVersionsVersionidApprove
+      x-module: P3
+      x-owner: "P7"
+      x-owner-note: "API Specification v4 x-module P3; owner P7 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0040"
+      x-capability:
+        area: Rules and parameters
+        right: A
+      x-first-release: E1
+      description: RW-RISK approves and the author cannot approve (409 MSG-P7-002). Approval requires the change checklist (DF-REF-295); a missing checklist returns 409 with MSG-P3-022. The version becomes
+        IN_FORCE on valid-from through RulePackageEffectiveDateJob.
+      parameters:
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulePackageVersion'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/rule-package-versions/{versionId}/rollback:
+    post:
+      tags:
+      - Rules and parameters
+      summary: Roll back a rule package version in force to the previous approved version
+      operationId: postAdminRulePackageVersionsVersionidRollback
+      x-module: P3
+      x-owner: "P7"
+      x-owner-note: "API Specification v4 x-module P3; owner P7 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0040"
+      x-capability:
+        area: Rules and parameters
+        right: U
+      x-first-release: E1
+      description: Rollback is one call (D-RCV-36 T4). The current version becomes ROLLED_BACK and the previous approved version becomes IN_FORCE from today; the new row carries rollback_of (DF-REF-294).
+        The reason is written to the decision log and the change report.
+      parameters:
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Idempotency-Key
+        in: header
+        required: true
+        description: Client key that makes the rollback safe to retry; a repeat returns the first result.
+        schema:
+          type: string
+          maxLength: 80
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RollbackRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulePackageVersion'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/rule-package-versions/{versionId}/dry-run:
+    get:
+      tags:
+      - Rules and parameters
+      summary: Read the dry-run counts of a loaded rule package version over open cases
+      operationId: getAdminRulePackageVersionsVersionidDryRun
+      x-module: P3
+      x-owner: "P7"
+      x-owner-note: "API Specification v4 x-module P3; owner P7 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0040"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      description: Returns the counts stored in dry_run_counts (DF-REF-293) and a sample of the cases each changed row would move. The dry run never changes a case.
+      parameters:
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DryRunReport'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/rule-packages/change-report:
+    get:
+      tags:
+      - Rules and parameters
+      summary: Report rule package changes, checklists and the decisions per package version for audit
+      operationId: getAdminRulePackagesChangeReport
+      x-module: P3
+      x-owner: "P7"
+      x-owner-note: "API Specification v4 x-module P3; owner P7 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0040"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E2
+      description: The new home of the rule change audit report (RWB-E2-041). One row per package version with its checksum, approver, checklist state and the count of decisions taken under it (RWB-E2-005).
+      parameters:
+      - name: fromDate
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      - name: toDate
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleChangeReport'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /approvals/{approvalId}:
+    get:
+      tags:
+      - Decisions
+      summary: Read one approval with its routing details for the decision screen
+      operationId: getApprovalsApprovalid
+      x-module: P7
+      x-owner: "P7"
+      x-capability:
+        area: Decision log
+        right: A
+      x-first-release: E2
+      parameters:
+      - name: approvalId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalDetail'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E400:
+      description: Bad request. The request is malformed. Messages MSG-GEN-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    DecisionLogEntry:
+      type: object
+      description: One record per decision. Append only and hash chained.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the decision log entry
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to; empty only for access events (decision code AC-...) with no case
+        decisionCode:
+          type: string
+          maxLength: 8
+          description: D5.1 to D9.3, X1 to X7, or an access event
+        ruleId:
+          type: string
+          maxLength: 20
+          description: Rule that fired
+        ruleVersion:
+          type: string
+          maxLength: 20
+          description: Rule version
+        modelVersion:
+          type: string
+          maxLength: 40
+          description: Model version used
+        agentVersion:
+          type: string
+          maxLength: 40
+          description: Agent and prompt version used
+        inputsRef:
+          type: string
+          maxLength: 400
+          description: Reference to the inputs snapshot, with the freshness of each input
+        recommendation:
+          type: object
+          description: Option, reasons, confidence and alternatives
+        approverUserId:
+          type: string
+          format: uuid
+          description: Who approved
+        approvalLevel:
+          type: string
+          maxLength: 4
+          enum:
+          - L1
+          - L2
+          - L3
+          - L4
+          - L5
+          - L6
+          description: Approval level applied
+        finalCall:
+          type: string
+          maxLength: 40
+          description: The option decided
+        overrideReason:
+          type: string
+          maxLength: 1000
+          description: Reason when the person did not follow the recommendation
+        actions:
+          type: object
+          description: Target system, result and timestamps of each action
+        outcome:
+          type: object
+          description: Cash, cure, loss and time, written when known
+        decidedAt:
+          type: string
+          format: date-time
+          description: When decided
+        prevHash:
+          type: string
+          maxLength: 64
+          description: Hash of the previous entry
+        entryHash:
+          type: string
+          maxLength: 64
+          description: Hash of this entry
+        chainSeq:
+          type: string
+          description: Position of the entry in the hash chain; prev_hash is the entry_hash of chain_seq minus 1; unique on its own
+        correctsEntryId:
+          type: string
+          format: uuid
+          description: The entry this entry corrects
+        actorUserId:
+          type: string
+          format: uuid
+          description: The person or service identity whose action, preparation or access the entry records
+        idempotencyKey:
+          type: string
+          maxLength: 80
+          description: Event ID of the calling module; a repeat returns the first entry; unique on its own
+      required:
+      - id
+      - decisionCode
+      - inputsRef
+      - finalCall
+      - decidedAt
+      - prevHash
+      - entryHash
+      - chainSeq
+    RulePackage:
+      type: object
+      description: One Drools decision-table package, with its owner and first-match policy.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: DF-REF-274. Record identifier of the rule package
+        packageCode:
+          type: string
+          maxLength: 30
+          description: DF-REF-275. Package code, for example PAYMENT_MATCH
+        title:
+          type: string
+          maxLength: 200
+          description: DF-REF-276. Package title shown to the rule author
+        ownerRole:
+          type: string
+          maxLength: 20
+          description: DF-REF-277. Role that owns the package, RW-COE
+        hitPolicy:
+          type: string
+          enum:
+          - FIRST
+          description: 'DF-REF-278. Hit policy, FIRST: exactly one row decides'
+      required:
+      - id
+      - packageCode
+      - title
+      - ownerRole
+      - hitPolicy
+    RulePackageVersion:
+      type: object
+      description: One uploaded and approved version of a rule package, with its workbook, DRL and checksum.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: DF-REF-279. Record identifier of the rule package version
+        packageId:
+          type: string
+          format: uuid
+          description: DF-REF-280. The rule_package this version belongs to
+        versionLabel:
+          type: string
+          maxLength: 30
+          description: DF-REF-281. Version label, for example ALLOC-2026.12
+        status:
+          type: string
+          maxLength: 20
+          enum:
+          - LOADED
+          - APPROVED
+          - IN_FORCE
+          - SUPERSEDED
+          - ROLLED_BACK
+          - REFUSED
+          description: DF-REF-282. LOADED, APPROVED, IN_FORCE, SUPERSEDED, ROLLED_BACK or REFUSED
+        sourceBlobRef:
+          type: string
+          maxLength: 500
+          description: DF-REF-283. Blob path of the uploaded XLS workbook
+        drlSource:
+          type: string
+          readOnly: true
+          description: DF-REF-284. DRL generated from the workbook, compiled to a KieBase
+        checksum:
+          type: string
+          maxLength: 64
+          description: DF-REF-285. SHA-256 of the workbook and the generated DRL
+        validFrom:
+          type: string
+          format: date
+          description: DF-REF-286. Date the version comes into force
+        validTo:
+          type: string
+          format: date
+          description: DF-REF-287. Last date the version is in force
+        author:
+          type: string
+          format: uuid
+          description: DF-REF-288. Who loaded the version; never the approver
+        approver:
+          type: string
+          format: uuid
+          description: DF-REF-289. RW-RISK approver of the version
+        loadedAt:
+          type: string
+          format: date-time
+          description: DF-REF-290. When the version was loaded
+        approvedAt:
+          type: string
+          format: date-time
+          description: DF-REF-291. When the version was approved
+        testResult:
+          type: string
+          maxLength: 20
+          description: DF-REF-292. PASSED or FAILED from the scenario and dry run checks
+        dryRunCounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: DF-REF-293. Counts of open cases each changed row would move, from the dry run
+        rollbackOf:
+          type: string
+          format: uuid
+          description: DF-REF-294. The version this one rolls back to
+        changeChecklist:
+          type: object
+          additionalProperties: true
+          description: DF-REF-295. Request, impact, test result, approver, load, verify and rollback plan
+      required:
+      - id
+      - packageId
+      - versionLabel
+      - status
+      - sourceBlobRef
+      - drlSource
+      - checksum
+      - validFrom
+      - author
+      - loadedAt
+    RulePackageVersionRequest:
+      type: object
+      description: Multipart upload of an XLS decision table as a new rule package version (D-RCV-36 T4).
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Drools XLS decision-table workbook; RuleSet is the package code and each row NAME is the rule ID
+        validFrom:
+          type: string
+          format: date
+          description: Date the approved version comes into force
+        changeChecklist:
+          type: object
+          additionalProperties: true
+          description: Request, impact, test result, approver, load, verify and rollback plan; required before approval
+      required:
+      - file
+      - validFrom
+    DryRunReport:
+      type: object
+      description: The dry run of one rule package version over the open cases.
+      properties:
+        versionId:
+          type: string
+          format: uuid
+        packageCode:
+          type: string
+          maxLength: 30
+        versionLabel:
+          type: string
+          maxLength: 30
+        businessDate:
+          type: string
+          format: date
+        generatedAt:
+          type: string
+          format: date-time
+        casesEvaluated:
+          type: integer
+        rulesFired:
+          type: integer
+        noMatch:
+          type: integer
+        refused:
+          type: integer
+        samples:
+          type: array
+          items:
+            type: object
+            properties:
+              caseNo:
+                type: string
+              ruleId:
+                type: string
+              outputs:
+                type: object
+                additionalProperties: true
+      required:
+      - versionId
+      - packageCode
+      - versionLabel
+      - casesEvaluated
+    RuleChangeReport:
+      type: object
+      description: Rule package changes, their checklists and the decisions taken under each version (RWB-E2-041).
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        fromDate:
+          type: string
+          format: date
+        toDate:
+          type: string
+          format: date
+        packages:
+          type: array
+          items:
+            type: object
+            properties:
+              packageCode:
+                type: string
+              versionLabel:
+                type: string
+              status:
+                type: string
+              author:
+                type: string
+                format: uuid
+              approver:
+                type: string
+                format: uuid
+              loadedAt:
+                type: string
+                format: date-time
+              approvedAt:
+                type: string
+                format: date-time
+              validFrom:
+                type: string
+                format: date
+              checksum:
+                type: string
+              checklistComplete:
+                type: boolean
+              decisionCount:
+                type: integer
+      required:
+      - generatedAt
+      - packages
+    ApprovalAction:
+      type: object
+      properties:
+        reason:
+          type: string
+        resolutionReference:
+          type: string
+    Recommendation:
+      type: object
+      properties:
+        decision:
+          type: string
+        recommended:
+          type: string
+        reasons:
+          type: array
+          items:
+            type: string
+        expectedReturnByRoute:
+          type: object
+        ruleVersion:
+          type: string
+        agentVersion:
+          type: string
+    Approval:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        decision:
+          type: string
+        preparedBy:
+          type: string
+        level:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI of the error-map row
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          description: Request path and trace ID, stamped by the owning service
+        messageCode:
+          type: string
+          pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+        messageTh:
+          type: string
+          description: Thai text of the message code
+        field:
+          type: string
+          description: JSON Pointer or parameter or header name of the first failing input
+        errors:
+          type: array
+          description: Present only on 400 or 422 when more than one input fails
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              messageCode:
+                type: string
+                pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+              detail:
+                type: string
+            required: [field, messageCode, detail]
+        traceId:
+          type: string
+          pattern: '^[0-9a-fA-F]{32}$'
+          description: 32-hex W3C trace ID of the request
+      required: [type, title, status, messageCode, traceId]
+    ApprovalTerm:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    RollbackRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+    ApprovalDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        decision:
+          type: string
+        preparedBy:
+          type: string
+        level:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+        regulationItem:
+          type: string
+        capabilityArea:
+          type: string
+        limitVersion:
+          type: string
+        ruleId:
+          type: string
+        ruleVersion:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+        escalationLevel:
+          type: integer
+        sourceType:
+          type: string
+        sourceRef:
+          type: string
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalTerm'
+        assignedUserId:
+          type: string
+          format: uuid
+    ApprovalPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Approval'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    DecisionLogPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionLogEntry'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer

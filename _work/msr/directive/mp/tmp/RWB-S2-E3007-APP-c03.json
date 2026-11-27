@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "| X1 | A role without the right U in capability area Treatment and offer calls the release | 403 before any read of the treatment; the refusal is the guard library's and is logged by it | MSG-P4-002 | TC-E3-007-05 |",
+   "new": "| X1 | A role without the right U in capability area Treatment and offer calls the release | 403 before any read of the treatment; the refusal is the guard library's and is logged by it | MSG-P4-002 | AC5, TC-E3-007-05, TC-E3-007-09 |"
+  },
+  {
+   "old": "| X2 | The release facts are incomplete: no offer amount, no release instant or no validity period in force | The release is refused before any write, with the field named; nothing changes | MSG-GEN-001 | TC-E3-007-01, TC-S2-E3007-CON-03 |",
+   "new": "| X2 | The release facts are incomplete: no offer amount, no release instant or no validity period in force | The release is refused before any write, with the field named; nothing changes | MSG-GEN-001 | AC6, TC-E3-007-10, TC-E3-007-01, TC-S2-E3007-CON-03 |"
+  },
+  {
+   "old": "| X4 | A record field is refused by the library | Nothing changes and the field is named; the offer is not released | MSG-P7-009 | TC-S2-E3007-CON-04 |",
+   "new": "| X4 | A record field is refused by the library | Nothing changes and the field is named; the offer is not released | MSG-P7-009 | AC7, TC-E3-007-11, TC-S2-E3007-CON-04 |"
+  },
+  {
+   "old": "| X5 | The rule answer is `CREDIT_DECLINED` under R-RES-12, or the customer declines or the offer expires under R-RES-17 and R-RES-18 | No release, no event and no timer; the case moves to `DECLINED_BY_CREDIT` or `RETURNED_TO_COLLINS` on the parent's move | None | Section 9 |",
+   "new": "| X5 | The rule answer is `CREDIT_DECLINED` under R-RES-12, or the customer declines or the offer expires under R-RES-17 and R-RES-18 | No release, no event and no timer; the case moves to `DECLINED_BY_CREDIT` or `RETURNED_TO_COLLINS` on the parent's move | None | AC8, TC-E3-007-12, Section 9 |"
+  },
+  {
+   "old": "| X6 | The validity date is reached and no signature has arrived | The durable timer fires, the offer ends and the date is named; the expiry move is the parent's | MSG-S2-003 | TC-E3-007-01 |",
+   "new": "| X6 | The validity date is reached and no signature has arrived | The durable timer fires, the offer ends and the date is named; the expiry move is the parent's | MSG-S2-003 | AC9, TC-E3-007-13, TC-E3-007-01 |"
+  },
+  {
+   "old": "| X7 | A consumer redelivers EV-10, or the same release arrives twice with one `Idempotency-Key` | The inbox dedupes by cloud event id and the workflow answers the first result: one release, one event, one timer | None | TC-E3-007-01 |",
+   "new": "| X7 | A consumer redelivers EV-10, or the same release arrives twice with one `Idempotency-Key` | The inbox dedupes by cloud event id and the workflow answers the first result: one release, one event, one timer | None | AC10, TC-E3-007-14, TC-E3-007-01 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Access refused (exception X1)\n    Given a role without the right U in capability area Treatment and offer\n    When the release is called\n    Then the call is refused with 403 before any read of the treatment\n    Then the user sees MSG-P4-002\n\n  Scenario: AC6 Release facts incomplete (exception X2)\n    Given a release without an offer amount, a release instant or a validity period in force\n    When the release is called\n    Then the release is refused before any write and the field is named\n    Then nothing changes and the user sees MSG-GEN-001\n\n  Scenario: AC7 Record field refused (exception X4)\n    Given the record library refuses a field\n    When the release is applied\n    Then nothing changes, the field is named and the offer is not released\n    Then the user sees MSG-P7-009\n\n  Scenario: AC8 Rule answer declines or offer expires (exception X5; BR2)\n    Given the rule answer is CREDIT_DECLINED under R-RES-12, or the customer declines or the offer expires under R-RES-17 and R-RES-18\n    When the answer arrives\n    Then no release, no event and no timer are made\n    Then the parent moves the case to DECLINED_BY_CREDIT or RETURNED_TO_COLLINS\n\n  Scenario: AC9 Validity date reached (exception X6; BR4, BR5)\n    Given the offer is released and no signature has arrived\n    When the validity date is reached\n    Then the durable timer fires and the offer ends\n    Then the user sees MSG-S2-003 with the date named\n\n  Scenario: AC10 Redelivery (exception X7)\n    Given the same release arrives twice with one Idempotency-Key, or EV-10 is redelivered\n    When the second delivery is received\n    Then the inbox dedupes by cloud event id and the workflow answers the first result\n    Then one release, one event and one timer exist\n\n  Scenario: AC11 Rule BR1 (R-RES-04 outcome)\n    Given a case in state IN_FCR_QUEUE with the allocation rule matched and an officer available\n    When CASE_PICKED_UP\n    Then the outcome of R-RES-04 is reported to the parent CaseWorkflow\n    Then the offer-preparation clock starts\n\n  Scenario: AC12 Rule BR2 (R-RES-11 outcome)\n    Given a case in state AWAITING_CREDIT_APPROVAL with final_call approved\n    When CREDIT_APPROVED\n    Then the outcome of R-RES-11 is reported to the parent CaseWorkflow and the offer is released\n    Then the validity clock is armed in the same apply step\n\n  Scenario: AC13 Rule BR3 counter-offer\n    Given a case in state OFFER_WITH_CUSTOMER\n    When CUSTOMER_COUNTER_OFFERED with offer_amount outside the current range\n    Then the case returns to the officer with the counter-offer and the gap\n    Then a new validity date is computed under R-RES-15\n\n  Scenario: AC14 Rule BR4 validity period\n    Given an offer is released with the period in force\n    When the release is stored\n    Then valid_until is the release date plus the period in force\n    Then expiry returns the case to the status it came from under R-RES-18\n\n  Scenario: AC15 Rule BR5 durable timer\n    Given a validity clock is armed\n    When a signature, a decline or a new offer arrives\n    Then the durable Temporal timer is cancelled\n    Then a breach is reported on the case timer path that rwb-case owns\n\n  Scenario: AC16 Rule BR6 values in force\n    Given the validity period, the offer-preparation clock and the rule version are needed\n    When the release is applied\n    Then each is read as a value in force with its version\n    Then no such value is written as a literal in code\n\n  Scenario: AC17 Rule BR7 same transaction\n    Given a release is applied\n    When the decision record, valid_until and the outbox row are written\n    Then they are stored in one transaction or none is stored\n    Then the officer is told the action was not taken\n\n  Scenario: AC18 Rule BR8 status moved by parent\n    Given the stage reports the outcome of R-RES-04 or R-RES-11\n    When the parent CaseWorkflow receives the outcome\n    Then the parent moves the case status and the assignment\n    Then rwb-treatment writes neither\n\n  Scenario: AC19 Rule BR9 event without customer value\n    Given a released offer\n    When EV-10 is published on rwb.treatment.events.v1\n    Then rwb-comms issues the letter and rwb-payment expects the money\n    Then the event carries no customer value\n\n  Scenario: AC20 Rule BR10 no ACE read\n    Given a released offer\n    When the send runs\n    Then no ACE view is read\n    Then the letter's addressee is resolved by rwb-comms"
+  },
+  {
+   "old": "this story sends no customer field and reads no `v_ace_customer` row (GAP-2658; ASM-4366; DP-05).",
+   "new": "this story sends no customer field and reads no `v_ace_customer` row (GAP-2658; ASM-4366; DP-05). The legacy wording of AC1 and AC4 names the decision log, which in this story is the local `decision_record` (DP-03), and the validity clock, which is the durable Temporal timer (ASM-4368)."
+  },
+  {
+   "old": "BR9 is the dispatch, and BR10 is the DP-05 boundary that retires the legacy `v_ace_customer` read.",
+   "new": "BR9 is the dispatch, and BR10 is the DP-05 boundary that retires the legacy `v_ace_customer` read. Open decision DL10 is still open: its assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed by the directive of 26 November 2026 and apply until the decision closes."
+  },
+  {
+   "old": "| BR5 | The wait is a timer, not a routed state: the validity clock is a durable Temporal timer inside `TreatmentWorkflow`, armed in the apply step and cancelled by a signature, a decline or a new offer | FSD A2.7.2; Architecture v5 slide 42 event 18; ASM-4368 |",
+   "new": "| BR5 | The wait is a timer, not a routed state: the validity clock is a durable Temporal timer inside `TreatmentWorkflow`, armed in the apply step and cancelled by a signature, a decline or a new offer; no Quartz table, job or connection is used, and a breach is reported on the case timer path that rwb-case owns | FSD A2.7.2; FSD A2.10; Architecture v5 slides 42 and 44; ASM-4368 |"
+  },
+  {
+   "old": "| BR6 | No value a business person may change is written in code: the validity period, the offer-preparation clock and the rule version are read as values in force with their version | FSD A2.7.3.1 BR-S2-007; ASM-4368 |",
+   "new": "| BR6 | No value a business person may change is written in code: the validity period, the offer-preparation clock and the rule version are read as values in force with their version; the parameters are the validity period and the offer-preparation clock, with parameter keys Not specified in the source documents (DOR-RWB-S2-E3007-APP-20), and reference data is read under the reference-data contract of DP-06 and DP-07 | FSD A2.7.3.1 BR-S2-007; ASM-4368; DP-06; DP-07 |"
+  },
+  {
+   "old": "The access check itself is the platform guard library's and is declared here as the capability area and the right only (ASM-4367; TSD S2 T6.1).",
+   "new": "The access check itself is the platform guard library's, called as the rwb-access authorise check under DP-08 before any read, and is declared here as the capability area and the right only; the operation name of that check is Not specified in the source documents (DOR-RWB-S2-E3007-APP-6) (ASM-4367; TSD S2 T6.1; DP-08)."
+  },
+  {
+   "old": "| TC-E3-007-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E3-007-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E3-007-07 | Section 12 operations, events and activities | Contract | Operations, events and activities of section 12 |\n| TC-E3-007-08 | Section 12.7 tables | Component | Boundary of the tables of section 12.7 |\n| TC-E3-007-09 | AC5 | Component | A role without the right U is refused with MSG-P4-002 before any read |\n| TC-E3-007-10 | AC6 | Component | Release facts incomplete are refused with MSG-GEN-001 before any write |\n| TC-E3-007-11 | AC7 | Component | A record field refused by the library leaves nothing changed with MSG-P7-009 |\n| TC-E3-007-12 | AC8 | End to end | Rule answer CREDIT_DECLINED or customer declines or offer expires |\n| TC-E3-007-13 | AC9 | End to end | Validity date reached with no signature, durable timer fires with MSG-S2-003 |\n| TC-E3-007-14 | AC10 | Component | Redelivery of EV-10 or a repeated Idempotency-Key yields one release |\n| TC-E3-007-15 | AC11 | End to end | Rule BR1 R-RES-04 outcome reported to the parent |\n| TC-E3-007-16 | AC12 | End to end | Rule BR2 R-RES-11 outcome reported and offer released |\n| TC-E3-007-17 | AC13 | Component | Rule BR3 counter-offer returns the case to the officer |\n| TC-E3-007-18 | AC14 | Component | Rule BR4 valid_until is release date plus period in force |\n| TC-E3-007-19 | AC15 | Component | Rule BR5 durable timer is cancelled by signature, decline or new offer |\n| TC-E3-007-20 | AC16 | Component | Rule BR6 values in force are read with their version |\n| TC-E3-007-21 | AC17 | Component | Rule BR7 record, valid_until and outbox row stored in one transaction |\n| TC-E3-007-22 | AC18 | End to end | Rule BR8 parent moves the case status and the assignment |\n| TC-E3-007-23 | AC19 | Component | Rule BR9 EV-10 carries no customer value |\n| TC-E3-007-24 | AC20 | Component | Rule BR10 no ACE view is read to send the offer |"
+  },
+  {
+   "old": "### 12. Contract",
+   "new": "### 12. Contract\n\nThe release is the offer operation that RWB-S2-E3002-CON publishes on base `/api/recovery/treatment/v1` and declares no path of its own; its body OfferRelease has six properties, three of them required, five mapped to treatment fields and `releasedAt` recorded on the decision record. A redelivery is deduped by cloud event id in the inbox and by the `Idempotency-Key` on the operation (GAP-2659; ASM-B2-S2-002-4). The release is dispatched as `rwb.treatment.TreatmentApproved.v1` on `rwb.treatment.events.v1` with key `caseId`; EV-10 carries the eleven properties of section 12.3 with no customer value, and the validity period and the offer-preparation clock are exported as parameters in force (GAP-2658; ASM-B2-S2-002-1; ASM-B2-S2-002-3)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19329",
+   "item": "DOR-RWB-S2-E3007-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add tab Story test cases rows for TC-E3-007-01 to -06 and new TC-E3-007-07 (contract) and TC-E3-007-08 (boundary) plus TC-E3-007-09 to -24.",
+   "note": "Story side: contract test TC-E3-007-07 and boundary test TC-E3-007-08 added to section 16. Workbook rows still needed."
+  },
+  {
+   "ruling": "R-19330",
+   "item": "DOR-RWB-S2-E3007-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Open decision DL10 and assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863 stated in section 8; decision still open."
+  },
+  {
+   "ruling": "R-19331",
+   "item": "DOR-RWB-S2-E3007-APP-20",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR6 names the parameters and the DP-06 and DP-07 reference-data contract; parameter keys are not specified in the source documents."
+  },
+  {
+   "ruling": "R-19332",
+   "item": "DOR-RWB-S2-E3007-APP-3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC5 to AC10 added for X1, X2, X4 to X7 with TC-E3-007-09 to -14; section 5 Covered by column now names them."
+  },
+  {
+   "ruling": "R-19333",
+   "item": "DOR-RWB-S2-E3007-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "AC11 to AC20 added for BR1 to BR10, each with a test row TC-E3-007-15 to -24 in section 16."
+  },
+  {
+   "ruling": "R-19334",
+   "item": "DOR-RWB-S2-E3007-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 names the rwb-access authorise check under DP-08; its operation name is not specified in the source documents."
+  },
+  {
+   "ruling": "R-19335",
+   "item": "DOR-RWB-S2-E3007-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 / Data Classification v5",
+   "change": "Add decision_record as a field or entity, or confirm it as the RWB-PLT-E1027-CON library object; counter_amount is not in story text.",
+   "note": "No ACE view read in section 11. Legacy wording explained in section 7. decision_record needs LDM entry."
+  },
+  {
+   "ruling": "R-22748",
+   "item": "GAP-1701",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR5 states no Quartz table, job or connection; clocks are durable Temporal timers in TreatmentWorkflow; breach on rwb-case timer path."
+  },
+  {
+   "ruling": "R-23365",
+   "item": "GAP-2659",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-S2-E3007-CON",
+   "change": "Publish OfferRelease with six properties (three required), EV-10 body of eleven properties with key caseId, dedupe by cloud event id and Idempotency-Key, release riding the RWB-S2-E3002-CON offer operation.",
+   "note": "Section 12 of this story states the working read. The release body must be published in RWB-S2-E3007-CON."
+  },
+  {
+   "ruling": "R-23373",
+   "item": "GAP-2658",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Section 12 states dispatch as rwb.treatment.TreatmentApproved.v1 on rwb.treatment.events.v1 with key caseId; RWB-S2-E3007-CON still to publish the contract."
+  }
+ ]
+}

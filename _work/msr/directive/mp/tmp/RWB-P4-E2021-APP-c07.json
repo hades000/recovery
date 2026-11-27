@@ -1,0 +1,71 @@
+{
+ "edits": [
+  {
+   "old": "| X8 | A second call arrives with the same `Idempotency-Key` | The first answer and its entry are returned; no second entry is written | None | AC11 |",
+   "new": "| X8 | A second call arrives with the same `Idempotency-Key` | The first answer and its entry are returned; no second entry is written | None | AC11, AC12 |"
+  },
+  {
+   "old": "    Then no second \"AC-READ\" entry is written for that call",
+   "new": "    Then no second \"AC-READ\" entry is written for that call\n\n  Scenario: AC12 A repeated write with the same Idempotency-Key leaves one entry for that key (new, D-RCV-60)\n    Given \"LIT-0101\" has already received an allowed answer for notice \"N-0101\" under an Idempotency-Key\n    When \"LIT-0101\" repeats the authorise call with the same Idempotency-Key and the same body\n    Then the first answer is returned unchanged and exactly one \"AC-READ\" entry exists for that key\n    Then the repeated call writes no second \"AC-READ\" entry\n\n  Scenario: AC13 The right, the mask default, the service identity and the version pair are read from data and never fixed in code (new, D-RCV-60)\n    Given the permission rows of matrix version \"PM-2026.12\" and the masking rows of \"MASK-SIT-01\" are in force\n    When the authorise path decides area \"LITIGATION\" with right \"R\" on notice \"N-0101\" for an actor with role class \"NON_HUMAN_ACTOR\" and scope \"ALL\" and a field with no masking row\n    Then the right is the letter read from the permission row of the matrix version in force and the field is masked\n    Then the service identity passes through the same role and scope checks as a person and the answer names matrix version \"PM-2026.12\" and masking version \"MASK-SIT-01\"\n    Then the code holds no enum of areas, roles or letters, as shown by the boundary check of the build\n\n  Scenario: AC14 A call with no valid session is refused with status 401 (new, D-RCV-60)\n    Given \"LIT-0101\" holds no valid session\n    When \"LIT-0101\" sends POST /api/recovery/access/v1/authorise with area \"LITIGATION\", right \"R\" and notice \"N-0101\"\n    Then the call is refused with status 401 and no answer\n    Then the answer carries no decision, no field marker and no case or notice data\n\n  Scenario: AC15 A replayed refusal with the same Idempotency-Key returns the stored first answer (new, D-RCV-60)\n    Given \"U-4101\" has already been refused a notice for case \"RC-2026-000321\" under an Idempotency-Key with area \"LITIGATION\" and right \"C\"\n    When \"U-4101\" replays the same authorise call with the same Idempotency-Key\n    Then the first refusal is returned unchanged and the idempotency_key row holds the stored answer\n    Then no second \"AC-DENY\" entry is written for that call"
+  },
+  {
+   "old": "The eleven criteria above are the ones this story owns",
+   "new": "The fifteen criteria above are the ones this story owns"
+  },
+  {
+   "old": "Coverage of BR1, BR5, BR6 and BR10 by the criteria of section 7: BR1 by AC1, BR5 by AC6, BR6 by AC5 and BR10 by AC8.",
+   "new": "Coverage of BR1, BR5, BR6 and BR10 by the criteria of section 7: BR1 by AC1, BR5 by AC6, BR6 by AC5 and BR10 by AC8. AC13 is also the boundary criterion for BR1, BR5, BR6 and BR10."
+  },
+  {
+   "old": "| TC-E2-021-17 | AC8 | Component | Cached answer for `LIT-0101` holds `MASK-SIT-01`; a later masking version is committed and `rwb.access.AccessPolicyChanged.v1` is published; the next authorise call answers with the later version and the matrix version stays `PM-2026.12` |",
+   "new": "| TC-E2-021-17 | AC8 | Component | Cached answer for `LIT-0101` holds `MASK-SIT-01`; a later masking version is committed and `rwb.access.AccessPolicyChanged.v1` is published; the next authorise call answers with the later version and the matrix version stays `PM-2026.12` |\n| TC-E2-021-18 | AC12, BR7 | Contract | The request repeated with one `Idempotency-Key` and the same body; the first answer is returned and exactly one `AC-READ` entry exists for that key |\n| TC-E2-021-19 | AC13, BR1, BR5, BR6, BR10 | Component | Permission rows of `PM-2026.12` and masking rows of `MASK-SIT-01` in force; service identity with role class `NON_HUMAN_ACTOR` and scope `ALL`; a field with no masking row; the right, the mask and the version pair come from the data |\n| TC-E2-021-20 | AC14 | Component | `LIT-0101` sends the authorise call with no valid session; 401 and no answer |\n| TC-E2-021-21 | AC15, BR7 | Contract | Refused call of `U-4101` for case `RC-2026-000321` replayed with one `Idempotency-Key`; the first refusal is returned and no second `AC-DENY` entry is written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29524",
+   "item": "ACR-RWB-P4-E2021-APP-AC8",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "No row added; AC8 already has TC-E2-021-17 in section 16.",
+   "note": "TC-E2-021-17 already covers AC8 in section 16; no new row needed."
+  },
+  {
+   "ruling": "R-30951",
+   "item": "NEWAC-RWB-P4-E2021-APP-AC13",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC12 (repeated write with same key leaves one entry) to section 7, TC-E2-021-18 to section 16, and AC11, AC12 in X8 Covered by.",
+   "note": "AC12 added for X8 replay; X8 now covered by AC11 and AC12; TC-E2-021-18 added."
+  },
+  {
+   "ruling": "R-30952",
+   "item": "NEWAC-RWB-P4-E2021-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC13 boundary criterion for BR1, BR5, BR6, BR10 to section 7, TC-E2-021-19 to section 16, and extended the section 8 coverage line.",
+   "note": "AC13 boundary criterion covers BR1, BR5, BR6, BR10; TC-E2-021-19 added; section 8 coverage updated."
+  },
+  {
+   "ruling": "R-30953",
+   "item": "NEWAC-RWB-P4-E2021-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 (no valid session gives 401 with no answer) to section 7 and TC-E2-021-20 to section 16.",
+   "note": "AC14 added for 401 on the authorise path, per the section 4 row for POST authorise; TC-E2-021-20 added."
+  },
+  {
+   "ruling": "R-30954",
+   "item": "NEWAC-RWB-P4-E2021-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 (replayed refusal returns stored first answer, no second AC-DENY) to section 7 and TC-E2-021-21 to section 16.",
+   "note": "AC15 added for replay of a write with the same key; TC-E2-021-21 added."
+  }
+ ]
+}

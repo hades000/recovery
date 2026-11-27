@@ -1,0 +1,57 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E2002-ITG",
+ "unit": "u02",
+ "rulings": [
+  "R-22331",
+  "R-29884"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 3
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22331",
+     "item": "GAP-0769",
+     "status": "Resolved",
+     "section": "3, 12.5, 12.6",
+     "target": "",
+     "change": "",
+     "note": "Per-case call in readPlanStatus, per proposed fix; matches RWB-P2-E2002-CON/APP and RWB-P3-E2002-APP drafts (no batch operation, queue rwb-case). Architecture v5 matrix still shows no P3-P2 call."
+    },
+    {
+     "ruling": "R-29884",
+     "item": "NEWAC-RWB-ITG-E2002-ITG-AC10",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Already in the story: section 7 scenario AC10 and section 16 row TC-E2-002-13-ITG cover X9. No edit needed."
+    }
+   ],
+   "edits": [
+    {
+     "old": "- The ACE read is bounded by the timeout the legacy story fixes: 2 seconds per call, with the batching of `rwb.ace.plan.batch-size` = 500 and `rwb.ace.plan.timeout-ms` = 2000 as properties, not code (DP-11).",
+     "new": "- The ACE read is bounded by the timeout the legacy story fixes: 2 seconds per call, with the batching of `rwb.ace.plan.batch-size` = 500 and `rwb.ace.plan.timeout-ms` = 2000 as properties, not code (DP-11).\n- The plan status passes from rwb-integration to rwb-case through the per-case operation: the plan-status step of DailyCaseRun calls `GET /api/recovery/integration/v1/cases/{caseId}/plan-status` once per case inside the `readPlanStatus` activity, with its page size and bounded concurrency taken from `rwb.ace.plan.batch-size` = 500 and its timeout from `rwb.ace.plan.timeout-ms` = 2000. No batch operation is used; the read of ACE stays with rwb-integration on its own base."
+    },
+    {
+     "old": "| Plan-status step | rwb-integration | P2 rwb-integration | The ACE read and the plan-status answer of the case, with the 2 s budget (DP-11) |",
+     "new": "| Plan-status step of DailyCaseRun (`readPlanStatus` activity) | rwb-case | P3 rwb-case calls; P2 rwb-integration answers | One call of the plan-status operation per case, and the ACE read and the answer on rwb-integration, with the 2 s budget (DP-11) |"
+    },
+    {
+     "old": "with the plan-status step on `rwb-integration` and the timer held as a durable timer (DP-10)",
+     "new": "with the plan-status step calling the `rwb-integration` operation once per case through the `readPlanStatus` activity and the timer held as a durable timer (DP-10)"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

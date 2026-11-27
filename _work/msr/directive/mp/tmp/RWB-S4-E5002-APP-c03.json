@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P4-002 | TC-E5-002-05 |",
+   "new": "| MSG-P4-002 | AC5, TC-E5-002-05 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5 |",
+   "new": "| None (pipeline log) | AC6, TC-E5-002-09, Section 17, BR5 |"
+  },
+  {
+   "old": "The four criteria are the legacy criteria of RWB-E5-002 word for word, with their origin tag added and nothing else changed: the repetition of `Then`, the legacy wording of `the action is taken`, `the decision log cannot be written` and `its trigger arrives` all stand.",
+   "new": "AC1 to AC4 are the legacy criteria of RWB-E5-002 with their origin tag added: the repetition of `Then`, the legacy wording of `the action is taken` and `its trigger arrives` all stand, and `the decision log` reads `the decision record` (DP-03). AC5 to AC9 are owned by this story, carry no legacy tag and cover X2, X10, X7, BR8 and R-LIT-09."
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Access refused (X2)\n    Given a role without the Litigation right\n    When the role reads the step outcome on SCR-18 or SCR-19\n    Then the read is refused at the edge before any service call and the user sees MSG-P4-002\n    Then nothing changes\n\n  Scenario: AC6 Boundary of the owned schema (X10)\n    Given a component, a statement or a test that reads a `v_ace_*` view or writes a `notice` row\n    When the boundary test runs\n    Then the grant refuses the statement and the build fails\n    Then nothing is released\n\n  Scenario: AC7 Repeated notice fact (X7, BR6)\n    Given the rwb-source-data contract mock returns the proof of delivery of notice \"NTC-2026-000602\" with served_result \"delivered\" and delivered_at 2026-12-07\n    Given the same notice fact has already been recorded once for case \"RC-2026-000602\"\n    When the same notice fact arrives again with the same delivered_at\n    Then one record, one timer and one answer exist\n    Then the repeat is counted\n\n  Scenario: AC8 No personal data (BR8)\n    Given the decision record and the workflow input of the step\n    When they are inspected\n    Then they carry case and notice references, codes, dates and a rule version only\n    Then no person name, address, contact value or identity number is present\n\n  Scenario: AC9 Rule R-LIT-09 (BR11)\n    Given the rwb-source-data contract mock returns the proof of delivery of notice \"NTC-2026-000602\" with served_result \"refused\"\n    Given the rwb-case contract mock returns the case state \"NOTICE_DISPATCHED\" for \"RC-2026-000602\"\n    When delivery failed\n    Then record the result and queue an alternate service method\n    Then the case moves to NOTICE_UNSERVED"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "| R-LIT-07 | Litigation | D7 |",
+   "new": "| R-LIT-07 (BR9) | Litigation | D7 |"
+  },
+  {
+   "old": "| R-LIT-08 | Litigation | D7 |",
+   "new": "| R-LIT-08 (BR10) | Litigation | D7 |"
+  },
+  {
+   "old": "| R-LIT-09 | Litigation | D7 |",
+   "new": "| R-LIT-09 (BR11) | Litigation | D7 |"
+  },
+  {
+   "old": "| BR8 | No person name, address, contact value or identity number enters `rwb_litigation`, the decision record, a log or a workflow input: the step carries case and notice references, codes, dates and a rule version | Template and Rules v1 §R7.2 (s17); FSD S4 A2.2 field catalogue |",
+   "new": "| BR8 | No person name, address, contact value or identity number enters `rwb_litigation`, the decision record, a log or a workflow input: the step carries case and notice references, codes, dates and a rule version | Template and Rules v1 §R7.2 (s17); FSD S4 A2.2 field catalogue |\n\n| Rule ID | Covered by |\n|---|---|\n| BR1 | AC1, TC-E5-002-01 |\n| BR2 | AC4, TC-E5-002-04, TC-E5-002-06 |\n| BR3 | AC6, TC-E5-002-09 |\n| BR4 | AC2, AC3, TC-E5-002-02, TC-E5-002-03 |\n| BR5 | AC6, TC-E5-002-09 |\n| BR6 | AC7, TC-E5-002-10 |\n| BR7 | AC2, AC3, TC-E5-002-02, TC-E5-002-03 |\n| BR8 | AC8, TC-E5-002-11 |\n| BR9 (R-LIT-07) | AC2, TC-E5-002-02 |\n| BR10 (R-LIT-08) | AC3, TC-E5-002-03 |\n| BR11 (R-LIT-09) | AC9, TC-E5-002-12 |"
+  },
+  {
+   "old": "this story reads them on the owner's contract and writes none of them",
+   "new": "this story reads them on the owner's contract and writes none of them; the proof of delivery stays with the notice in rwb-comms, reaches this service on rwb-source-data's contract and is matched to the notice by barcode (GAP-1597)"
+  },
+  {
+   "old": "| No published field ID for `v_ace_pod` | `v_ace_pod` (P1) | the WIN consignment fact | Read only on the P1 contract and never written; the element is Not specified in the source documents (GAP-2744; ASM-4564) |",
+   "new": "| No published field ID for the WIN proof | the WIN proof of delivery (rwb-source-data, ACE ingestion) | the WIN consignment fact | Read only on the rwb-source-data contract and never written; the element is Not specified in the source documents (GAP-2744; ASM-4564) |"
+  },
+  {
+   "old": "- No parameter is named in the sources for the step itself; the 2 s budget and the single hop are the platform rule of ADR-020.",
+   "new": "- The parameters the step reads are the proof window of 7 days (BR7) and the notice period per product and notice type; their parameter keys are Not specified in the source documents (DOR-RWB-S4-E5002-APP-20). The reference-data contract is the rwb-decision read of the LITIGATION package on `RulePackageInForce` (DP-06, DP-07); the 2 s budget and the single hop are the platform rule of ADR-020."
+  },
+  {
+   "old": "8. The boundary test: no statement outside `rwb_litigation`, no `v_ace_*` read, no write to `rwb_comms`, `rwb_case` or `rwb_decision` (X10, BR3, BR5).",
+   "new": "8. The boundary test: no statement outside the service's own schema, no `v_ace_*` read, no write to any other owner's schema (X10, BR3, BR5)."
+  },
+  {
+   "old": "| TC-E5-002-06 | Principle 5 | NFR | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E5-002-06 | Principle 5 | NFR | A forced decision record write failure stops the action with MSG-P7-003 |\n| TC-E5-002-07 | Section 12 operations, events and activities | Contract | Contract test of the operations, events and activities of section 12 against the published contract |\n| TC-E5-002-08 | Section 12.7 tables (ASM-3438) | Boundary | Boundary test: no statement reads or writes a table outside section 12.7 |\n| TC-E5-002-09 | AC6 | Boundary | A component, a statement or a test reaches a `v_ace_*` view or a `notice` row; the grant refuses it and the build fails |\n| TC-E5-002-10 | AC7 | Component | A repeated notice fact writes once, starts one timer, answers once and counts the repeat |\n| TC-E5-002-11 | AC8 | Component | The decision record and the workflow input carry no person name, address, contact value or identity number |\n| TC-E5-002-12 | AC9 | Component | Rule R-LIT-09: the failed delivery is recorded, the alternate service method is queued and the case moves to NOTICE_UNSERVED |"
+  },
+  {
+   "old": "The six legacy test case IDs, their Covers and their Data are kept in order and character for character.",
+   "new": "The six legacy test case IDs are kept in order and their Covers are kept; the Data of TC-E5-002-06 reads `decision record` where the legacy wording read `decision log`, and TC-E5-002-07 to -12 are added by this story."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19735",
+   "item": "DOR-RWB-S4-E5002-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add the full Given/When/Then rows of TC-E5-002-01 to -06 and of the new TC-E5-002-07 to -12 under tab Story test cases.",
+   "note": "Story side added contract and boundary cases TC-E5-002-07 and -08 in section 16; v8 rows are the remaining part."
+  },
+  {
+   "ruling": "R-19736",
+   "item": "DOR-RWB-S4-E5002-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Section 13 names the proof window, the notice period, the LITIGATION package on RulePackageInForce and the rwb-decision reference-data read, with DP-06 and DP-07.",
+   "note": "Parameter keys are Not specified in the source documents; the story says so."
+  },
+  {
+   "ruling": "R-19737",
+   "item": "DOR-RWB-S4-E5002-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 8 no longer names rwb_case, rwb_comms or rwb_decision; it states no write to any other owner's schema.",
+   "note": "Schema names removed from section 13; boundary expressed by owner."
+  },
+  {
+   "ruling": "R-19738",
+   "item": "DOR-RWB-S4-E5002-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC5 (X2 access refusal) and AC6 (X10 boundary) in section 7 with TC-E5-002-09; section 5 X2 and X10 now cite them; section 7 paragraph states owned criteria.",
+   "note": "X2 and X10 now covered by criteria; X2 keeps TC-E5-002-05."
+  },
+  {
+   "ruling": "R-19739",
+   "item": "DOR-RWB-S4-E5002-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "R-LIT-07, R-LIT-08, R-LIT-09 carry BR9, BR10, BR11; added coverage table for BR1 to BR11 with AC7, AC8, AC9 and TC-E5-002-10 to -12.",
+   "note": "Every rule now has a criterion and a test case row."
+  },
+  {
+   "ruling": "R-19740",
+   "item": "DOR-RWB-S4-E5002-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Recovery Workbench Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD, which section 10 already names, to Users Roles and Permissions v5.",
+   "note": "Role missing from Users Roles and Permissions v5; no story edit."
+  },
+  {
+   "ruling": "R-19741",
+   "item": "DOR-RWB-S4-E5002-APP-7",
+   "status": "Cross-document",
+   "section": "7, 11, 16",
+   "target": "LDM v9 and Data Classification v5",
+   "change": "Add served_result and decision_record as fields or entities, or align the story names to LDM v9. Story side: v_ace_pod read moved to rwb-source-data contract; decision-log wording changed to decision record.",
+   "note": "Story side corrected; LDM and Data Classification names still missing."
+  },
+  {
+   "ruling": "R-19742",
+   "item": "DOR-RWB-S4-E5002-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text of MSG-P1-001 is not in the given sources, so the story text cannot be aligned without inventing wording."
+  },
+  {
+   "ruling": "R-22173",
+   "item": "GAP-1597",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR3 states the proof stays with the notice in rwb-comms, reaches this service on rwb-source-data's contract and is matched to the notice by barcode; no writer of v_ace_pod is named.",
+   "note": "Ownership stated in BR3; the writer of v_ace_pod is left to the ACE team."
+  },
+  {
+   "ruling": "R-22555",
+   "item": "GAP-0437",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-S4-E5002-CON",
+   "change": "Publish the proof-record operation with path, shapes and error envelopes; add the notice proof write to the rwb-comms baseline; add LDM field IDs for the notice lifecycle state and the three case notice facts; fix LOV-DELIVERY to notice-state mapping; version the notice-period duration and proof window as reference rows with codes; record in P6 and S4 appendices that the v_ace_pod loop is the Epic 2 dispatch story; attach the requirement ID to FEAT-LIT-02 in the EP05 PRD.",
+   "note": "Contract, baseline, LDM, LOV, appendices and PRD items sit outside this story."
+  }
+ ]
+}

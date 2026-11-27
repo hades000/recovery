@@ -1,0 +1,106 @@
+{
+ "edits": [
+  {
+   "old": "    Then no such value reaches rwb_writeoff, the decision record, a log or a workflow input, and the reason is screened before it is stored",
+   "new": "    Then no such value reaches rwb_writeoff, the decision record, a log or a workflow input, and the reason is screened before it is stored\n\n  Scenario: AC7 A status change the model does not allow is refused with 409 (new, D-RCV-60)\n    Given the case is in a state other than WITH_COMMITTEE, or the decision event is not COMMITTEE_REJECTED\n    When the committee decision is taken\n    Then the system answers 409, nothing is written and the case keeps its state\n\n  Scenario: AC8 A request with no valid identity, with no right or for an unknown write-off is answered 401, 403 or 404 (new, D-RCV-60)\n    Given a request to the provided operations without a valid identity, from a role without the right, or for a writeOffId that does not exist\n    When the request reaches POST /write-offs/{writeOffId}/committee-decision\n    Then the system answers 401 with no valid identity, 403 with no right and 404 for an unknown writeOffId, with the platform error envelope, and nothing is written\n\n  Scenario: AC9 A replay of a write with the same Idempotency-Key is answered from the first answer (new, D-RCV-60)\n    Given a committee decision was written with an Idempotency-Key\n    When the same write is replayed with the same Idempotency-Key\n    Then no second record is written and the first answer is returned\n\n  Scenario: AC10 A retried or timed-out activity writes once (new, D-RCV-60)\n    Given the recordCommitteeDecision activity is retried or times out\n    When the workflow retries on its own schedule\n    Then nothing is written twice and no move is answered before the decision record is written\n\n  Scenario: AC11 A consumed call that fails or does not answer changes nothing (new, D-RCV-60)\n    Given the rwb-case or rwb-decision contract fails or does not answer inside 2 s\n    When the committee decision is taken\n    Then nothing is written, no move is answered and the caller sees 503 with the platform error envelope"
+  },
+  {
+   "old": "| X2 | The role does not hold the Write-off and posting right A | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC3, TC-E6-019-03 |",
+   "new": "| X2 | The role does not hold the Write-off and posting right A | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC3, TC-E6-019-03, TC-E6-019-09 |"
+  },
+  {
+   "old": "| X4 | The case is not at `WITH_COMMITTEE`, or the decision has already been taken | 409 and nothing is written for that case; a decision is not taken twice | None | AC1, X3 |",
+   "new": "| X4 | The case is not at `WITH_COMMITTEE`, or the decision has already been taken | 409 and nothing is written for that case; a decision is not taken twice | None | AC1, X3, AC7, TC-E6-019-11 |"
+  },
+  {
+   "old": "| X5 | The rwb-case or rwb-decision contract does not answer inside 2 s, or its breaker is open | The step retries on the workflow's own schedule; nothing is written and no move is answered; the caller sees 503 with the platform error envelope | None | AC1, X2 |",
+   "new": "| X5 | The rwb-case or rwb-decision contract does not answer inside 2 s, or its breaker is open | The step retries on the workflow's own schedule; nothing is written and no move is answered; the caller sees 503 with the platform error envelope | None | AC1, X2, AC10, AC11, TC-E6-019-14, TC-E6-019-15 |"
+  },
+  {
+   "old": "| X7 | A repeated `Idempotency-Key`, or the same decision taken twice | One record and one answer; the repeat answers the decision that exists and is counted | None | AC1 |",
+   "new": "| X7 | A repeated `Idempotency-Key`, or the same decision taken twice | One record and one answer; the repeat answers the decision that exists and is counted | None | AC1, AC9, TC-E6-019-13 |"
+  },
+  {
+   "old": "| X8 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC4, TC-E6-019-06, Section 17, BR5, BR6 |",
+   "new": "| X8 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC4, TC-E6-019-06, TC-E6-019-10, Section 17, BR5, BR6 |"
+  },
+  {
+   "old": "| TC-E6-019-08 | AC6, BR9 | Component | A decision reason carrying a name, an address, a contact value or an identity number; the reason is screened before it is stored and nothing of it reaches `rwb_writeoff`, the record, a log or a workflow input |",
+   "new": "| TC-E6-019-08 | AC6, BR9 | Component | A decision reason carrying a name, an address, a contact value or an identity number; the reason is screened before it is stored and nothing of it reaches `rwb_writeoff`, the record, a log or a workflow input |\n| TC-E6-019-09 | AC3, X2, Access | Component | A role without the Write-off and posting right A; 403 with MSG-P4-002, no read and no write |\n| TC-E6-019-10 | AC4, X8 | Component | A statement, a test and a component reaching a `v_ace_*` view, a `recovery_case` row and another service's schema; the grant refuses it and the build fails |\n| TC-E6-019-11 | AC7, X4 | Component | A case not at `WITH_COMMITTEE`, and a decision already taken; 409 and nothing written |\n| TC-E6-019-12 | AC8 | Component | A request with no valid identity, a role without the right and an unknown `writeOffId`; 401, 403 and 404 with the platform error envelope and nothing written |\n| TC-E6-019-13 | AC9, X7 | Component | The same `Idempotency-Key` replayed after a decision is written; no second record and the first answer returned |\n| TC-E6-019-14 | AC10, X5 | Component | The `recordCommitteeDecision` activity retried and timed out on the fake; one write and no move answered before the record |\n| TC-E6-019-15 | AC11, X5 | Component | The rwb-case or rwb-decision fake fails or does not answer inside 2 s; nothing written and 503 with the platform error envelope |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32944",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC10",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 (disallowed status change refused with 409) as the next free AC number; X4 covered-by and TC-E6-019-11 added."
+  },
+  {
+   "ruling": "R-32945",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC3",
+   "status": "Resolved",
+   "section": "5, 16",
+   "target": "",
+   "change": "",
+   "note": "X2 now also covered by TC-E6-019-09 (403, no read, no write) so the role refusal is not held by one test only."
+  },
+  {
+   "ruling": "R-32946",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC4",
+   "status": "Resolved",
+   "section": "5, 16",
+   "target": "",
+   "change": "",
+   "note": "X8 now also covered by TC-E6-019-10, a boundary test that the grant refuses ACE, recovery_case and foreign-schema statements."
+  },
+  {
+   "ruling": "R-32947",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC5",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Each BR1 to BR9 row already names its AC and TC in Covered by; architecture rules BR1, BR5 and BR6 are held by boundary test TC-E6-019-06."
+  },
+  {
+   "ruling": "R-32948",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 for 401, 403 and 404 on the provided operation with the platform error envelope; TC-E6-019-12 added."
+  },
+  {
+   "ruling": "R-32949",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC7",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 for replay with the same Idempotency-Key; X7 and TC-E6-019-13 now cover it."
+  },
+  {
+   "ruling": "R-32950",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC8",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for retried or timed-out activity writing once; X5 and TC-E6-019-14 now cover it."
+  },
+  {
+   "ruling": "R-32951",
+   "item": "NEWAC-RWB-S7-E6019-APP-AC9",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for a consumed call that fails or does not answer, nothing written and 503; X5 and TC-E6-019-15 now cover it."
+  }
+ ]
+}

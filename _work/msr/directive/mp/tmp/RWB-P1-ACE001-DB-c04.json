@@ -1,0 +1,100 @@
+{
+ "edits": [
+  {
+   "old": "- No approval is required to run a Draft migration on a development database; the migration reaches SIT once the tests in section 16 pass. DL43 is treated as accepted for this run and recorded as an assumption (ASM-3472).",
+   "new": "- No approval is required to run a Draft migration on a development database; the migration reaches SIT once the tests in section 16 pass. DL43 is treated as accepted for this run and recorded as an assumption (ASM-3472).\n- Until the Section B view migration is applied, the read flag rwb.dataengine.booking-facts stays off. The three Tier 2 fields principal_outstanding, settlement_booked_date and settlement_booked_amount answer fieldState NOT_AVAILABLE with no value, never a zero amount and never a default date (GAP-0596).\n- Before the Section B additions land in an environment, freshness is read from v_ace_batch_status populated with synthetic batch rows in system test only. An environment without the view shows the data product as not stamped and never infers freshness from a row count, a file or a data date (GAP-1507).\n- P1 writes no other service's schema. The cut-over package layout and the cut-over record are agreed at the cut-over rehearsal, and the extract carries legacy keys only (GAP-0532)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21814",
+   "item": "GAP-2170",
+   "status": "Cross-document",
+   "section": "",
+   "target": "API catalog (API-P1-003 entry) and the P1 cut-over story for RWB-DM-007",
+   "change": "Add API-P1-003 to the API catalog for the cut-over package hand-off. Set flag rwb.source-data.dm007-cutover to default off. Pipeline calls API-P1-002, API-P1-003 and API-P1-010 as the proposed fix states.",
+   "note": "Cut-over dump, package format, evidence store and API surface belong to the cut-over story and the API catalog, not this DB story."
+  },
+  {
+   "ruling": "R-21818",
+   "item": "GAP-0532",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "Added precondition: P1 writes no other service's schema; package layout and cut-over record agreed at rehearsal; extract carries legacy keys only.",
+   "note": "Section 3 now states the single-writer rule and that the extract carries legacy keys only."
+  },
+  {
+   "ruling": "R-21955",
+   "item": "GAP-1507",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "Added precondition: freshness read from v_ace_batch_status with synthetic rows in system test only; environments without the view show not stamped.",
+   "note": "Section 3 now names the pre-deployment freshness behaviour and forbids inferring freshness from row counts, files or data dates."
+  },
+  {
+   "ruling": "R-22022",
+   "item": "GAP-0777",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Platform DB story for the rwb-access schema slice, and RWB-P4-AD001-CON",
+   "change": "Grant to a login named rwb_access per the section R4 pattern and let the platform DB story set the real name and pool. Keep mapping rows in role.entra_group, with TSD P4 v3 outranking FSD v3. Read ACE group facts only through the P1 contract.",
+   "note": "Login name, mapping location and column set of the ACE group view are settled in the platform and P4 stories."
+  },
+  {
+   "ruling": "R-22177",
+   "item": "GAP-0579",
+   "status": "Cross-document",
+   "section": "",
+   "target": "P1 proof-of-delivery read contract story and TSD P1 v3",
+   "change": "Answer 200 with no row, ten field names marked not available with reason SECTION_B_NOT_DEPLOYED, DP07 STALE and MSG-P1-001, behind platform flag rwb.dataengine.pod-read. Never a guessed date or fallback to data_as_of.",
+   "note": "The read answer shape and flag name belong to the P1 read contract, not this DB migration story."
+  },
+  {
+   "ruling": "R-22245",
+   "item": "GAP-0896",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Template Specification, DL39 retirement rule, and sign-in story RWB-P4-E1022-APP",
+   "change": "Platform administrator owns the DEV identity list. Fix the synthetic key format in the Service Template Specification. Record the retirement rule with DL39. Sign-in story states the identity resolves to role.entra_group rows only.",
+   "note": "Test identity owner, key format and retirement rule sit in the template, DL39 and the sign-in story."
+  },
+  {
+   "ruling": "R-22345",
+   "item": "GAP-0662",
+   "status": "Cross-document",
+   "section": "",
+   "target": "P2 integration stories (rwb-integration contract on base /api/recovery/integration/v1) and the P1, P3 and P4 contract stories",
+   "change": "Read holding and DP02 freshness via rwb-source-data, parties via rwb-case, authorise and masking via rwb-access, audit via ACE Common INT-22. Flag rwb.integration.customer-products. Fix field names in P1, P3 and P4 contracts.",
+   "note": "Endpoint, contract field names, flag and login belong to the P2 integration and contract stories."
+  },
+  {
+   "ruling": "R-22384",
+   "item": "GAP-0596",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "Added precondition: flag rwb.dataengine.booking-facts stays off until the Section B migration; three Tier 2 fields answer NOT_AVAILABLE with no value.",
+   "note": "Section 3 now names the flag and the per-field answer. The RWB-P2-E2007-CON fix sits in the P2 contract."
+  },
+  {
+   "ruling": "R-22441",
+   "item": "GAP-3194",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Service Story Catalog v1 (ACE DB stories) and Ownership Map row 121",
+   "change": "Raise one ACE DB story per service lacking one (S2, S4, S5, S6, S7, P6, P8) for the column drop, or attach the drop to the creating APP story. Cite the chosen story on row 121 before wave 2.",
+   "note": "Seven services have no story for the 42-column drop. Catalog and ownership map must be updated before wave 2."
+  },
+  {
+   "ruling": "R-22942",
+   "item": "GAP-0244",
+   "status": "Cross-document",
+   "section": "",
+   "target": "P1 rwb-source-data contract story (customer operations)",
+   "change": "Add a contact read to the rwb-source-data customer contract, either GET /customers/{id}/contacts or contact points in the customer payload. Cite that operation in the sheet Read paths.",
+   "note": "No contact or consent operation exists in the rwb-source-data contract. Fix belongs in the P1 CON story."
+  }
+ ]
+}

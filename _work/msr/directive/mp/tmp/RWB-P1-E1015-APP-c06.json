@@ -1,0 +1,111 @@
+{
+ "edits": [
+  {
+   "old": "| None | AC7 (other slice) |",
+   "new": "| None | AC19 |"
+  },
+  {
+   "old": "| AC11 (other slice) |",
+   "new": "| AC20 |"
+  },
+  {
+   "old": "| AC10 (other slice) |",
+   "new": "| AC21 |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E1-015-09 |",
+   "new": "| MSG-P4-002 | AC22; TC-E1-015-09 |"
+  },
+  {
+   "old": "Then the daily jobs start for business date 2026-11-30",
+   "new": "Then the daily jobs start for business date 2026-11-30\n\n  Scenario: AC19 A batch completes one minute before the expected-by time (X5)\n    Given the batch row for DP01 for business date 2026-11-30 completes at 07:59\n    When the freshness step runs at 08:00\n    Then the system does not flag DP01 stale\n\n  Scenario: AC20 One source of a multi-source product is late (X7)\n    Given a multi-source data product is fed by sources CCMS and SVAF\n    Given CCMS has a COMPLETED batch for business date 2026-11-27\n    Given SVAF has COMPLETED batches only up to business date 2026-11-20\n    When the freshness step runs\n    Then the product carries business date 2026-11-20\n    Then the product is flagged stale\n    Then AceDataLate names SVAF as the late source\n\n  Scenario: AC21 A source that the day's jobs do not read is late (X8)\n    Given a source that the daily jobs for business date 2026-11-30 do not read has no COMPLETED batch for that date\n    When the completeness gate runs\n    Then the gate returns COMPLETE\n    Then only the products that read that source are flagged stale\n\n  Scenario: AC22 A role without the right reads the stamps (X9)\n    Given role RW-REFADM does not hold the right to read the freshness stamps\n    When role RW-REFADM calls GET /data-products/freshness\n    Then the call is refused with 403 and MSG-P4-002\n\n  Scenario: AC23 The provided operations answer 401, 403 and 404\n    Given GET /data-products/freshness is called without credentials, by a role without the right, and for a data product that does not exist\n    When each call is made\n    Then the answers are 401, 403 and 404 respectively\n\n  Scenario: AC24 A write is replayed with the same idempotency key\n    Given a write request has been accepted under an idempotency key\n    When the same write is replayed with the same idempotency key\n    Then the earlier answer is returned\n    Then no second write is made\n\n  Scenario: AC25 An activity is retried or times out\n    Given an activity of AceIngestCheckWorkflow fails with a retryable error or exceeds its timeout\n    When the activity is retried or times out\n    Then no second AceDataReady or AceDataLate event is published\n    Then the previous stamp stays in use\n\n  Scenario: AC26 A status change the model does not allow is refused\n    Given a status change of DP01 that the status model does not allow is requested\n    When the change is submitted\n    Then the change is refused\n    Then the stored status of DP01 stays unchanged"
+  },
+  {
+   "old": "| TC-E1-015-21 | AC18 | End to end | Late batch for DP01 at 08:40 after the stale flag |",
+   "new": "| TC-E1-015-21 | AC18 | End to end | Late batch for DP01 at 08:40 after the stale flag |\n| TC-E1-015-22 | AC19 | End to end | DP01 batch completes at 07:59; expected-by 08:00; freshness step at 08:00 |\n| TC-E1-015-23 | AC20 | End to end | Multi-source product; CCMS COMPLETED 2026-11-27; SVAF COMPLETED only up to 2026-11-20 |\n| TC-E1-015-24 | AC21 | End to end | Source not read by the day's jobs has no COMPLETED batch for 2026-11-30; completeness gate run |\n| TC-E1-015-25 | AC22 | Component | RW-REFADM calls GET /data-products/freshness without the right; refused with 403 and MSG-P4-002 |\n| TC-E1-015-26 | AC23 | Contract | GET /data-products/freshness called without credentials, by a role without the right, and for an unknown data product; answers 401, 403, 404 |\n| TC-E1-015-27 | AC24 | Component | Write replayed with the same idempotency key |\n| TC-E1-015-28 | AC25 | Component | Activity of AceIngestCheckWorkflow retried and exceeding its timeout |\n| TC-E1-015-29 | AC26 | Component | Status change the status model does not allow, requested for DP01 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30201",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC16",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC19 (X5) to section 7 and TC-E1-015-22 to section 16; X5 Covered by now AC19.",
+   "note": "AC7 is not in this story. AC19 is the next free number after AC18; X5 now points to AC19 with its test row."
+  },
+  {
+   "ruling": "R-30202",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC17",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC20 (X7) to section 7 and TC-E1-015-23 to section 16; X7 Covered by now AC20.",
+   "note": "AC11 is not in this story. AC20 added with the multi-source test data from TC-E1-015-12; X7 now points to AC20."
+  },
+  {
+   "ruling": "R-30203",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC18",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC21 (X8) to section 7 and TC-E1-015-24 to section 16; X8 Covered by now AC21.",
+   "note": "AC10 is not in this story. AC21 added for an unread late source; X8 now points to AC21 with its test row."
+  },
+  {
+   "ruling": "R-30204",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC19",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC22 (X9) to section 7 and TC-E1-015-25 to section 16; X9 Covered by now AC22; TC-E1-015-09 kept.",
+   "note": "X9 had only TC-E1-015-09. AC22 added with the 403 and MSG-P4-002 answer; X9 now lists AC22 and TC-E1-015-09."
+  },
+  {
+   "ruling": "R-30205",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC20",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "No edit. BR9, BR10 and BR11 are already covered by AC12, AC13, AC14 and TC-E1-015-15 to TC-E1-015-17.",
+   "note": "The item says BR9 to BR11 have no criterion, but the story already has AC12 to AC14 and TC-E1-015-15 to -17 for them."
+  },
+  {
+   "ruling": "R-30206",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC21",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC23 to section 7 (answers 401, 403, 404 of GET /data-products/freshness) and TC-E1-015-26 to section 16.",
+   "note": "Added AC23 for the 401, 403 and 404 answers of the freshness operation, with its contract test row TC-E1-015-26."
+  },
+  {
+   "ruling": "R-30207",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC22",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC24 (write replay with same idempotency key) to section 7 and TC-E1-015-27 to section 16.",
+   "note": "Added AC24 for an idempotent replay of a write, with test row TC-E1-015-27."
+  },
+  {
+   "ruling": "R-30208",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC23",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC25 (activity retry and timeout) to section 7 and TC-E1-015-28 to section 16.",
+   "note": "Added AC25 for a retried or timed-out AceIngestCheckWorkflow activity, with test row TC-E1-015-28."
+  },
+  {
+   "ruling": "R-30209",
+   "item": "NEWAC-RWB-P1-E1015-APP-AC24",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC26 (disallowed status change refused) to section 7 and TC-E1-015-29 to section 16.",
+   "note": "Added AC26 for a status change the model does not allow, with test row TC-E1-015-29."
+  }
+ ]
+}

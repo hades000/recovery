@@ -1,0 +1,41 @@
+{
+ "edits": [
+  {
+   "old": "    Then no ACE call is made and nothing changes",
+   "new": "    Then no ACE call is made and nothing changes\n\n  Scenario: AC11 Read guardrails (new in this story; covers BR12 to BR18)\n    Given the rwb-integration store and task queue are in place with no grant on recovery\n    When the caller reads GET /cases/{caseId}/plan-status for \"RW-2026-000310\" and the read is repeated\n    Then no table row, no outbox row, no decision record and no cached answer is written\n    Then the operation is served on /api/recovery/integration/v1 on the rwb-integration task queue with no Schedule or workflow\n    Then rwb_integration holds no grant on recovery and no foreign key into another schema\n    Then the status list, batch size, timeout, flag and breaker thresholds are read as rows and parameters\n    Then no account number or personal data appears in an event, log line or test report\n    Then the answer reports live true only for a value read from ACE and never returns a stored value\n    Then the plan section is reached only through the gateway-bff composite route\n\n  Scenario: AC12 Caller not authenticated (new in this story; covers the 401 answer)\n    Given the caller holds no valid session\n    When the caller calls GET /cases/{caseId}/plan-status for \"RW-2026-000310\"\n    Then the response is 401\n    Then no ACE call is made and nothing changes\n\n  Scenario: AC13 Status change not allowed (new in this story; covers a disallowed transition)\n    Given the case holds plan \"TDR-SYN-0310\" with status \"APPROVED\" in ACE\n    When the caller requests a change of plan \"TDR-SYN-0310\" to a status the model does not allow through this operation\n    Then the change is refused with response code \"Not specified in the source documents (NEWAC-RWB-P2-E2002-APP-AC13)\"\n    Then the plan status is unchanged"
+  },
+  {
+   "old": "| TC-E2-002-13 | Section 12.7 tables (ASM-3438) | Component | Boundary value of each table of section 12.7; test data not specified in the source documents (DOR-RWB-P2-E2002-APP-12) |",
+   "new": "| TC-E2-002-13 | Section 12.7 tables (ASM-3438) | Component | Boundary value of each table of section 12.7; test data not specified in the source documents (DOR-RWB-P2-E2002-APP-12) |\n| TC-E2-002-19 | AC11, BR12, BR13, BR14, BR15, BR16, BR17, BR18 | Component | Not specified in the source documents (NEWAC-RWB-P2-E2002-APP-AC11) |\n| TC-E2-002-20 | AC12 | Component | Call with no valid session to GET /cases/{caseId}/plan-status; answered 401 |\n| TC-E2-002-21 | AC13 | Component | Status change to a value the model does not allow requested through the operation; refused and status unchanged |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30450",
+   "item": "NEWAC-RWB-P2-E2002-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC11 added in section 7 for BR12 to BR18 with TC-E2-002-19 in section 16; test data not specified in source documents."
+  },
+  {
+   "ruling": "R-30451",
+   "item": "NEWAC-RWB-P2-E2002-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC12 added in section 7 for the 401 answer with TC-E2-002-20 in section 16."
+  },
+  {
+   "ruling": "R-30452",
+   "item": "NEWAC-RWB-P2-E2002-APP-AC13",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC13 added in section 7 for a refused disallowed status change with TC-E2-002-21; response code not specified in source documents."
+  }
+ ]
+}

@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "| DF-ACE-001 to DF-ACE-042 | v_ace_batch_status | the product date of the ACE batch | Read only |",
+   "new": "| Not specified in the source documents (CG-ALL-8641) | v_ace_batch_status | the product date of the ACE batch | Read only |"
+  },
+  {
+   "old": "2. `TreatmentWorkflow`: the break branch opens the step, calls `EvaluateRules` and the rule set in force returns the `RESTRUCTURE` row that applies to `CURE_PERIOD_EXPIRED`, with the rule ID and the package version (R-RES-29; R-RES-36 where the count is missing).",
+   "new": "2. `TreatmentWorkflow`: the break branch opens the step, calls `EvaluateRules` and the rule set in force returns the `RESTRUCTURE` row that applies to `CURE_PERIOD_EXPIRED`, with the rule ID and the package version (R-RES-29; R-RES-36 where the count is missing). The rule rows read in this step are reference data read through the rule loader (DF-REF-001 to DF-REF-015) under DP-06 and DP-07; the parameters read are Not specified in the source documents (DOR-RWB-S2-E3011-APP-20)."
+  },
+  {
+   "old": "9. The officer reads the broken state, the break count and the reason on SCR-14 through the gateway-bff composite route and through the treatment read of RWB-S2-E3001-APP, and the case owner works the returned case (DP-19).",
+   "new": "9. The officer reads the broken state, the break count and the reason on SCR-14 through the gateway-bff composite route and through the treatment read of RWB-S2-E3001-APP, and the case owner works the returned case (DP-19). SCR-14 shows an empty state when no broken plan is held, a loading state while the read runs, an error state when the read fails and a no-access state for a role without the right, which shows MSG-P4-002 (X6)."
+  },
+  {
+   "old": "The break count has no field, no identifier and no column in the Logical Data Model (GAP-2668; ASM-4383).",
+   "new": "The break count has no field, no identifier and no column in the Logical Data Model (GAP-2668; ASM-4383). The personal-data class of the payment fields read from the view is Not specified in the source documents (DOR-RWB-S2-E3011-APP-11); none is copied into a column of this service."
+  },
+  {
+   "old": "    Given the ACE payment view returns no payment of the plan inside the cure period",
+   "new": "    Given the rwb-source-data contract fake returns no payment of the plan inside the cure period"
+  },
+  {
+   "old": "| ACE payment view fixture | `v_ace_payment` and `v_ace_batch_status` | No payment in the cure window; a payment inside it; a partial payment; a product dated yesterday; an unreachable view |",
+   "new": "| rwb-source-data contract fake (ACE payment view) | `v_ace_payment` and `v_ace_batch_status` | No payment in the cure window; a payment inside it; a partial payment; a product dated yesterday; an unreachable view |"
+  },
+  {
+   "old": "The payment fixture and the case-signal fake are the Day-1 unblockers: the build and every test run against them, and no test reads a production view or needs a live case.",
+   "new": "The rwb-source-data contract fake and the case-signal fake are the Day-1 unblockers: the build and every test run against them, and no test reads a production view or needs a live case."
+  },
+  {
+   "old": "| X2 | A payment of the plan is found inside the cure window | The step reports \"payment found\", writes nothing and leaves the clear to R-RES-28 | None | Section 4 |",
+   "new": "| X2 | A payment of the plan is found inside the cure window | The step reports \"payment found\", writes nothing and leaves the clear to R-RES-28 | None | AC5 |"
+  },
+  {
+   "old": "| X5 | The record is refused for a missing or invalid field | Nothing is written, the field is named, the stage stays where it was | MSG-P7-009 | Section 12.8 |",
+   "new": "| X5 | The record is refused for a missing or invalid field | Nothing is written, the field is named, the stage stays where it was | MSG-P7-009 | AC6 |"
+  },
+  {
+   "old": "| X6 | A role without the right tries to re-run the step or read its result | 403 from the access guard and nothing changes; the step itself runs unattended under the service identity | MSG-P4-002 | Section 10 |",
+   "new": "| X6 | A role without the right tries to re-run the step or read its result | 403 from the access guard and nothing changes; the step itself runs unattended under the service identity | MSG-P4-002 | AC7 |"
+  },
+  {
+   "old": "| X7 | A second case signal arrives while the branch is running | The inbox dedupes by the cloud event id of the case signal and the activity is idempotent on the treatment, the rule version and the break count, so no second mark is written | None | Section 12.5 |",
+   "new": "| X7 | A second case signal arrives while the branch is running | The inbox dedupes by the cloud event id of the case signal and the activity is idempotent on the treatment, the rule version and the break count, so no second mark is written | None | AC8 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Payment found inside the cure window\n    Given the rwb-source-data contract fake returns a payment of the plan inside the cure period\n    When the detection step runs\n    Then the step reports \"payment found\", writes nothing and leaves the clear to R-RES-28\n\n  Scenario: AC6 Record refused for a missing or invalid field\n    Given the decision-record library mock returns the refusal MSG-P7-009 for a missing or invalid field\n    When the action is taken\n    Then nothing is written, the field is named and the stage stays where it was\n\n  Scenario: AC7 Role without the right is refused\n    Given a role without the right tries to re-run the step or read its result\n    When the request is made\n    Then 403 from the access guard, nothing changes and the user sees MSG-P4-002\n\n  Scenario: AC8 Second case signal while the branch is running\n    Given a second case signal arrives with the same cloud event id while the branch is running\n    When the second signal is received\n    Then the inbox dedupes it by the cloud event id and no second mark is written"
+  },
+  {
+   "old": "| TC-E3-011-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E3-011-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E3-011-07 | Contract (§12 operations, events and activities) | Component | Workflow, activities and stage report against the RWB-S2-E3011-CON element fake |\n| TC-E3-011-08 | Table boundary (§12.7; ASM-3438) | Component | Writes only `treatment` and `decision_record`; reads only the views and fields named in §11 |\n| TC-E3-011-09 | AC5 | Component | A payment of the plan found inside the cure window |\n| TC-E3-011-10 | AC6 | Component | Record refused for a missing or invalid field |\n| TC-E3-011-11 | AC7 | Component | A role without the right is refused |\n| TC-E3-011-12 | AC8 | Component | A second case signal while the branch is running |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12287",
+   "item": "CG-ALL-8641",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Field ID range replaced by a placeholder; LDM v9 gives no v_ace_batch_status field IDs in the source documents."
+  },
+  {
+   "ruling": "R-12288",
+   "item": "CG-ALL-8642",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity detectBrokenPlan (queue rwb-treatment) to the Activities sheet, or name the catalogued activity instead.",
+   "note": "Story keeps the activity name; the catalog row is missing."
+  },
+  {
+   "ruling": "R-12289",
+   "item": "CG-ALL-8644",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8 (next version)",
+   "change": "Add rows TC-E3-011-01 to TC-E3-011-06 to Story test cases, with Given, When and Then copied from the criterion each covers.",
+   "note": "Story rows are already listed in section 16; the v8 rows are missing."
+  },
+  {
+   "ruling": "R-12291",
+   "item": "CG-ALL-8646",
+   "status": "Resolved",
+   "section": "7; 12.8",
+   "target": "",
+   "change": "",
+   "note": "AC1 Given and the 12.8 fixture now sit on the rwb-source-data contract fake; production DP-05 reads are unchanged."
+  },
+  {
+   "ruling": "R-19401",
+   "item": "DOR-RWB-S2-E3011-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 9 now states SCR-14 empty, loading, error and no-access states; no-access shows MSG-P4-002 per X6."
+  },
+  {
+   "ruling": "R-19402",
+   "item": "DOR-RWB-S2-E3011-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Personal-data class of read payment fields added as Not specified in the source documents; no field is copied."
+  },
+  {
+   "ruling": "R-19403",
+   "item": "DOR-RWB-S2-E3011-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E3-011-07 for the section 12 contract and TC-E3-011-08 for the section 12.7 table boundary (ASM-3438)."
+  },
+  {
+   "ruling": "R-19404",
+   "item": "DOR-RWB-S2-E3011-APP-18",
+   "status": "Not applied",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Section 18 text is not in this chunk; DL10 and ASM-2250, ASM-2357, ASM-2377, ASM-2863 need its row in a later chunk."
+  },
+  {
+   "ruling": "R-19405",
+   "item": "DOR-RWB-S2-E3011-APP-20",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 2 names the rule rows, DP-06 and DP-07; parameters are Not specified in the source documents as a placeholder."
+  },
+  {
+   "ruling": "R-19406",
+   "item": "DOR-RWB-S2-E3011-APP-3",
+   "status": "Resolved",
+   "section": "5; 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 to AC8 for X2, X5, X6, X7 with TC-E3-011-09 to -12; section 5 Covered by now names them."
+  }
+ ]
+}

@@ -18,11 +18,13 @@ SCB Collections and Recovery. Henka Group, 22 November 2026
 | Structure | ISO/IEC/IEEE 29148, until the SCB X requirement template is adopted (DL13) |
 | Change | Version 4 re-bases the program requirements on the ACE database under D-RCV-35 (U1 to U5) and ADR-010, which supersedes ADR-005. Sections 1.1, 5 (intro and 5.1 to 5.3), 6.3, 6.5 (NFR-032), 7 and 9 change: section 5.1 states the four-tier read model and its counts, 5.2 is outbound only and 5.3 states the business-key link to ACE; the Workbench runs no inbound source load, reads source data only through the read-only recovery.v_ace_* views, and leaves Excel and SharePoint trackers to the Cutover plan. Requirement IDs are kept. REQ-RDF-005 and 006 are marked removed with their later home, and REQ-RDF-008 is re-worded to the reconciliation duty that stays in the Workbench, leaving 229 of 231 requirements live. DL43 is added as open. Other sections are unchanged. |
 | Change (version 5) | Version 5 is the D-RCV-60 microservice realignment. Requirement IDs, requirement text, targets, decision dates and the numbering of sections 1 to 9 are unchanged. Section 7 restates the three constraints that D-RCV-60 supersedes: the platform shape, the schema per service and the workflow engine. In section 9 the four owner cells that named persons are replaced by the placeholder in section 12 (root rule 4). New section 10 gives the delivery model: 19 service epics, seven platform and five integration epics, four waves and the contract-first build order. New section 11 traces every business requirement to its service epic and its business epic. New section 12 lists the gaps and assumptions this version raises. Release dates are marked tentative (U7, DL48). |
+| Change (update of 26 November 2026) | Version 5 is updated in place from its source documents. Section 2.1 adds the 27 business measures; section 6.2 adds NFR-079 and NFR-080, so section 6 holds 80 non-functional requirements; section 9 adds fifteen open decisions from the Decision Log v11; section 12 prints the register identifiers and adds section 12.3; new sections 13 to 16 carry the 32 regulatory obligations, the 42 audit findings, the 44 controls and the 14 reports. The ACE DB additions are named by DL43 and the one backlog story code is replaced by the Epic 1 requirement ID. Requirement IDs, requirement text and the numbering of sections 1 to 12 do not change. |
 
 | Version | Date | Change | Author |
 |---|---|---|---|
 | 4 | 15 November 2026 | Version 4, as described in the Change row above | Henka Group |
 | 5 | 22 November 2026 | D-RCV-60 microservice realignment | T3 Code / OpenCode / DeepSeek v4.1 Flash |
+| 5 (update) | 26 November 2026 | Updated in place from the source documents, as in the Change row above | Henka Group |
 
 
 # 1. Purpose and scope
@@ -66,6 +68,40 @@ The Workbench is measured on the 2027 targets below. Each measure is read from t
 | Manual processes removed | Near zero | 80% of the selected list |
 | Audit findings and fraud cases | 50 | 13 |
 | NPA sales cycle | 1,486 days | 1,095 days |
+
+## 2.1 Full measure set
+
+The eight measures above are the program's headline targets. The Business Measures and Targets v2 workbook holds 27 measures; all of them are listed here with the baseline and the 2027 target as the workbook states them. A value of To set is copied as the workbook writes it: the baseline or the target has not been set (GAP-3260; ASM-5686). The definitions, formulas, sources and quarterly path stay in the workbook.
+
+| ID | Group | Measure | Unit | Baseline | 2027 target | Direction | Owner |
+|---|---|---|---|---|---|---|---|
+| BM-01 | Outcome | Recovery rate on NPL | % | 66.3% | 73.0% | Up | Chief Debt Recovery Management Office |
+| BM-02 | Outcome | Recovery rate after write-off | % | To set | To set | Up | Finance and CFO delegate |
+| BM-03 | Outcome | Forward flow rate, bucket 3 | % | 25.7% | To set | Down | Product heads |
+| BM-04 | Outcome | Cure rate, total | % | To set | To set | Up | Product heads |
+| BM-05 | Outcome | Cure rate, restructuring | % | To set | To set | Up | Product heads |
+| BM-06 | Outcome | Restructure performing | % | To set | To set | Up | Product heads |
+| BM-07 | Outcome | First payment success after restructure | % | To set | To set | Up | Product heads |
+| BM-08 | Outcome | Loss on settlement | % | To set | To set | Down | Product heads |
+| BM-09 | Outcome | Loss on repossession | % | To set | To set | Down | Head of Asset Liquidity |
+| BM-10 | Outcome | Loss on NPL sale | % | To set | To set | Down | Head of Asset Liquidity |
+| BM-11 | Cost | Cost to collect | % | To set | To set | Down | Finance and CFO delegate |
+| BM-12 | Cost | Agency cost efficiency | Ratio | To set | To set | Up | Partner and agency manager |
+| BM-13 | Speed | Litigation turnaround | days | 21 | 6 | Down | Head of Litigation |
+| BM-14 | Speed | Deed in lieu turnaround | days | 26 | 12 | Down | Head of NPA |
+| BM-15 | Speed | Restructure turnaround | days | 23 | 5 | Down | Product heads |
+| BM-16 | Speed | Debt sale turnaround | days | To set | 45 | Down | Head of Asset Liquidity |
+| BM-17 | Speed | NPA sales cycle | days | 1,486 | 1,095 | Down | Head of NPA |
+| BM-18 | Control | Audit findings and fraud cases | count | 50 | 13 | Down | Chief Debt Recovery Management Office |
+| BM-19 | Control | Decisions within the delegation of authority | % | To set | 100.0% | Up | Risk |
+| BM-20 | Control | Cases with a breached prescription date | count | To set | 0 | Down | Head of Litigation |
+| BM-21 | Operations | Manual processes removed | % | 0.0% | 80.0% | Up | Business lead |
+| BM-22 | Operations | Cases inside the service level | % | To set | To set | Up | Team managers |
+| BM-23 | Operations | Cases per owner against the cap | cases | To set | To set | Within cap | Team managers |
+| BM-24 | Operations | Recommendations accepted | % | To set | To set | Up | Center of excellence |
+| BM-25 | Operations | Agent fallback rate | % | To set | To set | Down | Risk and model risk officer |
+| BM-26 | Data | Loads on time and complete | % | To set | 99.0% | Up | Data steward and data product owner |
+| BM-27 | Data | Reconciliation breaks | count | To set | 0 | Down | Data steward and data product owner |
 
 
 # 3. Users
@@ -115,20 +151,20 @@ Every role, its permissions and the release that gives it real users are in the 
 
 P1 is the read-only data position for the whole program. ACE ingests every source and holds it; the Workbench reads it only through SELECT-only recovery.v_ace_* views and holds only Workbench-owned data: the case, its decisions, reference data and the extension tables (D-RCV-35, ADR-010).
 
-The read model has four tiers. Tier 1 is 22 ACE tables that exist today; the recovery data in them is read through 16 Section A views, and the Workbench never alters them. Tier 2 is 14 ACE tables and 12 columns the ACE team adds under RWB-ACE-001 for 80 source fields; the new tables are read through 14 Section B views and the new columns extend v_ace_account, v_ace_customer and v_ace_efs_action. Tier 3 is 4 Workbench extension tables keyed by ACE business keys. Tier 4 is 88 retained Workbench tables. The recovery schema is 92 tables; with the 30 views the dictionary holds 122 sys_objects and 1,366 sys_fields.
+The read model has four tiers. Tier 1 is 22 ACE tables that exist today; the recovery data in them is read through 16 Section A views, and the Workbench never alters them. Tier 2 is 14 ACE tables and 12 columns the ACE team adds under the ACE DB additions (DL43) for 80 source fields; the new tables are read through 14 Section B views and the new columns extend v_ace_account, v_ace_customer and v_ace_efs_action. Tier 3 is 4 Workbench extension tables keyed by ACE business keys. Tier 4 is 88 retained Workbench tables. The recovery schema is 92 tables; with the 30 views the dictionary holds 122 sys_objects and 1,366 sys_fields.
 
-Two migrations carry the views, because a view cannot be created over a table that does not exist. Section A ships with RWB-E1-069, the next free sequence after the V0001 baseline. Section B ships when RWB-ACE-001 lands, and until then the features that read the Tier 2 additions stay behind their flags. DL43 is open: the ACE team has yet to accept the RWB-ACE-001 scope and its dates. No copy, load or tracker table remains in the recovery schema; source content is read through the views and the trackers are retired through the Cutover plan.
+Two migrations carry the views, because a view cannot be created over a table that does not exist. Section A ships with the read-only ACE source views requirement of Epic 1 (BR-E1-020), the next free sequence after the V0001 baseline. Section B ships when the ACE DB additions (DL43) land, and until then the features that read the Tier 2 additions stay behind their flags. DL43 is open: the ACE team has yet to accept the scope of the ACE DB additions and its dates. No copy, load or tracker table remains in the recovery schema; source content is read through the views and the trackers are retired through the Cutover plan.
 
 | ID | Requirement | Priority | Owner | Epic |
 |---|---|---|---|---|
 | REQ-RDF-001 | Recovery data is held in 14 data products, each with exactly one named system of record, ACE (ingested from the named source) or the Workbench, and one named owner. Source data in a data product is read from the ACE database through the read-only recovery.v_ace_* views and is not copied into the Workbench (D-RCV-35, ADR-010). | Must | Data steward and data product owner | E1 |
 | REQ-RDF-002 | Account balance, arrears, payments and classification for every account at 90 or more days past due are read from ACE through v_ace_account and v_ace_payment, current to the latest completed ACE batch for the previous working day. | Must | Data steward and data product owner | E1 |
 | REQ-RDF-003 | Collections contact history, promises and case status from EFS are read from ACE through v_ace_efs_action and v_ace_efs_assignment, so that the case carries what happened before day 90. | Must | Data steward and data product owner | E1 |
-| REQ-RDF-004 | Collateral records and appraisal values are available on the case without a person looking them up in CCMS or SVAF. ACE ingests them under RWB-ACE-001, and the Workbench reads them through v_ace_collateral, v_ace_collateral_detail and v_ace_valuation (DL43). The Workbench's acceptance of an appraisal is held in valuation_ext. | Must | Data steward and data product owner | E1 |
+| REQ-RDF-004 | Collateral records and appraisal values are available on the case without a person looking them up in CCMS or SVAF. ACE ingests them under the ACE DB additions (DL43), and the Workbench reads them through v_ace_collateral, v_ace_collateral_detail and v_ace_valuation (DL43). The Workbench's acceptance of an appraisal is held in valuation_ext. | Must | Data steward and data product owner | E1 |
 | REQ-RDF-005 | Removed by D-RCV-35 (U5). Excel and SharePoint trackers leave system scope. Later home: the tracker retirement procedure in the Cutover plan. Was: every recovery team's Excel file, SharePoint list and local file is listed with its owner, fields and update cycle, and each one has a decision to load it or record it as out of scope. | Removed | Program manager | E1 |
 | REQ-RDF-006 | Removed by D-RCV-35 (U5). No tracker is loaded into the Workbench. Later home: the Cutover plan, which retires each local copy with the owner's confirmation and a read-only archive. Was: every file with a load decision is loaded, its row counts reconciled, and its local copy retired with the owner's confirmation and a read-only archive kept. | Removed | Data steward and data product owner | E1 |
 | REQ-RDF-007 | The case list reconciles daily to the count of accounts at 90 or more days past due in v_ace_account, with no variance (DL25), and every business key on a Workbench table resolves to an ACE row. | Must | Data steward and data product owner | E1 |
-| REQ-RDF-008 | Data quality checks on source data run in ACE ingestion (RWB-ACE-001). The Workbench reports reconciliation breaks, referential completeness and its quality measures, each break with a reason visible to the data product owner. | Must | Data steward and data product owner | E1 |
+| REQ-RDF-008 | Data quality checks on source data run in ACE ingestion (the ACE DB additions, DL43). The Workbench reports reconciliation breaks, referential completeness and its quality measures, each break with a reason visible to the data product owner. | Must | Data steward and data product owner | E1 |
 | REQ-RDF-009 | Every data product carries a freshness stamp taken from the ACE batch record (v_ace_batch_status), and every decision records the freshness of the data it used. | Must | Center of excellence | E1 |
 | REQ-RDF-010 | Access to each data product is controlled per role, and personal data is masked by role in line with PDPA. The recovery service identity holds SELECT on the recovery.v_ace_* views only, and the customer identification number leaves ACE masked. | Must | Compliance | E1 |
 | REQ-RDF-011 | Every data product has a catalog entry stating its definition, owner, system of record, refresh cycle and retention, and, for source data, the ACE table and the view it is read through. | Must | Data steward and data product owner | E1 |
@@ -450,7 +486,7 @@ P3 covers the case and workflow layer, which the Workbench owns. A case links to
 
 # 6. Non-functional requirements
 
-78 non-functional requirements. Proposed targets apply until the bank sets a value. Open targets are held under DL11, and retention and protection targets under DL26.
+80 non-functional requirements. NFR-079 and NFR-080 are added from the Non Functional Specification v4, where D-RCV-60 states the one-hop call rule (GAP-3258). Proposed targets apply until the bank sets a value. Open targets are held under DL11, and retention and protection targets under DL26.
 
 ## 6.1 Volume and capacity
 
@@ -476,6 +512,8 @@ P3 covers the case and workflow layer, which the Workbench owns. A case links to
 | NFR-010 | An agent returns an answer within its target, after which the rule result is used and the case still routes. | Under 60 seconds | Proposed | Solution architect |
 | NFR-011 | A rule evaluation at a routing decision completes inside the user's wait. | Under 300 milliseconds per rule evaluation at the 95th percentile | Proposed, DL11 | Solution architect |
 | NFR-012 | A search across cases and documents returns within its target. | Under 3 seconds for a search across cases; under 5 seconds across documents | Proposed, DL11 | Business lead |
+| NFR-079 | A REST call between services completes inside its timeout, and no call chain is deeper than one hop from gateway-bff. | 2 seconds per REST call; one hop only; GET retried once with jitter; circuit breaker and bulkhead per downstream | Proposed, D-RCV-60 | Solution architect |
+| NFR-080 | A composite screen is composed by gateway-bff from parallel one-hop calls to the owning services, and never by one service calling another for a screen. | One hop per call; about 1.05 seconds budgeted at the 95th percentile, about 1.2 seconds planned, against the 2 second target | Proposed, D-RCV-60 | Solution architect |
 
 
 ## 6.3 ACE ingestion and freshness
@@ -613,7 +651,7 @@ The Workbench runs no inbound load (D-RCV-35, U1). Work that depends on source d
 | Programmatic workflow | Superseded by D-RCV-60 and ADR-016: case, stage and task state is still held in the owner's database and is still described in CMMN 1.1 terms, but a case is moved by a durable workflow, with one parent case workflow and one child workflow per stage, and a schedule per job (GAP-1495; ASM-2607) |
 | Principle 1 | Every rule, limit, threshold, template, name, queue, role, timer and route is a versioned data row, changed through a validated load without a code release |
 | Data through ACE ingestion | Source data lands in the ACE database through ACE ingestion, including sources ACE does not hold today. The recovery module reads it only through the read-only recovery.v_ace_* views, links to it by ACE business keys and holds no copy, load or staging table (D-RCV-35, ADR-010). No real-time feed today; same-day needs are named under DL06 |
-| ACE team dependency | The ACE team owns every ACE table and column the views read, and adds 14 tables, 12 columns and 80 source fields under RWB-ACE-001 by 21 November 2026 for the 30 November release (tentative) (DL43). Features that read the Tier 2 additions stay behind their feature flags until the additions land |
+| ACE team dependency | The ACE team owns every ACE table and column the views read, and adds 14 tables, 12 columns and 80 source fields under the ACE DB additions (DL43) by 21 November 2026 for the 30 November release (tentative) (DL43). Features that read the Tier 2 additions stay behind their feature flags until the additions land |
 | Document hub | The Workbench is the system of record for recovery documents |
 | Monthly releases | One production release at each month end, shared with the collection squad |
 
@@ -634,25 +672,40 @@ The Workbench runs no inbound load (D-RCV-35, U1). Work that depends on source d
 
 # 9. Open decisions that change these requirements
 
-DL43 is the new open decision. The others keep their v3 answers, with the wording changed where D-RCV-35 supersedes the COLLINS route or the read and write position.
+DL43 is the new open decision. The others keep their v3 answers, with the wording changed where D-RCV-35 supersedes the COLLINS route or the read and write position. The update of 26 November 2026 adds the fifteen open decisions of the Decision Log v11 that change a business requirement and were carried only in the epic documents or not at all: DL01, DL02, DL03, DL09, DL14, DL19, DL21, DL24, DL25, DL28, DL29, DL30, DL31, DL39 and DL40 (GAP-3265; ASM-5687). Rows already in an epic document are copied from it; DL01, DL02 and DL14 are copied from the Decision Log, with its recommendation as the answer the build uses. The delivery and tooling decisions DL04, DL05, DL07, DL08 and DL32 to DL38 do not change a business requirement and stay in the Decision Log.
 
 | Decision | Question | Answer the build uses until decided | Owner | Needed by |
 |---|---|---|---|---|
+| DL01 | Is access to the Workbench granted centrally or by the application owner? | B. SCB IT administers business applications this way today, and the Workbench build is the same under both options. | Not specified in the source documents (GAP-0117; ASM-0189) | 28 Oct |
+| DL02 | Who owns the Workbench as an application? | A, with the ACE team as technical custodian. ACE holds the collection and recovery modules in one service. | Not specified in the source documents (GAP-0117; ASM-0189) | 28 Oct |
+| DL03 | Who makes the architecture change that lets partners reach the Workbench from outside the bank, given a lead time of one to three months? | A or B, raised in November. Law firms are first needed at Epic 5, litigation, in March 2027. | Architecture lead with the architecture team | 29 Oct |
 | DL06 | Which interfaces need real time data, and which take the daily batch? | Option A, daily batch through COLLINS, is superseded by D-RCV-35: ACE ingests all source data, so the Workbench runs no source batch load and reads ACE once its batch is complete. Option B for the named same-day triggers. ACE has no real time feed today. Name the same-day triggers now: case transferred from EFS, payment received, legal event. | Not specified in the source documents (GAP-1491; ASM-2608) | 30 Oct |
+| DL09 | Who tests from the business, and when? | Business testers work with the squads two to three hours a day during the build, then a one-week UAT before each release. | Not specified in the source documents (GAP-1458; ASM-2559) | 31 Oct |
 | DL10 | What is the Thai name for each field, label and message? | The business lead drafts per module one epic ahead; Legal and Compliance approve. | Business lead with Legal and Compliance | 5 Nov |
 | DL11 | What is the value for each non-functional target, or the owner and date for it? | Use the ACE values where ACE has them; the solution architect proposes the rest; Risk agrees. | Solution architect with Risk | 5 Nov |
 | DL12 | Which legacy systems are kept, and does any need enhancing? | No legacy enhancement, with a list of the systems kept and what the Workbench reads from each. The read and write part of option A is superseded by D-RCV-35: source data is read only, through the SELECT-only recovery.v_ace_* views, not a direct read of ACE or COLLINS. | Not specified in the source documents (GAP-1491; ASM-2608) | 7 Nov |
 | DL13 | The SCB X consortium template for AI code generation arrives on 29 October. Are the Epic 1 and Epic 2 requirements rewritten to it before the build? | Remap the Epic 1 requirements by 4 November and use the template from Epic 2. TechX, SCB and Henka agree one template and keep it for every later epic. | Not specified in the source documents (GAP-1491; ASM-2608) | 30 Oct |
+| DL14 | Are TDR, phone, FCR, OA and DIL built by the ACE team, and litigation, debt sale and NPA by the Workbench team? | A. One case model in CMMN 1.1 terms covers both teams, so the split is a team assignment and not a design change. | Not specified in the source documents (GAP-0117; ASM-0189) and the product owner | 6 Nov |
 | DL15 | Are the inventory counts and the growth assumption the right base for sizing? | A: Mortgage 12,256, hire purchase 12,960 and SSME 2,903 accounts; 3,110 new accounts a month; 15 percent growth a year. | Data lead | 6 Nov |
 | DL16 | Does a case enter the Workbench at 90 or 91 days past due? | 90 days past due. The target operating model has the case owner holding the case from day 90. | Business lead | 6 Nov |
 | DL17 | Is a case one per customer per product, one per account, or one per customer? | One per customer per product, with the accounts linked. | Product owner with the solution architect | 6 Nov |
 | DL18 | Which person holds each approval level, with the limit by decision, amount and product, and the substitute for each? | Load the regulation's levels and limits now; add names and substitutes when signed. | Risk with the product heads | 30 Nov |
+| DL19 | Which document types and fields does the document hub classify and extract? | B where the bank has one; A until then. | Business lead with Legal | 6 Nov |
 | DL20 | Where do customer facts come from? | The customer facts ACE holds, which ACE ingests from SCBPDM and the core bank; the Workbench reads them through v_ace_customer. Amended by D-RCV-35, which removes the COLLINS route. | Solution architect with Not specified in the source documents (GAP-1491; ASM-2608) | 30 Oct |
+| DL21 | Which systems store the Workbench case identifier? | A for Epics 1 and 2. Each system added later is an interface change. | Solution architect with the IT lead | 6 Nov |
 | DL22 | How long may a case stay in each state before it escalates? | Load the values as parameters; escalation runs from the day they are loaded. | Business lead | 13 Nov |
 | DL23 | What is the most cases a person holds, and how is a queue ordered? | Load as parameters. | Product owner | 13 Nov |
+| DL24 | Which rules does the rules component load in Epic 1? | Allocation, assignment and transfer only. The route decision goes live in a later epic. | Product owner | 30 Oct |
+| DL25 | How large a difference between the case list and the ACE account view is accepted? | Zero; any difference holds the publish. | Data lead | 6 Nov |
 | DL26 | How long is each data product and document type kept, and which fields are masked for which role? | Provide per data product and document type. | Compliance | 13 Nov |
 | DL27 | How are storage, backup, legal hold and e-discovery provided for the document hub? | The ACE storage pattern with a write-once container and the bank backup service. | Solution architect with Compliance | 13 Nov |
-| DL43 | Does the ACE team accept the RWB-ACE-001 scope and its dates? The scope is 14 new ACE tables, 12 new columns and 80 source fields. | Open. The build assumes the scope is accepted: 14 new ACE tables, 12 new columns and 80 source fields. Dates to confirm, and the Tier 2 features stay behind their flags until the additions land. | ACE team lead | 21 Nov |
+| DL28 | Who owns the letter templates and the fields filled into them? | The document module owns templates and fields; Legal approves wording. | Product owner | 13 Nov |
+| DL29 | Which EFS contact outcomes come into the interaction ledger, and how far back? | A named list of outcomes for the case's collection period only. named by the business lead. | Data lead with the business lead | 13 Nov |
+| DL30 | Who builds SMS and LINE dispatch, EFS file automation, stage 2 and 3 extraction, and document generation? | B where a bank-wide service exists; A otherwise. | IT lead with the product owner | 13 Nov |
+| DL31 | Who owns screen design for the Workbench? | The TechX designer under the product owner. using the ACE components. | Product owner | 6 Nov |
+| DL39 | Which roles receive real users at each release? | Administration roles at Epic 1; business roles from the release that gives them a screen, starting with Epic 2. | Business lead | 20 Nov |
+| DL40 | What are the Entra ID group names and the bank IAM entry for the Workbench roles? | One group per role per environment. | SCB IT security | 6 Nov |
+| DL43 | Does the ACE team accept the scope of the ACE DB additions and its dates? The scope is 14 new ACE tables, 12 new columns and 80 source fields. | Open. The build assumes the scope is accepted: 14 new ACE tables, 12 new columns and 80 source fields. Dates to confirm, and the Tier 2 features stay behind their flags until the additions land. | ACE team lead | 21 Nov |
 
 # 10. Delivery model
 
@@ -793,45 +846,235 @@ Every business requirement in section 5 appears exactly once in this table, with
 | REQ-S9-005 to REQ-S9-007, REQ-S9-009 | 4 | RWB-SVC-S9 | rwb-partner | 4 | EP07 |
 | Total | 231 |  |  |  |  |
 
-The 78 non-functional requirements of section 6 are not business requirements and are delivered as non-functional work: RWB-ITG-NFR for the harness and the measured targets, and the platform epics RWB-PLT-OBS, RWB-PLT-EDGE, RWB-PLT-EVT, RWB-PLT-DB and RWB-PLT-WF for the mechanism each one relies on, in wave 0 and then in every wave that a target first applies to (ASM-2616).
+The 80 non-functional requirements of section 6 are not business requirements and are delivered as non-functional work: RWB-ITG-NFR for the harness and the measured targets, and the platform epics RWB-PLT-OBS, RWB-PLT-EDGE, RWB-PLT-EVT, RWB-PLT-DB and RWB-PLT-WF for the mechanism each one relies on, in wave 0 and then in every wave that a target first applies to (ASM-2616).
 
 Three modules have no requirement section of their own: P8 payment, P9 reporting and P10 agent. Their requirements are carried inside other sections: payment matching and posting in 5.3 and 5.12 to 5.14, the steering and management information duties in 5.3, 5.6 and 5.7, and the agent and model duties in 5.3, 5.5, 5.7 and 6.9. Their service epics therefore appear in 10.2 with no row of their own in this table (GAP-1498; ASM-2615).
 
 
 # 12. Gaps and assumptions raised by this version
 
-The rows below are the gaps and assumptions this version raises. They are numbered by the register step, and the identifiers here are the candidate identifiers (CG-B-REQ-BRD-PROG-n and ASM-B-REQ-BRD-PROG-n).
+The rows below are the gaps and assumptions this version raises, under the identifiers the Gap Register v1 and the Assumptions Register v1 give them. Version 5 first printed the candidate identifiers CG-1 to CG-8 and ASM-1 to ASM-14; the update of 26 November 2026 replaces them with the register identifiers (GAP-3268).
 
 ## 12.1 Gaps
 
 | ID | Type | What it affects |
 |---|---|---|
-| CG-1 | Conflict | Decision owners in section 9 are person names |
-| CG-2 | Ambiguous | One requirement prefix, REQ-DRI, is used by two modules |
-| CG-3 | Missing | No delivery model or service-epic mapping in version 4 |
-| CG-4 | Missing | Business epic codes EP01 to EP08 are not defined in this document |
-| CG-5 | Conflict | Three constraints in section 7 contradict the target architecture |
-| CG-6 | Ambiguous | Interaction ledger requirements sit under P7 but the ledger is P1's |
-| CG-7 | Ambiguous | Approval requirements sit under P7 but the authority table is P4's |
-| CG-8 | Missing | No requirement section for P8 payment, P9 reporting or P10 agent |
+| GAP-1491 | Conflict | Decision owners in section 9 are person names |
+| GAP-1492 | Ambiguous | One requirement prefix, REQ-DRI, is used by two modules |
+| GAP-1493 | Missing | No delivery model or service-epic mapping in version 4 |
+| GAP-1494 | Missing | Business epic codes EP01 to EP08 are not defined in this document |
+| GAP-1495 | Conflict | Three constraints in section 7 contradict the target architecture |
+| GAP-1496 | Ambiguous | Interaction ledger requirements sit under P7 but the ledger is P1's |
+| GAP-1497 | Ambiguous | Approval requirements sit under P7 but the authority table is P4's |
+| GAP-1498 | Missing | No requirement section for P8 payment, P9 reporting or P10 agent |
 
 ## 12.2 Assumptions
 
 | ID | Assumption | Why |
 |---|---|---|
-| ASM-1 | The document stays in Draft in this run | Overlay D-RCV-60; no human approval in this run |
-| ASM-2 | EP01 to EP08 are Epic 1 to Epic 8 of section 8 | The wave map names the codes; section 8 names the epics |
-| ASM-3 | Built on ACE is read as 19 services inside ACE | D-RCV-60, ADR-013 |
-| ASM-4 | Modular monolith is read as one schema and login per service | D-RCV-60, ADR-014 |
-| ASM-5 | No Temporal is read as superseded by the workflow platform | D-RCV-60, ADR-016 |
-| ASM-6 | The four named owners are replaced by the section 12 placeholder | Root rule 4 |
-| ASM-7 | REQ-DRI-001 to 005 and 009 to 012 are P7; 006 to 008 and 013 are P2 | Section 5.2 and 5.7 |
-| ASM-8 | The REQ-ILG requirements are delivered by P1 | Ownership Map, Rulings sheet; DP-18 |
-| ASM-9 | REQ-APD is P7; the authority table it reads is P4 | Ownership Map, Rulings sheet |
-| ASM-10 | REQ-DRI-010 and 011 are delivered by P3 | Default ruling of R-PREC |
-| ASM-11 | Release dates carry (tentative) | U7, DL48 |
-| ASM-12 | The Epic column E1 to E8 is read as EP01 to EP08 | Section 5 tables |
-| ASM-13 | P8, P9 and P10 have no requirement section of their own | Section 5 has 16 sections |
-| ASM-14 | The 78 non-functional requirements are delivered as non-functional work | Section 6; RWB-ITG-NFR |
+| ASM-2603 | The document stays in Draft in this run | Overlay D-RCV-60; no human approval in this run |
+| ASM-2604 | EP01 to EP08 are Epic 1 to Epic 8 of section 8 | The wave map names the codes; section 8 names the epics |
+| ASM-2605 | Built on ACE is read as 19 services inside ACE | D-RCV-60, ADR-013 |
+| ASM-2606 | Modular monolith is read as one schema and login per service | D-RCV-60, ADR-014 |
+| ASM-2607 | No Temporal is read as superseded by the workflow platform | D-RCV-60, ADR-016 |
+| ASM-2608 | The four named owners are replaced by the section 12 placeholder | Root rule 4 |
+| ASM-2609 | REQ-DRI-001 to 005 and 009 to 012 are P7; 006 to 008 and 013 are P2 | Section 5.2 and 5.7 |
+| ASM-2610 | The REQ-ILG requirements are delivered by P1 | Ownership Map, Rulings sheet; DP-18 |
+| ASM-2611 | REQ-APD is P7; the authority table it reads is P4 | Ownership Map, Rulings sheet |
+| ASM-2612 | REQ-DRI-010 and 011 are delivered by P3 | Default ruling of R-PREC |
+| ASM-2613 | Release dates carry (tentative) | U7, DL48 |
+| ASM-2614 | The Epic column E1 to E8 is read as EP01 to EP08 | Section 5 tables |
+| ASM-2615 | P8, P9 and P10 have no requirement section of their own | Section 5 has 16 sections |
+| ASM-2616 | The 80 non-functional requirements are delivered as non-functional work | Section 6; RWB-ITG-NFR |
 
 The document stays in Draft until the Product Owner and the business owner approve it. No approval is recorded in this version (ASM-2603).
+
+## 12.3 Gaps and assumptions raised by the update of 26 November 2026
+
+The update compares this document with its source documents. Rows marked resolved are closed in the Gap Register by this update; the others stay open.
+
+| ID | Type | What it affects |
+|---|---|---|
+| GAP-3254 | Missing | No source maps the 32 regulatory obligations to business requirement IDs; section 13 traces them to processes, rules and controls only |
+| GAP-3255 | Missing | 29 of the 32 regulatory obligations are not confirmed: 23 wait for Compliance and 6 for Legal |
+| GAP-3256 | Missing | The 42 audit findings, 24 of them open, are not traced to business requirement IDs; section 14 traces them to controls and releases |
+| GAP-3257 | Missing | The 44 controls were not in the BRD; section 15 now lists them (resolved by this update) |
+| GAP-3258 | Outdated | The BRD carried 78 non-functional requirements while the Non Functional Specification v4 carries 80 (resolved by this update) |
+| GAP-3259 | Missing | 19 of the 27 business measures were not in the BRD (resolved by section 2.1) |
+| GAP-3260 | Missing | 20 of the 27 business measures have a baseline or a 2027 target of To set; 13 of them have both |
+| GAP-3261 | Missing | The 14 reports of the reporting and MI requirements were not in the BRD (resolved by section 16) |
+| GAP-3262 | Missing | L2 processes 18.1 Forecast inflow and workload and 18.2 Plan capacity and rosters have no business requirement |
+| GAP-3263 | Missing | L2 process 14.3 Set fees, charges and waivers has no business requirement |
+| GAP-3264 | Missing | L2 process 15.2 Test strategies (champion and challenger) has no program requirement; it is named only in the Epics 3 to 8 BRD scope for E8 |
+| GAP-3265 | Missing | Fifteen open decisions that change a business requirement were not in section 9 (resolved by this update) |
+| GAP-3266 | Conflict | The epic BRDs keyed their requirements on backlog story codes, which the backlog re-slices (resolved by this update) |
+| GAP-3267 | Conflict | DL09 has a different owner in the Epic 1 BRD and the Epic 2 BRD |
+| GAP-3268 | Conflict | Section 12 printed candidate identifiers, not the register identifiers (resolved by this update) |
+
+| ID | Assumption | Why |
+|---|---|---|
+| ASM-5684 | The epic requirements are re-keyed BR-E1-nnn and BR-E2-nnn in the order of their section 3, and the old story codes are kept only in the run edit log | User instruction of 26 November 2026 |
+| ASM-5685 | The regulatory, audit, control and report tables are copied unchanged from their workbooks; the owner service is the one the workbook names | Rule 8, copy values character for character |
+| ASM-5686 | A measure value of To set is copied as written and means the value is not set | Business Measures and Targets v2 |
+| ASM-5687 | A decision row already in an epic BRD is copied from it; DL01, DL02 and DL14 take the Decision Log recommendation as the answer the build uses | Decision Log v11; epic BRDs section 7 |
+| ASM-5689 | The ACE DB additions are named by their decision DL43 and not by the ACE team's backlog story code | User instruction of 26 November 2026 |
+
+# 13. Regulatory obligations
+
+The Regulatory Requirements Map v3 lists 32 obligations from the law, BOT rules and bank policy. Each is copied below with the L2 process, the rule and the controls that satisfy it, its owner and the owner service. Compliance and Legal confirm the obligations in scope; the status column says which are confirmed (GAP-3255). No source maps an obligation to a business requirement ID (GAP-3254; ASM-5685).
+
+| ID | Source | Obligation | Process | Rule | Controls | Owner | Status | Owner service |
+|---|---|---|---|---|---|---|---|---|
+| REG-01 | Debt Collection Act B.E. 2558 | Contact the debtor only at the permitted times and places, identify the collector, and do not disclose the debt to third parties | 11.1 Answer customer contacts | Contact rules; R-UNI-04 | CTL-16, CTL-17, CTL-39 | Compliance | To confirm with Compliance | P6 rwb-comms; P9 rwb-reporting |
+| REG-02 | Debt Collection Act B.E. 2558 | No threats, insults, false or misleading statements, or unfair collection practices | 11.1 Answer customer contacts; 16.2 Control conduct | Conduct rules | CTL-39 | Compliance | To confirm with Compliance | P9 rwb-reporting |
+| REG-03 | Debt Collection Act B.E. 2558 | Collection agencies acting for the bank are registered and the bank oversees their conduct | 12.1 Select and contract partners; 12.4 Govern partners | Panel rules | CTL-35, CTL-37 | Partner and agency manager | To confirm with Compliance | S9 rwb-partner |
+| REG-04 | Debt Collection Act B.E. 2558 | Collection fees charged to the debtor are within the permitted rate and disclosed | 14.3 Set fees, charges and waivers; 13.2 Send letters and notices | Fee rules | CTL-14 | Compliance | To confirm with Compliance | P6 rwb-comms |
+| REG-05 | BOT Responsible Lending | Offer debt restructuring to a debtor in difficulty before the account becomes non-performing and before legal action or debt sale | 7.2 Decide the route; 7.3 Negotiate settlement or deed in lieu | R-RES-01 to R-RES-09 | CTL-26, CTL-04 | Product heads | To confirm with Compliance | S2 rwb-treatment; P7 rwb-decision |
+| REG-06 | BOT Responsible Lending | Inform the debtor before the debt is sold or transferred | 9.6 Sell debt; 13.2 Send letters and notices | Debt sale rules | CTL-14, CTL-15 | Head of Asset Liquidity | To confirm with Compliance | P6 rwb-comms |
+| REG-07 | BOT Responsible Lending | Debtors in difficulty are contacted and offered help; no account is left without contact | 6.1 Take over the case at 90 days past due; 11.1 Answer customer contacts | Allocation rules | CTL-01, CTL-03 | Business lead | To confirm with Compliance | P3 rwb-case |
+| REG-08 | BOT market conduct | Treat vulnerable customers fairly and apply the vulnerable customer treatment | 11.3 X2 Vulnerable customer or hardship | R-UNI-06 | CTL-16, CTL-39 | Hardship and vulnerability specialist | To confirm with Compliance | P6 rwb-comms; P9 rwb-reporting |
+| REG-09 | BOT market conduct | Handle complaints within the set time and stop disputed recovery until resolved | 11.2 X1 Dispute or complaint | R-UNI-04, R-UNI-09 | CTL-16 | Complaint officer | To confirm with Compliance | P6 rwb-comms |
+| REG-10 | BOT relief schemes | Apply relief scheme terms correctly, report scheme results accurately and claim compensation only for eligible debtors | 6.1 Take over the case at 90 days past due; 7.3 Negotiate settlement or deed in lieu; 15.1 Report performance | R-UNI-13 | CTL-23, CTL-25 | Product heads | To confirm with Compliance | S2 rwb-treatment |
+| REG-11 | BOT asset classification and provisioning | Classify, stage and provision accounts correctly, with the right product type for restructured hire purchase | 15.8 Classify, stage and re-age accounts | R-UNI-22 | CTL-02, CTL-25 | Finance and CFO delegate | To confirm with Compliance | P1 rwb-source-data; S2 rwb-treatment |
+| REG-12 | BOT asset classification and provisioning | Revalue collateral for Stage 3 accounts within the required period | 9.2 Hold and manage assets | R-DIS-15 | CTL-27 | Head of NPA | To confirm with Compliance | S5 rwb-asset |
+| REG-13 | BOT asset classification and provisioning | Write off only accounts that meet the write-off criteria, with the approval required | 10.1 Assess write-off; 10.2 Approve and post | R-WO-01 to R-WO-19 | CTL-33, CTL-04 | Write-off committee | To confirm with Compliance | S7 rwb-writeoff; P7 rwb-decision |
+| REG-14 | BOT NPA holding rules | Hold foreclosed assets within the permitted period and provision them on schedule | 9.2 Hold and manage assets | R-DIS-06, R-DIS-09 | CTL-30 | Head of NPA | To confirm with Compliance | S5 rwb-asset |
+| REG-15 | BOT reporting | Report repossessed vehicles and loss on sale in the BOT format | 15.1 Report performance | Reporting | CTL-38 | Reporting and BI analyst | To confirm with Compliance | S5 rwb-asset |
+| REG-16 | Civil and Commercial Code: guarantee | Send the guarantor notice within the period after the debtor's default | 7.5 Pursue guarantors and co-borrowers | R-GUA-06 | CTL-20, CTL-15 | Guarantee officer | To confirm with Legal | S3 rwb-guarantee; P6 rwb-comms |
+| REG-17 | Civil and Commercial Code: mortgage | Send the mortgagor notice and wait the notice period before enforcing the mortgage | 8.1 Prepare pre-litigation | R-LIT-01, R-LIT-07, R-LIT-15 | CTL-14, CTL-15 | Head of Litigation | To confirm with Legal | P6 rwb-comms |
+| REG-18 | Civil and Commercial Code: prescription | File before the claim expires under the prescription period for the claim type | 8.1 Prepare pre-litigation; 8.2 Instruct and file | R-UNI-31, R-LIT-11, R-LIT-20 | CTL-18 | Head of Litigation | To confirm with Legal | P3 rwb-case |
+| REG-19 | Civil Procedure Code | Serve the claim correctly and keep proof of service | 8.2 Instruct and file; 8.3 Manage to judgment | R-LIT-07 to R-LIT-10 | CTL-15, CTL-19 | Legal counsel | To confirm with Legal | P6 rwb-comms; S4 rwb-litigation |
+| REG-20 | Hire purchase contract rules | Give the hirer notice before terminating the contract and repossessing, and notify the hirer and guarantor before the vehicle is sold | 9.1 Take assets onto the books; 9.4 Sell assets by Dutch auction | R-DIS-01, R-DIS-04, R-DIS-05 | CTL-14, CTL-15, CTL-38 | Head of Asset Liquidity | To confirm with Legal | P6 rwb-comms; S5 rwb-asset |
+| REG-21 | Bankruptcy Act | Stop enforcement and file the claim with the official receiver within the deadline | 11.6 X5 Bankruptcy or external seizure | R-UNI-07 | CTL-22 | Legal counsel | To confirm with Legal | S8 rwb-deviation |
+| REG-22 | Personal Data Protection Act s.24 and s.26 | Process personal data only on a lawful basis; process sensitive data only where the Act allows | 16.5 Control access and data protection | Data classification | CTL-09, CTL-11 | Compliance and PDPA officer | To confirm with Compliance | P4 rwb-access |
+| REG-23 | Personal Data Protection Act | Answer data subject requests within the statutory period | 16.7 Handle data subject requests | R-UNI-11 | CTL-42 | Compliance and PDPA officer | To confirm with Compliance | P3 rwb-case |
+| REG-24 | Personal Data Protection Act | Keep personal data no longer than the retention period and protect it with security measures | 13.3 Store and retain documents; 16.5 Control access and data protection | Retention classes (DL26) | CTL-11, CTL-12 | Compliance and PDPA officer | To confirm with Compliance | P4 rwb-access; P5 rwb-document |
+| REG-25 | Personal Data Protection Act | Notify the regulator of a personal data breach within the required time | 16.6 Manage incidents and continuity | Incident process | CTL-37 | Compliance and PDPA officer | To confirm with Compliance | S9 rwb-partner |
+| REG-26 | Personal Data Protection Act | Share personal data with partners and debt buyers only under agreements and masking | 9.6 Sell debt; 12.2 Exchange work with partners | R-DS-10 to R-DS-13 | CTL-31, CTL-32 | Compliance and PDPA officer | To confirm with Compliance | S6 rwb-debtsale |
+| REG-27 | Credit Information Business Act | Report and correct credit information for recovery accounts accurately | 15.8 Classify, stage and re-age accounts | Reporting | CTL-02 | Credit Administration | To confirm with Compliance | P1 rwb-source-data |
+| REG-28 | Thai Credit Guarantee Corporation rules | Claim within the TCG deadline with the required documents | 7.4 Claim guarantees | R-GUA-01 to R-GUA-07 | CTL-20 | Guarantee officer | To confirm with Compliance | S3 rwb-guarantee |
+| REG-29 | Bank policy: NPL resolution policy (1 Jul 2026) | Resolve non-performing debt by the routes, criteria and approvals the policy sets | 7.2 Decide the route; 14.1 Set strategy and treatment policy | Route rules | CTL-04, CTL-08 | Product heads | In force | P7 rwb-decision |
+| REG-30 | Bank regulation: approval authority for problem loans and NPA (กกค.540031, amended by กกค.690070) | Approve each recovery decision at the level and within the limit the regulation sets | 17.1 Route recommendations for approval | Delegation of authority table | CTL-04, CTL-05 | Risk with the product heads | In force | P7 rwb-decision; P4 rwb-access |
+| REG-31 | Bank policy and regulation: sale of NPA (1 Jul 2026) | Sell NPA by the permitted channels, at approved prices, with complete public listings | 9.3 Decide the disposal route; 9.4 Sell assets by Dutch auction; 9.5 Other disposal routes | R-DIS-19 to R-DIS-29 | CTL-28, CTL-29 | Head of NPA | In force | S5 rwb-asset |
+| REG-32 | BOT IT risk and outsourcing | Control access, keep audit trails and oversee outsourced service providers | 16.5 Control access and data protection; 12.4 Govern partners | Permission matrix | CTL-06, CTL-09, CTL-10, CTL-37 | Application owner | To confirm with Compliance | P7 rwb-decision; P4 rwb-access; S9 rwb-partner |
+
+# 14. Audit findings
+
+The Audit Findings Response Map v2 lists 42 findings from the collections and recovery audit and review lists. Each is copied with the controls and the release that answer it. The program measure Audit findings and fraud cases (section 2, 50 to 13) counts these findings (GAP-3256).
+
+| ID | Source | Finding | Area | Status today | Controls | Workbench change | Release |
+|---|---|---|---|---|---|---|---|
+| AF-01 | Collections audit | Suspicious transactions linked to staff; staff accounts linked to suspicious parties | Approval and authority | Open | CTL-40, CTL-39 | Staff payment flag on customer accounts; conduct sample | E8 |
+| AF-02 | Collections audit | Staff paid installments on behalf of debtors | Approval and authority | On process, 31 Aug 2026 | CTL-40 | Payments from staff accounts flagged daily | E8 |
+| AF-03 | Collections audit | Unsuitable user access to EFS and the voice bot | Approval and authority | Open | CTL-09, CTL-10 | Role-based access, scope, access review every six months | E1 |
+| AF-04 | Collections audit | Incentive and commission rules not suitable | Approval and authority | Open | CTL-08 | Incentive inputs read from the decision log; rules as versioned data | E8 |
+| AF-05 | Collections audit | Fleet fuel spending not controlled | Approval and authority | Complete | None | Outside the Workbench | None |
+| AF-06 | Collections audit | Litigation not filed for debtors meeting the procedure criteria | Approval and authority | Open | CTL-18, CTL-15 | Prescription watch; litigation route by rule | E2 |
+| AF-07 | Collections audit | Cost of collection between field staff and agencies not managed | Approval and authority | Open | CTL-35 | Placement by measured return; cost per partner | E6 |
+| AF-08 | Collections audit | Governance and authority in the SCBP closure and work transfer unclear | Approval and authority | Open | CTL-03 | Allocation and transfer by rule with reasons | E1 |
+| AF-09 | Collections audit | Staff sent debtor data to personal email | Documentation and audit trail | Open | CTL-11, CTL-31 | No export beyond the role; masking; data stays in the Workbench | E1 |
+| AF-10 | Collections audit | Field staff did not record results in EFS in full | Documentation and audit trail | Open | CTL-07 | Interaction ledger; override reason required | E2 |
+| AF-11 | Collections audit | Evidence for decisions incomplete or unreliable | Documentation and audit trail | Open | CTL-06, CTL-12, CTL-13 | Decision log; write-once legal documents; custody | E1 |
+| AF-12 | Collections audit | IT security, SDLC and system governance documents incomplete | Documentation and audit trail | Open | None | This document set: architecture, security, test and run documents | E1 |
+| AF-13 | BOT | Risk assessment, governance and transition plan for the SCBP closure incomplete | Documentation and audit trail | Open | None | Outside the Workbench | None |
+| AF-14 | Collections audit | Interest not reduced under TDR terms after full payment | Fee, interest and debt amount | Open | CTL-25 | Exception list for completed plans without the rate change | E2 |
+| AF-15 | Collections audit | Relief scheme report inaccurate | Fee, interest and debt amount | Open | CTL-23 | Scheme results read from treatment records | E3 |
+| AF-16 | Collections audit | Installments and interest plan set wrongly in a relief scheme | Fee, interest and debt amount | On process, 31 Aug 2026 | CTL-23, CTL-26 | Terms checked by rule before approval | E3 |
+| AF-17 | Collections audit | Payment or compensation calculated wrongly in a relief scheme | Fee, interest and debt amount | Open | CTL-23, CTL-24 | Payoff age check; settlement against the floor | E3 |
+| AF-18 | BOT | Demand fee notice to customers incomplete | Fee, interest and debt amount | Open | CTL-14 | Notices from approved templates with the fee fields | E2 |
+| AF-19 | Collections audit | Debtors meeting criteria not transferred to the responsible unit | Debt collection practice | Open | CTL-01, CTL-03 | Case entry and allocation by rule | E1 |
+| AF-20 | Collections audit | Staff welfare loans over 115 days without an owner | Debt collection practice | Open | CTL-01 | Every account at 90 days past due has a case and an owner | E1 |
+| AF-21 | Collections audit | Debtors not removed from a relief scheme when no longer eligible | Debt collection practice | Open | CTL-25 | Scheme eligibility re-tested on each load | E3 |
+| AF-22 | Collections audit | Deceased debtors and guarantors not followed per procedure | Debt collection practice | Complete | CTL-21 | X3 by rule | E7 |
+| AF-23 | Collections audit | EFS did not allocate work, leaving gaps in follow-up | Debt collection practice | Open | CTL-01, CTL-03 | Daily reconciliation; allocation by rule | E1 |
+| AF-24 | Collections audit | Ransomware attack at an outsource agency | Agency governance | Open | CTL-37 | Partner security review; suspension and recall | E6 |
+| AF-25 | Collections audit | Work allocation to agencies not based on performance | Agency governance | Open | CTL-35 | Placement by scorecard | E6 |
+| AF-26 | Collections audit | Agency case progress not tracked in full | Agency governance | Open | CTL-36 | Partner service level clocks | E5 |
+| AF-27 | Collections audit | Recoverable court fees not tracked in full | Agency governance | Open | CTL-36 | Fee ledger to receipt | E5 |
+| AF-28 | Collections audit | Photograph standard for repossessed vehicles unclear | Agency governance | Open | CTL-38 | Condition record with photographs required at take-on | E7 |
+| AF-29 | Recovery audit 2026 | Credit model selection not suited to the debtor in two cases | Recovery | Complete | None | Model version recorded per decision | E4 |
+| AF-30 | Recovery audit 2026 | Relief scheme compensation where the first-year installment exceeds 50 percent | Recovery | On process, 31 Aug 2026 | CTL-23 | Terms checked by rule | E3 |
+| AF-31 | Recovery audit 2026 | Hire purchase TDR accounts classified with the wrong product type | Recovery | On process | CTL-02 | Product type from the core load checked against the list | E1 |
+| AF-32 | Recovery review 2026 | Collection process delayed TCG claims | Recovery | Complete | CTL-20 | Claim deadline timer | E4 |
+| AF-33 | Recovery review 2026 | Write-off not done per the bank's criteria | Recovery | Complete | CTL-33 | Write-off eligibility by rule | E6 |
+| AF-34 | Recovery review 2026 | Bad debt follow-up not canceled for bankruptcy cases | Recovery | Complete | CTL-22, CTL-34 | X5 and follow-up end by rule | E6 |
+| AF-35 | Recovery review 2026 | SSME unsecured debt over 180 days not managed effectively | Recovery | On process, 31 Oct 2026 | CTL-19, CTL-01 | Every case owned; litigation pack by rule | E5 |
+| AF-36 | Compliance review 2026 | 26 Responsible Lending accounts with no contact in the period | Recovery | Complete | CTL-01, CTL-16 | Every case owned with a contact plan | E2 |
+| AF-37 | Recovery audit 2025 | Stage 3 collateral not revalued within the required period | Recovery | Complete | CTL-27 | Re-appraisal cycle by rule | E3 |
+| AF-38 | Recovery audit 2025 | NPA transferred but not actioned or actioned late | Recovery | Complete | CTL-30 | Take-on exception list | E3 |
+| AF-39 | Recovery audit 2025 | NPA listings on the website and app incomplete or wrong | Recovery | Complete | CTL-29 | Listing completeness check | E3 |
+| AF-40 | Recovery audit 2025 | Brokers set prices below the bank's listed price | Recovery | Complete | CTL-28 | Floor price within the limit | E3 |
+| AF-41 | Recovery audit 2025 | Not every account of a debtor restructured | Recovery | Complete | CTL-26 | Treatment covers every account | E3 |
+| AF-42 | Recovery audit 2025 | Monitoring of accounts in TDR status not enough | Recovery | Complete | CTL-25 | Restructure performing measure and exceptions | E2 |
+
+# 15. Controls
+
+The Controls Catalog v4 lists 44 controls on the recovery process. Each answers an audit finding or a regulatory obligation. The catalog holds how each control is performed, its evidence and its test; this table carries what it checks and what it answers (GAP-3257).
+
+| ID | L2 | Process | What it checks | Type | Obligations | Audit finding it answers | First in | Owner service |
+|---|---|---|---|---|---|---|---|---|
+| CTL-01 | 6.1 | Take over the case at 90 days past due | Every account at 90 days past due or more in v_ace_account has exactly one open case, and the five ACE reconciliations REC-01 to REC-05 close with zero unexplained on each business date | Detective | REG-07 | EFS did not allocate work and left gaps in follow-up | E1 | P3 rwb-case |
+| CTL-02 | 6.1 | Take over the case at 90 days past due | Each ACE ingestion job for a recovery source completes for the business date and passes the business date, structure, control total, key, reference and list checks before the views serve it | Preventive | REG-11, REG-27 | Collateral data repaired in WIN was recorded wrongly | E1 | P1 rwb-source-data |
+| CTL-03 | 18.3 | Build and allocate work lists | Each new case is allocated by the allocation table within the caseload cap, with the rule row recorded | Preventive | REG-07 | Debtors meeting the criteria were not transferred to the responsible unit | E1 | P3 rwb-case |
+| CTL-04 | 17.1 | Route recommendations for approval | The approver holds the approval level and the amount is within the limit for the decision, product and level | Preventive | REG-05, REG-13, REG-29, REG-30 | Approval and authority governance findings (9 of 29) | E2 | P7 rwb-decision |
+| CTL-05 | 17.1 | Route recommendations for approval | The person who prepared a decision cannot approve it | Preventive | REG-30 | Approval and authority governance findings | E2 | P4 rwb-access |
+| CTL-06 | 17.2 | Keep the decision log | No action proceeds unless its decision log entry is written | Preventive | REG-32 | Documentation and audit trail findings (5 of 29) | E1 | P7 rwb-decision |
+| CTL-07 | 17.2 | Keep the decision log | A person who departs from the recommendation records a coded reason | Preventive | None | Collection officers did not record results in EFS in full | E2 | P7 rwb-decision |
+| CTL-08 | 14.2 | Set decision rules and limits | A rule, limit or list changes only through a validated load approved by its owner, and by Risk where a limit moves | Preventive | REG-29 | Collection procedure not followed because rules lived in documents | E1 | P7 rwb-decision |
+| CTL-09 | 16.5 | Control access and data protection | Every request is checked against the role, the capability and the scope; out of scope records are refused | Preventive | REG-22, REG-32 | Unsuitable user access to EFS and the voice bot | E1 | P4 rwb-access |
+| CTL-10 | 16.5 | Control access and data protection | Role owners confirm each person's roles every six months; leavers lose access the same working day | Detective | REG-32 | Unsuitable user access to EFS and the voice bot | E2 | P4 rwb-access |
+| CTL-11 | 16.5 | Control access and data protection | Personal fields are masked unless the role is allowed to see them; no personal data leaves the bank by email | Preventive | REG-22, REG-24 | Staff sent debtor data to personal email | E1 | P4 rwb-access |
+| CTL-12 | 13.3 | Store and retain documents | Legal documents cannot be changed or deleted; a new version is added instead | Preventive | REG-24 | Evidence for decisions incomplete or unreliable | E1 | P5 rwb-document |
+| CTL-13 | 13.4 | Control document custody | Each original document has a holder and a due-back date; overdue originals raise a task | Detective | None | Evidence for decisions incomplete or unreliable | E2 | P5 rwb-document |
+| CTL-14 | 13.2 | Send letters and notices | Every notice is generated from the current template version approved by Legal | Preventive | REG-04, REG-06, REG-17, REG-20 | Demand fee notice to customers incomplete (BOT finding) | E2 | P6 rwb-comms |
+| CTL-15 | 13.2 | Send letters and notices | A notice period starts only from the delivery date on the proof of delivery | Preventive | REG-06, REG-16, REG-17, REG-19, REG-20 | Litigation not filed for debtors meeting the procedure criteria | E2 | P6 rwb-comms |
+| CTL-16 | 11.1 | Answer customer contacts | No contact is made while a contact stop is in force; statutory notices continue | Preventive | REG-01, REG-08, REG-09 | Debt collection practice findings | E2 | P6 rwb-comms |
+| CTL-17 | 11.1 | Answer customer contacts | Messages go only on channels the customer has consented to | Preventive | REG-01 | Debt collection practice findings | E2 | P6 rwb-comms |
+| CTL-18 | 8.1 | Prepare pre-litigation | Every case has a prescription date; a warning forces a litigation review ahead of other actions | Preventive | REG-18 | Litigation not filed for debtors meeting the procedure criteria | E2 | P3 rwb-case |
+| CTL-19 | 8.2 | Instruct and file | The pack holds every required document before filing | Preventive | REG-19 | SSME unsecured debt over 180 days not managed effectively | E5 | S4 rwb-litigation |
+| CTL-20 | 7.4 | Claim guarantees | Each guarantee has a claim deadline timer from the date the default conditions are met | Preventive | REG-16, REG-28 | Collection process delayed TCG claims | E4 | S3 rwb-guarantee |
+| CTL-21 | 11.4 | X3 Deceased customer | A death raises X3, stops contact and routes the case to the specialist and Legal | Preventive | None | Deceased debtors and guarantors not followed per procedure | E7 | S8 rwb-deviation |
+| CTL-22 | 11.6 | X5 Bankruptcy or external seizure | A bankruptcy stops enforcement, starts the claim deadline and ends bad debt follow-up where the rule applies | Preventive | REG-21 | Bad debt follow-up not canceled for bankruptcy cases | E7 | S8 rwb-deviation |
+| CTL-23 | 7.3 | Negotiate settlement or deed in lieu | A settlement below the floor goes for approval with the gap shown | Preventive | REG-10 | Payment and compensation amounts calculated wrongly in relief schemes | E3 | S2 rwb-treatment |
+| CTL-24 | 7.3 | Negotiate settlement or deed in lieu | A payoff figure older than its limit is refreshed before an offer is sent | Preventive | None | Fee, interest and debt amount findings (5 of 29) | E3 | S2 rwb-treatment |
+| CTL-25 | 6.1 | Take over the case at 90 days past due | Interest is reduced under the restructure terms once the customer has paid as agreed | Detective | REG-10, REG-11 | Interest not reduced per TDR conditions after full payment | E2 | S2 rwb-treatment |
+| CTL-26 | 6.1 | Take over the case at 90 days past due | A restructure covers every account of the customer in the case | Preventive | REG-05 | Some debtors did not have every account restructured | E3 | S2 rwb-treatment |
+| CTL-27 | 9.2 | Hold and manage assets | An asset is priced only on an appraisal inside its age limit; Stage 3 collateral is revalued on schedule | Preventive | REG-12 | Stage 3 collateral not revalued within the required period | E3 | S5 rwb-asset |
+| CTL-28 | 9.4 | Sell assets by Dutch auction | The floor price is within the approver's limit as a share of fair market value | Preventive | REG-31 | Brokers set prices below the bank's listed price | E3 | S5 rwb-asset |
+| CTL-29 | 9.4 | Sell assets by Dutch auction | Every asset ready to sell is listed on HOME.SCB and the app with the approved price and details | Detective | REG-31 | NPA listings on the website and app incomplete or wrong | E3 | S5 rwb-asset |
+| CTL-30 | 9.1 | Take assets onto the books | An asset whose title has transferred is taken onto the books and moved to sale without delay | Detective | REG-14 | NPA assets transferred but not actioned or actioned late | E3 | S5 rwb-asset |
+| CTL-31 | 9.6 | Sell debt | The data tape passes the masking check before the data room opens | Preventive | REG-26 | Staff sent debtor data to personal email | E5 | S6 rwb-debtsale |
+| CTL-32 | 9.6 | Sell debt | Only buyers who pass KYC, licensing and eligibility and sign the non-disclosure agreement reach the data room | Preventive | REG-26 | Outsource agency governance findings | E5 | S6 rwb-debtsale |
+| CTL-33 | 10.1 | Assess write-off | Only cases meeting the eligibility rule and the tax criteria version enter the write-off population; cases with open deviations are held out | Preventive | REG-13 | Asset write-off not done per the bank's criteria | E6 | S7 rwb-writeoff |
+| CTL-34 | 10.3 | Recover after charge-off | Follow-up on written-off debt ends when the bank's criteria are met, and the case is handed to the right unit | Detective | None | Bad debt follow-up not canceled per regulation and procedure | E6 | S7 rwb-writeoff |
+| CTL-35 | 12.3 | Track performance and pay fees | Work goes to partners by the scorecard and the panel rules, not by hand | Preventive | REG-03 | Work allocation to agencies not based on performance | E6 | S9 rwb-partner |
+| CTL-36 | 12.3 | Track performance and pay fees | Every partner instruction has a service level; court fees due back are tracked to receipt | Detective | None | Agency case progress and recoverable court fees not tracked in full | E5 | S9 rwb-partner |
+| CTL-37 | 12.4 | Govern partners | Partners meet the bank's security and conduct requirements; a breach suspends allocation and recalls work | Detective | REG-03, REG-25, REG-32 | Ransomware attack at an outsource agency | E6 | S9 rwb-partner |
+| CTL-38 | 9.1 | Take assets onto the books | Each repossessed vehicle has a condition record with photographs in the set standard | Preventive | REG-15, REG-20 | Photograph standard for repossessed vehicles unclear | E7 | S5 rwb-asset |
+| CTL-39 | 16.2 | Control conduct | A sample of contacts, notices and decisions is checked each month against the conduct rules | Detective | REG-01, REG-02, REG-08 | Employee conduct and suspicious transactions | E8 | P9 rwb-reporting |
+| CTL-40 | 16.2 | Control conduct | Payments from staff accounts to customer loans are flagged for review | Detective | None | Staff paid installments on behalf of debtors | E8 | P8 rwb-payment |
+| CTL-41 | 19.3 | Reconcile and correct | Every receipt is matched to the case and the account, or held on the exception list | Detective | None | Fee, interest and debt amount findings | E4 | P8 rwb-payment |
+| CTL-42 | 16.7 | Handle data subject requests | A data subject request holds automated processing on the case and reaches Compliance within the statutory period | Preventive | REG-23 | PDPA obligations | E2 | P3 rwb-case |
+| CTL-43 | 16.5 | Control access and data protection | Every read of ACE source data goes through recovery.v_ace_*; the view-owner role holds SELECT on the listed ACE tables and nothing else; the recovery role has no privilege on an ACE table and cannot write a view | Preventive | REG-22, REG-32 | Unsuitable user access to EFS and the voice bot | E1 | P1 rwb-source-data |
+| CTL-44 | 16.4 | Answer audit and regulatory requests | Every recovery.v_ace_* view exists with the columns and types the dictionary and the data contract publish: 30 views, 122 objects and 1,366 fields | Detective | REG-11, REG-27 | None | E1 | P1 rwb-source-data |
+
+# 16. Reports and management information
+
+The Reporting and Management Information Requirements v2 lists 14 reports. Each is copied with its readers, frequency, the decision it supports, its measures and its first epic. The source's Built in column names Power BI and the data lake, which ADR-018 removes; under D-RCV-60 every report is built from the reporting read model of P9 rwb-reporting, and the source of the regulatory extract is open (GAP-1657; GAP-3261).
+
+| ID | Report | Who reads it | How often | Decision it supports | Measures | First in |
+|---|---|---|---|---|---|---|
+| RPT-01 | CEO update | CEO, sponsors | Every two weeks | Whether recovery and the program are on track | Flow rate B1 to B3, % recovery, NPL reduction, NPA sales, program status by epic, decisions needed | E2 |
+| RPT-02 | Steering committee pack | Steering committee | Monthly | Scope, budget, risks and decisions above the program | Project KPIs against the scorecard; benefits; risks; decisions | E2 |
+| RPT-03 | Steering dashboard | Product heads, Chief Debt Recovery Management Office | Daily | Where recovery is behind and why | Inflow, stock, cures, recovery by route and product, turnaround, cost | E2 |
+| RPT-04 | Queue and caseload | Team managers | Daily | Who needs help and which cases are at risk | Cases per owner against the cap, age in state, breached service levels, exception queues | E2 |
+| RPT-05 | Litigation service levels | Head of Litigation | Weekly | Which packs and firms are late | Document preparation SLA (target 60%), legal SLA (target 95%), time to file, firm scorecard | E5 |
+| RPT-06 | Settlement and deed in lieu | Product heads | Weekly | Whether treatments reach booking | Offers, approvals, bookings, turnaround, below-floor approvals | E3 |
+| RPT-07 | NPA stock and sales | Head of NPA | Weekly | What is unsold and why | Stock by age, holding cost, listings, sales against floor, NPA sales amount | E3 |
+| RPT-08 | Debt sale and internal AMC | Head of Asset Liquidity | Per lot; monthly | Whether lots achieve their reserve and the uplift against debt sale | Lots, bids against reserve, recovery uplift versus debt sales (target 45%), put-backs | E6 |
+| RPT-09 | Write-off and recovery after charge-off | Finance and CFO delegate | Monthly | What is written off and recovered | Population, approvals, postings, recovery after write-off | E6 |
+| RPT-10 | Partner scorecard | Partner and agency manager | Monthly | Which partners get more or less work | Results, service levels, cost, conduct by partner | E7 |
+| RPT-11 | Decision and agent monitor | Risk and model risk officer, center of excellence | Weekly | Whether rules and agents decide well | Acceptance, overrides by reason, fallbacks, outcomes by route against rule-only | E2 |
+| RPT-12 | Data health | Data steward | Daily | Whether the data can be trusted today | Loads, checks, breaks, stale products | E1 |
+| RPT-13 | Audit and controls | Internal audit, Compliance | Quarterly | Whether controls ran | Control evidence by control ID; access reviews; decision log chain | E2 |
+| RPT-14 | Regulatory returns | Compliance, Finance | As the regulator requires | BOT reporting obligations | Repossessed vehicles and loss on sale; relief scheme results | E8 |

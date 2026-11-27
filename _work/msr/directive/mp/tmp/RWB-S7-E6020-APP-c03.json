@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the timer duration is the review date and not a constant.",
+   "new": "- The 2 s budget, the single hop and the breaker are the platform rule of ADR-020; the timer duration is the review date and not a constant.\n- Parameters read: the rule rows R-WO-17 to R-WO-19 and the package version in force, read through `RulePackageClient` from the WO package of rwb-decision; that package read is the reference-data contract. DP-06 and DP-07 are not in this story's pattern set, and the read's contract element is Not specified in the source documents (DOR-RWB-S7-E6020-APP-20)."
+  },
+  {
+   "old": "9. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to `rwb_case`, `rwb_decision` or any other schema, and no write to a column of `write_off` (X9, BR1, BR5, BR6).",
+   "new": "9. The boundary test: no statement outside `rwb_writeoff`, no `v_ace_*` read, no write to any other service's schema, and no write to a column of `write_off` (X9, BR1, BR5, BR6)."
+  },
+  {
+   "old": "| X2 | The role does not hold the Write-off and posting right A | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | TC-E6-020-04 |",
+   "new": "| X2 | The role does not hold the Write-off and posting right A | 403 before any read or write; nothing changes and no record is written | MSG-P4-002 | AC4, TC-E6-020-04 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5, BR6 |",
+   "new": "| None (pipeline log) | AC5, Section 17, BR5, BR6 |"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the decision record cannot be written"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 A role without the Write-off and posting right A is refused before any read or write (new, D-RCV-60)\n    Given a user whose role does not hold the Write-off and posting right A\n    When the user submits a committee decision on case \"RC-2026-000732\"\n    Then the system answers 403 with MSG-P4-002 and writes no record\n\n  Scenario: AC5 A component reaching a v_ace view, a recovery_case row, a timer row or another service's schema is refused (new, D-RCV-60)\n    Given a component, a statement or a test that reads a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC10 A status change the model does not allow is refused (new, D-RCV-60)\n    Given case \"RC-2026-000732\" is at a state from which the model does not allow the move \"DEFERRED\"\n    When the committee decision for the deferral is submitted\n    Then the system refuses the move and the case stays in its state"
+  },
+  {
+   "old": "The three criteria are the legacy criteria of RWB-E6-020 word for word, with their origin tag added and nothing else changed: the repeated `Then`, the wording of `the user acts on the screen`, `committee deferred`, `the action is taken` and `the decision log cannot be written` all stand.",
+   "new": "The three criteria are the legacy criteria of RWB-E6-020 word for word, with their origin tag added and one wording change, `decision log` to `decision record` (CG-ALL-11037): the repeated `Then`, the wording of `the user acts on the screen`, `committee deferred` and `the action is taken` all stand, and `the decision record cannot be written` replaces `the decision log cannot be written`."
+  },
+  {
+   "old": "| BR9 | No person name, address, contact value or identity number enters `rwb_writeoff`, the decision record, a log or a workflow input; `membersPresent` and the member's identity stay identifiers in the ledger | Template and Rules §R7.2 (s17); TSD S7 T6.2 |",
+   "new": "| BR9 | No person name, address, contact value or identity number enters `rwb_writeoff`, the decision record, a log or a workflow input; `membersPresent` and the member's identity stay identifiers in the ledger | Template and Rules §R7.2 (s17); TSD S7 T6.2 |\n| BR10 | R-WO-17: from `WITH_COMMITTEE` on `COMMITTEE_DEFERRED` with `review_date` present, set the review timer and hold the case for the next scan, moving it to `DEFERRED` | Business Rules and Routing Logic v4 row R-WO-17 |\n| BR11 | R-WO-19: from `DEFERRED` on `REVIEW_DATE_REACHED`, return the case to the next monthly scan, moving it to `SCAN_DUE` | Business Rules and Routing Logic v4 row R-WO-19 |"
+  },
+  {
+   "old": "The two rows are the rows of the Business Rules and Routing Logic v4, copied character for character.",
+   "new": "The two rows are the rows of the Business Rules and Routing Logic v4, copied character for character; their rule IDs in the table below are BR10 (R-WO-17) and BR11 (R-WO-19)."
+  },
+  {
+   "old": "so the check is stated here and not built here.",
+   "new": "so the check is stated here and not built here: the rwb-access authorise check on `POST /write-offs/{writeOffId}/committee-decision` tests the capability area \"Write-off and posting\" and right A before any read or write, and its request contract is Not specified in the source documents (DOR-RWB-S7-E6020-APP-6)."
+  },
+  {
+   "old": "The refusal, missing-review-date and not-recorded states read the messages of section 14.",
+   "new": "The refusal, missing-review-date and not-recorded states read the messages of section 14.\n\nThe states empty, loading, error and no access of SCR-27 are not in Screen Specifications v1: empty is Not specified in the source documents (CG-ALL-11038), loading is Not specified in the source documents (CG-ALL-11038), error is Not specified in the source documents (CG-ALL-11038) and no access is Not specified in the source documents (CG-ALL-11038)."
+  },
+  {
+   "old": "| TC-E6-020-05 | Principle 5 | Component | A forced decision log write failure inside the transaction; the case stays at `WITH_COMMITTEE` and no timer is armed |",
+   "new": "| TC-E6-020-05 | Principle 5 | Component | A forced decision record write failure inside the transaction; the case stays at `WITH_COMMITTEE` and no timer is armed |"
+  },
+  {
+   "old": "| TC-E6-020-07 | Boundary (§12.7) | Component | Each table of §12.7 checked at its boundary: `write_off` read only; `decision_record`, `idempotency_key` and `outbox_event` written only by this step; no read of tables not owned |",
+   "new": "| TC-E6-020-07 | Boundary (§12.7) | Component | Each table of §12.7 checked at its boundary: `write_off` read only; `decision_record`, `idempotency_key` and `outbox_event` written only by this step; no read of tables not owned |\n| TC-E6-020-08 | AC4 | Component | A role without the Write-off and posting right A; 403 with MSG-P4-002 and no read or write |\n| TC-E6-020-09 | AC5, BR5, BR6 | Component | A component, statement or test reading a `v_ace_*` view, a `recovery_case` row, a `timer` row or another service's schema; the grant refuses it and the boundary test fails the build |\n| TC-E6-020-10 | AC10 | Component | Not specified in the source documents (NEWAC-RWB-S7-E6020-APP-AC10) |\n| TC-E6-020-11 | BR1, BR4, BR10, BR11 | Component | The deferral run in `WriteOffWorkflow` on `rwb-writeoff` with R-WO-17 and R-WO-19 applied from the package; the `DEFERRED` and `SCAN_DUE` answers asserted and no `write_off` column written |\n| TC-E6-020-12 | BR2, BR7, BR8 | Component | The record written with the rule ID, package version, decision, review date and both states before the move; a repeated key arms no second timer; a firing after the case has left `DEFERRED` writes nothing |\n| TC-E6-020-13 | BR3, BR9 | Component | A case not at `WITH_COMMITTEE` refused with 409; an absent review date refused under R-WO-18; no name, address, contact value or identity number in the record, the log or a workflow input |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20916",
+   "item": "DOR-RWB-S7-E6020-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Added a parameters bullet naming rule rows R-WO-17 to R-WO-19, the package version and the RulePackageClient package read as the reference-data contract; DP-06 and DP-07 noted."
+  },
+  {
+   "ruling": "R-20917",
+   "item": "DOR-RWB-S7-E6020-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Build step 9 no longer names rwb_case or rwb_decision; it says any other service's schema."
+  },
+  {
+   "ruling": "R-20918",
+   "item": "DOR-RWB-S7-E6020-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC4 (X2, right A refusal) and AC5 (X9, boundary) with TC-E6-020-08 and TC-E6-020-09; X2 and X9 Covered by cells updated."
+  },
+  {
+   "ruling": "R-20919",
+   "item": "DOR-RWB-S7-E6020-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added BR10 (R-WO-17) and BR11 (R-WO-19); test rows TC-E6-020-08 to 13 cover BR1 to BR11 and AC4, AC5, AC10."
+  },
+  {
+   "ruling": "R-20920",
+   "item": "DOR-RWB-S7-E6020-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Recovery Workbench Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD to the role list, or remove it from the Authority row of RWB-S7-E6020-APP section 10. Story side: rwb-access authorise check stated.",
+   "note": "Story side added the rwb-access authorise check for the operation with its contract Not specified. Role SY-DATALOAD is not in v5."
+  },
+  {
+   "ruling": "R-20921",
+   "item": "DOR-RWB-S7-E6020-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; Data Classification v5",
+   "change": "Add decision_record as a library object of rwb_writeoff (DP-03) to the LDM v9 and Data Classification v5 entities. Story side P3 wording fixed under CG-ALL-11037.",
+   "note": "P3 legacy wording fixed in criteria and tests. P2 decision_record is not in LDM v9 or Data Classification v5; that needs the other documents."
+  },
+  {
+   "ruling": "R-23627",
+   "item": "GAP-1810",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 (write_off entity) and the DB story of this service",
+   "change": "Hold removal_reason, review_date, decision_reason and pack_document_id as required fields of the committee and eligibility records and fix their physical names in the DB story.",
+   "note": "Story §11 review_date row stays Not specified; the field set and physical names belong to the LDM and the DB story."
+  },
+  {
+   "ruling": "R-27660",
+   "item": "CG-ALL-11037",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Changed decision log to decision record in AC1, AC3 and TC-E6-020-05 and the §7 wording note; the workflow is named in §12.5."
+  },
+  {
+   "ruling": "R-27661",
+   "item": "CG-ALL-11038",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added empty, loading, error and no access states for SCR-27, each marked Not specified in the source documents (CG-ALL-11038)."
+  },
+  {
+   "ruling": "R-32953",
+   "item": "NEWAC-RWB-S7-E6020-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 for a disallowed status change with TC-E6-020-10; proposed test data Not specified in the source documents."
+  }
+ ]
+}

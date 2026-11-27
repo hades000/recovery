@@ -1,0 +1,32 @@
+{
+ "edits": [
+  {
+   "old": "    Then the capacity panels show run duration, rows per run and worker count against the queue backlog",
+   "new": "    Then the capacity panels show run duration, rows per run and worker count against the queue backlog\n\n  Scenario: AC8 The release holds the business rules BR1 to BR9 (new, D-RCV-60)\n    Given the release of rwb-source-data and the business rules of section 8\n    When the release is verified against each rule\n    Then the release uses only the rwb_source_data login and writes only schema rwb_source_data (BR1, BR8)\n    Then the migration runs as the per-service Flyway sequence before the deployment is ready (BR2)\n    Then every consumer group has a retry topic and a .dlt topic and no event is acknowledged unless processed (BR3)\n    Then no Temporal Schedule and no Quartz job is registered and the daily fallback is DailyCaseList of RWB-P1-E1002-CON (BR4)\n    Then no environment value is hard-coded and the replica counts, sizes, scaling threshold and alert windows come from values files and parameters (BR5)\n    Then every alert carries a message ID and links one runbook entry (BR6)\n    Then the rerun requires an Idempotency-Key, starts one run per business date and refuses a date not shown complete with 409 (BR7)\n    Then no lake path exists: no extract job, no lake target and no Power BI refresh (BR9)\n\n  Scenario: AC9 A consumed call that fails or does not answer leaves the event unacknowledged (new, D-RCV-60)\n    Given the AceDataReady consumer and a consumed call that fails or does not answer\n    When the consumer processes the event\n    Then the event is not acknowledged and the consumer does not mark it processed\n    Then the event is retried on the retry topic and, once the retry attempts are exhausted, is moved to the .dlt topic\n    Then the failed call is recorded in the run and is not dropped silently"
+  },
+  {
+   "old": "| TC-E1-011-11 | §12.7 tables (ASM-3438) | NFR | Each table of §12.7 checked at its boundary values in `rwb_source_data`, including the outbox, processed-event and idempotency tables |",
+   "new": "| TC-E1-011-11 | §12.7 tables (ASM-3438) | NFR | Each table of §12.7 checked at its boundary values in `rwb_source_data`, including the outbox, processed-event and idempotency tables |\n| TC-E1-011-12 | AC8 | NFR | Each of BR1 to BR9 checked against the release and its boundary test |\n| TC-E1-011-13 | AC9 | NFR | A consumed event whose call fails and one whose call does not answer; no acknowledgement, the retry topic and the .dlt topic |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30192",
+   "item": "NEWAC-RWB-P1-E1011-OPS-AC8",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 in section 7 covering BR1 to BR9 and test case TC-E1-011-12 in section 16."
+  },
+  {
+   "ruling": "R-30193",
+   "item": "NEWAC-RWB-P1-E1011-OPS-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 in section 7 for a failed or unanswered consumed call and test case TC-E1-011-13 in section 16."
+  }
+ ]
+}

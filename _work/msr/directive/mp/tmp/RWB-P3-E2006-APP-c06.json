@@ -1,0 +1,80 @@
+{
+ "edits": [
+  {
+   "old": "| X4 | The result date is after today | The result is refused; nothing changes | MSG-GEN-002 | AC6, owned by the P2 story of legacy key RWB-E2-006, not by this story |",
+   "new": "| X4 | The result date is after today | The result is refused; nothing changes | MSG-GEN-002 | AC14, this story; AC6 is carried by the P2 story of legacy key RWB-E2-006 |"
+  },
+  {
+   "old": "| X5 | The NLEADS approval level is below the level the plan needs | The result is refused; nothing changes | MSG-P2-018 | AC7, owned by the P2 story of legacy key RWB-E2-006, not by this story |",
+   "new": "| X5 | The NLEADS approval level is below the level the plan needs | The result is refused; nothing changes | MSG-P2-018 | AC15, this story; AC7 is carried by the P2 story of legacy key RWB-E2-006 |"
+  },
+  {
+   "old": "| X10 | A role without the Treatment and offer right opens the pack or records a result | Refused before any read or write | MSG-P4-002 | AC12, owned by the P2 story of legacy key RWB-E2-006, not by this story; TC-E2-006-12 |",
+   "new": "| X10 | A role without the Treatment and offer right opens the pack or records a result | Refused before any read or write | MSG-P4-002 | AC16, this story; AC12 is owned by the P2 story of legacy key RWB-E2-006; TC-E2-006-12 and TC-E2-006-18 |"
+  },
+  {
+   "old": "    Then nothing is read or written",
+   "new": "    Then nothing is read or written\n\n  Scenario: AC14 Result date after today (legacy RWB-E2-006 AC6, result date case)\n    Given an approved restructure plan on treatment \"TRT-SYN-0610\"\n    When the officer records NLEADS reference \"NL-SYN-000610\", result \"APPROVED\", approval level \"L6\" and a result date after today\n    Then the response is refused with message MSG-GEN-002\n    Then the treatment and the route state do not change\n\n  Scenario: AC15 Approval level below the plan level (legacy RWB-E2-006 AC7)\n    When the officer records NLEADS reference \"NL-SYN-000610\", result \"APPROVED\" and approval level \"L5\"\n    Then the response is refused with message MSG-P2-018\n    Then the treatment and the route state do not change\n\n  Scenario: AC16 Role without the right records a result (legacy RWB-E2-006 access case)\n    Given a role without the Treatment and offer right is signed in\n    When the role records a result for the treatment\n    Then the response is refused with message MSG-P4-002\n    Then nothing is read or written\n\n  Scenario: AC17 Case boundary and single result (BR4, BR10, BR11, BR12)\n    Given case \"RW-2026-000610\" already has a recorded result\n    When the officer records a second result for its treatment\n    Then the second result is refused with message MSG-P2-010 and no second decision record is written\n    Given the rwb-source-data contract mock returns the NLEADS decision from \"v_ace_credit_decision\"\n    Then rwb-case reads the NLEADS decision only through the rwb-source-data contract\n    Then the case links to ACE and to the treatment by \"account_key\" and \"treatmentId\" only\n    Then the route state, the queue and the owner are written only through the rwb-case interface\n\n  Scenario: AC18 Error answers of the provided operations\n    Given a call to a provided operation is made without a valid signed-in session\n    Then the response is 401\n    Given a call is made by a signed-in role without the access it needs\n    Then the response is 403\n    Given a call is made for a case that does not exist\n    Then the response is 404\n\n  Scenario: AC19 Replay of a write with the same idempotency key\n    Given the officer has recorded result \"APPROVED\" with reference \"NL-SYN-000610\" and approval level \"L6\"\n    When the same write is replayed with the same idempotency key\n    Then the replay returns the outcome of the first write\n    Then no second decision record is written"
+  },
+  {
+   "old": "| TC-E2-006-15 | BR11, tables of section 12.7 | Boundary | Case linked by account_key and treatmentId only; no foreign key and no ACE or treatment row copied into rwb_case; assumption ASM-3438 |",
+   "new": "| TC-E2-006-15 | BR11, tables of section 12.7 | Boundary | Case linked by account_key and treatmentId only; no foreign key and no ACE or treatment row copied into rwb_case; assumption ASM-3438 |\n| TC-E2-006-16 | AC14, X4 | End to end | Result date after today; refused with MSG-GEN-002 |\n| TC-E2-006-17 | AC15, X5 | End to end | Approval level L5 for a plan that needs L6; refused with MSG-P2-018 |\n| TC-E2-006-18 | AC16, X10 | End to end | Role without the Treatment and offer right opens the pack and records a result; refused with MSG-P4-002 |\n| TC-E2-006-19 | AC17, BR4, BR10, BR11, BR12 | Boundary | Second result refused with MSG-P2-010; NLEADS decision read only through rwb-source-data; case linked by business key only; route state written only through rwb-case |\n| TC-E2-006-20 | AC18 | Contract | Call without a valid session answers 401; call by a role without access answers 403; call for a case that does not exist answers 404 |\n| TC-E2-006-21 | AC19 | End to end | Same write replayed with the same idempotency key; no second decision record written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30647",
+   "item": "NEWAC-RWB-P3-E2006-APP-AC14",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 scenario for X4 result date after today, TC-E2-006-16 row, and pointed X4 Covered by to AC14."
+  },
+  {
+   "ruling": "R-30648",
+   "item": "NEWAC-RWB-P3-E2006-APP-AC15",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 scenario for X5 approval level below plan level, TC-E2-006-17 row, and pointed X5 Covered by to AC15. Conflicts with AC2 L5 result; left for GAP-0663."
+  },
+  {
+   "ruling": "R-30649",
+   "item": "NEWAC-RWB-P3-E2006-APP-AC16",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 scenario for a role without the right recording a result, TC-E2-006-18 row, and pointed X10 Covered by to AC16."
+  },
+  {
+   "ruling": "R-30650",
+   "item": "NEWAC-RWB-P3-E2006-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 scenario covering BR4, BR10, BR11 and BR12, with TC-E2-006-19 row (Boundary) in section 16."
+  },
+  {
+   "ruling": "R-30651",
+   "item": "NEWAC-RWB-P3-E2006-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 scenario for error answers 401, 403 and 404, with TC-E2-006-20 row in section 16."
+  },
+  {
+   "ruling": "R-30652",
+   "item": "NEWAC-RWB-P3-E2006-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC19 scenario for replay of a write with the same idempotency key, with TC-E2-006-21 row in section 16."
+  }
+ ]
+}

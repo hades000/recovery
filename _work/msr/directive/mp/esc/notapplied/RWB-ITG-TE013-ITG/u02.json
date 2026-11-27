@@ -1,0 +1,91 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-TE013-ITG",
+ "unit": "u02",
+ "rulings": [
+  "R-22932",
+  "R-22933",
+  "R-22934",
+  "R-22935",
+  "R-28928"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 4
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22932",
+     "item": "GAP-2422",
+     "status": "Resolved",
+     "section": "12",
+     "target": "",
+     "change": "",
+     "note": "Section 12 states the DP-03 reading: caller records and publishes; legacy sentence superseded."
+    },
+    {
+     "ruling": "R-22933",
+     "item": "GAP-0619",
+     "status": "Resolved",
+     "section": "12, 11",
+     "target": "",
+     "change": "",
+     "note": "Step and link operations, 60 s budget and decision_log_id link added, matching RWB-P10-TE013-CON section 12.1."
+    },
+    {
+     "ruling": "R-22934",
+     "item": "GAP-0621",
+     "status": "Resolved",
+     "section": "13",
+     "target": "",
+     "change": "",
+     "note": "Deployment values recorded as per-environment reviewed values; unsourced ones marked. Checked RWB-P10-TE013-OPS."
+    },
+    {
+     "ruling": "R-22935",
+     "item": "GAP-2188",
+     "status": "Resolved",
+     "section": "12",
+     "target": "",
+     "change": "",
+     "note": "Member names from RWB-P10-TE013-CON sections 11 and 12; types, refusal detail and record reference marked unspecified."
+    },
+    {
+     "ruling": "R-28928",
+     "item": "GAP-2418",
+     "status": "Resolved",
+     "section": "14",
+     "target": "",
+     "change": "",
+     "note": "MSG-P7-009 text already in section 14; MSG-P7-008 from Message Standard v4; not-found ID and text marked unspecified."
+    }
+   ],
+   "edits": [
+    {
+     "old": "The client reaches the agent by starting AgentRunWorkflow through the P10 contract and, after the 60 second budget, reads the run through `GET /api/recovery/agent/v1/admin/agent-runs` (GAP-0381; ASM-0551).",
+     "new": "The client reaches the agent through `POST /api/recovery/agent/v1/agent-steps`, which rwb-agent runs as AgentRunWorkflow, and, after the 60 second budget, reads the run through `GET /api/recovery/agent/v1/admin/agent-runs` (GAP-0381; GAP-0619; ASM-0551).\n\n**Client operations of the step.** As fixed by RWB-P10-TE013-CON, the calling step, not the harness, calls `POST /api/recovery/agent/v1/agent-steps` and `PUT /api/recovery/agent/v1/agent-runs/{runId}/decision-record`; the harness proves this real cross-service hop through CallerDriver. The step request carries agentCode, caseId, decisionCode, stepKey, ruleResult {ruleId, ruleVersion, toState, result} and inputs (masked). The answer carries decisionLogEntryId, appliedResult {ruleId, ruleVersion, toState, result}, recommendation, fallback, fallbackReason, autonomyMode and agentRunId. The step operation is the one exception to the 2 s client budget: its budget is the policy timeout of 60 seconds. The link body is the record reference, and the link is stored on `agent_run.decision_log_id`. The member types beyond the legacy Java types, the detail text of each refusal, the refusal set of the step operation as reviewed with its owners and the identifier the record reference carries are Not specified in the source documents (GAP-2188). The route is named when RWB-PLT-N001-CON is baselined.\n\n**Decision record event.** The calling service appends the record locally in its own schema and transaction through the DP-03 library and publishes DecisionRecorded on `rwb.decision-record.v1` from its outbox; rwb-decision collects it into the ledger. This supersedes the legacy RWB-TE-013 sentence on the client and the decision log writer: the client of rwb-agent publishes no DecisionRecorded event (GAP-2422)."
+    },
+    {
+     "old": "| DF-AGT-058 | `agent_run` (rwb_agent) | decision_log_id | Read through the P10 run read; the caller writes the run ID into the record's actions instead (ASM-0552) |",
+     "new": "| DF-AGT-058 | `agent_run` (rwb_agent) | decision_log_id | Set by the link operation `PUT /api/recovery/agent/v1/agent-runs/{runId}/decision-record`; read through the P10 run read; the caller also writes the run ID into the record's actions (GAP-0619; ASM-0552) |"
+    },
+    {
+     "old": "- The 2 s client budget, the 60 s workflow budget, the 5 minute ledger catch-up and the poll interval.",
+     "new": "- The 2 s client budget, the 60 s workflow budget, the 5 minute ledger catch-up and the poll interval.\n- The environment values of the rwb-agent deployment of RWB-P10-TE013-OPS, held as reviewed values per environment and never as template constants, with the login taken through a secret reference and granted on `rwb_agent` only. The login and secret name; the partitions, replication factor, retention, retry topic name, `.dlt` topic name and producer credential owner of `rwb.decision-record.v1`; the worker concurrency, pollers, activity timeouts and identity; the alert thresholds; the route path; and the capacity figures are Not specified in the source documents (GAP-0621)."
+    },
+    {
+     "old": "this story creates no new message ID. Report lines of the harness are for developers and are not part of the message standard.",
+     "new": "this story creates no new message ID. Report lines of the harness are for developers and are not part of the message standard.\n\nThe Error and Message Standard v4 carries the chain verifier break as MSG-P7-008. The identifier and text of the not-found answer of the decision-log read are Not specified in the source documents (GAP-2418). This harness asserts neither outcome."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

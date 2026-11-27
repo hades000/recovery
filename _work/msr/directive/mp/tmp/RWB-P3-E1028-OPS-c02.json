@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "| Contract dependencies | None |",
+   "new": "| Contract dependencies | None |\n| Contract version | v1 (the `/v1` paths and the `.v1` event names of section 12) |"
+  },
+  {
+   "old": "#### 12.4 Events consumed\n\n| Event | Topic | Provisioning |\n|---|---|---|\n| `rwb.case.CaseCreated.v1`, `rwb.case.CaseAllocated.v1`, `rwb.case.CaseTransferred.v1`, `rwb.case.CaseStateChanged.v1` | `rwb.case.events.v1` | Consumer group `rwb-case` with the inbox of schema `rwb_case`; retry and `.dlt` in the same step |\n| `rwb.deviation.DeviationRaised.v1`, `rwb.deviation.DeviationCleared.v1` | `rwb.deviation.events.v1` | Same consumer group, same retry and `.dlt` path; S8 owns the topic |",
+   "new": "#### 12.4 Events consumed\n\n| Event | Topic | Provisioning | Owner |\n|---|---|---|---|\n| `rwb.case.CaseCreated.v1`, `rwb.case.CaseAllocated.v1`, `rwb.case.CaseTransferred.v1`, `rwb.case.CaseStateChanged.v1` | `rwb.case.events.v1` | Consumer group `rwb-case` with the inbox of schema `rwb_case`; retry and `.dlt` in the same step | rwb-case (consumer group `rwb-case`) |\n| `rwb.deviation.DeviationRaised.v1`, `rwb.deviation.DeviationCleared.v1` | `rwb.deviation.events.v1` | Same consumer group, same retry and `.dlt` path; S8 owns the topic | rwb-case (consumer group `rwb-case`); S8 owns the topic |"
+  },
+  {
+   "old": "| CaseWorkflow | Workflow, parent, one per case, workflow ID = case ID | `rwb-case` | Worker deployment with the build ID of the release; holds the durable timers and raises `TimerBreached` |",
+   "new": "| CaseWorkflow | Workflow, parent, one per case, workflow ID = `case-{caseId}` | `rwb-case` | Worker deployment with the build ID of the release; holds the durable timers and raises `TimerBreached` |"
+  },
+  {
+   "old": "| Item | Content |\n|---|---|",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Deployment values | Image digest, chart version, replica counts, resource requests and limits, probe paths and timings, log level, feature switch `rwb.p3.timers`, the client timeouts, the alert thresholds |",
+   "new": "| Deployment values | Image digest, chart version, replica counts, resource requests and limits, probe paths and timings, log level, feature switch `rwb.p3.timers`, the client timeouts, the alert thresholds | BR6 |"
+  },
+  {
+   "old": "| Schema | `rwb_case`, migrated by the per-service Flyway sequence; `recovery_case`, `timer`, `queue` and the library objects, with the two escalation columns and the three indexes of RWB-P3-E1028-APP |",
+   "new": "| Schema | `rwb_case`, migrated by the per-service Flyway sequence; `recovery_case`, `timer`, `queue` and the library objects, with the two escalation columns and the three indexes of RWB-P3-E1028-APP | BR2 |"
+  },
+  {
+   "old": "| Topics | `rwb.case.events.v1` for the four case events and `TimerBreached`, with retry and `.dlt`; `rwb.deviation.events.v1` for the two deviation events; `rwb.decision-record.v1` used as its owner provisions it |",
+   "new": "| Topics | `rwb.case.events.v1` for the four case events and `TimerBreached`, with retry and `.dlt`; `rwb.deviation.events.v1` for the two deviation events; `rwb.decision-record.v1` used as its owner provisions it | BR3, BR5 |"
+  },
+  {
+   "old": "| Queue | Temporal task queue `rwb-case` in namespace `rwb-recovery` |",
+   "new": "| Queue | Temporal task queue `rwb-case` in namespace `rwb-recovery` | Not specified in the source documents (DOR-RWB-P3-E1028-OPS-7) |"
+  },
+  {
+   "old": "| Schedules | None for this capability; `JOB-05` is retired and `JOB-21` is the platform's |",
+   "new": "| Schedules | None for this capability; `JOB-05` is retired and `JOB-21` is the platform's | BR4, BR9 |"
+  },
+  {
+   "old": "| Dashboard series | timers by type and status, overdue timers, escalated timers, prescription warnings in force, timer fires, catch-up after an outage, projection lag, breach volume, MSG-P7-003 rate, MSG-P3-026 count, worker poll health, workflow open and stuck |",
+   "new": "| Dashboard series | timers by type and status, overdue timers, escalated timers, prescription warnings in force, timer fires, catch-up after an outage, projection lag, breach volume, MSG-P7-003 rate, MSG-P3-026 count, worker poll health, workflow open and stuck | BR8, BR10 |"
+  },
+  {
+   "old": "| Runbook entries | timer did not fire, catch-up did not happen, breach not escalated, projection stopped, missing level or legal period is not an incident |",
+   "new": "| Runbook entries | timer did not fire, catch-up did not happen, breach not escalated, projection stopped, missing level or legal period is not an incident | BR7 |"
+  },
+  {
+   "old": "| Secrets | The rwb-case login secret, the Kafka client credential and the Temporal mTLS material, all from the platform secret store |",
+   "new": "| Secrets | The rwb-case login secret, the Kafka client credential and the Temporal mTLS material, all from the platform secret store | BR1 |"
+  },
+  {
+   "old": "| TC-P3-E1028-OPS-06 | AC6, BR7, BR10 | NFR | Six synthetic conditions raise their alerts and resolve one runbook entry each, with the message ID, the links and the escalation path |",
+   "new": "| TC-P3-E1028-OPS-06 | AC6, BR7, BR10 | NFR | Six synthetic conditions raise their alerts and resolve one runbook entry each, with the message ID, the links and the escalation path |\n| TC-P3-E1028-OPS-07 | §12.4, §12.5 | NFR | Contract test of the operations, events and activities of section 12: the consumed events, CaseWorkflow with its workflow ID form, EvaluateRules and RecordAndApply |\n| TC-P3-E1028-OPS-08 | §12.7, ASM-3438 | NFR | Boundary test of the tables of section 12.7: rwb_case objects only, and no write to v_ace_account or v_ace_holiday |\n| TC-P3-E1028-OPS-09 | BR6 | NFR | Values file scan finds no hard-coded replica count, resource size, timeout or threshold in the release |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-05032",
+   "item": "DOR-RWB-P3-E1028-OPS-23",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Added Contract version row: v1 from the /v1 paths and .v1 event names",
+   "note": "Contract version now stated as v1 in the header table."
+  },
+  {
+   "ruling": "R-05033",
+   "item": "DOR-RWB-P3-E1028-OPS-8",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "rwb-source-data API yaml; rwb-access API yaml; rwb-case.yaml",
+   "change": "Publish GET /api/recovery/source-data/v1/accounts/{accountId} and GET /api/recovery/source-data/v1/calendar/holidays in rwb-source-data; publish POST /api/recovery/access/v1/authorise in rwb-access; in rwb-case.yaml replace the closed timerType enum with a reference to LOV-TIMER.",
+   "note": "Contract paths and the timerType enum are in other documents; no story edit."
+  },
+  {
+   "ruling": "R-10264",
+   "item": "CG-ALL-3647",
+   "status": "Cross-document",
+   "section": "12.4",
+   "target": "Kafka Catalog v1",
+   "change": "Add rwb-case as a consumer of rwb.case.CaseCreated.v1 in the Events catalog row EV-01, with its ACL.",
+   "note": "Catalog consumer list lacks rwb-case; story 12.4 now shows rwb-case as owner of the consumer."
+  },
+  {
+   "ruling": "R-10265",
+   "item": "CG-ALL-3648",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "CaseWorkflow workflow ID set to case-{caseId} per ADR-011, the ADR taking precedence over the design slide.",
+   "note": "Workflow ID form follows ADR-011 case-{caseId}; the slide form case ID is not used."
+  },
+  {
+   "ruling": "R-15903",
+   "item": "DOR-RWB-P3-E1028-OPS-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add a role named platform engineer, or map this story role to an existing role code in Users Roles and Permissions v5.",
+   "note": "Role platform engineer is not in Users Roles and Permissions v5; the change belongs there."
+  },
+  {
+   "ruling": "R-15904",
+   "item": "DOR-RWB-P3-E1028-OPS-10",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "Screen specification for SCR-03 and SCR-09 (P3)",
+   "change": "Add empty, loading, error and no access states to SCR-03 and SCR-09.",
+   "note": "SCR-03 and SCR-09 are not in this story; their states belong in the screen specification."
+  },
+  {
+   "ruling": "R-15905",
+   "item": "DOR-RWB-P3-E1028-OPS-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-P3-E1028-OPS-07 contract test for section 12, TC-08 boundary test for 12.7, TC-09 for BR6.",
+   "note": "Contract and boundary tests added. TC-01 to 06 registration in Test Cases v8 and section 18 versus RTM v7 are cross-document."
+  },
+  {
+   "ruling": "R-15906",
+   "item": "DOR-RWB-P3-E1028-OPS-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Added Owner column to the 12.4 table: rwb-case consumer group, S8 owns the deviation topic.",
+   "note": "Owner column added to 12.4 with service and topic owner."
+  },
+  {
+   "ruling": "R-15907",
+   "item": "DOR-RWB-P3-E1028-OPS-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-P3-E1028-OPS-09 covering BR6.",
+   "note": "BR6 now has a test case; the criterion for BR6 in section 7 is not in this chunk."
+  },
+  {
+   "ruling": "R-15908",
+   "item": "DOR-RWB-P3-E1028-OPS-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Added BR Field ID column to the section 11 table with rule IDs from section 8; Queue has no matching rule.",
+   "note": "Eight rows now carry BR IDs; Queue row keeps not specified. Legacy job wording check is cross-document."
+  }
+ ]
+}

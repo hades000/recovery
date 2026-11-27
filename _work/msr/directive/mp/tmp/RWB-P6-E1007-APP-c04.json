@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "| Patterns applied | DP01, DP02, DP03, DP05, DP07, DP09, DP10, DP11, DP16, DP17, DP19 |",
+   "new": "| Patterns applied | DP01, DP02, DP03, DP05, DP07, DP08, DP09, DP10, DP11, DP16, DP17, DP19 |"
+  },
+  {
+   "old": "| X5 | The answer of the source-data contract carries the stale marker of the business date | The record set is not built from a partial answer; the run is held and names the product and its date | MSG-P1-001 | TC-E1-007-04 |",
+   "new": "| X5 | The answer of the source-data contract carries the stale marker of the business date | The record set is not built from a partial answer; the run is held and names the product and its date | MSG-P1-001 | AC9, TC-E1-007-11 |"
+  },
+  {
+   "old": "| X10 | The decision record cannot be written where a rule decided the eligible set | Nothing is written into the file and the run stops with an incident | MSG-P7-003 | BR10 |",
+   "new": "| X10 | The decision record cannot be written where a rule decided the eligible set | Nothing is written into the file and the run stops with an incident | MSG-P7-003 | AC10, BR10 |"
+  },
+  {
+   "old": "The inbox ignores the repeat, counts the hit and no run state moves a second time (R-UNI-40)",
+   "new": "The inbox ignores the repeat, counts the hit and no run state moves a second time (BR13)"
+  },
+  {
+   "old": "Given the legacy key RWB-E1-007 carried the reporting extract \"INT-19\" under JOB-15 and the decision-log copy \"INT-20\" under JOB-13 as lake files",
+   "new": "Given the legacy key RWB-E1-007 carried the reporting extract \"INT-19\" and the copy \"INT-20\" as lake files"
+  },
+  {
+   "old": "Then a caller without the right is refused with MSG-P4-002 and nothing is read",
+   "new": "Then a caller without the right is refused with MSG-P4-002 and nothing is read\n\n  Scenario: AC9 A stale source answer holds the run and builds no partial record set (new, D-RCV-60)\n    Given the rwb-source-data contract mock returns the stale marker of the business date 2026-11-30 for the source product\n    Given 85 notices of business date 2026-11-30 are in state \"Generated\"\n    When the file run for interface \"INT-14\" and business date 2026-11-30 builds the record set\n    Then the record set is not built from the partial answer and the run is held\n    Then MSG-P1-001 names the source product and the date 2026-11-30 on SCR-44\n\n  Scenario: AC10 A decision record that cannot be written stops the run before any file is written (new, D-RCV-60)\n    Given the eligible set of business date 2026-11-30 is decided by a rule\n    Given the local decision-record library cannot write the decision record\n    When the file run for interface \"INT-14\" and business date 2026-11-30 builds the record set\n    Then nothing is written into the \"INT-14\" file and no notice changes state\n    Then the run stops with an incident and shows MSG-P7-003"
+  },
+  {
+   "old": "The eight criteria are new work under D-RCV-60",
+   "new": "The ten criteria are new work under D-RCV-60"
+  },
+  {
+   "old": "legacy section 12, JOB-10 (\"a second run adds nothing\"); R-UNI-40",
+   "new": "legacy section 12, JOB-10 (\"a second run adds nothing\"); BR13"
+  },
+  {
+   "old": "| R-UNI-33 | A downstream system that fails is retried, and the state of the record is not advanced until the retry succeeds | legacy BR5; INT-14 error handling |",
+   "new": "| BR11 | A downstream system that fails is retried, and the state of the record is not advanced until the retry succeeds | legacy BR5; INT-14 error handling |"
+  },
+  {
+   "old": "| R-UNI-34 | A retried call that passes its limit leaves the record in the exception queue with the reason, and the queue is reviewed by the owning team | legacy BR6; INT-14 error handling |",
+   "new": "| BR12 | A retried call that passes its limit leaves the record in the exception queue with the reason, and the queue is reviewed by the owning team | legacy BR6; INT-14 error handling |"
+  },
+  {
+   "old": "| R-UNI-40 | The same event or the same source row twice produces one effect, and the repeat is counted | legacy BR7 |",
+   "new": "| BR13 | The same event or the same source row twice produces one effect, and the repeat is counted | legacy BR7; R-UNI-40 |\n\n**Coverage.** BR1 AC1; BR2 and BR3 AC2; BR4 AC7; BR5 AC3; BR6 AC4; BR7 AC6; BR8 TC-E1-007-13; BR9 AC5; BR10 AC10; BR11 AC4; BR12 AC4; BR13 AC3."
+  },
+  {
+   "old": "a local guard on the operation itself is not named in the source documents, and DP-08 is not in this story's pattern list (GAP-1166; ASM-2113).",
+   "new": "a local guard on the operation itself is not named in the source documents (GAP-1166; ASM-2113), so both operations call the rwb-access authorise check of DP-08 before any read or write; the check's operation name is Not specified in the source documents (DOR-RWB-P6-E1007-APP-6)."
+  },
+  {
+   "old": "**No personal data.** The rows this story reads carry identifiers, dates, a code and a counter. The addressee, the address and the contact value are read by rwb-source-data and used inside the file build as a token; they are never stored in `rwb_comms`, never logged, never put on the manifest beyond the claim-check reference and never put on an event. The file content is never logged, only its name, its record count and its hash.",
+   "new": "**Personal data.** The rows this story reads carry identifiers, dates, a code and a counter; the contact fields DF-ACE-076, DF-ACE-077 and DF-ACE-078 are personal data, read through the rwb-source-data contract and never stored here. The addressee, the address and the contact value are read by rwb-source-data and used inside the file build as a token; they are never stored in `rwb_comms`, never logged, never put on the manifest beyond the claim-check reference and never put on an event. The file content is never logged, only its name, its record count and its hash.\n\n**Open decision DL06.** DL06 is still open; this story builds on its assumptions ASM-0189, ASM-2559, ASM-2608 and ASM-2776, which the directive of 26 November 2026 confirms."
+  },
+  {
+   "old": "No new table and no new column is created:",
+   "new": "The names `recovery_svc`, `interface_run` and `interface_signoff` are legacy names of the retired path; they are not LDM v9 or Data Classification v5 entities and appear only in the change log and the retired-path checks (GAP-1165; ASM-2112). No new table and no new column is created:"
+  },
+  {
+   "old": "| MSG-P4-003 | A read or a rerun names a business date with no run | This record was not found. |",
+   "new": "| MSG-P4-003 | A read or a rerun names a business date with no run | This record was not found. |\n| MSG-P7-003 | The decision record cannot be written where a rule decided the eligible set; the run stops with an incident | Not specified in the source documents (DOR-RWB-P6-E1007-APP-9) |"
+  },
+  {
+   "old": "| TC-E1-007-04 | AC4 | End to end | The hand-off of 2026-11-30 with no item reference; the stale marker of the business date; the next run under the same idempotency key |",
+   "new": "| TC-E1-007-04 | AC4 | End to end | The hand-off of 2026-11-30 with no item reference; the stale marker of the business date; the next run under the same idempotency key |\n| TC-E1-007-11 | AC9 | End to end | The stale marker of the business date on the source answer; the run is held, no partial record set is built and MSG-P1-001 names the product and its date |\n| TC-E1-007-12 | AC10 | Component | The decision record cannot be written; nothing is written into the file and the run stops with an incident |\n| TC-E1-007-13 | BR8 | NFR | No Quartz row and no job table entry is written by this service; JOB-10 and JOB-11 are the only jobs named |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17511",
+   "item": "DOR-RWB-P6-E1007-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states that contact fields DF-ACE-076 to DF-ACE-078 are personal data, read through the contract and never stored in rwb_comms."
+  },
+  {
+   "ruling": "R-17512",
+   "item": "DOR-RWB-P6-E1007-APP-18",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Open decision DL06 and its assumptions ASM-0189, ASM-2559, ASM-2608 and ASM-2776 are stated in section 11 and confirmed by the directive."
+  },
+  {
+   "ruling": "R-17513",
+   "item": "DOR-RWB-P6-E1007-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC9 added for X5 and AC10 for X10, with TC-E1-007-11 and TC-E1-007-12; section 5 Covered by column updated."
+  },
+  {
+   "ruling": "R-17514",
+   "item": "DOR-RWB-P6-E1007-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "R-UNI-33, R-UNI-34 and R-UNI-40 renamed BR11, BR12, BR13; coverage line maps BR1 to BR13; BR8 covered by TC-E1-007-13."
+  },
+  {
+   "ruling": "R-17515",
+   "item": "DOR-RWB-P6-E1007-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "DP-08 added to patterns; both run operations call the rwb-access authorise check. Its operation name is not in the sources."
+  },
+  {
+   "ruling": "R-17516",
+   "item": "DOR-RWB-P6-E1007-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Legacy names recovery_svc, interface_run and interface_signoff are marked as non-LDM retired names; AC6 drops legacy job and decision-log wording."
+  },
+  {
+   "ruling": "R-17517",
+   "item": "DOR-RWB-P6-E1007-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P7-003 row added with placeholder text. Standard v4 texts for MSG-P1-001, MSG-P2-001 and MSG-P4-003 are not in the sources, so not copied."
+  },
+  {
+   "ruling": "R-21873",
+   "item": "GAP-0673",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Service Contract Catalog",
+   "change": "Supersede the INT-03 line of FSD P2 Integration v3 A1.5 and TSD P2 Integration v3 T1 and T5.1 for legacy key RWB-E4-046, with date and decision; interface owner loads the ALS interface as one versioned interface_config row per environment.",
+   "note": "Story keeps the legacy reading; the catalog must record the supersession and the interface owner must load the row."
+  },
+  {
+   "ruling": "R-21874",
+   "item": "GAP-1416",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-PLT-TE006-CON",
+   "change": "Specify the library artifact and major version, the three interfaces, the DDL of outbox, processed_event and idempotency_key, CloudEvents attributes, the retry ladder and dead-letter topic.",
+   "note": "Contract shape, publication channel and retry split belong to the platform library contract, not this story."
+  },
+  {
+   "ruling": "R-21875",
+   "item": "GAP-0334",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P2-E1007-CON",
+   "change": "Define the deliverFile manifest schema, the claim-check handoff and the two Airflow window calls, and publish them in the activity contract jar and AsyncAPI before the first SIT run.",
+   "note": "Manifest payload, claim-check handoff and window trigger belong to the P2 contract review, not this story."
+  }
+ ]
+}

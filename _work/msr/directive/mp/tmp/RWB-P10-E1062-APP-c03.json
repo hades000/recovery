@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "| Ready to start | After RWB-P10-E1058-APP, RWB-P10-TE013-APP |",
+   "new": "| Ready to start | After RWB-P10-E1058-APP, RWB-P10-TE013-APP (both are not done yet; the build starts when both are Done) |"
+  },
+  {
+   "old": "| X7 | A role without the right | Refused with 403 | MSG-P4-002 | TC-E1-062-10 |",
+   "new": "| X7 | A role without the right | Refused with 403 | MSG-P4-002 | AC10 |"
+  },
+  {
+   "old": "| X8 | A consumed contract of section 12.2 does not answer inside its 2 s budget | The run ends TOOL_UNAVAILABLE with fallback true, no proposal is raised for the case and event, the failure is counted on the run, and the run is not retried for that event | None to a user | TC-P10-E1062-CON-05 |",
+   "new": "| X8 | A consumed contract of section 12.2 does not answer inside its 2 s budget | The run ends TOOL_UNAVAILABLE with fallback true, no proposal is raised for the case and event, the failure is counted on the run, and the run is not retried for that event | None to a user | AC11 |"
+  },
+  {
+   "old": "| X9 | The rwb-decision registry answers no rule package version for R-DEV-02 to R-DEV-06, or the checksum of the fetched package does not verify against the kit | The run ends TOOL_UNAVAILABLE with fallback true and the reason names the package, the proposal keeps no owner role, and nothing is written outside `rwb_agent` | None to a user | TC-P10-E1062-CON-05 |",
+   "new": "| X9 | The rwb-decision registry answers no rule package version for R-DEV-02 to R-DEV-06, or the checksum of the fetched package does not verify against the kit | The run ends TOOL_UNAVAILABLE with fallback true and the reason names the package, the proposal keeps no owner role, and nothing is written outside `rwb_agent` | None to a user | AC12 |"
+  },
+  {
+   "old": "X7 is not reached by a criterion of this story: it is proved by the access test case TC-E1-062-10 and by RWB-ITG-E1062-ITG across services, and the message is kept so a reader finds the legacy set complete.",
+   "new": "X7 is reached by criterion AC10: it is proved by the access test case TC-E1-062-10 and by RWB-ITG-E1062-ITG across services, and the message is kept so a reader finds the legacy set complete."
+  },
+  {
+   "old": "    Then the run holds status \"TIMED_OUT\" and is not retried for that event",
+   "new": "    Then the run holds status \"TIMED_OUT\" and is not retried for that event\n\n  Scenario: AC10 A role without the right is refused (story criterion for X7)\n    Given role \"RW-CASEOWN\" calls the evaluation read\n    When the platform guard checks the call\n    Then the call is refused with status 403 and message \"MSG-P4-002\"\n\n  Scenario: AC11 A consumed contract misses its budget (story criterion for X8)\n    Given a consumed contract of section 12.2 does not answer inside its 2 s budget\n    When the agent runs\n    Then the run holds status \"TOOL_UNAVAILABLE\" and fallback true, no proposal is raised for the case and event, the failure is counted on the run, and the run is not retried for that event\n\n  Scenario: AC12 The rule package is missing or fails its checksum (story criterion for X9)\n    Given the rwb-decision registry answers no rule package version for R-DEV-02 to R-DEV-06, or the checksum of the fetched package does not verify against the kit\n    When the agent runs\n    Then the run holds status \"TOOL_UNAVAILABLE\" and fallback true, the reason names the package, the proposal keeps no owner role, and nothing is written outside \"rwb_agent\"\n\n  Scenario: AC13 The run writes six tables only (story criterion for BR8)\n    Given a screening run is recorded for a case\n    When the run is written\n    Then the run writes only the six tables of section 12.7 in \"rwb_agent\" and the review count comes from migration \"V10_005__evaluation_review_count.sql\"\n\n  Scenario: AC14 The code list comes from the reference-data contract (story criterion for BR9)\n    Given the rwb-case reference-data contract mock returns the codes X1 to X7 of LOV-DEVIATION\n    Given the model stub returns code \"X9\"\n    When the guardrail runs\n    Then code \"X9\" is refused and never proposed, and the codes are read through the contract and not from a table\n\n  Scenario: AC15 The events carry no personal data (story criterion for BR10)\n    Given case \"RW-2026-000402\" has one proposal of code X4\n    When the run state change commits\n    Then the outbox holds the run facts and the proposal as CloudEvents 1.0 messages on \"rwb.agent.events.v1\", keyed by the case ID, in the same transaction, and no field classed as personal data is carried"
+  },
+  {
+   "old": "| TC-E1-062-10 | Access | Contract | RW-CASEOWN calls the evaluation read; refused with MSG-P4-002 |",
+   "new": "| TC-E1-062-10 | AC10, Access | Contract | RW-CASEOWN calls the evaluation read; refused with MSG-P4-002 |\n| TC-E1-062-11 | AC13, BR7, BR8 | Component | Run written; the six tables of section 12.7 in rwb_agent only; no other schema written |\n| TC-E1-062-12 | AC11, X8 | Contract | Consumed read answers after 2 s; proved by TC-P10-E1062-CON-05 of RWB-P10-E1062-CON |\n| TC-E1-062-13 | AC12, X9 | Contract | Registry answers no package version, or the checksum fails; proved by TC-P10-E1062-CON-05 |\n| TC-E1-062-14 | AC14, BR9 | Component | Code list X1 to X7 from the reference-data contract; model stub returns code X9 |\n| TC-E1-062-15 | AC15, BR10 | Component | One proposal on case RW-2026-000402; run state change committed |"
+  },
+  {
+   "old": "because they are failures of the contract seam and not of a business criterion.",
+   "new": "and criteria AC11 and AC12 of section 7 carry them in this story."
+  },
+  {
+   "old": "and carry no personal data | DP-09; §R7.2 s17; BR7 |",
+   "new": "and carry no personal data (no field classed as personal data is carried; AC15) | DP-09; §R7.2 s17; BR7 |"
+  },
+  {
+   "old": "| None | TC-E1-062-01, TC-E1-062-04 |",
+   "new": "| None | TC-E1-062-01, TC-E1-062-04, TC-E1-062-11 |"
+  },
+  {
+   "old": "TC-E1-062-04, TC-P10-E1062-CON-05 |",
+   "new": "TC-E1-062-04, TC-P10-E1062-CON-05, TC-E1-062-13 |"
+  },
+  {
+   "old": "TC-E1-062-08, TC-P10-E1062-CON-05 |",
+   "new": "TC-E1-062-08, TC-P10-E1062-CON-05, TC-E1-062-14 |"
+  },
+  {
+   "old": "TC-P10-E1062-CON-04 |",
+   "new": "TC-P10-E1062-CON-04, TC-E1-062-15 |"
+  },
+  {
+   "old": "TC-E1-062-01, TC-E1-062-05 |",
+   "new": "TC-E1-062-01, TC-E1-062-05, TC-E1-062-12 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09868",
+   "item": "CG-ALL-2617",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity ResolveOwnerRole to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity missing from catalog; change belongs to the Temporal Catalog."
+  },
+  {
+   "ruling": "R-09869",
+   "item": "CG-ALL-2618",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity CallModelGateway to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity missing from catalog; change belongs to the Temporal Catalog."
+  },
+  {
+   "ruling": "R-09870",
+   "item": "CG-ALL-2619",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity CheckScreeningGuardrail to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity missing from catalog; change belongs to the Temporal Catalog."
+  },
+  {
+   "ruling": "R-09871",
+   "item": "CG-ALL-2620",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity RecordScreeningRun to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity missing from catalog; change belongs to the Temporal Catalog."
+  },
+  {
+   "ruling": "R-09872",
+   "item": "CG-ALL-2621",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add activity PublishScreeningEvents to the Activities sheet, or name a catalogued activity in section 12.5",
+   "note": "Activity missing from catalog; change belongs to the Temporal Catalog."
+  },
+  {
+   "ruling": "R-15337",
+   "item": "DOR-RWB-P10-E1062-APP-11",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR10 now states no field classed as personal data is carried; AC15 proves it."
+  },
+  {
+   "ruling": "R-15338",
+   "item": "DOR-RWB-P10-E1062-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Boundary test TC-E1-062-11 added for the section 12.7 tables; section 18 lists updated. RTM v7 not in story sources."
+  },
+  {
+   "ruling": "R-15339",
+   "item": "DOR-RWB-P10-E1062-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Ready to start row states the build waits until both open build dependencies are Done; 12 dependencies listed."
+  },
+  {
+   "ruling": "R-15340",
+   "item": "DOR-RWB-P10-E1062-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X7, X8, X9 now covered by AC10, AC11, AC12 with test rows TC-E1-062-10, -12, -13."
+  },
+  {
+   "ruling": "R-15341",
+   "item": "DOR-RWB-P10-E1062-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR8, BR9, BR10 now covered by AC13, AC14, AC15 with tests TC-E1-062-11, -14, -15."
+  }
+ ]
+}

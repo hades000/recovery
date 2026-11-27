@@ -1,0 +1,220 @@
+{
+ "edits": [
+  {
+   "old": "| TC-S1-E4001-APP-01 | The boundary: no `v_ace_*` read, no foreign schema write and no published event | Component | The build scan of step 10, plus an outbox that must stay empty |",
+   "new": "| TC-S1-E4001-APP-01 | The boundary: no `v_ace_*` read, no foreign schema write and no published event (BR1, BR8, BR9) | Component | The build scan of step 10, plus an outbox that must stay empty |\n| TC-S1-E4001-APP-02 | Contract: the route operation, its events and its activities of §12 answer as the contract of RWB-S1-E4001-CON; no person data in any payload (BR10) | Contract | The route operation and the appraisal activities of §12 against the contract fake of RWB-S1-E4001-CON |\n| TC-S1-E4001-APP-03 | Boundary of the §12.7 tables: `decision_record` and `idempotency_key` are the only tables written, and no other table of §12.7 is written or read (BR6, BR8) | Component | The build scan of the statements against the tables of §12.7, with the grant of `rwb_valuation` |\n| TC-S1-E4001-APP-04 | AC3: a role without the Treatment and offer right is refused before any read or write | Component | A role without Treatment and offer U; 403 with MSG-P4-002 and no read or record |\n| TC-S1-E4001-APP-05 | AC4: the case is not at the route decision, or the asset of the appraisal is not on the case | Component | Case `RC-2026-000401` not at the route decision, and an appraisal whose asset is not on the case; nothing ordered and the state reported to the parent |\n| TC-S1-E4001-APP-06 | AC5: rwb-integration refuses the order, or the interface run fails after the retry limit | Component | The order-submission fake refusing and the interface-run fake failed; the case stays at the route decision and the exception queue holds the item |\n| TC-S1-E4001-APP-07 | AC6: the ACE data product is stale after a late or failed batch | Component | The stale data product of TC-E4-001-01; nothing written and MSG-P1-001 shown with the data date |\n| TC-S1-E4001-APP-08 | AC7: the appraisal has no acceptance in valuation_ext | Component | An appraisal with no acceptance; no order and MSG-GEN-001 naming the missing acceptance |\n| TC-S1-E4001-APP-09 | AC8: the appraisal is inside the limit | Component | The inside-limit appraisal of TC-E4-001-01; nothing ordered and the outcome recorded with the limit version |\n| TC-S1-E4001-APP-10 | AC9: rwb-source-data or rwb-case does not answer inside 2 s, or its breaker is open | Component | The no-answer and open-breaker fakes; nothing written and 503 with the platform envelope |\n| TC-S1-E4001-APP-11 | AC10: the same assessment is submitted twice with the same Idempotency-Key (BR7, BR15) | Component | The same command twice; one record, one order and the stored answer returned |\n| TC-S1-E4001-APP-12 | AC11: a statement reaches a v_ace_* view, a recovery_case row or another service's schema | Component | The build scan of step 10 with a forced statement; the grant refuses it, the build fails and nothing is released |"
+  },
+  {
+   "old": "| TC-E4-001-02 | AC2: the decision log cannot be written |",
+   "new": "| TC-E4-001-02 | AC2: the decision log cannot be written; BR5 and BR13 |"
+  },
+  {
+   "old": "| Principle 5: a forced decision log write failure |",
+   "new": "| Principle 5: a forced decision log write failure; BR5 |"
+  },
+  {
+   "old": "raises none | Component | Case `RC-2026-000401`",
+   "new": "raises none; BR1, BR2, BR3, BR4, BR11, BR12 and BR14 | Component | Case `RC-2026-000401`"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E4-001-03 |",
+   "new": "| MSG-P4-002 | AC3, TC-E4-001-03 |"
+  },
+  {
+   "old": "The step does not run, nothing is ordered and the state is reported to the parent | None | TC-E4-001-01 |",
+   "new": "The step does not run, nothing is ordered and the state is reported to the parent | None | AC4, TC-E4-001-01 |"
+  },
+  {
+   "old": "the exception queue of rwb-integration holds the item | None | TC-E4-001-01 |",
+   "new": "the exception queue of rwb-integration holds the item | None | AC5, TC-E4-001-01 |"
+  },
+  {
+   "old": "| MSG-P1-001 | TC-E4-001-01 |",
+   "new": "| MSG-P1-001 | AC6, TC-E4-001-01 |"
+  },
+  {
+   "old": "| MSG-GEN-001 | TC-E4-001-01 |",
+   "new": "| MSG-GEN-001 | AC7, TC-E4-001-01 |"
+  },
+  {
+   "old": "the route decision continues | None | TC-E4-001-01 |",
+   "new": "the route decision continues | None | AC8, TC-E4-001-01 |"
+  },
+  {
+   "old": "the platform envelope | None | TC-E4-001-01 |",
+   "new": "the platform envelope | None | AC9, TC-E4-001-01 |"
+  },
+  {
+   "old": "the repeat is counted | None | TC-E4-001-01 |",
+   "new": "the repeat is counted | None | AC10, TC-E4-001-01 |"
+  },
+  {
+   "old": "| None (pipeline log) | s17, BR4, BR8 |",
+   "new": "| None (pipeline log) | AC11, s17, BR4, BR8 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Right not held (exception X2)\n    Given the role does not hold the Treatment and offer right of the operation\n    When the route operation is called\n    Then the answer is 403 with MSG-P4-002, no read is made and no record is written\n\n  Scenario: AC4 Case not at the route decision (exception X3)\n    Given the case is not at the route decision, or the asset of the appraisal is not on the case\n    When the appraisal step runs\n    Then the step does not run, nothing is ordered and the state is reported to the parent\n\n  Scenario: AC5 Order refused or run failed (exception X4)\n    Given rwb-integration refuses the order or the interface run fails after the retry limit\n    When the order is submitted\n    Then the case stays at the route decision, the failure and its run reference are recorded, and the exception queue of rwb-integration holds the item\n\n  Scenario: AC6 Stale ACE data product (exception X5)\n    Given the ACE data product is stale after a late or failed batch\n    When the age check runs\n    Then the step holds, writes nothing and shows MSG-P1-001 with the data date, and resumes on a fresh answer\n\n  Scenario: AC7 Appraisal not accepted (exception X6)\n    Given the appraisal has no acceptance in valuation_ext\n    When the route decision is taken\n    Then no order is raised and the route decision names the missing acceptance with MSG-GEN-001\n\n  Scenario: AC8 Appraisal inside the limit (exception X7)\n    Given the appraisal is inside the limit\n    When the age check runs\n    Then nothing is ordered, the outcome is recorded with the limit version and the route decision continues\n\n  Scenario: AC9 No answer inside 2 s (exception X8)\n    Given rwb-source-data or rwb-case does not answer inside 2 s, or its breaker is open\n    When the step calls the service\n    Then the step waits and retries on the workflow's own schedule, nothing is written and the caller sees 503 with the platform envelope\n\n  Scenario: AC10 Repeat with the same Idempotency-Key (exception X9)\n    Given the same assessment is submitted twice with the same Idempotency-Key\n    When the second submission arrives\n    Then one record and one order exist, the stored answer is returned and the repeat is counted\n\n  Scenario: AC11 Boundary reached (exception X10)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case row or another service's schema\n    When the statement runs\n    Then the grant refuses the statement, the boundary test fails the build and nothing is released"
+  },
+  {
+   "old": "| VR-S1-001-1 |",
+   "new": "| BR11 (VR-S1-001-1) |"
+  },
+  {
+   "old": "| BR-S1-001 |",
+   "new": "| BR12 (BR-S1-001) |"
+  },
+  {
+   "old": "| R-UNI-39 |",
+   "new": "| BR13 (R-UNI-39) |"
+  },
+  {
+   "old": "| R-UNI-38 |",
+   "new": "| BR14 (R-UNI-38) |"
+  },
+  {
+   "old": "| R-UNI-40 |",
+   "new": "| BR15 (R-UNI-40) |"
+  },
+  {
+   "old": "10. The boundary test: no statement outside `rwb_valuation`, no `v_ace_*` read, no write to `rwb_case`, `rwb_decision` or `rwb_integration`, and no outbox row (X10, BR8, BR9).",
+   "new": "10. The boundary test: no statement outside `rwb_valuation`, no `v_ace_*` read, no write to the schema of any other owner, and no outbox row (X10, BR8, BR9)."
+  },
+  {
+   "old": "- The age limit and the appraisal types of `LOV-APPRAISAL` at their version in force (TSD S1 T3.2), read as reference data or as a rule row and never as constants.",
+   "new": "- The age limit and the appraisal types of `LOV-APPRAISAL` at their version in force (TSD S1 T3.2), read as reference data or as a rule row and never as constants. Parameter name of the age limit: Not specified in the source documents (DOR-RWB-S1-E4001-APP-20; GAP-0429). Both are read under the reference-data contract of DP-06 and DP-07."
+  },
+  {
+   "old": "| Source | Reference | Used in |\n|---|---|---|",
+   "new": "| Source | Reference | Feature | L3 process | Used in |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| Legacy story | RWB-E4-001, disposition Split (rework); AC2 owned word for word by this story; AC1 is owned by RWB-ITG-E4001-ITG | 1, 7, 16 |",
+   "new": "| Legacy story | RWB-E4-001, disposition Split (rework); AC2 owned word for word by this story; AC1 is owned by RWB-ITG-E4001-ITG | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 1, 7, 16 |"
+  },
+  {
+   "old": "| Feature | FEAT-VAL-01 Order an appraisal when the last one is stale, module S1, epic E4, depends on FEAT-RDF-06 | 1, 2, 3 |",
+   "new": "| Feature | FEAT-VAL-01 Order an appraisal when the last one is stale, module S1, epic E4, depends on FEAT-RDF-06 | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 1, 2, 3 |"
+  },
+  {
+   "old": "| FSD S1 v3 | A1.4 preconditions; A2.1.2 steps and integration points; A2.1.3.1 VR-S1-001-1 and BR-S1-001; A2.1.3.3 roles; A2.1.4.3 exception flows; requirements REQ-S1-001 to REQ-S1-008; SCR-13 | 2, 3, 4, 5, 8, 14, 15 |",
+   "new": "| FSD S1 v3 | A1.4 preconditions; A2.1.2 steps and integration points; A2.1.3.1 VR-S1-001-1 and BR-S1-001; A2.1.3.3 roles; A2.1.4.3 exception flows; requirements REQ-S1-001 to REQ-S1-008; SCR-13 | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 2, 3, 4, 5, 8, 14, 15 |"
+  },
+  {
+   "old": "| TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T3.2 `LOV-APPRAISAL` and `LOV-ROUTE`; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12, 13, 16 |",
+   "new": "| TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T3.2 `LOV-APPRAISAL` and `LOV-ROUTE`; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 3, 10, 11, 12, 13, 16 |"
+  },
+  {
+   "old": "| Logical data model | DF-ACE-091 to DF-ACE-098, DF-ACE-187 to DF-ACE-195, DF-EXT-036 to DF-EXT-049, DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-COL-018 to DF-COL-027 and DF-COL-043 to DF-COL-044 | 11 |",
+   "new": "| Logical data model | DF-ACE-091 to DF-ACE-098, DF-ACE-187 to DF-ACE-195, DF-EXT-036 to DF-EXT-049, DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-COL-018 to DF-COL-027 and DF-COL-043 to DF-COL-044 | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 11 |"
+  },
+  {
+   "old": "| Routing logic | R-UNI-38, R-UNI-39 and R-UNI-40; the valuation states of R-DIL-07 to R-DIL-11; no S1 route rule is in force, because the S1 package is Phase 2 | 4, 8, 9, 14 |",
+   "new": "| Routing logic | R-UNI-38, R-UNI-39 and R-UNI-40; the valuation states of R-DIL-07 to R-DIL-11; no S1 route rule is in force, because the S1 package is Phase 2 | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 4, 8, 9, 14 |"
+  },
+  {
+   "old": "| Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 |",
+   "new": "| Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules v1 §R5.5) | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 13 |"
+  },
+  {
+   "old": "| Gaps and assumptions | GAP-2590 to -7; ASM-4287 to -8; the contract gaps GAP-2587 to -3 belong to RWB-S1-E4001-CON and are cited here where the surface is read | 1, 3, 4, 11, 12, 13, 14, 16 |",
+   "new": "| Gaps and assumptions | GAP-2590 to -7; ASM-4287 to -8; the contract gaps GAP-2587 to -3 belong to RWB-S1-E4001-CON and are cited here where the surface is read | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | 1, 3, 4, 11, 12, 13, 14, 16 |"
+  },
+  {
+   "old": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | all |",
+   "new": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | FEAT-VAL-01 | Not specified in the source documents (DOR-RWB-S1-E4001-APP-2) | all |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18916",
+   "item": "DOR-RWB-S1-E4001-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add to tab Story test cases the rows TC-E4-001-01 to TC-E4-001-04, TC-S1-E4001-APP-01, TC-S1-E4001-APP-02 and TC-S1-E4001-APP-03 (new contract and §12.7 boundary tests), and rows APP-04 to APP-12",
+   "note": "Story side: contract test APP-02 and §12.7 boundary test APP-03 added to section 16. Workbook rows for all IDs are still needed."
+  },
+  {
+   "ruling": "R-18917",
+   "item": "DOR-RWB-S1-E4001-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to section 18; L3 process not named in the sources, so it is marked Not specified."
+  },
+  {
+   "ruling": "R-18918",
+   "item": "DOR-RWB-S1-E4001-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Reference-data contract DP-06 and DP-07 named in section 13; age-limit parameter name not in sources (GAP-0429), marked Not specified."
+  },
+  {
+   "ruling": "R-18919",
+   "item": "DOR-RWB-S1-E4001-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Step 10 names no other schema; the boundary is stated as no write to any other owner's schema."
+  },
+  {
+   "ruling": "R-18920",
+   "item": "DOR-RWB-S1-E4001-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC3 to AC11 added for exceptions X2 to X10 with TC rows APP-04 to APP-12; section 5 Covered by column now names the criteria."
+  },
+  {
+   "ruling": "R-18921",
+   "item": "DOR-RWB-S1-E4001-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "",
+   "note": "Rules given BR11 to BR15; section 16 Covers column now names BR1 to BR15 against tests."
+  },
+  {
+   "ruling": "R-18922",
+   "item": "DOR-RWB-S1-E4001-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Add or correct fields DF-COL-018, DF-COL-027, DF-COL-043 and DF-COL-044, and add decision_record as an entity or field (also check Data Classification v5)",
+   "note": "AC2 kept word for word as the legacy criterion, so the wording part of the P3 detail is not edited. Story unchanged in section 11."
+  },
+  {
+   "ruling": "R-18923",
+   "item": "DOR-RWB-S1-E4001-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The text of MSG-P1-001 in Error and Message Standard v4 is not in the sources read, so the story cannot be aligned without invented text. Story keeps the FSD wording."
+  },
+  {
+   "ruling": "R-22766",
+   "item": "GAP-0436",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Harness values, business date, product codes, evidence format and gates are not in the sources. Agree at wave 3 entry check with integration lead. No harness value in this story."
+  },
+  {
+   "ruling": "R-22767",
+   "item": "GAP-0429",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "SVAF interface, product code, parameter name, route and harness pack are not in the sources. Agree at wave 3 entry check with integration lead. Parameter cited as Not specified in section 13."
+  }
+ ]
+}

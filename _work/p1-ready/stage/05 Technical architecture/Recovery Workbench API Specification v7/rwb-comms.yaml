@@ -1,0 +1,1492 @@
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-comms (Communications)"
+  version: 5.1.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-comms (Communications, module P6, service wave
+    1) under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16
+    November 2026) by the D-RCV-60 microservice realignment.
+    This document holds 18 operations under REST base /api/recovery/comms/v1; schema rwb_comms; topic
+    rwb.comms.events.v1; Temporal task queue rwb-comms in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-comms.asyncapi.yaml.
+servers:
+- url: "/api/recovery/comms/v1"
+  description: "Relative to the rwb-comms service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Treatment"
+- name: "Litigation"
+- name: "Interactions"
+- name: "Administration"
+x-service:
+  code: "P6"
+  service: "rwb-comms"
+  name: "Communications"
+  wave: 1
+  schema: "rwb_comms"
+  rest-base: "/api/recovery/comms/v1"
+  topic: "rwb.comms.events.v1"
+  task-queue: "rwb-comms"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-comms.asyncapi.yaml"
+  operations: 18
+  bodyRef-rule: "bodyRef resolves to a P5 rwb-document object when the body is a document-hub object, otherwise to the service's own container"
+  legacy-mapping: "POST /admin/reference-loads is mapped to POST /admin/templates plus the approve and withdraw operations of /api/recovery/comms/v1; SHA-256 file hash is kept as upload idempotency; TC-E1-046-09 asserts refusal on the mapped operation"
+paths:
+  /cases/{caseId}/notices:
+    post:
+      tags:
+      - Litigation
+      summary: Generate a notice from the approved template
+      description: "Error rows: withdrawn-template hold answered with notice state Held; repeat with a different key answered 409; missing field answered 422."
+      operationId: postCasesCaseidNotices
+      x-error-rows: "Withdrawn-template hold: notice returned in state Held. Repeat with different key: 409. Missing field: 422."
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Litigation
+        right: C
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoticeRequest'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notice'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /notices/{noticeId}:
+    get:
+      tags:
+      - Litigation
+      summary: Read a notice with its dispatch and proof of delivery
+      operationId: getNoticesNoticeid
+      x-guard-enforcement: "Area Litigation, right R, enforced at gateway-bff on the screen path. Guard library is a platform item."
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Litigation
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notice'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/templates:
+    get:
+      tags:
+      - Administration
+      summary: List template versions by code, language and state
+      operationId: getAdminTemplates
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: code
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: language
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplatePage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+    post:
+      tags:
+      - Administration
+      summary: Upload a new template version in state DRAFT
+      operationId: postAdminTemplates
+      x-legacy-mapping: "Legacy POST /api/recovery/v1/admin/reference-loads maps to POST /admin/templates plus approve and withdraw on /api/recovery/comms/v1; SHA-256 file hash is the idempotency rule"
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                templateCode:
+                  type: string
+                language:
+                  type: string
+                productGroup:
+                  type: string
+                channel:
+                  type: string
+                noticeType:
+                  type: string
+                signatureBasis:
+                  type: string
+                mergeCodes:
+                  type: string
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '413':
+          $ref: '#/components/responses/E413'
+        '415':
+          $ref: '#/components/responses/E415'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/templates/{templateId}/content:
+    get:
+      tags:
+      - Administration
+      summary: Download a template body
+      operationId: getAdminTemplatesTemplateidContent
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: templateId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/templates/{templateId}/approve:
+    post:
+      tags:
+      - Administration
+      summary: Record the Legal approval of a draft template version with its valid from date
+      operationId: postAdminTemplatesTemplateidApprove
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: A
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateApproval'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: templateId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/templates/{templateId}/withdraw:
+    post:
+      tags:
+      - Administration
+      summary: Withdraw an approved template version with a reason
+      operationId: postAdminTemplatesTemplateidWithdraw
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: A
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateWithdrawal'
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: templateId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/messages:
+    post:
+      tags:
+      - Interactions
+      summary: Send an SMS or LINE message from an approved template after the conduct check
+      operationId: postCasesCaseidMessages
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Case record
+        right: C
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageRequest'
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Interaction'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /treatments/{treatmentId}/signature-requests:
+    get:
+      tags:
+      - Treatment
+      summary: List the signature requests of a treatment
+      operationId: getTreatmentsTreatmentidSignatureRequests
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Treatment and offer
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: treatmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SignatureRequest'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+    post:
+      tags:
+      - Treatment
+      summary: Send reviewed generated documents for signature by e-signature, branch or paper; copies them to the write-once store and writes
+        the decision log entry
+      operationId: postTreatmentsTreatmentidSignatureRequests
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Treatment and offer
+        right: C
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignatureRequestCreate'
+      parameters:
+      - name: treatmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SignatureRequest'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /signature-requests/{requestId}/result:
+    post:
+      tags:
+      - Treatment
+      summary: Record a branch or paper signature result with the scanned document
+      operationId: postSignatureRequestsRequestidResult
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Treatment and offer
+        right: U
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignatureResultRequest'
+      parameters:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: 'Branch and paper signatures only. EasyApp e-signature results are not received by the Workbench: they land in ACE esign_request
+        and are read through v_ace_esign (D-RCV-35). An e-signature request returns 409.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureRequest'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /notices/{noticeId}/channel-view:
+    get:
+      tags:
+      - Litigation
+      summary: Read the channel view of a notice
+      operationId: getNoticesNoticeidChannelView
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Litigation
+        right: R
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: channel
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/NoticeChannel'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeChannelView'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /notices/{noticeId}/views:
+    post:
+      tags:
+      - Litigation
+      summary: Record that the offer was viewed
+      operationId: postNoticesNoticeidViews
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Litigation
+        right: C
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoticeViewRequest'
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeView'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /notices/{noticeId}/responses:
+    post:
+      tags:
+      - Litigation
+      summary: Record a response to the notice
+      operationId: postNoticesNoticeidResponses
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Litigation
+        right: C
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResponseRequest'
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /notices/{noticeId}/responses:
+    get:
+      tags:
+      - Litigation
+      summary: List the responses to the notice, newest first
+      operationId: getNoticesNoticeidResponses
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Litigation
+        right: R
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /parties/{partyId}/contact-points:
+    get:
+      summary: Read the contact points of a party
+      description: Contact points of a party with the consent and verification state of each channel, and the stop mark of the case the caller names. Case reference parameter schema Not specified in the source documents (CG-ALL-6724)
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: R
+      parameters:
+      - name: partyId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success, list of ContactPoint
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /contact-points/{contactKey}:
+    put:
+      summary: Maintain the consent and verification state of one contact point and channel
+      description: Returns the stored ContactPoint and its new version. Request fields (channel code, consent and verification values) Not specified in the source documents (CG-ALL-6725). A repeat with the same If-Match version returns the first answer.
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: U
+      parameters:
+      - name: contactKey
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: If-Match
+        in: header
+        required: true
+        description: Version of the contact point as read
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: ContactPointRequest, fields Not specified in the source documents (CG-ALL-6725)
+      responses:
+        '200':
+          description: Success, stored ContactPoint with its new version
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /notices/{noticeId}/custody-movements:
+    post:
+      summary: Record one movement of the original of a notice
+      description: Returns the stored Movement. Further request fields Not specified in the source documents (CG-ALL-6753). Idempotency-Key answers are kept 24 hours.
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: C
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: CustodyMovementRequest with document_id, moved_at, from_location, to_location and held_by
+      responses:
+        '201':
+          description: Success, stored Movement
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+    get:
+      summary: List the movements of the original of a notice, newest first
+      description: Movements of the original of a notice, newest first. Response fields Not specified in the source documents (CG-ALL-6754).
+      x-module: P6
+      x-owner: "P6"
+      x-capability:
+        area: Documents
+        right: R
+      parameters:
+      - name: noticeId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success, list of Movement
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Canonical UUID key for one POST request.
+      schema:
+        type: string
+        format: uuid
+  responses:
+    E400:
+      description: Bad request. Messages MSG-GEN-001, MSG-GEN-007 and MSG-PLT-N009-03
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002, MSG-PLT-N009-05
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E413:
+      description: Payload too large. The file is above the size limit. Messages MSG-P5-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E415:
+      description: Unsupported media type. The file type is not allowed. Messages MSG-P5-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006, MSG-PLT-N009-06
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Notice:
+      type: object
+      description: A demand, recall or statutory notice and its proof of delivery.
+        Regeneration keeps the same notice row, moves document_id and template_id to the chosen Approved variant, increments the version, and keeps the superseded document readable per AC-ALT-P6-007-01.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the notice
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        documentId:
+          type: string
+          format: uuid
+          description: The generated notice
+        noticeType:
+          type: string
+          maxLength: 25
+          enum:
+          - DEMAND
+          - RECALL
+          - STATUTORY_SALE_NOTICE
+          - GUARANTOR_NOTICE
+          description: Demand, recall, statutory sale notice, guarantor notice
+        sentDate:
+          type: string
+          format: date
+          description: Date sent
+        barcode:
+          type: string
+          maxLength: 40
+          description: Registered mail barcode
+        callbackDate:
+          type: string
+          format: date
+          description: Date the proof of delivery came back
+        deliveryStatus:
+          type: string
+          maxLength: 15
+          description: Delivered, refused, undeliverable, pending; value set is LOV-DELIVERY in Reference Data v5
+        sentType:
+          type: string
+          maxLength: 10
+          enum:
+          - BEFORE_NPL
+          - NPL
+          description: Before NPL or NPL
+        personKey:
+          type: string
+          maxLength: 255
+          description: ACE person_key of the customer the notice is addressed to
+        templateId:
+          type: string
+          format: uuid
+          description: Template version the notice was generated from
+        holdReason:
+          type: string
+          maxLength: 30
+          description: 'Why the notice is held: missing merge field, TEMPLATE_WITHDRAWN, CONTACT_STOP_Xn, LEGAL_HOLD'
+        dispatchFileId:
+          type: string
+          format: uuid
+          description: WIN file the notice was last written to
+        dispatchAttempts:
+          type: integer
+          description: Number of WIN files the notice has been sent in without acknowledgment
+      required:
+      - id
+      - caseId
+      - noticeType
+      - dispatchAttempts
+    Interaction:
+      type: object
+      description: 'One entry in the interaction ledger: a contact, letter, promise, payment or hand-over.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the interaction
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        personKey:
+          type: string
+          maxLength: 255
+          description: ACE person_key of the customer (v_ace_customer)
+        occurredAt:
+          type: string
+          format: date-time
+          description: When it happened
+        channel:
+          type: string
+          maxLength: 15
+          enum:
+          - MOBILE
+          - HOME_PHONE
+          - WORK_PHONE
+          - LINE
+          - EMAIL
+          - POSTAL_ADDRESS
+          - CALL
+          - VISIT
+          - SMS
+          - LETTER
+          - PORTAL
+          - BRANCH
+          description: Call, visit, SMS, LINE, email, letter, portal, branch; empty for Workbench events such as CASE_CREATED
+        direction:
+          type: string
+          maxLength: 8
+          enum:
+          - INBOUND
+          - OUTBOUND
+          description: Inbound or outbound; empty for Workbench events such as CASE_CREATED
+        actionCode:
+          type: string
+          maxLength: 10
+          description: Action code
+        contactResult:
+          type: string
+          maxLength: 20
+          enum:
+          - RIGHT_PARTY
+          - THIRD_PARTY
+          - NO_ANSWER
+          - WRONG_NUMBER
+          - REFUSED
+          description: Right party, third party, no answer, wrong number
+        promiseAmount:
+          type: number
+          description: Amount promised, baht
+        promiseDate:
+          type: string
+          format: date
+          description: Date promised
+        summary:
+          type: string
+          maxLength: 2000
+          x-personal-data: true
+          description: Summary of what was said. Masked unless the caller's role may see it
+        conductCheck:
+          type: string
+          maxLength: 15
+          enum:
+          - PASSED
+          - BLOCKED
+          - NOT_APPLICABLE
+          description: Passed, blocked, not applicable
+        sourceSystem:
+          type: string
+          maxLength: 10
+          enum:
+          - EFS
+          - WORKBENCH
+          description: EFS for collections history read from ACE (v_ace_efs_action), or the Workbench
+        eventCode:
+          type: string
+          maxLength: 40
+          enum:
+          - CONTACT
+          - LETTER
+          - PROMISE
+          - PAYMENT
+          - HANDOVER
+          - CASE_CREATED
+          - CASE_ALLOCATED
+          - CASE_TRANSFERRED
+          - CASE_ESCALATED
+          - DOCUMENT_ATTACHED
+          - DECISION_TAKEN
+          - CORRECTION
+          - PARTNER_RESULT
+          - OFFER
+          description: Ledger event
+        actorType:
+          type: string
+          maxLength: 10
+          enum:
+          - USER
+          - SERVICE
+          - PARTNER
+          description: User, service or partner
+        actorRef:
+          type: string
+          maxLength: 64
+          description: User ID or service identity code that acted
+        sourceRef:
+          type: string
+          maxLength: 60
+          description: Producing module and event, or the interface, for example EV-02 CaseAllocated or INT-07
+        idempotencyKey:
+          type: string
+          maxLength: 120
+          description: Unique key of the event or request; repeats are rejected; unique on its own
+        caseSeq:
+          type: string
+          description: Gap-free sequence of the entry within its case; unique with case_id
+        decisionLogId:
+          type: string
+          format: uuid
+          description: Decision log entry the entry records, for DECISION_TAKEN
+        correctsEntryId:
+          type: string
+          format: uuid
+          description: Entry this entry corrects
+        contactKey:
+          type: string
+          maxLength: 255
+          description: The contact point reached, as the v_ace_contact composite key contact_type:key (PHONE, EMAIL or ADDRESS); the number or
+            address is masked by role
+        fromHolderRef:
+          type: string
+          maxLength: 60
+          description: 'Who held the case before a hand-over: USER:<user id> or PARTNER:<partner code>'
+        toHolderRef:
+          type: string
+          maxLength: 60
+          description: 'Who holds the case after a hand-over: USER:<user id> or PARTNER:<partner code>'
+        treatmentId:
+          type: string
+          format: uuid
+          description: The treatment offered, for an OFFER entry
+        proceedsId:
+          type: string
+          format: uuid
+          description: The proceeds matched, for a PAYMENT entry
+        retentionClass:
+          type: string
+          maxLength: 10
+          description: Retention class of the entry, set by entry type
+        deliveryStatus:
+          type: string
+          maxLength: 15
+          enum:
+          - SENT
+          - DELIVERED
+          - READ
+          - FAILED
+          description: Delivery state of an outbound SMS, LINE message or letter
+        externalRef:
+          type: string
+          maxLength: 60
+          description: Reference returned by NSS, LINE OA or WIN
+      required:
+      - id
+      - caseId
+      - occurredAt
+      - sourceSystem
+    NoticeRequest:
+      type: object
+      properties:
+        noticeType:
+          type: string
+          enum:
+          - DEMAND
+          - RECALL
+          - STATUTORY_SALE_NOTICE
+          - GUARANTOR_NOTICE
+        personKey:
+          type: string
+          maxLength: 255
+        language:
+          type: string
+          enum:
+          - TH
+          - EN
+    NoticeChannel:
+      type: string
+      maxLength: 15
+      description: LOV-CHANNEL code (TSD P6 T3.2)
+      enum:
+      - MOBILE
+      - HOME_PHONE
+      - WORK_PHONE
+      - LINE
+      - EMAIL
+      - POSTAL_ADDRESS
+      - CALL
+      - VISIT
+      - SMS
+      - LETTER
+      - PORTAL
+      - BRANCH
+    NoticeChannelView:
+      type: object
+      properties:
+        noticeId:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        noticeType:
+          description: Not specified in the source documents (CG-ALL-6649)
+        templateCode:
+          description: Not specified in the source documents (CG-ALL-6649)
+        templateVersion:
+          description: Not specified in the source documents (CG-ALL-6649)
+        language:
+          description: Not specified in the source documents (CG-ALL-6649)
+        channel:
+          $ref: '#/components/schemas/NoticeChannel'
+        bodyRef:
+          description: Not specified in the source documents (CG-ALL-6649)
+        offerId:
+          description: Not specified in the source documents (CG-ALL-6649)
+        offerValidityDate:
+          description: Not specified in the source documents (CG-ALL-6649)
+        mergeValues:
+          description: Not specified in the source documents (CG-ALL-6649)
+    NoticeViewRequest:
+      type: object
+      required:
+      - channel
+      - viewedAt
+      properties:
+        channel:
+          $ref: '#/components/schemas/NoticeChannel'
+        viewedAt:
+          description: Not specified in the source documents (CG-ALL-6650)
+    NoticeView:
+      type: object
+      properties:
+        viewId:
+          description: Not specified in the source documents (CG-ALL-6650)
+        noticeId:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        channel:
+          $ref: '#/components/schemas/NoticeChannel'
+        viewedAt:
+          description: Not specified in the source documents (CG-ALL-6650)
+        deliveryStatus:
+          type: string
+          enum:
+          - DELIVERED
+          - REFUSED
+          - UNDELIVERABLE
+          - PENDING
+    ResponseRequest:
+      type: object
+      required:
+      - responseCode
+      - channel
+      - respondedAt
+      properties:
+        responseCode:
+          description: Not specified in the source documents (GAP-1107; ASM-2055)
+        channel:
+          $ref: '#/components/schemas/NoticeChannel'
+        respondedAt:
+          description: Not specified in the source documents (GAP-1107; ASM-2055)
+    Response:
+      type: object
+      properties:
+        id:
+          description: Not specified in the source documents (CG-ALL-6673)
+        noticeId:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        responseCode:
+          description: Not specified in the source documents (GAP-1107; ASM-2055)
+        channel:
+          $ref: '#/components/schemas/NoticeChannel'
+        respondedAt:
+          description: Not specified in the source documents (GAP-1107; ASM-2055)
+        decisionRecordId:
+          description: Not specified in the source documents (GAP-1107; ASM-2055)
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI of the error-map row
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          description: Request path and trace ID, stamped by the owning service
+        messageCode:
+          type: string
+          pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+        messageTh:
+          type: string
+          description: Thai text of the message code
+        field:
+          type: string
+          description: JSON Pointer or parameter or header name of the first failing input
+        errors:
+          type: array
+          description: Present only on 400 or 422 when more than one input fails
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              messageCode:
+                type: string
+                pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+              detail:
+                type: string
+            required: [field, messageCode, detail]
+        traceId:
+          type: string
+          pattern: '^[0-9a-fA-F]{32}$'
+          description: 32-hex W3C trace ID of the request
+      required: [type, title, status, messageCode, traceId]
+    SignatureRequestCreate:
+      type: object
+      properties:
+        documentIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        personKey:
+          type: string
+          maxLength: 255
+        method:
+          type: string
+    SignatureRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        caseId:
+          type: string
+          format: uuid
+        treatmentId:
+          type: string
+          format: uuid
+        documentId:
+          type: string
+          format: uuid
+        personKey:
+          type: string
+          maxLength: 255
+        method:
+          type: string
+        status:
+          type: string
+          description: Signature status; for e-signature it follows v_ace_esign.status, for branch or paper it is recorded through POST /signature-requests/{requestId}/result
+        externalRef:
+          type: string
+          description: EasyApp reference, read from v_ace_esign (EasyApp lands in ACE esign_request); read only
+          readOnly: true
+        sentAt:
+          type: string
+          format: date-time
+        signedAt:
+          type: string
+          format: date-time
+        signedDocumentId:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+    SignatureResultRequest:
+      type: object
+      properties:
+        result:
+          type: string
+        signedDocumentId:
+          type: string
+          format: uuid
+        signedAt:
+          type: string
+          format: date-time
+    TemplatePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Template'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        templateCode:
+          type: string
+        templateVersion:
+          type: integer
+        language:
+          type: string
+        productGroup:
+          type: string
+        channel:
+          type: string
+        noticeType:
+          type: string
+        signatureBasis:
+          type: string
+        mergeCodes:
+          type: array
+          items:
+            type: string
+        state:
+          type: string
+        approvedBy:
+          type: string
+          format: uuid
+        approvedAt:
+          type: string
+          format: date-time
+        validFrom:
+          type: string
+          format: date
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+    TemplateApproval:
+      type: object
+      properties:
+        validFrom:
+          type: string
+          format: date
+    TemplateWithdrawal:
+      type: object
+      properties:
+        reason:
+          type: string
+    MessageRequest:
+      type: object
+      properties:
+        channel:
+          type: string
+        templateCode:
+          type: string
+        language:
+          type: string
+        personKey:
+          type: string
+          maxLength: 255

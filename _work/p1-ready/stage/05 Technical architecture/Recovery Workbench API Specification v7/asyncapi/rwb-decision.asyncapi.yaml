@@ -1,0 +1,215 @@
+# Change log. D-RCV-60, 26 November 2026: cross-document changes under the programme directive. Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+asyncapi: 3.0.0
+info:
+  title: "Recovery Workbench events - rwb-decision"
+  version: 5.0.0
+  description: >-
+    AsyncAPI 3.0 contract for the business-event topic of rwb-decision (Decision and rules, module P7). One
+    document per service, as Arch v5 slide 42 notes require; the document set is version 5.0.0 of 22 November
+    2026 (D-RCV-60 microservice realignment).
+    Producer and consumer names are those of the Arch v5 event catalogue, slides 42 and 43; payload field names
+    are those of Event and Messaging Design v4 (sheet Events, payload column). Property types, required flags
+    and formats are not specified in the source documents (GAP-0096; ASM-0160).
+    Events carry IDs and facts, never personal data (Arch v5 slide 42 notes).
+x-topic:
+  name: "rwb.decision.events.v1"
+  partitions: 12
+  replication-factor: 3
+  retention: "7 days"
+  key: "caseId"
+  mode: "CloudEvents 1.0 Kafka binding, binary mode (ce_* headers)"
+  retry: "retry topics 1 min, 10 min, 1 h, then .dlt with alert"
+  schema-registry: "JSON Schema registry, BACKWARD compatibility"
+  fallback: "Event Hubs Premium"
+  source: "Arch v5 slide 35 (Kafka line) and slide 42 notes"
+  dead-letter: "rwb.decision.events.v1.dlt"
+  dead-letter-note: "Top-level name derived by appending .dlt to the service topic (Template and Rules R4)"
+defaultContentType: "application/cloudevents+json"
+channels:
+  "rwb.decision.events.v1":
+    address: "rwb.decision.events.v1"
+    title: "rwb.decision.events.v1"
+    messages:
+      DecisionRecorded:
+        $ref: '#/components/messages/DecisionRecorded'
+      ApprovalRequested:
+        $ref: '#/components/messages/ApprovalRequested'
+      RulePackageInForce:
+        $ref: '#/components/messages/RulePackageInForce'
+      BookingDecisionMade:
+        $ref: '#/components/messages/BookingDecisionMade'
+operations:
+  publishDecisionRecorded:
+    action: send
+    channel:
+      $ref: '#/channels/rwb.decision.events.v1'
+    summary: "Publish DecisionRecorded (EV-08) to rwb.decision.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.decision.events.v1/messages/DecisionRecorded'
+  publishApprovalRequested:
+    action: send
+    channel:
+      $ref: '#/channels/rwb.decision.events.v1'
+    summary: "Publish ApprovalRequested (EV-09) to rwb.decision.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.decision.events.v1/messages/ApprovalRequested'
+  publishRulePackageInForce:
+    action: send
+    channel:
+      $ref: '#/channels/rwb.decision.events.v1'
+    summary: "Publish RulePackageInForce (EV-30) to rwb.decision.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.decision.events.v1/messages/RulePackageInForce'
+  publishBookingDecisionMade:
+    action: send
+    channel:
+      $ref: '#/channels/rwb.decision.events.v1'
+    summary: "Publish BookingDecisionMade per treatment and business date to rwb.decision.events.v1"
+    messages:
+    - $ref: '#/channels/rwb.decision.events.v1/messages/BookingDecisionMade'
+x-shared-topics:
+- name: "rwb.decision-record.v1"
+  asyncapi: "asyncapi/rwb.decision-record.v1.asyncapi.yaml"
+  note: "Every service publishes DecisionRecorded (DP-03); the shared contract sits in one document"
+components:
+  messages:
+    DecisionRecorded:
+      name: "rwb.decision.DecisionRecorded.v1"
+      title: "DecisionRecorded"
+      summary: "EV-08 DecisionRecorded"
+      description: "Produced by rwb-decision; consumers: rwb-decision, rwb-reporting"
+      x-consumers: ["rwb-decision", "rwb-reporting"]
+      contentType: "application/cloudevents+json"
+      headers:
+        $ref: '#/components/schemas/CloudEventsHeaders'
+      payload:
+        $ref: '#/components/schemas/DecisionRecordedEvent'
+    ApprovalRequested:
+      name: "rwb.decision.ApprovalRequested.v1"
+      title: "ApprovalRequested"
+      summary: "EV-09 ApprovalRequested"
+      description: "Produced by rwb-decision; consumers: gateway-bff (inbox)"
+      x-consumers: ["gateway-bff (inbox)"]
+      contentType: "application/cloudevents+json"
+      headers:
+        $ref: '#/components/schemas/CloudEventsHeaders'
+      payload:
+        $ref: '#/components/schemas/ApprovalRequestedEvent'
+    RulePackageInForce:
+      name: "rwb.decision.RulePackageInForce.v1"
+      title: "RulePackageInForce"
+      summary: "EV-30 RulePackageInForce"
+      description: "Produced by rwb-decision; consumers: rwb-case, rwb-valuation, rwb-treatment, rwb-payment"
+      x-consumers: ["rwb-case", "rwb-valuation", "rwb-treatment", "rwb-payment"]
+      contentType: "application/cloudevents+json"
+      headers:
+        $ref: '#/components/schemas/CloudEventsHeaders'
+      payload:
+        $ref: '#/components/schemas/RulePackageInForceEvent'
+    BookingDecisionMade:
+      name: "rwb.decision.BookingDecisionMade.v1"
+      title: "BookingDecisionMade"
+      summary: "BookingDecisionMade per treatment and business date"
+      description: "Published by rwb-decision on rwb.decision.events.v1 per treatment and business date, with outcome, row, package code and version, business date and difference terms. Key: treatmentId per RWB-P2-E2007-CON and RWB-P3-E2007-APP; the channel key is caseId (x-topic key), not reconciled. Property types and formats: Not specified in the source documents (GAP-2487)."
+      contentType: "application/cloudevents+json"
+      headers:
+        $ref: '#/components/schemas/CloudEventsHeaders'
+      payload:
+        type: object
+        description: "Field types and formats: Not specified in the source documents (GAP-2487)"
+  schemas:
+    CloudEventsHeaders:
+      type: object
+      description: "CloudEvents 1.0 Kafka binding in binary mode; ce_* headers (Arch v5 slide 35)"
+      properties:
+        ce_specversion:
+          type: string
+        ce_id:
+          type: string
+          description: "Event ID; also the idempotency key (Event and Messaging Design v4, sheet Rules)"
+        ce_source:
+          type: string
+        ce_type:
+          type: string
+        ce_time:
+          type: string
+          format: date-time
+        ce_subject:
+          type: string
+          description: "Kafka key: caseId (Arch v5 slide 35)"
+        ce_datacontenttype:
+          type: string
+    DecisionRecordedEvent:
+      allOf:
+      - $ref: '#/components/schemas/CloudEventEnvelope'
+      - type: object
+        properties:
+          type:
+            const: "rwb.decision.DecisionRecorded.v1"
+          data:
+            type: object
+            description: "EV-08 DecisionRecorded payload; field names from Event and Messaging Design v4 (sheet Events); property types, required flags and formats are not specified in the source documents (GAP-0096; ASM-0160)"
+            properties:
+              entryId: {}
+              caseId: {}
+              decisionCode: {}
+              approver: {}
+    ApprovalRequestedEvent:
+      allOf:
+      - $ref: '#/components/schemas/CloudEventEnvelope'
+      - type: object
+        properties:
+          type:
+            const: "rwb.decision.ApprovalRequested.v1"
+          data:
+            type: object
+            description: "EV-09 ApprovalRequested payload; field names from Event and Messaging Design v4 (sheet Events); property types, required flags and formats are not specified in the source documents (GAP-0096; ASM-0160)"
+            properties:
+              approvalId: {}
+              caseId: {}
+              level: {}
+              amount: {}
+    RulePackageInForceEvent:
+      allOf:
+      - $ref: '#/components/schemas/CloudEventEnvelope'
+      - type: object
+        properties:
+          type:
+            const: "rwb.decision.RulePackageInForce.v1"
+          data:
+            type: object
+            description: "EV-30 RulePackageInForce payload; field names from Event and Messaging Design v4 (sheet Events); property types, required flags and formats are not specified in the source documents (GAP-0096; ASM-0160)"
+            properties:
+              packageCode: {}
+              packageVersion: {}
+              versionId: {}
+              validFrom: {}
+              approvedBy: {}
+    CloudEventEnvelope:
+      type: object
+      description: "CloudEvents 1.0 envelope (specversion, id, source, type, time, subject, data); Kafka binary mode carries the attributes in ce_* headers (Arch v5 slide 35)"
+      required: [specversion, id, source, type, time, subject, data]
+      properties:
+        specversion:
+          type: string
+          const: "1.0"
+        id:
+          type: string
+        source:
+          type: string
+        type:
+          type: string
+        time:
+          type: string
+          format: date-time
+        subject:
+          type: string
+        datacontenttype:
+          type: string
+        data:
+          type: object

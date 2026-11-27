@@ -1,0 +1,63 @@
+{
+ "edits": [
+  {
+   "old": "| Contract dependencies | RWB-P1-E1017-CON |",
+   "new": "| Contract dependencies | RWB-P1-E1017-CON; RWB-P3-E1043-CON (C, DP-07 and DP-11); the P4 authorise contract of DP-11 (Not specified in the source documents, GAP-2429); the added H rows RWB-PLT-E1027-CON, RWB-PLT-E1043-CON, RWB-PLT-E1071-CON, RWB-PLT-E1044-CON and RWB-PLT-N001-CON are carried in sections 3, 12.2, 12.8 and 13 and enter the dependency map at step D1 |"
+  },
+  {
+   "old": "    And the record names the archive location that proves where the rows went",
+   "new": "    And the record names the archive location that proves where the rows went\n\n  Scenario: AC10 A decision code outside LOV-DECISION is refused (new, D-RCV-60)\n    Given the rwb-case reference-data contract mock returns LOV-DECISION with the archive and purge decision codes in force\n    When rwb-document offers the record of an archive action whose decision code is not in LOV-DECISION in force\n    Then the ledger refuses the record with MSG-P7-009\n    And no decision_log_entry row is written and no chain_seq is consumed\n    And the decision code and final call are read from the reference-data client in the version in force, not written in code\n\n  Scenario: AC11 An unauthenticated read of the decision log is answered 401 (new, D-RCV-60)\n    When a caller without a credential reads GET /api/recovery/decision/v1/decision-log or GET /api/recovery/decision/v1/decision-log/{entryId}\n    Then the answer is 401 for each operation\n    And no DecisionLogPage and no entry is returned\n\n  Scenario: AC12 A retried or timed-out activity writes one record (new, D-RCV-60)\n    Given the rwb-document activity that writes the record of an archive action times out before the decision-record library answers\n    When the activity is retried with the same event ID and idempotency key\n    Then one decision_log_entry row exists for the action and no second chain_seq is consumed\n    And an activity that timed out before the append writes no entry, consumes no chain_seq and commits no archive or delete"
+  },
+  {
+   "old": "| TC-E1-017-12 | AC3, BR1, BR4 | Contract | Each table of section 12.7 offered as a retention target, one row each; each `rwb_decision` table refused in full, the check named, and nothing appended |",
+   "new": "| TC-E1-017-12 | AC3, BR1, BR4 | Contract | Each table of section 12.7 offered as a retention target, one row each; each `rwb_decision` table refused in full, the check named, and nothing appended |\n| TC-E1-017-13 | AC10, BR8 | Component | Reference data LOV-DECISION in force with a decision code outside it; the code and final call read from the reference-data client; MSG-P7-009 |\n| TC-E1-017-14 | AC11, BR6 | Contract | GET decision-log and GET decision-log/{entryId} called without a credential; 401 for each |\n| TC-E1-017-15 | AC12, BR3 | Component | Library fake times out, then the activity retried with the same idempotency key; one entry, one chain_seq |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28504",
+   "item": "GAP-3230",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Recovery Workbench delivery sequence v6 (tracker)",
+   "change": "Drop the rows of RWB-E1-014 and RWB-TE-007 at cut-over, or keep them struck through with 'retired, not pulled'; remove them from Depends on of RWB-E1-056 and RWB-E1-017.",
+   "note": "Rows and dependencies sit in the v6 sequence, not in this story; no story edit made."
+  },
+  {
+   "ruling": "R-28505",
+   "item": "GAP-2429",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Contract dependencies now name RWB-P3-E1043-CON, the DP-11 P4 authorise contract and the five added H rows, carried in sections 3, 12.2, 12.8 and 13; Depends on (build) left as None for step D1.",
+   "note": "Authorise contract name is Not specified in the source documents (GAP-2429); D1 decides the dependency map."
+  },
+  {
+   "ruling": "R-31420",
+   "item": "NEWAC-RWB-P7-E1017-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 (decision code outside LOV-DECISION refused with MSG-P7-009) and test row TC-E1-017-13 covering AC10 and BR8.",
+   "note": "Criterion added in section 7 with test case row TC-E1-017-13 in section 16."
+  },
+  {
+   "ruling": "R-31421",
+   "item": "NEWAC-RWB-P7-E1017-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 (unauthenticated reads of the two decision-log operations answer 401) and test row TC-E1-017-14 covering AC11 and BR6.",
+   "note": "Status 401 taken from the item; test row added in section 16."
+  },
+  {
+   "ruling": "R-31422",
+   "item": "NEWAC-RWB-P7-E1017-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 (retried or timed-out activity writes one record, no second chain_seq) and test row TC-E1-017-15 covering AC12 and BR3.",
+   "note": "Criterion added in section 7 with test case row TC-E1-017-15 in section 16."
+  }
+ ]
+}

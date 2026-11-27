@@ -1,0 +1,164 @@
+{
+ "edits": [
+  {
+   "old": "| Event | Topic | Consumer group | Payload used | When |\n|---|---|---|---|---|",
+   "new": "| Event | Topic | Consumer group | Payload used | When | Owner service |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| `CaseCreated` (EV-01), `CaseStateChanged` (EV-05) | `rwb.case.events.v1` | `rwb-reporting.case.v1` | the case id, product group, stage, route, queue and business date; CASES_BY_STAGE and CASES_BY_QUEUE_AGE | replayed for the business date of the run |",
+   "new": "| `CaseCreated` (EV-01), `CaseStateChanged` (EV-05) | `rwb.case.events.v1` | `rwb-reporting.case.v1` | the case id, product group, stage, route, queue and business date; CASES_BY_STAGE and CASES_BY_QUEUE_AGE | replayed for the business date of the run | P3 (rwb-case) |"
+  },
+  {
+   "old": "| `CaseAllocated` (EV-02) | `rwb.case.events.v1` | `rwb-reporting.case.v1` | the queue and the owner of a case; CASES_BY_QUEUE_AGE | as above |",
+   "new": "| `CaseAllocated` (EV-02) | `rwb.case.events.v1` | `rwb-reporting.case.v1` | the queue and the owner of a case; CASES_BY_QUEUE_AGE | as above | P3 (rwb-case) |"
+  },
+  {
+   "old": "| `DecisionRecorded` (EV-08) | `rwb.decision-record.v1` | `rwb-reporting.decision.v1` | the decision code, the agent version, the final call, the override reason and the time; DECISIONS_LOGGED, AGENT_OVERRIDE | as above |",
+   "new": "| `DecisionRecorded` (EV-08) | `rwb.decision-record.v1` | `rwb-reporting.decision.v1` | the decision code, the agent version, the final call, the override reason and the time; DECISIONS_LOGGED, AGENT_OVERRIDE | as above | P7 |"
+  },
+  {
+   "old": "| `TreatmentApproved` (EV-10) | `rwb.treatment.events.v1` | `rwb-reporting.treatment.v1` | the treatment id, case and terms; TREATMENTS | as above |",
+   "new": "| `TreatmentApproved` (EV-10) | `rwb.treatment.events.v1` | `rwb-reporting.treatment.v1` | the treatment id, case and terms; TREATMENTS | as above | S2 |"
+  },
+  {
+   "old": "| `NoticeDispatched` (EV-14), `NoticeDelivered` (EV-15) | `rwb.comms.events.v1` | `rwb-reporting.notice.v1` | the notice id, case, type and sent date; LETTERS_SENT | as above |",
+   "new": "| `NoticeDispatched` (EV-14), `NoticeDelivered` (EV-15) | `rwb.comms.events.v1` | `rwb-reporting.notice.v1` | the notice id, case, type and sent date; LETTERS_SENT | as above | P6 (rwb-comms) |"
+  },
+  {
+   "old": "| `AgentRunCompleted` (EV-28) | `rwb.agent.events.v1` | `rwb-reporting.agent.v1` | the run id, agent, case, outcome and fallback; the agent rates, with RWB-P10-E1063-CON as the contract of record | as above |",
+   "new": "| `AgentRunCompleted` (EV-28) | `rwb.agent.events.v1` | `rwb-reporting.agent.v1` | the run id, agent, case, outcome and fallback; the agent rates, with RWB-P10-E1063-CON as the contract of record | as above | P10 (rwb-agent) |"
+  },
+  {
+   "old": "TC-E2-009-10, BR7 |",
+   "new": "TC-E2-009-10, BR7, AC10 |"
+  },
+  {
+   "old": "| MSG-P7-003 | BR12 |",
+   "new": "| MSG-P7-003 | BR12, AC11 |"
+  },
+  {
+   "old": "| None | BR9 |",
+   "new": "| None | BR9, AC12 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | BR10 |",
+   "new": "| MSG-GEN-006 | BR10, AC13 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17 |",
+   "new": "| None (pipeline log) | Section 17, AC14 |"
+  },
+  {
+   "old": "Then the frozen baseline rows of 2026-11-27 are unchanged",
+   "new": "Then the frozen baseline rows of 2026-11-27 are unchanged\n\n  Scenario: AC10 Role lacks Reporting R (exception X6; BR7)\n    Given the role RW-REFADM holds no Reporting R\n    When RW-REFADM sends GET /reports/measures?measure=CASES_BY_STAGE&from=2026-12-15&to=2026-12-15\n    Then the read is refused with MSG-P4-002 and nothing changes\n\n  Scenario: AC11 Decision record cannot be written (exception X7; BR12)\n    Given the local decision record cannot be written for the publish of 2026-12-15\n    When JOB-15 runs at 01:30 on 2026-12-16\n    Then no snapshot row, no \"measure_publish\" row and no extract are written for 2026-12-15\n    Then MSG-P7-003 is raised and nothing is changed\n\n  Scenario: AC12 Case-facts read unanswered (exception X8; BR9)\n    Given the rwb-case contract mock does not answer inside 2 s for the 2026-12-15 cut-off\n    When JOB-15 runs at 01:30 on 2026-12-16\n    Then \"reconcileCounts\" retries on the workflow policy\n    Then 2026-12-15 stays unpublished with no snapshot rows and no extract\n\n  Scenario: AC13 Extract hand-over fails (exception X9; BR10)\n    Given the hand-over of the 2026-12-15 extract to rwb-integration fails\n    When JOB-15 runs at 01:30 on 2026-12-16\n    Then the snapshot rows for 2026-12-15 stand as published\n    Then the extract is retried from the run and the Reporting and BI analyst is alerted\n\n  Scenario: AC14 Reach into another schema (exception X10; BR8)\n    Given a component issues a statement that reaches another service's schema or a \"v_ace_*\" view\n    When the boundary test runs in the build\n    Then the grant refuses the statement and the boundary test fails the build\n\n  Scenario: AC15 Measure rows are data (BR11)\n    Given \"CASES_BY_STAGE\" is held in measure_definition with definition_version \"MD-2026.12\"\n    When JOB-15 runs at 01:30 on 2026-12-16\n    Then the value for \"CASES_BY_STAGE\" is computed from its definition row\n    Then no measure code, formula, unit, age band, data product or publish status is written as a constant\n\n  Scenario: AC16 Same business date twice (BR13)\n    Given the measures for 2026-12-15 are published\n    When JOB-15 runs twice for business date 2026-12-15 with the same execution id\n    Then the rows for 2026-12-15 hold the same values once\n    Then 2026-12-15 is published once"
+  },
+  {
+   "old": "The test cases of section 16 are the ten legacy ones.",
+   "new": "The test cases of section 16 are the ten legacy ones.\n\nAC10 to AC14 cover the exception paths X6 to X10 that the microservice adds, and AC15 and AC16 cover the business rules BR11 and BR13, which no criterion covered before."
+  },
+  {
+   "old": "| The recovery service identity of rwb-reporting (`rwb_reporting`) | Opens the Schedule run, loads the facts, computes the measures, reconciles, writes the record, the snapshots and `measure_publish`, and hands the extract over; holds no grant on another `rwb_*` schema |",
+   "new": "| The recovery service identity of rwb-reporting (`rwb_reporting`) | Opens the Schedule run, loads the facts, computes the measures, reconciles, writes the record, the snapshots and `measure_publish`, and hands the extract over; holds no grant on another `rwb_*` schema |\n| The rwb-access authorisation check (DP-08) | Authorises each read of `GET /reports/measures` against the caller's Reporting R and scope before any data is read (BR7) |"
+  },
+  {
+   "old": "`decision_record` is a library object created in `rwb_reporting` by the library's own migration (DP-03, DP-15); no other table is added",
+   "new": "`decision_record` is a library object created in `rwb_reporting` by the library's own migration (DP-03, DP-15); it is not an entity of LDM v9 and has no row in Data Classification v5, so it is named here as a library object only; no other table is added"
+  },
+  {
+   "old": "Where the legacy text says the decision log entry, this build writes the local decision record of DP-03;",
+   "new": "Where the legacy text says the decision log entry, this build means the local decision record of DP-03 and reads each criterion with that meaning; JOB-15 is the scheduled run of this build;"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18445",
+   "item": "DOR-RWB-P9-E2009-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "Owner service column added to the events table in 12.4",
+   "note": "Each consumed event now names its owning service: P3, P7, S2, P6 or P10."
+  },
+  {
+   "ruling": "R-18446",
+   "item": "DOR-RWB-P9-E2009-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "AC10 to AC14 added for X6 to X10; Covered by cells of X6 to X10 now name them",
+   "note": "Test case rows in section 16 for AC10 to AC14 are not in this chunk and still need adding."
+  },
+  {
+   "ruling": "R-18447",
+   "item": "DOR-RWB-P9-E2009-APP-4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC11, AC12, AC13, AC14, AC15 and AC16 added with rule tags for BR12, BR9, BR10, BR8, BR11 and BR13",
+   "note": "Section 16 test rows for the new criteria are not in this chunk and still need adding."
+  },
+  {
+   "ruling": "R-18448",
+   "item": "DOR-RWB-P9-E2009-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Row added for the rwb-access authorisation check (DP-08) enforcing Reporting R and scope",
+   "note": "Authority now names the authorise check on each measures read."
+  },
+  {
+   "ruling": "R-18449",
+   "item": "DOR-RWB-P9-E2009-APP-7",
+   "status": "Resolved",
+   "section": "11, 7",
+   "target": "",
+   "change": "decision_record marked as a library object outside LDM v9 and Data Classification v5; section 7 note ties legacy decision-log wording to DP-03",
+   "note": "Legacy job and decision-log wording now carries its meaning in the criteria."
+  },
+  {
+   "ruling": "R-18450",
+   "item": "DOR-RWB-P9-E2009-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text is not in this chunk; MSG-P7-003 and MSG-GEN-006 cannot be aligned without inventing wording."
+  },
+  {
+   "ruling": "R-21932",
+   "item": "GAP-2579",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "No source fixes the measure set, business day, month key or screen; choosing them is a solution architect decision, so none is invented here."
+  },
+  {
+   "ruling": "R-21933",
+   "item": "GAP-0251",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Star schema workbook v3",
+   "change": "Facts!A2 to name the star schema as the read model in rwb_reporting (P9), fed from service topics, served via GET /dashboards/{id} and GET /reports/{id} behind gateway-bff, with no data lake or Power BI connection",
+   "note": "Data lake landing removed per Architecture v5; story side already has no fact table."
+  },
+  {
+   "ruling": "R-21934",
+   "item": "GAP-0255",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Star schema workbook v3 (Measures)",
+   "change": "Add a Read-model controls section naming measure_definition, measure_snapshot and measure_publish under P9 with the publish gate, and stating that queue measures stay with P3 rwb_case",
+   "note": "Control tables and publish gate are missing from the v3 measures sheet."
+  },
+  {
+   "ruling": "R-21935",
+   "item": "GAP-0257",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Star schema workbook v3 (Dimensions and Facts)",
+   "change": "dim_org and fact_case_daily key owner and team by ID; display name resolved from P3 queue_member and assignment behind the rwb-access masking policy; no personal data on an event",
+   "note": "Owner name in dashboard facts needs an ID-only or masking rule, which v3 does not state."
+  }
+ ]
+}

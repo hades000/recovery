@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| Contract dependencies | RWB-P6-E2021-CON |",
+   "new": "| Contract dependencies | RWB-P6-E2021-CON; RWB-P3-E1043-CON (rwb-case contract, read at the version in force carried by the record; DP-07) |"
+  },
+  {
+   "old": "| External dependencies | None |",
+   "new": "| External dependencies | None |\n| Platform dependencies (DP-added, H; platform CON stories) | RWB-PLT-E1027-CON (DP-03); RWB-PLT-E1043-CON (DP-07); RWB-PLT-TE006-CON (DP-09); RWB-PLT-E1071-CON (DP-10); RWB-PLT-E1044-CON (DP-15); RWB-PLT-N001-CON (DP-19) |\n| Service baselines (DP-added) | Not specified in the source documents (GAP-1277) |"
+  },
+  {
+   "old": "    Then rwb-case starts no timer of its own for the notice period",
+   "new": "    Then rwb-case starts one NOTICE_PERIOD timer on the case from the call-back date 2026-12-18"
+  },
+  {
+   "old": "    Then no ledger entry is returned",
+   "new": "    Then no ledger entry is returned\n\n  Scenario: AC13 Only the delivery date starts the notice-period clock (new, D-RCV-60)\n    Given notice \"N-0101\" is \"Sent\" on 2026-12-15\n    When the rwb-comms contract mock returns NoticeDelivered for \"N-0101\" with result \"UNDELIVERABLE\"\n    Then no NOTICE_PERIOD timer is started on case \"RC-2026-000321\"\n    Then the task due date for \"NOTICE_UNSERVED\" comes from the SERVICE_LEVEL reference row in force and no value is held in code\n\n  Scenario: AC14 A caller without access is refused (new, D-RCV-60)\n    Given the requester holds no Case record R role\n    When the requester sends GET /api/recovery/case/v1/cases/RC-2026-000321/timeline\n    Then the response is status 403 with MSG-P4-002\n    Then an unauthenticated call returns status 401 with a message code Not specified in the source documents (NEWAC-RWB-P3-E2021-APP-AC14)\n\n  Scenario: AC15 A replayed write changes nothing (new, D-RCV-60)\n    Given case \"RC-2026-000321\" is \"IN_PROGRESS\" with legal hold false\n    When \"LIT-0101\" sends POST /api/recovery/case/v1/cases/RC-2026-000321/legal-hold twice with the same idempotency key\n    Then the case is \"ON_HOLD\" with one decision record for the hold\n    Then the second call writes nothing; the idempotency key header is Not specified in the source documents (NEWAC-RWB-P3-E2021-APP-AC15)"
+  },
+  {
+   "old": "| BR6 | No notice-period clock is started from a print date or from an unserved letter; the clock is the E5002 story's and starts from the delivery date | R-LIT-07; R-LIT-08 | None yet; new AC and TC rows needed |",
+   "new": "| BR6 | No notice-period clock is started from a print date or from an unserved letter; a delivered notice starts the NOTICE_PERIOD timer on the case from the call-back date | R-LIT-07; R-LIT-08 | AC4, AC13 |"
+  },
+  {
+   "old": "| BR8 | Which hold reasons, task codes and due dates apply is data held as reference data, never code | Principle 1; LOV-ROLE; GAP-2218 | None yet; new AC and TC rows needed |",
+   "new": "| BR8 | Which hold reasons, task codes and due dates apply is data held as reference data, never code | Principle 1; LOV-ROLE; GAP-2218 | AC13 |"
+  },
+  {
+   "old": "| TC-E2-021-15 | New; section 12.7 table boundary (ASM-3438) | Component | Write to `interaction` from rwb_case; refused |",
+   "new": "| TC-E2-021-15 | New; section 12.7 table boundary (ASM-3438) | Component | Write to `interaction` from rwb_case; refused |\n| TC-E2-021-16 | New; AC13 here (BR6, BR8) | Component | N-0101 Sent 2026-12-15; NoticeDelivered UNDELIVERABLE; SERVICE_LEVEL row in force |\n| TC-E2-021-17 | New; AC14 here | Contract | Requester without Case record R reads the timeline; unauthenticated call |\n| TC-E2-021-18 | New; AC15 here | Contract | POST legal-hold sent twice with one idempotency key |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28798",
+   "item": "GAP-1090",
+   "status": "Cross-document",
+   "section": "",
+   "target": "rwb-source-data reconciliation story (JOB-04, Architecture v5)",
+   "change": "Assign REC-05 to the JOB-04 reconciliation story and add the notice break count and its series there.",
+   "note": "REC-05 is not named in this story; the owner and mechanism belong to rwb-source-data."
+  },
+  {
+   "ruling": "R-28799",
+   "item": "GAP-1093",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-P6-E2021-OPS and the three values files",
+   "change": "Set deployment slot and replica counts once DL35 is decided; confirm the six alert thresholds at UAT.",
+   "note": "Operations values are not in this story; DL35 remains open in TSD P6."
+  },
+  {
+   "ruling": "R-28800",
+   "item": "GAP-1609",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "AC4 now starts a NOTICE_PERIOD timer from the call-back date; BR6 and BR8 Covered by set to AC4/AC13; TC-E2-021-16 added.",
+   "note": "Timer owner is rwb-case per Arch v5; undelivered path is the NoticeDelivered UNDELIVERABLE result applied in the inbox (AC5)."
+  },
+  {
+   "ruling": "R-28801",
+   "item": "GAP-2106",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Architecture v5 job map (JOB-10) and RWB-P2 integration story",
+   "change": "Record rwb-comms as owner of the JOB-10 notice and Schedule, and rwb-integration as owner of transport and retry, publishing FileDelivered or FileFailed to P6.",
+   "note": "JOB-10 ownership is set in Architecture and P2/P6 stories, not in this case-side story."
+  },
+  {
+   "ruling": "R-28802",
+   "item": "GAP-2217",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Section 1 already states the slice owns no legacy criterion; nine case-side criteria AC1-AC9 accepted; legacy AC1-AC12 stay with P6."
+  },
+  {
+   "ruling": "R-28803",
+   "item": "GAP-2219",
+   "status": "Cross-document",
+   "section": "",
+   "target": "parameter-catalog.csv",
+   "change": "Allocate one key for the rwb-case slice flag (hold switch, ledger facts, NOTICE_UNSERVED task) at first build.",
+   "note": "Key allocation belongs to the parameter catalog; the story names no key, which is not invented here."
+  },
+  {
+   "ruling": "R-28805",
+   "item": "GAP-1277",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "Contract dependencies adds RWB-P3-E1043-CON; new Platform dependencies row lists six H dependencies; Service baselines row added.",
+   "note": "Second service baseline is not specified in the source documents; Ready to start stays Day 1. Correct the ownership metadata at next version."
+  },
+  {
+   "ruling": "R-30702",
+   "item": "NEWAC-RWB-P3-E2021-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC13 (delivery date starts clock; no code-held values) and TC-E2-021-16; BR6 and BR8 Covered by set to AC13.",
+   "note": "BR1-BR5 and BR7 already carry AC1-AC8 in Covered by; AC13 covers the two rules with no criterion."
+  },
+  {
+   "ruling": "R-30703",
+   "item": "NEWAC-RWB-P3-E2021-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 (403 with MSG-P4-002; 401 message code not specified) and TC-E2-021-17.",
+   "note": "The 401 message code is Not specified in the source documents (NEWAC-RWB-P3-E2021-APP-AC14)."
+  },
+  {
+   "ruling": "R-30704",
+   "item": "NEWAC-RWB-P3-E2021-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 (replayed hold POST changes nothing) and TC-E2-021-18.",
+   "note": "Idempotency key header name is Not specified in the source documents (NEWAC-RWB-P3-E2021-APP-AC15)."
+  }
+ ]
+}

@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E2-029-14 | §12.7 tables (ASM-3438) | Component | Boundary values of the tables of section 12.7; Not specified in the source documents (DOR-RWB-P7-E2029-APP-12) |",
+   "new": "| TC-E2-029-14 | §12.7 tables (ASM-3438) | Component | Boundary values of the tables of section 12.7; Not specified in the source documents (DOR-RWB-P7-E2029-APP-12) |\n| TC-E2-029-15 | AC4, BR5 | Component | Item of \"SCREENING\" \"P2\" for MORTGAGE and BKK is WAITING and prepared by RW-COE; the preparer approves and is refused with MSG-P7-002; a user below the delegation level approves and is held with MSG-P7-001 and no record |\n| TC-E2-029-16 | AC10, BR9 | Contract | Rejection of X6 on case `RW-2027-000801` with appraisal date 2027-01-25 on the rwb-source-data fake; the inputs reference names that date |\n| TC-E2-029-17 | AC11, BR10 | Component | Second record appended after the first for case `RW-2027-000801`; the chain link holds and the update and delete attempts leave the first record unchanged |\n| TC-E2-029-18 | AC12, BR14 | Component | Rejection of X6 on case `RW-2027-000801`; the record, event, trail and logs carry no personal data |\n| TC-E2-029-19 | AC13, BR15 | Component | Rejection of X6 on case `RW-2027-000801`; no case status, task, timer or deviation is set or changed |"
+  },
+  {
+   "old": "Then role RW-PHONECOL is refused with 403 and MSG-P4-002 and the out-of-scope case is refused with 404",
+   "new": "Then role RW-PHONECOL is refused with 403 and MSG-P4-002 and the out-of-scope case is refused with 404\n\n  Scenario: AC10 The inputs reference names the ACE input and its date from the contract (new, D-RCV-60)\n    Given the rwb-source-data contract fake returns the appraisal date 2027-01-25 for the case \"RW-2027-000801\"\n    When rwb-agent sends the verdict \"REJECTED\" for item \"X6\" with reason \"Customer answered on 2027-01-25\"\n    Then the inputs reference of the record names the ACE input and the data date 2027-01-25\n    Then this service reads no ACE view or table to build the record\n\n  Scenario: AC11 The record is append only and hash chained (new, D-RCV-60)\n    Given one decision record exists for case \"RW-2027-000801\" with decision \"X6\" and final call \"REJECTED\"\n    When a second record is appended for the same case and a caller sends an update or a delete of the first record\n    Then the second record's previous hash equals the entry hash of the first and its chain sequence number is the next one\n    Then the update and the delete leave the first record unchanged, and a wrong record is corrected only by a new record that names it as corrects_entry_id\n\n  Scenario: AC12 The record holds no personal data (new, D-RCV-60)\n    Given one decision record exists for case \"RW-2027-000801\" with decision \"X6\" and final call \"REJECTED\"\n    When the record, its outbox event, its trail and its logs are read\n    Then each carries case and run identifiers, codes, versions, the reason, user references and dates only\n\n  Scenario: AC13 A record changes no case value (new, D-RCV-60)\n    Given the case \"RW-2027-000801\" holds its current status, tasks, timers and deviations\n    When the rejection of \"X6\" is recorded\n    Then no case status, no task, no timer and no deviation is set or changed for case \"RW-2027-000801\" by this story\n    Then the pause of R-DEV-01 is not set here and stays with rwb-deviation on a confirmation"
+  },
+  {
+   "old": "The nine criteria above are new for the `rwb-decision` slice",
+   "new": "The thirteen criteria above are new for the `rwb-decision` slice"
+  },
+  {
+   "old": "| BR9 | The inputs reference of a record names the ACE input and its date, read on the `rwb-source-data` contract or a `v_ace_*` view of this service; no ACE table is read | DP-05; legacy section 11 DF-ACE-193 |",
+   "new": "| BR9 | The inputs reference of a record names the ACE input and its date, read on the `rwb-source-data` contract only; no ACE view or table is read | DP-05; legacy section 11 DF-ACE-193 |"
+  },
+  {
+   "old": "| rwb-source-data fake | The P1 freshness read of DP-05, or the `v_ace_valuation` view | The appraisal date that the inputs reference of a rejection names |",
+   "new": "| rwb-source-data fake | The P1 freshness read of DP-05 | The appraisal date that the inputs reference of a rejection names |"
+  },
+  {
+   "old": "| DF-ACE-193 | `v_ace_valuation` | appraisal_date | Read for the data date of the inputs reference (DP-05), never copied |",
+   "new": "| DF-ACE-193 | rwb-source-data contract | appraisal_date | Read for the data date of the inputs reference (DP-05), never copied |"
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, which stays open; its assumptions are ASM-2250, ASM-2357, ASM-2377 and ASM-2863."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11337",
+   "item": "CG-ALL-7358",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID, distinct from MSG-P7-009, for 'A code, a final call or a required version is not a value it must have'; the story then cites it",
+   "note": "Needs a new ID from the standard owner; no story edit until it exists. Story cannot cite an ID not yet in the standard."
+  },
+  {
+   "ruling": "R-11338",
+   "item": "CG-ALL-7360",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-029-15 covering AC4 with explicit data; AC4 was already listed on TC-E2-029-13."
+  },
+  {
+   "ruling": "R-11339",
+   "item": "CG-ALL-7362",
+   "status": "Resolved",
+   "section": "8, 11, 12.8",
+   "target": "",
+   "change": "",
+   "note": "BR9, the 12.8 source-data fake row and DF-ACE-193 now read only the rwb-source-data contract; no ACE view is named."
+  },
+  {
+   "ruling": "R-18168",
+   "item": "DOR-RWB-P7-E2029-APP-10",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "P3 screen specification for SCR-03",
+   "change": "Add empty, loading, error and no-access states to SCR-03",
+   "note": "This story owns no screen; section 19 places screens in other slices. States belong to the SCR-03 owner."
+  },
+  {
+   "ruling": "R-18169",
+   "item": "DOR-RWB-P7-E2029-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Section 14 now states DL10 is open with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863."
+  },
+  {
+   "ruling": "R-18170",
+   "item": "DOR-RWB-P7-E2029-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 to AC13 for BR9, BR10, BR14, BR15 with TC-16 to TC-19; BR5 now covered by AC4 and TC-15."
+  },
+  {
+   "ruling": "R-18171",
+   "item": "DOR-RWB-P7-E2029-APP-7",
+   "status": "Resolved",
+   "section": "11, 12.8",
+   "target": "",
+   "change": "",
+   "note": "ACE view read removed from DF-ACE-193 and the 12.8 fake; the rwb-source-data contract serves the appraisal date."
+  },
+  {
+   "ruling": "R-18172",
+   "item": "DOR-RWB-P7-E2029-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID, distinct from MSG-P7-009, for the value check, then cite it in section 14",
+   "note": "Same fix as CG-ALL-7358; the story cannot cite the new ID until the standard holds it."
+  },
+  {
+   "ruling": "R-22212",
+   "item": "GAP-1823",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "FSD S8 A2.2.4 to A2.9.4 criteria, with the story groomer and owner",
+   "change": "Rewrite each 'Timers shown' criterion; carry the row as evidence and add the pause, stop, routing and clear step criteria in the owning story",
+   "note": "This story has no S8 feature rows; the rewrite belongs to the S8 features with the owner before wave 2."
+  },
+  {
+   "ruling": "R-22213",
+   "item": "GAP-1826",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "03 Requirements and specifications/PRD/Recovery Workbench PRD P7 rwb-decision v1.md",
+   "change": "Name R-DEV-04, 10, 11, 13, 14, 16, 19, 20, 21 and 22 as the requirement set with their design rule IDs; package authoring stays in the rwb-decision rule registry",
+   "note": "This story adds no R-DEV rule. The ten unnamed rules need a home in the PRD; owner is the CoE analyst with P7."
+  }
+ ]
+}

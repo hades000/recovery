@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| X8 | The legal-hold answer does not arrive inside the 2 s budget | The run fails before any selection; nothing is archived and nothing is deleted, because a hold that is unknown is treated as a hold | None from this service; the breaker opens | Section 12.2 |",
+   "new": "| X8 | The legal-hold answer does not arrive inside the 2 s budget | The run fails before any selection; nothing is archived and nothing is deleted, because a hold that is unknown is treated as a hold | None from this service; the breaker opens | AC10 |"
+  },
+  {
+   "old": "| X9 | The `Idempotency-Key` is replayed with a different body | `422` with the error envelope; the stored answer is not overwritten | MSG-GEN-001 | Section 12.1 |",
+   "new": "| X9 | The `Idempotency-Key` is replayed with a different body | `422` with the error envelope; the stored answer is not overwritten | MSG-GEN-001 | AC11 |"
+  },
+  {
+   "old": "| X10 | A rule names a table this story does not own | The rules are refused in full and the table is named | MSG-P1-002 | Section 12.1 |",
+   "new": "| X10 | A rule names a table this story does not own | The rules are refused in full and the table is named | MSG-P1-002 | AC12 |"
+  },
+  {
+   "old": "    Then the system refuses the rerun with status 409 and MSG-P2-006",
+   "new": "    Then the system refuses the rerun with status 409 and MSG-P2-006\n\n  Scenario: AC10 The legal-hold answer does not arrive in time (new, exception X8)\n    Given the rwb-case legal-hold answer for the run does not arrive inside the 2 s budget\n    When JOB-17 runs\n    Then the run ends \"FAILED\" before any selection\n    Then the system archives no row and deletes no row\n    Then the circuit breaker to the rwb-case legal-hold interface opens\n\n  Scenario: AC11 An Idempotency-Key is replayed with a different body (new, exception X9)\n    Given a retention run was started with an Idempotency-Key and a body with rule version \"RET-2026.11\"\n    When the same Idempotency-Key is posted with a body that differs\n    Then the system answers 422 with the error envelope and MSG-GEN-001\n    Then the stored answer of the first start is not overwritten\n\n  Scenario: AC12 A rule names a table this story does not own (new, exception X10)\n    Given a retention load version \"RET-2026.12\" with a row for product \"DP05\" and a table this story does not own\n    When the load is validated\n    Then the system refuses the load in full with MSG-P1-002 and names the table in the {check} value\n\n  Scenario: AC13 A rule names an ACE view (new, BR8)\n    Given a retention load version \"RET-2026.12\" with a row for product \"DP05\" and table \"v_ace_efs_action\"\n    When the load is validated\n    Then the system refuses the load in full with MSG-P1-002 and check \"v_ace_efs_action is ACE data; ACE applies its own retention\""
+  },
+  {
+   "old": "and no tenth criterion is added.",
+   "new": "and AC10 to AC13 are added for exceptions X8 to X10 and for BR8."
+  },
+  {
+   "old": "The legal-hold part of AC3 is stubbed with the rwb-case contract mock named in its Given,",
+   "new": "The two operations are `POST /retention-runs` and `GET /retention-runs/{runId}` on `/api/recovery/source-data/v1`, with the rule version, the run date and the rules in the request, and the status, counts per table, rule version, archive location and held cases in the answer; the field-level detail is settled in RWB-P1-E1017-CON. The legal-hold part of AC3 is stubbed with the rwb-case contract mock named in its Given,"
+  },
+  {
+   "old": "The approval of the rule set is P5's authority in the target, and the legacy approval row is kept here to show where it moved.",
+   "new": "The approval of the rule set is P5's authority in the target, and the legacy approval row is kept here to show where it moved. Each operation of this service (`POST /retention-runs` and `GET /retention-runs/{runId}`) is authorised through rwb-access before it runs; the authorise check name is Not specified in the source documents (DOR-RWB-P1-E1017-APP-6)."
+  },
+  {
+   "old": "| BR4 | A row is removed only after its archive copy is written and checked | Archive container (RWB-PLT-TE012-APP); NFR-074 |",
+   "new": "| BR4 | A row is removed only after its archive copy is written and checked, under the service's own credential, with the manifest (row count and SHA-256 per file) read back before any delete | Archive container (RWB-PLT-TE012-APP); NFR-074 |"
+  },
+  {
+   "old": "No rule here fixes a business value: the months, the tables, the age-basis fields and the end action are all data in the request.",
+   "new": "No rule here fixes a business value: the months, the tables, the age-basis fields and the end action are all data in the request. P5 rwb-document owns both retention tables, `retention_rule` and `retention_action`, the load and the retention Schedule JOB-17 (ASM-0076); this service holds no rule table and no Schedule, keeps only a contract read, receives the rule version, the run date and the rules in the run request, validates them against its own tables and applies them to its own eight tables. Each owner applies the rule to its own schema, and the suite asserts the rule version, legal holds and the decision-log exclusion through the owners' APIs and Temporal visibility. Each archive or purge action writes a decision record whose decision code and final call come from LOV-DECISION and the final-call list through the rwb-case reference-data contract, with ruleId empty, the run reference in inputsRef, and the product, table, counts, hold report reference and archive location in actions and outcome; the value names are settled with the reference-data owner before the first joint environment."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15056",
+   "item": "DOR-RWB-P1-E1017-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC10 to AC12 added for X8 to X10; Covered by column now names them. Section 16 test rows for AC10 to AC12 are outside this chunk."
+  },
+  {
+   "ruling": "R-15057",
+   "item": "DOR-RWB-P1-E1017-APP-4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC13 added for BR8 (ACE view refused with MSG-P1-002). Section 16 test row for AC13 is outside this chunk."
+  },
+  {
+   "ruling": "R-15058",
+   "item": "DOR-RWB-P1-E1017-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD. Story side: rwb-access authorise step for POST /retention-runs and GET /retention-runs/{runId} added to section 10; check name Not specified in the source documents.",
+   "note": "Role SY-DATALOAD is missing from the roles document; the authorise check name is not in any source."
+  },
+  {
+   "ruling": "R-15059",
+   "item": "DOR-RWB-P1-E1017-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Align the MSG-P2-006 text with the standard and confirm the meaning of MSG-GEN-001 used for X9 and for a start whose body fails validation.",
+   "note": "Standard text and MSG-GEN-001 meaning are not in this story's sources; legacy texts kept until the standard is confirmed."
+  },
+  {
+   "ruling": "R-21968",
+   "item": "GAP-0342",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 now states P5 owns rule and archive, each owner applies the rule to its own schema, and assertions run via owner APIs and Temporal visibility."
+  },
+  {
+   "ruling": "R-21969",
+   "item": "GAP-0488",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 now assigns retention_rule, retention_action, the load and JOB-17 to P5; P1 holds no rule table or Schedule and reads rules from the request."
+  },
+  {
+   "ruling": "R-21970",
+   "item": "GAP-0489",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading names POST and GET /retention-runs on /api/recovery/source-data/v1 with request and answer fields; field detail deferred to RWB-P1-E1017-CON."
+  },
+  {
+   "ruling": "R-21972",
+   "item": "GAP-2426",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Decision record approach stated: LOV-DECISION via rwb-case, ruleId empty, run reference in inputsRef. Value names left to reference-data owner."
+  },
+  {
+   "ruling": "R-21973",
+   "item": "GAP-3158",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 gives P5 both retention tables and JOB-17; P1 keeps only a contract read."
+  },
+  {
+   "ruling": "R-21975",
+   "item": "GAP-0490",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "RWB-PLT-TE012-APP",
+   "change": "Publish the write-once container contract: account, credential scope, immutability policy, request shape and manifest schema. Story side: BR4 now states own credential and manifest read-back.",
+   "note": "Container contract is absent from all sources; the story keeps the path and manifest rule per the proposed fix."
+  }
+ ]
+}

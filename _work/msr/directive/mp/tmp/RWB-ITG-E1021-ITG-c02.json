@@ -1,0 +1,208 @@
+{
+ "edits": [
+  {
+   "old": "| Case | New, Assigned, In progress, any Waiting, On hold; the case is never written by the suite, and the queue and the owner are read back through the case contract |",
+   "new": "| Case | NEW, ASSIGNED, IN_PROGRESS, WAITING_APPROVAL, WAITING_CUSTOMER, WAITING_PARTNER, On hold; the case is never written by the suite, and the queue and the owner are read back through the case contract |"
+  },
+  {
+   "old": "| On hold | LEGAL_HOLD_LIFTED (R-UNI-21) | Lifted through the legal-hold endpoint | The status it paused in, one of NEW, ASSIGNED, IN_PROGRESS, WAITING_APPROVAL, WAITING_CUSTOMER, WAITING_PARTNER |",
+   "new": "| On hold | LEGAL_HOLD_LIFTED (R-UNI-21) | Lifted through the legal-hold endpoint | One of NEW, ASSIGNED, IN_PROGRESS, WAITING_APPROVAL, WAITING_CUSTOMER, WAITING_PARTNER, the value of status_before_hold |"
+  },
+  {
+   "old": "and `rwb.decision-record.DecisionRecorded.v1` on `rwb.decision-record.v1`, reads",
+   "new": "and `rwb.decision.DecisionRecorded.v1` on `rwb.decision-record.v1`, reads"
+  },
+  {
+   "old": "Then one rwb.decision-record.DecisionRecorded.v1 carries the same rule ID and package version",
+   "new": "Then one rwb.decision.DecisionRecorded.v1 carries the same rule ID and package version"
+  },
+  {
+   "old": "as `rwb.decision-record.DecisionRecorded.v1` within five minutes",
+   "new": "as `rwb.decision.DecisionRecorded.v1` within five minutes"
+  },
+  {
+   "old": "| BR14 | The decision record commits in `rwb_case` in the same transaction as the case move and leaves as `rwb.decision-record.DecisionRecorded.v1`; rwb-decision collects it into the central ledger within five minutes | DP-03; ADR-022; REQ-CWC-016 |",
+   "new": "| BR14 | The decision record commits in `rwb_case` in the same transaction as the case move and leaves as `rwb.decision.DecisionRecorded.v1`; rwb-decision collects it into the central ledger within five minutes | DP-03; ADR-022; REQ-CWC-016 |"
+  },
+  {
+   "old": "| ADR-022 | Local decision record plus central ledger | `rwb.decision-record.DecisionRecorded.v1` on `rwb.decision-record.v1`, the decision-log read, the five-minute target | TC-E1-021-01-ITG, TC-E1-021-09-ITG, TC-E1-021-16-ITG |",
+   "new": "| ADR-022 | Local decision record plus central ledger | `rwb.decision.DecisionRecorded.v1` on `rwb.decision-record.v1`, the decision-log read, the five-minute target | TC-E1-021-01-ITG, TC-E1-021-09-ITG, TC-E1-021-16-ITG |"
+  },
+  {
+   "old": "| REQ-CWC-016 | Every transfer logged with the rule ID and the rule version | `rwb.decision-record.DecisionRecorded.v1`, `GET /api/recovery/decision/v1/decision-log`, the local record in `rwb_case`, MSG-P7-003 | TC-E1-021-01-ITG, TC-E1-021-03-ITG, TC-E1-021-09-ITG, TC-E1-021-16-ITG |",
+   "new": "| REQ-CWC-016 | Every transfer logged with the rule ID and the rule version | `rwb.decision.DecisionRecorded.v1`, `GET /api/recovery/decision/v1/decision-log`, the local record in `rwb_case`, MSG-P7-003 | TC-E1-021-01-ITG, TC-E1-021-03-ITG, TC-E1-021-09-ITG, TC-E1-021-16-ITG |"
+  },
+  {
+   "old": "| MSG-P3-027 | No TRANSFER version is in force for a rule trigger | The rule version was refused at the {check} check: {detail}. |",
+   "new": "| MSG-P3-027 | No TRANSFER version is in force for a rule trigger | The {table} load was refused: {check}. The version in force is unchanged. |"
+  },
+  {
+   "old": "and the {detail} names the package code only",
+   "new": "and the {table} names the package code only"
+  },
+  {
+   "old": "the durable timer of CaseWorkflow (TimerDue is retired)",
+   "new": "the durable timer of CaseWorkflow"
+  },
+  {
+   "old": "Then each move leaves exactly one rwb.case.CaseTransferred.v1 and one decision record, one event to one transfer",
+   "new": "Then each move leaves exactly one rwb.case.CaseTransferred.v1 and one decision record, one event to one transfer\n    Then the status and the clocks of each case are unchanged"
+  },
+  {
+   "old": "Then the repeat is counted as an inbox hit and writes no second decision record",
+   "new": "Then the repeat is counted as an inbox hit and writes no second decision record\n    Then every cross-service call of the run is one hop to its owner with the 2 s budget"
+  },
+  {
+   "old": "Then the rule is evaluated inside the activity on the case service's own copy of the package",
+   "new": "Then the rule is evaluated inside the activity on the case service's own copy of the package\n    Then no shared rule server and no local rule table is read"
+  },
+  {
+   "old": "Then the caller right is taken from the authorise contract of rwb-access and never from the request body",
+   "new": "Then the caller right is taken from the authorise contract of rwb-access and never from the request body\n    Then the manual call keeps its endpoint, request, response and errors, and it is one hop with the 2 s budget"
+  },
+  {
+   "old": "Then no decision record exists for the trigger and no case was moved by a default row",
+   "new": "Then no decision record exists for the trigger and no case was moved by a default row\n\n  Scenario: AC11 Two transfers reach the same case in the same second and the second is refused (new, D-RCV-60)\n    Given case RW-2026-000313 is in queue \"TDR-BKK-CO\" with owner U-21\n    When two transfer triggers for case RW-2026-000313 commit in the same second\n    Then the first transfer commits and the case moves once\n    Then the second transfer is refused on the version check with MSG-GEN-004\n    Then the second transfer is recorded as rejected and writes no decision record\n\n  Scenario: AC12 A named target owner at the caseload cap is refused and nothing changes (new, D-RCV-60)\n    Given owner U-24 holds 150 open cases in queue \"LIT-BKK-OFF\"\n    Given case RW-2026-000304 is in queue \"TDR-BKK-CO\" with owner U-21\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000304/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-24\n    Then the call returns status 422 with MSG-P3-002\n    Then the case keeps its queue, its owner and its assignment\n\n  Scenario: AC13 A transfer of a closed case is refused with status 409 (new, D-RCV-60)\n    Given case RW-2026-000305 is closed in queue \"TDR-BKK-CO\" with owner U-21\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/RW-2026-000305/transfer with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the call returns status 409 with MSG-P3-005\n    Then the case keeps its queue, its owner and its assignment\n\n  Scenario: AC14 A decision record that cannot be written refuses the transfer and the event is retried (new, D-RCV-60)\n    Given the decision record write of rwb-case is forced to fail for one case of the run\n    When an identity with the Queue and allocation right U calls POST /api/recovery/case/v1/cases/{caseId}/transfer for that case with reason code \"MANUAL\", transfer reason \"R03\" and target owner U-22\n    Then the call is refused with MSG-P7-003 and the case keeps its queue and owner\n    Then a rule trigger for that case that matches rule \"TRF-009\" is retried from the topic and the case does not move until the record is written\n\n  Scenario: AC15 A legal hold placed on a case already on hold is refused with status 409 (new, D-RCV-60)\n    Given case RW-2026-000310 is on hold through the legal-hold endpoint\n    When an identity with the Case record right U places a legal hold through POST /api/recovery/case/v1/cases/RW-2026-000310/legal-hold with reason \"Court order\" and reference \"ORD-2026-0412\"\n    Then the call returns status 409 with MSG-P3-005\n    Then the hold already in force is unchanged"
+  },
+  {
+   "old": "| X1 | Two transfers reach the same case in the same second | The first commits; the second is refused on the version check and recorded as rejected | MSG-GEN-004 | TC-E1-021-03-ITG |",
+   "new": "| X1 | Two transfers reach the same case in the same second | The first commits; the second is refused on the version check and recorded as rejected | MSG-GEN-004 | AC11, TC-E1-021-03-ITG, TC-E1-021-18-ITG |"
+  },
+  {
+   "old": "| X3 | A named target owner at the caseload cap | The call is refused with status 422 and nothing changes | MSG-P3-002 | TC-E1-021-07-ITG |",
+   "new": "| X3 | A named target owner at the caseload cap | The call is refused with status 422 and nothing changes | MSG-P3-002 | AC12, TC-E1-021-07-ITG, TC-E1-021-19-ITG |"
+  },
+  {
+   "old": "| X4 | A transfer of a closed case | The call is refused with status 409 | MSG-P3-005 | TC-E1-021-08-ITG |",
+   "new": "| X4 | A transfer of a closed case | The call is refused with status 409 | MSG-P3-005 | AC13, TC-E1-021-08-ITG, TC-E1-021-20-ITG |"
+  },
+  {
+   "old": "| X5 | The decision record cannot be written | The transfer is refused and the case keeps its queue and owner; for a rule transfer the event is retried from the topic | MSG-P7-003 | TC-E1-021-09-ITG, TC-E1-021-16-ITG |",
+   "new": "| X5 | The decision record cannot be written | The transfer is refused and the case keeps its queue and owner; for a rule transfer the event is retried from the topic | MSG-P7-003 | AC14, TC-E1-021-09-ITG, TC-E1-021-16-ITG, TC-E1-021-21-ITG |"
+  },
+  {
+   "old": "| X9 | A legal hold is placed on a case already on hold | The call is refused with status 409 | MSG-P3-005 | TC-E1-021-13-ITG |",
+   "new": "| X9 | A legal hold is placed on a case already on hold | The call is refused with status 409 | MSG-P3-005 | AC15, TC-E1-021-13-ITG, TC-E1-021-22-ITG |"
+  },
+  {
+   "old": "| TC-E1-021-01-ITG | AC1, BR1 | Integration | Case in TDR-BKK-CO, route R4 approved; package TRANSFER \"TRF-2026.11\"; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-01-ITG | AC1, BR1, BR10 | Integration | Case in TDR-BKK-CO, route R4 approved; package TRANSFER \"TRF-2026.11\"; end-to-end: real services on the wave 1 contracts |"
+  },
+  {
+   "old": "| TC-E1-021-02-ITG | AC2, BR3 | Integration | Manual transfer with R03; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-02-ITG | AC2, BR3, BR11 | Integration | Manual transfer with R03; end-to-end: real services on the wave 1 contracts |"
+  },
+  {
+   "old": "| TC-E1-021-09-ITG | AC9, BR9 | Integration | Decision log store down for a manual call; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-09-ITG | AC9, BR9 | Integration | Decision record store down for a manual call; end-to-end: real services on the wave 1 contracts |"
+  },
+  {
+   "old": "| TC-E1-021-10-ITG | AC10, BR6 | Integration | legal_hold = true and the timer trigger of TRF-003 (legacy TimerDue); end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-10-ITG | AC10, BR6 | Integration | legal_hold = true and the timer trigger of TRF-003; end-to-end: real services on the wave 1 contracts |"
+  },
+  {
+   "old": "| TC-E1-021-11-ITG | AC11, BR8 | Integration | Event EVT-88120 twice; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-11-ITG | AC11, BR8, BR16 | Integration | Event EVT-88120 twice; end-to-end: real services on the wave 1 contracts |"
+  },
+  {
+   "old": "| TC-E1-021-15-ITG | Access | Integration | RW-CASEOWN calls POST /cases/{caseId}/transfer and is refused with MSG-P4-002; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-15-ITG | Access, BR18 | Integration | RW-CASEOWN calls POST /cases/{caseId}/transfer and is refused with MSG-P4-002; end-to-end: real services on the wave 1 contracts |"
+  },
+  {
+   "old": "| TC-E1-021-16-ITG | Principle 5 | NFR | Decision log write forced to fail for a rule transfer; event retried, case unchanged; end-to-end: real services on the wave 1 contracts |",
+   "new": "| TC-E1-021-16-ITG | Principle 5 | NFR | Decision log write forced to fail for a rule transfer; event retried, case unchanged; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-17-ITG | Contract of section 12 (ADR-020, DP-13), BR17 | Contract | Preflight of the operations, events and activities of section 12 against the published contracts; drift stops the run before any assertion |\n| TC-E1-021-18-ITG | AC11, BR5 | Integration | Two transfers of RW-2026-000313 in the same second; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-19-ITG | AC12, BR4 | Integration | Owner U-24 at 150 named as target; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-20-ITG | AC13 | Integration | Closed case RW-2026-000305; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-21-ITG | AC14, BR9 | Integration | Decision record write forced to fail for a manual call; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-22-ITG | AC15 | Integration | Hold on a case on hold; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-23-ITG | AC10, BR12 | Integration | No TRANSFER version in force on the business date; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-24-ITG | AC3, BR13 | Integration | TRANSFER version fetched, checksum verified and evaluated in the activity; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-25-ITG | AC4, BR14 | Integration | Rule transfer of RW-2026-000301 and its ledger record; end-to-end: real services on the wave 1 contracts |\n| TC-E1-021-26-ITG | AC5, BR15 | Integration | Move of RW-2026-000303 and its CaseTransferred event; end-to-end: real services on the wave 1 contracts |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-03482",
+   "item": "DOR-RWB-ITG-E1021-ITG-5",
+   "status": "Resolved",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "Case state row and LIFTED row now use the story's uppercase state codes; 'the status it paused in' replaced by status_before_hold values."
+  },
+  {
+   "ruling": "R-03483",
+   "item": "DOR-RWB-ITG-E1021-ITG-8",
+   "status": "Resolved",
+   "section": "4, 7, 8, 18",
+   "target": "",
+   "change": "",
+   "note": "Event type set to rwb.decision.DecisionRecorded.v1 per Kafka Catalog v1 in §4, AC4, §8 BR14 and §18; topic rwb.decision-record.v1 unchanged."
+  },
+  {
+   "ruling": "R-09337",
+   "item": "CG-ALL-260",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P3-027 text copied from Error and Message Standard v4; {table} now carries the package code and {check} is kept."
+  },
+  {
+   "ruling": "R-13899",
+   "item": "DOR-RWB-ITG-E1021-ITG-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add a role code or role name for the QA integration engineer persona, or record it there as a non-role persona; §1 of the story is left unchanged.",
+   "note": "The persona in §1 has no role code or role name in Users Roles and Permissions v5; the role record belongs to that document."
+  },
+  {
+   "ruling": "R-13900",
+   "item": "DOR-RWB-ITG-E1021-ITG-10",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "SCR-02, SCR-03 and SCR-05 are not in this chunk; their empty, loading, error and no-access states need the screen spec, which is not invented here."
+  },
+  {
+   "ruling": "R-13901",
+   "item": "DOR-RWB-ITG-E1021-ITG-12",
+   "status": "Not applied",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-021-17-ITG contract row. §18 vs RTM v7 and the not-owned criteria need RTM v7, which is not in this chunk."
+  },
+  {
+   "ruling": "R-13902",
+   "item": "DOR-RWB-ITG-E1021-ITG-18",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "DL10 is a business decision removed from the directive's scope, so it stays open; no edit is made to close it."
+  },
+  {
+   "ruling": "R-13903",
+   "item": "DOR-RWB-ITG-E1021-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 to AC15 for X1, X3, X4, X5 and X9 with TC-18 to TC-22; §5 Covered by column now names them."
+  },
+  {
+   "ruling": "R-13904",
+   "item": "DOR-RWB-ITG-E1021-ITG-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR10 to BR18 added as Then lines in AC1, AC2, AC3 and AC7, and mapped in §16 to TC-01, 02, 11, 15, 17 and new TC-23 to TC-26."
+  },
+  {
+   "ruling": "R-13905",
+   "item": "DOR-RWB-ITG-E1021-ITG-7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Legacy TimerDue wording removed from AC1 and TC-10; 'Decision log store' in TC-09 changed to 'Decision record store'."
+  }
+ ]
+}

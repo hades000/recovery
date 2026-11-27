@@ -1,0 +1,2221 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-case (Case and workflow)"
+  version: 5.1.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-case (Case and workflow, module P3, service wave
+    1) under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16
+    November 2026) by the D-RCV-60 microservice realignment.
+    This document holds 25 operations under REST base /api/recovery/case/v1; schema rwb_case; topic
+    rwb.case.events.v1; Temporal task queue rwb-case in namespace rwb-recovery. The v4 text of every operation,
+    parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: GET /admin/lists/{listCode} (x-module P4, owner P3);
+    POST /admin/reference-loads (x-module P4, owner P3); POST /admin/reference-loads/{loadId}/approve (x-module
+    P4, owner P3); POST /admin/reference-loads/{loadId}/verify (x-module P4, owner P3); POST
+    /admin/reference-loads/{loadId}/rollback (x-module P4, owner P3).
+    Moved out of this document to another service: GET /cases/{caseId}/interactions (now rwb-source-data, owner
+    P1); POST /cases/{caseId}/interactions (now rwb-source-data, owner P1); GET /admin/rule-packages (now
+    rwb-decision, owner P7); POST /admin/rule-packages/{packageCode}/versions (now rwb-decision, owner P7); GET
+    /admin/rule-packages/{packageCode}/versions (now rwb-decision, owner P7); POST
+    /admin/rule-package-versions/{versionId}/approve (now rwb-decision, owner P7); POST
+    /admin/rule-package-versions/{versionId}/rollback (now rwb-decision, owner P7); GET
+    /admin/rule-package-versions/{versionId}/dry-run (now rwb-decision, owner P7); GET
+    /admin/rule-packages/change-report (now rwb-decision, owner P7); POST /admin/workflows/smoke (now
+    gateway-bff (PLT platform surface), owner PLT).
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-case.asyncapi.yaml.
+servers:
+- url: "/api/recovery/case/v1"
+  description: "Relative to the rwb-case service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Cases"
+- name: "Work"
+- name: "Administration"
+x-service:
+  code: "P3"
+  service: "rwb-case"
+  name: "Case and workflow"
+  wave: 1
+  schema: "rwb_case"
+  rest-base: "/api/recovery/case/v1"
+  topic: "rwb.case.events.v1"
+  task-queue: "rwb-case"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-case.asyncapi.yaml"
+  operations: 25
+paths:
+  /cases:
+    get:
+      tags:
+      - Cases
+      summary: List cases in the caller's scope with filters and paging
+      operationId: getCases
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: product
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: stage
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: owner
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: queue
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: deviation
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: caseNo
+        in: query
+        required: false
+        description: Exact case number (RW-YYYY-NNNNNN), max 18 characters; searches open and closed cases in the caller scope (RWB-E1-018).
+        schema:
+          type: string
+          maxLength: 18
+      - name: ageFrom
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: ageTo
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      description: Add query parameter route (LOV-ROUTE) and sort value serviceLevelDueAt; size 1 to 200; response header X-Data-As-Of. Case items
+        add ageDays (integer), serviceLevelDueAt (date-time) and serviceLevelState (string). Add query parameter breached (boolean). Query values
+        product, stage and status are checked against LOV-PRODUCT, LOV-STAGE and LOV-CASE-STATUS; a value outside its list returns 422 with MSG-GEN-007.
+        Case items add prescriptionClockStatus (RUNNING, EXPIRED, NONE). Case items add nextAction (string), nextActionOwner (string), nextActionDueDate
+        (date) and nextActionOverdue (boolean).
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasePage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}:
+    get:
+      tags:
+      - Cases
+      summary: Read one case with accounts, parties, stage, owner, clocks and deviations
+      operationId: getCasesCaseid
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: 'Schema Case: productGroup loses its closed enum (MORTGAGE, HIRE_PURCHASE, SSME, UNSECURED) and is validated against LOV-PRODUCT,
+        so a product added to the list needs no API release. Applies wherever Case is returned (GET /cases, GET /cases/{caseId}, GET /queues/{queueId}/cases);
+        a product filter value outside the list returns 422 with MSG-GEN-007.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/timeline:
+    get:
+      tags:
+      - Cases
+      summary: Read the case history as one timeline
+      operationId: getCasesCaseidTimeline
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      description: Add query parameters page (default 0) and size (default 50, 1 to 200). TimelinePage adds unavailableSources (array of string);
+        TimelineItem adds reasonCode, fromQueueCode, toQueueCode and ruleId (string).
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinePage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/accounts:
+    get:
+      tags:
+      - Cases
+      summary: Read the accounts on the case with balances and arrears
+      operationId: getCasesCaseidAccounts
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CaseAccount'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/parties:
+    get:
+      tags:
+      - Cases
+      summary: Read the parties on the case, masked by role
+      operationId: getCasesCaseidParties
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CaseParty'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/transfer:
+    post:
+      tags:
+      - Cases
+      summary: Transfer the case to another owner or queue with a reason
+      operationId: postCasesCaseidTransfer
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Queue and allocation
+        right: U
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: Declare the Idempotency-Key header (uuid, required). TransferRequest adds transferReasonCode (string, LOV-TRANSFER-REASON,
+        required). A transfer rule refusal returns 409 with MSG-P3-033; a bulk transfer with refusals returns MSG-P3-035.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/legal-hold:
+    post:
+      tags:
+      - Cases
+      summary: Place or lift a legal hold on the case
+      operationId: postCasesCaseidLegalHold
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: U
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LegalHoldRequest'
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /me/tasks:
+    get:
+      tags:
+      - Work
+      summary: List the caller's open tasks
+      operationId: getMeTasks
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: due
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /tasks/{taskId}:
+    patch:
+      tags:
+      - Work
+      summary: Complete or reassign a task
+      operationId: patchTasksTaskid
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: U
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /queues:
+    get:
+      tags:
+      - Work
+      summary: List queues with counts, age and cap use
+      operationId: getQueues
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Queue and allocation
+        right: R
+      x-first-release: E2
+      description: 'Queue adds openCaseCount (integer), oldestEntryDate (date), oldestAgeDays (integer), breachCount (integer) and owners (array
+        of QueueOwnerLoad: ownerUserId uuid, openCaseCount integer, atCap boolean).'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Queue'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /queues/{queueId}/cases:
+    get:
+      tags:
+      - Work
+      summary: List the cases in a queue
+      operationId: getQueuesQueueidCases
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Queue and allocation
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: queueId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CasePage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /queues/{queueId}/placements:
+    post:
+      tags:
+      - Work
+      summary: Place a case on a queue from a model or an agent
+      operationId: postQueuesQueueidPlacements
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Queue and allocation
+        right: C
+      x-first-release: E2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlacementRequest'
+      parameters:
+      - name: queueId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: 'Response becomes 201 PlacementResult (queueId, overflow, assignment absent when overflow is true, decisionLogEntryId) so a
+        placement when every owner is at the cap returns the overflow result. PlacementRequest reason 1 to 1000 characters, version 1 to 40. Errors:
+        404 MSG-P2-025 (placement switched off); 409 MSG-P2-024 (already in the queue), MSG-P2-021 (open deviation), MSG-P3-005, MSG-GEN-004;
+        422 MSG-P2-020 (caller not approved), MSG-GEN-001, MSG-GEN-002.'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/timers:
+    get:
+      tags:
+      - Work
+      summary: 'Read the clocks on a case: stage, service level, prescription, notice'
+      operationId: getCasesCaseidTimers
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Timer'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/lists/{listCode}:
+    get:
+      tags:
+      - Administration
+      summary: Read a list of values with its versions
+      operationId: getAdminListsListcode
+      x-module: P4
+      x-owner: "P3"
+      x-owner-note: "API Specification v4 x-module P4; owner P3 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0041"
+      x-capability:
+        area: Reference data
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: listCode
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOfValues'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/reference-loads:
+    post:
+      tags:
+      - Administration
+      summary: 'Load reference data: lists, queues, timers, templates, delegation limits'
+      operationId: postAdminReferenceLoads
+      x-module: P4
+      x-owner: "P3"
+      x-owner-note: "API Specification v4 x-module P4; owner P3 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0041"
+      x-capability:
+        area: Reference data
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                table:
+                  type: string
+                validFrom:
+                  type: string
+      description: Add multipart fields changeRequestRef (max 30), impactSummary (max 1000) and rollbackPlan (max 1000). ReferenceLoad adds changeRequestRef,
+        impactSummary, rollbackPlan, testResult, verifiedBy (uuid) and verifiedAt (date-time). Approval of a version with a missing checklist
+        item or a FAILED test returns 409 with MSG-P3-022. Accept the P5 table codes DOCUMENT_TYPE (RWB-E1-025), DOCUMENT_CHECKLIST (RWB-E1-040),
+        RETENTION_CLASS (RWB-E1-041) and DOCUMENT_HUB_PARAMETER (RWB-E1-024), validated by the P5 ReferenceTableLoader implementations; a failed
+        check returns 409 or 422 with MSG-P3-027.
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceLoad'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/reference-loads/{loadId}/approve:
+    post:
+      tags:
+      - Administration
+      summary: Approve a reference data load
+      operationId: postAdminReferenceLoadsLoadidApprove
+      x-module: P4
+      x-owner: "P3"
+      x-owner-note: "API Specification v4 x-module P4; owner P3 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0041"
+      x-capability:
+        area: Reference data
+        right: A
+      x-first-release: E1
+      parameters:
+      - name: loadId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: 'Authorization: Reference data A is held by no role. Check the approver role for the load''s table (see gaps) and that the
+        caller is not the loader (409 MSG-P7-002). Approval writes a decision log entry with decision code AC-VERS.'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceLoad'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/{caseId}/next-action:
+    get:
+      tags:
+      - Cases
+      summary: Read the next action of a case with its owner, due date, wait and overdue state
+      operationId: getCasesCaseidNextAction
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NextAction'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/export:
+    get:
+      tags:
+      - Cases
+      summary: Export the filtered case list to Excel, masked by role, with access event AC-EXPT
+      operationId: getCasesExport
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: product
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: stage
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: owner
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: queue
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: team
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: deviation
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: ageFrom
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: ageTo
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+      description: Endpoint added in RWB-E1-031. Accept query parameter breached; add the columns age in state, service level state, service level
+        due, prescription date, prescription clock and deviation open. Endpoint added in RWB-E1-031. Add the columns next action, next action
+        owner, next action due date and next action overdue.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/parameters:
+    get:
+      tags:
+      - Administration
+      summary: Read the parameter catalog with the value in force per environment; secrets listed without values
+      operationId: getAdminParameters
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: key
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: owner
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: environment
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Parameter'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/change-log:
+    get:
+      tags:
+      - Administration
+      summary: Report every reference and rule version change for audit, with its checklist and effect, as JSON or CSV
+      operationId: getAdminChangeLog
+      x-module: P3
+      x-owner: "P3"
+      x-capability:
+        area: Rules and parameters
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: table
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: format
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeLogPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/reference-loads/{loadId}/verify:
+    post:
+      tags:
+      - Administration
+      summary: Record the verification of a reference data version after its valid from date
+      operationId: postAdminReferenceLoadsLoadidVerify
+      x-module: P4
+      x-owner: "P3"
+      x-owner-note: "API Specification v4 x-module P4; owner P3 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0041"
+      x-capability:
+        area: Reference data
+        right: U
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+      parameters:
+      - name: loadId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceLoad'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/reference-loads/{loadId}/rollback:
+    post:
+      tags:
+      - Administration
+      summary: Roll back an approved reference data version to the version before it
+      operationId: postAdminReferenceLoadsLoadidRollback
+      x-module: P4
+      x-owner: "P3"
+      x-owner-note: "API Specification v4 x-module P4; owner P3 per Microservice Ownership Map v1 (sheet Endpoints) and ASM-0041"
+      x-capability:
+        area: Reference data
+        right: U
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RollbackRequest'
+      parameters:
+      - name: loadId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceLoad'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/retention-exclusions:
+    get:
+      tags: [Cases]
+      summary: Read open and held cases for retention exclusion
+      operationId: getCasesRetentionExclusions
+      x-module: P3
+      x-owner: P3
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      description: Returns the full open and legal-hold exclusion set for retention. Uses cursor paging; maximum page size is 1,000.
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Retention exclusion page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionExclusionsPage'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /cases/closure-dates:
+    get:
+      tags: [Cases]
+      summary: Read closure dates for closed and unheld cases
+      operationId: getCasesClosureDates
+      x-module: P3
+      x-owner: P3
+      x-capability:
+        area: Case record
+        right: R
+      x-first-release: E1
+      description: Returns closed, unheld cases before the supplied boundary. Uses cursor paging; maximum page size is 1,000.
+      parameters:
+      - name: closedBefore
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Closure date page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClosureDatesPage'
+        '400':
+          $ref: '#/components/responses/E400'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /parameters/{key}:
+    get:
+      tags: [Administration]
+      summary: Read one parameter with its value in force
+      operationId: getParameter
+      x-module: P3
+      x-owner: P3
+      x-first-release: E1
+      description: 'RD-P1-028, RD-P1-063; builder RWB-P3-E1042-CON. Service workload identities only. The parameter catalog row and the value in force from parameter_value on the business date. A key the catalog does not list, or a parameter with secret true, answers 404 MSG-P4-003. One hop, 2 s. Consumer: rwb-source-data. Pending: name of the business date query parameter, owner rwb-case service owner, tracked as NEW-GAP-FD1-contracts-1.'
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema: {type: string, maxLength: 100}
+      responses:
+        '200':
+          description: The catalog row and the value in force
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Parameter'
+                - type: object
+                  properties:
+                    description: {type: string}
+                  required: [key, valueInForce, versionNo, validFrom]
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E400:
+      description: Bad request. Messages MSG-GEN-001, MSG-GEN-007 and MSG-PLT-N009-03
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Case:
+      type: object
+      description: One recovery case per customer per product, from 90 days past due to close.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the case
+          readOnly: true
+        caseNo:
+          type: string
+          maxLength: 18
+          description: Case number RW-YYYY-NNNNNN, issued at creation and never reused
+        productGroup:
+          type: string
+          maxLength: 15
+          x-list-of-values: LOV-PRODUCT
+          description: Mortgage, hire purchase, SSME or unsecured
+        primaryPersonKey:
+          type: string
+          maxLength: 255
+          description: ACE person_key of the borrower the case is opened for (v_ace_customer); business key, no foreign key
+        status:
+          type: string
+          maxLength: 20
+          enum:
+          - NEW
+          - ASSIGNED
+          - IN_PROGRESS
+          - WAITING_CUSTOMER
+          - WAITING_PARTNER
+          - WAITING_APPROVAL
+          - ON_HOLD
+          - CLOSED
+          description: 'Case status: new, assigned, in progress, waiting customer, waiting partner, waiting approval, on hold, closed'
+        stageCode:
+          type: string
+          maxLength: 20
+          enum:
+          - RESTRUCTURE
+          - SETTLEMENT
+          - DEED_IN_LIEU
+          - GUARANTEE_CLAIM
+          - LITIGATION
+          - ASSET_DISPOSAL
+          - DEBT_SALE
+          - WRITE_OFF
+          - DEVIATIONS
+          description: The stage the case is on
+        routeState:
+          type: string
+          maxLength: 60
+          description: The routing state from the rule set, for example FIRM_INSTRUCTED
+        routeCode:
+          type: string
+          maxLength: 4
+          enum:
+          - R1
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          description: The approved route R1 to R8
+        ownerUserId:
+          type: string
+          format: uuid
+          description: The case owner
+        queueId:
+          type: string
+          format: uuid
+          description: The queue the case is in
+        teamCode:
+          type: string
+          maxLength: 20
+          description: The owning team, used by scope rules
+        regionCode:
+          type: string
+          maxLength: 10
+          description: The owning region, used by scope rules
+        entryDate:
+          type: string
+          format: date
+          description: The date the case entered recovery
+        dpdAtEntry:
+          type: integer
+          description: Days past due on the entry date
+        exposureBand:
+          type: string
+          maxLength: 10
+          description: Exposure band set from the outstanding balance at entry
+        totalOutstandingAtEntry:
+          type: number
+          description: Total outstanding across linked accounts at entry, in baht
+        prescriptionDate:
+          type: string
+          format: date
+          description: The earliest date a legal claim on the case expires
+        stageClockStart:
+          type: string
+          format: date-time
+          description: When the current state started, for the service level
+        deviationOpen:
+          type: boolean
+          description: True while any deviation X1 to X7 is open
+        legalHold:
+          type: boolean
+          description: True while a legal hold stops normal routing
+        ruleVersion:
+          type: string
+          maxLength: 20
+          description: The rule version the current state was entered under
+        closedDate:
+          type: string
+          format: date
+          description: The date the case closed
+        closureReason:
+          type: string
+          maxLength: 20
+          enum:
+          - CURED
+          - SETTLED
+          - REALIZED
+          - SOLD
+          - WRITTEN_OFF
+          - INSURANCE_SETTLED
+          - MERGED
+          - CANCELED
+          description: Cured, settled, realized, sold, written off, insurance settled, merged, canceled
+        planRef:
+          type: string
+          maxLength: 30
+          description: Reference of the ACE restructure plan on the case
+        planStatus:
+          type: string
+          maxLength: 10
+          enum:
+          - CREATED
+          - APPROVED
+          - BOOKED
+          - BROKEN
+          description: 'ACE plan status: created, approved, booked or broken'
+        planStatusAsOf:
+          type: string
+          format: date
+          description: Date of the plan status in ACE
+        nextActionText:
+          type: string
+          maxLength: 1000
+          description: The next action, copied from action_text of the rule that moved the case
+        nextActionOwnerRole:
+          type: string
+          maxLength: 20
+          description: Owner role of the next action, from owner_role of the rule
+        nextActionDueDate:
+          type: string
+          format: date
+          description: Due date from the rule's timer_spec or the service levels and timers table
+        nextActionRuleId:
+          type: string
+          maxLength: 20
+          description: Rule ID that set the next action
+        nextActionWaiting:
+          type: boolean
+          description: True when the next action waits on a customer, party or partner
+        lastAllocationDate:
+          type: string
+          format: date
+          description: Business date of the last allocation run that decided the case
+        statusBeforeHold:
+          type: string
+          maxLength: 20
+          enum:
+          - NEW
+          - ASSIGNED
+          - IN_PROGRESS
+          - WAITING_CUSTOMER
+          - WAITING_PARTNER
+          - WAITING_APPROVAL
+          - ON_HOLD
+          - CLOSED
+          description: The case status when a legal hold was placed, restored when it is lifted
+      required:
+      - id
+      - caseNo
+      - productGroup
+      - primaryPersonKey
+      - status
+      - entryDate
+      - dpdAtEntry
+      - totalOutstandingAtEntry
+      - deviationOpen
+      - legalHold
+      - nextActionWaiting
+    CaseAccount:
+      type: object
+      description: Links each ACE account to the case it is recovered under.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the case account link
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        accountKey:
+          type: string
+          maxLength: 255
+          description: ACE account_key of the account (v_ace_account); business key, no foreign key
+        isPrimary:
+          type: boolean
+          description: True for the account the case was opened on
+        linkedFrom:
+          type: string
+          format: date
+          description: Date the account joined the case
+        linkedTo:
+          type: string
+          format: date
+          description: Date the account left the case
+      required:
+      - id
+      - caseId
+      - accountKey
+      - isPrimary
+      - linkedFrom
+    CaseParty:
+      type: object
+      description: The role each party plays on a case.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the case party link
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        personKey:
+          type: string
+          maxLength: 255
+          description: ACE person_key of the customer (v_ace_customer); business key, no foreign key
+        partyRole:
+          type: string
+          maxLength: 20
+          enum:
+          - BORROWER
+          - CO_BORROWER
+          - GUARANTOR
+          - AUTHORIZED_SIGNATORY
+          - HEIR
+          description: Borrower, co-borrower, guarantor, authorized signatory, heir
+        roleFrom:
+          type: string
+          format: date
+          description: Date the role starts
+        roleTo:
+          type: string
+          format: date
+          description: Date the role ends
+      required:
+      - id
+      - caseId
+      - personKey
+      - partyRole
+      - roleFrom
+    Assignment:
+      type: object
+      description: Who holds a case or a task and from when.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the assignment
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        taskId:
+          type: string
+          format: uuid
+          description: The task this record belongs to
+        assigneeUserId:
+          type: string
+          format: uuid
+          description: The person or service identity assigned
+        assignedAt:
+          type: string
+          format: date-time
+          description: When assigned
+        endedAt:
+          type: string
+          format: date-time
+          description: When the assignment ended
+        reason:
+          type: string
+          maxLength: 20
+          enum:
+          - ALLOCATION
+          - TRANSFER
+          - REBALANCE
+          - MANUAL
+          - ESCALATION
+          description: Allocation, transfer, rebalance, manual, escalation
+        ruleId:
+          type: string
+          maxLength: 20
+          description: The rule that made the assignment
+        queueId:
+          type: string
+          format: uuid
+          description: The queue the assignment placed the case in
+        transferReasonCode:
+          type: string
+          maxLength: 20
+          enum:
+          - R01
+          - R02
+          - R03
+          - R04
+          - R05
+          - R06
+          description: Coded reason for a manual transfer or move
+      required:
+      - id
+      - caseId
+      - assigneeUserId
+      - assignedAt
+      - reason
+    Task:
+      type: object
+      description: 'A unit of work on a case: a CMMN human, customer, partner or decision task.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the task
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        taskCode:
+          type: string
+          maxLength: 60
+          description: The task in the case model, for example VERIFY_PACK
+        elementType:
+          type: string
+          maxLength: 20
+          enum:
+          - HUMAN_TASK
+          - CUSTOMER_TASK
+          - PARTNER_TASK
+          - DECISION_TASK
+          - STAGE_ENTRY
+          - MILESTONE
+          - EVENT_LISTENER
+          description: Human, customer, partner or decision task, milestone, event listener
+        discretion:
+          type: string
+          maxLength: 15
+          enum:
+          - AUTOMATIC
+          - DISCRETIONARY
+          - REQUIRED
+          description: Automatic, discretionary, required
+        status:
+          type: string
+          maxLength: 15
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - DONE
+          - CANCELED
+          description: Open, in progress, done, canceled
+        ownerRole:
+          type: string
+          maxLength: 20
+          description: Role that owns the task
+        dueAt:
+          type: string
+          format: date-time
+          description: When the task is due
+        completedAt:
+          type: string
+          format: date-time
+          description: When it completed
+        outcomeCode:
+          type: string
+          maxLength: 40
+          description: The event the task produced
+      required:
+      - id
+      - caseId
+      - taskCode
+      - elementType
+      - discretion
+      - status
+    Queue:
+      type: object
+      description: A queue of work belonging to one team and one role.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the queue
+          readOnly: true
+        queueCode:
+          type: string
+          maxLength: 30
+          description: Queue code
+        queueName:
+          type: string
+          maxLength: 100
+          description: Queue name
+        teamCode:
+          type: string
+          maxLength: 20
+          description: Team the queue belongs to
+        roleCode:
+          type: string
+          maxLength: 20
+          description: Role that works the queue
+        assignmentMethod:
+          type: string
+          maxLength: 20
+          enum:
+          - ROUND_ROBIN
+          - LOWEST_LOAD
+          - NAMED_OWNER
+          - SKILL
+          description: Round robin, lowest load, named owner, skill
+        capacityCap:
+          type: integer
+          description: Most open cases one person may hold in the queue
+        overflowQueueId:
+          type: string
+          format: uuid
+          description: Queue that receives overflow
+        rrCursorUserId:
+          type: string
+          format: uuid
+          description: The member last given a case by round robin in the queue
+        tableVersion:
+          type: integer
+          description: The QUEUE reference version applied to the row
+      required:
+      - id
+      - queueCode
+      - queueName
+      - teamCode
+      - roleCode
+      - assignmentMethod
+    Timer:
+      type: object
+      description: 'A running clock on a case: a service level, a legal period or an offer validity.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the timer
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        taskId:
+          type: string
+          format: uuid
+          description: The task this record belongs to
+        timerType:
+          type: string
+          maxLength: 20
+          enum:
+          - SERVICE_LEVEL
+          - NOTICE_PERIOD
+          - CURE_PERIOD
+          - PRESCRIPTION
+          - HEARING_DEADLINE
+          - OFFER_VALIDITY
+          - HOLDING_AGE
+          - CLAIM_DEADLINE
+          - INSTALLMENT_DUE
+          description: Service level, notice period, cure period, prescription, hearing deadline, offer validity, holding age, claim deadline
+        startedAt:
+          type: string
+          format: date-time
+          description: When it started
+        expiresAt:
+          type: string
+          format: date-time
+          description: When it expires
+        warnAt:
+          type: string
+          format: date-time
+          description: When the warning is raised
+        paused:
+          type: boolean
+          description: True while paused by a deviation. A prescription timer never pauses
+        status:
+          type: string
+          maxLength: 15
+          enum:
+          - RUNNING
+          - PAUSED
+          - EXPIRED
+          - STOPPED
+          description: Running, paused, expired, stopped
+        escalationLevel:
+          type: integer
+          description: How many times it has escalated
+        warnedAt:
+          type: string
+          format: date-time
+          description: When the warning was sent, so it is sent once
+        treatmentId:
+          type: string
+          format: uuid
+          description: The treatment a plan timer belongs to
+        escalatedToRole:
+          type: string
+          maxLength: 20
+          description: Role the breach was last escalated to
+        escalatedAt:
+          type: string
+          format: date-time
+          description: When the timer last escalated
+      required:
+      - id
+      - caseId
+      - timerType
+      - startedAt
+      - expiresAt
+      - paused
+      - status
+      - escalationLevel
+    TransferRequest:
+      type: object
+      properties:
+        toOwnerId:
+          type: string
+          format: uuid
+        toQueueId:
+          type: string
+          format: uuid
+        reasonCode:
+          type: string
+          enum:
+          - ALLOCATION
+          - TRANSFER
+          - REBALANCE
+          - MANUAL
+          - ESCALATION
+        note:
+          type: string
+    LegalHoldRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+          - place
+          - lift
+        reason:
+          type: string
+        reference:
+          type: string
+    TaskUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - DONE
+          - CANCELED
+        assigneeId:
+          type: string
+          format: uuid
+        note:
+          type: string
+    PlacementRequest:
+      type: object
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        modelOrAgent:
+          type: string
+        version:
+          type: string
+    ListOfValues:
+      type: object
+      properties:
+        code:
+          type: string
+        values:
+          type: object
+    ReferenceLoad:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        table:
+          type: string
+        validFrom:
+          type: string
+          format: date
+        status:
+          type: string
+        rows:
+          type: integer
+    TimelineItem:
+      type: object
+      properties:
+        at:
+          type: string
+        type:
+          type: string
+        summary:
+          type: string
+        by:
+          type: string
+        reference:
+          type: string
+    RetentionExclusionsPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RetentionExclusion'
+        page:
+          type: integer
+        size:
+          type: integer
+          maximum: 1000
+        total:
+          type: integer
+        cursor:
+          type: [string, 'null']
+          description: Cursor for the next page; null when no further page exists.
+      required: [items, page, size, total]
+    RetentionExclusion:
+      type: object
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        caseNumber:
+          type: string
+          maxLength: 18
+        reason:
+          type: string
+          enum: [LEGAL_HOLD, OPEN]
+        closedAt:
+          type: [string, 'null']
+          format: date-time
+          description: Closure timestamp; null when no closure timestamp is present.
+        accountKeys:
+          type: array
+          items:
+            type: string
+        personKeys:
+          type: array
+          items:
+            type: string
+      required: [caseId, caseNumber, reason, closedAt, accountKeys, personKeys]
+    ClosureDatesPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClosureDate'
+        page:
+          type: integer
+        size:
+          type: integer
+          maximum: 1000
+        total:
+          type: integer
+        cursor:
+          type: [string, 'null']
+          description: Cursor for the next page; null when no further page exists.
+      required: [items, page, size, total]
+    ClosureDate:
+      type: object
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        closedAt:
+          type: string
+          format: date-time
+        accountKeys:
+          type: array
+          items:
+            type: string
+        personKeys:
+          type: array
+          items:
+            type: string
+      required: [caseId, closedAt, accountKeys, personKeys]
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI of the error-map row
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          description: Request path and trace ID, stamped by the owning service
+        messageCode:
+          type: string
+          pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+        messageTh:
+          type: string
+          description: Thai text of the message code
+        field:
+          type: string
+          description: JSON Pointer or parameter or header name of the first failing input
+        errors:
+          type: array
+          description: Present only on 400 or 422 when more than one input fails
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              messageCode:
+                type: string
+                pattern: '^MSG-[A-Z0-9]+(?:-[A-Z0-9]+)*-[0-9]{2,3}$'
+              detail:
+                type: string
+            required: [field, messageCode, detail]
+        traceId:
+          type: string
+          pattern: '^[0-9a-fA-F]{32}$'
+          description: 32-hex W3C trace ID of the request
+      required: [type, title, status, messageCode, traceId]
+    NextAction:
+      type: object
+      properties:
+        text:
+          type: string
+        ownerRole:
+          type: string
+        ownerName:
+          type: string
+        ownerUserId:
+          type: string
+          format: uuid
+        dueDate:
+          type: string
+          format: date
+        waiting:
+          type: boolean
+        overdue:
+          type: boolean
+        missing:
+          type: boolean
+        ruleId:
+          type: string
+        ruleVersion:
+          type: string
+    PlacementResult:
+      type: object
+      properties:
+        queueId:
+          type: string
+          format: uuid
+        overflow:
+          type: boolean
+        assignment:
+          $ref: '#/components/schemas/Assignment'
+        decisionLogEntryId:
+          type: string
+          format: uuid
+    QueueOwnerLoad:
+      type: object
+      properties:
+        ownerUserId:
+          type: string
+          format: uuid
+        openCaseCount:
+          type: integer
+        atCap:
+          type: boolean
+    RollbackRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+    Parameter:
+      type: object
+      properties:
+        key:
+          type: string
+        kind:
+          type: string
+        type:
+          type: string
+        unit:
+          type: string
+        min:
+          type: string
+        max:
+          type: string
+        default:
+          type: string
+        scope:
+          type: string
+        required:
+          type: boolean
+        owner:
+          type: string
+        environments:
+          type: array
+          items:
+            type: string
+        usedBy:
+          type: array
+          items:
+            type: string
+        secret:
+          type: boolean
+        valueInForce:
+          type: string
+        versionNo:
+          type: integer
+        validFrom:
+          type: string
+          format: date
+    ChangeLogPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeLogEntry'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    ChangeLogEntry:
+      type: object
+      properties:
+        table:
+          type: string
+        version:
+          type: integer
+        status:
+          type: string
+        validFrom:
+          type: string
+          format: date
+        validTo:
+          type: string
+          format: date
+        changeRequestRef:
+          type: string
+        impactSummary:
+          type: string
+        testResult:
+          type: string
+        authorUserId:
+          type: string
+          format: uuid
+        loadedAt:
+          type: string
+          format: date-time
+        approverUserId:
+          type: string
+          format: uuid
+        approvedAt:
+          type: string
+          format: date-time
+        verifiedBy:
+          type: string
+          format: uuid
+        verifiedAt:
+          type: string
+          format: date-time
+        rollbackPlan:
+          type: string
+        rowsAdded:
+          type: integer
+        rowsChanged:
+          type: integer
+        rowsRemoved:
+          type: integer
+        rulesChanged:
+          type: array
+          items:
+            type: string
+    VerifyRequest:
+      type: object
+      properties:
+        note:
+          type: string
+    CasePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Case'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    TimelinePage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineItem'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+    TaskPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer

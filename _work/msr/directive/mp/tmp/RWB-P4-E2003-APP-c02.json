@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| The platform feature-flag library (R-PREC default ruling) | The switch of this capability, read as a flag and not as a parameter of another service |",
+   "new": "| The platform feature-flag library (R-PREC default ruling) | The switch of this capability, read as the flag `rwb.integration.customer-products` and not as a parameter of another service |"
+  },
+  {
+   "old": "| X4 | The masking rows cannot be read | Fail closed: every field is answered masked, the read continues, and an incident is raised to the platform administrator queue. No open answer is ever given from a failed read | None | BR2 |",
+   "new": "| X4 | The masking rows cannot be read | Fail closed: every field is answered masked, the read continues, and an incident is raised to the platform administrator queue. No open answer is ever given from a failed read | None | AC9 |"
+  },
+  {
+   "old": "| X5 | A request names a field ID the masking catalogue does not carry | The field ID is echoed and answered masked, and a break is raised to the data steward so the catalogue gains the field; no value is opened | None | BR2 |",
+   "new": "| X5 | A request names a field ID the masking catalogue does not carry | The field ID is echoed and answered masked, and a break is raised to the data steward so the catalogue gains the field; no value is opened | None | AC10 |"
+  },
+  {
+   "old": "| X6 | The feature switch of this capability is off | Every role is answered masked for `DF-ACE-281`, whatever its row says; the refusal paths are unchanged | None | BR9 |",
+   "new": "| X6 | The feature switch of this capability is off | Every role is answered masked for `DF-ACE-281`, whatever its row says; the refusal paths are unchanged | None | AC11 |"
+  },
+  {
+   "old": "    Then the service is not restarted, no event is consumed and no answer taken under \"MASK-2026.12\" is served after the change",
+   "new": "    Then the service is not restarted, no event is consumed and no answer taken under \"MASK-2026.12\" is served after the change\n\n  Scenario: AC9 A failed masking read answers every field masked and raises an incident (new, D-RCV-60)\n    Given the masking rows of \"MASK-2026.12\" cannot be read\n    Given the caller holds only role \"RW-CASEOWN\" and owns case \"RW-2026-000410\"\n    When the caller asks POST /api/recovery/access/v1/authorise for area \"CASE_RECORD\", right \"R\", case \"RW-2026-000410\" and field \"DF-ACE-281\"\n    Then the read continues and \"DF-ACE-281\" is answered as masked with the last-four shape\n    Then an incident is raised to the platform administrator queue and no open answer is given from the failed read\n\n  Scenario: AC10 A field ID the masking catalogue does not carry is echoed masked and raised to the data steward (new, D-RCV-60)\n    Given the caller holds only role \"RW-CASEOWN\" and owns case \"RW-2026-000410\"\n    Given the field ID the caller asks for is not carried by the masking catalogue\n    When the caller asks POST /api/recovery/access/v1/authorise for area \"CASE_RECORD\", right \"R\", case \"RW-2026-000410\" and that field ID\n    Then the field ID is echoed and answered as masked\n    Then a break is raised to the data steward so the catalogue gains the field, and no value is opened\n\n  Scenario: AC11 The feature switch off answers every role masked for DF-ACE-281 (new, D-RCV-60)\n    Given the feature switch of this capability is off\n    Given the caller holds only role \"RW-CASEOWN\" and owns case \"RW-2026-000410\"\n    When the caller asks POST /api/recovery/access/v1/authorise for area \"CASE_RECORD\", right \"R\", case \"RW-2026-000410\" and field \"DF-ACE-281\"\n    Then \"DF-ACE-281\" is answered as masked with the last-four shape whatever its masking row says\n    Then the refusal paths of AC5 and AC6 are unchanged"
+  },
+  {
+   "old": "The eight criteria above are new and test only this deliverable: the masking rows of one field, the masking answer at the masking version in force, and the two refusals of the other-products read.",
+   "new": "The eleven criteria above are new and test only this deliverable: the masking rows of one field, the masking answer at the masking version in force, the two refusals of the other-products read, and the exception paths X4, X5 and X6."
+  },
+  {
+   "old": "Whether `DF-ACE-281` is the only personal field of the panel, and whether the other six fields need a row or an explicit `unmasked` false, is Not specified in the source documents (GAP-0912; ASM-1634); this story writes rows for `DF-ACE-281` only and answers the other fields as covered by no row.",
+   "new": "Whether `DF-ACE-281` is the only personal field of the panel, and whether the other six fields need a row or an explicit `unmasked` false, is Not specified in the source documents (GAP-0912; ASM-1634); this story writes rows for `DF-ACE-281` only and answers the other fields as covered by no row.\n\nOpen decisions that this story carries, each with its assumptions (each decision is still open and its assumptions apply): DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863); DL20 (ASM-0189, ASM-2559, ASM-2608); DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355); DL43 (ASM-0193, ASM-0737, ASM-0748, ASM-0816)."
+  },
+  {
+   "old": "| TC-E2-003-02 | AC1, BR7 |",
+   "new": "| TC-E2-003-02 | AC2, BR7 |"
+  },
+  {
+   "old": "| TC-E2-003-04 | AC1, BR2 |",
+   "new": "| TC-E2-003-04 | AC4, BR2 |"
+  },
+  {
+   "old": "| TC-E2-003-05 | AC6, BR6 |",
+   "new": "| TC-E2-003-05 | AC5, BR6 |"
+  },
+  {
+   "old": "| TC-E2-003-10 | AC1, AC4 | Component | Boundary test of `masking_rule` (section 12.7): rows at `MASK-2026.12` for `DF-ACE-281` for the five clear roles and `RW-PHONECOL`; `RW-CONDUCT` and `DF-ACE-284` with no row; `role` read for `default_scope` only |",
+   "new": "| TC-E2-003-10 | AC1, AC4 | Component | Boundary test of `masking_rule` (section 12.7): rows at `MASK-2026.12` for `DF-ACE-281` for the five clear roles and `RW-PHONECOL`; `RW-CONDUCT` and `DF-ACE-284` with no row; `role` read for `default_scope` only |\n| TC-E2-003-11 | AC9, BR2 | NFR | The masking rows of `MASK-2026.12` cannot be read; `RW-CASEOWN` asks for `DF-ACE-281` on case `RW-2026-000410`; `DF-ACE-281` is answered masked with the last-four shape, the read continues, and an incident is raised to the platform administrator queue |\n| TC-E2-003-12 | AC10, BR2 | Component | A field ID the masking catalogue does not carry is asked by `RW-CASEOWN` on case `RW-2026-000410`; the field ID is echoed and answered masked, and a break is raised to the data steward; no value is opened |\n| TC-E2-003-13 | AC11, BR9 | Component | The feature switch of this capability is off; `RW-CASEOWN` asks for `DF-ACE-281` on case `RW-2026-000410`; the field is answered masked whatever its row says, and the AC5 and AC6 refusals are unchanged |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16755",
+   "item": "DOR-RWB-P4-E2003-APP-18",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Open decisions DL10, DL20, DL26 and DL43 with their assumptions added to section 11."
+  },
+  {
+   "ruling": "R-16756",
+   "item": "DOR-RWB-P4-E2003-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC9, AC10, AC11 for X4, X5, X6 with TC-E2-003-11 to 13; section 5 Covered by updated; prose count now eleven."
+  },
+  {
+   "ruling": "R-16757",
+   "item": "DOR-RWB-P4-E2003-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR9 is now covered by AC11 and test case TC-E2-003-13."
+  },
+  {
+   "ruling": "R-16758",
+   "item": "DOR-RWB-P4-E2003-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9; RWB-P2-E2003-APP",
+   "change": "Add or confirm BR field ID DF-REF-039 in LDM v9; P2 Criteria and test data must read through the rwb-source-data contract, not ACE views directly.",
+   "note": "DF-REF-039 is not in LDM v9; the detcheck sits in the P2 story, so no edit here."
+  },
+  {
+   "ruling": "R-22344",
+   "item": "GAP-0915",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Fix the masking answer schema: per-role row, marker values clear and masked, last-four shape, and masking version.",
+   "note": "Field names of the masking answer belong to the contract story; this story states only the content."
+  },
+  {
+   "ruling": "R-22345",
+   "item": "GAP-0662",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "Architecture v5; TSD P2 Integration v3; RWB-P1-E1069-CON; RWB-P3-E1043-CON; RWB-P4-E1037-CON",
+   "change": "Keep the P2 endpoint on /api/recovery/integration/v1; read holding and freshness via rwb-source-data, parties via rwb-case, and the masking rule via rwb-access; fix contract field names in the P1, P3 and P4 contract stories.",
+   "note": "Flag name rwb.integration.customer-products is now stated in section 3; the rest belongs to other documents."
+  },
+  {
+   "ruling": "R-22346",
+   "item": "GAP-0390",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "RWB-PLT-N001-CON; Logical Data Model v9 (next version); integration harness record",
+   "change": "Publish the gateway-bff composite route and merge order; agree the harness repository, environments, seed data, evidence format and gate; publish the rwb_access field IDs in the next LDM.",
+   "note": "The harness, route and field IDs are not in this story and are not invented here."
+  },
+  {
+   "ruling": "R-25443",
+   "item": "CG-ALL-5147",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E2-003-02, -04 and -05 now show the AC numbers of Test Cases v8 (AC2, AC4, AC5)."
+  },
+  {
+   "ruling": "R-25444",
+   "item": "CG-ALL-5149",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Requirements Traceability Matrix v7",
+   "change": "Align the REQ-CHO-003 and REQ-RDF-010 test lists with section 18 of RWB-P4-E2003-APP in the next RTM version.",
+   "note": "The RTM test lists differ and the RTM is another workbook; no story edit made."
+  },
+  {
+   "ruling": "R-25445",
+   "item": "CG-ALL-5151",
+   "status": "Not applied",
+   "section": "3, 3.1",
+   "target": "",
+   "change": "",
+   "note": "Migration file name is at a line not in the supplied text; the service's next Flyway number is Not specified in the source documents (CG-ALL-5151)."
+  }
+ ]
+}

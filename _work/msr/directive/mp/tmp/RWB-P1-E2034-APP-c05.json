@@ -1,0 +1,72 @@
+{
+ "edits": [
+  {
+   "old": "| X9 | The entry cannot be inserted | 503 with the rollback; the incident hook fires; nothing is discarded silently | MSG-P1-022 | AC7 |",
+   "new": "| X9 | The entry cannot be inserted | 503 with the rollback; the incident hook fires; nothing is discarded silently | MSG-P1-022 | AC7, AC12 |"
+  },
+  {
+   "old": "    Then no other service holds a copy of the ledger and each reads it only through the case read",
+   "new": "    Then no other service holds a copy of the ledger and each reads it only through the case read\n\n  Scenario: AC12 A failed entry answers 503 with the rollback and is never discarded silently (new, D-RCV-60)\n    Given the ledger store cannot insert a row for case \"RW-2026-000301\"\n    When a LETTER entry for notice \"NT-SYN-0301\" is appended through POST /cases/{caseId}/interactions\n    Then the append answers 503 with MSG-P1-022 and the insert is rolled back\n    Then the incident hook fires with the case ID and the error class and no entry is discarded silently\n\n  Scenario: AC13 The one-ledger and append-only rules hold in the schema and the repository (new, D-RCV-60)\n    Given the entries of case \"RW-2026-000301\" are stored by this service\n    When the schema of rwb_source_data and the ledger repository are inspected\n    Then the schema holds one interaction table and no other service holds a copy of it\n    Then the repository exposes no update and no delete method for the interaction table\n\n  Scenario: AC14 The provided operations answer 401, 403 and 404 on their refusal paths (new, D-RCV-60)\n    Given the caller holds no Case record C on case \"RW-2026-000301\"\n    When the caller appends an entry through POST /cases/{caseId}/interactions\n    Then the append answers 403 with MSG-P4-002 and nothing is written\n    Given a case that does not exist is requested through GET /cases/{caseId}/interactions\n    Then the read answers 404 with MSG-P4-003 and nothing is returned\n    Then a call with no valid identity answers 401; the trigger is Not specified in the source documents (NEWAC-RWB-P1-E2034-APP-AC14)\n\n  Scenario: AC15 A consumed call that fails or does not answer writes nothing and guesses no value (new, D-RCV-60)\n    Given the reference-data library does not answer inside 2 s for event code \"LETTER\"\n    When a LETTER entry for notice \"NT-SYN-0301\" is appended through POST /cases/{caseId}/interactions\n    Then the append answers 503 and nothing is written\n    Then no retention class is guessed for the entry"
+  },
+  {
+   "old": "| TC-E2-034-18 | AC9, BR1 - this story's store evidence: one interaction table in rwb_source_data, read only through the case read | Component | Entries of case \"RW-2026-000301\" in the ledger store |",
+   "new": "| TC-E2-034-18 | AC9, BR1 - this story's store evidence: one interaction table in rwb_source_data, read only through the case read | Component | Entries of case \"RW-2026-000301\" in the ledger store |\n| TC-E2-034-19 | AC12, X9 - this story's store evidence: the failed insert answers 503 with the rollback and the incident hook; no entry is discarded silently | End to end | Not specified in the source documents (NEWAC-RWB-P1-E2034-APP-AC12) |\n| TC-E2-034-20 | AC13, BR1, BR7 - this story's store evidence: one interaction table and no update or delete method on the repository | Component | Not specified in the source documents (NEWAC-RWB-P1-E2034-APP-AC13) |\n| TC-E2-034-21 | AC14, X6, X7 - this story's evidence: the 401, 403 and 404 answers of the provided append and case read | Component | Not specified in the source documents (NEWAC-RWB-P1-E2034-APP-AC14) |\n| TC-E2-034-22 | AC15, X8 - this story's evidence: a consumed call that fails or does not answer writes nothing and guesses no class | Component | Not specified in the source documents (NEWAC-RWB-P1-E2034-APP-AC15) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28845",
+   "item": "GAP-2226",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Story keeps occurred time then case sequence (BR9). Screen page order stays with the case timeline contract per ASM-B2-P3-010-2."
+  },
+  {
+   "ruling": "R-29334",
+   "item": "ACR-RWB-P1-E2034-APP-AC4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "TC-E2-034-13 already covers AC4 as written (Component); no new row needed."
+  },
+  {
+   "ruling": "R-30311",
+   "item": "NEWAC-RWB-P1-E2034-APP-AC12",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 to section 7, TC-E2-034-19 to section 16, and AC12 to the X9 Covered by cell. Test data not in source."
+  },
+  {
+   "ruling": "R-30312",
+   "item": "NEWAC-RWB-P1-E2034-APP-AC13",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 for BR1 and BR7 as a schema and repository guardrail, with TC-E2-034-20. Test data not in source."
+  },
+  {
+   "ruling": "R-30313",
+   "item": "NEWAC-RWB-P1-E2034-APP-AC14",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for 401, 403, 404 with TC-E2-034-21. The 401 trigger is not in source and is marked as such."
+  },
+  {
+   "ruling": "R-30314",
+   "item": "NEWAC-RWB-P1-E2034-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for a failed or silent consumed call, with TC-E2-034-22. Test data not in source."
+  }
+ ]
+}

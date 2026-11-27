@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "| BR5 | No clock is a Quartz job: S1 owns no job and no schedule, and a clock is a timer row of the case, driven by the workflow platform | TE-007 retirement; context pack S1 ownership rows (no job) |",
+   "new": "| BR5 | No clock is a Quartz job: S1 owns no job and no schedule; the route timers are durable timers inside `RouteDecisionWorkflow` through the workflow kit, a clock is a timer row of the case, and a breach is reported on the timer path rwb-case owns | TE-007 retirement; DP-10; Architecture v5 slide 44; context pack S1 ownership rows (no job) |"
+  },
+  {
+   "old": "| MSG-P1-001 | The data product is stale after a late or failed ACE batch (X3) | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The data product is stale after a late or failed ACE batch (X3) | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "| BR12 (VR-S1-012-1) | Data product stale after a late or failed ACE batch for its source (`v_ace_batch_status`) | MSG-P1-001 {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| BR12 (VR-S1-012-1) | Data product stale after a late or failed ACE batch for its source (`v_ace_batch_status`) | MSG-P1-001 {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "MSG-P1-001 is copied from VR-S1-012-1 of FSD S1.",
+   "new": "MSG-P1-001 is copied from Error and Message Standard v4 section 4."
+  },
+  {
+   "old": "and no source publishes a message text for it.",
+   "new": "and no source publishes a message text for it. The four messages are served from the catalogues of the services that own them, and their Thai and English wording goes through the message standard before the wave 3 release."
+  },
+  {
+   "old": "| SCR-13 Route decision | Loading; recommendation; overridden; submitted |",
+   "new": "| SCR-13 Route decision | Loading; recommendation; overridden; submitted; empty, error and no access: Not specified in the source documents (CG-ALL-8250) |"
+  },
+  {
+   "old": "| X9 | The route start is composed with a task code, a timer type or a duration that is not a governed row | The step refuses the start and names the missing row; no value is defaulted | None (reason on the record) | AC6, BR1, BR2, TC-S1-E4012-APP-08 |",
+   "new": "| X9 | The route start is composed with a task code, a timer type or a duration that is not a governed row | The step refuses the start and names the missing row; no value is defaulted | None (reason on the record) | AC6, AC11, BR1, BR2, TC-S1-E4012-APP-08, TC-S1-E4012-APP-14 |"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the decision record cannot be written"
+  },
+  {
+   "old": "    Then nothing is released",
+   "new": "    Then nothing is released\n\n  Scenario: AC11 Composed route start with a value that is not a governed row refuses the start (X9, BR1, BR2)\n    Given the rwb-decision contract mock returns the rule row in force for route \"R4\" with a timer duration that is not a governed row\n    When the route start is composed\n    Then the step refuses the start and names the missing row\n    Then no value is defaulted\n\n  Scenario: AC12 Rules with no criterion hold on the route start (BR1, BR3, BR5, BR9, BR10, BR11)\n    Given the route start runs on its fakes\n    When the step runs in the workflow\n    Then the start happens in the same step with no second call (BR3)\n    Then no Quartz job is created (BR5)\n    Then RouteDecided is published through the outbox (BR9)\n    Then a clock is recomputed only from the rule row in force (BR1, BR10)\n    Then no person name, address, contact value or identity number enters the record or the workflow input (BR11)\n\n  Scenario: AC13 Error answers of the provided operations are 401, 403 or 404 (X2)\n    Given a call to the route operation fails a check; the trigger of 401 and 404 is Not specified in the source documents (NEWAC-RWB-S1-E4012-APP-AC12)\n    When the answer is returned\n    Then the status is 401, 403 or 404 in the platform envelope\n    Then no read or write happens before the check"
+  },
+  {
+   "old": "with their origin tag added and nothing else changed: the repetition",
+   "new": "with their origin tag added and only the term `decision log` replaced by `decision record`: the repetition"
+  },
+  {
+   "old": "`the decision log cannot be written` all stand.",
+   "new": "`the decision record cannot be written` all stand."
+  },
+  {
+   "old": "AC1 says the result is written \"to the decision log with the rule version\"",
+   "new": "AC1 says the result is written \"to the decision record with the rule version\""
+  },
+  {
+   "old": "| TC-E4-012-02 | AC2: the decision log cannot be written | Component | The decision-record stub stopped; nothing written, no route start and MSG-P7-003 shown |",
+   "new": "| TC-E4-012-02 | AC2: the decision record cannot be written | Component | The decision-record stub stopped; nothing written, no route start and MSG-P7-003 shown |"
+  },
+  {
+   "old": "| TC-S1-E4012-APP-13 | Rules BR3, BR5, BR6, BR9, BR10 and BR11: same-step start with no second call, no Quartz job, record before answer, RouteDecided published through the outbox, clock recomputed only from the rule row in force, no personal data | Component | The route start on its fakes, the library stub and the workflow input |",
+   "new": "| TC-S1-E4012-APP-13 | Rules BR3, BR5, BR6, BR9, BR10 and BR11: same-step start with no second call, no Quartz job, record before answer, RouteDecided published through the outbox, clock recomputed only from the rule row in force, no personal data | Component | The route start on its fakes, the library stub and the workflow input |\n| TC-S1-E4012-APP-14 | AC11: a task code, timer type or duration composed into the route start that is not a governed row refuses the start and names the missing row (X9, BR1, BR2) | Component | Not specified in the source documents (NEWAC-RWB-S1-E4012-APP-AC10) |\n| TC-S1-E4012-APP-15 | AC12: the rules BR1, BR3, BR5, BR9, BR10 and BR11 hold on the route start | Component | Not specified in the source documents (NEWAC-RWB-S1-E4012-APP-AC11) |\n| TC-S1-E4012-APP-16 | AC13: error answers of the provided operations are 401, 403 or 404 in the platform envelope, with no read or write before the check | Component | Not specified in the source documents (NEWAC-RWB-S1-E4012-APP-AC12) |"
+  },
+  {
+   "old": "The activity names are a target design choice and are fixed by the baseline so that the workflow history is stable.",
+   "new": "The activity names are a target design choice and are fixed by the baseline so that the workflow history is stable. The consumed operations of rwb-case, rwb-decision and rwb-access have no published name yet: their owners publish the names before the wave 3 tag, rwb-case confirms that it creates the task and timer rows from the answered sets, and the clients and fakes are built from the documented use until then; a published name is a minor version of the baseline."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23358",
+   "item": "GAP-1684",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR5 now sets the route timers as durable timers inside RouteDecisionWorkflow through the workflow kit, with breaches reported on the rwb-case timer path and no Quartz.",
+   "note": "Quartz timer mechanism replaced in BR5; cites DP-10 and Architecture v5 slide 44; no Quartz table, job or connection."
+  },
+  {
+   "ruling": "R-26805",
+   "item": "CG-ALL-8245",
+   "status": "Resolved",
+   "section": "14",
+   "change": "MSG-P1-001 wording in section 14 and BR12 set to the standard text ending 'Today's load has not arrived.'; source cited as Error and Message Standard v4 section 4.",
+   "target": "",
+   "note": "Text copied from the standard; trigger matches 'stale after a late or failed load' so no new message ID is needed."
+  },
+  {
+   "ruling": "R-26806",
+   "item": "CG-ALL-8249",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Decision log wording changed to decision record in AC1, AC2, the legacy-criteria note and TC-E4-012-02.",
+   "note": "Five lines changed; the note states that only the term decision log was replaced."
+  },
+  {
+   "ruling": "R-26807",
+   "item": "CG-ALL-8250",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "SCR-13 states extended with empty, error and no access as Not specified in the source documents (CG-ALL-8250).",
+   "note": "Loading, recommendation, overridden and submitted kept; the three states the specification lacks are marked not specified."
+  },
+  {
+   "ruling": "R-28889",
+   "item": "GAP-1690",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Section 14 now states that the four messages are served from the catalogues of their owning services, with Thai and English wording through the message standard before wave 3 release.",
+   "note": "No message of this service added; MSG-GEN-001, MSG-P1-001, MSG-P4-002 and MSG-P7-003 remain other services' messages."
+  },
+  {
+   "ruling": "R-28891",
+   "item": "GAP-1695",
+   "status": "Cross-document",
+   "section": "",
+   "target": "FSD S1",
+   "change": "Carry version 3 in full; mark versions 1 and 2 as Not specified in the source documents; the FSD owner supplies both change notes at the next FSD version.",
+   "note": "The story cites no FSD version, so no story edit is needed."
+  },
+  {
+   "ruling": "R-29102",
+   "item": "GAP-2649",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Section 12.5 states that the consumed operations of rwb-case, rwb-decision and rwb-access are named by their owners before the wave 3 tag, with clients and fakes built from documented use until then.",
+   "note": "Fallback recorded; owners still publish operation names, and rwb-case confirms its task and timer row creation."
+  },
+  {
+   "ruling": "R-32032",
+   "item": "NEWAC-RWB-S1-E4012-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 5, 16",
+   "target": "",
+   "change": "AC11 added for a composed value that is not a governed row; X9 covered-by extended with AC11 and TC-S1-E4012-APP-14; TC-S1-E4012-APP-14 added.",
+   "note": "Proposed test not specified in the source documents; new AC takes next free number AC11, so the TC data is marked not specified."
+  },
+  {
+   "ruling": "R-32033",
+   "item": "NEWAC-RWB-S1-E4012-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC12 added covering BR1, BR3, BR5, BR9, BR10 and BR11; TC-S1-E4012-APP-15 added.",
+   "note": "Proposed test not specified in the source documents; new AC takes next free number AC12; BR4, BR6, BR7 and BR8 are covered by AC10, AC2 and AC7."
+  },
+  {
+   "ruling": "R-32034",
+   "item": "NEWAC-RWB-S1-E4012-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC13 added for error answers 401, 403 and 404 of the provided operations; TC-S1-E4012-APP-16 added.",
+   "note": "Proposed test not specified in the source documents; 401 and 404 triggers marked not specified; new AC takes next free number AC13."
+  }
+ ]
+}

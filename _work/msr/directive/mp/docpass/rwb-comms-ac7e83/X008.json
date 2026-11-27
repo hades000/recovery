@@ -1,0 +1,147 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench API Specification v5/rwb-comms.yaml",
+ "unit": "X008",
+ "items": [
+  "R-01730",
+  "R-01731",
+  "R-01733",
+  "R-01734",
+  "R-01736",
+  "R-01737",
+  "R-01739",
+  "R-01740",
+  "R-06578",
+  "R-06582",
+  "R-06588",
+  "R-06592"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "tries": [
+    {
+     "error": "DISPOSITION INCOMPLETE: no row for ['R-01730', 'R-01731', 'R-01733', 'R-01734', 'R-01736', 'R-01737', 'R-01739', 'R-01740', 'R-06578', 'R-06582', 'R-06588', 'R-06592']"
+    },
+    {
+     "ok": true,
+     "fixes": 2
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "X008-F1",
+     "finding": "R-01730",
+     "op": "replace",
+     "old": "components:",
+     "new": "  /parties/{partyId}/contact-points:\n    get:\n      summary: Read the contact points of a party\n      description: Contact points of a party with the consent and verification state of each channel, and the stop mark of the case the caller names. Case reference parameter schema Not specified in the source documents (CG-ALL-6724)\n      x-module: P6\n      x-owner: \"P6\"\n      x-capability:\n        area: Documents\n        right: R\n      parameters:\n      - name: partyId\n        in: path\n        required: true\n        schema:\n          type: string\n      responses:\n        '200':\n          description: Success, list of ContactPoint\n        '401':\n          $ref: '#/components/responses/E401'\n        '403':\n          $ref: '#/components/responses/E403'\n        '404':\n          $ref: '#/components/responses/E404'\n        '503':\n          $ref: '#/components/responses/E503'\n  /contact-points/{contactKey}:\n    put:\n      summary: Maintain the consent and verification state of one contact point and channel\n      description: Returns the stored ContactPoint and its new version. Request fields (channel code, consent and verification values) Not specified in the source documents (CG-ALL-6725). A repeat with the same If-Match version returns the first answer.\n      x-module: P6\n      x-owner: \"P6\"\n      x-capability:\n        area: Documents\n        right: U\n      parameters:\n      - name: contactKey\n        in: path\n        required: true\n        schema:\n          type: string\n      - name: If-Match\n        in: header\n        required: true\n        description: Version of the contact point as read\n        schema:\n          type: string\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              type: object\n              description: ContactPointRequest, fields Not specified in the source documents (CG-ALL-6725)\n      responses:\n        '200':\n          description: Success, stored ContactPoint with its new version\n        '401':\n          $ref: '#/components/responses/E401'\n        '403':\n          $ref: '#/components/responses/E403'\n        '404':\n          $ref: '#/components/responses/E404'\n        '409':\n          $ref: '#/components/responses/E409'\n        '422':\n          $ref: '#/components/responses/E422'\n        '503':\n          $ref: '#/components/responses/E503'\ncomponents:"
+    },
+    {
+     "fix_id": "X008-F2",
+     "finding": "R-01736",
+     "op": "replace",
+     "old": "components:",
+     "new": "  /notices/{noticeId}/custody-movements:\n    post:\n      summary: Record one movement of the original of a notice\n      description: Returns the stored Movement. Further request fields Not specified in the source documents (CG-ALL-6753). Idempotency-Key answers are kept 24 hours.\n      x-module: P6\n      x-owner: \"P6\"\n      x-capability:\n        area: Documents\n        right: C\n      parameters:\n      - name: noticeId\n        in: path\n        required: true\n        schema:\n          type: string\n      - name: Idempotency-Key\n        in: header\n        required: true\n        schema:\n          type: string\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              type: object\n              description: CustodyMovementRequest with document_id, moved_at, from_location, to_location and held_by\n      responses:\n        '201':\n          description: Success, stored Movement\n        '401':\n          $ref: '#/components/responses/E401'\n        '403':\n          $ref: '#/components/responses/E403'\n        '404':\n          $ref: '#/components/responses/E404'\n        '409':\n          $ref: '#/components/responses/E409'\n        '422':\n          $ref: '#/components/responses/E422'\n        '503':\n          $ref: '#/components/responses/E503'\n    get:\n      summary: List the movements of the original of a notice, newest first\n      description: Movements of the original of a notice, newest first. Response fields Not specified in the source documents (CG-ALL-6754).\n      x-module: P6\n      x-owner: \"P6\"\n      x-capability:\n        area: Documents\n        right: R\n      parameters:\n      - name: noticeId\n        in: path\n        required: true\n        schema:\n          type: string\n      responses:\n        '200':\n          description: Success, list of Movement\n        '401':\n          $ref: '#/components/responses/E401'\n        '403':\n          $ref: '#/components/responses/E403'\n        '404':\n          $ref: '#/components/responses/E404'\n        '503':\n          $ref: '#/components/responses/E503'\ncomponents:"
+    }
+   ],
+   "disposition": [
+    {
+     "item": "R-01730",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "GET contact-points path published in rwb-comms.yaml; story text unchanged. Response fields left as Not specified (CG-ALL-6724)."
+    },
+    {
+     "item": "R-01731",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "PUT contact-points/{contactKey} published in rwb-comms.yaml; story text unchanged. Request fields left as Not specified (CG-ALL-6725)."
+    },
+    {
+     "item": "R-06578",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "GET and PUT contact-point paths published (F1). Error message IDs CG-ALL-6726 are not in this document and were not changed."
+    },
+    {
+     "item": "R-01733",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "GET contact-points operation published in the owner yaml, matching the story declaration in 12.1."
+    },
+    {
+     "item": "R-01734",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "PUT contact-points/{contactKey} operation published in the owner yaml, matching the story declaration in 12.1."
+    },
+    {
+     "item": "R-06582",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1"
+     ],
+     "note": "GET and PUT contact-point operations published (F1). The event-name failure is fixed in the story, not in this document."
+    },
+    {
+     "item": "R-01736",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "POST /notices/{noticeId}/custody-movements published in the owner yaml; operation shape as fixed in CON."
+    },
+    {
+     "item": "R-01737",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "GET /notices/{noticeId}/custody-movements published in the owner yaml; operation shape as fixed in CON."
+    },
+    {
+     "item": "R-06588",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "Both custody-movements paths published (F2). Error message IDs CG-ALL-6744 are not in this document and were not changed."
+    },
+    {
+     "item": "R-01739",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "POST custody-movements path published in rwb-comms.yaml, so the story operation is now declared by its owner."
+    },
+    {
+     "item": "R-01740",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "GET custody-movements path published in rwb-comms.yaml, so the story operation is now declared by its owner."
+    },
+    {
+     "item": "R-06592",
+     "status": "Resolved",
+     "fix_ids": [
+      "F2"
+     ],
+     "note": "Both custody-movement operations published (F2). The event-type fix is in the story, not in this document."
+    }
+   ]
+  }
+ ]
+}

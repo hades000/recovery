@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The role does not hold the Treatment and offer right of the operation | 403 before any read, any agent call or any write, and no record is written | MSG-P4-002 | AC3, TC-E4-007-03 |",
+   "new": "| X2 | The role does not hold the Treatment and offer right of the operation | 403 before any read, any agent call or any write, and no record is written | MSG-P4-002 | AC3, TC-E4-007-03, TC-S1-E4007-APP-06 |"
+  },
+  {
+   "old": "| X3 | The agent answer fails the allowed-action check, names a route outside the open set, or falls below the confidence threshold | The step applies the rules in force and records the fallback; where the rules give no answer the case goes to the owner's queue with the reasons | None (owner's queue) | AC4, TC-E4-007-01 |",
+   "new": "| X3 | The agent answer fails the allowed-action check, names a route outside the open set, or falls below the confidence threshold | The step applies the rules in force and records the fallback; where the rules give no answer the case goes to the owner's queue with the reasons | None (owner's queue) | AC4, TC-E4-007-01, TC-S1-E4007-APP-07 |"
+  },
+  {
+   "old": "| X9 | rwb-source-data, rwb-agent, rwb-case or rwb-decision does not answer inside 2 s | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 with the platform envelope | None | AC10, TC-E4-007-01 |",
+   "new": "| X9 | rwb-source-data, rwb-agent, rwb-case or rwb-decision does not answer inside 2 s | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 with the platform envelope | None | AC10, TC-E4-007-01, TC-S1-E4007-APP-13 |"
+  },
+  {
+   "old": "| X10 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC11, s17, BR4, BR9 |",
+   "new": "| X10 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC11, TC-S1-E4007-APP-14, s17, BR4, BR9 |"
+  },
+  {
+   "old": "    Then the case returns to the route decision and the rule gap is logged",
+   "new": "    Then the case returns to the route decision and the rule gap is logged\n\n  Scenario: AC17 The business rules hold in the build (BR1 to BR10)\n    Given the build, the grants, the contract, the workflow inputs and the outbox of rwb_valuation are checked\n    When the guardrail test runs\n    Then every rule BR1 to BR10 of section 8 holds\n    Then any breach fails the build and nothing is released\n\n  Scenario: AC18 A call has no credential, no right or an unknown resource (X2)\n    Given a call to a provided operation has no valid credential, its role does not hold the right, or it names a case or assessment that is not found\n    When the operation is called\n    Then the system answers 401 with no valid credential, 403 as in AC3 for a role without the right, and 404 when the resource is not found\n    Then no read, no agent call and no write is made\n\n  Scenario: AC19 A write is replayed with the same key (R-UNI-40)\n    Given a write of the operations is submitted again with the same Idempotency-Key\n    When the replay arrives\n    Then the stored response is returned with no second agent call, no second record and no second write\n    Then the replay is counted\n\n  Scenario: AC20 An activity is retried or times out (X9)\n    Given an activity of RouteDecisionWorkflow fails or does not complete within its timeout\n    When the workflow retries the activity\n    Then the retry follows the retry policy of the workflow and writes nothing before the record\n    Then a timed-out activity is not recorded as a recommendation\n\n  Scenario: AC21 A consumed call fails (X9)\n    Given a consumed call to rwb-source-data, rwb-case or rwb-decision fails or does not answer\n    When the step reads from it\n    Then nothing is written and the caller sees 503 with the platform envelope\n    Then a failed call to rwb-agent follows AC5 and is not treated here\n\n  Scenario: AC22 A status change is not allowed (X7)\n    Given a status change that the model does not allow is requested\n    When the step applies it\n    Then the change is refused, nothing is written and the state is reported to the parent"
+  },
+  {
+   "old": "BR17 by AC16; BR18 by AC8.",
+   "new": "BR17 by AC16; BR18 by AC8. BR1 to BR10 are also held by AC17 and TC-S1-E4007-APP-20."
+  },
+  {
+   "old": "| TC-S1-E4007-APP-19 | AC16: person decides, missing data | Component | Person decision naming the missing data |",
+   "new": "| TC-S1-E4007-APP-19 | AC16: person decides, missing data | Component | Person decision naming the missing data |\n| TC-S1-E4007-APP-20 | AC17: business rules BR1 to BR10 hold in the build | Component | The build scan, the grants, the contract, the workflow inputs and the outbox of rwb_valuation |\n| TC-S1-E4007-APP-21 | AC18: call with no credential, no right or an unknown resource | Component | A call with no valid credential; a role without the right; a case or assessment that is not found |\n| TC-S1-E4007-APP-22 | AC19: replayed write with the same Idempotency-Key | Component | Write submitted twice with the same Idempotency-Key |\n| TC-S1-E4007-APP-23 | AC20: activity of RouteDecisionWorkflow retried or timed out | Component | Activity that fails and retries; activity that times out |\n| TC-S1-E4007-APP-24 | AC21: consumed call fails | Component | rwb-source-data, rwb-case or rwb-decision fake that fails or does not answer |\n| TC-S1-E4007-APP-25 | AC22: status change the model does not allow | Component | A status change the model does not allow, with the case state reported to the parent |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31944",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X9 Covered by now lists TC-S1-E4007-APP-13 with AC10 and TC-E4-007-01.",
+   "note": "X9 row in section 5 now traces to the dedicated consumed-service test TC-S1-E4007-APP-13 as well as AC10."
+  },
+  {
+   "ruling": "R-31945",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X10 Covered by now lists TC-S1-E4007-APP-14 with AC11, s17, BR4 and BR9.",
+   "note": "X10 row in section 5 now traces to the boundary statement test TC-S1-E4007-APP-14."
+  },
+  {
+   "ruling": "R-31946",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC17 (BR1 to BR10 guardrail), test row TC-S1-E4007-APP-20, and a coverage note in section 8.",
+   "note": "BR1 to BR10 are held by a guardrail criterion AC17 with its test TC-S1-E4007-APP-20 as a build check."
+  },
+  {
+   "ruling": "R-31947",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC18 covering 401, 403 and 404 with test row TC-S1-E4007-APP-21.",
+   "note": "AC18 gives 401 for no credential, 403 as in AC3 and 404 for an unknown resource, with no read, agent call or write."
+  },
+  {
+   "ruling": "R-31948",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC19 for a replayed write with the same Idempotency-Key with test row TC-S1-E4007-APP-22.",
+   "note": "AC19 returns the stored response on replay with no second agent call, record or write."
+  },
+  {
+   "ruling": "R-31949",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC20 for activity retry and timeout with test row TC-S1-E4007-APP-23.",
+   "note": "AC20 follows the workflow retry policy and records no timed-out activity as a recommendation."
+  },
+  {
+   "ruling": "R-31950",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC21 for a failed consumed call with test row TC-S1-E4007-APP-24.",
+   "note": "AC21 writes nothing and gives 503 with the platform envelope; rwb-agent failures stay under AC5."
+  },
+  {
+   "ruling": "R-31951",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC17",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC22 for a disallowed status change with test row TC-S1-E4007-APP-25.",
+   "note": "AC22 refuses the disallowed change, writes nothing and reports the state to the parent."
+  },
+  {
+   "ruling": "R-31952",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X2 Covered by now lists TC-S1-E4007-APP-06 with AC3 and TC-E4-007-03.",
+   "note": "X2 row in section 5 now traces to the role-refusal test TC-S1-E4007-APP-06."
+  },
+  {
+   "ruling": "R-31953",
+   "item": "NEWAC-RWB-S1-E4007-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "X3 Covered by now lists TC-S1-E4007-APP-07 with AC4 and TC-E4-007-01.",
+   "note": "X3 row in section 5 now traces to the agent-fallback test TC-S1-E4007-APP-07."
+  }
+ ]
+}

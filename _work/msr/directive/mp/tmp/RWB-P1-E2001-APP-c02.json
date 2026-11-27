@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "instead of the `collections_history` copy the monolith loaded",
+   "new": "instead of the EFS history copy the monolith loaded"
+  },
+  {
+   "old": "| X7 | A view does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database as the unavailable system; nothing is guessed from a cache | MSG-GEN-006 | Section 12.1 |",
+   "new": "| X7 | A view does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database as the unavailable system; nothing is guessed from a cache | MSG-GEN-006 | AC7 |"
+  },
+  {
+   "old": "| X8 | A caller without the right calls either read | 403, and the refusal is logged without a key value | MSG-P4-002 | Section 10 |",
+   "new": "| X8 | A caller without the right calls either read | 403, and the refusal is logged without a key value | MSG-P4-002 | AC8 |"
+  },
+  {
+   "old": "    Then the second read reads v_ace_efs_action again, so this service holds no copy of the history",
+   "new": "    Then the second read reads v_ace_efs_action again, so this service holds no copy of the history\n\n  Scenario: AC7 A view that does not answer inside 5 s yields 503 and no guessed value (new, D-RCV-60)\n    Given v_ace_efs_action does not answer inside 5 s for A-0001 and 2026-12-14\n    When the run calls GET /api/recovery/source-data/v1/efs-history?accountKey=A-0001&businessDate=2026-12-14\n    Then the answer is 503 with a problem body naming the ACE database as the unavailable system and MSG-GEN-006\n    Then the answer holds no history row and no value taken from a cache\n\n  Scenario: AC8 A caller without the right on the read is refused and the refusal logs no key value (new, D-RCV-60)\n    Given a caller whose role does not include the history read\n    When the caller calls GET /api/recovery/source-data/v1/efs-history?accountKey=A-0001&businessDate=2026-12-14\n    Then the answer is 403 with MSG-P4-002 naming the action the caller tried\n    Then the refusal is logged without the account key value"
+  },
+  {
+   "old": "| TC-E2-001-10 | Principle 5 — regression evidence: the proof belongs to rwb-decision and to RWB-ITG-E2001-ITG | NFR | Decision log write forced to fail during a run of 50 synthetic accounts; no case is created without its entry |",
+   "new": "| TC-E2-001-10 | Principle 5 — regression evidence: the proof belongs to rwb-decision and to RWB-ITG-E2001-ITG | NFR | Decision log write forced to fail during a run of 50 synthetic accounts; no case is created without its entry |\n| TC-E2-001-11 | Section 12 — each operation and activity of section 12, contract level | Contract | Contract fakes of RWB-P2-E2001-CON for the two reads and the gate |\n| TC-E2-001-12 | Section 12.7 — boundary of the tables read and of the tables not written (ASM-3438) | Component | Views of the recovery schema and data_product_load are read; a write attempt on any of them is refused |\n| TC-E2-001-13 | AC7, X7 | End to end | View v_ace_efs_action held past 5 s for A-0001 |\n| TC-E2-001-14 | AC8, X8 | Component | Caller whose role lacks the history read calls GET efs-history for A-0001; refused with MSG-P4-002 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09768",
+   "item": "CG-ALL-2350",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Replaced the name collections_history in BR3 with the descriptive phrase EFS history copy.",
+   "note": "Name removed from the story; no field of that name is used in this story."
+  },
+  {
+   "ruling": "R-09769",
+   "item": "CG-ALL-2355",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for the session-ended text of the story, so MSG-P4-001 keeps its sign-in-with-no-role meaning; the story cites the new ID once it exists.",
+   "note": "No story edit until the new ID exists; cannot invent it."
+  },
+  {
+   "ruling": "R-15189",
+   "item": "DOR-RWB-P1-E2001-APP-10",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Screen specification holding SCR-04 and SCR-45",
+   "change": "Add empty, loading, error and no-access states to SCR-04 and SCR-45; this story owns no screen.",
+   "note": "The screens belong to another specification; this story has no screen to add states to."
+  },
+  {
+   "ruling": "R-15190",
+   "item": "DOR-RWB-P1-E2001-APP-11",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Data Classification v5 Fields",
+   "change": "Re-check the personal-data class of the P2 fields flagged by detcheck against the story statement that none is carried.",
+   "note": "The item does not name the P2 fields; the classification is owned by the data dictionary."
+  },
+  {
+   "ruling": "R-15191",
+   "item": "DOR-RWB-P1-E2001-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test case lists of section 18 with section 16, including TC-E2-001-11 to TC-E2-001-14.",
+   "note": "Added contract test (11), §12.7 boundary test (12), and AC7/AC8 tests (13, 14); RTM list alignment is cross-document."
+  },
+  {
+   "ruling": "R-15192",
+   "item": "DOR-RWB-P1-E2001-APP-18",
+   "status": "Not applied",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "No assumption ID for DL17 or DL29 exists in the sources; one cannot be invented."
+  },
+  {
+   "ruling": "R-15193",
+   "item": "DOR-RWB-P1-E2001-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC7 (X7, 503 and MSG-GEN-006) and AC8 (X8, 403 and MSG-P4-002); X7 and X8 now cite them; TC-E2-001-13 and -14 added.",
+   "note": "Exceptions X7 and X8 are now covered by criteria; §7 now holds 8 owned criteria."
+  },
+  {
+   "ruling": "R-15194",
+   "item": "DOR-RWB-P1-E2001-APP-7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Removed the name collections_history from BR3 in section 8; the 31 rows of section 11 are unchanged.",
+   "note": "Name check resolved in the story; the 31 data rows were confirmed."
+  },
+  {
+   "ruling": "R-15195",
+   "item": "DOR-RWB-P1-E2001-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Confirm the MSG-P1-001 text against section 4 of the standard, and add a new ID for the session-ended text in place of MSG-P4-001.",
+   "note": "The standard text for MSG-P1-001 is not supplied, so the story text is not changed here."
+  },
+  {
+   "ruling": "R-22303",
+   "item": "GAP-3175",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Event and Messaging next version; Kafka Topic and Event Catalog v1",
+   "change": "List LoadCompleted (EV-26) as the legacy alias of AceDataReady (EV-26) on rwb.source-data.events.v1.",
+   "note": "Story already uses AceDataReady in step 1; the alias belongs to the event catalogues."
+  }
+ ]
+}

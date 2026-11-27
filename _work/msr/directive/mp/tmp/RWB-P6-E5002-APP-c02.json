@@ -1,0 +1,160 @@
+{
+ "edits": [
+  {
+   "old": "11. SCR-18 and SCR-19 read the notice state, the delivery status and the callback date from this service through the composite route, read only, next to the pack states of rwb-litigation and the case and timer of rwb-case.",
+   "new": "11. SCR-18 and SCR-19 read the notice state, the delivery status and the callback date from this service through the composite route, read only, next to the pack states of rwb-litigation and the case and timer of rwb-case.\n12. SCR-18 and SCR-19 show these states: empty, when the composite route returns no notice for the case, with the screen saying so; loading, while the notice facts are read; error, when the composite route fails, with the platform error envelope and no notice facts shown; no access, for a caller without the Litigation right, with MSG-P4-002 and no notice facts shown."
+  },
+  {
+   "old": "| None (pipeline log) | BR6 |",
+   "new": "| None (pipeline log) | AC9 |"
+  },
+  {
+   "old": "    Then both screens call one composite route and no owner service directly",
+   "new": "    Then both screens call one composite route and no owner service directly\n\n  Scenario: AC9 A statement that reaches an ACE view or another owner's schema is refused (new, D-RCV-60)\n    Given the boundary test runs over the components of this story\n    When a component issues a statement that reads an ACE view, an ACE table or writes to rwb_case, rwb_litigation or rwb_decision\n    Then the grant refuses the statement and the boundary test fails the build\n    Then nothing is released"
+  },
+  {
+   "old": "The eight criteria are new under D-RCV-60",
+   "new": "The nine criteria are new under D-RCV-60"
+  },
+  {
+   "old": "| R-LIT-07 |",
+   "new": "| BR11 (R-LIT-07) |"
+  },
+  {
+   "old": "| R-LIT-08 |",
+   "new": "| BR12 (R-LIT-08) |"
+  },
+  {
+   "old": "| R-UNI-40 |",
+   "new": "| BR13 (R-UNI-40) |"
+  },
+  {
+   "old": "| CTL-15 |",
+   "new": "| BR14 (CTL-15) |"
+  },
+  {
+   "old": "A refusal keeps MSG-P4-002 and changes nothing.",
+   "new": "Both operations pass the rwb-access authorise check (DP-08) before any read or write, and the check enforces the rights above. A refusal keeps MSG-P4-002 and changes nothing."
+  },
+  {
+   "old": "8. Add the boundary test: no statement outside `rwb_comms`, no `v_ace_*` read, no write to `rwb_case`, `rwb_litigation` or `rwb_decision`; test BR6.",
+   "new": "8. Add the boundary test: no statement outside `rwb_comms`, no `v_ace_*` read, no write to `rwb_case`, `rwb_litigation` or `rwb_decision` (the schemas of other owners, named only as the targets the grant must refuse); test BR6, AC9 and section 12.7."
+  },
+  {
+   "old": "| TC-E5-002-01 | AC1, AC2, AC5 |",
+   "new": "| TC-E5-002-01 | AC1, AC2, AC5, BR1, BR2, BR5, BR13 |"
+  },
+  {
+   "old": "| TC-E5-002-02 | AC1, AC3, AC8 |",
+   "new": "| TC-E5-002-02 | AC1, AC3, AC8, BR3, BR9, BR10, BR11 |"
+  },
+  {
+   "old": "| TC-E5-002-03 | AC2, AC3 |",
+   "new": "| TC-E5-002-03 | AC2, AC3, BR2, BR3, BR12, BR14 |"
+  },
+  {
+   "old": "| TC-E5-002-04 | AC6 |",
+   "new": "| TC-E5-002-04 | AC6, BR4 |"
+  },
+  {
+   "old": "| TC-E5-002-05 | AC7 |",
+   "new": "| TC-E5-002-05 | AC7, BR8 |"
+  },
+  {
+   "old": "| TC-E5-002-06 | AC4, AC6 | Component | A request with no delivery status (422, MSG-GEN-001), an unknown notice (404) and a notice with no sent date (409); the forced decision-record failure |",
+   "new": "| TC-E5-002-06 | AC4, AC6 | Component | A request with no delivery status (422, MSG-GEN-001), an unknown notice (404) and a notice with no sent date (409); the forced decision-record failure |\n| TC-E5-002-07 | Section 12.1 operations, BR7, BR10 | Contract | The published contract of rwb-comms on base `/api/recovery/comms/v1`: GET `/notices/{noticeId}` and POST `/notices/{noticeId}/proof-of-delivery`, with and without `Idempotency-Key`, the answers 401, 403, 404, 409, 422 and 503, and each answer checked for no person name, address or contact value |\n| TC-E5-002-08 | AC9, BR3, BR6, section 12.7 tables | Boundary | Build boundary test over `rwb_comms`: a statement that reads a `v_ace_*` view or writes `rwb_case`, `rwb_litigation` or `rwb_decision` is refused by the grant and fails the build |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11140",
+   "item": "CG-ALL-6797",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "RWB-PLT-E1027-CON (decision-record library)",
+   "change": "Record decision_record as a library table created in rwb_comms by the library migration (DP-03), with its name and owner, in that document.",
+   "note": "decision_record is a platform library object, not an LDM v9 or Data Classification v5 entity; the story already states this in 12.7 and the header of the data section."
+  },
+  {
+   "ruling": "R-11141",
+   "item": "CG-ALL-6800",
+   "status": "Not applied",
+   "section": "4, 12.1",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 message IDs for 401, 404, 409 and 503 are not in the sources; none invented. Business analyst to confirm the IDs."
+  },
+  {
+   "ruling": "R-11142",
+   "item": "CG-ALL-6801",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows TC-E5-002-01 to -06 with Given, When and Then from the criteria they cover; also add TC-E5-002-07 and -08 added in section 16.",
+   "note": "Story section 16 now lists TC-E5-002-07 and -08; the Test Cases v8 rows for all eight IDs are needed in the next version."
+  },
+  {
+   "ruling": "R-17842",
+   "item": "DOR-RWB-P6-E5002-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Added flow step 12 giving empty, loading, error and no-access states for SCR-18 and SCR-19."
+  },
+  {
+   "ruling": "R-17843",
+   "item": "DOR-RWB-P6-E5002-APP-11",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "The fields the detcheck classes as personal data are not named in the sources; their classes cannot be stated without the Data Classification v5 field list."
+  },
+  {
+   "ruling": "R-17844",
+   "item": "DOR-RWB-P6-E5002-APP-12",
+   "status": "Cross-document",
+   "section": "16, 18",
+   "target": "Recovery Workbench Test Cases v8.xlsx; Recovery Workbench RTM v7",
+   "change": "Add TC-E5-002-01 to -08 to Story test cases in Test Cases v8; align the section 18 test lists for this story with RTM v7.",
+   "note": "Story added TC-07 (contract on 12.1) and TC-08 (boundary, ASM-3438 tables). Test Cases v8 and RTM v7 are outside this story."
+  },
+  {
+   "ruling": "R-17845",
+   "item": "DOR-RWB-P6-E5002-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Step 8 now states that rwb_case, rwb_litigation and rwb_decision belong to other owners and are named only as refused write targets."
+  },
+  {
+   "ruling": "R-17846",
+   "item": "DOR-RWB-P6-E5002-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 in Gherkin with TC-E5-002-08; X10 now covered by AC9 instead of BR6."
+  },
+  {
+   "ruling": "R-17847",
+   "item": "DOR-RWB-P6-E5002-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR11 to BR14 added to the four rule rows; BR1 to BR14 now listed in section 16 Covers, with TC-07 and TC-08 added."
+  },
+  {
+   "ruling": "R-17848",
+   "item": "DOR-RWB-P6-E5002-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 now names the rwb-access authorise check (DP-08) as the check that passes both operations before any read or write."
+  }
+ ]
+}

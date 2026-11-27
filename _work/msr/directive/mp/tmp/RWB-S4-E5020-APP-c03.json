@@ -1,0 +1,156 @@
+{
+ "edits": [
+  {
+   "old": "No column is added for the reason or the review date (BR5; GAP-2828; ASM-4681).",
+   "new": "No column is added for the reason or the review date (BR5; GAP-2828; ASM-4681). The other schemas named in this section are owned elsewhere: `rwb_case` by P3 and `rwb_decision` by P7; this story reads them through their contracts and writes to neither (DP-01, BR3)."
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E5-020-05 |",
+   "new": "| MSG-P4-002 | AC5, TC-E5-020-05 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR3, BR5 |",
+   "new": "| None (pipeline log) | AC6, TC-E5-020-07, BR3, BR5 |"
+  },
+  {
+   "old": "The review date, the reason list and the D7 route set are values in force, so none is a constant of this story.",
+   "new": "The review date, the reason list and the D7 route set are values in force, so none is a constant of this story. The message IDs and the English wording are those of the FSD and are kept character for character; the Thai wording and the field-level text of MSG-GEN-001 are left to the message work of DL10 and are not set here (GAP-1748)."
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Role without the Litigation right is refused (X2)\n    Given the rwb-case contract mock returns the case state \"ENFORCEMENT_DECISION\" for case \"RC-2026-000820\"\n    Given a role without the Litigation right of the operation\n    When the action is taken\n    Then the operation answers 403 before any read or write and nothing is written\n    Then the user sees MSG-P4-002\n\n  Scenario: AC6 Boundary of the service schema (X9)\n    Given the boundary test runs over every component, statement and test of this service\n    When a statement reaches a recovery_case, queue, assignment or task row, a rule_row, a decision_log_entry or another service's schema\n    Then the grant refuses the statement and the build fails\n    Then nothing is released\n\n  Scenario: AC7 Rule R-LIT-56 return on the review date (GAP-2831)\n    Given the rwb-case contract mock returns the case state \"DEFERRAL_RECORDED\" for case \"RC-2026-000820\"\n    Given a deferral is recorded with a review date\n    When the review date is reached\n    Then the case returns to ENFORCEMENT_DECISION under R-LIT-56"
+  },
+  {
+   "old": "is proved here as a regression on the same contract, not rebuilt (GAP-2830; ASM-4683).",
+   "new": "is proved here as a regression on the same contract, not rebuilt (GAP-2830; ASM-4683). AC5 to AC7 are the criteria this split adds for X2, X9 and R-LIT-56 (GAP-2831). The legacy decision-log wording of AC1 is read as the decision record of RWB-PLT-E1027-CON, the local record the step writes (DP-03); no other wording is changed."
+  },
+  {
+   "old": "| Template and Rules v1 §R7.2 (s17); TSD S4 T6.2 |",
+   "new": "| Template and Rules v1 §R7.2 (s17); TSD S4 T6.2 |\n| BR10 | R-LIT-55, the first rule row above: the deferral is recorded with the reason and the review date, the stage moves to `DEFERRAL_RECORDED`, and the review date re-queues the case | Business Rules and Routing Logic v4 R-LIT-55 |\n| BR11 | R-LIT-44, the second rule row above: the judgment for the bank records the judgment date and amount and opens the enforcement task; it is built by RWB-S4-E5016-APP and kept here as a regression | Business Rules and Routing Logic v4 R-LIT-44; GAP-2830 |\n\n**Coverage of the rules.** BR1 by AC1 and AC2; BR2 by AC1, AC4 and TC-E5-020-04; BR3 by AC6 and TC-E5-020-07; BR4 by AC1 and AC2; BR5 and BR6 by AC6 and TC-E5-020-07; BR7 by AC2, AC7 and TC-E5-020-08; BR8 by AC1; BR9 by AC6 and TC-E5-020-07; BR10 by AC1 and AC2; BR11 by AC3. Each criterion is proved by its test case row in section 16."
+  },
+  {
+   "old": "R-LIT-56 with R-LIT-57 are the return and the second-deferral routing, neither of which an AC of this key covers (GAP-2831; ASM-4684).",
+   "new": "R-LIT-56 is the return to `ENFORCEMENT_DECISION` when the review date is reached and is covered by AC7; R-LIT-57, the second-deferral routing, is left to `rwb-writeoff` and is covered by no criterion of this key (GAP-2831; ASM-4684)."
+  },
+  {
+   "old": "DP-08 is not in this story's pattern set: the capability area and the right are declared per operation and the guard is a service-template capability, so the check is stated here and not built here.",
+   "new": "DP-08 is not in this story's pattern set: the capability area and the right are declared per operation and the guard is a service-template capability, so the check is stated here and not built here. The authorisation check is the rwb-access check of the capability area `Litigation` at right `U` or `C` for each operation of section 13, made by the guard before any read or write."
+  },
+  {
+   "old": "The test fixtures are synthetic: case `RC-2026-000820`, action `LA-2026-000820`.",
+   "new": "The test fixtures are synthetic: case `RC-2026-000820`, action `LA-2026-000820`. `deferral_reason`, `deferral_review_date` and `decision_record` are operation input elements and the library's decision-record object, not fields or entities of LDM v9 or Data Classification v5; they are declared here and in section 12 under those names (GAP-2828)."
+  },
+  {
+   "old": "Reference data: the step reads the rule package in force (section 12.5) and the reason code list, which has no source specification.",
+   "new": "Reference data: the step reads the rule package in force (section 12.5) and the reason code list, which has no source specification. The reason code list is declared as a versioned reference value with the placeholder Not specified in the source documents (GAP-2828), and no column of `legal_action` is added for it until the reference-data owner publishes the list."
+  },
+  {
+   "old": "**Dependencies the tables add and the plan does not hold.** The three H rows are the plan's. The three consumed contracts of 12.2 are class C dependencies in fact and are not in the metadata row, so the story builds against their documents and fakes on Day 1 and the absence is recorded as GAP-2829 with ASM-4682.",
+   "new": "**Dependencies the tables add and the plan does not hold.** The three H rows are the plan's. The three consumed contracts of 12.2 are class C dependencies in fact and are not in the metadata row, so the story builds against their documents and fakes on Day 1 and the absence is recorded as GAP-2829 with ASM-4682. The three consumed owner contracts are the case read, the case answer and queue placement of rwb-case, and the rule package read of rwb-decision; their operation names are Not specified in the source documents (GAP-2829), so the fakes answer them on Day 1 and the metadata rows stay as the plan gives them."
+  },
+  {
+   "old": "9. The regression case of AC3 on the judgment path of RWB-S4-E5016-APP through the same contract (AC3).",
+   "new": "9. The regression case of AC3 on the judgment path of RWB-S4-E5016-APP through the same contract (AC3); the boundary is declared in the CON absence test, so that no judgment write, JUDGMENT_RECORDED move or enforcement task request is built in this service (GAP-2830)."
+  },
+  {
+   "old": "| TC-E5-020-05 | Access | Component | A role without the right is refused with MSG-P4-002 |",
+   "new": "| TC-E5-020-05 | Access | Component | A role without the right is refused with MSG-P4-002 |\n| TC-E5-020-07 | Boundary | Component | No statement outside `rwb_litigation` and no write to `rwb_case` or `rwb_decision`; the build fails otherwise (X9, AC6) |\n| TC-E5-020-08 | Rule | Component | R-LIT-56 returns the case to ENFORCEMENT_DECISION when the review date is reached (AC7) |"
+  },
+  {
+   "old": "No column is added for the reason or the review date (BR5; GAP-2828; ASM-4681). The other schemas named in this section are owned elsewhere: `rwb_case` by P3 and `rwb_decision` by P7; this story reads them through their contracts and writes to neither (DP-01, BR3).",
+   "new": "No column is added for the reason or the review date (BR5; GAP-2828; ASM-4681). The other schemas named in this section are owned elsewhere: `rwb_case` by P3 and `rwb_decision` by P7; this story reads them through their contracts and writes to neither (DP-01, BR3)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20041",
+   "item": "DOR-RWB-S4-E5020-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Section 13 now states that rwb_case is owned by P3 and rwb_decision by P7, read through contracts and never written here."
+  },
+  {
+   "ruling": "R-20042",
+   "item": "DOR-RWB-S4-E5020-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 for X2 and AC6 for X9 with TC-E5-020-07; X2 and X9 Covered by cells now name criteria."
+  },
+  {
+   "ruling": "R-20043",
+   "item": "DOR-RWB-S4-E5020-APP-4",
+   "status": "Resolved",
+   "section": "8, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added BR10 and BR11 for the two rule rows and a coverage line mapping BR1 to BR11 to criteria and test cases."
+  },
+  {
+   "ruling": "R-20044",
+   "item": "DOR-RWB-S4-E5020-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Confirm role SY-DATALOAD with its Litigation U right as TSD S4 T6.1 gives it, or add the role. Story side: section 10 now names the rwb-access check per operation.",
+   "note": "SY-DATALOAD is not in v5; the story names the authorise check for capability Litigation, rights U and C."
+  },
+  {
+   "ruling": "R-20045",
+   "item": "DOR-RWB-S4-E5020-APP-7",
+   "status": "Resolved",
+   "section": "7, 11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 declares deferral_reason, deferral_review_date and decision_record as input elements and library object; section 7 maps legacy decision-log wording to the decision record."
+  },
+  {
+   "ruling": "R-22804",
+   "item": "GAP-1748",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Message IDs and English wording kept as the FSD gives them; Thai and MSG-GEN-001 field text left to DL10 and stated as not set here."
+  },
+  {
+   "ruling": "R-23201",
+   "item": "GAP-2831",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 and TC-E5-020-08 for the R-LIT-56 return; R-LIT-57 stated as left to rwb-writeoff; timer and no-schedule rule kept."
+  },
+  {
+   "ruling": "R-23254",
+   "item": "GAP-2829",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Section 13 names the three consumed owner contracts and states fakes on Day 1. The 12.2 rows are not in the supplied text, so not edited."
+  },
+  {
+   "ruling": "R-23451",
+   "item": "GAP-2830",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-S4-E5020-CON",
+   "change": "Declare in the absence test that no judgment write, JUDGMENT_RECORDED move or enforcement task request is built in rwb-litigation; the judgment path is RWB-S4-E5016-APP's.",
+   "note": "Story side done in build step 9 (regression of AC3); the absence test boundary sits in the CON story."
+  },
+  {
+   "ruling": "R-23461",
+   "item": "GAP-2828",
+   "status": "Resolved",
+   "section": "11, 13",
+   "target": "",
+   "change": "",
+   "note": "Reason list declared as versioned reference value with placeholder; no legal_action column added; the two elements stay as contract and record facts."
+  }
+ ]
+}

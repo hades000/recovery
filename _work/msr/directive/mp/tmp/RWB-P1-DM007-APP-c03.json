@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "2. `CutoverLegalReader` reads the dump once for the open cases at cut-over and only those: the `recovery_case` rows, the `legal_action` rows (`DF-LEG-001` to `DF-LEG-014`), the `notice` rows (`DF-LEG-015` to `DF-LEG-034`) and the `partner_instruction` rows (`DF-PRT-008` to `DF-PRT-016`); a second read inside the same business date is refused.",
+   "new": "2. `CutoverLegalReader` reads the dump once for the open cases at cut-over and only those: the `recovery_case` rows, the `legal_action` rows (`DF-LEG-001` to `DF-LEG-014`), the `notice` rows (`DF-LEG-015` to `DF-LEG-034`) and the `partner_instruction` rows (`DF-PRT-008` to `DF-PRT-016`); a second read inside the same business date is refused. The extract carries the legacy keys only (GAP-0532)."
+  },
+  {
+   "old": "1. The cut-over window opens and the release pipeline starts the cut-over step for one business date and one environment as one-off bulk work through the service's own operations. No Temporal Schedule runs it and no operator touches a schema (Arch v5 slide 32; ASM-3485).",
+   "new": "1. The cut-over window opens and the release pipeline starts the cut-over step for one business date and one environment as one-off bulk work through the service's own operations. No Temporal Schedule runs it and no operator touches a schema (Arch v5 slide 32; ASM-3485). The feature switch `rwb.source-data.dm007-cutover-extract` defaults off when the release pipeline first runs the step (GAP-0534)."
+  },
+  {
+   "old": "4. `LegalHandoverPackages` assembles one package per owner — legal action for rwb-litigation, notice for rwb-comms, instruction for rwb-partner — each row carrying its case, its keys, its facts, its source tag and its migration date, and writes them to the cut-over record of the release pipeline and not to a table (ASM-3484).",
+   "new": "4. `LegalHandoverPackages` assembles one package per owner — legal action for rwb-litigation, notice for rwb-comms, instruction for rwb-partner — each row carrying its case, its keys, its facts, its source tag and its migration date, and writes them to the cut-over record of the release pipeline and not to a table (ASM-3484). The package layout is agreed at the cut-over rehearsal (GAP-0532)."
+  },
+  {
+   "old": "10. A rerun of the same business date after a failure produces the same packages and the same count and duplicates nothing (AC7); the cut-over record is the ledger of every move.",
+   "new": "10. A rerun of the same business date after a failure produces the same packages and the same count and duplicates nothing (AC7); the cut-over record is the ledger of every move. The shape of the dump, the cut-over record and the DM007 instruction slice is agreed at the cut-over rehearsal and recorded in the runbook entry of the release pipeline (GAP-2171)."
+  },
+  {
+   "old": "The six criteria after it are new for this slice",
+   "new": "The nine criteria after it are new for this slice"
+  },
+  {
+   "old": "Then exactly one package per owner exists for 2026-12-10, the count is unchanged, and no row and no file is duplicated",
+   "new": "Then exactly one package per owner exists for 2026-12-10, the count is unchanged, and no row and no file is duplicated\n\n  Scenario: AC8 The provided operations answer 401, 403 and 404 as their contract states (new, D-RCV-60)\n    Given a caller without a token, a caller whose right is absent, and a case id that has no row\n    When each caller calls a provided operation of section 12\n    Then the answers are 401, 403 and 404 in that order, each an RFC 9457 problem response with messageId set, and no row is written\n\n  Scenario: AC9 A retried or timed-out cut-over activity writes no second package (new, D-RCV-60)\n    Given the cut-over activity of section 12 is retried or runs past its timeout, the timeout being Not specified in the source documents (NEWAC-RWB-P1-DM007-APP-AC9)\n    When the activity runs again for 2026-12-10\n    Then exactly one package per owner exists for 2026-12-10 and the count is unchanged, as AC7 requires\n\n  Scenario: AC10 A consumed call that fails or does not answer writes no package (new, D-RCV-60)\n    Given the rwb-litigation contract mock fails or does not answer during the cut-over step for 2026-12-10\n    When the cut-over step runs to completion for 2026-12-10\n    Then the step stops before any package is handed over, and the failure is recorded in the cut-over record"
+  },
+  {
+   "old": "| MSG-P1-001 | The DP07 batch is late when the cut-over hands the Workbench facts over | {product} is from {date}. Today's ACE batch has not arrived. | The cut-over record and the DP07 freshness read (X5) |",
+   "new": "| MSG-P1-001 | The DP07 batch is late when the cut-over hands the Workbench facts over | {product} is from {date}. Today's load has not arrived. | The cut-over record and the DP07 freshness read (X5) |"
+  },
+  {
+   "old": "| MSG-P1-012 | A reconciliation break or a new REC-05 orphan falls on a day of the ten, or a sign-off is attempted too early | The case list for {date} does not reconcile to ACE for {product}: a difference of {variance} accounts, {pct} percent. | The evidence reader and the sign-off (X6, X9; AC2, AC3) |",
+   "new": "| MSG-P1-012 | A reconciliation break or a new REC-05 orphan falls on a day of the ten, or a sign-off is attempted too early | The case list for {date} does not reconcile to ALS for {product}: a difference of {variance} accounts, {pct} percent. | The evidence reader and the sign-off (X6, X9; AC2, AC3) |"
+  },
+  {
+   "old": "| SCR-45 Data quality | Loading; breaks | `rwb-source-data`, through the gateway-bff composite route of DP-19; the ten day rows, the reset day and the sign-off are read there beside the reconciliation breaks and the REC-05 orphans |",
+   "new": "| SCR-45 Data quality | Loading; breaks; empty, error and no access: Not specified in the source documents (CG-ALL-1937) | `rwb-source-data`, through the gateway-bff composite route of DP-19; the ten day rows, the reset day and the sign-off are read there beside the reconciliation breaks and the REC-05 orphans |"
+  },
+  {
+   "old": "| TC-P1-DM007-APP-06 | Section 12.7 (ASM-3438); BR1, BR2 | Component | Each table of section 12.7 in a fixture statement, the `rwb_source_data` login's grants, and a row count before and after; the boundary test reports any write outside `rwb_source_data` |",
+   "new": "| TC-P1-DM007-APP-06 | Section 12.7 (ASM-3438); BR1, BR2 | Component | Each table of section 12.7 in a fixture statement, the `rwb_source_data` login's grants, and a row count before and after; the boundary test reports any write outside `rwb_source_data` |\n| TC-P1-DM007-APP-07 | AC8 | Contract | Each provided operation of section 12 called without a token, with a token lacking the right, and for a case id with no row; the answers checked as 401, 403 and 404 |\n| TC-P1-DM007-APP-08 | AC9 | Component | The cut-over activity retried and run past its timeout for 2026-12-10, then run again; the package and count rows checked for duplicates |\n| TC-P1-DM007-APP-09 | AC10 | Component | The rwb-litigation contract mock failing and not answering during the cut-over step for 2026-12-10; the package rows and the cut-over record checked |"
+  },
+  {
+   "old": "The six new cases carry the service prefix",
+   "new": "The nine new cases carry the service prefix"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21817",
+   "item": "GAP-2171",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Cutover dump, record, pipeline step and DM007 slice shape fixed at rehearsal in steps 1, 2, 4 and 10; values stay in values file."
+  },
+  {
+   "ruling": "R-21818",
+   "item": "GAP-0532",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 2 says extract carries legacy keys only; step 4 says package layout is agreed at rehearsal; P1 writes no other schema."
+  },
+  {
+   "ruling": "R-21819",
+   "item": "GAP-0534",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 1 sets feature switch rwb.source-data.dm007-cutover-extract to default off; clean-day and sign-off mechanism already in steps 6 and 7."
+  },
+  {
+   "ruling": "R-24250",
+   "item": "CG-ALL-1932",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4: 'Today's load has not arrived.'"
+  },
+  {
+   "ruling": "R-24251",
+   "item": "CG-ALL-1933",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-012 text copied from standard (ALS); the sign-off-too-early use differs from RWB-E1-002 trigger, BA to confirm."
+  },
+  {
+   "ruling": "R-24252",
+   "item": "CG-ALL-1935",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align REQ-RDF-001 and REQ-RDF-008 test lists with section 18 of RWB-P1-DM007-APP (TC-DM-007-03, TC-P1-DM007-APP-03, TC-P1-DM007-APP-01) in its next version.",
+   "note": "RTM v7 is another workbook; its test lists for two requirements differ from section 18."
+  },
+  {
+   "ruling": "R-24253",
+   "item": "CG-ALL-1937",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-45 empty, error and no access marked Not specified in the source documents; loading and breaks kept."
+  },
+  {
+   "ruling": "R-30147",
+   "item": "NEWAC-RWB-P1-DM007-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for a consumed call that fails or does not answer; TC-P1-DM007-APP-09 added."
+  },
+  {
+   "ruling": "R-30148",
+   "item": "NEWAC-RWB-P1-DM007-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 added for provided operations answering 401, 403 and 404; TC-P1-DM007-APP-07 added."
+  },
+  {
+   "ruling": "R-30149",
+   "item": "NEWAC-RWB-P1-DM007-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added for activity retry and timeout; timeout value Not specified in the source documents; TC-P1-DM007-APP-08 added."
+  }
+ ]
+}

@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P4-002 | TC-E3-008-05 |",
+   "new": "| MSG-P4-002 | AC5, TC-E3-008-05 |"
+  },
+  {
+   "old": "| None | Section 8, BR1 |",
+   "new": "| None | AC6, Section 8, BR1 |"
+  },
+  {
+   "old": "| MSG-S2-003 | Section 8, BR1 |",
+   "new": "| MSG-S2-003 | AC7, Section 8, BR1 |"
+  },
+  {
+   "old": "| Not specified in the source documents (GAP-2661; ASM-4372) | Section 8, BR2 |",
+   "new": "| Not specified in the source documents (GAP-2661; ASM-4372) | AC8, Section 8, BR2 |"
+  },
+  {
+   "old": "| MSG-P7-009 | Section 12.8 |",
+   "new": "| MSG-P7-009 | AC9, Section 12.8 |"
+  },
+  {
+   "old": "| MSG-GEN-001 | TC-S2-E3008-CON-04 |",
+   "new": "| MSG-GEN-001 | AC10, TC-S2-E3008-CON-04 |"
+  },
+  {
+   "old": "| None | Section 4, step 11 |",
+   "new": "| None | AC11, Section 4, step 11 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 Access refused for a role without the right (exception X1)\n    Given a role without the right in capability area Treatment and offer\n    When it reads the signed treatment\n    Then it is refused with 403 before any read\n    Then the refusal is logged by the guard library and the user sees MSG-P4-002\n\n  Scenario: AC6 No signature (exception X2)\n    Given a case in state OFFER_WITH_CUSTOMER\n    When CUSTOMER_SIGNED arrives with signed = N, or with no signature fact\n    Then no rule of this story fires\n    Then the case stays in the offer state\n\n  Scenario: AC7 Signature after the offer timer fired (exception X3)\n    Given a case in state OFFER_WITH_CUSTOMER and the offer timer has fired\n    When CUSTOMER_SIGNED arrives\n    Then the stage does not route the case to operations\n    Then the user sees MSG-S2-003\n\n  Scenario: AC8 Signature not verified on a restructure (exception X4)\n    Given a case in state OFFER_WITH_CUSTOMER\n    When CUSTOMER_SIGNED arrives with signed = Y and the signature not verified\n    Then R-RES-16 does not fire and nothing is written\n    Then the case stays in OFFER_WITH_CUSTOMER\n\n  Scenario: AC9 Field refused by the library (exception X6)\n    Given the decision record library refuses a record field\n    When the action is taken\n    Then nothing changes and the field is named\n    Then the case stays in the offer state and the user sees MSG-P7-009\n\n  Scenario: AC10 Hand-over not satisfying the published element (exception X7)\n    Given a hand-over element that does not satisfy RWB-S2-E3008-CON\n    When the apply step validates it\n    Then the apply step fails validation before the child completes and the workflow retries\n    Then no partial element leaves the stage and the message MSG-GEN-001 is raised\n\n  Scenario: AC11 Same signal delivered twice (exception X8)\n    Given the same signal is delivered twice\n    When the stage handles both deliveries\n    Then one signature status, one decision record and one hand-over exist\n    Then the first answer is returned"
+  },
+  {
+   "old": "BR9 is why no approval step appears in the flow.",
+   "new": "BR9 is why no approval step appears in the flow.\n\n**Open decision DL10.** DL10 is still open. Its assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are taken as stated until DL10 is decided.\n\n**Reference data.** The list LOV-TRT-SIGNATURE gives the values of `signature_status` (BR4). The parameters of BR3, namely the two target states, the rule IDs, the rule versions and the one-working-day timer, are read through the parameter and reference-data contracts of DP-06 and DP-07 and never written as constants."
+  },
+  {
+   "old": "| Signature fixture | The signature fact on the case event | `signed = Y` and verified; `signed = Y` and not verified; `signed = N`; a signature that arrives after the offer timer fired |",
+   "new": "| Signature fixture | The signature fact on the case event | `signed = Y` and verified; `signed = Y` and not verified; `signed = N`; a signature that arrives after the offer timer fired |\n| rwb-source-data contract fake | Any Given or test-data line that needs ACE customer or payment facts | None: no criterion or test reads an ACE view or extension table (DP-05) |"
+  },
+  {
+   "old": "| TC-E3-008-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E3-008-06 | Principle 5 | Component | A forced decision log write failure stops the action with MSG-P7-003 |\n| TC-E3-008-07 | AC5 | Component | A role without the right is refused before any read and the refusal is logged by the guard library |\n| TC-E3-008-08 | AC6 | Component | A signature with signed = N, or no signature fact, leaves the case in the offer state |\n| TC-E3-008-09 | AC7 | Component | A signature after the offer timer fired routes nothing and raises MSG-S2-003 |\n| TC-E3-008-10 | AC8 | Component | signed = Y and not verified on a restructure writes nothing and the case stays in OFFER_WITH_CUSTOMER |\n| TC-E3-008-11 | AC9 | Component | A field refused by the library is named and nothing changes |\n| TC-E3-008-12 | AC10 | Component | A hand-over failing RWB-S2-E3008-CON is retried with no partial element and raises MSG-GEN-001 |\n| TC-E3-008-13 | AC11 | Component | The same signal delivered twice gives one signature status, one record and one hand-over |\n| TC-E3-008-14 | Section 12 operations, events and activities | Component | RWB-S2-E3008-CON hand-over fake and the rwb-case case-status mock on the forwarded signal |\n| TC-E3-008-15 | ASM-3438; Section 12.7 tables | Component | No table of another service is read or written and no foreign key crosses a schema |\n| TC-E3-008-16 | BR1 | Component | R-RES-16 routes OFFER_WITH_CUSTOMER with signed = Y and signature verified |\n| TC-E3-008-17 | BR2 | Component | R-SET-10 routes OFFER_WITH_CUSTOMER_SET with signed = Y and the payment instruction flag |\n| TC-E3-008-18 | BR3 | Component | Target states, rule IDs, rule versions and timer are read from the package and parameters, not constants |\n| TC-E3-008-19 | BR4 | Component | signature_status is written as SIGNED and no other value |\n| TC-E3-008-20 | BR5 | Component | A signature after the offer validity date routes nothing |\n| TC-E3-008-21 | BR6 | Component | The decision record and the signature status are written in one transaction, or neither is stored |\n| TC-E3-008-22 | BR7 | Component | No case table is read or written and the hand-over is returned to the parent |\n| TC-E3-008-23 | BR8 | Component | One hand-over element; facts without a column are kept on the decision record only |\n| TC-E3-008-24 | BR9 | Component | The signed path runs with no approval step |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12262",
+   "item": "CG-ALL-8593",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add Story test cases rows TC-E3-008-01 to TC-E3-008-06 with Given, When and Then copied from the criteria they cover in RWB-S2-E3008-APP section 7.",
+   "note": "Test rows live in Test Cases v8 workbook; story section 16 already lists the IDs."
+  },
+  {
+   "ruling": "R-12264",
+   "item": "CG-ALL-8595",
+   "status": "Resolved",
+   "section": "12.8",
+   "target": "",
+   "change": "",
+   "note": "Added rwb-source-data contract fake row to 12.8 stating no criterion or test reads ACE views."
+  },
+  {
+   "ruling": "R-19345",
+   "item": "DOR-RWB-S2-E3008-APP-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role name 'restructuring officer (FCR)' with code RW-RESTRUCT, as used in the story role list, in capability area Treatment and offer.",
+   "note": "Role name missing from Users Roles and Permissions v5; story text unchanged."
+  },
+  {
+   "ruling": "R-19346",
+   "item": "DOR-RWB-S2-E3008-APP-10",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no-access state text for SCR-14 and SCR-15 is not in the source documents; no state invented."
+  },
+  {
+   "ruling": "R-19347",
+   "item": "DOR-RWB-S2-E3008-APP-11",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Personal-data fields flagged by detcheck are not identified in the sources; classification cannot be decided here."
+  },
+  {
+   "ruling": "R-19348",
+   "item": "DOR-RWB-S2-E3008-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added contract test TC-E3-008-14 for section 12 and boundary test TC-E3-008-15 for 12.7 tables; Test Cases v8 row is CG-ALL-8593."
+  },
+  {
+   "ruling": "R-19349",
+   "item": "DOR-RWB-S2-E3008-APP-18",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Added open decision DL10 with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 in section 8."
+  },
+  {
+   "ruling": "R-19350",
+   "item": "DOR-RWB-S2-E3008-APP-20",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Section 8 now names the list LOV-TRT-SIGNATURE, the BR3 parameters and the DP-06 and DP-07 reference-data contracts."
+  },
+  {
+   "ruling": "R-19351",
+   "item": "DOR-RWB-S2-E3008-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 to AC11 for exceptions X1 to X4, X6 to X8 with TC-E3-008-07 to -13; section 5 Covered by updated."
+  },
+  {
+   "ruling": "R-19352",
+   "item": "DOR-RWB-S2-E3008-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Added test rows TC-E3-008-16 to -24 covering BR1 to BR9 in section 16."
+  }
+ ]
+}

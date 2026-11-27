@@ -1,0 +1,64 @@
+{
+ "stage": "audit",
+ "story": "RWB-P7-E1021-APP",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "error": "EDIT 3 FAILED: table row does not end with '|': '| TC-E1-021-20 | AC9, BR4:'"
+    },
+    {
+     "ok": true,
+     "edits": 2
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-31431",
+     "item": "AC15: §8 BR4 (these rules have no criterion and no test; a rule that is an architecture constraint may belong in a guardrail or boundary test instead)",
+     "status": "Resolved",
+     "section": "8",
+     "target": "",
+     "change": "",
+     "note": "BR4 is already covered by the existing AC8 in section 7 and TC-E1-021-20 in section 16. The duplicate AC8 scenario is removed; no criterion added."
+    },
+    {
+     "ruling": "R-31432",
+     "item": "AC16: error answers 401, 403, 404 of the provided operations (no criterion names these status codes)",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Added AC9 (renumbered from AC16 to close the AC9 to AC15 gap) covering 401 no token, 403 no right and 404 unknown case or version, with its test row TC-E1-021-21."
+    }
+   ],
+   "edits": [
+    {
+     "old": "  Scenario: AC8 A decision code outside LOV-DECISION is refused before any append and names the field (new, D-RCV-60)\n    Given the rwb-case contract mock returns a DecisionRecorded event \"EV-9a04-0002\" for case \"RW-2026-000304\" with decision code \"D99\"\n    When the event arrives on \"rwb.decision-record.v1\"\n    Then the record is refused with MSG-P7-009 naming \"decisionCode\"\n    Then no decision_log_entry is appended and no chain_seq is used\n  Scenario: AC16 A provided read answers 401, 403 or 404 and returns no entry or model (new, D-RCV-60)",
+     "new": "  Scenario: AC9 A provided read answers 401, 403 or 404 and returns no entry or model (new, D-RCV-60)"
+    },
+    {
+     "old": "| TC-E1-021-21 | AC16: a provided read answers 401, 403 or 404 and returns no entry or model | Component | Unauthenticated call to GET decision-log; caller with no Decision log right; unknown case; unknown version of TRANSFER on GET rule-models |",
+     "new": "| TC-E1-021-21 | AC9: a provided read answers 401, 403 or 404 and returns no entry or model | Component | Unauthenticated call to GET decision-log; caller with no Decision log right; unknown case; unknown version of TRANSFER on GET rule-models |"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-31431",
+     "kind": "wrong",
+     "issue": "Added a second 'AC8' scenario in section 7. It duplicates the existing AC8 criterion covering BR4, which the disposition says must not be duplicated."
+    },
+    {
+     "ruling": "R-31432",
+     "kind": "wrong",
+     "issue": "New criterion numbered AC16 leaves AC9 to AC15 skipped (lint). Renumbered to AC9 so the sequence is contiguous; TC-E1-021-21 follows it."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 2
+}

@@ -1,0 +1,1039 @@
+# DIR-ALL: directive run check of all staged story copies (D-RCV-60)
+
+Write only:
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-NFR Non-functional integration/RWB ITG TE009 ITG Performance test harness - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-NFR Non-functional integration/RWB ITG TE010 ITG Browser and accessibility tests - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1001 ITG Recovery tables for the 14 data products - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1002 ITG Case list v1 with case ID, owner and queue - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1007 ITG Integration adapters for outbound files - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1008 ITG Decision log store v1, append only and hash chained - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1011 ITG Reconciliation and data quality report - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1013 ITG Baseline measures - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1015 ITG Freshness stamp per data product - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1016 ITG Access control per data product and catalog entries - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1017 ITG Retention and archive rule for the data store - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1018 ITG Case ID issuance and case record v1 - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1019 ITG Roles, teams and queues as data - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1020 ITG Allocation and assignment engine v1 - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1021 ITG Transfer rules and engine v1 - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1022 ITG Sign-on with SSO, MFA and the first roles - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1023 ITG Case record view v1, read only - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1024 ITG Document store and index - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1025 ITG Document types and fields agreed - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1026 ITG Attach and search screen - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1027 ITG Decision log writer v1 - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1028 ITG Service levels, timers, escalation and prescription dates - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1030 ITG Daily rebalancing and queue measures - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1031 ITG Queue and owner on the case list with filters - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1032 ITG Automatic attach from the OCR intake - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1034 ITG Letter template management - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1037 ITG Role to permission matrix as data and PDPA field masking by role - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1039 ITG Access log into the decision log and break-glass admin - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1046 ITG Template and merge field catalog as data - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1047 ITG Feature flags for module release with a removal date - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1049 ITG OCR pipeline on the Workbench document hub - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1050 ITG Document classification - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1052 ITG Notice generation v1 - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1054 ITG Review queue for low-confidence documents - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1055 ITG Proof of delivery capture design with WIN - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1057 ITG Intake from branches, mailroom, partner SFTP and email - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1058 ITG Agent platform set-up [E1a] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1059 ITG Case intake agent in shadow [E1b] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1060 ITG Extraction evaluation [E1c] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1062 ITG Deviation screening agent in shadow [E2b] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1063 ITG Agent monitoring dashboard v1 [E2c] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1064 ITG Data dictionary for the 14 data products - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1065 ITG Sandbox database with synthetic recovery data - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1066 ITG Interaction ledger store and writer - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1067 ITG Every Workbench action into the interaction ledger - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1069 ITG Read-only ACE source views, grants and boundary rule - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1070 ITG Temporal platform on the ACE AKS clusters - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1073 ITG Rule authoring, validation, test scenarios, approval and rollback in Drools - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG TE004 ITG Masked data in SIT and UAT - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG TE006 ITG Outbox and retry for outbound work - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG TE008 ITG Decision log hash chain check - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG TE013 ITG Agent runtime client with fallback - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG W1J01 ITG Contract-test harness and synthetic test data - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG W1J02 ITG Wave 1 v5 journey end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2001 ITG EFS hand-over with full history - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2002 ITG ACE plan status on the case - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2003 ITG Customer's other products on the case - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2004 ITG Treatment entity and plan timers data model - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2005 ITG Decision log query API for audit - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2006 ITG Credit approval pack for NLEADS - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2007 ITG Booking confirmation from the ALS load - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2008 ITG Payment matching with the missed payment event - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2009 ITG Steering dashboard v1 data set - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2010 ITG Stage 2 data products  contracts, plans and treatments - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2012 ITG Manual transfer and reassignment screen with reason - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2013 ITG Approval routing with the delegation of authority table - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2014 ITG Approval screen for D7.1 demand and recall notices - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2015 ITG Timers, escalation and the deviation flag on the case record view - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2016 ITG Full case record view with the history timeline - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2017 ITG Contract, CA and mortgage document generation screens - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2018 ITG E-signature flow for customers and the bank - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2019 ITG Partner identities through the external gateway - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2021 ITG Letter dispatch loop with proof of delivery from WIN - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2022 ITG SMS and LINE dispatch through NSS and LINE OA - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2024 ITG Field app photos and bills into the document hub - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2025 ITG Extraction for the stage 2 and 3 document types - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2026 ITG Document generation engine for contract, CA and mortgage templates - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2027 ITG Payment matching rules with the data team - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2028 ITG Case intake agent live at L1 [E3a] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2029 ITG Deviation screening agent evaluation and L1 on one segment [E3b] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2030 ITG Legal document agent in shadow on Epic 1 data [E3c] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2031 ITG Agent monitoring dashboard v2 [E3d] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2032 ITG TDR offer-suggestion model through the model gateway [E3e] - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2033 ITG Case and queue list with status, owner and ageing - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2034 ITG Interaction ledger on the case and from every channel - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2035 ITG Next action on the case - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2036 ITG Queue write interface for models and agents - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2038 ITG Temporal security, codec server and admin audit - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2041 ITG Rule change governance and audit report - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2042 ITG Epic 2 rule packages in Drools - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2043 ITG Temporal and Drools integration pattern and reference case workflow - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E3006 ITG Calculate the plan installment - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E3010 ITG Book the plan and set the schedule - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E3013 ITG Check encumbrance and eligibility before negotiation - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E3017 ITG Release the collateral after settlement - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E3026 ITG Re-appraise a held asset on cycle - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG W2J01 ITG Wave 2 journey end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E4001 ITG Order an appraisal when the last one is stale - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E4002 ITG Receive the appraisal value from SVAF - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E4045 ITG Calculate fees and charges - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E4046 ITG Post a settlement booking to ALS - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E4047 ITG Post to the general ledger - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E4050 ITG Reconcile money movements daily - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E5002 ITG Record proof of delivery on a notice - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG E5009 ITG Instruct the firm through the portal - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W3 Wave 3 integration/RWB ITG W3J01 ITG Wave 3 journey end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG AD014 ITG Configure queues - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG AD015 ITG Configure service levels and timers - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG AD018 ITG Interface and job monitor - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG AD019 ITG Data quality and reconciliation console - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG AD022 ITG Partner firms and partner users - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM003 ITG Migrate case and ownership - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM004 ITG Migrate treatment and offers - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM005 ITG Migrate contact and promises - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM006 ITG Migrate collateral and assets - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM007 ITG Migrate legal events and cases - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM008 ITG Migrate partner performance - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM009 ITG Migrate debt sale - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM010 ITG Migrate documents and extracted fields - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM011 ITG Migrate scores and route economics - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM012 ITG Migrate decision log - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM013 ITG Migrate money and closure - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6008 ITG Derecognize and post to the general ledger - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6017 ITG Route the population to the committee and schedule it - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6021 ITG Post an approved write-off - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6025 ITG Close the case after the retention period - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6028 ITG Sell a post charge-off population - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6029 ITG Onboard a partner and set terms - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6030 ITG Hold the partner panel and fee schedule as data - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6031 ITG Allocate work by measured return - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6032 ITG Override an allocation with a reason - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E6033 ITG Receive a partner result into the case - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7001 ITG Run X1 dispute and complaint end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7002 ITG Run X2 vulnerability and hardship end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7003 ITG Run X3 deceased customer end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7004 ITG Run X4 fraud end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7005 ITG Run X5 bankruptcy and seizure end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7006 ITG Run X6 lost contact and skip trace end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7007 ITG Run X7 collateral event end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7012 ITG Approve partner fees - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7013 ITG Hold a partner review - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7014 ITG Issue a notice on a missed target - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7015 ITG End a partner contract and recall the work - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7016 ITG Check partner conduct - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E7017 ITG Manage extra costs and services on an asset - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG E8012 ITG Publish a panel change - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG W4J01 ITG Wave 4 journey end to end - integration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-DB ACE DB schemas and logins/RWB PLT N011 DB PgBouncer pools, migrator role and grant check - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-DB ACE DB schemas and logins/RWB PLT NF06 DB Create the 19 rwb_  schemas and logins - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EDGE Edge and gateway/RWB PLT N001 APP gateway-bff routes and composite screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EDGE Edge and gateway/RWB PLT N001 CON gateway-bff route contract - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EDGE Edge and gateway/RWB PLT N006 INF Redis session store for gateway-bff - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EDGE Edge and gateway/RWB PLT N007 INF Partner gateway in the DMZ (FAPI 2.0) - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EDGE Edge and gateway/RWB PLT NF07 INF Airflow edge integration - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EVT Kafka event platform/RWB PLT N002 INF Kafka topics, retry and dead-letter topics and ACLs - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EVT Kafka event platform/RWB PLT N008 INF Schema registry with BACKWARD compatibility - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-EVT Kafka event platform/RWB PLT N012 INF Blob, Key Vault and MFT SFTP standard resources - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1027 APP Decision log writer v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1027 CON Decision log writer v1 - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1037 APP Role to permission matrix as data and PDPA field masking by role v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1037 CON Role to permission matrix as data and PDPA field masking by role - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1042 APP Central configuration service and parameter catalog v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1042 CON Central configuration service and parameter catalog - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1042 OPS Central configuration service and parameter catalog - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1043 APP Reference data service with versioned tables v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1043 CON Reference data service with versioned tables - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1047 APP Feature flags for module release with a removal date v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1047 CON Feature flags for module release with a removal date - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1072 APP Drools runtime and rule package store v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT E1072 CON Drools runtime and rule package store - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT N009 APP RFC 9457 problem and Idempotency-Key helpers v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT N009 CON RFC 9457 problem and Idempotency-Key helpers - interface and fake - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT NF02 APP Shared library baseline v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT TE006 APP Outbox and retry for outbound work v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-LIB Shared libraries/RWB PLT TE006 CON Outbox and retry for outbound work - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-OBS Observability/RWB PLT E1056 OPS Run books and monitoring for every Epic 1 Workbench job - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-OBS Observability/RWB PLT N005 OPS Platform dashboards and alerts baseline - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT E1044 APP Database migrations versioned with parameterized schema names v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT E1044 APP-2 Database migrations versioned with parameterized schema names v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT E1044 CON Database migrations versioned with parameterized schema names - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT E1044 OPS Database migrations versioned with parameterized schema names - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT N004 OPS Service pipeline template and Helm chart - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT NF01 OPS Repository and pipeline baseline - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT NF03 OPS Environment baseline - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT NF04 OPS Secrets and configuration baseline - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT NF05 OPS Quality gates baseline - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE001 APP Recovery module folder and boundary test v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE001 APP-2 Recovery module folder and boundary test v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE002 APP Code owners for the recovery module v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE002 OPS Code owners for the recovery module - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE003 APP Types and contract tests from the API specification v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE003 APP-2 Types and contract tests from the API specification v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE004 APP Masked data in SIT and UAT v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE008 APP Decision log hash chain check v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE011 APP PDPA lint for code, tests and logs v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-TPL Service template and repositories/RWB PLT TE012 APP Document storage containers v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E1070 APP Temporal platform on the ACE AKS clusters v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E1070 CON Temporal platform on the ACE AKS clusters - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E1071 APP Temporal worker and SDK in the recovery module v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E1071 CON Temporal worker and SDK in the recovery module - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2037 APP Temporal observability and run books v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2037 CON Temporal observability and run books - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2038 APP Temporal security, codec server and admin audit v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2038 CON Temporal security, codec server and admin audit - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2039 APP Temporal resilience  backup, failover, upgrade and archive v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2039 CON Temporal resilience  backup, failover, upgrade and archive - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2040 APP Workflow versioning and replay test gate v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT E2040 CON Workflow versioning and replay test gate - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT N003 INF Temporal namespace rwb-recovery and codec key - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT N010 APP Workflow kit templates and codec server v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT N010 CON Workflow kit templates - interface and fake - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-PLT-WF Temporal workflow platform/RWB PLT NF08 INF Temporal platform baseline - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 ACE001 DB ACE DB additions for the Recovery Workbench - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 AD018 APP Interface and job monitor v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 AD018 CON Interface and job monitor - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 AD018 OPS Interface and job monitor - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 AD019 APP Data quality and reconciliation console v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 AD019 OPS Data quality and reconciliation console - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM001 APP Migrate account and arrears v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM002 APP Migrate customer and party v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM003 APP Migrate case and ownership v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM004 APP Migrate treatment and offers v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM005 APP Migrate contact and promises v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM006 APP Migrate collateral and assets v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM007 APP Migrate legal events and cases v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM008 APP Migrate partner performance v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM009 APP Migrate debt sale v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM010 APP Migrate documents and extracted fields v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM011 APP Migrate scores and route economics v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM012 APP Migrate decision log v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM013 APP Migrate money and closure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 DM014 APP Migrate reference data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1001 APP Recovery tables for the 14 data products v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1002 APP Case list v1 with case ID, owner and queue v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1002 CON Case list v1 with case ID, owner and queue - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1002 OPS Case list v1 with case ID, owner and queue - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1011 APP Reconciliation and data quality report v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1011 CON Reconciliation and data quality report - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1011 OPS Reconciliation and data quality report - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1013 APP Baseline measures v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1015 APP Freshness stamp per data product v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1015 CON Freshness stamp per data product - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1015 OPS Freshness stamp per data product - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1016 APP Access control per data product and catalog entries v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1016 CON Access control per data product and catalog entries - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1016 DB Access control per data product and catalog entries - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1017 APP Retention and archive rule for the data store v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1017 CON Retention and archive rule for the data store - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1017 OPS Retention and archive rule for the data store - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1018 APP Case ID issuance and case record v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1055 APP Proof of delivery capture design with WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1064 APP Data dictionary for the 14 data products v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1064 CON Data dictionary for the 14 data products - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1064 OPS Data dictionary for the 14 data products - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1065 APP Sandbox database with synthetic recovery data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1065 CON Sandbox database with synthetic recovery data - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1065 DB Sandbox database with synthetic recovery data - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1066 APP Interaction ledger store and writer v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1066 CON Interaction ledger store and writer - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1066 OPS Interaction ledger store and writer - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1067 APP Every Workbench action into the interaction ledger v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1067 CON Every Workbench action into the interaction ledger - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1068 APP Interaction ledger read interface v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1069 APP Read-only ACE source views, grants and boundary rule v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1069 DB Read-only ACE source views, grants and boundary rule - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2001 APP EFS hand-over with full history v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2007 APP Booking confirmation from the ALS load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2008 APP Payment matching with the missed payment event v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2010 APP Stage 2 data products  contracts, plans and treatments v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2010 CON Stage 2 data products  contracts, plans and treatments - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2010 OPS Stage 2 data products  contracts, plans and treatments - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2021 APP Letter dispatch loop with proof of delivery from WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2022 APP SMS and LINE dispatch through NSS and LINE OA v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2034 APP Interaction ledger on the case and from every channel v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 AD020 APP Autonomy level per decision step v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 AD020 CON Autonomy level per decision step - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1058 APP Agent platform set-up [E1a] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1058 CON Agent platform set-up [E1a] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1058 INF Agent platform set-up [E1a] - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1058 OPS Agent platform set-up [E1a] - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1059 APP Case intake agent in shadow [E1b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1059 CON Case intake agent in shadow [E1b] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1060 APP Extraction evaluation [E1c] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1061 APP Intake agent evaluation and L1 proposal [E2a] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1061 CON Intake agent evaluation and L1 proposal [E2a] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1062 APP Deviation screening agent in shadow [E2b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1062 CON Deviation screening agent in shadow [E2b] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1063 APP Agent monitoring dashboard v1 [E2c] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1063 CON Agent monitoring dashboard v1 [E2c] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E1063 OPS Agent monitoring dashboard v1 [E2c] - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2028 APP Case intake agent live at L1 [E3a] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2028 CON Case intake agent live at L1 [E3a] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2028 OPS Case intake agent live at L1 [E3a] - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2029 APP Deviation screening agent evaluation and L1 on one segment [E3b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2029 CON Deviation screening agent evaluation and L1 on one segment [E3b] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2030 APP Legal document agent in shadow on Epic 1 data [E3c] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2030 CON Legal document agent in shadow on Epic 1 data [E3c] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2031 APP Agent monitoring dashboard v2 [E3d] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2031 CON Agent monitoring dashboard v2 [E3d] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2031 OPS Agent monitoring dashboard v2 [E3d] - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2032 APP TDR offer-suggestion model through the model gateway [E3e] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2032 CON TDR offer-suggestion model through the model gateway [E3e] - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E2032 INF TDR offer-suggestion model through the model gateway [E3e] - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E3030 APP Change an autonomy level v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E3030 CON Change an autonomy level - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E3031 APP Detect model drift and raise a decision v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E8003 APP Run a champion and challenger test v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E8004 APP Raise or lower an autonomy level with approval v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E8004 CON Raise or lower an autonomy level with approval - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E8005 APP Review agent risk at the committee v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 E8005 CON Review agent risk at the committee - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 TE013 APP Agent runtime client with fallback v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 TE013 CON Agent runtime client with fallback - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P10 rwb-agent (Agent)/RWB P10 TE013 OPS Agent runtime client with fallback - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E1007 APP Integration adapters for outbound files v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E1007 CON Integration adapters for outbound files - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E1007 INF Integration adapters for outbound files - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E1007 OPS Integration adapters for outbound files - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E1073 APP Rule authoring, validation, test scenarios, approval and rollback in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2001 APP EFS hand-over with full history v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2001 CON EFS hand-over with full history - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2001 OPS EFS hand-over with full history - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2002 APP ACE plan status on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2002 CON ACE plan status on the case - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2002 OPS ACE plan status on the case - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2003 APP Customer's other products on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2006 APP Credit approval pack for NLEADS v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2007 APP Booking confirmation from the ALS load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2007 CON Booking confirmation from the ALS load - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2007 OPS Booking confirmation from the ALS load - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2033 APP Case and queue list with status, owner and ageing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2033 CON Case and queue list with status, owner and ageing - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2034 APP Interaction ledger on the case and from every channel v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2034 CON Interaction ledger on the case and from every channel - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2034 OPS Interaction ledger on the case and from every channel - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2035 APP Next action on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2035 CON Next action on the case - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2035 OPS Next action on the case - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2036 APP Queue write interface for models and agents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E2036 CON Queue write interface for models and agents - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P2 rwb-integration (Integration)/RWB P2 E4046 APP Post a settlement booking to ALS v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 AD019 APP Data quality and reconciliation console v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1002 APP Case list v1 with case ID, owner and queue v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1007 APP Integration adapters for outbound files v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1011 APP Reconciliation and data quality report v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1013 APP Baseline measures v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1018 APP Case ID issuance and case record v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1018 CON Case ID issuance and case record v1 - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1018 OPS Case ID issuance and case record v1 - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1019 APP Roles, teams and queues as data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1019 CON Roles, teams and queues as data - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1019 DB Roles, teams and queues as data - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1020 APP Allocation and assignment engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1020 CON Allocation and assignment engine v1 - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1020 OPS Allocation and assignment engine v1 - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1021 APP Transfer rules and engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1021 CON Transfer rules and engine v1 - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1021 OPS Transfer rules and engine v1 - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1023 APP Case record view v1, read only v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1023 CON Case record view v1, read only - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1028 APP Service levels, timers, escalation and prescription dates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1028 CON Service levels, timers, escalation and prescription dates - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1028 OPS Service levels, timers, escalation and prescription dates - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1030 APP Daily rebalancing and queue measures v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1030 CON Daily rebalancing and queue measures - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1030 OPS Daily rebalancing and queue measures - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1031 APP Queue and owner on the case list with filters v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1031 CON Queue and owner on the case list with filters - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1032 APP Automatic attach from the OCR intake v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1035 APP Case record view v1.1 with documents and history timeline v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1035 CON Case record view v1.1 with documents and history timeline - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1042 APP Central configuration service and parameter catalog v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1042 CON Central configuration service and parameter catalog - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1043 APP Reference data service with versioned tables v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1043 CON Reference data service with versioned tables - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1045 APP Multi-product parameters for Mortgage, HP and SSME v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1050 APP Document classification v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1052 APP Notice generation v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1054 APP Review queue for low-confidence documents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1055 APP Proof of delivery capture design with WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1065 APP Sandbox database with synthetic recovery data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1066 APP Interaction ledger store and writer v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1067 APP Every Workbench action into the interaction ledger v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1073 APP Rule authoring, validation, test scenarios, approval and rollback in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1073 CON Rule authoring, validation, test scenarios, approval and rollback in Drools - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E1073 INF Rule authoring, validation, test scenarios, approval and rollback in Drools - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2001 APP EFS hand-over with full history v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2002 APP ACE plan status on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2004 APP Treatment entity and plan timers data model v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2004 CON Treatment entity and plan timers data model - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2004 OPS Treatment entity and plan timers data model - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2006 APP Credit approval pack for NLEADS v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2007 APP Booking confirmation from the ALS load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2009 APP Steering dashboard v1 data set v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2011 APP Queue view screens  my queue, team queues, filters and ageing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2011 CON Queue view screens  my queue, team queues, filters and ageing - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2012 APP Manual transfer and reassignment screen with reason v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2012 CON Manual transfer and reassignment screen with reason - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2012 OPS Manual transfer and reassignment screen with reason - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2013 APP Approval routing with the delegation of authority table v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2014 APP Approval screen for D7.1 demand and recall notices v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2015 APP Timers, escalation and the deviation flag on the case record view v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2015 CON Timers, escalation and the deviation flag on the case record view - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2015 OPS Timers, escalation and the deviation flag on the case record view - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2016 APP Full case record view with the history timeline v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2016 CON Full case record view with the history timeline - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2021 APP Letter dispatch loop with proof of delivery from WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2024 APP Field app photos and bills into the document hub v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2033 APP Case and queue list with status, owner and ageing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2034 APP Interaction ledger on the case and from every channel v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2035 APP Next action on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2036 APP Queue write interface for models and agents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2041 APP Rule change governance and audit report v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2041 CON Rule change governance and audit report - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2042 APP Epic 2 rule packages in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2042 CON Epic 2 rule packages in Drools - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2042 INF Epic 2 rule packages in Drools - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2042 OPS Epic 2 rule packages in Drools - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2043 APP Temporal and Drools integration pattern and reference case workflow v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2043 CON Temporal and Drools integration pattern and reference case workflow - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E2043 OPS Temporal and Drools integration pattern and reference case workflow - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E3013 APP Check encumbrance and eligibility before negotiation v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E5002 APP Record proof of delivery on a notice v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E6017 APP Route the population to the committee and schedule it v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P3 rwb-case (Case and workflow)/RWB P3 E6025 APP Close the case after the retention period v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD001 APP Map Entra ID groups to Workbench roles v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD001 CON Map Entra ID groups to Workbench roles - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD002 APP Permission matrix as a versioned load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD002 CON Permission matrix as a versioned load - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD003 APP Scope per role v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD003 CON Scope per role - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD004 APP Masking profiles per role v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD004 CON Masking profiles per role - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD005 APP Separation of duty check at sign-in v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD005 CON Separation of duty check at sign-in - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD006 APP Break-glass access v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD006 CON Break-glass access - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD006 DB Break-glass access - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD007 APP Access log search and export v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD007 CON Access log search and export - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD008 APP Access review list v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD008 CON Access review list - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD009 APP Load a list of values version v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD009 CON Load a list of values version - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD010 APP Approve a reference data load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD010 CON Approve a reference data load - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD011 APP Load a rule version v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD011 CON Load a rule version - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD012 APP Approve a rule version v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD012 CON Approve a rule version - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD013 APP Roll back a rule or reference version v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD013 CON Roll back a rule or reference version - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD014 APP Configure queues v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD014 CON Configure queues - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD015 APP Configure service levels and timers v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD015 CON Configure service levels and timers - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD016 APP Load the delegation of authority table v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 AD016 CON Load the delegation of authority table - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1001 APP Recovery tables for the 14 data products v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1007 APP Integration adapters for outbound files v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1008 APP Decision log store v1, append only and hash chained v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1016 APP Access control per data product and catalog entries v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1018 APP Case ID issuance and case record v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1019 APP Roles, teams and queues as data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1020 APP Allocation and assignment engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1021 APP Transfer rules and engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1022 APP Sign-on with SSO, MFA and the first roles v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1022 CON Sign-on with SSO, MFA and the first roles - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1022 DB Sign-on with SSO, MFA and the first roles - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1023 APP Case record view v1, read only v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1028 APP Service levels, timers, escalation and prescription dates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1037 APP Role to permission matrix as data and PDPA field masking by role v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1037 CON Role to permission matrix as data and PDPA field masking by role - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1038 APP Delegation of authority table as reference data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1039 APP Access log into the decision log and break-glass admin v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1039 CON Access log into the decision log and break-glass admin - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1039 DB Access log into the decision log and break-glass admin - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1039 OPS Access log into the decision log and break-glass admin - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1054 APP Review queue for low-confidence documents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1062 APP Deviation screening agent in shadow [E2b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1063 APP Agent monitoring dashboard v1 [E2c] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1064 APP Data dictionary for the 14 data products v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1065 APP Sandbox database with synthetic recovery data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E1069 APP Read-only ACE source views, grants and boundary rule v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2002 APP ACE plan status on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2003 APP Customer's other products on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2004 APP Treatment entity and plan timers data model v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2007 APP Booking confirmation from the ALS load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2008 APP Payment matching with the missed payment event v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2013 APP Approval routing with the delegation of authority table v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2014 APP Approval screen for D7.1 demand and recall notices v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2015 APP Timers, escalation and the deviation flag on the case record view v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2017 APP Contract, CA and mortgage document generation screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2019 APP Partner identities through the external gateway v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2019 CON Partner identities through the external gateway - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2019 INF Partner identities through the external gateway - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2021 APP Letter dispatch loop with proof of delivery from WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2022 APP SMS and LINE dispatch through NSS and LINE OA v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2024 APP Field app photos and bills into the document hub v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2026 APP Document generation engine for contract, CA and mortgage templates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2027 APP Payment matching rules with the data team v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2031 APP Agent monitoring dashboard v2 [E3d] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2033 APP Case and queue list with status, owner and ageing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2034 APP Interaction ledger on the case and from every channel v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2035 APP Next action on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2036 APP Queue write interface for models and agents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2041 APP Rule change governance and audit report v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E2042 APP Epic 2 rule packages in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8006 APP Run the full administration screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8006 CON Run the full administration screens - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8007 APP Change a decision rule through the administration screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8007 CON Change a decision rule through the administration screens - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8008 APP Move an approval limit v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8008 CON Move an approval limit - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8009 APP Set the treatment policy by product v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8009 CON Set the treatment policy by product - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8010 APP Add a letter template with Compliance approval v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8010 CON Add a letter template with Compliance approval - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8011 APP Roll back a configuration version v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8011 CON Roll back a configuration version - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8012 APP Publish a panel change v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8012 CON Publish a panel change - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8013 APP Run a QA sample against the rule version applied v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8013 CON Run a QA sample against the rule version applied - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8014 APP Return a defective pack v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8014 CON Return a defective pack - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8015 APP Detect a broken hash chain in the decision log v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8015 CON Detect a broken hash chain in the decision log - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8016 APP Handle a data subject request v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8016 CON Handle a data subject request - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8017 APP Manage an incident v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8017 CON Manage an incident - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8018 APP Refer a case to Aric v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8018 CON Refer a case to Aric - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8019 APP Control access by role and by agent v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P4 rwb-access (Access and authority)/RWB P4 E8019 CON Control access by role and by agent - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 AD021 APP Retention classes and legal hold v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 AD021 CON Retention classes and legal hold - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1007 APP Integration adapters for outbound files v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1016 APP Access control per data product and catalog entries v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1017 APP Retention and archive rule for the data store v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1018 APP Case ID issuance and case record v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1021 APP Transfer rules and engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1024 APP Document store and index v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1025 APP Document types and fields agreed v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1026 APP Attach and search screen v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1032 APP Automatic attach from the OCR intake v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1032 CON Automatic attach from the OCR intake - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1032 INF Automatic attach from the OCR intake - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1032 OPS Automatic attach from the OCR intake - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1033 APP Search across cases v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1039 APP Access log into the decision log and break-glass admin v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1040 APP Document checklist per case type as reference data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1041 APP Retention classes and virus scan on intake v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1041 CON Retention classes and virus scan on intake - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1046 APP Template and merge field catalog as data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1049 APP OCR pipeline on the Workbench document hub v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1049 CON OCR pipeline on the Workbench document hub - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1049 INF OCR pipeline on the Workbench document hub - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1049 OPS OCR pipeline on the Workbench document hub - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1050 APP Document classification v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1050 CON Document classification - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1050 OPS Document classification - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1052 APP Notice generation v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1053 APP Field extraction for the six types into the index v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1053 CON Field extraction for the six types into the index - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1054 APP Review queue for low-confidence documents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1054 CON Review queue for low-confidence documents - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1055 APP Proof of delivery capture design with WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1057 APP Intake from branches, mailroom, partner SFTP and email v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1057 CON Intake from branches, mailroom, partner SFTP and email - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1057 INF Intake from branches, mailroom, partner SFTP and email - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1057 OPS Intake from branches, mailroom, partner SFTP and email - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1062 APP Deviation screening agent in shadow [E2b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1065 APP Sandbox database with synthetic recovery data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E1067 APP Every Workbench action into the interaction ledger v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2016 APP Full case record view with the history timeline v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2017 APP Contract, CA and mortgage document generation screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2017 CON Contract, CA and mortgage document generation screens - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2018 APP E-signature flow for customers and the bank v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2024 APP Field app photos and bills into the document hub v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2024 CON Field app photos and bills into the document hub - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2025 APP Extraction for the stage 2 and 3 document types v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2025 CON Extraction for the stage 2 and 3 document types - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2025 OPS Extraction for the stage 2 and 3 document types - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2026 APP Document generation engine for contract, CA and mortgage templates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2026 CON Document generation engine for contract, CA and mortgage templates - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P5 rwb-document (Document)/RWB P5 E2030 APP Legal document agent in shadow on Epic 1 data [E3c] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 AD017 APP Manage letter and notice templates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 AD017 CON Manage letter and notice templates - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1007 APP Integration adapters for outbound files v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1011 APP Reconciliation and data quality report v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1019 APP Roles, teams and queues as data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1032 APP Automatic attach from the OCR intake v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1034 APP Letter template management v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1046 APP Template and merge field catalog as data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1046 CON Template and merge field catalog as data - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1049 APP OCR pipeline on the Workbench document hub v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1052 APP Notice generation v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1052 CON Notice generation v1 - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1055 APP Proof of delivery capture design with WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1055 CON Proof of delivery capture design with WIN - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1055 INF Proof of delivery capture design with WIN - infrastructure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1055 OPS Proof of delivery capture design with WIN - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1063 APP Agent monitoring dashboard v1 [E2c] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E1073 APP Rule authoring, validation, test scenarios, approval and rollback in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2013 APP Approval routing with the delegation of authority table v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2014 APP Approval screen for D7.1 demand and recall notices v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2017 APP Contract, CA and mortgage document generation screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2018 APP E-signature flow for customers and the bank v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2018 OPS E-signature flow for customers and the bank - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2021 APP Letter dispatch loop with proof of delivery from WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2021 CON Letter dispatch loop with proof of delivery from WIN - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2021 OPS Letter dispatch loop with proof of delivery from WIN - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2022 APP SMS and LINE dispatch through NSS and LINE OA v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2022 CON SMS and LINE dispatch through NSS and LINE OA - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2022 OPS SMS and LINE dispatch through NSS and LINE OA - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2026 APP Document generation engine for contract, CA and mortgage templates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E2042 APP Epic 2 rule packages in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4035 APP View the offer on LINE and web v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4035 CON View the offer on LINE and web - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4036 APP Accept an offer in self-service v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4036 CON Accept an offer in self-service - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4037 APP Pay in self-service v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4037 CON Pay in self-service - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4038 APP Raise a dispute in self-service v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4038 CON Raise a dispute in self-service - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4039 APP Maintain the contact repository v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4039 CON Maintain the contact repository - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4040 APP Record a custody movement of a document v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4040 CON Record a custody movement of a document - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4041 APP Answer a legal or audit document request v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4041 CON Answer a legal or audit document request - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4042 APP Apply retention on case closure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E4042 CON Apply retention on case closure - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P6 rwb-comms (Communications)/RWB P6 E5002 APP Record proof of delivery on a notice v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1001 APP Recovery tables for the 14 data products v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1008 APP Decision log store v1, append only and hash chained v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1008 CON Decision log store v1, append only and hash chained - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1008 DB Decision log store v1, append only and hash chained - ACE DB v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1008 OPS Decision log store v1, append only and hash chained - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1017 APP Retention and archive rule for the data store v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1018 APP Case ID issuance and case record v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1020 APP Allocation and assignment engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1021 APP Transfer rules and engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1027 APP Decision log writer v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1027 CON Decision log writer v1 - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1028 APP Service levels, timers, escalation and prescription dates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1030 APP Daily rebalancing and queue measures v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1032 APP Automatic attach from the OCR intake v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1039 APP Access log into the decision log and break-glass admin v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1046 APP Template and merge field catalog as data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1052 APP Notice generation v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1054 APP Review queue for low-confidence documents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E1073 APP Rule authoring, validation, test scenarios, approval and rollback in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2001 APP EFS hand-over with full history v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2002 APP ACE plan status on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2004 APP Treatment entity and plan timers data model v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2005 APP Decision log query API for audit v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2005 CON Decision log query API for audit - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2006 APP Credit approval pack for NLEADS v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2007 APP Booking confirmation from the ALS load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2008 APP Payment matching with the missed payment event v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2012 APP Manual transfer and reassignment screen with reason v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2013 APP Approval routing with the delegation of authority table v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2013 CON Approval routing with the delegation of authority table - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2013 OPS Approval routing with the delegation of authority table - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2014 APP Approval screen for D7.1 demand and recall notices v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2014 CON Approval screen for D7.1 demand and recall notices - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2014 OPS Approval screen for D7.1 demand and recall notices - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2017 APP Contract, CA and mortgage document generation screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2019 APP Partner identities through the external gateway v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2021 APP Letter dispatch loop with proof of delivery from WIN v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2022 APP SMS and LINE dispatch through NSS and LINE OA v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2024 APP Field app photos and bills into the document hub v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2025 APP Extraction for the stage 2 and 3 document types v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2026 APP Document generation engine for contract, CA and mortgage templates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2027 APP Payment matching rules with the data team v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2028 APP Case intake agent live at L1 [E3a] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2029 APP Deviation screening agent evaluation and L1 on one segment [E3b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2032 APP TDR offer-suggestion model through the model gateway [E3e] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2035 APP Next action on the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2036 APP Queue write interface for models and agents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2041 APP Rule change governance and audit report v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2042 APP Epic 2 rule packages in Drools v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E2043 APP Temporal and Drools integration pattern and reference case workflow v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 E6028 APP Sell a post charge-off population v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P7 rwb-decision (Decision and rules)/RWB P7 TE013 APP Agent runtime client with fallback v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 DM013 APP Migrate money and closure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E1001 APP Recovery tables for the 14 data products v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E2008 APP Payment matching with the missed payment event v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E2008 CON Payment matching with the missed payment event - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E2008 OPS Payment matching with the missed payment event - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E2027 APP Payment matching rules with the data team v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E2027 CON Payment matching rules with the data team - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E2027 OPS Payment matching rules with the data team - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4043 APP Match a settlement payment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4043 CON Match a settlement payment - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4044 APP Match auction and enforcement proceeds v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4044 CON Match auction and enforcement proceeds - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4045 APP Calculate fees and charges v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4046 APP Post a settlement booking to ALS v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4047 APP Post to the general ledger v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4048 APP Run the deed in lieu rental auto-debit v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4048 CON Run the deed in lieu rental auto-debit - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4049 APP Apply proceeds to the case balance v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4049 CON Apply proceeds to the case balance - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E4050 APP Reconcile money movements daily v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E6036 APP Produce provision inputs v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E1013 APP Baseline measures v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E1013 CON Baseline measures - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E1013 OPS Baseline measures - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E2009 APP Steering dashboard v1 data set v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E2009 CON Steering dashboard v1 data set - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E2009 OPS Steering dashboard v1 data set - deployment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E6037 APP Track benefit realisation v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E6037 CON Track benefit realisation - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E8001 APP Produce regulatory returns v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E8001 CON Produce regulatory returns - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E8002 APP Classify, stage and re-age an account v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P9 rwb-reporting (Reporting)/RWB P9 E8002 CON Classify, stage and re-age an account - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4001 APP Order an appraisal when the last one is stale v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4001 CON Order an appraisal when the last one is stale - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4002 APP Receive the appraisal value from SVAF v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4002 CON Receive the appraisal value from SVAF - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4003 APP Flag appraisal outliers against market and last value v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4003 CON Flag appraisal outliers against market and last value - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4004 APP Accept the appraisal value v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4004 CON Accept the appraisal value - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4005 APP Call COLLINS for return by route v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4005 CON Call COLLINS for return by route - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4006 APP Calculate the payoff and settlement range v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4006 CON Calculate the payoff and settlement range - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4007 APP Score the routes and recommend one with reasons v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4007 CON Score the routes and recommend one with reasons - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4008 APP Approve a route inside the limit v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4008 CON Approve a route inside the limit - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4009 APP Approve a route above the limit at committee v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4009 CON Approve a route above the limit at committee - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4010 APP Hold the case and set a review date v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4010 CON Hold the case and set a review date - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4011 APP Reconsider the route after new information v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4011 CON Reconsider the route after new information - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4012 APP Start the route flow and set its timers v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S1 rwb-valuation (Valuation and route)/RWB S1 E4012 CON Start the route flow and set its timers - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2004 APP Treatment entity and plan timers data model v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2006 APP Credit approval pack for NLEADS v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2007 APP Booking confirmation from the ALS load v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2008 APP Payment matching with the missed payment event v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2010 APP Stage 2 data products  contracts, plans and treatments v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2017 APP Contract, CA and mortgage document generation screens v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2018 APP E-signature flow for customers and the bank v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2025 APP Extraction for the stage 2 and 3 document types v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2026 APP Document generation engine for contract, CA and mortgage templates v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2027 APP Payment matching rules with the data team v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E2032 APP TDR offer-suggestion model through the model gateway [E3e] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3001 APP Create the treatment record v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3001 CON Create the treatment record - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3002 APP Offer a settlement inside the range v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3002 CON Offer a settlement inside the range - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3003 APP Approve a settlement below the floor v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3003 CON Approve a settlement below the floor - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3004 APP Offer a TDR plan v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3004 CON Offer a TDR plan - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3005 APP Pre-assess affordability through ACE v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3005 CON Pre-assess affordability through ACE - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3006 APP Calculate the plan installment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3006 CON Calculate the plan installment - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3007 APP Send the offer and start the validity timer v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3007 CON Send the offer and start the validity timer - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3008 APP Route the signed offer to operations for booking v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3008 CON Route the signed offer to operations for booking - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3009 APP Return the case to its prior status on no signature v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3009 CON Return the case to its prior status on no signature - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3010 APP Book the plan and set the schedule v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3010 CON Book the plan and set the schedule - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3011 APP Detect and handle a broken plan v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3011 CON Detect and handle a broken plan - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3012 APP Run a deed in lieu to ownership transfer v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3012 CON Run a deed in lieu to ownership transfer - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3013 APP Check encumbrance and eligibility before negotiation v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3013 CON Check encumbrance and eligibility before negotiation - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3014 APP Unlock the asset as a non performing asset by rule v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3014 CON Unlock the asset as a non performing asset by rule - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3015 APP Capture the collateral inspection in the field v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3015 CON Capture the collateral inspection in the field - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3016 APP Set up a deed in lieu buy-back rental v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3016 CON Set up a deed in lieu buy-back rental - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3017 APP Release the collateral after settlement v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3017 CON Release the collateral after settlement - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3018 APP Generate the treatment document set v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S2 rwb-treatment (Treatment and offer)/RWB S2 E3018 CON Generate the treatment document set - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E2010 APP Stage 2 data products  contracts, plans and treatments v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4013 APP Prepare a TCG guarantee claim v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4013 CON Prepare a TCG guarantee claim - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4014 APP Submit the claim to the TCG portal v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4014 CON Submit the claim to the TCG portal - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4015 APP Track the claim to payment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4015 CON Track the claim to payment - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4016 APP Record the subrogation position v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4016 CON Record the subrogation position - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4017 APP Notify guarantors and co-borrowers v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4017 CON Notify guarantors and co-borrowers - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4018 APP Negotiate with a guarantor v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4018 CON Negotiate with a guarantor - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4019 APP Close the case when a guarantee clears the debt v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4019 CON Close the case when a guarantee clears the debt - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4020 APP File an insurance claim on a collateral event v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S3 rwb-guarantee (Guarantee)/RWB S3 E4020 CON File an insurance claim on a collateral event - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E2025 APP Extraction for the stage 2 and 3 document types v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5001 APP Issue demand and recall notices v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5001 CON Issue demand and recall notices - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5002 APP Record proof of delivery on a notice v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5002 CON Record proof of delivery on a notice - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5003 APP Run the notice period timer v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5003 CON Run the notice period timer - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5004 APP Assemble the litigation pack v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5004 CON Assemble the litigation pack - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5005 APP Check the pack against the defect list v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5005 CON Check the pack against the defect list - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5006 APP Recover a missing or lost document v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5006 CON Recover a missing or lost document - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5007 APP Verify the pack and approve filing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5007 CON Verify the pack and approve filing - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5008 APP Select the law firm from the panel v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5008 CON Select the law firm from the panel - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5009 APP Instruct the firm through the portal v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5009 CON Instruct the firm through the portal - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5010 APP Record the court filing and receipt v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5010 CON Record the court filing and receipt - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5011 APP Track hearings, deadlines and fees v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5011 CON Track hearings, deadlines and fees - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5012 APP Recommend the next litigation step v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5012 CON Recommend the next litigation step - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5013 APP Settle before judgment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5013 CON Settle before judgment - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5014 APP Decide and manage an appeal v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5014 CON Decide and manage an appeal - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5015 APP Pay court fees and legal expenses v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5015 CON Pay court fees and legal expenses - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5016 APP Record the judgment v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5016 CON Record the judgment - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5017 APP Trace assets for enforcement v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5017 CON Trace assets for enforcement - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5018 APP Apply for the writ and seizure v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5018 CON Apply for the writ and seizure - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5019 APP Follow the LED auction ladder v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5019 CON Follow the LED auction ladder - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5020 APP Record an enforcement deferral with its reason v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5020 CON Record an enforcement deferral with its reason - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5021 APP File a bankruptcy petition v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5021 CON File a bankruptcy petition - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5022 APP Match enforcement proceeds to the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S4 rwb-litigation (Litigation)/RWB S4 E5022 CON Match enforcement proceeds to the case - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E1011 APP Reconciliation and data quality report v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3019 APP Take a repossessed vehicle onto the books v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3019 CON Take a repossessed vehicle onto the books - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3020 APP Take a property onto the books after a deed in lieu v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3020 CON Take a property onto the books after a deed in lieu - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3021 APP Take a property onto the books after an LED auction v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3021 CON Take a property onto the books after an LED auction - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3022 APP Serve the statutory notice and prove delivery v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3022 CON Serve the statutory notice and prove delivery - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3023 APP Track holding age against the provision steps v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3023 CON Track holding age against the provision steps - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3024 APP Record and track the asset stock balance v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3024 CON Record and track the asset stock balance - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3025 APP Maintain a held property v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3025 CON Maintain a held property - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3026 APP Re-appraise a held asset on cycle v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3026 CON Re-appraise a held asset on cycle - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3027 APP Recommend the disposal route v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3027 CON Recommend the disposal route - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3028 APP Set the start and floor price v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3028 CON Set the start and floor price - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3029 APP Publish the listing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E3029 CON Publish the listing - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4021 APP Evict occupants from a held property v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4021 CON Evict occupants from a held property - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4022 APP Run the descending price schedule v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4022 CON Run the descending price schedule - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4023 APP Allocate the asset to an auction vendor by distance v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4023 CON Allocate the asset to an auction vendor by distance - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4024 APP Run auction rounds and report bids v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4024 CON Run auction rounds and report bids - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4025 APP Accept a bid below the floor with a second signature v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4025 CON Accept a bid below the floor with a second signature - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4026 APP Re-list on no bid v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4026 CON Re-list on no bid - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4027 APP Enforce the five-day payment term v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4027 CON Enforce the five-day payment term - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4028 APP Transfer vehicle registration v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4028 CON Transfer vehicle registration - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4029 APP Record a property transfer at the Land Office v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4029 CON Record a property transfer at the Land Office - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4030 APP Apply proceeds and raise the shortfall v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4030 CON Apply proceeds and raise the shortfall - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4031 APP Transfer a pool to RAMC or the joint venture v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4031 CON Transfer a pool to RAMC or the joint venture - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4032 APP Arrange a customer buy-back v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4032 CON Arrange a customer buy-back - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4033 APP Rent a held asset to a third party v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4033 CON Rent a held asset to a third party - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4034 APP Sell through a broker v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S5 rwb-asset (Asset)/RWB S5 E4034 CON Sell through a broker - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E5023 APP Select eligible accounts for sale by rule v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E5023 CON Select eligible accounts for sale by rule - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E5024 APP Build the lots and estimate the price v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E5024 CON Build the lots and estimate the price - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E5025 APP Prepare the masked data tape v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E5026 APP Open the buyer data room v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E5026 CON Open the buyer data room - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6001 APP Approve lots, reserve and tiered terms v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6001 CON Approve lots, reserve and tiered terms - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6002 APP Qualify a buyer against KYC and licensing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6002 CON Qualify a buyer against KYC and licensing - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6003 APP Bar a buyer that fails qualification v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6003 CON Bar a buyer that fails qualification - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6004 APP Take buyer bids v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6004 CON Take buyer bids - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6005 APP Award the lot and test the price v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6005 CON Award the lot and test the price - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6006 APP Generate the sale agreement and notices v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6006 CON Generate the sale agreement and notices - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6007 APP Transfer the data to the buyer v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6007 CON Transfer the data to the buyer - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6008 APP Derecognize and post to the general ledger v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6008 CON Derecognize and post to the general ledger - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6009 APP Handle a buyer put-back claim v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6009 CON Handle a buyer put-back claim - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6010 APP Close a case awarded in a sold lot v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6010 CON Close a case awarded in a sold lot - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6011 APP Confirm buyer remittance v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6011 CON Confirm buyer remittance - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S6 rwb-debtsale (Debt sale)/RWB S6 E6012 APP Apply the debt sale cap v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6013 APP Run the monthly eligibility scan on both tracks v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6013 CON Run the monthly eligibility scan on both tracks - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6014 APP Apply the tax criteria v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6014 CON Apply the tax criteria - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6015 APP Prepare the write-off pack v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6015 CON Prepare the write-off pack - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6016 APP Remove a case from the proposed population v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6016 CON Remove a case from the proposed population - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6017 APP Route the population to the committee and schedule it v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6017 CON Route the population to the committee and schedule it - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6018 APP Approve a write-off inside the limit v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6018 CON Approve a write-off inside the limit - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6019 APP Reject a write-off v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6019 CON Reject a write-off - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6020 APP Defer a write-off v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6020 CON Defer a write-off - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6021 APP Post an approved write-off v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6021 CON Post an approved write-off - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6022 APP Send provision inputs to Finance v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6022 CON Send provision inputs to Finance - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6023 APP Reconcile the approved and posted populations v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6023 CON Reconcile the approved and posted populations - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6024 APP Work the write-off exception loop v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6024 CON Work the write-off exception loop - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6025 APP Close the case after the retention period v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6025 CON Close the case after the retention period - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6026 APP Change the eligibility or tax criteria v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6026 CON Change the eligibility or tax criteria - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6027 APP Record a customer payment after charge-off v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6027 CON Record a customer payment after charge-off - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6028 APP Sell a post charge-off population v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S7 rwb-writeoff (Write-off)/RWB S7 E6028 CON Sell a post charge-off population - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E1020 APP Allocation and assignment engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E1021 APP Transfer rules and engine v1 v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E1023 APP Case record view v1, read only v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E1062 APP Deviation screening agent in shadow [E2b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E1065 APP Sandbox database with synthetic recovery data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E2009 APP Steering dashboard v1 data set v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E2012 APP Manual transfer and reassignment screen with reason v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E2015 APP Timers, escalation and the deviation flag on the case record view v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E2029 APP Deviation screening agent evaluation and L1 on one segment [E3b] v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E2033 APP Case and queue list with status, owner and ageing v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E2036 APP Queue write interface for models and agents v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7001 APP Run X1 dispute and complaint end to end v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7001 CON Run X1 dispute and complaint end to end - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7002 APP Run X2 vulnerability and hardship end to end v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7002 CON Run X2 vulnerability and hardship end to end - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7003 APP Run X3 deceased customer end to end v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7003 CON Run X3 deceased customer end to end - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7004 APP Run X4 fraud end to end v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7004 CON Run X4 fraud end to end - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7005 APP Run X5 bankruptcy and seizure end to end v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7005 CON Run X5 bankruptcy and seizure end to end - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7006 APP Run X6 lost contact and skip trace end to end v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7006 CON Run X6 lost contact and skip trace end to end - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7007 APP Run X7 collateral event end to end v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7007 CON Run X7 collateral event end to end - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7008 APP Review an override v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7008 CON Review an override - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7009 APP Match a complaint to the preceding contact v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7009 CON Match a complaint to the preceding contact - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7010 APP Handle a contact sent while a block is on v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S8 rwb-deviation (Deviation)/RWB S8 E7010 CON Handle a contact sent while a block is on - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 AD022 APP Partner firms and partner users v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 AD022 CON Partner firms and partner users - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E1032 APP Automatic attach from the OCR intake v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E1057 APP Intake from branches, mailroom, partner SFTP and email v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E2019 APP Partner identities through the external gateway v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E2034 APP Interaction ledger on the case and from every channel v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6029 APP Onboard a partner and set terms v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6029 CON Onboard a partner and set terms - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6030 APP Hold the partner panel and fee schedule as data v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6030 CON Hold the partner panel and fee schedule as data - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6031 APP Allocate work by measured return v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6031 CON Allocate work by measured return - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6032 APP Override an allocation with a reason v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6032 CON Override an allocation with a reason - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6033 APP Receive a partner result into the case v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6033 CON Receive a partner result into the case - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6034 APP Place a charged-off account with an agency v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6034 CON Place a charged-off account with an agency - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6035 APP Match a recovery and calculate the agency fee v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E6035 CON Match a recovery and calculate the agency fee - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7011 APP Score partners monthly v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7011 CON Score partners monthly - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7012 APP Approve partner fees v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7012 CON Approve partner fees - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7013 APP Hold a partner review v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7013 CON Hold a partner review - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7014 APP Issue a notice on a missed target v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7014 CON Issue a notice on a missed target - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7015 APP End a partner contract and recall the work v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7015 CON End a partner contract and recall the work - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7016 APP Check partner conduct v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7016 CON Check partner conduct - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7017 APP Manage extra costs and services on an asset v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7017 CON Manage extra costs and services on an asset - contract v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7018 APP Capture field work through the field app v2.md
+- _work/msr/directive/stage/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-S9 rwb-partner (Partner)/RWB S9 E7018 CON Capture field work through the field app - contract v2.md
+
+Do not write anything else.

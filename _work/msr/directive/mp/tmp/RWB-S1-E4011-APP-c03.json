@@ -1,0 +1,236 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The role does not hold the Treatment and offer right of the operation | 403 before any read or write, and no record is written | MSG-P4-002 | TC-E4-011-03 |",
+   "new": "| X2 | The role does not hold the Treatment and offer right of the operation | 403 before any read or write, and no record is written | MSG-P4-002 | AC3, TC-E4-011-03 |"
+  },
+  {
+   "old": "| X3 | The recompute finds no change to the picture | Nothing is recorded, the reopen is not needed and the case state stays | None | TC-E4-011-01 |",
+   "new": "| X3 | The recompute finds no change to the picture | Nothing is recorded, the reopen is not needed and the case state stays | None | AC4, TC-E4-011-01, TC-E4-011-06 |"
+  },
+  {
+   "old": "| X4 | The case is closed, cancelled, merged or in a legal hold | The step does not run, nothing is recorded and the state is reported to the parent | None | TC-E4-011-01 |",
+   "new": "| X4 | The case is closed, cancelled, merged or in a legal hold | The step does not run, nothing is recorded and the state is reported to the parent | None | AC5, TC-E4-011-01, TC-E4-011-07 |"
+  },
+  {
+   "old": "| X5 | The ACE data product behind the payments or the appraisal is stale | The step holds, writes nothing and shows the data date; it resumes on a fresh answer | MSG-P1-001 | TC-E4-011-01 |",
+   "new": "| X5 | The ACE data product behind the payments or the appraisal is stale | The step holds, writes nothing and shows the data date; it resumes on a fresh answer | MSG-P1-001 | AC6, TC-E4-011-01, TC-E4-011-08 |"
+  },
+  {
+   "old": "| X6 | rwb-decision, rwb-deviation, rwb-case or rwb-source-data does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 with the platform envelope | None | TC-E4-011-01 |",
+   "new": "| X6 | rwb-decision, rwb-deviation, rwb-case or rwb-source-data does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 with the platform envelope | None | AC7, TC-E4-011-01, TC-E4-011-09 |"
+  },
+  {
+   "old": "| X7 | A required element of the request is absent or the reason code is not one of its list | 422 before the step runs, and no record | MSG-GEN-001 | TC-E4-011-01 |",
+   "new": "| X7 | A required element of the request is absent or the reason code is not one of its list | 422 before the step runs, and no record | MSG-GEN-001 | AC8, TC-E4-011-01, TC-E4-011-10 |"
+  },
+  {
+   "old": "| X8 | The same command is submitted twice with the same `Idempotency-Key` | One record, one answer; the stored answer is returned and the repeat is counted | None | TC-E4-011-01 |",
+   "new": "| X8 | The same command is submitted twice with the same `Idempotency-Key` | One record, one answer; the stored answer is returned and the repeat is counted | None | AC9, TC-E4-011-01, TC-E4-011-11 |"
+  },
+  {
+   "old": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, `recovery_case`, a deviation row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | s17, BR8, BR9 |",
+   "new": "| X9 | A component, a statement or a test reaches a `v_ace_*` view, `recovery_case`, a deviation row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC10, TC-S1-E4011-APP-01, s17, BR8, BR9 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Access refused without the right (exception X2)\n    Given the role does not hold Treatment and offer U\n    When the role calls the route operation\n    Then the system refuses with 403 before any read or write and no record is written\n    And the user sees MSG-P4-002\n\n  Scenario: AC4 No change, nothing recorded (exception X3)\n    Given the recompute finds no change to the picture\n    When the step runs\n    Then nothing is recorded, the reopen is not needed and the case state stays\n\n  Scenario: AC5 Case not open, step refused (exception X4)\n    Given the case is closed, cancelled, merged or in a legal hold\n    When the step runs\n    Then the step does not run, nothing is recorded and the state is reported to the parent\n\n  Scenario: AC6 Stale ACE data product holds the step (exception X5)\n    Given the ACE data product behind the payments or the appraisal is stale\n    When the step runs\n    Then the step holds, writes nothing and shows the data date with MSG-P1-001\n    And it resumes on a fresh answer\n\n  Scenario: AC7 Consumed service unavailable (exception X6)\n    Given rwb-decision, rwb-deviation, rwb-case or rwb-source-data does not answer inside 2 s or its breaker is open\n    When the step runs\n    Then the step waits and retries on the workflow's own schedule\n    And nothing is written and the caller sees 503 with the platform envelope\n\n  Scenario: AC8 Request invalid (exception X7)\n    Given a required element of the request is absent or the reason code is not one of its list\n    When the command is submitted\n    Then 422 is returned before the step runs and no record is written\n    And the user sees MSG-GEN-001\n\n  Scenario: AC9 Repeated command (exception X8)\n    Given the same command is submitted twice with the same Idempotency-Key\n    When the repeat arrives\n    Then one record is written, one answer is given and the stored answer is returned\n    And the repeat is counted\n\n  Scenario: AC10 Boundary held (exception X9)\n    Given a component, a statement or a test reaches a v_ace_* view, recovery_case, a deviation row or another service's schema\n    When the build runs\n    Then the grant refuses the statement and the boundary test fails the build\n    And nothing is released, no event is published and no name, address, contact value or identity number is written"
+  },
+  {
+   "old": "| VR-S1-011-1 | Required field empty | MSG-GEN-001 Enter {field}. |",
+   "new": "| BR12 (VR-S1-011-1) | Required field empty | MSG-GEN-001 Enter {field}. |"
+  },
+  {
+   "old": "| BR-S1-011 | No value a business person may change is written in code; it is read from reference data with its version | None |",
+   "new": "| BR13 (BR-S1-011) | No value a business person may change is written in code; it is read from reference data with its version | None |"
+  },
+  {
+   "old": "| R-UNI-02 | A part payment that changes the exposure band: recompute the segment and re-run the owner ladder and the hard gates | None |",
+   "new": "| BR14 (R-UNI-02) | A part payment that changes the exposure band: recompute the segment and re-run the owner ladder and the hard gates | None |"
+  },
+  {
+   "old": "| R-UNI-22 | The account is re-aged or reclassified upstream: recompute the segment, re-run the gates, record the change | None |",
+   "new": "| BR15 (R-UNI-22) | The account is re-aged or reclassified upstream: recompute the segment, re-run the gates, record the change | None |"
+  },
+  {
+   "old": "| R-UNI-38 | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |",
+   "new": "| BR16 (R-UNI-38) | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |"
+  },
+  {
+   "old": "| R-UNI-39 | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |",
+   "new": "| BR17 (R-UNI-39) | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |"
+  },
+  {
+   "old": "| R-UNI-40 | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |",
+   "new": "| BR18 (R-UNI-40) | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |"
+  },
+  {
+   "old": "| R-DEV-19 | A deviation re-routes the case: recompute the segment and re-run the hard gates | None |",
+   "new": "| BR19 (R-DEV-19) | A deviation re-routes the case: recompute the segment and re-run the hard gates | None |"
+  },
+  {
+   "old": "| BR11 | No person name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log, a data-product call or a workflow input | Template and Rules v1 §R7.2 (s17) |",
+   "new": "| BR11 | No person name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log, a data-product call or a workflow input | Template and Rules v1 §R7.2 (s17) |\n\nCoverage of BR1 to BR11: BR1 by AC6 and AC10; BR2 and BR3 by AC1 and TC-E4-011-01; BR4 by AC2, TC-E4-011-02 and TC-E4-011-04; BR5 by AC5 and TC-E4-011-07; BR6 by AC4 and TC-E4-011-06; BR7 by AC10 and TC-S1-E4011-APP-01; BR8 by AC9 and TC-E4-011-11; BR9 by AC10, TC-S1-E4011-APP-01 and TC-S1-E4011-APP-02; BR10 and BR11 by AC10 and TC-S1-E4011-APP-01."
+  },
+  {
+   "old": "- The reason codes of the reopen and the route codes of `LOV-ROUTE` at their version in force, read as a list and never enumerated in code.",
+   "new": "- The reason codes of the reopen and the route codes of `LOV-ROUTE` at their version in force, read as a list and never enumerated in code. The reference data is read on the reference-data contract (DP-06, DP-07)."
+  },
+  {
+   "old": "- No parameter is named in the sources for the step's timeout or for what counts as a change, and no S1 rule package is in force (GAP-2642; ASM-4350).",
+   "new": "- No parameter is named in the sources for the step's timeout or for what counts as a change, and no S1 rule package is in force (GAP-2642; ASM-4350). The parameters the step reads are Not specified in the source documents (DOR-RWB-S1-E4011-APP-20)."
+  },
+  {
+   "old": "7. The boundary test: no statement outside `rwb_valuation`, no `v_ace_*` read, no write to `rwb_case`, `rwb_decision`, `rwb_deviation` or `rwb_source_data`, and no outbox row (X9, BR9, BR10).",
+   "new": "7. The boundary test: no statement outside `rwb_valuation`, no `v_ace_*` read, no write to another service's schema, and no outbox row (X9, BR9, BR10)."
+  },
+  {
+   "old": "**Database and migrations.** No Flyway file.",
+   "new": "**Database and migrations.** This service owns the schema `rwb_valuation` only. No Flyway file."
+  },
+  {
+   "old": "| TC-S1-E4011-APP-01 | The boundary: no `v_ace_*` read, no foreign schema write, no deviation row and no published event | Component | The build scan of step 10, plus an outbox that must stay empty |",
+   "new": "| TC-S1-E4011-APP-01 | The boundary: no `v_ace_*` read, no foreign schema write, no deviation row and no published event | Component | The build scan of step 10, plus an outbox that must stay empty |\n| TC-E4-011-05 | Contract: the operations, events and activities of section 12 match their contract documents | Component | The contract fakes of the operations of section 12.1 and 12.2 and the consumed reads of section 12.8 |\n| TC-S1-E4011-APP-02 | Boundary: each table of section 12.7 is written only in its owner's schema and no other table is read or written (ASM-3438) | Component | The tables of section 12.7 and the build scan of step 7 |\n| TC-E4-011-06 | AC4: the recompute finds no change; nothing is recorded and the case state stays | Component | Case `RC-2026-001111` with the picture unchanged |\n| TC-E4-011-07 | AC5: a closed, cancelled, merged or legal-hold case is refused and nothing is recorded | Component | Case `RC-2026-001111` in each of the four states |\n| TC-E4-011-08 | AC6: a stale ACE data product holds the step and shows its data date with MSG-P1-001 | Component | The rwb-source-data payment fake with a stale product |\n| TC-E4-011-09 | AC7: a consumed service does not answer inside 2 s or its breaker is open; nothing is written and 503 is returned | Component | The rwb-deviation fake with no answer beyond 2 s and an open breaker |\n| TC-E4-011-10 | AC8: a required element absent or a reason code outside its list; 422 before the step runs | Component | A request with a required element absent and one with a reason code outside its list |\n| TC-E4-011-11 | AC9: the same command submitted twice with the same Idempotency-Key gives one record | Component | Case `RC-2026-001111` with the same command submitted twice |"
+  },
+  {
+   "old": "| Source | Reference | Used in |\n|---|---|---|",
+   "new": "| Source | Reference | Used in | Feature | L3 process |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| Legacy story | RWB-E4-011, disposition Split (rework); AC1 and AC2 owned word for word by this story | 1, 7, 16 |",
+   "new": "| Legacy story | RWB-E4-011, disposition Split (rework); AC1 and AC2 owned word for word by this story | 1, 7, 16 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| Feature | FEAT-VAL-11 Reconsider the route after new information, module S1, epic E4, depends on FEAT-VAL-07 | 1, 2, 3 |",
+   "new": "| Feature | FEAT-VAL-11 Reconsider the route after new information, module S1, epic E4, depends on FEAT-VAL-07 | 1, 2, 3 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| FSD S1 v3 | A2.11.1 intent and metric; A2.11.2 steps, integration points and prerequisite; A2.11.3.1 VR-S1-011-1 and BR-S1-011; A2.11.3.3 roles; AC-S1-011-01; AC-EXC-S1-011-01 and -02; SCR-13 | 2, 3, 4, 5, 8, 14, 15 |",
+   "new": "| FSD S1 v3 | A2.11.1 intent and metric; A2.11.2 steps, integration points and prerequisite; A2.11.3.1 VR-S1-011-1 and BR-S1-011; A2.11.3.3 roles; AC-S1-011-01; AC-EXC-S1-011-01 and -02; SCR-13 | 2, 3, 4, 5, 8, 14, 15 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| TSD S1 v2 | T2 components; T3.1 `valuation` and `score`; T3.2 `LOV-ROUTE`; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12, 13, 16 |",
+   "new": "| TSD S1 v2 | T2 components; T3.1 `valuation` and `score`; T3.2 `LOV-ROUTE`; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12, 13, 16 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| API specification v4 | `POST /cases/{caseId}/route` with `RouteRequest` and `Approval`; `GET /cases/{caseId}/recommendation` with `Recommendation`; `GET /data-products/{productCode}/records`; `POST /cases/{caseId}/deviations` (S8) | 11, 12.1, 12.2, 12.8 |",
+   "new": "| API specification v4 | `POST /cases/{caseId}/route` with `RouteRequest` and `Approval`; `GET /cases/{caseId}/recommendation` with `Recommendation`; `GET /data-products/{productCode}/records`; `POST /cases/{caseId}/deviations` (S8) | 11, 12.1, 12.2, 12.8 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| Logical data model | DF-CAS-036 to DF-CAS-045, DF-ACE-043 to DF-ACE-054, DF-COL-021 to DF-COL-025, DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-CAS-001 to DF-CAS-023 | 11 |",
+   "new": "| Logical data model | DF-CAS-036 to DF-CAS-045, DF-ACE-043 to DF-ACE-054, DF-COL-021 to DF-COL-025, DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-CAS-001 to DF-CAS-023 | 11 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| Routing logic | R-UNI-02, R-UNI-22, R-UNI-38, R-UNI-39 and R-UNI-40, R-DEV-19; the D6 states `ROUTE_D6_REOPEN` and `BACK_TO_ROUTE_DECISION`; no S1 route rule is in force | 4, 8, 9, 14 |",
+   "new": "| Routing logic | R-UNI-02, R-UNI-22, R-UNI-38, R-UNI-39 and R-UNI-40, R-DEV-19; the D6 states `ROUTE_D6_REOPEN` and `BACK_TO_ROUTE_DECISION`; no S1 route rule is in force | 4, 8, 9, 14 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| Epics 3 to 8 specification | E4 FEAT-VAL-11 row, depends on FEAT-VAL-07 | 1, 3 |",
+   "new": "| Epics 3 to 8 specification | E4 FEAT-VAL-11 row, depends on FEAT-VAL-07 | 1, 3 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 |",
+   "new": "| Patterns | DP-03, DP-05, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| Gaps and assumptions | GAP-2642 to -6; ASM-4350 to -6 | 1, 3, 4, 11, 12, 13, 16 |",
+   "new": "| Gaps and assumptions | GAP-2642 to -6; ASM-4350 to -6 | 1, 3, 4, 11, 12, 13, 16 | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  },
+  {
+   "old": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | all |",
+   "new": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-020, ADR-022; D-RCV-60 | all | FEAT-VAL-11 | Not specified in the source documents (DOR-RWB-S1-E4011-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19089",
+   "item": "DOR-RWB-S1-E4011-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16",
+   "target": "",
+   "change": "Added TC-E4-011-05 contract test and TC-S1-E4011-APP-02 boundary test for the section 12.7 tables (ASM-3438) to section 16.",
+   "note": "Test Cases v8 workbook rows for TC-E4-011-01 to -04 and TC-S1-E4011-APP-01 are another document; not edited here."
+  },
+  {
+   "ruling": "R-19090",
+   "item": "DOR-RWB-S1-E4011-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added Feature and L3 process columns to section 18; Feature is FEAT-VAL-11 on all eleven rows, L3 process is Not specified.",
+   "note": "L3 process value is not in the source documents; cell carries the Not specified marker."
+  },
+  {
+   "ruling": "R-19091",
+   "item": "DOR-RWB-S1-E4011-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Configuration bullets now name the reference-data contract (DP-06, DP-07) and state that the step's parameters are Not specified.",
+   "note": "Parameters are not named in any source; marked as Not specified (DOR-RWB-S1-E4011-APP-20)."
+  },
+  {
+   "ruling": "R-19092",
+   "item": "DOR-RWB-S1-E4011-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 7 no longer names other schemas; database paragraph states this service owns rwb_valuation only.",
+   "note": "Other schemas are now referred to only as another service's schema."
+  },
+  {
+   "ruling": "R-19093",
+   "item": "DOR-RWB-S1-E4011-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC3 to AC10 in section 7 for exceptions X2 to X9; added TC-E4-011-06 to -11; section 5 Covered by now lists the AC IDs.",
+   "note": "AC3 uses existing TC-E4-011-03 and AC10 uses TC-S1-E4011-APP-01; X1 unchanged."
+  },
+  {
+   "ruling": "R-19094",
+   "item": "DOR-RWB-S1-E4011-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Assigned BR12 to BR19 to the eight rule rows without a BR ID; added coverage line mapping BR1 to BR11 to AC and TC rows.",
+   "note": "Coverage uses the new AC4 to AC10 and TC rows; AC10 also covers no event and no personal data."
+  },
+  {
+   "ruling": "R-19095",
+   "item": "DOR-RWB-S1-E4011-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Add DF-COL-021 and DF-COL-025 to LDM v9; add decision_record as a field or entity in LDM v9 or Data Classification v5.",
+   "note": "Story keeps legacy AC wording as written; decision_record is the library object named in section 12.7."
+  },
+  {
+   "ruling": "R-19096",
+   "item": "DOR-RWB-S1-E4011-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 text for MSG-P1-001 is not in the source documents; legacy wording kept until reconciled."
+  },
+  {
+   "ruling": "R-23353",
+   "item": "GAP-2643",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "API Specification v4",
+   "change": "Publish the deviation read of a case, the rule-in-force, segment and gate read of rwb-decision, and the product codes of v_ace_payment and the accepted appraisal.",
+   "note": "Owners S8, P7 and P1 publish; story keeps the placeholder and GAP-2643 (ASM-4351)."
+  },
+  {
+   "ruling": "R-23355",
+   "item": "GAP-2645",
+   "status": "Cross-document",
+   "section": "11, 12.7",
+   "target": "TSD S1 v2 (T3.1) and Ownership Map",
+   "change": "Name the store of the earlier decision and its versions; if it is a table, the DB story of rwb_valuation creates it in its Flyway sequence.",
+   "note": "Until named, the local decision record holds the reopen and the earlier decision reference (ASM-4353)."
+  }
+ ]
+}

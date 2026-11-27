@@ -1,0 +1,76 @@
+{
+ "edits": [
+  {
+   "old": "Then the stored file of \"IN-0011\" is unchanged and only document_field rows are written",
+   "new": "Then the stored file of \"IN-0011\" is unchanged and only document_field rows are written\n\n  Scenario: AC16 A caller without a valid token or without Documents R is refused (new, D-RCV-60)\n    When a caller without a valid token calls GET /api/recovery/document/v1/documents/DOC-0010\n    Then the response is 401 and no field value is returned\n    When a caller with a valid token and without Documents R calls GET /api/recovery/document/v1/documents/DOC-0010\n    Then the response is 403 and no field value is returned\n\n  Scenario: AC17 A retried extraction attempt that times out is not written partially (new, D-RCV-60)\n    Given the extractor does not answer within 60 seconds on attempt 1 for item \"IN-0012\" and answers on attempt 2\n    When extractStep runs\n    Then the activity retries and extracted_fields of \"IN-0012\" holds one set of fields\n\n  Scenario: AC18 A status change the model does not allow is refused (new, D-RCV-60)\n    Given item \"IN-0001\" has extract_status \"DONE\"\n    When an attempt sets extract_status of \"IN-0001\" to \"PENDING\"\n    Then the change is refused and extract_status stays \"DONE\""
+  },
+  {
+   "old": "| TC-E1-053-18 | AC15, BR10 | End to end | Write-once stored document IN-0011 |",
+   "new": "| TC-E1-053-18 | AC15, BR10 | End to end | Write-once stored document IN-0011 |\n| TC-E1-053-19 | AC16 | Component | Caller without a valid token and caller without Documents R call GET /documents/{documentId}; 401 and 403 |\n| TC-E1-053-20 | AC17, BR7 | End to end | Extractor stub timing out on attempt 1 and answering on attempt 2 |\n| TC-E1-053-21 | AC18 | End to end | Item IN-0001 at extract_status DONE; attempt to set PENDING |"
+  },
+  {
+   "old": "| TC-E1-053-14 | Access | Component | RW-REFADM user (Documents -) calls GET /documents/{documentId}; refused with MSG-P4-002 |",
+   "new": "| TC-E1-053-14 | AC14, Access | Component | RW-REFADM user (Documents -) calls GET /documents/{documentId}; refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| BR10 | Extraction never changes the stored file, so a write-once document is not altered | CTL-12 |",
+   "new": "| BR10 | Extraction never changes the stored file, so a write-once document is not altered | CTL-12; AC15, TC-E1-053-18 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28996",
+   "item": "GAP-1008",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-API catalogue and AsyncAPI fragment of rwb-document",
+   "change": "Publish the resource names, property sets, paths and DocumentFieldsExtracted payload of this baseline as version 1; allow additive change only within major version 1.",
+   "note": "Story already names the 12.1 operations and 12.3 payload; the shapes must be fixed in the API catalogue and AsyncAPI fragment."
+  },
+  {
+   "ruling": "R-31159",
+   "item": "NEWAC-RWB-P5-E1053-APP-AC14",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X9 covered by AC14; TC-E1-053-14 now covers AC14 and TC-E1-053-17 is the AC14 test."
+  },
+  {
+   "ruling": "R-31160",
+   "item": "NEWAC-RWB-P5-E1053-APP-AC15",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR10 now cites AC15 and TC-E1-053-18 in its Source cell."
+  },
+  {
+   "ruling": "R-31161",
+   "item": "NEWAC-RWB-P5-E1053-APP-AC16",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC16 added for 401 and 403 of the provided operations; test TC-E1-053-19 added in section 16."
+  },
+  {
+   "ruling": "R-31162",
+   "item": "NEWAC-RWB-P5-E1053-APP-AC17",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC17 added for a retried attempt that times out; test TC-E1-053-20 added in section 16."
+  },
+  {
+   "ruling": "R-31163",
+   "item": "NEWAC-RWB-P5-E1053-APP-AC18",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC18 added for a disallowed extract_status change; test TC-E1-053-21 added in section 16."
+  }
+ ]
+}

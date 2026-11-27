@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "the Thai text follows DL10.",
+   "new": "the Thai text follows DL10. Open decision DL10 is still open; its assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 apply until it closes."
+  },
+  {
+   "old": "| X3 | The token carries no Recovery role, or no second factor | No answer is given: 401 before the policy is read; one refusal entry with the reason | MSG-P4-001 | BR3 |",
+   "new": "| X3 | The token carries no Recovery role, or no second factor | No answer is given: 401 before the policy is read; one refusal entry with the reason | MSG-P4-001 | BR3, AC10 |"
+  },
+  {
+   "old": "| X5 | The caller asks for the identity number in clear | The answer marks it `masked`, because the ACE view exposes `id_no_masked` and `id_no_last4` only | None | BR5 |",
+   "new": "| X5 | The caller asks for the identity number in clear | The answer marks it `masked`, because the ACE view exposes `id_no_masked` and `id_no_last4` only | None | BR5, AC11 |"
+  },
+  {
+   "old": "| X6 | Two roles of the caller conflict (for example RW-SECADM with a business role) | The sign-in access check refuses the session from the `role_conflict` rows this service holds; no authorise request is made | MSG-P4-006 | BR10 |",
+   "new": "| X6 | Two roles of the caller conflict (for example RW-SECADM with a business role) | The sign-in access check refuses the session from the `role_conflict` rows this service holds; no authorise request is made | MSG-P4-006 | BR10, AC12 |"
+  },
+  {
+   "old": "| X8 | The reference list of scope or capability is not available | No answer is given rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | BR10 |",
+   "new": "| X8 | The reference list of scope or capability is not available | No answer is given rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | BR10, AC13 |"
+  },
+  {
+   "old": "| X9 | The caller is an agent or a service identity, not a person | The same checks run under the service identity's roles; a service identity with no role is refused 401 | MSG-P4-001 | BR3 |",
+   "new": "| X9 | The caller is an agent or a service identity, not a person | The same checks run under the service identity's roles; a service identity with no role is refused 401 | MSG-P4-001 | BR3, AC14 |"
+  },
+  {
+   "old": "    Then a field with no row in \"MASK-SIT-02\" comes back \"masked\"",
+   "new": "    Then a field with no row in \"MASK-SIT-02\" comes back \"masked\"\n\n  Scenario: AC10 A token with no Recovery role or no second factor is refused before the policy is read (new, D-RCV-60)\n    Given a test user holds a token with no Recovery role or no second factor\n    When the caller asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and action \"open the case record\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n    Then the permission matrix is not read for the request\n    Then one refusal entry with the reason is written\n\n  Scenario: AC11 The identity number is never clear (new, D-RCV-60)\n    Given test user \"U-81\" holds RW-CASEOWN and owns case \"RW-2026-000701\"\n    When \"U-81\" asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and asks for the identity number DF-PTY-007 in clear\n    Then the answer marks DF-PTY-007 \"masked\" under masking version \"MASK-SIT-01\"\n    Then the answer carries no identity number value and no clear state\n\n  Scenario: AC12 A conflicting role pair refuses the session (new, D-RCV-60)\n    Given a test user holds RW-SECADM together with a business role that conflicts with it in the role_conflict rows of this service\n    When the user signs in to the Workbench\n    Then the sign-in access check refuses the session with message MSG-P4-006\n    Then no authorise request is made for the session\n\n  Scenario: AC13 A reference list that is not available answers 503 and guesses nothing (new, D-RCV-60)\n    Given the reference list of scope or capability is not available\n    Given test user \"U-81\" holds RW-CASEOWN and owns case \"RW-2026-000701\"\n    When \"U-81\" asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and field ID DF-PTY-007\n    Then the answer is status 503 with message MSG-GEN-006\n    Then no scope or capability is guessed and the refusal is recorded as one AC-DENY decision record\n\n  Scenario: AC14 An agent or service identity is checked under its own roles (new, D-RCV-60)\n    Given a service identity holds no Workbench role\n    When the service identity asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and action \"open the case record\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n    Then the same checks run under the service identity's roles\n\n  Scenario: AC15 The case facts arrive in the request and no table of another schema is read (new, D-RCV-60)\n    Given test user \"U-81\" holds RW-CASEOWN and owns case \"RW-2026-000701\"\n    When \"U-81\" asks for case \"RW-2026-000701\", area \"CASE_RECORD\", right \"R\" and the request carries the case facts of the case\n    Then the service reads no table of recovery_case, case_account, case_party, interaction, document or queue\n    Then the answer and the decision record carry no personal value and no complete copy of the case"
+  },
+  {
+   "old": "AC1 to AC9 are the criteria this story owns;",
+   "new": "AC1 to AC15 are the criteria this story owns;"
+  },
+  {
+   "old": "In AC9 the cached answer is proved to change on the policy event and to need no deployment.",
+   "new": "In AC9 the cached answer is proved to change on the policy event and to need no deployment. AC10 and AC14 prove BR3, AC12 and AC13 prove BR10, AC15 proves BR8 and AC9 proves BR9."
+  },
+  {
+   "old": "Field IDs are those in the Logical Data Model and Data Dictionary v9.",
+   "new": "Field IDs are those in the Logical Data Model and Data Dictionary v9. The criteria and the test data of this story read no `v_ace_*` view; the view columns named above identify the field IDs only, and the values belong to P1."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16646",
+   "item": "DOR-RWB-P4-E1023-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "DL10 open decision stated in §14 with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 that apply until it closes."
+  },
+  {
+   "ruling": "R-16647",
+   "item": "DOR-RWB-P4-E1023-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC10 to AC14 added in §7 and §5 Covered by names them; §16 TC rows for AC10 to AC14 lie outside this chunk."
+  },
+  {
+   "ruling": "R-16648",
+   "item": "DOR-RWB-P4-E1023-APP-4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "BR3 by AC10 and AC14; BR10 by AC12 and AC13; BR8 by new AC15; BR9 by AC9, mapped in §7 note. §16 TC rows outside this chunk."
+  },
+  {
+   "ruling": "R-16649",
+   "item": "DOR-RWB-P4-E1023-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Define DF-REF-039 as role.entra_group; confirm or remove P2 names id_no_token and value_token as fields or entities.",
+   "note": "Story §11 now states the criteria and test data read no v_ace_* view. DF-REF-039 and the P2 names need the source documents."
+  },
+  {
+   "ruling": "R-16650",
+   "item": "DOR-RWB-P4-E1023-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Message standard (MSG-P4-006 entry)",
+   "change": "Align MSG-P4-006 to one meaning; this story uses it for a role conflict (X6, §14).",
+   "note": "Story message meaning kept; the standard's different meaning of MSG-P4-006 needs aligning."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Business requirements document",
+   "change": "State in section 8.2 that Epic 1 stories keep the business-epic wave; delivery lead confirms the wave per story at build sequencing.",
+   "note": "This rwb-access story is wave 1 and is not one of the three services named; the rule belongs in the BRD."
+  },
+  {
+   "ruling": "R-22023",
+   "item": "GAP-0348",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-ITG-E1023-ITG",
+   "change": "Fix the case-scoped deviation read, treat rwb-deviation as available in SIT for the wave 1 run, and keep the W1J01 synthetic fixture.",
+   "note": "Gap sits in the integration slice; AC18 and its fixture are not in this story."
+  },
+  {
+   "ruling": "R-22024",
+   "item": "GAP-0692",
+   "status": "Cross-document",
+   "section": "",
+   "target": "RWB-PLT-DB; rwb-case story",
+   "change": "Name the rwb-case login per DP-02 from RWB-PLT-DB when issued; grant SELECT, INSERT and UPDATE on schema rwb_case only.",
+   "note": "No rwb-case login is named in this story, which reads rwb_access only."
+  },
+  {
+   "ruling": "R-22025",
+   "item": "GAP-0695",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "rwb-source-data contract (P1)",
+   "change": "Add the interaction read with its path and page and size parameters; fix timeline default order as occurred_at descending with page size from a parameter.",
+   "note": "This story reads contact history through the P1 ledger contract (BR8); the paging contract belongs to P1."
+  },
+  {
+   "ruling": "R-22026",
+   "item": "GAP-0694",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "RWB-P4-E1039-CON",
+   "change": "Publish the masking policy request and response keyed by view field ID with a masked flag and the source column per field.",
+   "note": "The answer carries markers only (BR4); the masking contract shape is not defined in this story."
+  }
+ ]
+}

@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "BR10 to BR14 are built here.",
+   "new": "BR10 to BR14 are built here. The case-side audit read keeps the retention of the decision records it summarises and holds no retention of its own. AC5 is the run this story tests for ALLOC-2026.12 (loaded 2026-12-08, verify date 2026-12-08, approved 2026-12-09, valid from 2026-12-10); the approval on 2026-12-02 in AC1 is a separate reading for the business analyst to confirm before SIT. The scope is rule package versions; the reference-data change checklist and its report stay with RWB-E1-043."
+  },
+  {
+   "old": "| X4 | The decision record cannot be written | The state change, the record and the outbox row are one transaction, so nothing moves and the case is retried | MSG-P7-003 | AC10 |",
+   "new": "| X4 | The decision record cannot be written | The state change, the record and the outbox row are one transaction, so nothing moves and the case is retried | MSG-P7-003 | AC10, AC17 |"
+  },
+  {
+   "old": "| X8 | rwb-decision does not answer the change report or the decision log inside the REST budget | One hop and the 2 s timeout apply; the call answers 503 and the case-side audit read still answers from rwb_case alone | None | AC1, AC10 |",
+   "new": "| X8 | rwb-decision does not answer the change report or the decision log inside the REST budget | One hop and the 2 s timeout apply; the call answers 503 and the case-side audit read still answers from rwb_case alone | None | AC1, AC10, AC18 |"
+  },
+  {
+   "old": "    Then the impact summary reads \"412 open Mortgage cases in the BKK queue\"",
+   "new": "    Then the impact summary reads \"412 open Mortgage cases in the BKK queue\"\n\n  Scenario: AC17 Decision record write retried (exception X4)\n    Given the decision record of a case decided under ALLOCATION cannot be written\n    When the case is decided\n    Then nothing moves, the state change, the record and the outbox row are not written and the case is retried\n\n  Scenario: AC18 Consumed call times out or fails (exception X8)\n    Given the rwb-decision contract mock fails the change report call or does not answer inside the REST budget of 2 s\n    When \"U-AUD-01\" reads the change report for 2026-12-01 to 2026-12-31\n    Then the call answers 503 and the case-side audit read still answers from rwb_case alone\n\n  Scenario: AC19 Status change the model does not allow is refused (BR3)\n    Given ALLOCATION version \"ALLOC-2026.13\" has status \"LOADED\" and no approver\n    When the rwb-decision contract mock is asked to move \"ALLOC-2026.13\" straight to IN_FORCE\n    Then the change is refused and \"ALLOC-2026.13\" stays \"LOADED\""
+  },
+  {
+   "old": "| TC-E2-041-11 | Access; BR13 | Component | RW-CASEOWN (no Rules and parameters right) reads the audit read; refused with MSG-P4-002 |",
+   "new": "| TC-E2-041-11 | Access; X7; BR13 | Component | RW-CASEOWN (no Rules and parameters right) reads the audit read; refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E2-041-18 | Rule; BR14 | Component | Impact summary counts 412 open Mortgage cases of queue MTG-BKK-CO from the rwb-case case list (AC16) |",
+   "new": "| TC-E2-041-18 | Rule; BR14 | Component | Impact summary counts 412 open Mortgage cases of queue MTG-BKK-CO from the rwb-case case list (AC16) |\n| TC-E2-041-19 | Exception X4 | Component | Decision record cannot be written; nothing moves and the case is retried (AC17) |\n| TC-E2-041-20 | Exception X8 | Component | Change report call fails or does not answer in 2 s; 503, and the audit read answers from rwb_case alone (AC18) |\n| TC-E2-041-21 | Rule; BR3 | Component | LOADED version moved straight to IN_FORCE; refused and stays LOADED (AC19) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28858",
+   "item": "GAP-0720",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Contract README (case-side audit read contract)",
+   "change": "State the deprecation window for a published field and the retention of the contract fakes; neither is in the source documents.",
+   "note": "Story side done: audit read retention follows the decision records it summarises (section 8). Other two windows open."
+  },
+  {
+   "ruling": "R-28859",
+   "item": "GAP-2415",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "run Change Register",
+   "change": "Record the rename of rwb.p3.rule-change-report and the move of the checklist, two operations and the report to rwb-decision; keep the legacy flag as a parameter read.",
+   "note": "Split already in story: section 7 assigns steps 1 to 6 to P7 rwb-decision. Legacy story not edited."
+  },
+  {
+   "ruling": "R-28860",
+   "item": "GAP-2416",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Section 8 now reads AC5 as the run this story tests (load 2026-12-08, verify 2026-12-08, approval 2026-12-09, valid from 2026-12-10).",
+   "note": "AC1 2026-12-02 approval kept as a separate reading for the BA to confirm before SIT."
+  },
+  {
+   "ruling": "R-28861",
+   "item": "GAP-0719",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Section 8 records rule-package scope for RWB-E2-041 and that the reference-data checklist stays with RWB-E1-043.",
+   "note": "FSD A2.16 reference-data example not copied; scope recorded in story."
+  },
+  {
+   "ruling": "R-30719",
+   "item": "NEWAC-RWB-P3-E2041-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "TC-E2-041-11 now covers X7 as well as BR13; X7 is covered by AC11 and TC-E2-041-13.",
+   "note": "X7 row already maps to AC11; tagged TC-11 with X7 so the exception is no longer covered by TC-11 alone."
+  },
+  {
+   "ruling": "R-30720",
+   "item": "NEWAC-RWB-P3-E2041-APP-AC12",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "No edit: AC12 to AC16 and TC-E2-041-14 to TC-E2-041-18 already cover BR2, BR7, BR9, BR12 and BR14.",
+   "note": "Criteria and test rows already present in sections 7 and 16."
+  },
+  {
+   "ruling": "R-30721",
+   "item": "NEWAC-RWB-P3-E2041-APP-AC13",
+   "status": "Not applied",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Status codes per operation are not named in the source documents; adding 401, 403 or 404 mappings would invent values."
+  },
+  {
+   "ruling": "R-30722",
+   "item": "NEWAC-RWB-P3-E2041-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC17 (X4 decision record write retried) and TC-E2-041-19; X4 row now covered by AC17.",
+   "note": "Timeout half of the item is covered by AC18 and TC-E2-041-20 (X8)."
+  },
+  {
+   "ruling": "R-30723",
+   "item": "NEWAC-RWB-P3-E2041-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC18 (consumed call fails or times out, 503, audit read answers from rwb_case alone) and TC-E2-041-20; X8 row now covered by AC18.",
+   "note": "Covers the failed-call case alongside the timeout."
+  },
+  {
+   "ruling": "R-30724",
+   "item": "NEWAC-RWB-P3-E2041-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC19 (LOADED version moved straight to IN_FORCE is refused, BR3) and TC-E2-041-21.",
+   "note": "Disallowed transition covered; transition set taken from BR3 and the legacy statuses."
+  }
+ ]
+}

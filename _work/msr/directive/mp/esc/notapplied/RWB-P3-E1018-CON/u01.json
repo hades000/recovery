@@ -1,0 +1,113 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E1018-CON",
+ "unit": "u01",
+ "rulings": [
+  "R-00684",
+  "R-04945",
+  "R-15793",
+  "R-21976",
+  "R-21977",
+  "R-21979",
+  "R-21980",
+  "R-21981"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 2
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-00684",
+     "item": "CG-ALL-3474",
+     "status": "Cross-document",
+     "section": "2",
+     "target": "Service Template Specification v1 (service naming rule)",
+     "change": "Rule the last Java package segment for rwb-case, because `case` is a Java reserved word, and publish it; the story then copies the ruled segment in place of th.co.scb.ace.workbench.recovery.case.",
+     "note": "`case` is a Java reserved word; the rwb-case package segment is in neither the story nor the excerpts, so the ruling stays with the Service Template Specification v1 (CG-ALL-3474)."
+    },
+    {
+     "ruling": "R-04945",
+     "item": "DOR-RWB-P3-E1018-CON-14",
+     "status": "Cross-document",
+     "section": "",
+     "target": "The signed epic design record for the service epic RWB-SVC-P3",
+     "change": "Record the signed epic design sign-off for RWB-SVC-P3 that DoR item 14 asks for.",
+     "note": "Neither the story nor the excerpts hold a signed epic design; the sign-off can only be confirmed on the epic design record (DOR-RWB-P3-E1018-CON-14)."
+    },
+    {
+     "ruling": "R-15793",
+     "item": "DOR-RWB-P3-E1018-CON-9",
+     "status": "Cross-document",
+     "section": "14",
+     "target": "The standard message catalogue",
+     "change": "Issue contract-level message IDs that do not clash with the standard: MSG-P3-030, MSG-P3-031, MSG-P3-032 and MSG-P3-033 are used in §14 with meanings other than the standard's, and two further §14 IDs clash as well; §14 then copies the agreed IDs.",
+     "note": "detcheck flags four IDs plus two more in §14; the standard's meanings and the replacement IDs are in neither the excerpts nor the story (DOR-RWB-P3-E1018-CON-9)."
+    },
+    {
+     "ruling": "R-21976",
+     "item": "GAP-0343",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC10 and TC-P3-E1018-CON-19 assert rwb.case.CaseCreated.v1 and the P7 rwb.decision.DecisionRecorded.v1 ledger entry, per RWB-E1-018 AC1, Arch v5 slides 14/15 and DP-03."
+    },
+    {
+     "ruling": "R-21977",
+     "item": "GAP-0575",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC11 and TC-P3-E1018-CON-20 return one break row per key and view in the candidate answer, counted in the run log, with no table; settled in ASM-B-P1-07-E1018-5."
+    },
+    {
+     "ruling": "R-21979",
+     "item": "GAP-0573",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC12 and TC-P3-E1018-CON-21: P1 writes party_ext and account_ext through two PUTs by business key with all four flags; settled in ASM-B-P1-07-E1018-3."
+    },
+    {
+     "ruling": "R-21980",
+     "item": "GAP-0576",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC13 and TC-P3-E1018-CON-22 return product_group as read, unvalidated and unmapped; settled in ASM-B-P1-07-E1018-6."
+    },
+    {
+     "ruling": "R-21981",
+     "item": "GAP-0676",
+     "status": "Cross-document",
+     "section": "11, 12.1, 19",
+     "target": "openapi/rwb-case-v1.yaml (the rwb-case API file)",
+     "change": "Record the field-level schema agreed in the baseline review of RWB-P3-E1018-CON: required flags per operation, the page and sort parameter set of GET /cases, the caseNo pattern and the exact error codes per operation.",
+     "note": "The story fixes the field names and leaves the field-level detail to the baseline review (GAP-0676, ASM-1223); the schema itself belongs in the rwb-case API file."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then no CaseStateChanged event is emitted",
+     "new": "    Then no CaseStateChanged event is emitted\n\n  Scenario: AC10 The CaseCreated event and the decision record are asserted on the platform (new, D-RCV-60)\n    Given the ALS batch is seeded through the W1J01 harness\n    When DailyCaseRun creates a case\n    Then rwb.case.CaseCreated.v1 is published on rwb.case.events.v1 with caseId, caseNo, productGroup, accounts and businessDate\n    Then the decision is recorded through P7 as rwb.decision.DecisionRecorded.v1 on rwb.decision-record.v1 under DP-03\n\n  Scenario: AC11 A key and view with no row come back as a break row in the same answer (new, D-RCV-60)\n    Given a key and a view of REC-05 with no matching row\n    When the candidate read answers\n    Then the same response carries one break row with keyType ACCOUNT or PERSON, businessKey, viewName and businessDate\n    Then the break rows are counted in the run log of the call and listed for the data steward and the ACE team\n    Then no dq_ table returns and no table is created for the break rows\n\n  Scenario: AC12 P1 writes the extension flags through two PUT operations by business key (new, D-RCV-60)\n    Given the exclusion screen records a decision on a case\n    When the screen confirms with its right and its audit entry\n    Then P1 writes party_ext and account_ext through two PUT operations by business key\n    Then the body carries all four party flags, so party_ext.vulnerable is always written by the caller and never defaulted by P1\n    Then a repeat of the same body leaves one row and a changed body replaces the flags on the same key with a version increment\n\n  Scenario: AC13 product_group is returned as read, never mapped and never validated (new, D-RCV-60)\n    Given v_ace_account.product_category holds a value\n    When the candidate row is returned\n    Then product_group is that value, unvalidated and unmapped\n    Then a value outside LOV-PRODUCT is returned as read and is never coerced, dropped or defaulted\n    Then any mapping, label or validation is the consumer's, through the rwb-case reference-data contract"
+    },
+    {
+     "old": "| TC-P3-E1018-CON-18 | AC9 | Component | A status change the model does not allow is refused with 409 and the error envelope; no CaseStateChanged event is emitted |",
+     "new": "| TC-P3-E1018-CON-18 | AC9 | Component | A status change the model does not allow is refused with 409 and the error envelope; no CaseStateChanged event is emitted |\n| TC-P3-E1018-CON-19 | AC10 | Component | The ALS batch is seeded through the W1J01 harness; rwb.case.CaseCreated.v1 is on rwb.case.events.v1 and the P7 DecisionRecorded entry is on rwb.decision-record.v1 |\n| TC-P3-E1018-CON-20 | AC11 | Component | A key and view with no row yields one break row with keyType, businessKey, viewName and businessDate; the run log counts it and no table is created |\n| TC-P3-E1018-CON-21 | AC12 | Component | P1 writes party_ext and account_ext through two PUT operations by business key; all four party flags are in the body; a repeat leaves one row and a changed body increments the version |\n| TC-P3-E1018-CON-22 | AC13 | Contract | product_group is the product_category value as read; MORTGAGE and HIRE_PURCHASE come back unchanged and a value outside LOV-PRODUCT is neither coerced nor dropped |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

@@ -1,0 +1,164 @@
+{
+ "edits": [
+  {
+   "old": "| ID | Trigger | What the harness asserts | Message | ITG test case |\n|---|---|---|---|---|",
+   "new": "| ID | Trigger | What the harness asserts | Message | ITG test case | Covered by |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "TC-E6-028-01-ITG (AC1) |",
+   "new": "TC-E6-028-01-ITG (AC1) | AC1 |"
+  },
+  {
+   "old": "exists for | None | TC-E6-028-02-ITG (AC2) |",
+   "new": "exists for | None | TC-E6-028-02-ITG (AC2) | AC2 |"
+  },
+  {
+   "old": "R-WO-15) | None | TC-E6-028-02-ITG (AC2) |",
+   "new": "R-WO-15) | None | TC-E6-028-02-ITG (AC2) | AC2 |"
+  },
+  {
+   "old": "TC-E6-028-03-ITG (AC3) |",
+   "new": "TC-E6-028-03-ITG (AC3) | AC3 |"
+  },
+  {
+   "old": "TC-E6-028-04-ITG (AC5) |",
+   "new": "TC-E6-028-04-ITG (AC5) | AC5 |"
+  },
+  {
+   "old": "TC-E6-028-05-ITG (AC6) |",
+   "new": "TC-E6-028-05-ITG (AC6) | AC6 |"
+  },
+  {
+   "old": "TC-E6-028-06-ITG (AC4) |",
+   "new": "TC-E6-028-06-ITG (AC4) | AC4 |"
+  },
+  {
+   "old": "Then the case answers APPROVED and the decision log holds the final call",
+   "new": "Then the case answers APPROVED and the decision-log read holds the final call"
+  },
+  {
+   "old": "And the decision log holds no entry for the sale selection",
+   "new": "And the decision-log read holds no entry for the sale selection"
+  },
+  {
+   "old": "    And no decision is recorded for the write-off and no case changes state",
+   "new": "    And no decision is recorded for the write-off and no case changes state\n\n  Scenario: AC7 A pack inside the write-off committee limit is routed to the write-off committee (new, D-RCV-60)\n    Given the write-off \"WO-SYN-000728\" sits inside the write-off committee limit\n    Then GET \"/api/recovery/decision/v1/decision-log?caseId={caseId}\" holds the routing to the write-off committee under R-WO-11\n    And the meeting of the write-off committee is scheduled for \"WO-SYN-000728\"\n    And GET \"/api/recovery/decision/v1/approvals\" holds no approval item for \"WO-SYN-000728\"\n\n  Scenario: AC8 A placement held for want of agency capacity stays at PLACEMENT_DECIDED and is not sold (new, D-RCV-60)\n    Given one case of the population is held for want of agency capacity\n    Then GET \"/api/recovery/case/v1/cases/{caseId}\" answers PLACEMENT_DECIDED for that case\n    And that case is in no lot of GET \"/api/recovery/debtsale/v1/debt-sale-lots/{lotId}\"\n    And that case is never reported SOLD_POST_CHARGEOFF\n\n  Scenario: AC9 Every call answers within its 2 s budget on the owner's base path (new, D-RCV-60)\n    Given each call of AC1 to AC8 is made once by the harness\n    Then each answer arrives within 2 s\n    And each call is one hop on the owner's base path \"/api/recovery/<short>/v1\" with no call made on another service's behalf"
+  },
+  {
+   "old": "The harness asserts these rules and changes none of them.",
+   "new": "Coverage of these rules in section 7: BR1 AC7; BR2 and BR3 AC2; BR4 and BR5 AC8; BR6 and BR7 AC1 and AC3; BR8 AC4 and AC5; BR9 AC3; BR10 AC9.\n\nThe harness asserts these rules and changes none of them."
+  },
+  {
+   "old": "| Depends on (build) | None |",
+   "new": "| Depends on (build) | RWB-S7-E6028-APP, RWB-P7-E6028-APP (not built yet; the harness starts on the contract fakes) |"
+  },
+  {
+   "old": "S7 takes the decision and moves the states, P7 holds the approval item",
+   "new": "S7 takes the decision and publishes its outcome (which service moves the case state is an open question with the P3 owner, GAP-1800), P7 holds the approval item"
+  },
+  {
+   "old": "Field IDs are those in the Logical Data Model and Data Dictionary v9.",
+   "new": "Field IDs are those in the Logical Data Model and Data Dictionary v9. Reference data: the write-off committee limit is read as a parameter on the approval item, and the rule catalogue is read through the decision entry; both come through the reference-data contracts DP-06 and DP-07."
+  },
+  {
+   "old": "The write-off table is S7's, the lot and its accounts are S6's",
+   "new": "The write-off table is S7's, the one table the Ownership Map holds (its four entity groups are eligibility, committee decision, posting and recovery after charge-off, with key fields Not specified in the source documents (GAP-1794)), the lot and its accounts are S6's"
+  },
+  {
+   "old": "| TC-E6-028-06-ITG | ITG AC4 | Integration | The decision record with its rule version, the central confirmation and the one entry per action |",
+   "new": "| TC-E6-028-06-ITG | ITG AC4 | Integration | The decision record with its rule version, the central confirmation and the one entry per action |\n| TC-E6-028-07-ITG | ITG AC7 | Integration | One pack inside the write-off committee limit, `WO-SYN-000728`, routed to the write-off committee |\n| TC-E6-028-08-ITG | ITG AC8 | Integration | One case held for want of agency capacity at PLACEMENT_DECIDED, outside any lot |\n| TC-E6-028-09-ITG | ITG AC9 | Component | Each call of AC1 to AC8, timed against the 2 s budget on the owner's base path |\n| TC-E6-028-10-ITG | §12 operations, events and activities | Contract | Each operation, event and activity of §12 against the published contract RWB-ITG-E6028-CON |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14553",
+   "item": "DOR-RWB-ITG-E6028-ITG-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-E6-028-10-ITG, a contract test for the §12 operations, events and activities",
+   "note": "Contract test row added to §16 for §12; the legacy TC copies remain as stated in §16."
+  },
+  {
+   "ruling": "R-14554",
+   "item": "DOR-RWB-ITG-E6028-ITG-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Build dependency row names RWB-S7-E6028-APP and RWB-P7-E6028-APP as not yet built",
+   "note": "Both builds named as unbuilt dependencies; the harness starts on the contract fakes as section 10 states."
+  },
+  {
+   "ruling": "R-14555",
+   "item": "DOR-RWB-ITG-E6028-ITG-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Reference data sentence names the limit parameter, the rule catalogue and the contracts DP-06 and DP-07",
+   "note": "Parameters and lists read by the harness are now named with the reference-data contracts DP-06 and DP-07."
+  },
+  {
+   "ruling": "R-14556",
+   "item": "DOR-RWB-ITG-E6028-ITG-3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added a Covered by column to the section 5 table mapping each exception path to its criterion",
+   "note": "Each exception path X1 to X7 is now tied to AC1 to AC6 in a Covered by column."
+  },
+  {
+   "ruling": "R-14557",
+   "item": "DOR-RWB-ITG-E6028-ITG-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "Added AC7 to AC9 for BR1, BR4 and BR5 and BR10, a coverage line in §8 and TC-E6-028-07 to 09 in §16",
+   "note": "Each rule BR1 to BR10 is now covered by a criterion and a test case; BR9 uses the DP09 check in AC3."
+  },
+  {
+   "ruling": "R-14558",
+   "item": "DOR-RWB-ITG-E6028-ITG-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Recovery Workbench Users Roles and Permissions v5",
+   "change": "Add role RW-OFF (Case officer, no Write-off and posting A) to the role list, or confirm the code the document holds",
+   "note": "Role RW-OFF is not in Users Roles and Permissions v5; the change belongs to that document."
+  },
+  {
+   "ruling": "R-14559",
+   "item": "DOR-RWB-ITG-E6028-ITG-7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Replaced the decision-log wording in AC2 and AC5 with decision-log read wording",
+   "note": "Criteria now name the decision-log read; no legacy job wording remains in §7 or §16."
+  },
+  {
+   "ruling": "R-22832",
+   "item": "GAP-1794",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Recovery Workbench Microservice Ownership Map v1 (Tables) and Logical Data Model",
+   "change": "Add rows for the four rwb_writeoff entity groups with key fields; the S7 DB story carries the rest of the table set",
+   "note": "§11 names the four groups and write_off as the one table; key fields stay unspecified; map rows belong to the Ownership Map."
+  },
+  {
+   "ruling": "R-22833",
+   "item": "GAP-1800",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "§10 states the state split as an open question with the P3 owner; S7 publishes its outcome",
+   "note": "Story now states the split as an open question with the P3 owner, so no state has two writers in the story."
+  },
+  {
+   "ruling": "R-22835",
+   "item": "GAP-1812",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Recovery Workbench Business Rules and Routing Logic v4 (R-WO-37 to R-WO-39)",
+   "change": "Re-scope R-WO-37 to R-WO-39 to consume ProceedsMatched (EV-25); the initial match stays open with the P8 owner",
+   "note": "This story does not carry payment matching; the rule re-scope belongs to the FSD S7 rules document."
+  }
+ ]
+}

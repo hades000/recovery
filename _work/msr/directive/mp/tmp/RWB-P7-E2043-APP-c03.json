@@ -1,0 +1,156 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E2-043-07 | AC7, AC8, BR8, BR11, BR15 | End to end | Case `RW-2026-000777` at `WITH_FCR_OFFICER` after the entry's `decidedAt`; reads by case, rule, approver and date; size 200 and 201; a role without the right |",
+   "new": "| TC-E2-043-07 | AC7, AC8, BR8, BR11, BR15 | End to end | Case `RW-2026-000777` at `WITH_FCR_OFFICER` after the entry's `decidedAt`; reads by case, rule, approver and date; size 200 and 201; a role without the right |\n| TC-E2-043-08 | AC1, DP-01, section 12.7 | Component | Write and read attempts against each table of section 12.7 through the rwb-decision login: owned tables accepted; tables of `rwb_case`, `rwb_document` and `rwb_access` refused |"
+  },
+  {
+   "old": "| TC-E2-043-01 | AC1, AC7, BR1, BR2, BR3, BR12 | Component | Three facts of the reference run, keys `CASE_EVENT:EV-CASE-0777-01`, `-03` and `-04`, rule `R-RES-04`, version `RES-2026.12`, 100-entry chain fixture |",
+   "new": "| TC-E2-043-01 | AC1, AC7, AC10, AC11, AC12, BR1, BR2, BR3, BR12 | Component | Three facts of the reference run, keys `CASE_EVENT:EV-CASE-0777-01`, `-03` and `-04`, rule `R-RES-04`, version `RES-2026.12`, 100-entry chain fixture |"
+  },
+  {
+   "old": "| TC-E2-043-04 | AC4, BR5, BR14 | Unit | Empty rule version, decision code `D99`, a fact with a personal-data field, and the library forced to fail |",
+   "new": "| TC-E2-043-04 | AC4, AC9, BR5, BR14 | Unit | Empty rule version, decision code `D99`, a fact with a personal-data field, and the library forced to fail |"
+  },
+  {
+   "old": "| X7 | A fact carries a personal-data field outside the schema — a name, an account number, a contact point | The append is refused, the fact is dead-lettered with an alert and the field is named in the incident, never copied into a log line | MSG-P7-009 | TC-E2-043-04 |",
+   "new": "| X7 | A fact carries a personal-data field outside the schema — a name, an account number, a contact point | The append is refused, the fact is dead-lettered with an alert and the field is named in the incident, never copied into a log line | MSG-P7-009 | AC9, TC-E2-043-04 |"
+  },
+  {
+   "old": "| X8 | A correction arrives for an entry that exists | A new entry is appended with `corrects_entry_id` naming the corrected entry; the corrected entry is unchanged and both stay in the chain | None | TC-E2-043-01 |",
+   "new": "| X8 | A correction arrives for an entry that exists | A new entry is appended with `corrects_entry_id` naming the corrected entry; the corrected entry is unchanged and both stay in the chain | None | AC10, TC-E2-043-01 |"
+  },
+  {
+   "old": "| X9 | Two consumers of the same partition attempt the chain head at once | The ledger serialises the head, one of them takes the next `chain_seq` and the other retries and appends after it; no two entries share a `chain_seq` | None | TC-E2-043-01 |",
+   "new": "| X9 | Two consumers of the same partition attempt the chain head at once | The ledger serialises the head, one of them takes the next `chain_seq` and the other retries and appends after it; no two entries share a `chain_seq` | None | AC11, TC-E2-043-01 |"
+  },
+  {
+   "old": "| X10 | An entry is amended or deleted through the service login or through the schema owner role | All statements are refused — by the missing `UPDATE` and `DELETE` grant for the service login and by the append-only rule of the table — and the refused attempts are written to the ACE audit log | None | TC-E2-043-01 |",
+   "new": "| X10 | An entry is amended or deleted through the service login or through the schema owner role | All statements are refused — by the missing `UPDATE` and `DELETE` grant for the service login and by the append-only rule of the table — and the refused attempts are written to the ACE audit log | None | AC12, TC-E2-043-01 |"
+  },
+  {
+   "old": "    Given the fact of the key \"CASE_EVENT:EV-CASE-0777-01\" is published at 2026-12-01T06:10+07:00 and reaches the ledger at 06:11",
+   "new": "    Given the fact of the key \"CASE_EVENT:EV-CASE-0777-01\" is published at 2026-12-01T06:10+07:00 and reaches the ledger at 06:11\n    When the fact is consumed from rwb.decision-record.v1 at 06:11"
+  },
+  {
+   "old": "    Given the fact of the key \"CASE_EVENT:EV-CASE-0777-03\" is published at 2026-12-01T06:20+07:00 and reaches the ledger at 06:31",
+   "new": "    Given the fact of the key \"CASE_EVENT:EV-CASE-0777-03\" is published at 2026-12-01T06:20+07:00 and reaches the ledger at 06:31\n    When the completeness check of the case runs at 06:31"
+  },
+  {
+   "old": "    Then the answer is 422 with MSG-GEN-002 for \"size\" between 1 and 200",
+   "new": "    Then the answer is 422 with MSG-GEN-002 for \"size\" between 1 and 200\n\n  Scenario: AC9 A fact with a personal-data field outside the schema is refused and its value is never logged (new, D-RCV-60)\n    Given a fact of the run carrying a field outside the schema that holds a personal-data value\n    When it is consumed\n    Then the append is refused with MSG-P7-009 naming the offending field, and no entry, no chain_seq and no inbox row is written\n    Then the fact is dead-lettered with an alert, the field is named in the incident and no personal-data value is copied into a log line\n\n  Scenario: AC10 A correction is appended and the entry it corrects stays unchanged (new, D-RCV-60)\n    Given the entry of the key \"CASE_EVENT:EV-CASE-0777-01\" exists for case \"RW-2026-000777\"\n    When a correction of that entry is consumed with corrects_entry_id naming the corrected entry\n    Then a new entry is appended with the next chain_seq and corrects_entry_id naming the corrected entry\n    Then the corrected entry is unchanged and both entries stay in the chain\n\n  Scenario: AC11 Two consumers of one partition take the chain head in turn (new, D-RCV-60)\n    Given two consumers of the same partition of rwb.decision-record.v1 attempt the chain head of case \"RW-2026-000777\" at the same time\n    When both appends are taken\n    Then the ledger serialises the head and one entry takes the next chain_seq\n    Then the other consumer retries and appends after it, and no two entries share a chain_seq\n\n  Scenario: AC12 An amend or delete through the service login or the schema owner role is refused and audited (new, D-RCV-60)\n    Given an entry of case \"RW-2026-000777\" exists\n    When an UPDATE or a DELETE of that entry is attempted through the rwb-decision login or through the schema owner role\n    Then every statement is refused by the missing grant or by the append-only rule of the table\n    Then each refused attempt is written to the ACE audit log and the entry is unchanged"
+  },
+  {
+   "old": "These eight criteria are new under D-RCV-60 and test only",
+   "new": "These twelve criteria are new under D-RCV-60 and test only"
+  },
+  {
+   "old": "9. The contract-fake run of the whole slice: the topic stub, the library fake, the reference-data and parameters fakes, the case-read fake and the authorise fake, green from Day 1 (AC1 to AC8).",
+   "new": "9. The contract-fake run of the whole slice: the topic stub, the library fake, the reference-data and parameters fakes, the case-read fake and the authorise fake, green from Day 1 (AC1 to AC12). The fake answers come from the published OpenAPI documents and event schemas; the harness repository, SIT environment, seeding set and script, per-run evidence format and retention, and pass or fail gate are agreed by the integration lead at the wave 2 entry check (GAP-0422)."
+  },
+  {
+   "old": "10. The boundary and privacy tests: no write to `rwb_case`, `rwb_document` or `rwb_access`, no read of their tables, and no personal-data field in an entry, a fact, an outbox row, a log line or the chain-check report (BR14, AC4).",
+   "new": "10. The boundary and privacy tests: no write to `rwb_case` (P3 rwb-case), `rwb_document` (P5) or `rwb_access` (P4), no read of their tables, and no personal-data field in an entry, a fact, an outbox row, a log line or the chain-check report (BR14, AC4)."
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, which is open; its assumptions are ASM-2250, ASM-2357, ASM-2377 and ASM-2863. MSG-P7-009, MSG-GEN-002 and MSG-GEN-006 are used here with the meaning of the rows above, which differs from the standard's; the standard's meaning is Not specified in the source documents (DOR-RWB-P7-E2043-APP-9)."
+  },
+  {
+   "old": "TC-E2-043-01, TC-E2-043-02, TC-E2-043-07 |",
+   "new": "TC-E2-043-01, TC-E2-043-02, TC-E2-043-07, TC-E2-043-08 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-18203",
+   "item": "DOR-RWB-P7-E2043-APP-11",
+   "status": "Not applied",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Field classification is in section 11, outside this chunk; the item names no personal-data field, so none can be listed without inventing one."
+  },
+  {
+   "ruling": "R-18204",
+   "item": "DOR-RWB-P7-E2043-APP-12",
+   "status": "Resolved",
+   "section": "12.7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-043-08 boundary test for section 12.7 tables (ASM-3438) and listed it in section 18; RTM v7 match is not verifiable from this chunk."
+  },
+  {
+   "ruling": "R-18205",
+   "item": "DOR-RWB-P7-E2043-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "DL10 now stated as open, with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 in section 14."
+  },
+  {
+   "ruling": "R-18206",
+   "item": "DOR-RWB-P7-E2043-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Build step 10 now names each other schema with its owner: rwb_case (P3), rwb_document (P5), rwb_access (P4)."
+  },
+  {
+   "ruling": "R-18207",
+   "item": "DOR-RWB-P7-E2043-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC5 gets a When; AC9 to AC12 added for X7 to X10 with Covered by updated in section 5 and TC rows in section 16."
+  },
+  {
+   "ruling": "R-18208",
+   "item": "DOR-RWB-P7-E2043-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Section 14 states that MSG-P7-009, MSG-GEN-002 and MSG-GEN-006 are used here differently from the standard; the standard's meaning is not in the sources."
+  },
+  {
+   "ruling": "R-22047",
+   "item": "GAP-2016",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "RWB-P3-E2043-APP",
+   "change": "Make the durable timer authoritative, with the timer row as its audit copy written by ApplyStateActivity in the same transaction as the state and read back on a reopen.",
+   "note": "Story side unchanged: section 12.7 already states that the timer table is not owned or read by this story."
+  },
+  {
+   "ruling": "R-22730",
+   "item": "GAP-2024",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-P3-E2043-APP",
+   "change": "Parent forwards DeviationRaised to the running stage child, which pauses and resumes its own stage timer on DeviationCleared. Rule for a child started while a deviation is open: Not specified in the source documents (GAP-2024).",
+   "note": "Stage clock ownership sits with rwb-case and S8 rwb-deviation; this story holds no stage timer."
+  },
+  {
+   "ruling": "R-22731",
+   "item": "GAP-0422",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Build step 9 now names the fakes' source and the integration lead's wave 2 entry agreement; the rwb-case outbox read stays with RWB-P3-E2043-APP."
+  },
+  {
+   "ruling": "R-22732",
+   "item": "GAP-0725",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Platform workflow kit owner (DevOps team)",
+   "change": "Fix the build ID as the release commit ID supplied by the workflow kit, pin builds with drain-on-complete, and set the policy once for all 19 services.",
+   "note": "No build ID value appears in this story; the policy belongs to the platform workflow kit."
+  }
+ ]
+}

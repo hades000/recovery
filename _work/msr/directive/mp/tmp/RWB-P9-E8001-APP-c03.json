@@ -1,0 +1,117 @@
+{
+ "edits": [
+  {
+   "old": "reaches the returns step (the step name is Not specified in the source documents (GAP-2582; ASM-4261)).",
+   "new": "reaches the returns step, which runs inside JOB-15 (the step name is Not specified in the source documents (GAP-2582; ASM-4261))."
+  },
+  {
+   "old": "the returns reader reads the frozen set through GET /reports/measures under the base",
+   "new": "the returns reader reads the frozen set through GET /reports/measures (API-P9-001) under the base"
+  },
+  {
+   "old": "case counts already reconciled by this service",
+   "new": "case counts already reconciled by this service; document_field and rule_row are not read"
+  },
+  {
+   "old": "and delivered as a file | TSD P9 NFR-065",
+   "new": "and read through GET /reports/measures, with no file and no data lake copy | TSD P9 NFR-065"
+  },
+  {
+   "old": "| MSG-P1-001 | A data product of the return is stale for the business date | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | A data product of the return is stale for the business date | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "No state of a screen is owned here: the answer shows the frozen rows of the latest PUBLISHED date, and a HELD date shows the earlier published date with its held reason.",
+   "new": "States of SCR-37: loaded, the answer shows the frozen rows of the latest PUBLISHED date, and a HELD date shows the earlier published date with its held reason. Empty, error and no access: Not specified in the source documents (CG-ALL-7896). Loading: as Screen Specifications v1 section SCR-37 gives it, otherwise Not specified in the source documents (CG-ALL-7896)."
+  },
+  {
+   "old": "| X5 | The caller lacks Reporting R | 403 with the refusal; nothing is read | MSG-P4-002 | AC3 |",
+   "new": "| X5 | The caller lacks Reporting R | 403 with the refusal; nothing is read | MSG-P4-002 | AC3; TC-E8-001-06 |"
+  },
+  {
+   "old": "| X4 | The decision-log read of rwb-decision does not answer | The run stops; no snapshot row is frozen for the date; the next run retries | MSG-GEN-006 | AC1 |",
+   "new": "| X4 | The decision-log read of rwb-decision does not answer | The run stops; no snapshot row is frozen for the date; the next run retries | MSG-GEN-006 | AC1; AC7 |"
+  },
+  {
+   "old": "    Then it carries codes, dates, amounts and counts only",
+   "new": "    Then it carries codes, dates, amounts and counts only\n\n  Scenario: AC5 The return rules hold on a run (new, D-RCV-60)\n    Given a run builds the return for the business date\n    When the run reads, freezes and publishes the return\n    Then the measures come from measure_definition, a stale product holds the return with MSG-P1-001, the record is written before any row is frozen, and a frozen row is never rewritten\n\n  Scenario: AC6 A provided operation answers only the codes its contract allows (new, D-RCV-60)\n    Given the contract of GET /reports/measures allows the codes 401, 403 and 404\n    When a caller reads the return without a valid session, without Reporting R or on a refused read\n    Then the system answers 401, 403 or 404 as the contract gives, and no other code\n\n  Scenario: AC7 A consumed call that fails or does not answer stops the run (new, D-RCV-60)\n    Given the rwb-decision contract mock does not answer the decision-log read\n    When the run reads the decision facts of the business date\n    Then the run stops, no snapshot row is frozen for the date and the user sees MSG-GEN-006"
+  },
+  {
+   "old": "| TC-E8-001-07 | AC4 | Component | A frozen snapshot row and its event, workflow input and log line; only codes, dates, amounts and counts are present |",
+   "new": "| TC-E8-001-07 | AC4 | Component | A frozen snapshot row and its event, workflow input and log line; only codes, dates, amounts and counts are present |\n| TC-E8-001-08 | AC5 (BR1 to BR7) | Component | A synthetic run with a definition in force, a stale product and a decision record; the rules of BR1 to BR7 hold |\n| TC-E8-001-09 | AC6 | Contract | A stub of GET /reports/measures answers 401, 403 and 404 in turn; a code outside the contract is refused |\n| TC-E8-001-10 | AC7 | Component | The rwb-decision fake forced to fail on the decision-log read; no frozen row and no PUBLISHED row for the date |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23163",
+   "item": "GAP-2582",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Returns step set inside JOB-15 at 01:30; API-P9-001 named; BR7 says document_field and rule_row are not read. MSG-P9-002/003 texts stay Not specified until the message owner sets them."
+  },
+  {
+   "ruling": "R-23164",
+   "item": "GAP-2584",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "FSD P9 A2.1 and A2.7.2; TSD P9 T5.1",
+   "change": "Keep INT-19 and the Power BI and data lake points as a documented retirement, not a target. Story side fixed in BR3: read through GET /reports/measures, no file or lake copy.",
+   "note": "Story side done in BR3; retirement rows still to be kept in FSD and TSD."
+  },
+  {
+   "ruling": "R-26589",
+   "item": "CG-ALL-7892",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text now copied from Error and Message Standard v4: Today's load has not arrived."
+  },
+  {
+   "ruling": "R-26590",
+   "item": "CG-ALL-7896",
+   "status": "Resolved",
+   "section": "15",
+   "note": "SCR-37 states added; empty, error and no access marked Not specified in the source documents; loading as the specification gives it."
+  },
+  {
+   "ruling": "R-29026",
+   "item": "GAP-2583",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "RWB-P9-E8001-CON (contract slice)",
+   "change": "Define the closed eleven-member Measure answer with definitionVersion and frozen; additive filters within major version 1; pin consumed event names; consume and fake the P7 decision-log read; no file element; JOB-15 registration stays with the platform.",
+   "note": "Story names API-P9-001 in step 8; contract defaults belong to the contract story."
+  },
+  {
+   "ruling": "R-31724",
+   "item": "NEWAC-RWB-P9-E8001-APP-AC3",
+   "status": "Resolved",
+   "section": "5",
+   "note": "X5 now cites TC-E8-001-06 with AC3, which already holds the refusal test; TC-E8-001-03 stays the access contract case."
+  },
+  {
+   "ruling": "R-31725",
+   "item": "NEWAC-RWB-P9-E8001-APP-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "note": "New AC5 covers BR1 to BR7 with TC-E8-001-08; BR8 stays under AC4. Test data is in the TC row, so proposed test needs no Not specified."
+  },
+  {
+   "ruling": "R-31726",
+   "item": "NEWAC-RWB-P9-E8001-APP-AC5",
+   "status": "Resolved",
+   "section": "7",
+   "note": "New AC6 (next free number) covers the 401, 403, 404 answers with TC-E8-001-09 as a contract test."
+  },
+  {
+   "ruling": "R-31727",
+   "item": "NEWAC-RWB-P9-E8001-APP-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "note": "New AC7 (next free number) covers a failed or silent consumed call with TC-E8-001-10; X4 now cites AC7."
+  }
+ ]
+}

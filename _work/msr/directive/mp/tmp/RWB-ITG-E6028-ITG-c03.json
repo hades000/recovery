@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "The three workflows are observed only. Each is registered by its own service's worker and its steps are that service's; this story starts none of them by hand and asserts their effect through the case read, the approval read, the lot read and the decision log.",
+   "new": "The three workflows are observed only. Each is registered by its own service's worker and its steps are that service's; this story starts none of them by hand and asserts their effect through the case read, the approval read, the lot read and the decision log. The hand-over from the write-off route to the debt sale route (R-WO-32, BR6) has no S7 cell and no S6 cell in the connection matrix: the population, the route and the approval are recorded here as product behaviour, and the call type and direction are an open question with the S6 owner before the wave 4 system test. The platform contracts RWB-PLT-E1027-CON and RWB-PLT-N001-CON and the consumed contracts of P3 and P4 are carried in the Dependency Map as non-blocking contracts (GAP-1312); the metadata rows stay as the plan gives them."
+  },
+  {
+   "old": "the decision-log read holds the final call, the approver and the limit applied under R-WO-13 and R-WO-15",
+   "new": "the decision record read holds the final call, the approver and the limit applied under R-WO-13 and R-WO-15"
+  },
+  {
+   "old": "And the decision-log read holds no entry for the sale selection",
+   "new": "And the decision record read holds no entry for the sale selection"
+  },
+  {
+   "old": "| A refused or failed action | No lot, no account row, no state change and no decision entry; the answer carries MSG-P4-002 or MSG-P7-003 | The case read, the lot read and the decision log, read before and after the call |",
+   "new": "| A refused or failed action | No lot, no account row, no state change and no decision entry; the answer carries MSG-P4-002 or MSG-P7-003 | The case read, the lot read and the decision log, read before and after the call |\n| Empty | Not specified in the source documents (CG-ALL-1107) | Not specified in the source documents (CG-ALL-1107) |\n| Loading | Not specified in the source documents (CG-ALL-1107) | Not specified in the source documents (CG-ALL-1107) |\n| Error | Not specified in the source documents (CG-ALL-1107) | Not specified in the source documents (CG-ALL-1107) |\n| No access | Not specified in the source documents (CG-ALL-1107) | Not specified in the source documents (CG-ALL-1107) |"
+  },
+  {
+   "old": "What the wave entry check looks at instead of a screen is the run report, whose environment, layout and retention are `Not specified in the source documents (GAP-0458; ASM-0650)`.",
+   "new": "What the wave entry check looks at instead of a screen is the run report, whose environment, layout and retention are `Not specified in the source documents (GAP-0458; ASM-0650)` until agreed at the wave 4 entry check and held as configuration. The write-off read and the write-off sale operation do not exist: the population is asserted through the case read, the decision-log read and DP09, and the handover is driven by S6's published lot operation."
+  },
+  {
+   "old": "    And each call is one hop on the owner's base path \"/api/recovery/<short>/v1\" with no call made on another service's behalf",
+   "new": "    And each call is one hop on the owner's base path \"/api/recovery/<short>/v1\" with no call made on another service's behalf\n\n  Scenario: AC10 A retried or timed-out activity does not repeat the sale or the decision record (new, D-RCV-60)\n    Given the sale selection of the approved population has been called with one Idempotency-Key\n    When the activity of DebtSaleWorkflow that writes the lot times out and is retried\n    Then one lot exists and no second account row is added\n    And each decision record of the run is written once, with its rule id and rule version\n\n  Scenario: AC11 A consumed call that fails or does not answer leaves no lot and no case moved (new, D-RCV-60)\n    Given a consumed call of the sale selection fails or does not answer\n    When POST \"/api/recovery/debtsale/v1/debt-sale-lots\" is called for the approved population\n    Then the answer carries the error of the failed call and no lot is created\n    And no case of the population moves to SOLD_POST_CHARGEOFF\n    And the decision record read holds no entry for the sale selection"
+  },
+  {
+   "old": "| TC-E6-028-10-ITG | §12 operations, events and activities | Contract | Each operation, event and activity of §12 against the published contract RWB-ITG-E6028-CON |",
+   "new": "| TC-E6-028-10-ITG | §12 operations, events and activities | Contract | Each operation, event and activity of §12 against the published contract RWB-ITG-E6028-CON |\n| TC-E6-028-11-ITG | ITG AC10 | Integration | A sale selection with one Idempotency-Key, its writing activity timed out and retried, over the three accounts |\n| TC-E6-028-12-ITG | ITG AC11 | Integration | A consumed call of the sale selection forced to fail, and one forced not to answer, with no lot created |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22836",
+   "item": "GAP-0458",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Run-report environment, layout, retention and keys held as configuration, agreed at wave 4 entry; write-off read and sale operation recorded as absent.",
+   "note": "Section 15 now states the configuration hold and the absent write-off read and sale operation; the values stay Not specified until agreed."
+  },
+  {
+   "ruling": "R-22837",
+   "item": "GAP-1311",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "Recovery Workbench TSD P7 v2 (T-A.1 and T-A.2)",
+   "change": "Publish POST /approvals on the decision base with caseId, decisionCode, regulationItem, capabilityArea, productGroup, amount, sourceType, sourceRef, ruleId, ruleVersion and Idempotency-Key; add the reason-bearing ApprovalAction, the item and page shapes, the LOV-DECISION and final-call reference data, the MSG-P7 texts and the login name.",
+   "note": "Approval raise, action and answer shapes, value sets, message texts and login name are published in TSD P7 and not in this story."
+  },
+  {
+   "ruling": "R-22839",
+   "item": "GAP-1314",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Users Roles and Permissions (P4 role model)",
+   "change": "Add RW-CREDCOMM to the holders of the Write-off and posting capability right, or record why the routed role cannot decide; read the Decision log right A on the approval operations and the R column as read only.",
+   "note": "Approval authority is read two ways in the sources; the P4 role model must settle the routed committee role before the wave entry check."
+  },
+  {
+   "ruling": "R-22841",
+   "item": "GAP-1799",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Hand-over carried as product behaviour in the section 12.5 note; call type and direction recorded as open with the S6 owner before the wave 4 system test.",
+   "note": "The hand-over population, route and approval are recorded; the call type and direction are an open question with the S6 owner."
+  },
+  {
+   "ruling": "R-22842",
+   "item": "GAP-1312",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Recovery Workbench Dependency Map",
+   "change": "Carry H RWB-PLT-E1027-CON (DP-03) and H RWB-PLT-N001-CON (DP-19) and the four consumed contracts as non-blocking platform and published contracts of wave 0, built against their fakes; metadata rows unchanged.",
+   "note": "Section 13 text is not in this chunk, so section 12.5 carries the citation to this row; the Dependency Map change is outside this story."
+  },
+  {
+   "ruling": "R-24092",
+   "item": "CG-ALL-1106",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "AC2 and AC5 wording changed from decision-log read to decision record read.",
+   "note": "AC2 and AC5 now say decision record read in place of the decision-log wording."
+  },
+  {
+   "ruling": "R-24093",
+   "item": "CG-ALL-1107",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Empty, loading, error and no access rows added to the section 15 state table.",
+   "note": "Four state rows added; the screen specification gives no value for them, so each reads Not specified (CG-ALL-1107)."
+  },
+  {
+   "ruling": "R-30039",
+   "item": "NEWAC-RWB-ITG-E6028-ITG-AC7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "No change; section 8 coverage already maps BR1 to BR10 to AC1 to AC9, and section 16 holds a test row for each.",
+   "note": "Every BR1 to BR10 already has an AC in section 7 and a TC in section 16 per the section 8 coverage line; no criterion added."
+  },
+  {
+   "ruling": "R-30040",
+   "item": "NEWAC-RWB-ITG-E6028-ITG-AC8",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC10 (retried or timed-out activity) and TC-E6-028-11-ITG.",
+   "note": "AC10 added: a retried or timed-out sale selection writes one lot and one decision record per action; TC-E6-028-11-ITG added."
+  },
+  {
+   "ruling": "R-30041",
+   "item": "NEWAC-RWB-ITG-E6028-ITG-AC9",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC11 (consumed call fails or does not answer) and TC-E6-028-12-ITG.",
+   "note": "AC11 added: a failed or unanswered consumed call leaves no lot and no case moved; TC-E6-028-12-ITG added."
+  }
+ ]
+}

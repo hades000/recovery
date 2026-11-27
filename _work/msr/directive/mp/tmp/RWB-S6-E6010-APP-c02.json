@@ -1,0 +1,108 @@
+{
+ "edits": [
+  {
+   "old": "#### 12.5 Workflows and activities",
+   "new": "#### 12.5 Workflows and activities\n\nWorkflow ID form and start rule of `DebtSaleWorkflow`: the Temporal Catalog v1 Workflows row gives the trigger as 'The monthly sale cycle opens, or a residual arrives from disposal (R-DS-01)'; the workflow ID form, the start mode (start or signalWithStart) and the duplicate-start policy are Not specified in the source documents (CG-ALL-10763)."
+  },
+  {
+   "old": "| Requirement ID | Requirement (short) | Elements | Test cases |\n|---|---|---|---|\n| REQ-S6-007 | An account awarded in a lot stops every other open action on its case the same day (Business Requirements Program v5, FSD S6 A2.14); the split plan carries no requirement id for this slice (GAP-3010; ASM-4976) | The closure step, the R-UNI-47 evaluation, the decision record and the closure answer | TC-E6-010-01, TC-E6-010-02, TC-S6-E6010-APP-01 |\n| ADR-013 | 19 services inside ACE | rwb-debtsale as the owner of the closure step | TC-E6-010-01 |\n| ADR-020 | Contract-first REST, one hop, 2 s timeout | The four consumed rows with their budget and breaker | TC-E6-010-01, TC-E6-010-03 |\n| ADR-022 | Local decision record plus central ledger | The record written before the closure answer | TC-E6-010-02, TC-E6-010-04 |",
+   "new": "| Requirement ID | Requirement (short) | Elements | Test cases | Feature | L3 process |\n|---|---|---|---|---|---|\n| REQ-S6-007 | An account awarded in a lot stops every other open action on its case the same day (Business Requirements Program v5, FSD S6 A2.14); the split plan carries no requirement id for this slice (GAP-3010; ASM-4976) | The closure step, the R-UNI-47 evaluation, the decision record and the closure answer | TC-E6-010-01, TC-E6-010-02, TC-S6-E6010-APP-01 | FEAT-DBS-14 | Not specified in the source documents (DOR-RWB-S6-E6010-APP-2) |\n| ADR-013 | 19 services inside ACE | rwb-debtsale as the owner of the closure step | TC-E6-010-01 | FEAT-DBS-14 | Not specified in the source documents (DOR-RWB-S6-E6010-APP-2) |\n| ADR-020 | Contract-first REST, one hop, 2 s timeout | The four consumed rows with their budget and breaker | TC-E6-010-01, TC-E6-010-03 | FEAT-DBS-14 | Not specified in the source documents (DOR-RWB-S6-E6010-APP-2) |\n| ADR-022 | Local decision record plus central ledger | The record written before the closure answer | TC-E6-010-02, TC-E6-010-04 | FEAT-DBS-14 | Not specified in the source documents (DOR-RWB-S6-E6010-APP-2) |"
+  },
+  {
+   "old": "| TC-S6-E6010-APP-01 | AC1, BR4 | Component | A lot of three cases, one already closed and one with no open case; three evaluations, one record per open case, one answer per closed case and no re-close |",
+   "new": "| TC-S6-E6010-APP-01 | AC1, BR4 | Component | A lot of three cases, one already closed and one with no open case; three evaluations, one record per open case, one answer per closed case and no re-close |\n| TC-S6-E6010-APP-02 | AC1, AC2 | Contract | The operations, events and activities of section 12 (DebtSaleWorkflow, closeCase and the closure answer) are called with the inputs and outputs written in section 12.5; no field outside that contract is sent or accepted |\n| TC-S6-E6010-APP-03 | BR5 | Component | Each table of section 12.7 is exercised at its boundary: debt_sale_account is only read, no column of debt_sale_lot is written, decision_record and idempotency_key are the only objects written, outbox_event receives no row, and no cross-schema join or foreign key is used |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-08561",
+   "item": "DOR-RWB-S6-E6010-APP-8",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "API Specification v5 yaml; Temporal Catalog v1",
+   "change": "Add bases /api/recovery/case/v1, /api/recovery/access/v1 and /api/recovery/decision/v1 to the API yaml; align the DebtSaleWorkflow task queue and namespace to the catalog.",
+   "note": "Base paths and workflow task queue belong to the API yaml and Temporal Catalog v1; story text not changed."
+  },
+  {
+   "ruling": "R-13157",
+   "item": "CG-ALL-10757",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Give the dictionary field name for debt_sale_account.account_id, or record the owning object in the owning document.",
+   "note": "Dictionary name for account_id is not in this chunk; no name invented."
+  },
+  {
+   "ruling": "R-13158",
+   "item": "CG-ALL-10758",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Record decision_record as a platform library object created in rwb_debtsale, or add it to the dictionary.",
+   "note": "Story already names it as a PLT library object; dictionary entry belongs to LDM v9."
+  },
+  {
+   "ruling": "R-13159",
+   "item": "CG-ALL-10763",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Added workflow ID form and start mode/duplicate-start policy as Not specified, with catalog trigger quoted.",
+   "note": "Catalog gives trigger only; ID form, start mode and duplicate policy marked Not specified."
+  },
+  {
+   "ruling": "R-13160",
+   "item": "CG-ALL-10764",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1 (Activities)",
+   "change": "Add activity closeCase on task queue rwb-debtsale with the contract element of section 12.5, or catalogue an existing activity.",
+   "note": "Activity row belongs to Temporal Catalog v1; story already flags the name as a target choice."
+  },
+  {
+   "ruling": "R-13161",
+   "item": "CG-ALL-10765",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows TC-E6-010-01 to TC-E6-010-04 and TC-S6-E6010-APP-01 with Given, When and Then copied from their criteria; also add TC-S6-E6010-APP-02 and -03.",
+   "note": "Test rows belong to Test Cases v8; story IDs unchanged."
+  },
+  {
+   "ruling": "R-20752",
+   "item": "DOR-RWB-S6-E6010-APP-10",
+   "status": "Not applied",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "Screen states for SCR-26 must be written in section 9, which is not in this chunk; no state wording invented."
+  },
+  {
+   "ruling": "R-20753",
+   "item": "DOR-RWB-S6-E6010-APP-11",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Data Classification v5 Fields",
+   "change": "Reconcile the personal-data class of the debt_sale_account fields read here (for example borrower_code) with the story statement that none is carried.",
+   "note": "Classification belongs to Data Classification v5; story statement not changed."
+  },
+  {
+   "ruling": "R-20754",
+   "item": "DOR-RWB-S6-E6010-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "Added TC-S6-E6010-APP-02 (contract test of section 12 operations, events, activities) and TC-S6-E6010-APP-03 (boundary test of section 12.7 tables, BR5).",
+   "note": "Two rows added; they still need Test Cases v8 rows (see R-13161)."
+  },
+  {
+   "ruling": "R-20755",
+   "item": "DOR-RWB-S6-E6010-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Added Feature and L3 process columns to the section 18 table; Feature FEAT-DBS-14 on all rows, L3 process Not specified.",
+   "note": "L3 process not given in sources; marked Not specified (DOR-RWB-S6-E6010-APP-2)."
+  }
+ ]
+}

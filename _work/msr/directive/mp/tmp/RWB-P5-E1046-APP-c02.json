@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "No template code, merge code, language or date is a constant in Java.",
+   "new": "No template code, merge code, language or date is a constant in Java. Open decisions DL10, DL26 and DL28 stay open; the programme directive of 26 November 2026 confirms their assumptions: DL10 with ASM-2250, ASM-2357, ASM-2377 and ASM-2863; DL26 with ASM-0247, ASM-0264, ASM-0275 and ASM-0355; DL28 with ASM-1861, ASM-1925, ASM-2093 and ASM-2727."
+  },
+  {
+   "old": "because `template` is P6's table in `rwb_comms` (DP01).",
+   "new": "because `template` is P6's table in `rwb_comms`, owned by rwb-comms (P6) and read only through RWB-P6-E1046-CON (DP01)."
+  },
+  {
+   "old": "| X8 | A role without Documents U regenerates, or without Documents C generates | Refused with 403 before any row is read | MSG-P4-002 | TC-E1-046-09 |",
+   "new": "| X8 | A role without Documents U regenerates, or without Documents C generates | Refused with 403 before any row is read | MSG-P4-002 | AC10, TC-E1-046-12 |"
+  },
+  {
+   "old": "    Then the document row holds no template code, no language, no approver, no approval date and no body",
+   "new": "    Then the document row holds template_code \"DEMAND-MTG\" and template_version 2, and no language, no approver, no approval date and no body"
+  },
+  {
+   "old": "    Then no log line and no event payload carries a merge value, and a code marked personalData appears only as its field name",
+   "new": "    Then no log line and no event payload carries a merge value, and a code marked personalData appears only as its field name\n\n  Scenario: AC10 A role without the declared Documents right is refused before any row (new, D-RCV-60)\n    Given a user with Documents R only is in the scope of case \"RW-2026-000102\"\n    When the user regenerates a \"DEMAND-MTG\" document of that case\n    Then the service refuses with 403 and MSG-P4-002\n    Then no document row and no document_field row is read or written\n\n  Scenario: AC11 The approval stays with the catalog and the service writes none (new, D-RCV-60)\n    Given the rwb-comms contract mock returns version 2 of \"DEMAND-MTG\" \"TH\" in state \"Approved\" with Legal approver \"LEG-0001\"\n    When \"TEST-LIT-01\" generates a \"DEMAND-MTG\" letter for case \"RW-2026-000102\" on 2026-11-10\n    Then the document stamps template_id \"TPL-0002\" and no approver is written to any row\n    Then the service offers no operation that approves a template"
+  },
+  {
+   "old": "The nine criteria are new under D-RCV-60 and test the P5 binding only.",
+   "new": "The eleven criteria are new under D-RCV-60 and test the P5 binding only."
+  },
+  {
+   "old": "| TC-E1-046-09 | AC7, BR9 (legacy Access) | Component | RW-PHONECOL, Documents R only, regenerates; refused with MSG-P4-002; the load path of the legacy case is P6's |",
+   "new": "| TC-E1-046-09 | AC7, BR9 (legacy Access) | Component | RW-PHONECOL, Documents R only, regenerates; refused with MSG-P4-002; the load path of the legacy case is P6's |\n| TC-E1-046-12 | AC10, X8, BR9 | Component | A user with Documents R only regenerates; refused with 403 and MSG-P4-002 before any row is read |\n| TC-E1-046-13 | AC11, BR7 | Component | The catalog answers an Approved version with its Legal approver; the document stamps the identifier and no approval field is written |"
+  },
+  {
+   "old": "The document holds the catalog version identifier only: no template attribute, no approval field and no body is copied into `rwb_document`",
+   "new": "The document holds the catalog version identifier, its template code and its version number only: no other template attribute, no approval field and no body is copied into `rwb_document`"
+  },
+  {
+   "old": "this story's pattern set does not include the access pattern, so it adds no dependency for the guard and holds no role table.",
+   "new": "this story's pattern set does not include the access pattern (DP-08), so it calls no rwb-access authorise check and adds no dependency for the guard; the declared right is enforced at gateway-bff and by the service's own operation configuration, which refuses an absent right with 403 MSG-P4-002, and it holds no role table."
+  },
+  {
+   "old": "under the rwb-document login",
+   "new": "under the service login, which is Not specified in the source documents (GAP-1068)"
+  },
+  {
+   "old": "task queue `rwb-document` (not used by this story).",
+   "new": "task queue `rwb-document` (not used by this story). Operation paths follow the Ownership Map and TSD P5 API-P5-016 (`POST /cases/{caseId}/generated-documents`); the architecture v5 slide 16 name `POST /documents/generate` is not used (ASM-101). The template version and the merge field list are read only through RWB-P6-E1046-CON, and no template row is held (ASM-102). P6 rwb-comms owns the template version, its Legal approval and the merge field catalogue; this slice supplies its own treatment values and never reads the catalogue as a table (GAP-1879)."
+  },
+  {
+   "old": "No column is added: `document.template_id` (DF-DOC-032), `document.doc_version`, `document.previous_version_id` and the `document_field` columns already exist in TSD P5 v2 T3.1.",
+   "new": "Two columns are added to `document` beside `template_id` and `treatment_id`: `template_code` varchar(30) and `template_version` integer (ASM-103). `document.template_id` (DF-DOC-032), `document.doc_version`, `document.previous_version_id` and the `document_field` columns already exist in TSD P5 v2 T3.1."
+  },
+  {
+   "old": "One index, `ix_document_template` on `document` (`template_id`, `doc_version`), so the version chain of a document is one index range.",
+   "new": "One partial unique index, `ix_document_template` on `document` (`treatment_id`, `template_id`) where `state` is DRAFT and `is_active` (ASM-103); the version chain is read through `doc_version` and `previous_version_id`."
+  },
+  {
+   "old": "- The five reference lists arrive through the rwb-case reference-data contract (DP07).",
+   "new": "- The five reference lists arrive through the rwb-case reference-data contract (DP07).\n- The field registry (`sys_fields`, GET /api/recovery/source-data/v1/admin/data-dictionary/fields, P1 rwb-source-data) is read as one hop with a 2 s timeout against the published data-dictionary document as a fake (DP-11); its contract dependency is Not specified in the source documents (GAP-1064).\n- This slice loads no reference data: POST /admin/reference-loads is P3 rwb-case, the field-ID check sits behind the P1 data dictionary contract and the template body sits with P5 rwb-document; a load with any refused row is refused in full and one decision record is written per version approval (GAP-0360)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17226",
+   "item": "DOR-RWB-P5-E1046-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Section 8 states that DL10, DL26 and DL28 stay open and lists each decision's confirmed assumptions from the directive.",
+   "note": "DL10, DL26 and DL28 remain open; their assumptions are listed in section 8 as confirmed by the 26 Nov 2026 directive."
+  },
+  {
+   "ruling": "R-17227",
+   "item": "DOR-RWB-P5-E1046-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "The Database note now states that rwb_comms is owned by P6 rwb-comms and is read only through RWB-P6-E1046-CON.",
+   "note": "Section 13 names rwb_comms as owned by P6 rwb-comms, read only through RWB-P6-E1046-CON."
+  },
+  {
+   "ruling": "R-17228",
+   "item": "DOR-RWB-P5-E1046-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC10 for X8 with TC-E1-046-12; X8 now covered by AC10 and TC-E1-046-12; criteria count updated to eleven.",
+   "note": "X8 is now covered by new AC10 and test case TC-E1-046-12 in section 16; section 7 holds the new criterion."
+  },
+  {
+   "ruling": "R-17229",
+   "item": "DOR-RWB-P5-E1046-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 stating the approval stays with the catalog and the service writes none; added test case TC-E1-046-13 covering AC11 and BR7.",
+   "note": "BR7 is now covered by new AC11 in section 7 and test case TC-E1-046-13 in section 16."
+  },
+  {
+   "ruling": "R-17230",
+   "item": "DOR-RWB-P5-E1046-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Section 10 states that no rwb-access authorise check is called; the declared right is enforced at gateway-bff and by the service's own operation configuration with 403 MSG-P4-002.",
+   "note": "Section 10 now names the enforcement point (gateway-bff plus operation configuration, 403 MSG-P4-002); no rwb-access check is called."
+  },
+  {
+   "ruling": "R-22121",
+   "item": "GAP-1023",
+   "status": "Not applied",
+   "section": "7, 8, 13",
+   "target": "",
+   "change": "Applied points 1 to 3: operation path, P6 catalog read with no template row, two added document columns and partial unique index; BR3 and AC1 aligned.",
+   "note": "Points 1-3 applied in sections 7, 8 and 13. Fix text is cut off after point 3, so points 4-6 are not applied."
+  },
+  {
+   "ruling": "R-22122",
+   "item": "GAP-1879",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Section 13 states P6 rwb-comms owns the template version, its Legal approval and the merge field catalogue, read only through the contract, never as a table.",
+   "note": "Section 13 records P6 rwb-comms as owner of the catalogue and approval; the slice reads it only through the contract."
+  },
+  {
+   "ruling": "R-22123",
+   "item": "GAP-1064",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added a configuration bullet for the P1 field registry read, one hop, 2 s timeout, fake, with its contract dependency recorded as Not specified.",
+   "note": "Section 13 records the P1 data-dictionary read as a one-hop 2 s fake; its contract dependency is Not specified in the sources."
+  },
+  {
+   "ruling": "R-22124",
+   "item": "GAP-1068",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Section 10 states gateway-bff enforcement and 403 MSG-P4-002 refusal from operation configuration; the service login is marked Not specified.",
+   "note": "Section 10 states the service-side guard and marks the service login name as Not specified in the sources."
+  },
+  {
+   "ruling": "R-22126",
+   "item": "GAP-0360",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added a bullet stating this slice loads no reference data, names the P3, P1 and P5 owners, and the refuse-in-full and decision record rules.",
+   "note": "Section 13 names P3 rwb-case for reference loads, P1 for the field-ID check and P5 for the body; this slice loads nothing."
+  }
+ ]
+}

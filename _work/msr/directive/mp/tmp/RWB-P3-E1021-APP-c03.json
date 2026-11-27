@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "    Then the system writes no decision log entry",
+   "new": "    Then the system writes no decision log entry\n\n  Scenario: AC15 Role without transfer right (exception X11)\n    Given a role RW-CASEOWN with Queue and allocation R and no Queue and allocation U\n    When RW-CASEOWN calls POST /cases/{caseId}/transfer for case RW-2026-000315\n    Then the system refuses the call with 403 and MSG-P4-002\n    Then the case keeps its queue and owner\n\n  Scenario: AC16 Transfer keeps status and clocks (BR10)\n    Given case RW-2026-000316 is \"IN_PROGRESS\" in queue \"TDR-BKK-CO\" with its clocks running\n    When a team manager transfers it to owner U-25 with transfer reason \"R01\"\n    Then the case status is \"IN_PROGRESS\" and its clocks are unchanged\n\n  Scenario: AC17 Manual transfer API unchanged (BR11)\n    Given the transfer endpoint keeps the legacy endpoint, request, response, errors and authorization\n    When a team manager calls the transfer endpoint for case RW-2026-000317 with reason code \"MANUAL\", transfer reason \"R01\" and target owner U-26\n    Then the response and error codes match the legacy transfer endpoint\n\n  Scenario: AC18 Version not in force leaves the event unprocessed (BR12)\n    Given package TRANSFER version \"TRF-2026.11\" is not in force\n    When TimerDue arrives for case RW-2026-000318 and matches rule \"TRF-003\"\n    Then the event stays unprocessed on the inbound topic\n    Then the case keeps its queue and owner"
+  },
+  {
+   "old": "    When the route decision approves route \"R4\" for the case",
+   "new": "    When the route decision approves route \"R4\" for the case, the route-decided fact committed as rwb.case.CaseStateChanged.v1 (assumed; GAP-0346)"
+  },
+  {
+   "old": "| LOV-TRANSFER-REASON (assumed); REQ-WKM-003; VR-P3-010-1 |",
+   "new": "| LOV-TRANSFER-REASON (assumed); REQ-WKM-003; VR-P3-010-1; DL23 (ASM-1232, ASM-1237, ASM-1259, ASM-1560; decision open) |"
+  },
+  {
+   "old": "- BR1 is executed by the embedded Drools kit inside the `EvaluateRules` activity; the row order is the salience in the package, and no trigger list, row order or target queue is written in code (D-RCV-36 T3, T5).",
+   "new": "- BR1 is executed by the embedded Drools kit inside the `EvaluateRules` activity; the row order is the salience in the package, and no trigger list, row order or target queue is written in code (D-RCV-36 T3, T5). The deviation-raised and deviation-cleared triggers are evaluated in RWB-S8-E1021-APP against the package in force from rwb-decision; the manual and the other trigger paths stay in this story. The package stays one artefact with one version (GAP-3077)."
+  },
+  {
+   "old": "This story adds no REST operation consumption and no guard of its own for it: the refusal shape is 403 with MSG-P4-002, as in the legacy endpoint.",
+   "new": "The rwb-access authorise call is the check consumed here; its operation name is Not specified in the source documents (GAP-3076). This story adds no guard of its own for it: the refusal shape is 403 with MSG-P4-002, as in the legacy endpoint."
+  },
+  {
+   "old": "### 12. Contract",
+   "new": "### 12. Contract\n\nThe six consumed rows below have no operation name published in any source (GAP-3076). Their clients and fakes are built from the documented use, and each published name replaces its placeholder in a minor contract version with no behaviour change:\n\n- rwb-case transfer request that performs the move\n- rwb-case queue and capacity read\n- reference-data read of LOV-TRANSFER-REASON\n- rwb-decision package read\n- rwb-access authorise call\n- rwb-source-data case-facts read"
+  },
+  {
+   "old": "| VR-P3-010-1; DL23 |",
+   "new": "| VR-P3-010-1; DL23 (ASM-1232, ASM-1237, ASM-1259, ASM-1560) |"
+  },
+  {
+   "old": "| MSG-P4-002 | Access test TC-E1-021-15 |",
+   "new": "| MSG-P4-002 | AC15 |"
+  },
+  {
+   "old": "| TC-E1-021-15 | Access |",
+   "new": "| TC-E1-021-15 | AC15 |"
+  },
+  {
+   "old": "| TC-E1-021-04 | AC4, BR2 |",
+   "new": "| TC-E1-021-04 | BR2 |"
+  },
+  {
+   "old": "| TC-E1-021-16 | Principle 5 | NFR | Decision log write forced to fail for a rule transfer; event retried, case unchanged |",
+   "new": "| TC-E1-021-16 | Principle 5 | NFR | Decision log write forced to fail for a rule transfer; event retried, case unchanged |\n| TC-E1-021-17 | Section 12 | Contract | Provider and consumer checks for the operations, events and activities of section 12 against RWB-P3-E1021-CON |\n| TC-E1-021-18 | Section 12.7 (ASM-3438) | Component | Boundary on the queue cap: owner with 149 and with 150 open cases in the target queue |\n| TC-E1-021-19 | AC16, BR10 | End to end | Case IN_PROGRESS with clocks running; manual transfer to U-25 with reason R01 |\n| TC-E1-021-20 | AC17, BR11 | Contract | Manual transfer with reason code MANUAL, R01 and target owner U-26 against the legacy endpoint contract |\n| TC-E1-021-21 | AC18, BR12 | End to end | TRANSFER version not in force; TimerDue matching TRF-003 |"
+  },
+  {
+   "old": "TC-E1-021-01 to TC-E1-021-14 |",
+   "new": "TC-E1-021-01 to TC-E1-021-14, TC-E1-021-17, TC-E1-021-18 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15849",
+   "item": "DOR-RWB-P3-E1021-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16, 18",
+   "target": "",
+   "change": "",
+   "note": "Added TC-17 contract and TC-18 boundary rows, TC-04 now covers BR2 only. RTM v7 test lists still need aligning to section 18."
+  },
+  {
+   "ruling": "R-15850",
+   "item": "DOR-RWB-P3-E1021-APP-18",
+   "status": "Resolved",
+   "section": "8, 18",
+   "target": "",
+   "change": "",
+   "note": "DL23 now carries ASM-1232, ASM-1237, ASM-1259 and ASM-1560 in BR3 and section 18, marked as open."
+  },
+  {
+   "ruling": "R-15851",
+   "item": "DOR-RWB-P3-E1021-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X11 now covered by AC15 in section 7 and section 5; TC-E1-021-15 now lists AC15. AC15 to AC18 added in Gherkin."
+  },
+  {
+   "ruling": "R-15852",
+   "item": "DOR-RWB-P3-E1021-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR10, BR11 and BR12 now covered by AC16, AC17 and AC18 and by TC-E1-021-19, 20 and 21."
+  },
+  {
+   "ruling": "R-15853",
+   "item": "DOR-RWB-P3-E1021-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 names the rwb-access authorise call; its operation name is Not specified (GAP-3076)."
+  },
+  {
+   "ruling": "R-15854",
+   "item": "DOR-RWB-P3-E1021-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Confirm the MSG-P3-027 entry wording against section 14 of RWB-P3-E1021-APP; section 14 text is kept until the v4 wording is supplied.",
+   "note": "v4 wording for MSG-P3-027 is Not specified in the source documents; no story edit made."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Business Requirements Document",
+   "change": "State in section 8.2 that Epic 1 stories keep the business-epic wave; delivery lead confirms the wave per story at build sequencing.",
+   "note": "rwb-case story is not in the three named services; no story edit here."
+  },
+  {
+   "ruling": "R-22009",
+   "item": "GAP-0346",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1 trigger read as the route-decided fact committed as rwb.case.CaseStateChanged.v1, recorded as assumed."
+  },
+  {
+   "ruling": "R-22010",
+   "item": "GAP-3076",
+   "status": "Resolved",
+   "section": "10, 12",
+   "target": "",
+   "change": "",
+   "note": "Section 12 records the six consumed rows as placeholders until owners publish names; section 10 notes the authorise call."
+  },
+  {
+   "ruling": "R-22011",
+   "item": "GAP-3077",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR1 states deviation triggers are evaluated in RWB-S8-E1021-APP against the P7 package; manual and other paths stay here."
+  }
+ ]
+}

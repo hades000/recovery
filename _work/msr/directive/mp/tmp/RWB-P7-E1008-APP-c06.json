@@ -1,0 +1,63 @@
+{
+ "edits": [
+  {
+   "old": "| External dependencies | RWB-P7-E1008-DB, RWB-P7-E1008-OPS (RWB-P7-E1008-DB creates the DP-09 objects processed_event and outbox_event; this story builds the consumer against the published template) |",
+   "new": "| External dependencies | RWB-P7-E1008-DB, RWB-P7-E1008-OPS (RWB-P7-E1008-DB creates the DP-09 objects processed_event and outbox_event; this story builds the consumer against the published template; the index ix_declog_approver_time is added by the separate index-only migration V2005_1__declog_approver_index.sql after the RWB-P7-E1008-APP table baseline in the rwb-decision sequence, and no file of RWB-P7-E1008-APP or RWB-P7-E1008-DB is edited) |"
+  },
+  {
+   "old": "    Then the system refuses the call with status 403 and message MSG-P4-002",
+   "new": "    Then the system refuses the call with status 403 and message MSG-P4-002\n\n  Scenario: AC9 Ledger architecture constraints (rules BR7, BR8, BR9, BR10)\n    Given the rwb_decision schema and the services of the Recovery Workbench are in place\n    When the writers of rwb_decision rows, the published operations, the data-lake copies and the reporting copies are checked\n    Then only the ingest of rwb.decision-record.v1 writes a rwb_decision row, and no append operation is published\n    Then the two published operations are read only, and no data-lake copy or reporting copy of the ledger exists\n    Then retained entries follow the bank retention schedule and the daily seal is kept in immutable storage\n    Then the record of a service reaches the ledger within 5 minutes of its commit, and a gap raises an alert\n\n  Scenario: AC10 Error answers of the provided operations\n    Given the caller holds the Decision log right\n    When the caller calls GET /decision-log/{entryId} for an entry ID that is not stored\n    Then the system answers with status 404\n    Given the caller is not authenticated\n    When the caller calls GET /decision-log/{entryId}\n    Then the system answers with status 401\n\n  Scenario: AC11 Activity retry and timeout\n    Given an append of an entry is started in a transaction\n    When the append activity fails transiently and is retried\n    Then the entry is stored once, with one chain_seq\n    When the append activity times out\n    Then the system stores no entry and chain_seq is not used"
+  },
+  {
+   "old": "| TC-E1-008-12 | §12.7 | Boundary | Each of the four tables of §12.7 checked for its owner and its read or write rule on the `rwb_decision` schema |",
+   "new": "| TC-E1-008-12 | §12.7 | Boundary | Each of the four tables of §12.7 checked for its owner and its read or write rule on the `rwb_decision` schema |\n| TC-E1-008-13 | AC9, BR7, BR8, BR9, BR10 | Not specified in the source documents (NEWAC-RWB-P7-E1008-APP-AC9) | Not specified in the source documents (NEWAC-RWB-P7-E1008-APP-AC9) |\n| TC-E1-008-14 | AC10 | Not specified in the source documents (NEWAC-RWB-P7-E1008-APP-AC10) | Not specified in the source documents (NEWAC-RWB-P7-E1008-APP-AC10) |\n| TC-E1-008-15 | AC11 | Not specified in the source documents (NEWAC-RWB-P7-E1008-APP-AC11) | Not specified in the source documents (NEWAC-RWB-P7-E1008-APP-AC11) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28718",
+   "item": "GAP-1246",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "External dependencies row names migration V2005_1__declog_approver_index.sql as index-only, after the E1008-APP table baseline; no E1008 file edited.",
+   "note": "Ownership of the approver index migration recorded in the header. The migration is index-only and follows the E1008-APP baseline; no E1008 file is edited."
+  },
+  {
+   "ruling": "R-28852",
+   "item": "GAP-2410",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Recovery Workbench work packages workbook (WP line for RWB-P7-E2035-APP)",
+   "change": "Record in the build sequence that a secondary slice builds against the platform contracts and published fakes and reads the same service's wave-1 rows through its own schema, keeping lane depth within R5.7 rule 5.",
+   "note": "The gap sits on the WP line of RWB-P7-E2035-APP, not on this story. The build-sequence note belongs in the work packages workbook."
+  },
+  {
+   "ruling": "R-31410",
+   "item": "NEWAC-RWB-P7-E1008-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 (401 and 404 of GET /decision-log/{entryId}) to section 7 and TC-E1-008-14 to section 16.",
+   "note": "AC10 covers 401 and 404 on the provided read. Test level and data are not specified in the source documents, so the TC row shows that text."
+  },
+  {
+   "ruling": "R-31411",
+   "item": "NEWAC-RWB-P7-E1008-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 (activity retry and timeout of the append) to section 7 and TC-E1-008-15 to section 16.",
+   "note": "AC11 covers a retried and a timed-out append activity. Test level and data are not specified in the source documents, so the TC row shows that text."
+  },
+  {
+   "ruling": "R-31412",
+   "item": "NEWAC-RWB-P7-E1008-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 (BR7 to BR10 ledger constraints) to section 7 and TC-E1-008-13 to section 16.",
+   "note": "AC9 covers BR7 to BR10 with a criterion and a test row. Test level and data are not specified in the source documents, so the TC row shows that text."
+  }
+ ]
+}

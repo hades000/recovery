@@ -1,0 +1,121 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E1032-APP",
+ "unit": "u01",
+ "rulings": [
+  "R-00754",
+  "R-00755",
+  "R-05060",
+  "R-05061",
+  "R-10280",
+  "R-15950",
+  "R-15952",
+  "R-22058"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 4
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-00754",
+     "item": "CG-ALL-3707",
+     "status": "Not applied",
+     "section": "13",
+     "target": "",
+     "change": "",
+     "note": "Service Template Specification v1 L371 shows only th.co.scb.ace.workbench.recovery.case, the reserved word itself; no replacement package segment in the sources, so none is written."
+    },
+    {
+     "ruling": "R-00755",
+     "item": "CG-ALL-3708",
+     "status": "Not applied",
+     "section": "13",
+     "target": "",
+     "change": "",
+     "note": "Service Template Specification v1 L371 gives only th.co.scb.ace.workbench.recovery.case; no replacement segment for the casedocument package in the sources, so none is invented."
+    },
+    {
+     "ruling": "R-05060",
+     "item": "DOR-RWB-P3-E1032-APP-22",
+     "status": "Not applied",
+     "section": "Header metadata table",
+     "target": "",
+     "change": "",
+     "note": "No fake library version appears in the source excerpts; the row already reads Not specified in the source documents (DOR-RWB-P3-E1032-APP-22), pending RWB-P5-E1032-CON."
+    },
+    {
+     "ruling": "R-05061",
+     "item": "DOR-RWB-P3-E1032-APP-23",
+     "status": "Not applied",
+     "section": "Header metadata table",
+     "target": "",
+     "change": "",
+     "note": "The sources give only the /v1 base path and no contract version; the row already carries Not specified in the source documents (DOR-RWB-P3-E1032-APP-23)."
+    },
+    {
+     "ruling": "R-10280",
+     "item": "CG-ALL-3700",
+     "status": "Not applied",
+     "section": "12.1",
+     "target": "",
+     "change": "",
+     "note": "Searched Error and Message Standard v4 for the 401 no session message ID; only MSG-P1-001 is in the excerpts, so §12.1 keeps the placeholder."
+    },
+    {
+     "ruling": "R-15950",
+     "item": "DOR-RWB-P3-E1032-APP-4",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "Added AC19 for BR3 and AC20 for BR7 in section 7; TC-E1-032-20 and TC-E1-032-21 now cite them",
+     "note": "Every business rule now has a criterion and a test case row; AC19 and AC20 take the next free numbers in the story pattern."
+    },
+    {
+     "ruling": "R-15952",
+     "item": "DOR-RWB-P3-E1032-APP-9",
+     "status": "Resolved",
+     "section": "14",
+     "target": "",
+     "change": "MSG-P1-001 When column aligned to the standard",
+     "note": "MSG-P1-001 When text taken from Error and Message Standard v4 table 3 row 8; the message text already matched that row."
+    },
+    {
+     "ruling": "R-22058",
+     "item": "GAP-0742",
+     "status": "Cross-document",
+     "section": "11, 12.7, 13",
+     "target": "Recovery Workbench Logical Data Model and Data Dictionary v9",
+     "change": "Add entity case_document_link (owner P3, schema rwb_case) with field IDs for case_id, document_id, checklist_state, extracted_field_count, linked_at and source_event_id",
+     "note": "Story side already creates case_document_link in V1032_1 with the unique index and no cross-service foreign key; only the field IDs are missing."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    When a status change of case \"RW-2026-000789\" to OPEN is requested\n    Then the system refuses the change and the case keeps status closed\n    Then rwb-case writes no case document link",
+     "new": "    When a status change of case \"RW-2026-000789\" to OPEN is requested\n    Then the system refuses the change and the case keeps status closed\n    Then rwb-case writes no case document link\n\n  Scenario: AC19 The link holds the business keys only, with no document row copied (new, D-RCV-60)\n    Given document \"DOC-0001\" is stored for case \"RW-2026-000123\"\n    When rwb-case writes the case document link from EV-16\n    Then the link holds case_id and the document reference from rwb-document only, with no foreign key across services\n    Then no document table is read and no document row is copied into rwb_case\n\n  Scenario: AC20 The account number is resolved only through the source-data contract (new, D-RCV-60)\n    Given the rwb-source-data contract mock returns account_key \"A-5002\" for the ACE account number \"TEST-ACC-0002\"\n    When the matcher calls GET /cases?accountNo=TEST-ACC-0002\n    Then account_key \"A-5002\" is resolved only through the rwb-source-data contract\n    Then the ACE account number is never stored in rwb_case and never logged"
+    },
+    {
+     "old": "| MSG-P1-001 | The account data of the business date is not available | {product} is from {date}. Today's load has not arrived. |",
+     "new": "| MSG-P1-001 | Data product stale after a late or failed load | {product} is from {date}. Today's load has not arrived. |"
+    },
+    {
+     "old": "| TC-E1-032-20 | BR3 | Component | Link written with the document reference only; no document row read or copied into rwb_case |",
+     "new": "| TC-E1-032-20 | AC19, BR3 | Component | Link written with the document reference only; no document row read or copied into rwb_case |"
+    },
+    {
+     "old": "| TC-E1-032-21 | BR7 | Component | Account number resolved through rwb-source-data; not stored in rwb_case and not logged |",
+     "new": "| TC-E1-032-21 | AC20, BR7 | Component | Account number resolved through rwb-source-data; not stored in rwb_case and not logged |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

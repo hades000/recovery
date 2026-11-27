@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| S3 rwb-guarantee claim contract | Contract | C, outside the Work Package's C list: the guarantee claim read, faked (GAP-0509; ASM-0701) |",
+   "new": "| S3 rwb-guarantee claim contract | Contract | C, outside the Work Package's C list: the guarantee claim read, faked (GAP-0509; ASM-0701); in wave 2 the DP04 guarantee part stays empty rather than stale until the live claim read lands (GAP-2739) |"
+  },
+  {
+   "old": "- the writer of `dp_treatment` and `dp_guarantee_claim` in schema `rwb_source_data`, keyed by record ID and business date, plus the `data_product_load` row of DP04 written through the freshness story (DP-01, DP-15);",
+   "new": "- the writer of `dp_treatment` and `dp_guarantee_claim` in schema `rwb_source_data`, keyed by record ID and business date, plus the `data_product_load` row of DP04 written through the freshness story (DP-01, DP-15), and it never reads this copy as the source of a treatment (GAP-1716);"
+  },
+  {
+   "old": "2. The listener of this story starts `Stage2ProductWorkflow` on task queue `rwb-source-data` with the business date",
+   "new": "2. The listener of this story starts `Stage2ProductWorkflow` on task queue `rwb-source-data` in namespace `rwb-recovery` with the business date"
+  },
+  {
+   "old": "4. `writeDp04Page` activity: resolves the case of every row to confirm it exists, holds on the break list any row whose case does not resolve, and upserts the other rows into `dp_treatment` and `dp_guarantee_claim` in schema `rwb_source_data`, keyed by record ID and business date, one transaction per page.",
+   "new": "4. `writeDp04Page` activity: resolves the case of every row to confirm it exists, holds on the break list any row whose case does not resolve, and upserts the other rows into `dp_treatment` and `dp_guarantee_claim` in schema `rwb_source_data`, keyed by record ID and business date, one transaction per page. The claim read answers every claim in the window with its `case_id` and resolves no case here (GAP-2740)."
+  },
+  {
+   "old": "9. A rerun of D replaces the snapshot rows by record ID, publishes nothing new and never duplicates a row.",
+   "new": "9. A rerun of D replaces the snapshot rows by record ID, publishes nothing new and never duplicates a row.\n\nThe retry policy of the activities is Not specified in the source documents (GAP-0510). The DP04 expected-by time is 08:00, as decision DL11 assumes, until the data steward records it in the data_product row (GAP-0511). Deployment values, thresholds and timings are named chart values per environment in RWB-P1-E2010-OPS; the test-data fixture owner is Not specified in the source documents (GAP-0513) and is named at the wave 2 entry check."
+  },
+  {
+   "old": "The five texts are the legacy texts carried unchanged;",
+   "new": "The five texts are the legacy texts carried unchanged, except MSG-P2-006, which takes the Error and Message Standard v4 text;"
+  },
+  {
+   "old": "| MSG-P2-006 | Rerun while JOB-02 is running | {job} is already running. Wait for it to finish before you rerun it. |",
+   "new": "| MSG-P2-006 | Rerun while JOB-02 is running | {job} is already running. Wait for it to finish before you run it again. |"
+  },
+  {
+   "old": "The case record view SCR-03 shows the DP04 data for roles with an access row in force.",
+   "new": "The case record view SCR-03 shows the DP04 data for roles with an access row in force. Its empty, loading, error and no access states are Not specified in the source documents (CG-ALL-2409)."
+  },
+  {
+   "old": "state Breaks shows the DP04 References breaks and the active-count break for the data steward.",
+   "new": "state Breaks shows the DP04 References breaks and the active-count break for the data steward. Its empty, error and no access states are Not specified in the source documents (CG-ALL-2410)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22449",
+   "item": "GAP-2739",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Copy stays with rwb-source-data and claim with rwb-guarantee; DP04 guarantee part stays empty not stale in wave 2; wave difference recorded as DP04 release dependency in the traceability row."
+  },
+  {
+   "ruling": "R-22450",
+   "item": "GAP-2740",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Claim read answers every claim with its case_id; References check, break list and retry stay with this story's writer step."
+  },
+  {
+   "ruling": "R-24468",
+   "item": "CG-ALL-2407",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P2-006 text copied from Error and Message Standard v4; the When column already matches the standard's rerun use."
+  },
+  {
+   "ruling": "R-24469",
+   "item": "CG-ALL-2408",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Requirements Traceability Matrix v7 (RTM v7)",
+   "change": "Align its test lists for REQ-RDF-014 and REQ-RDF-010 to section 18 of RWB-P1-E2010-APP in its next version.",
+   "note": "Section 18 of this story left as is; the RTM holds the wider test lists and needs its next version to match."
+  },
+  {
+   "ruling": "R-24470",
+   "item": "CG-ALL-2409",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-03 empty, loading, error and no access states added; the screen specification lacks three of them, so they are marked Not specified."
+  },
+  {
+   "ruling": "R-24471",
+   "item": "CG-ALL-2410",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-45 empty, error and no access states marked Not specified because Screen Specifications v1 lacks them; loading state already listed."
+  },
+  {
+   "ruling": "R-28754",
+   "item": "GAP-1716",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Scope bullet states this service never reads the dated DP04 copy as the source of a treatment; the live treatment row stays with rwb-case."
+  },
+  {
+   "ruling": "R-28755",
+   "item": "GAP-0510",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Namespace rwb-recovery added to the workflow start; retry policy marked Not specified; workflow, queue and activity names already in the flow."
+  },
+  {
+   "ruling": "R-28756",
+   "item": "GAP-0511",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "DP04 expected-by time carried as 08:00 per the DL11 assumption, to be replaced when the data steward records it in the data_product row."
+  },
+  {
+   "ruling": "R-28757",
+   "item": "GAP-0513",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Deployment values and thresholds named as chart values per environment in RWB-P1-E2010-OPS; fixture owner marked Not specified until the wave 2 entry check."
+  }
+ ]
+}

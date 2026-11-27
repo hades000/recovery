@@ -1,0 +1,85 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E1035-APP",
+ "unit": "u01",
+ "rulings": [
+  "R-00756",
+  "R-15953",
+  "R-15955",
+  "R-15959"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 5
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-00756",
+     "item": "CG-ALL-3717",
+     "status": "Resolved",
+     "section": "13",
+     "target": "",
+     "change": "Section 13 records that the package is the Service Template Specification v1 name for rwb-case, copied, with no segment renamed or invented.",
+     "note": "Service Template Specification v1 line 371, P3 row gives th.co.scb.ace.workbench.recovery.case; the story copies that name per the ruling."
+    },
+    {
+     "ruling": "R-15953",
+     "item": "DOR-RWB-P3-E1035-APP-10",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "SCR-04 states spelled out: loading explicit, as SCR-03; empty, error and no access kept as Not specified in Screen Specifications v1 (CG-ALL-3719).",
+     "note": "SCR-03 loading, empty, error and no access were already in section 15; SCR-04 loading is now stated explicitly and the other three states stay CG-ALL-3719."
+    },
+    {
+     "ruling": "R-15955",
+     "item": "DOR-RWB-P3-E1035-APP-15",
+     "status": "Resolved",
+     "section": "6",
+     "target": "",
+     "change": "INVEST Small now says the story fits two weeks.",
+     "note": "The two-week claim comes from the item itself (DOR-RWB-P3-E1035-APP-15), replacing 'Fits one week' in the section 6 table."
+    },
+    {
+     "ruling": "R-15959",
+     "item": "DOR-RWB-P3-E1035-APP-4",
+     "status": "Resolved",
+     "section": "7; 16",
+     "target": "",
+     "change": "Added AC11 to AC16 for BR5, BR6, BR7, BR8, BR9 and BR11, with test cases TC-E1-035-14 to TC-E1-035-19; BR10 stays on AC9.",
+     "note": "BR10 was already covered by AC9 and TC-E1-035-12; the other six rules had test case coverage but no criterion in section 7."
+    }
+   ],
+   "edits": [
+    {
+     "old": "**Package.** Java package `th.co.scb.ace.workbench.recovery.case`, module `timeline`; the screen module is served by the gateway-bff composite route of RWB-PLT-N001-CON and holds no server code of its own.",
+     "new": "**Package.** Java package `th.co.scb.ace.workbench.recovery.case`, module `timeline`; the screen module is served by the gateway-bff composite route of RWB-PLT-N001-CON and holds no server code of its own. The package name is the one the Service Template Specification v1 gives for service rwb-case in its P3 row: the story copies it and no segment is renamed or invented here (CG-ALL-3717; R-00756)."
+    },
+    {
+     "old": "SCR-04 states: loading (skeleton rows, as SCR-03); empty, error and no access: not in Screen Specifications v1; Not specified in the source documents (CG-ALL-3719).",
+     "new": "SCR-04 states: Loading: skeleton rows with the section headings, as SCR-03. Empty, error and no access: not in Screen Specifications v1; Not specified in the source documents (CG-ALL-3719), so no SCR-04 state beyond loading is claimed in this story."
+    },
+    {
+     "old": "| Small | Fits one week |",
+     "new": "| Small | Fits two weeks (DOR-RWB-P3-E1035-APP-15) |"
+    },
+    {
+     "old": "    Given a call to the timeline of case RW-2026-000801 by a user whose role does not include Case record R\n    When the timeline is called\n    Then the response is 403",
+     "new": "    Given a call to the timeline of case RW-2026-000801 by a user whose role does not include Case record R\n    When the timeline is called\n    Then the response is 403\n\n  Scenario: AC11 A personal field in a contact summary is masked by role (new, D-RCV-60)\n    Given a contact item on the timeline of case RW-2026-000801 whose summary holds a personal field\n    Given the rwb-access contract mock returns the masking policy for the role of U-81\n    When the timeline opens\n    Then the summary shows the value the masking policy allows for that role\n    Then the rest of the item shows with its time and its by\n\n  Scenario: AC12 The type order and the section timeout come from the parameters contract (new, D-RCV-60)\n    Given the parameters contract returns `timeline.type.order` and `caserecord.section.timeout.ms` on every request\n    When the timeline opens\n    Then the items follow the type order the parameters contract returned\n    Then a source that exceeds the returned section timeout sets its section to the failed state with MSG-P3-023\n    Then no order and no timeout is read from a constant in code\n\n  Scenario: AC13 The timeline of a case with 500 events reads in under 2 seconds (new, D-RCV-60)\n    Given case RW-2026-000801 has 500 events across the four sources\n    Given the rwb-decision, rwb-source-data and rwb-document contract mocks answer within their 2 s budget\n    When the timeline opens\n    Then the first page is returned in under 2 seconds (NFR-070)\n\n  Scenario: AC14 A transfer item takes its queues from the assignment rows and its rule version from the decision record (new, D-RCV-60)\n    Given a transfer at 2026-12-04 14:00 with an assignment row carrying the to queue and a closed previous assignment row carrying the from queue and the from owner\n    Given the rwb-decision contract mock returns the transfer decision record with rule \"TRF-007\" and version \"TRF-2026.11\"\n    When the transfer item is opened\n    Then the to queue comes from `assignment.queue_id`, and the from queue and the from owner from the closed previous assignment row\n    Then the rule version \"TRF-2026.11\" comes from the decision record, never from a column\n\n  Scenario: AC15 A case state change and the creation item come from the decision records (new, D-RCV-60)\n    Given case RW-2026-000802 has no status-history row of its own\n    Given the rwb-decision contract mock returns the creation record and a state change record of the case\n    When the timeline opens\n    Then the creation item and the state change show from the decision records, with the rule version\n\n  Scenario: AC16 The scope filter applies before the merge (new, D-RCV-60)\n    Given case RW-2026-000804 belongs to team \"LIT-BKK\" and U-81 has scope Own\n    Given the rwb-access contract mock returns scope Own for U-81\n    Given the rwb-decision, rwb-source-data and rwb-document contract mocks record every call\n    When U-81 opens the timeline for RW-2026-000804\n    Then the response is 404 with MSG-P4-003 and no item\n    Then none of the three contracts is called for the case"
+    },
+    {
+     "old": "| TC-E1-035-13 | BR5, BR6, BR7, BR8, BR9, BR11 | Component | Not specified in the source documents (NEWAC-RWB-P3-E1035-APP-AC9) |",
+     "new": "| TC-E1-035-13 | BR5, BR6, BR7, BR8, BR9, BR11 | Component | Not specified in the source documents (NEWAC-RWB-P3-E1035-APP-AC9) |\n| TC-E1-035-14 | AC11, BR5 | Component | Contact item whose summary holds a personal field; rwb-access masking policy mock |\n| TC-E1-035-15 | AC12, BR7 | Component | Parameters contract returning `timeline.type.order` and `caserecord.section.timeout.ms` |\n| TC-E1-035-16 | AC13, BR6 | Component | 500 events across the four sources |\n| TC-E1-035-17 | AC14, BR8 | Component | Transfer with a closed previous assignment row; decision record TRF-007 version TRF-2026.11 |\n| TC-E1-035-18 | AC15, BR9 | Component | Case with no status-history row; creation and state change records from the rwb-decision mock |\n| TC-E1-035-19 | AC16, BR11 | Component | Out-of-scope case; the three contracts record no call |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

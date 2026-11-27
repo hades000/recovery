@@ -1,0 +1,172 @@
+{
+ "edits": [
+  {
+   "old": "writes the result to the decision log with the rule version",
+   "new": "writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "\"the decision log cannot be written\"",
+   "new": "\"the decision record cannot be written\""
+  },
+  {
+   "old": "a forced decision log write failure",
+   "new": "a forced decision record write failure"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E6-022-04 |",
+   "new": "| MSG-P4-002 | AC4, TC-E6-022-04 |"
+  },
+  {
+   "old": "| MSG-S7-001 | VR-S7-010-1, X8 |",
+   "new": "| MSG-S7-001 | AC5, VR-S7-010-1, TC-E6-022-06 |"
+  },
+  {
+   "old": "fed twice | None | X7 |",
+   "new": "fed twice | None | AC6, TC-E6-022-07 |"
+  },
+  {
+   "old": "| None | X4 |",
+   "new": "| None | AC7, TC-E6-022-08 |"
+  },
+  {
+   "old": "| Not specified in the source documents (GAP-3035; ASM-5076) | X7, R-WO-27 |",
+   "new": "| Not specified in the source documents (GAP-3035; ASM-5076) | AC8, TC-E6-022-09, R-WO-27 |"
+  },
+  {
+   "old": "the key answers the feed that exists | None | X7 |",
+   "new": "the key answers the feed that exists | None | AC9, TC-E6-022-10 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5, BR8 |",
+   "new": "| None (pipeline log) | AC10, TC-E6-022-11, Section 17, BR5, BR8 |"
+  },
+  {
+   "old": "| MSG-GEN-001 | X9 |",
+   "new": "| MSG-GEN-001 | AC11, TC-E6-022-12 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC4 Access refused (exception X2)\n    Given a caller without the Write-off and posting right\n    When the caller reads the feed outcome\n    Then the system answers 403 before any read\n    Then nothing changes and no record is written\n\n  Scenario: AC5 No tax criteria version (exception X3)\n    Given no tax criteria version is in force at the business date\n    When the run arrives\n    Then the step holds the case at PROVISION_RELEASED and writes nothing\n    Then the system raises MSG-S7-001\n\n  Scenario: AC6 Case not at PROVISION_RELEASED (exception X4)\n    Given a case that is not at PROVISION_RELEASED or has left the population since it was read\n    When the run arrives for that case\n    Then the system answers 409 for that case and writes nothing for it\n    Then a case that has already moved is not fed twice\n\n  Scenario: AC7 Dependency does not answer (exception X5)\n    Given rwb-case, rwb-decision or the reference-data read does not answer inside 2 s, or its breaker is open\n    When the step runs\n    Then the step retries on the workflow's own schedule and writes nothing\n    Then the caller sees 503 with the platform error envelope\n\n  Scenario: AC8 Finance feed rejects the file (exception X6, R-WO-27)\n    Given the Finance provision feed rejects the file\n    When the rejection is received\n    Then R-WO-27 records the rejection code and answers FINANCE_FEED_REJECTED\n    Then the two-working-day task is raised\n\n  Scenario: AC9 Repeated run (exception X7, BR11)\n    Given the same business date, population and package version arrive twice, or the same Idempotency-Key arrives twice\n    When the repeat is received\n    Then one record, one feed and one answer are produced per case\n    Then the repeat is counted and the key answers the feed that exists\n\n  Scenario: AC10 Boundary breach (exception X8)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case row or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement and the build fails\n    Then nothing is released\n\n  Scenario: AC11 Feed row changed or absent (exception X9, MSG-GEN-001)\n    Given the Finance feed row has changed since the last run or no row is in force at the business date\n    When the next feed is built\n    Then the next feed obeys the new version, or no feed is built\n    Then the cases stay at PROVISION_RELEASED with the refusal in the run log\n\n  Scenario: AC12 Provision inputs leave as feed items (BR1, BR4)\n    Given the rwb-case contract mock returns the case at PROVISION_RELEASED\n    When the feed is sent\n    Then the provision inputs and the tax file leave as two items of the Finance provision feed\n    Then the case move is answered and not written\n\n  Scenario: AC13 Own rows only, no personal data (BR3, BR10)\n    Given the posted population of the business date\n    When the population is read\n    Then only the write_off rows of this service are read\n    Then no name, address, contact value or identity number enters a record, a feed item, a log or a workflow input\n\n  Scenario: AC14 Tax criteria version as reference data (BR5, BR6)\n    Given the reference data holds the tax criteria version with its version\n    When the step runs\n    Then the tax criteria version is read with its version\n    Then no value a business person may change is written in code\n\n  Scenario: AC15 Re-send after a cleared rejection (BR7, BR8, BR14, BR15)\n    Given a case at FINANCE_FEED_REJECTED\n    When an accepted re-send arrives\n    Then the case returns to FINANCE_FEED_SENT under R-WO-28 and the tax file reference is recorded\n    Then the feed status, the feed reference, the acceptance code and the tax file reference are held in the decision record and the case state\n\n  Scenario: AC16 Month-end close as a durable timer (BR9)\n    Given the month-end close of R-WO-26\n    When the close arrives\n    Then the close runs as a durable timer of WriteOffWorkflow and not as a Schedule\n\n  Scenario: AC17 Decision recorded before anything leaves (BR2)\n    Given the decision for the case is ready\n    When the step runs\n    Then the decision is recorded with the rule ID and the package version before anything leaves\n    Then a failed write changes nothing and the caller sees MSG-P7-003"
+  },
+  {
+   "old": "R-WO-29, which decides the post charge-off treatment once the feed is accepted, belongs to the story that owns that treatment and is not this step's.",
+   "new": "R-WO-29, which decides the post charge-off treatment once the feed is accepted, belongs to the story that owns that treatment and is not this step's.\n\nBR12 to BR15 are the four rows: R-WO-25 is BR12, R-WO-26 is BR13, R-WO-27 is BR14 and R-WO-28 is BR15. Coverage: BR1 and BR4 by AC12; BR2 by AC17; BR3 and BR10 by AC13; BR5 and BR6 by AC14; BR7, BR8, BR14 and BR15 by AC15; BR9 by AC16; BR11 by AC9; BR12 and BR13 by AC2; TC-E6-022-13 to TC-E6-022-18 name the same rules. The interface path of the Finance provision feed is an open question (GAP-1796), owned by the solution architect with the integration lead; this story designs no file."
+  },
+  {
+   "old": "| TSD S7 T-A.2; R-UNI-40 |",
+   "new": "| TSD S7 T-A.2; R-UNI-40 |\n| BR12 | The provision is released before this step starts; R-WO-25 is tabled only and belongs to RWB-S7-E6021-APP | R-WO-25 |\n| BR13 | The provision inputs and the tax file go to Finance on the month-end close and the case moves to FINANCE_FEED_SENT | R-WO-26 |\n| BR14 | A rejected file is held, the feed is retried and the task is raised after the retry limit | R-WO-27 |\n| BR15 | An accepted re-send returns the case to FINANCE_FEED_SENT and records the tax file reference | R-WO-28 |"
+  },
+  {
+   "old": "| NFR | The record store stopped during a business date; the run is repeated after recovery and writes once |",
+   "new": "| NFR | The record store stopped during a business date; the run is repeated after recovery and writes once |\n| TC-E6-022-06 | No tax criteria version in force: the case is held at PROVISION_RELEASED with MSG-S7-001 and nothing is written | Component | No version in force at the business date; the run resumes after Finance publishes it |\n| TC-E6-022-07 | A case not at PROVISION_RELEASED, or already moved, is refused with 409 and not fed twice | Component | A case at another state or outside the population when the run arrives |\n| TC-E6-022-08 | A dependency that does not answer inside 2 s is retried, writes nothing and answers 503 | Component | rwb-case, rwb-decision or the reference-data read does not answer or its breaker is open |\n| TC-E6-022-09 | A rejected file records the rejection code, answers FINANCE_FEED_REJECTED and raises the two-working-day task | Component | The Finance provision feed rejects the file |\n| TC-E6-022-10 | The same business date, population and package version, or the same Idempotency-Key, twice gives one record, one feed and one answer | Component | The run and the key repeated |\n| TC-E6-022-11 | A statement reaching a v_ace_* view, a recovery_case row or another service's schema is refused and fails the build | Component | A component, a statement or a test reaches a forbidden object |\n| TC-E6-022-12 | A changed or absent Finance feed row is obeyed, or no feed is built and the cases stay at PROVISION_RELEASED | Component | The feed row changes between runs or no row is in force |\n| TC-E6-022-13 | The provision inputs and the tax file leave as two feed items and the case move is answered, not written | Component | The rwb-case contract mock returns the case at PROVISION_RELEASED |\n| TC-E6-022-14 | Only this service's write_off rows are read and no personal data enters a record, feed item, log or workflow input | Component | The posted population of the business date |\n| TC-E6-022-15 | The tax criteria version is read with its version and no business value is written in code | Component | Reference data holds the tax criteria version |\n| TC-E6-022-16 | A cleared rejection returns the case to FINANCE_FEED_SENT and the feed elements are held in the decision record and case state | Component | A case at FINANCE_FEED_REJECTED and an accepted re-send |\n| TC-E6-022-17 | The month-end close runs as a durable timer of WriteOffWorkflow and not as a Schedule | Component | The month-end close of R-WO-26 |\n| TC-E6-022-18 | The decision is recorded with the rule ID and the package version before anything leaves; a failed write changes nothing | Component | The decision for the case is ready |"
+  },
+  {
+   "old": "Read: the posted population of the business date; no column changes at this step",
+   "new": "Read: the posted population of the business date; no column changes at this step. responsibility_center, cost_center and gl_product are mirrored from the general ledger and never re-keyed; the completeness of this field set depends on DEF-05, whose scope is Not specified in the source documents (GAP-1809)"
+  },
+  {
+   "old": "| Refused, not recorded, no tax criteria version | The messages of section 14 | This service and the reference data |",
+   "new": "| Refused, not recorded, no tax criteria version | The messages of section 14 | This service and the reference data |\n| Empty | Not specified in the source documents (CG-ALL-11092) | Not specified in the source documents (CG-ALL-11092) |\n| Loading | Not specified in the source documents (CG-ALL-11092) | Not specified in the source documents (CG-ALL-11092) |\n| Error | Not specified in the source documents (CG-ALL-11092) | Not specified in the source documents (CG-ALL-11092) |\n| No access | Not specified in the source documents (CG-ALL-11092) | Not specified in the source documents (CG-ALL-11092) |"
+  },
+  {
+   "old": "the workflow ID form and the duplicate-start policy are not specified in the source documents (CG-ALL-11086).",
+   "new": "the workflow ID form and the duplicate-start policy are not specified in the source documents (CG-ALL-11086). The step provides no operation: the scan and the committee decision are API-S7-001 and API-S7-002, which are sibling stories'; the four consumed reads and the Finance feed call are its consumed surfaces, with their placeholders (GAP-3035)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20954",
+   "item": "DOR-RWB-S7-E6022-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X2 to X9 now covered by AC4 to AC11 and TC-E6-022-04 and TC-E6-022-06 to TC-E6-022-12; the §5 Covered by column is updated."
+  },
+  {
+   "ruling": "R-20955",
+   "item": "DOR-RWB-S7-E6022-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR12 to BR15 assigned to the four R-WO rows; BR1 to BR15 covered by AC2, AC9, AC12 to AC17 and TC-E6-022-13 to TC-E6-022-18."
+  },
+  {
+   "ruling": "R-20956",
+   "item": "DOR-RWB-S7-E6022-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD to the roles table, or confirm its absence and remove it from the §10 Authority table.",
+   "note": "SY-DATALOAD is not in v5; the story row stays until the roles document is settled."
+  },
+  {
+   "ruling": "R-20957",
+   "item": "DOR-RWB-S7-E6022-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Register field finance_feed_status and entity decision_record in LDM v9 or Data Classification v5.",
+   "note": "P3 wording is fixed in the story under CG-ALL-11091; P2 names are not in LDM v9 or Data Classification v5."
+  },
+  {
+   "ruling": "R-23268",
+   "item": "GAP-3035",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Split plan, slice RWB-S7-E6022-APP",
+   "change": "Record the four consumed reads and the Finance feed call as class C with their placeholders; keep the three H rows as they stand.",
+   "note": "Story §12.5 now declares no provided operation and names API-S7-001 and API-S7-002; BR5, BR8 and BR9 hold the rest."
+  },
+  {
+   "ruling": "R-23633",
+   "item": "GAP-1796",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Feed path carried as an open question with a named owner in §8; no file is designed and the retry and task are kept."
+  },
+  {
+   "ruling": "R-23634",
+   "item": "GAP-3036",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "RWB-S7-E6022-CON contract baseline",
+   "change": "Declare no provided operation and the two absence records; keep placeholders, confirm operation names and feed values before tag, bind errors to section 14 message IDs, record the tag date.",
+   "note": "The story declares no operation; the baseline must publish the absence records."
+  },
+  {
+   "ruling": "R-27677",
+   "item": "CG-ALL-11091",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Decision log wording replaced by decision record in AC1, AC3 and TC-E6-022-05; legacy quote adjusted to match."
+  },
+  {
+   "ruling": "R-27678",
+   "item": "CG-ALL-11092",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access states added to SCR-27; each marked Not specified, as Screen Specifications v1 lacks them."
+  },
+  {
+   "ruling": "R-28907",
+   "item": "GAP-1809",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Eleven model fields kept; three GL-sourced fields marked mirrored and never re-keyed; DEF-05 is an open question; no field invented or dropped."
+  }
+ ]
+}

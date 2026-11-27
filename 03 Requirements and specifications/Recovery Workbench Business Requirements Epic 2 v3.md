@@ -59,98 +59,98 @@ One owner and a timer on every case, full history on one screen, approval routin
 
 # 3. Requirements at development detail
 
-Each requirement is one backlog story. The requirement states what the Workbench does, the benefit states what changes for the user, and the scenarios are the acceptance criteria in the story.
+Each requirement has a business requirement ID (BR-E2-nnn) that belongs to this document. The requirement states what the Workbench does and the benefit states what changes for the user. The backlog stories that deliver a requirement, and their acceptance criteria, are held in the backlog and are not listed here, so a change to the backlog does not change this document.
 
 ## 3.1 P1 Recovery data engine
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-010 | Stage 2 data products: contracts, plans and treatments | The stage 2 data products (treatments, plans, contracts, guarantees) added to the recovery data store with their systems of record | A data product owner | The settlement, TDR and DIL screens in Epic 3 read from one store | Should | 3 |
+| BR-E2-001 | Stage 2 data products: contracts, plans and treatments | The stage 2 data products (treatments, plans, contracts, guarantees) added to the recovery data store with their systems of record | A data product owner | The settlement, TDR and DIL screens in Epic 3 read from one store | Should | 3 |
 
 
 ## 3.2 P2 Integration
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-001 | EFS hand-over with full history from the COLLINS load | The case created or updated from the EFS data in the COLLINS daily load, with the full contact and promise history | A case owner | The case starts the morning after it reaches 90 days past due | Must | 3 |
-| RWB-E2-002 | ACE plan status on the case | The restructure plan status from the ACE common module (created, approved, booked, broken) on the case | A case owner | A case with a live plan is never treated as if it had none | Must | 3 |
-| RWB-E2-003 | Customer's other products on the case | The customer's other products and their status on the case, from the customer profile ACE receives through COLLINS | A case owner | I can see the whole relationship before I decide a route | Should | 3 |
-| RWB-E2-006 | Credit approval pack for NLEADS | The credit approval pack for an approved plan prepared for submission in NLEADS, with the result recorded on the treatment | A restructure operations officer | A plan reaches credit without re-keying the case facts | Must | 3 |
-| RWB-E2-007 | Booking confirmation from the ALS load | The booked terms or settlement matched from the next day's ALS load to the approved treatment, with a task when the booking is missing | A restructure operations officer | Every approved decision is confirmed as booked | Must | 3 |
-| RWB-E2-023 | Automated EFS file load | The EFS file load automated end to end and reconciled daily | A data product owner | One checked path remains | Should | 3 |
-| RWB-E2-033 | Case and queue list with status, owner and ageing | Every case in every queue with its status, owner, age in state and breach flag | A team manager | I can see where work is sitting without asking anyone | Must | 3 |
-| RWB-E2-034 | Interaction ledger on the case and from every channel | Every interaction on the case recorded in one ledger | A case owner | Contactability is not found and then lost again | Must | 3 |
-| RWB-E2-035 | Next action on the case | The case to tell me what to do next and by when | A case owner | I never open a case and have to work out what it needs | Must | 4 |
-| RWB-E2-036 | Queue write interface for models and agents | An interface that lets a model or an agent place a case on a queue | An AI product owner | Analytical output reaches a person the next working day instead of through a weekly manual step | Must | 4 |
+| BR-E2-002 | EFS hand-over with full history from the COLLINS load | The case created or updated from the EFS data in the COLLINS daily load, with the full contact and promise history | A case owner | The case starts the morning after it reaches 90 days past due | Must | 3 |
+| BR-E2-003 | ACE plan status on the case | The restructure plan status from the ACE common module (created, approved, booked, broken) on the case | A case owner | A case with a live plan is never treated as if it had none | Must | 3 |
+| BR-E2-004 | Customer's other products on the case | The customer's other products and their status on the case, from the customer profile ACE receives through COLLINS | A case owner | I can see the whole relationship before I decide a route | Should | 3 |
+| BR-E2-005 | Credit approval pack for NLEADS | The credit approval pack for an approved plan prepared for submission in NLEADS, with the result recorded on the treatment | A restructure operations officer | A plan reaches credit without re-keying the case facts | Must | 3 |
+| BR-E2-006 | Booking confirmation from the ALS load | The booked terms or settlement matched from the next day's ALS load to the approved treatment, with a task when the booking is missing | A restructure operations officer | Every approved decision is confirmed as booked | Must | 3 |
+| BR-E2-007 | Automated EFS file load | The EFS file load automated end to end and reconciled daily | A data product owner | One checked path remains | Should | 3 |
+| BR-E2-008 | Case and queue list with status, owner and ageing | Every case in every queue with its status, owner, age in state and breach flag | A team manager | I can see where work is sitting without asking anyone | Must | 3 |
+| BR-E2-009 | Interaction ledger on the case and from every channel | Every interaction on the case recorded in one ledger | A case owner | Contactability is not found and then lost again | Must | 3 |
+| BR-E2-010 | Next action on the case | The case to tell me what to do next and by when | A case owner | I never open a case and have to work out what it needs | Must | 4 |
+| BR-E2-011 | Queue write interface for models and agents | An interface that lets a model or an agent place a case on a queue | An AI product owner | Analytical output reaches a person the next working day instead of through a weekly manual step | Must | 4 |
 
 
 ## 3.3 P3 Case and workflow
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-004 | Treatment entity and plan timers data model | The treatment entity (TDR, settlement, DIL: terms, approval, booking, outcome) and its plan timers in the case store, with the data product for reporting | A product owner | TDR and DIL run inside the Workbench from Epic 2 and every plan has a record | Must | 3 |
-| RWB-E2-011 | Queue view screens: my queue, team queues, filters and ageing | Screens for my queue and my team's queues with filters by stage, route, status and age, sorted by service level | A team manager | Every person sees their work in one place and the lead sees the team's load | Must | 3 |
-| RWB-E2-012 | Manual transfer and reassignment screen with reason | A screen to transfer a case to another queue or reassign it to a person, with a reason code required and the transfer rules checked | A team manager | A hand-off is one action with a record, not an email | Must | 3 |
-| RWB-E2-015 | Timers, escalation and the deviation flag on the case record view | The case record view to show every timer with its due date, the escalation path, the prescription date and any deviation flag with its approver | A case owner | The next deadline and the reason a case left the path are visible on the case | Must | 3 |
-| RWB-E2-016 | Full case record view with the history timeline | The case record view to show every action, decision, transfer, letter and document on one timeline with filters | A case owner | I read the whole case in one place | Must | 3 |
+| BR-E2-012 | Treatment entity and plan timers data model | The treatment entity (TDR, settlement, DIL: terms, approval, booking, outcome) and its plan timers in the case store, with the data product for reporting | A product owner | TDR and DIL run inside the Workbench from Epic 2 and every plan has a record | Must | 3 |
+| BR-E2-013 | Queue view screens: my queue, team queues, filters and ageing | Screens for my queue and my team's queues with filters by stage, route, status and age, sorted by service level | A team manager | Every person sees their work in one place and the lead sees the team's load | Must | 3 |
+| BR-E2-014 | Manual transfer and reassignment screen with reason | A screen to transfer a case to another queue or reassign it to a person, with a reason code required and the transfer rules checked | A team manager | A hand-off is one action with a record, not an email | Must | 3 |
+| BR-E2-015 | Timers, escalation and the deviation flag on the case record view | The case record view to show every timer with its due date, the escalation path, the prescription date and any deviation flag with its approver | A case owner | The next deadline and the reason a case left the path are visible on the case | Must | 3 |
+| BR-E2-016 | Full case record view with the history timeline | The case record view to show every action, decision, transfer, letter and document on one timeline with filters | A case owner | I read the whole case in one place | Must | 3 |
 
 
 ## 3.4 P4 Access and administration
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-019 | Partner identities through the external gateway | Law firms, valuers and agencies to sign in to the partner portal with external identities through the external gateway, with roles per partner | A partner manager | Partners work in the Workbench from Epic 5 without SCB accounts | Should | 3 |
+| BR-E2-017 | Partner identities through the external gateway | Law firms, valuers and agencies to sign in to the partner portal with external identities through the external gateway, with roles per partner | A partner manager | Partners work in the Workbench from Epic 5 without SCB accounts | Should | 3 |
 
 
 ## 3.5 P5 Document hub
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-017 | Contract, CA and mortgage document generation screens | Screens to generate the agreement, the CA and the mortgage documents from templates with the case facts, review them and send them for signature | A restructure operations officer | DIL and TDR documents are produced without re-keying | Must | 3 |
-| RWB-E2-024 | Field app photos and bills into the document hub | Photos, bills and checklists captured in the field app to enter the document hub against the case, with location and time | A field collector | An inspection is on the case the same day it is made | Must | 3 |
-| RWB-E2-025 | Extraction for the stage 2 and 3 document types | Field extraction extended to the stage 2 and 3 types: contracts, CA, mortgage documents, court filings, hearing notices, judgments | A document hub owner | The litigation pack and the treatment record fill themselves | Must | 3 |
-| RWB-E2-026 | Document generation engine for contract, CA and mortgage templates | The generation engine that fills the contract, CA and mortgage templates from the case facts with the merge field catalog and Legal-approved versions | A restructure operations officer | The documents the screens generate are correct and versioned | Must | 3 |
+| BR-E2-018 | Contract, CA and mortgage document generation screens | Screens to generate the agreement, the CA and the mortgage documents from templates with the case facts, review them and send them for signature | A restructure operations officer | DIL and TDR documents are produced without re-keying | Must | 3 |
+| BR-E2-019 | Field app photos and bills into the document hub | Photos, bills and checklists captured in the field app to enter the document hub against the case, with location and time | A field collector | An inspection is on the case the same day it is made | Must | 3 |
+| BR-E2-020 | Extraction for the stage 2 and 3 document types | Field extraction extended to the stage 2 and 3 types: contracts, CA, mortgage documents, court filings, hearing notices, judgments | A document hub owner | The litigation pack and the treatment record fill themselves | Must | 3 |
+| BR-E2-021 | Document generation engine for contract, CA and mortgage templates | The generation engine that fills the contract, CA and mortgage templates from the case facts with the merge field catalog and Legal-approved versions | A restructure operations officer | The documents the screens generate are correct and versioned | Must | 3 |
 
 
 ## 3.6 P6 Communications
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-018 | E-signature flow for customers and the bank | To sign the agreement on EasyApp or at a branch, with the bank signature added and the signed document returned to the case | A customer | A settlement completes without paper where the law allows | Must | 3 |
-| RWB-E2-021 | Letter dispatch loop with proof of delivery from WIN | Every generated letter sent to WIN for print and post, with the dispatch and proof of delivery status returned to the case and the notice period timer started from delivery | A litigation officer | The notice period is counted from proof, not from printing | Must | 3 |
-| RWB-E2-022 | SMS and LINE dispatch through NSS and LINE OA | Messages sent from templates through NSS and the LINE official account with delivery status on the case and the contact rules applied | A case owner | The customer is reached on the channel they use and every contact is recorded | Must | 3 |
+| BR-E2-022 | E-signature flow for customers and the bank | To sign the agreement on EasyApp or at a branch, with the bank signature added and the signed document returned to the case | A customer | A settlement completes without paper where the law allows | Must | 3 |
+| BR-E2-023 | Letter dispatch loop with proof of delivery from WIN | Every generated letter sent to WIN for print and post, with the dispatch and proof of delivery status returned to the case and the notice period timer started from delivery | A litigation officer | The notice period is counted from proof, not from printing | Must | 3 |
+| BR-E2-024 | SMS and LINE dispatch through NSS and LINE OA | Messages sent from templates through NSS and the LINE official account with delivery status on the case and the contact rules applied | A case owner | The customer is reached on the channel they use and every contact is recorded | Must | 3 |
 
 
 ## 3.7 P7 Decision center and log
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-005 | Decision log query API for audit | A query API over the decision log by case, decision, approver, date and rule version, with the hash chain verified on every result | An internal auditor | An audit question is answered from the log in minutes | Must | 3 |
-| RWB-E2-013 | Approval routing with the delegation of authority table | Every decision that needs approval routed to the role the delegation of authority table names, with a queue per approver role and escalation on timeout | An approver | The right person approves within the limit and nothing waits unseen | Must | 3 |
-| RWB-E2-014 | Approval screen for D7.1 demand and recall notices | A screen that shows the generated notice, the case facts and the rule that proposed it, with approve, change or reject and a reason | A litigation officer | The first decision runs in the Workbench with a person approving | Must | 3 |
+| BR-E2-025 | Decision log query API for audit | A query API over the decision log by case, decision, approver, date and rule version, with the hash chain verified on every result | An internal auditor | An audit question is answered from the log in minutes | Must | 3 |
+| BR-E2-026 | Approval routing with the delegation of authority table | Every decision that needs approval routed to the role the delegation of authority table names, with a queue per approver role and escalation on timeout | An approver | The right person approves within the limit and nothing waits unseen | Must | 3 |
+| BR-E2-027 | Approval screen for D7.1 demand and recall notices | A screen that shows the generated notice, the case facts and the rule that proposed it, with approve, change or reject and a reason | A litigation officer | The first decision runs in the Workbench with a person approving | Must | 3 |
 
 
 ## 3.8 P8 Payments and posting
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-008 | Payment matching with the missed payment event | Payments from the ALS load matched to plans each day, with a missed payment event when a due payment has not arrived | A case owner | A broken plan is known the day after it breaks | Must | 3 |
-| RWB-E2-027 | Payment matching rules with the data team | The matching rules (amount, date window, reference, partial payments) held as data and run by the matching engine, with the exception list for unmatched items | A reconciliation officer | Most payments match without a person and the rest are listed | Must | 3 |
+| BR-E2-028 | Payment matching with the missed payment event | Payments from the ALS load matched to plans each day, with a missed payment event when a due payment has not arrived | A case owner | A broken plan is known the day after it breaks | Must | 3 |
+| BR-E2-029 | Payment matching rules with the data team | The matching rules (amount, date window, reference, partial payments) held as data and run by the matching engine, with the exception list for unmatched items | A reconciliation officer | Most payments match without a person and the rest are listed | Must | 3 |
 
 
 ## 3.9 P9 Reporting
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-009 | Steering dashboard v1 data set | A Power BI data set for the steering dashboard: cases by stage, queue and age, decisions logged, treatments, letters sent, agent acceptance | A program manager | The steering committee reads the same numbers the teams work with | Should | 3 |
+| BR-E2-030 | Steering dashboard v1 data set | A Power BI data set for the steering dashboard: cases by stage, queue and age, decisions logged, treatments, letters sent, agent acceptance | A program manager | The steering committee reads the same numbers the teams work with | Should | 3 |
 
 
 ## 3.10 P10 Agent runtime
 
 | Key | Requirement | What the Workbench does | For | User benefit | Priority | Tests |
 |---|---|---|---|---|---|---|
-| RWB-E2-031 | Agent monitoring dashboard v2 [E3d] | The monitoring dashboard extended with acceptance, override, latency, cost per agent and per segment, and drift alerts | An AI product owner | Every agent at L1 is watched daily | Must | 3 |
-| RWB-E2-032 | TDR offer-suggestion model through the model gateway [E3e] | The TDR team's offer-suggestion model exposed through the model gateway so the Workbench treatment record can carry the suggestion, if the model exists | A restructure operations officer | One gateway serves every model the Workbench uses | Could | 3 |
+| BR-E2-031 | Agent monitoring dashboard v2 [E3d] | The monitoring dashboard extended with acceptance, override, latency, cost per agent and per segment, and drift alerts | An AI product owner | Every agent at L1 is watched daily | Must | 3 |
+| BR-E2-032 | TDR offer-suggestion model through the model gateway [E3e] | The TDR team's offer-suggestion model exposed through the model gateway so the Workbench treatment record can carry the suggestion, if the model exists | A restructure operations officer | One gateway serves every model the Workbench uses | Could | 3 |
 
 
 # 4. Program requirements met in this epic
@@ -357,7 +357,6 @@ The build order inside every service epic follows the contract, not the screen.
 - **Rules are embedded per service and registered centrally.** Each service evaluates the rule packages it uses, and the package registry and its versions live in rwb-decision.
 - **The owner of a story is a suggestion.** Every story names a team type — TechX for contracts and application code, the ACE team for database work, SCB IT infrastructure for infrastructure, the DevOps team for operations, and the QA team for the harness and the non-functional work — and any team may pick the story up. Every team type therefore has Day-1 work in wave 2.
 
-A story identifier reads RWB-<scope>-<legacy compact>-<work type>, with a -2 suffix on the delta copy of a preserved story. The work types are CON, APP, DB, INF, OPS and ITG.
 
 # 9. Requirement to service epic traceability
 
@@ -377,42 +376,42 @@ Every requirement of section 3 is delivered by the service epic named below as p
 | RWB-SVC-P10 | rwb-agent | 2 | 0 |
 | RWB-ITG-W2 | Integration harness for wave 2 | 0 | 30 |
 
-| Requirement | Requirement title | Primary service epic | Other service epics and the harness | Business epic | Wave | Service wave (Architecture v5) | Stories in the plan |
+| Requirement | Requirement title | Primary service epic | Other service epics and the harness | Business epic | Wave | Service wave (Architecture v5) | Position |
 |---|---|---|---|---|---|---|---|
-| RWB-E2-010 | Stage 2 data products: contracts, plans and treatments | RWB-SVC-P1 | RWB-ITG-W2, RWB-SVC-S2, RWB-SVC-S3 | EP02 | 2 | 1 | Split (rework), 6 stories |
-| RWB-E2-001 | EFS hand-over with full history from the COLLINS load | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P7 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-002 | ACE plan status on the case | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-003 | Customer's other products on the case | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P4 | EP02 | 2 | 1 | Split (rework), 3 stories |
-| RWB-E2-006 | Credit approval pack for NLEADS | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Split (rework), 5 stories |
-| RWB-E2-007 | Booking confirmation from the ALS load | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Split (rework), 9 stories |
-| RWB-E2-023 | Automated EFS file load | RWB-SVC-P2 | None | EP02 | 2 | 1 | No story in the plan (GAP-1459; ASM-2565) |
-| RWB-E2-033 | Case and queue list with status, owner and ageing | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-S8 | EP02 | 2 | 1 | Split (rework), 6 stories |
-| RWB-E2-034 | Interaction ledger on the case and from every channel | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-S9 | EP02 | 2 | 1 | Split (rework), 8 stories |
-| RWB-E2-035 | Next action on the case | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-036 | Queue write interface for models and agents | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S8 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-004 | Treatment entity and plan timers data model | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-011 | Queue view screens: my queue, team queues, filters and ageing | RWB-SVC-P3 | None | EP02 | 2 | 1 | Moved (no impact), 2 stories |
-| RWB-E2-012 | Manual transfer and reassignment screen with reason | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S8 | EP02 | 2 | 1 | Split (rework), 6 stories |
-| RWB-E2-015 | Timers, escalation and the deviation flag on the case record view | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-S8 | EP02 | 2 | 1 | Split (rework), 6 stories |
-| RWB-E2-016 | Full case record view with the history timeline | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P5 | EP02 | 2 | 1 | Split (rework), 4 stories |
-| RWB-E2-019 | Partner identities through the external gateway | RWB-SVC-P4 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S9 | EP02 | 2 | 1 | Split (rework), 6 stories |
-| RWB-E2-017 | Contract, CA and mortgage document generation screens | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P6, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-024 | Field app photos and bills into the document hub | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Split (rework), 6 stories |
-| RWB-E2-025 | Extraction for the stage 2 and 3 document types | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S2, RWB-SVC-S4 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-026 | Document generation engine for contract, CA and mortgage templates | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P6, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-018 | E-signature flow for customers and the bank | RWB-SVC-P6 | RWB-ITG-W2, RWB-SVC-P5, RWB-SVC-S2 | EP02 | 2 | 1 | Split (rework), 5 stories |
-| RWB-E2-021 | Letter dispatch loop with proof of delivery from WIN | RWB-SVC-P6 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Split (rework), 8 stories |
-| RWB-E2-022 | SMS and LINE dispatch through NSS and LINE OA | RWB-SVC-P6 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-005 | Decision log query API for audit | RWB-SVC-P7 | RWB-ITG-W2 | EP02 | 2 | 1 | Split (rework), 3 stories |
-| RWB-E2-013 | Approval routing with the delegation of authority table | RWB-SVC-P7 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P6 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-014 | Approval screen for D7.1 demand and recall notices | RWB-SVC-P7 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P6 | EP02 | 2 | 1 | Split (rework), 7 stories |
-| RWB-E2-008 | Payment matching with the missed payment event | RWB-SVC-P8 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 2 | Split (rework), 8 stories |
-| RWB-E2-027 | Payment matching rules with the data team | RWB-SVC-P8 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 2 | Split (rework), 7 stories |
-| RWB-E2-009 | Steering dashboard v1 data set | RWB-SVC-P9 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-S8 | EP02 | 2 | 1 | Split (rework), 6 stories |
-| RWB-E2-031 | Agent monitoring dashboard v2 [E3d] | RWB-SVC-P10 | RWB-ITG-W2, RWB-SVC-P4 | EP02 | 2 | 1 | Split (rework), 5 stories |
-| RWB-E2-032 | TDR offer-suggestion model through the model gateway [E3e] | RWB-SVC-P10 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Split (rework), 6 stories |
+| BR-E2-001 | Stage 2 data products: contracts, plans and treatments | RWB-SVC-P1 | RWB-ITG-W2, RWB-SVC-S2, RWB-SVC-S3 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-002 | EFS hand-over with full history from the COLLINS load | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P7 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-003 | ACE plan status on the case | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-004 | Customer's other products on the case | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P4 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-005 | Credit approval pack for NLEADS | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-006 | Booking confirmation from the ALS load | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-007 | Automated EFS file load | RWB-SVC-P2 | None | EP02 | 2 | 1 | Not in the plan (GAP-1459; ASM-2565) |
+| BR-E2-008 | Case and queue list with status, owner and ageing | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-S8 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-009 | Interaction ledger on the case and from every channel | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-S9 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-010 | Next action on the case | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-011 | Queue write interface for models and agents | RWB-SVC-P2 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S8 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-012 | Treatment entity and plan timers data model | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-013 | Queue view screens: my queue, team queues, filters and ageing | RWB-SVC-P3 | None | EP02 | 2 | 1 | Build (no impact) |
+| BR-E2-014 | Manual transfer and reassignment screen with reason | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S8 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-015 | Timers, escalation and the deviation flag on the case record view | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-S8 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-016 | Full case record view with the history timeline | RWB-SVC-P3 | RWB-ITG-W2, RWB-SVC-P5 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-017 | Partner identities through the external gateway | RWB-SVC-P4 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S9 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-018 | Contract, CA and mortgage document generation screens | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P6, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-019 | Field app photos and bills into the document hub | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-020 | Extraction for the stage 2 and 3 document types | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S2, RWB-SVC-S4 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-021 | Document generation engine for contract, CA and mortgage templates | RWB-SVC-P5 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P6, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-022 | E-signature flow for customers and the bank | RWB-SVC-P6 | RWB-ITG-W2, RWB-SVC-P5, RWB-SVC-S2 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-023 | Letter dispatch loop with proof of delivery from WIN | RWB-SVC-P6 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-024 | SMS and LINE dispatch through NSS and LINE OA | RWB-SVC-P6 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P4, RWB-SVC-P7 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-025 | Decision log query API for audit | RWB-SVC-P7 | RWB-ITG-W2 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-026 | Approval routing with the delegation of authority table | RWB-SVC-P7 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P6 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-027 | Approval screen for D7.1 demand and recall notices | RWB-SVC-P7 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-P4, RWB-SVC-P6 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-028 | Payment matching with the missed payment event | RWB-SVC-P8 | RWB-ITG-W2, RWB-SVC-P1, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 2 | Build (rework) |
+| BR-E2-029 | Payment matching rules with the data team | RWB-SVC-P8 | RWB-ITG-W2, RWB-SVC-P4, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 2 | Build (rework) |
+| BR-E2-030 | Steering dashboard v1 data set | RWB-SVC-P9 | RWB-ITG-W2, RWB-SVC-P3, RWB-SVC-S8 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-031 | Agent monitoring dashboard v2 [E3d] | RWB-SVC-P10 | RWB-ITG-W2, RWB-SVC-P4 | EP02 | 2 | 1 | Build (rework) |
+| BR-E2-032 | TDR offer-suggestion model through the model gateway [E3e] | RWB-SVC-P10 | RWB-ITG-W2, RWB-SVC-P7, RWB-SVC-S2 | EP02 | 2 | 1 | Build (rework) |
 
-The plan holds 41 Epic 2 legacy keys against the 32 requirements above. The 10 keys with no requirement row here are E2-028, E2-029, E2-030, E2-037, E2-038, E2-039, E2-040, E2-041, E2-042, E2-043 (GAP-1462); they are built from another source. RWB-E2-023 is the one requirement with no story and no slice (GAP-1459; ASM-2565), and RWB-E2-011 is the one requirement the plan moves without impact on its content.
+The plan holds 41 Epic 2 backlog items against the 32 requirements above; ten of them have no requirement row here (GAP-1462); they are built from another source. BR-E2-007 is the one requirement with no story and no slice (GAP-1459; ASM-2565), and BR-E2-013 is the one requirement the plan moves without impact on its content.
 
 # 10. Document control and change log
 
@@ -458,6 +457,7 @@ The table is left empty for the people who approve this version. Until it is sig
 | Version | Date | Change | Tool |
 |---|---|---|---|
 | 3 | 22 November 2026 | D-RCV-60 microservice realignment: two header lines; metadata rows for the realigned version, date, decision, status and tool; the release date marked tentative; two owner cells written as roles; section 7.1 on the effect of the realignment; section 8 Delivery model; section 9 requirement to service epic traceability; section 10 document control. No requirement, identifier, priority, count or date changes. | T3 Code / OpenCode / DeepSeek v4.1 Flash |
+| 3 (update) | 26 November 2026 | Updated in place from the source documents. Every requirement is re-keyed from its backlog story code to a business requirement ID BR-E2-001 to BR-E2-032 in order of section 3; the story counts in section 9 are replaced by the position of each requirement, and the story identifier convention is removed. No requirement text, priority, count or date changes (GAP-3266; ASM-5684). | Henka Group |
 
 Version 1 is the version the metadata table names and version 2 is the file this version was read from; both values are kept as the source writes them (GAP-1461).
 
@@ -471,7 +471,7 @@ Version 1 is the version the metadata table names and version 2 is the file this
 | Platform and integration epics | Template and Rules R5.1 |
 | Wave map and the conflict rule | Template and Rules R5.6 and R5.7 |
 | Contract-first order, work types and suggested owners | Template and Rules R5.2, R5.3 and R5.7 |
-| Primary service epic, other service epics, story counts and dispositions | split_plan.json, legacy and slices blocks, for each RWB-E2 key |
+| Primary service epic, other service epics and position | split_plan.json, legacy and slices blocks, for each Epic 2 requirement |
 | Delegation of authority ownership | Ownership Map rulings, delegation_limit |
 | Decision, ADR and DL identifiers | ids.json; Template and Rules R8.4 |
 | Personal-data classes | This version's classification of the requirements of section 3; no source states a classification |
@@ -482,17 +482,17 @@ Each row is a candidate in the run's registers and is numbered with the other wo
 
 | ID | Kind | Statement |
 |---|---|---|
-| GAP-1459 | Gap (Missing, P2) | RWB-E2-023 Automated EFS file load has no legacy story and no slice in the plan |
+| GAP-1459 | Gap (Missing, P2) | BR-E2-007 Automated EFS file load has no legacy story and no slice in the plan |
 | GAP-1460 | Gap (Missing, P3) | Two open decisions name individuals as owners and the source states no role for either |
 | GAP-1461 | Gap (Ambiguous, P3) | The document control block says Version 1 and 28 October 2026 while the source file is v2 and this version is 3 |
 | GAP-1462 | Gap (Missing, P3) | Ten Epic 2 legacy keys in the plan have no requirement row in this BRD |
-| GAP-1463 | Gap (Ambiguous, P3) | RWB-E2-032 is conditional on a model existing and no decision row names who confirms it |
+| GAP-1463 | Gap (Ambiguous, P3) | BR-E2-032 is conditional on a model existing and no decision row names who confirms it |
 | ASM-2560 | Assumption (High) | Epic 2 carries the business epic tag EP02 and wave 2 of the wave map. |
 | ASM-2561 | Assumption (High) | The Delivery model and the requirement-to-service-epic trace table are added from the run's plan, not from the source document. |
 | ASM-2562 | Assumption (High) | The module codes P1 to P10 of section 3 are read as the service epics RWB-SVC-P1 to RWB-SVC-P10, and the business names the source uses (recovery data store, document hub, case store) are kept as business names only. |
 | ASM-2563 | Assumption (High) | No requirement text, identifier, priority, count or date of the source is changed. The edits are the two header lines, the added metadata rows, the tentative marking of the release date, two owner cells written as roles, and sections 7.1 and 8 to 10. |
 | ASM-2564 | Assumption (Medium) | Where a service epic's Architecture v5 wave is later than wave 2 — S3 rwb-guarantee, S4 rwb-litigation and S9 rwb-partner in this epic — the plan's wave 2 governs for the Epic 2 stories, and the conflict gap is raised once per service and business epic in the service work packages, not here. |
-| ASM-2565 | Assumption (Medium) | RWB-E2-023 is read as module P2 Integration from its section heading, which is the only source that places it. |
+| ASM-2565 | Assumption (Medium) | BR-E2-007 is read as module P2 Integration from its section heading, which is the only source that places it. |
 | ASM-2566 | Assumption (High) | The document is issued as Draft without human approval in this run; the approval table of section 10.2 is left empty for the approvers. |
 | ASM-2567 | Assumption (Medium) | The individual names in the owner cells of DL03 and DL09 are replaced by the role that appears to hold the decision, and the replacement is recorded here rather than in the decision text. |
 | ASM-2568 | Assumption (High) | The source carries no business-rule or key-performance identifiers, so none is added; the program requirement identifiers REQ-* of section 4 are the testable statements this BRD gives. |

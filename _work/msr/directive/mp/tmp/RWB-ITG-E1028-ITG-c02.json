@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| BR2 | The warning is raised at the warning percentage of the service level, once | RWB-E1-028 BR2; warning percent 80 assumed (DL22) |",
+   "new": "| BR2 | The warning is raised at the warning percentage of the service level, once | RWB-E1-028 BR2; warning percent 80 confirmed (DL22) |"
+  },
+  {
+   "old": "| BR12 | The `timer` row stays a P3 projection behind `GET /api/recovery/case/v1/cases/{caseId}/timers`; it is the read model, not the clock | ASM-0078; Architecture v5 slide 42 |",
+   "new": "| BR12 | The durable timer in `CaseWorkflow` is authoritative; the `timer` row stays a P3 projection behind `GET /api/recovery/case/v1/cases/{caseId}/timers` as its audit copy, written with the workflow state in the same transaction by ApplyStateActivity and read back on a reopen | ASM-0078; Architecture v5 slide 42; GAP-2016 |"
+  },
+  {
+   "old": "| Cross-service account-date and holiday input, and the Temporal timer visibility surface | v_ace_account and the holiday calendar behind P3, and the workflow history of `CaseWorkflow` | last_payment_date, contract_date, non-working days, timer visibility | Not specified in the source documents (GAP-0353; ASM-0447) |",
+   "new": "| Cross-service account-date and holiday input, and the timer state read by the suite | v_ace_account and the holiday calendar behind P3, and the timer contract of section 12.2 | last_payment_date, contract_date, non-working days, timer state | Account dates and holidays proved in RWB-P3-E1028-APP; timer state read through the P3 timer contract (GAP-0353) |"
+  },
+  {
+   "old": "the exact surface on which a past fire and the timer state inside the workflow are read is the one open point of this story.",
+   "new": "a past fire and the timer state are read through the P3 timer contract of section 12.2 and the breach through the event of section 12.4."
+  },
+  {
+   "old": "**Database.** None of its own. The suite writes no service table and no schema object, and it reads the `timer` projection only through the P3 contract (ASM-0078).",
+   "new": "**Database.** None of its own. The suite writes no service table and no schema object, and it reads the `timer` projection only through the P3 contract (ASM-0078). The schemas `rwb_case` and `rwb_decision` are owned by RWB-P3-E1028-APP and RWB-P7-E1028-APP; the suite reads neither directly."
+  },
+  {
+   "old": "| X15 | A suite step tries to read a service schema directly | The step does not exist: the suite is built with no client for a service schema, and the pipeline scan fails any change that adds one | None | Section 17 |",
+   "new": "| X15 | A suite step tries to read a service schema directly | The step does not exist: the suite is built with no client for a service schema, and the pipeline scan fails any change that adds one | None | AC13 |"
+  },
+  {
+   "old": "    Then the timer state is read only through the P3 projection and the Temporal history of the case workflow",
+   "new": "    Then the timer state is read only through the P3 projection and the Temporal history of the case workflow\n\n  Scenario: AC13 A suite step that reads a service schema directly does not exist (new, D-RCV-60)\n    Given the suite is built with no client for a service schema\n    When the pipeline scans the suite and every change to it\n    Then no step reads a service schema directly\n    Then the pipeline scan fails any change that adds such a client"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13962",
+   "item": "DOR-RWB-ITG-E1028-ITG-17",
+   "status": "Not applied",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Build status of the three APP stories is theirs, not this story's; the dependencies are already named in the header."
+  },
+  {
+   "ruling": "R-13963",
+   "item": "DOR-RWB-ITG-E1028-ITG-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "DL22 assumption confirmed in BR2 (warning percent 80). DL10 is not cited in this story; its assumptions are confirmed by the directive."
+  },
+  {
+   "ruling": "R-13964",
+   "item": "DOR-RWB-ITG-E1028-ITG-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Section 13 now names rwb_case and rwb_decision as owned by RWB-P3-E1028-APP and RWB-P7-E1028-APP; the suite owns neither."
+  },
+  {
+   "ruling": "R-13965",
+   "item": "DOR-RWB-ITG-E1028-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "X15 now covered by new AC13 in section 7. The AC13 row in section 16 is not in this chunk and must be added with it."
+  },
+  {
+   "ruling": "R-13966",
+   "item": "DOR-RWB-ITG-E1028-ITG-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR7, BR15 and BR16 need new criteria and section 16 rows; sources give no values for them. Deferred to the section 16 chunk."
+  },
+  {
+   "ruling": "R-13967",
+   "item": "DOR-RWB-ITG-E1028-ITG-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P3-E1028-APP story (Criteria and tests)",
+   "change": "Replace legacy JOB and DecisionLogWriter wording with the durable timer in CaseWorkflow and the decision-record wording of DP-03.",
+   "note": "Story §11 already has 17 rows; the legacy wording sits in the P3 story's criteria and tests."
+  },
+  {
+   "ruling": "R-22046",
+   "item": "GAP-1623",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "FSD P7 acceptance criteria A2.15 and A2.16 with the rwb-case contract",
+   "change": "Record the chosen option: P3 reacts to ApprovalRequested to move case state to Waiting approval and raise the task; align AC-P7-015-01 wording.",
+   "note": "Directive takes the preferred option (one writer of case state). No story text in this chunk depends on it."
+  },
+  {
+   "ruling": "R-22047",
+   "item": "GAP-2016",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR12 now makes the durable timer authoritative and the timer row its audit copy, written in the same transaction and read back on reopen."
+  },
+  {
+   "ruling": "R-22048",
+   "item": "GAP-0353",
+   "status": "Resolved",
+   "section": "11, 13",
+   "target": "",
+   "change": "",
+   "note": "Section 11 row and open-point sentence now name the timer contract, the event and the P3 proof of P1 date inputs. No TimerDue assertion remains."
+  },
+  {
+   "ruling": "R-22049",
+   "item": "GAP-2202",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "Architecture v5 Ownership Map and RWB-P3-E1028-APP contract",
+   "change": "Add the two P1 rows (linked-account date query, holiday query) with query and answer shape; name in the P3 contract the operation carrying the wave 1 pause.",
+   "note": "Suite calls neither P1 read; AC10 pause already runs through the P3 case action, so no story text changed here."
+  }
+ ]
+}

@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "2. Fix the `Proceeds` element on DF-FIN-001 to DF-FIN-009, the `ProceedsPage` element on the pagination convention, and the `MatchRequest` element with the fields the match needs, marking the fields no source gives with the placeholder.",
+   "new": "2. Fix the `Proceeds` element on DF-FIN-001 to DF-FIN-009, the `ProceedsPage` element with `page`, `size` and `total` on the pagination convention, and the `MatchRequest` element with the case reference, the treatment reference, the account payment reference, the amount, the received date and the match value, marking every derived field and every field no source gives with the placeholder."
+  },
+  {
+   "old": "4. Draft the AsyncAPI fragment and the three JSON schemas `TreatmentBooked`, `PaymentMissed` and `ProceedsMatched` with the CloudEvents envelope, `ce_type` `rwb.payment.<Event>.v1`, `ce_source` `/rwb-payment`, `ce_subject` `case/<caseId>`, key `caseId` and no personal data.",
+   "new": "4. Draft the AsyncAPI fragment and the three JSON schemas `TreatmentBooked`, `PaymentMissed` and `ProceedsMatched` with the CloudEvents envelope, `ce_type` `rwb.payment.<Event>.v1`, `ce_source` `/rwb-payment`, `ce_subject` `case/<caseId>`, key `caseId` and no personal data. The `TreatmentBooked` and `ProceedsMatched` field lists are written from the envelope, the modelled columns and the match value, with every field no source gives marked as a placeholder, and the registry is kept in BACKWARD mode."
+  },
+  {
+   "old": "6. Record the consumed surface as consumed and faked: the settlement treatment of rwb-treatment, the case read and answer of rwb-case, the receipt read of rwb-source-data and the package read of rwb-decision.",
+   "new": "6. Record the consumed surface as consumed and faked: the settlement treatment of rwb-treatment on `GET /treatments/{treatmentId}`, the case read and answer of rwb-case, the receipt read of rwb-source-data and the package read of rwb-decision. The decision record is written locally through RWB-PLT-E1027-CON, and no `v_ace_*` view and no table of another schema is read."
+  },
+  {
+   "old": "The JOB-07 event-started workflow (`PaymentMatchingWorkflow`",
+   "new": "The event-started workflow (`PaymentMatchingWorkflow`"
+  },
+  {
+   "old": "the text is the legacy and FSD wording, copied unchanged;",
+   "new": "the text is the legacy and FSD wording, copied unchanged except MSG-P1-001, whose English text is copied from Error and Message Standard v4;"
+  },
+  {
+   "old": "| MSG-P1-001 | The data product of the source is stale after a late or failed ACE batch, which is VR-P8-003-1 of the FSD | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The data product of the source is stale after a late or failed ACE batch, which is VR-P8-003-1 of the FSD | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "The contract serves SCR-28 Proceeds matching in its loading, matched and unmatched states through the gateway-bff composite route (DP-19).",
+   "new": "The contract serves SCR-28 Proceeds matching in its loading, matched and unmatched states through the gateway-bff composite route (DP-19). Its empty, error and no access states are Not specified in the source documents (CG-ALL-7636), because the screen specification does not give them."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-23128",
+   "item": "GAP-2510",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx (Story test cases); FSD P8 v3 Requirements served table",
+   "change": "Carry the settlement data set (case, settlement treatment, receipt on business date, amount to SETTLEMENT) into the four legacy test case rows; add the FEAT-PAY-03 requirement row to FSD P8.",
+   "note": "Business owner confirms the data set; no story text changed. Story PRD reference still lacks a requirement ID until FSD is updated."
+  },
+  {
+   "ruling": "R-23129",
+   "item": "GAP-2511",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Rule registry (PAYMENT_MATCH settlement arm); API Specification of rwb-payment; Service Contract Catalog",
+   "change": "Publish the settlement arm package code, rule IDs, tolerance, window and grace; name the three consumed operations; rwb-case publishes the money-side answer and outcome code.",
+   "note": "Criteria unchanged; placeholders replaced by published values once the registry is updated."
+  },
+  {
+   "ruling": "R-23130",
+   "item": "GAP-2512",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "FSD P8 v3 A2.3.3.1 Data table and the DP-05 row of the pattern table",
+   "change": "Retire the v_ace_payment and v_ace_batch_status reads of rwb-payment; only rwb-source-data reads the ACE views, with its freshness stamp.",
+   "note": "Story step 6 already reads receipt and batch status on the rwb-source-data contract; no story edit needed."
+  },
+  {
+   "ruling": "R-23131",
+   "item": "GAP-2514",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "TSD P8 v2 appendix T-A; API Specification file of rwb-payment",
+   "change": "Publish MatchRequest (case reference, treatment reference, account payment reference, amount, received date, match value) and ProceedsPage (page, size, total).",
+   "note": "Story step 2 now names the fields and marks derived ones; TSD and API publication pending."
+  },
+  {
+   "ruling": "R-23132",
+   "item": "GAP-2515",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Kafka Topic and Event Catalog v1; AsyncAPI document of rwb-payment",
+   "change": "Publish field lists of rwb.payment.TreatmentBooked.v1 and rwb.payment.ProceedsMatched.v1 keyed by caseId, with identifiers, amounts, dates, list values and rule version only; registry in BACKWARD mode.",
+   "note": "Story step 4 now writes both schemas with placeholders for unsourced fields; catalogue publication pending."
+  },
+  {
+   "ruling": "R-23170",
+   "item": "GAP-1365",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Step 6 reads the treatment on GET /treatments/{treatmentId}, the receipt on rwb-source-data, the case on rwb-case, writes the decision record via RWB-PLT-E1027-CON, and forbids v_ace_* reads.",
+   "note": "DP-05 applied as a prohibition in the consumed-surface step."
+  },
+  {
+   "ruling": "R-26498",
+   "item": "CG-ALL-7633",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text set to the English text of Error and Message Standard v4 MSG-P1-001: {product} is from {date}. Today's load has not arrived.",
+   "note": "Condition is the same stale-data case, so no new message ID; the When column is left as written."
+  },
+  {
+   "ruling": "R-26499",
+   "item": "CG-ALL-7634",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, Story test cases (next version)",
+   "change": "Add rows TC-P8-E4043-CON-01 to TC-P8-E4043-CON-05 with Given, When and Then copied from the criteria they cover.",
+   "note": "Story cites the v8 tab, which has no such rows. TC-P8-E4043-CON-06 is not in this item and is not changed here."
+  },
+  {
+   "ruling": "R-26500",
+   "item": "CG-ALL-7635",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Workflow row now reads 'The event-started workflow (PaymentMatchingWorkflow' with the JOB-07 wording removed.",
+   "note": "AC7 text is not in this chunk, so its job and decision-log wording needs the section 7 pass."
+  },
+  {
+   "ruling": "R-26501",
+   "item": "CG-ALL-7636",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 states that the empty, error and no access states of SCR-28 are Not specified in the source documents (CG-ALL-7636).",
+   "note": "Screen Specifications v1 gives only loading among the four states; the missing three are marked, not invented."
+  }
+ ]
+}

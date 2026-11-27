@@ -1,0 +1,125 @@
+{
+ "stage": "audit",
+ "story": "RWB-P7-E2006-APP",
+ "unit": "audit",
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 6
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-31475",
+     "item": "NEWAC-RWB-P7-E2006-APP-AC12",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "X1 now maps to AC11; AC11 scenario and TC-E2-006-16 added",
+     "note": "AC11 is the next free number; X1 is traced to it and AC12 is taken by X7."
+    },
+    {
+     "ruling": "R-31476",
+     "item": "NEWAC-RWB-P7-E2006-APP-AC13",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "AC13 now covers a treatment that is not a restructure, refused by the owning service; X7 maps to AC12 and AC13; TC-E2-006-18 re-pointed",
+     "note": "Case-state part is in AC12 and TC-17; restructure part is in AC13. The NLEADS scenario that was wrongly numbered AC13 is removed."
+    },
+    {
+     "ruling": "R-06776",
+     "item": "DOR-RWB-P7-E2006-APP-23",
+     "status": "Cross-document",
+     "section": "header",
+     "target": "RWB-P7-E2006-CON",
+     "change": "Placeholder in Contract dependencies row",
+     "note": "A placeholder edit exists; the contract version needs its owner."
+    },
+    {
+     "ruling": "R-11246",
+     "item": "CG-ALL-7083",
+     "status": "Cross-document",
+     "section": "12.1",
+     "target": "Error and Message Standard v4",
+     "change": "401 errors marked Not specified in the source documents (CG-ALL-7083)",
+     "note": "A placeholder edit exists; the business analyst must name the message ID."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| Contract dependencies | RWB-P7-E2006-CON (contract version: Not specified in the source documents (DOR-RWB-P7-E2006-APP-23)) |",
+     "new": "| Contract dependencies | RWB-P7-E2006-CON (not yet created; contract version: Not specified in the source documents (DOR-RWB-P7-E2006-APP-23)) |"
+    },
+    {
+     "old": "  Scenario: AC13 NLEADS is never called and the result is taken from the caller (new, D-RCV-60)\n    When the caller records reference \"NL-SYN-000614\", result \"APPROVED\" and approval level \"L5\"\n    Then the service makes no call to NLEADS\n    Then one entry exists with decision code \"D5\" and final call \"approved\"",
+     "new": "  Scenario: AC13 A treatment that is not a restructure is refused by its owning service and this service is not called (new, D-RCV-60)\n    Given the treatment \"TRT-SYN-0610\" is not a restructure\n    When the caller records reference \"NL-SYN-000614\", result \"APPROVED\" and approval level \"L5\"\n    Then the owning service refuses with message MSG-P3-005\n    Then this service is not called and no entry is written"
+    },
+    {
+     "old": "| TC-E2-006-18 | AC13; BR4 | Component | Result recorded at level L5; no call to NLEADS |",
+     "new": "| TC-E2-006-18 | AC13 | Component | Treatment not a restructure; owning service refuses with MSG-P3-005; no call to this service |"
+    },
+    {
+     "old": "AC12; RWB-P3-E2006-APP",
+     "new": "AC12; AC13; RWB-P3-E2006-APP"
+    },
+    {
+     "old": "| POST | `/api/recovery/decision/v1/approvals/{approvalId}/approve` | API-P7-003: record an approved NLEADS result at the level returned; 200 with the DecisionLogEntry | Decision log, right A, scope applied | `Idempotency-Key` header; one result per approval; the officer also needs Treatment and offer right U on the rwb-integration pack endpoint (legacy MSG-P4-002 kept) |",
+     "new": "| POST | `/api/recovery/decision/v1/approvals/{approvalId}/approve` | API-P7-003: record an approved NLEADS result at the level returned; 200 with the DecisionLogEntry | Decision log, right A, scope applied | `Idempotency-Key` header; one result per approval |"
+    },
+    {
+     "old": "| POST | `/api/recovery/decision/v1/approvals/{approvalId}/refuse` | API-P7-005: record a refused NLEADS result with its reason; 200 with the DecisionLogEntry | Decision log, right A, scope applied | `Idempotency-Key` header; one result per approval; the officer also needs Treatment and offer right U on the rwb-integration pack endpoint (legacy MSG-P4-002 kept) |",
+     "new": "| POST | `/api/recovery/decision/v1/approvals/{approvalId}/refuse` | API-P7-005: record a refused NLEADS result with its reason; 200 with the DecisionLogEntry | Decision log, right A, scope applied | `Idempotency-Key` header; one result per approval |"
+    }
+   ],
+   "findings": [
+    {
+     "ruling": "R-31476",
+     "kind": "wrong",
+     "issue": "AC13 scenario is an NLEADS happy path with no source item; it takes the AC13 number the item reserves for the restructure refusal, and duplicates AC14."
+    },
+    {
+     "ruling": "R-22379",
+     "kind": "wrong",
+     "issue": "Approve and refuse rows add a Treatment and offer right U requirement. GAP-2481 keeps Decision log right A, and the story says no right changes."
+    },
+    {
+     "ruling": "R-31475",
+     "kind": "wrong status",
+     "issue": "Marked Not applied, but X1 now maps to AC11 and a new AC11 scenario is added. That is a story edit."
+    },
+    {
+     "ruling": "R-31476",
+     "kind": "wrong status",
+     "issue": "Marked Not applied, but X7 maps to AC12 and AC13 and scenarios were added. Status should reflect the edits."
+    },
+    {
+     "ruling": "R-06776",
+     "kind": "wrong status",
+     "issue": "Marked Not applied, but a placeholder was added to the Contract dependencies row, so it should be Cross-document."
+    },
+    {
+     "ruling": "R-11246",
+     "kind": "wrong status",
+     "issue": "Marked Not applied, but a 401 placeholder was added to the error list. Status should be Cross-document."
+    },
+    {
+     "ruling": "R-06774",
+     "kind": "ok",
+     "issue": "Lint flag on RWB-P7-E2006-CON is valid since the story does not exist yet; fixed by marking it not yet created."
+    },
+    {
+     "ruling": "R-18036",
+     "kind": "wrong",
+     "issue": "New paragraph says every operation calls the DP-08 rwb-access check. No item asks for this; it is not traced to an item (DOR-6 only says the check name is a placeholder)."
+    }
+   ]
+  }
+ ],
+ "sonnet_findings": 8
+}

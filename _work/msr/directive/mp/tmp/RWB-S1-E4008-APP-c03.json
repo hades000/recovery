@@ -1,0 +1,210 @@
+{
+ "edits": [
+  {
+   "old": "| X2 | The caller does not hold the Treatment and offer right of the operation | 403 before any read or write, and no record is written | MSG-P4-002 | TC-E4-008-03 |",
+   "new": "| X2 | The caller does not hold the Treatment and offer right of the operation | 403 before any read or write, and no record is written | MSG-P4-002 | AC3, TC-S1-E4008-APP-03, TC-E4-008-03 |"
+  },
+  {
+   "old": "| X3 | A required element of the command is absent or invalid | Nothing is written and the field is named | MSG-GEN-001 | TC-E4-008-01 |",
+   "new": "| X3 | A required element of the command is absent or invalid | Nothing is written and the field is named | MSG-GEN-001 | AC4, TC-S1-E4008-APP-04, TC-E4-008-01 |"
+  },
+  {
+   "old": "| X4 | The chosen route is above the caller's limit in force | The approval is refused with its reason and the case is routed to FEAT-VAL-09; no approval is recorded | None (reason on the record) | TC-E4-008-01 |",
+   "new": "| X4 | The chosen route is above the caller's limit in force | The approval is refused with its reason and the case is routed to FEAT-VAL-09; no approval is recorded | None (reason on the record) | AC5, TC-S1-E4008-APP-05, TC-E4-008-01 |"
+  },
+  {
+   "old": "| X5 | The chosen route departs from the recommendation and the override reason is absent | Nothing is written and the coded reason is required | MSG-GEN-001 | TC-E4-008-01 |",
+   "new": "| X5 | The chosen route departs from the recommendation and the override reason is absent | Nothing is written and the coded reason is required | MSG-GEN-001 | AC6, TC-S1-E4008-APP-06, TC-E4-008-01 |"
+  },
+  {
+   "old": "| X6 | The case is not at the route decision, or the recommendation is not on the case | The step does not run, nothing is approved and the state is reported to the parent | None | TC-E4-008-01 |",
+   "new": "| X6 | The case is not at the route decision, or the recommendation is not on the case | The step does not run, nothing is approved and the state is reported to the parent | None | AC7, TC-S1-E4008-APP-07, TC-E4-008-01 |"
+  },
+  {
+   "old": "| X7 | rwb-case, rwb-decision or rwb-access does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 in the platform envelope | None | TC-E4-008-01 |",
+   "new": "| X7 | rwb-case, rwb-decision or rwb-access does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 in the platform envelope | None | AC8, TC-S1-E4008-APP-08, TC-E4-008-01 |"
+  },
+  {
+   "old": "| X8 | The same approval is submitted twice with the same `Idempotency-Key` | One record, one answer and no second move; the repeat is counted | None | TC-S1-E4008-APP-02 |",
+   "new": "| X8 | The same approval is submitted twice with the same `Idempotency-Key` | One record, one answer and no second move; the repeat is counted | None | AC9, TC-S1-E4008-APP-09, TC-S1-E4008-APP-02 |"
+  },
+  {
+   "old": "| X9 | A component, a statement or a test reaches a `recovery_case` row, a `v_ace_*` view or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | s17, BR8, TC-S1-E4008-APP-01 |",
+   "new": "| X9 | A component, a statement or a test reaches a `recovery_case` row, a `v_ace_*` view or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC10, TC-S1-E4008-APP-10, s17, BR8, TC-S1-E4008-APP-01 |"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "    Given the decision log cannot be written",
+   "new": "    Given the decision record cannot be written"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Access without the right (X2)\n    Given the rwb-access contract mock returns no Treatment and offer right U for \"RW-CASEOWN\"\n    When the user acts on the screen\n    Then the system answers 403 with MSG-P4-002\n    Then no record is written and nothing is read from rwb-case or rwb-decision\n\n  Scenario: AC4 Required element absent (X3, BR12)\n    Given the command has no value for one required element\n    When the user acts on the screen\n    Then nothing is written\n    Then the system shows MSG-GEN-001 and names the field\n\n  Scenario: AC5 Route above the limit (X4, BR1, BR2, BR15)\n    Given the rwb-case contract mock returns the case state \"ROUTE_D6\" for \"RC-2026-000408\"\n    Given the rwb-decision contract mock returns the rule id, the rule version and a limit in force that the chosen route exceeds\n    When the user acts on the screen\n    Then the approval is refused with its reason\n    Then the case is routed to FEAT-VAL-09 and no approval is recorded\n\n  Scenario: AC6 Override without a coded reason (X5, BR4, BR14)\n    Given the chosen route differs from the recommended route\n    Given the override reason is absent\n    When the user acts on the screen\n    Then nothing is written\n    Then the coded reason is required and MSG-GEN-001 is shown\n\n  Scenario: AC7 Case not at the route decision (X6, BR3)\n    Given the rwb-case contract mock returns a state other than \"ROUTE_D6\" for \"RC-2026-000408\", or no recommendation on the case\n    When the user acts on the screen\n    Then the step does not run and nothing is approved\n    Then the state is reported to the parent workflow\n\n  Scenario: AC8 Dependency does not answer in time (X7)\n    Given the rwb-case contract mock does not answer inside 2 s\n    When the user acts on the screen\n    Then the step waits and retries on the workflow schedule\n    Then nothing is written and the caller sees 503 in the platform envelope\n\n  Scenario: AC9 Same approval submitted twice (X8, BR8, BR18)\n    Given an approval is recorded under an Idempotency-Key\n    When the same command is submitted again with the same Idempotency-Key\n    Then one record and one answer exist and no second case move is made\n    Then the repeat is counted\n\n  Scenario: AC10 Statement outside rwb_valuation (X9, BR6, BR9, BR10)\n    Given a component, a statement or a test reads a recovery_case row, a v_ace_* view or another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement and the build fails\n    Then no event is published and nothing is released"
+  },
+  {
+   "old": "with their origin tag added and nothing else changed:",
+   "new": "with their origin tag added, the decision-log wording replaced by the decision record (CG-ALL-8134), and nothing else changed:"
+  },
+  {
+   "old": "`the decision log cannot be written` and",
+   "new": "`the decision record cannot be written` and"
+  },
+  {
+   "old": "AC1 says the result is written \"to the decision log with the rule version\"",
+   "new": "AC1 says the result is written \"to the decision record with the rule version\""
+  },
+  {
+   "old": "| VR-S1-008-1 | Required field empty | MSG-GEN-001 Enter {field}. |",
+   "new": "| BR12 (VR-S1-008-1) | Required field empty | MSG-GEN-001 Enter {field}. |"
+  },
+  {
+   "old": "| BR-S1-008 | No value a business person may change is written in code; it is read from reference data with its version | None |",
+   "new": "| BR13 (BR-S1-008) | No value a business person may change is written in code; it is read from reference data with its version | None |"
+  },
+  {
+   "old": "| R-UNI-14 | An authorized user overrides the route inside the delegation: record the coded reason, move the case to the chosen route | None |",
+   "new": "| BR14 (R-UNI-14) | An authorized user overrides the route inside the delegation: record the coded reason, move the case to the chosen route | None |"
+  },
+  {
+   "old": "| R-UNI-15 | The override is outside the user's limit: refuse the change, raise the request to the approver named in the matrix | None |",
+   "new": "| BR15 (R-UNI-15) | The override is outside the user's limit: refuse the change, raise the request to the approver named in the matrix | None |"
+  },
+  {
+   "old": "| R-UNI-38 | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |",
+   "new": "| BR16 (R-UNI-38) | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |"
+  },
+  {
+   "old": "| R-UNI-39 | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |",
+   "new": "| BR17 (R-UNI-39) | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |"
+  },
+  {
+   "old": "| R-UNI-40 | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |",
+   "new": "| BR18 (R-UNI-40) | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |"
+  },
+  {
+   "old": "| BR7 | The authority matrix is administered by rwb-access and its limit version by rwb-decision; this story neither sets nor approves a limit | FSD S1 A2.8.3.3; FEAT-ADM-03 context |",
+   "new": "| BR7 | The authority matrix and its limit version are read from rwb-decision, the one row the branch reads (one hop, 2 s, version recorded); this story neither sets nor approves a limit | FSD S1 A2.8.3.3; FEAT-ADM-03 context; GAP-2634 |"
+  },
+  {
+   "old": "No column is added for the limit applied or the override reason: they are recorded in the decision record and answered to the case.",
+   "new": "No column is added for the limit applied or the override reason: they are recorded in the decision record and answered to the case. Schema owners: `rwb_case` is rwb-case (P3), `rwb_decision` is rwb-decision (P7) and `rwb_access` is rwb-access (P4); this service holds no grant on any of them (BR9)."
+  },
+  {
+   "old": "- No parameter is named in the sources for the limit or for the step, and no S1 rule package is in force (GAP-2632; ASM-4335).",
+   "new": "- No parameter is named in the sources for the limit or for the step, and no S1 rule package is in force (GAP-2632; ASM-4335).\n- Reference-data contract: the rule row and the authority-matrix limit with their versions are read through `RuleAndLimitClient` from rwb-decision, and the route codes through `LOV-ROUTE`; the parameter keys of that contract are Not specified in the source documents (DOR-RWB-S1-E4008-APP-20; DP-06 and DP-07 not applied)."
+  },
+  {
+   "old": "| SCR-13 Route decision | Loading; recommendation; overridden; submitted |",
+   "new": "| SCR-13 Route decision | Loading; recommendation; overridden; submitted; empty; error; no access |"
+  },
+  {
+   "old": "and above the limit with its reason and the committee hand-off |",
+   "new": "and above the limit with its reason and the committee hand-off. Empty, error and no access: Not specified in the source documents (CG-ALL-8135) |"
+  },
+  {
+   "old": "| TC-E4-008-02 | AC2: the decision log cannot be written | Component | The decision-record stub stopped; nothing written, no case move and MSG-P7-003 shown |",
+   "new": "| TC-E4-008-02 | AC2 (BR5, BR17): the decision record cannot be written | Component | The decision-record stub stopped; nothing written, no case move and MSG-P7-003 shown |"
+  },
+  {
+   "old": "| TC-E4-008-04 | Principle 5: a forced decision log write failure | NFR | A forced failure at the moment of the approval; no record, no move and no event |",
+   "new": "| TC-E4-008-04 | Principle 5 (BR5): a forced decision record write failure | NFR | A forced failure at the moment of the approval; no record, no move and no event |"
+  },
+  {
+   "old": "| TC-S1-E4008-APP-02 | Idempotency: the same command twice under one key records one approval and answers the stored answer | Component | The same command repeated within the key's life, and a second command under a new key |",
+   "new": "| TC-S1-E4008-APP-02 | Idempotency: the same command twice under one key records one approval and answers the stored answer | Component | The same command repeated within the key's life, and a second command under a new key |\n| TC-S1-E4008-APP-03 | AC3 (X2): a caller without the Treatment and offer right U gets 403 with MSG-P4-002 before any read or write, and no record is written | Component | A role without Treatment and offer U; no read, no write |\n| TC-S1-E4008-APP-04 | AC4 (X3, BR12): a required element of the command is absent or invalid; nothing is written and the field is named with MSG-GEN-001 | Component | The command with one required element removed, and with one invalid |\n| TC-S1-E4008-APP-05 | AC5 (X4, BR1, BR2, BR13, BR15): a route above the caller's limit is refused with its reason and routed to FEAT-VAL-09; the limit is read from the matrix with its version | Component | Case RC-2026-000408, one route above the limit in force, the limit version read from the rwb-decision fake |\n| TC-S1-E4008-APP-06 | AC6 (X5, BR4, BR14): an override of the recommendation with no coded reason is refused; nothing is written | Component | Recommended route R2, a chosen route different from it, no override reason |\n| TC-S1-E4008-APP-07 | AC7 (X6, BR3): the case is not at the route decision, or no recommendation is on the case; the step does not run and the state is reported to the parent | Component | A case at ROUTE_D6 without a recommendation, and a case in another state |\n| TC-S1-E4008-APP-08 | AC8 (X7): rwb-case, rwb-decision or rwb-access does not answer inside 2 s or its breaker is open; the step waits and retries, nothing is written, the caller sees 503 | Component | The rwb-case fake delayed beyond 2 s and an open breaker |\n| TC-S1-E4008-APP-09 | AC9 (X8, BR8, BR18): the same approval submitted twice with the same Idempotency-Key gives one record, one answer and no second move | Component | The same command repeated under one key |\n| TC-S1-E4008-APP-10 | AC10 (X9, BR6, BR9, BR10): a statement or a component that reaches recovery_case, a v_ace_* view or another schema fails the boundary test; no event is published | Component | The boundary test over the build, with the grants of rwb_valuation |\n| TC-S1-E4008-APP-11 | BR7, BR16: the step neither sets nor approves a limit, reads the limit and its version from rwb-decision only, and keeps the rule version an open case was decided under | Component | The rwb-decision fake with two limit versions and a case decided under the earlier one |\n| TC-S1-E4008-APP-12 | BR11: no person name, address, contact value or identity number enters the decision record, a log or a workflow input | Component | A synthetic approval fixture with the decision record and the workflow input inspected |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19044",
+   "item": "DOR-RWB-S1-E4008-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Reference-data contract added to §13 (rwb-decision row, LOV-ROUTE); parameter keys Not specified in the source documents; DP-06 and DP-07 not applied."
+  },
+  {
+   "ruling": "R-19045",
+   "item": "DOR-RWB-S1-E4008-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "§13 now states the owner of rwb_case, rwb_decision and rwb_access and that this service holds no grant on them (BR9)."
+  },
+  {
+   "ruling": "R-19046",
+   "item": "DOR-RWB-S1-E4008-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC3 to AC10 added for X2 to X9 with TC-S1-E4008-APP-03 to -10; §5 Covered by column lists the criterion and its test case."
+  },
+  {
+   "ruling": "R-19047",
+   "item": "DOR-RWB-S1-E4008-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR12 to BR18 assigned to the seven rule rows; BR1 to BR11 covered by AC3 to AC10, TC-S1-E4008-APP-03 to -12 and TC-E4-008-02/-04."
+  },
+  {
+   "ruling": "R-19048",
+   "item": "DOR-RWB-S1-E4008-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Confirm decision_record as a PLT library object outside LDM v9 or add it as an entity in LDM v9 and Data Classification v5. The P3 wording is fixed in the story (CG-ALL-8134)."
+  },
+  {
+   "ruling": "R-23339",
+   "item": "GAP-1681",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-S1-E4008-CON (contract story); Ownership Map",
+   "change": "Publish GET /cases/{id}/valuation and POST /cases/{id}/route-proposals as Arch v5 slide 18 states; reconcile POST /cases/{caseId}/route with API Specification v4 before wave 3 system test."
+  },
+  {
+   "ruling": "R-23340",
+   "item": "GAP-1688",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "Story names routes only as LOV-ROUTE data in §13 and prints no route number where sources disagree; numbering stays with P7 and the BA."
+  },
+  {
+   "ruling": "R-23344",
+   "item": "GAP-2634",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR7 now reads the limit and its version from rwb-decision, the one row the branch reads (one hop, 2 s); owners confirm the Ownership Map row."
+  },
+  {
+   "ruling": "R-26779",
+   "item": "CG-ALL-8134",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC1, AC2, the §7 explanatory paragraph and TC-E4-008-02 and -04 now use decision record; no job or run wording remains."
+  },
+  {
+   "ruling": "R-26780",
+   "item": "CG-ALL-8135",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, error and no access added to SCR-13 states, each marked Not specified in the source documents (CG-ALL-8135)."
+  }
+ ]
+}

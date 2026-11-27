@@ -1,0 +1,32 @@
+{
+ "edits": [
+  {
+   "old": "    Then the call is refused with status 401\n    Then the read writes nothing",
+   "new": "    Then the call is refused with status 401\n    Then the read writes nothing\n\n  Scenario: AC10 A refused, returned or undeliverable result marks the notice unserved and keeps the reference rules (new, D-RCV-60)\n    Given the rwb-litigation contract mock returns served result \"refused\" for notice \"NT-2026-000512-01\"\n    When the delivery answer reaches case \"RW-2026-000512\"\n    Then the notice is marked unserved and the case moves from \"NOTICE_DISPATCHED\" to \"NOTICE_UNSERVED\" by R-LIT-09\n    Then an alternate service method is queued\n    Then no notice-period timer row is written and the case status stays \"In progress\"\n    Then the notice-period end comes from the SERVICE_LEVEL reference row, not from a constant in code\n    Then the move reads no ACE view and no notice table\n\n  Scenario: AC11 A retried or timed-out activity writes one decision record and one state move (new, D-RCV-60)\n    Given the EvaluateAndApply activity for case \"RW-2026-000512\" times out before it returns\n    When the workflow retries the activity\n    Then the retry writes no second decision record, no second state move and no second timer row\n    Then the case stays in \"NOTICE_DISPATCHED\" until the retried activity completes\n    Then no event is published a second time"
+  },
+  {
+   "old": "| TC-E5-002-13 | RWB-P3-E5002-APP AC9 | Component | Request without an rwb-case login on GET /cases/{caseId} for case RW-2026-000512 |",
+   "new": "| TC-E5-002-13 | RWB-P3-E5002-APP AC9 | Component | Request without an rwb-case login on GET /cases/{caseId} for case RW-2026-000512 |\n| TC-E5-002-14 | RWB-P3-E5002-APP AC10, BR2b, BR4, BR10, BR11 | Component | S4 stub served result refused for NT-2026-000512-01 with the case in NOTICE_DISPATCHED; SERVICE_LEVEL reference row; no ACE view or notice table read |\n| TC-E5-002-15 | RWB-P3-E5002-APP AC11, BR5, BR7 | NFR | EvaluateAndApply activity timeout forced on case RW-2026-000512, then retried; timeout value Not specified in the source documents (NEWAC-RWB-P3-E5002-APP-AC11) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30743",
+   "item": "NEWAC-RWB-P3-E5002-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 (retried or timed-out EvaluateAndApply activity) to section 7 and TC-E5-002-15 to section 16.",
+   "note": "Timeout value not in sources; data cell says so. Test covers BR5 and BR7 as NFR."
+  },
+  {
+   "ruling": "R-30744",
+   "item": "NEWAC-RWB-P3-E5002-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 (BR2b, BR4, BR10, BR11) to section 7 and TC-E5-002-14 to section 16.",
+   "note": "AC9 already exists, so the next free number AC10 is used. TC-14 covers all four rules."
+  }
+ ]
+}

@@ -1,0 +1,180 @@
+{
+ "edits": [
+  {
+   "old": "Given no payment on account \"A-0555\" appears in v_ace_payment between 2026-12-05 and 2026-12-15",
+   "new": "Given the rwb-source-data payments fake holds no payment on account \"A-0555\" between 2026-12-05 and 2026-12-15"
+  },
+  {
+   "old": "Given v_ace_payment holds payment \"PAY-90004\" of 12,500.00 THB on account \"A-0555\" dated 2026-12-05",
+   "new": "Given the rwb-source-data payments fake holds payment \"PAY-90004\" of 12,500.00 THB on account \"A-0555\" dated 2026-12-05"
+  },
+  {
+   "old": "Given v_ace_payment holds payment \"PAY-90005\" of 12,500.00 THB on account \"A-0666\" dated 2026-12-05",
+   "new": "Given the rwb-source-data payments fake holds payment \"PAY-90005\" of 12,500.00 THB on account \"A-0666\" dated 2026-12-05"
+  },
+  {
+   "old": "copied word for word with the origin tag added to the `Scenario` line:",
+   "new": "copied word for word with the origin tag added to the `Scenario` line, except the three Given lines that read ACE views, which are written against the rwb-source-data fake (CG-ALL-7523):"
+  },
+  {
+   "old": "AC1, AC3, AC4 and AC5 of the legacy story belong to no story of this split (GAP-2503; ASM-4142).",
+   "new": "AC1, AC3, AC4 and AC5 of the legacy story belong to no story of this split (GAP-2503; ASM-4142). AC10 to AC15 are added in this split for exceptions X2, X3, X8 and X9 and for rules BR3 and BR8, and carry no legacy origin tag."
+  },
+  {
+   "old": "Then the run summary counts the match under version \"PM-2026.12\"",
+   "new": "Then the run summary counts the match under version \"PM-2026.12\"\n\n  Scenario: AC10 Payment on an account with no open case (no legacy criterion; exception X2)\n    Given the rwb-source-data payments fake holds a payment on account \"A-0999\" dated 2026-12-14\n    When JOB-07 runs for business date 2026-12-14\n    Then the payment on \"A-0999\" is listed on the REC-05 business-key break\n    Then no proceeds row is written for that payment\n\n  Scenario: AC11 ACE batch not COMPLETE (no legacy criterion; exception X3)\n    Given the rwb-source-data AceDataReady fake holds the ALS business date 2026-12-15 with batch status FAILED\n    When JOB-07 starts for business date 2026-12-15\n    Then the workflow ends with MSG-P1-001 before matching\n    Then no missed payment is raised and no proceeds row is written\n\n  Scenario: AC12 Consumed contract does not answer in 2 s (no legacy criterion; exception X8)\n    Given the rwb-case open-case fake does not answer within 2 s\n    When JOB-07 runs for business date 2026-12-14\n    Then the activity retries on the workflow policy with 1 s initial, back-off 2 and 10 attempts\n    Then nothing is written until an answer arrives\n\n  Scenario: AC13 Statement reaches a schema this login does not hold (no legacy criterion; exception X9)\n    Given a statement of rwb-payment reads another service's schema or a view this login does not hold\n    When the boundary test runs in the build\n    Then the grant refuses the statement\n    Then the boundary test fails the build\n\n  Scenario: AC14 Unmatched payment on the exception list (no legacy criterion; rule BR3)\n    Given the rwb-source-data payments fake holds payment \"PAY-90005\" of 12,500.00 THB on account \"A-0666\" dated 2026-12-05\n    When JOB-07 runs on 2026-12-06\n    Then \"PAY-90005\" is written with matched_to UNMATCHED\n    Then \"PAY-90005\" is held on the exception list for the reconciliation agent\n\n  Scenario: AC15 Daily reconciliation of payments to proceeds (no legacy criterion; rule BR8)\n    Given the rwb-source-data payments fake holds the payments of 2026-12-14\n    When JOB-07 completes for business date 2026-12-14\n    Then the count and the amount of the payments of 2026-12-14 equal the count and the amount of the proceeds rows for 2026-12-14"
+  },
+  {
+   "old": "| X2 | A payment is on an account with no open case | It is listed on the REC-05 business-key break; no proceeds row is written | None | BR4 |",
+   "new": "| X2 | A payment is on an account with no open case | It is listed on the REC-05 business-key break; no proceeds row is written | None | AC10, BR4 |"
+  },
+  {
+   "old": "| X3 | The ACE batch for ALS is not COMPLETE for the business date | The workflow ends before matching; no missed payment is raised from stale data | MSG-P1-001 | BR5 |",
+   "new": "| X3 | The ACE batch for ALS is not COMPLETE for the business date | The workflow ends before matching; no missed payment is raised from stale data | MSG-P1-001 | AC11, BR5 |"
+  },
+  {
+   "old": "| X8 | A consumed contract does not answer inside 2 s, or its breaker is open | The activity retries on the workflow policy (1 s initial, back-off 2, 10 attempts); nothing is written until an answer arrives | None | BR9 |",
+   "new": "| X8 | A consumed contract does not answer inside 2 s, or its breaker is open | The activity retries on the workflow policy (1 s initial, back-off 2, 10 attempts); nothing is written until an answer arrives | None | AC12, BR9 |"
+  },
+  {
+   "old": "| X9 | A component, a statement or a test reaches another service's schema or a view this login does not hold | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | Section 17 |",
+   "new": "| X9 | A component, a statement or a test reaches another service's schema or a view this login does not hold | The grant refuses the statement and the boundary test fails the build | None (pipeline log) | AC13, Section 17 |"
+  },
+  {
+   "old": "| MSG-P3-027 | No PAYMENT_MATCH version is in force | The rule version was refused at the {check} check: {detail}. |",
+   "new": "| MSG-P3-027 | No PAYMENT_MATCH version is in force | The {table} load was refused: {check}. The version in force is unchanged. |"
+  },
+  {
+   "old": "{detail} names the package code \"PAYMENT_MATCH\" and the business date only",
+   "new": "{table} names the package code \"PAYMENT_MATCH\" only"
+  },
+  {
+   "old": "14. `GET /proceeds` answers the matched and unmatched receipts on `/api/recovery/payment/v1` through the gateway-bff composite route, one hop with a 2 s budget (DP-13, DP-19).",
+   "new": "14. `GET /proceeds` answers the matched and unmatched receipts on `/api/recovery/payment/v1` through the gateway-bff composite route, one hop with a 2 s budget (DP-13, DP-19).\n\nPersonal-data classing of the fields read in step 4 (payment_code, account_key, payment_date, payment_amount, data_as_of and the next installment date) is Not specified in the source documents (DOR-RWB-P8-E2008-APP-11); the events carry no personal data (DP-09) and the messages of section 14 carry no payment or account fact."
+  },
+  {
+   "old": "| Event | Topic | Consumer group | Payload used | When |\n|---|---|---|---|---|",
+   "new": "| Event | Topic | Owner service | Consumer group | Payload used | When |\n|---|---|---|---|---|---|"
+  },
+  {
+   "old": "| `AceDataReady` (EV-26), `rwb.source-data.AceDataReady.v1` | `rwb.source-data.events.v1` | `rwb-payment.ace-data-ready.v1` | the source, the business date and the batch status; starts `matchPayments` | on the relay of rwb-source-data, deduped in `inbox_event` |",
+   "new": "| `AceDataReady` (EV-26), `rwb.source-data.AceDataReady.v1` | `rwb.source-data.events.v1` | rwb-source-data | `rwb-payment.ace-data-ready.v1` | the source, the business date and the batch status; starts `matchPayments` | on the relay of rwb-source-data, deduped in `inbox_event` |"
+  },
+  {
+   "old": "| `DecisionRecorded` (EV-08) | `rwb.decision-record.v1` | none | produced by this service's library and consumed by rwb-decision and rwb-reporting; this service subscribes to none of its own records | named only |",
+   "new": "| `DecisionRecorded` (EV-08) | `rwb.decision-record.v1` | rwb-payment, local decision-record library (RWB-PLT-E1027-CON) | none | produced by this service's library and consumed by rwb-decision and rwb-reporting; this service subscribes to none of its own records | named only |"
+  },
+  {
+   "old": "The run is unattended: no officer task sits on the happy path, and the step runs under the service identity of the service.",
+   "new": "The run is unattended: no officer task sits on the happy path, and the step runs under the service identity of the service.\n\nScreen states added for the readiness check (DOR-RWB-P8-E2008-APP-10); the wording and the trigger of each state are Not specified in the source documents (DOR-RWB-P8-E2008-APP-10):\n- SCR-04: empty, loading, error and no-access states.\n- SCR-14: empty, loading, error and no-access states.\n- SCR-28: empty, error and no-access states.\n- SCR-44: empty, loading, error and no-access states."
+  },
+  {
+   "old": "The run is unattended: no officer task sits on the happy path, and the step runs under the service identity of the service.",
+   "new": "The run is unattended: no officer task sits on the happy path, and the step runs under the service identity of the service.\n\nAccess to the operations of this story (`GET /proceeds` in section 4, step 14, and the operations of section 12) is checked by the rwb-access authorise check of DP-08; the name of that check and the roles it accepts are Not specified in the source documents (DOR-RWB-P8-E2008-APP-6)."
+  },
+  {
+   "old": "The legacy story and this file are linked one way: the legacy key is carried in the metadata and in every `Scenario` tag.",
+   "new": "The legacy story and this file are linked one way: the legacy key is carried in the metadata and in every `Scenario` tag.\n\nOpen decision DL25 applies to this story and is still open; its assumptions are ASM-0728, ASM-0735, ASM-0743 and ASM-2602."
+  },
+  {
+   "old": "| TC-E2-008-09 | AC9, BR9, BR12 | Component | `PAY-90001` matched under version PM-2026.12 |",
+   "new": "| TC-E2-008-09 | AC9, BR9, BR12 | Component | `PAY-90001` matched under version PM-2026.12 |\n| TC-E2-008-11 | §12 operations, events and activities | Component | rwb-payment OpenAPI fake, `AceDataReady` fake and gateway-bff fake (§12.8) |\n| TC-E2-008-12 | §12.7 tables, BR11 (ASM-3438) | Component | every `v_ace_*` view and other services' schemas, refused for this login |\n| TC-E2-008-13 | AC10, BR4 | Component | payment on `A-0999`, no open case |\n| TC-E2-008-14 | AC11, BR5 | Component | ALS batch FAILED for 2026-12-15 |\n| TC-E2-008-15 | AC12, BR9 | Component | rwb-case open-case fake does not answer within 2 s |\n| TC-E2-008-16 | AC13 | Component | statement reading a schema or view this login does not hold |\n| TC-E2-008-17 | AC14, BR3 | Component | `PAY-90005` on `A-0666` matches no plan |\n| TC-E2-008-18 | AC15, BR8 | Component | payments of 2026-12-14 reconciled to proceeds |"
+  },
+  {
+   "old": "Integration copies of these IDs end in `-ITG` and belong to RWB-ITG-E2008-ITG.",
+   "new": "Integration copies of these IDs end in `-ITG` and belong to RWB-ITG-E2008-ITG. TC-E2-008-11 and -12 test section 12 and section 12.7 and have no legacy case; TC-E2-008-13 to -18 cover AC10 to AC15 and have no legacy case."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11404",
+   "item": "CG-ALL-7519",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P3-027 now uses the standard v4 English text and placeholders {table} and {check}; the trigger matches the standard row."
+  },
+  {
+   "ruling": "R-11406",
+   "item": "CG-ALL-7523",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Three Given lines reading ACE views in AC2 and AC7 now name the rwb-source-data payments fake; section 4 step 4 is production read per DP-05."
+  },
+  {
+   "ruling": "R-18238",
+   "item": "DOR-RWB-P8-E2008-APP-10",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Added empty, loading, error and no-access states for SCR-04, SCR-14, SCR-28 and SCR-44; wording marked Not specified in the source documents."
+  },
+  {
+   "ruling": "R-18239",
+   "item": "DOR-RWB-P8-E2008-APP-11",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Added statement that personal-data classing of the step 4 fields is Not specified; events carry no personal data per DP-09."
+  },
+  {
+   "ruling": "R-18240",
+   "item": "DOR-RWB-P8-E2008-APP-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Confirm the test lists of REQ-CHO-007 and REQ-CHO-009 against the test case IDs in section 16 of RWB-P8-E2008-APP (TC-E2-008-02 to -18).",
+   "note": "Added TC-E2-008-11 (contract) and -12 (boundary, ASM-3438); the section 18 test lists differ from RTM v7 and need RTM alignment."
+  },
+  {
+   "ruling": "R-18241",
+   "item": "DOR-RWB-P8-E2008-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Added open decision DL25 with assumptions ASM-0728, ASM-0735, ASM-0743 and ASM-2602; decision still open."
+  },
+  {
+   "ruling": "R-18242",
+   "item": "DOR-RWB-P8-E2008-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Added Owner service column; rwb-source-data owns AceDataReady, rwb-payment's library owns DecisionRecorded."
+  },
+  {
+   "ruling": "R-18243",
+   "item": "DOR-RWB-P8-E2008-APP-3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 to AC13 for exceptions X2, X3, X8 and X9; section 5 Covered by column now names them."
+  },
+  {
+   "ruling": "R-18244",
+   "item": "DOR-RWB-P8-E2008-APP-4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 (BR3), AC15 (BR8), TCs 17 and 18, and BR4, BR5 and BR11 now covered by AC10, AC11, TC-12 and TC-13 and TC-14."
+  },
+  {
+   "ruling": "R-18245",
+   "item": "DOR-RWB-P8-E2008-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Section 10 names the rwb-access authorise check of DP-08; its name and accepted roles are marked Not specified in the source documents."
+  }
+ ]
+}

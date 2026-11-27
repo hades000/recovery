@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "(DL43; tracked in RWB-P1-E1069-DB)",
+   "new": "(DL43, assumptions ASM-0193, ASM-0737, ASM-0748 and ASM-0816; tracked in RWB-P1-E1069-DB)"
+  },
+  {
+   "old": "Given the recovery schema holds the tables, the three helper functions and the dictionary rows of V0001",
+   "new": "Given the recovery schema holds the tables and the dictionary rows of V0001, and the three helper functions arrive with V0002"
+  },
+  {
+   "old": "| X7 | A read asks for a field ID that the authorise answer does not cover | The field is returned masked; the read itself succeeds and no value is returned clear | None; the answer carries a marker per field ID, never text | Section 12.2 |",
+   "new": "| X7 | A read asks for a field ID that the authorise answer does not cover | The field is returned masked; the read itself succeeds and no value is returned clear | None; the answer carries a marker per field ID, never text | AC9 |"
+  },
+  {
+   "old": "| X8 | The authorise call does not answer inside 2 s | The read is refused with 503 and no field is returned; no answer is guessed from a stale cache | MSG-P4-002 from the guard library; no body from this service | Section 12.2 |",
+   "new": "| X8 | The authorise call does not answer inside 2 s | The read is refused with 503 and no field is returned; no answer is guessed from a stale cache | MSG-P4-002 from the guard library; no body from this service | AC10 |"
+  },
+  {
+   "old": "Then the view names the rule allows are read from the module map, not written in the test",
+   "new": "Then the view names the rule allows are read from the module map, not written in the test\n\n  Scenario: AC9 A field the authorise answer does not cover is returned masked (exception X7)\n    Given the authorise answer covers field ID \"DF-ACE-001\" and does not cover field ID \"DF-ACE-002\"\n    When a read asks for \"DF-ACE-002\" from recovery.v_ace_account\n    Then the read succeeds\n    Then the field \"DF-ACE-002\" is returned masked\n    Then the answer carries a marker for \"DF-ACE-002\" and holds no value in clear\n\n  Scenario: AC10 An authorise call that does not answer inside 2 s refuses the read (exception X8)\n    Given the authorise call does not answer inside 2 s\n    When a read of recovery.v_ace_account is requested\n    Then the read is refused with 503\n    Then no field is returned and no answer is taken from a stale cache\n    Then the error is MSG-P4-002 from the guard library, and no body comes from this service"
+  },
+  {
+   "old": "| TC-E1-069-02 | AC2, BR3 | Component | Sessions as recovery_svc, ace_view_owner and a test role with no grant in SIT |",
+   "new": "| TC-E1-069-02 | AC2, BR3 | Component | Sessions as recovery_svc, ace_view_owner and a test role with no grant in SIT |\n| TC-E1-069-09 | AC9 | Component | A read of a field ID that the authorise answer does not cover, in SIT |\n| TC-E1-069-10 | AC10 | Component | An authorise call that does not answer inside 2 s, in SIT |"
+  },
+  {
+   "old": "Field IDs are those in the Logical Data Model and Data Dictionary.",
+   "new": "Field IDs are those in the Logical Data Model and Data Dictionary.\n\nNames of database roles, views, functions and tables in this story, such as `ace_view_owner`, `v_data_dictionary`, `recovery_svc` and `ace_to_date`, are physical objects of the source system. They are not LDM fields or entities in LDM v9 or Data Classification v5 and are not added there."
+  },
+  {
+   "old": "No criterion here reaches another service over a contract, so no contract-mock Given line is added, and no legacy line is dropped or reworded.",
+   "new": "No criterion here reaches another service over a contract, so no contract-mock Given line is added, and no legacy line is dropped or reworded. The 19 service login names are taken from the Environment and Deployment Design when it is issued. Until then, the other 18 service logins hold no privilege on PUBLIC or on the 30 views, PUBLIC holds nothing, and BND-6 is two build rules: no class names `public`, and no class outside rwb-source-data names a `v_ace_*` view or another service's schema."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15177",
+   "item": "DOR-RWB-P1-E1069-APP-18",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "DL43 now carries its assumptions ASM-0193, ASM-0737, ASM-0748 and ASM-0816 in the open-decision line of section 4."
+  },
+  {
+   "ruling": "R-15178",
+   "item": "DOR-RWB-P1-E1069-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X7 and X8 now point to new AC9 and AC10 in section 7, with Gherkin scenarios and TC-E1-069-09 and TC-E1-069-10 in section 16. TC numbers assume the next free IDs."
+  },
+  {
+   "ruling": "R-15179",
+   "item": "DOR-RWB-P1-E1069-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now states that the flagged physical names are source-system objects, not LDM fields or entities, and are not added to LDM v9 or Data Classification v5."
+  },
+  {
+   "ruling": "R-21840",
+   "item": "GAP-0566",
+   "status": "Cross-document",
+   "section": "3, 4, 7",
+   "target": "RWB-P1-E1069-CON and Service Contract Catalog",
+   "change": "Publish the three read operations with their response fields and problem body in RWB-P1-E1069-CON. Record in the Service Contract Catalog that the view SQL, helper functions and conformance test are rwb-source-data's application slice, the login, grants, view owner and four extension tables are the database slice, and the 19-login proof is the wave 1 integration slice. Story side: helper functions now arrive with V0002 (Background)",
+   "note": "Story Background now places the helper functions with V0002, matching flow step 1 and BR6. Contract and catalog changes sit in other documents."
+  },
+  {
+   "ruling": "R-22092",
+   "item": "GAP-0358",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map",
+   "change": "Keep the matrix, role and masking tables and their load and approval with P4 rwb-access; keep the parameters and LOV load with P3. Name rwb-source-data as the masking point at the data read, with the masked read proven through the P1 data product contract.",
+   "note": "This story loads no matrix and has no masking read path of its own, so no story edit is needed; the change belongs to the Ownership Map."
+  },
+  {
+   "ruling": "R-22271",
+   "item": "GAP-0014",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map",
+   "change": "Add the Architecture v5 tables for S1 (rwb_valuation object groups) and P8 (payment and proceeds matching, fees, bookings, posting files) to the Tables sheet. Populate the FK cuts sheet with ID references for each cross-schema key.",
+   "note": "This story creates no table and reads no table of another service, so the inventory and FK cuts are changed in the Ownership Map only."
+  },
+  {
+   "ruling": "R-22272",
+   "item": "GAP-0110",
+   "status": "Resolved",
+   "section": "none",
+   "target": "",
+   "change": "",
+   "note": "Story already places the 30 v_ace_* views in schema recovery, read-only, via recovery_views.sql; v_data_dictionary is rwb_source_data per the table in section 12. No edit."
+  },
+  {
+   "ruling": "R-22273",
+   "item": "GAP-0259",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map",
+   "change": "Set the Owner column on all 304 fields of the 30 recovery.v_ace_* views to P1 rwb-source-data (recovery view). Grant no other service login any privilege on a view.",
+   "note": "Story already names P1 rwb-source-data as contract owner and ace_view_owner as view owner; the Ownership Map row is the open change."
+  },
+  {
+   "ruling": "R-22274",
+   "item": "GAP-0263",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map workbook (Handling tab)",
+   "change": "Replace the recovery identity SELECT rule on recovery.v_ace_* (rows 7 and 22) with: only the rwb_source_data login holds SELECT on the 30 views; other services read through the P1 REST contract or a Temporal activity; the read audit is written through the ACE Common PII logging path.",
+   "note": "Story already limits view SELECT to rwb_source_data in section 12 and in the target reading. The Handling tab rows are in another workbook."
+  },
+  {
+   "ruling": "R-22275",
+   "item": "GAP-0377",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Section 12 target reading now states the other 18 logins hold no privilege on PUBLIC or the views, and BND-6 is two build rules. The 19 login names come from Environment and Deployment Design when issued."
+  }
+ ]
+}

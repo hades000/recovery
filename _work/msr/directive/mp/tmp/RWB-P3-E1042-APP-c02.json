@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "| X9 | A role without Rules and parameters R reads the catalog | Refused with 403 | MSG-P4-002 | Access test TC-E1-042-12 |",
+   "new": "| X9 | A role without Rules and parameters R reads the catalog | Refused with 403 | MSG-P4-002 | AC12; access test TC-E1-042-12 |"
+  },
+  {
+   "old": "    Then the system restarts no instance",
+   "new": "    Then the system restarts no instance\n\n  Scenario: AC12 A role without Rules and parameters R is refused the catalog (new, D-RCV-60)\n    Given a user whose role does not include Rules and parameters R\n    When that user calls GET /admin/parameters\n    Then the system refuses the read with 403 and MSG-P4-002"
+  },
+  {
+   "old": "These eleven criteria stay as written and every value in them is kept:",
+   "new": "These eleven criteria stay as written and every value in them is kept, and AC12 (new, D-RCV-60) covers exception X9:"
+  },
+  {
+   "old": "**Event.** Publishes ParameterVersionApproved (new internal event, see additions: paramKeys, versionNo, validFrom) to the outbox; every instance refreshes its cache.",
+   "new": "**Event.** Publishes rwb.case.ParameterVersionApproved.v1 on rwb.case.events.v1 with paramKeys, versionNo and validFrom to the outbox; every instance refreshes its cache, and the cache time to live is the fallback. The cache time to live is read from the catalog entry refdata.cache.ttl-seconds; the client does not read config.cache.ttl-seconds.\n\nThe client artefact coordinates (group, artefact name, version scheme and publication channel) are taken from the platform library baseline at version freeze and pinned in the service template.\n\n**Contract artefact.** Version 1 (major) of the published client contract carries ParameterService, ParameterValue, the generated ParameterKeys, the catalog and value data contract DF-REF-132 to DF-REF-158, the consumed operations of this section with their status codes and message IDs, the cache and refresh rule, the start-up rule and the two build-check contracts, with a fake. It is frozen when the consuming stories pass their drift tests.\n\n**Build-check contract.** The two build-check rule sets are the contract of RWB-PLT-E1042-CON: the literal values 0, 1 and -1 and test code are allowed, and test code is identified by path and by annotation.\n\n**Chart values and probe.** The chart values are RWB_ENV, RWB_PARAMETER_CATALOG and RWB_PARAMETER_TTL_KEY; RWB_PARAMETER_TTL_KEY is a bootstrap time to live compared against the catalog entry at deployment. One parameter-catalog-seed hook runs before the rollout and fails the release when a key has no entry, owner or default. The probe runs the same check as the start-up check (X3). One page is raised for a missing required value; two warnings are raised for a stale cache and a failed refresh, from the library's own metrics."
+  },
+  {
+   "old": "| MSG-P4-002 | Role without the right | You cannot {action} here. Your role does not include it. |",
+   "new": "| MSG-P4-002 | Role without the right | You cannot {action} here. Your role does not include it. |\n| MSG-P4-001 | Request without a valid sign-in (401) | Not specified in the source documents (DOR-RWB-P3-E1042-APP-9) |"
+  },
+  {
+   "old": "| TC-E1-042-12 | Access | End to end | RW-PHONECOL calls GET /admin/parameters and is refused with MSG-P4-002 |",
+   "new": "| TC-E1-042-12 | AC12, Access | End to end | RW-PHONECOL calls GET /admin/parameters and is refused with MSG-P4-002 |\n| TC-E1-042-13 | Section 12 operations and events (contract) | Component | GET /admin/parameters, reference-loads, approve, rollback and the ParameterVersionApproved payload |\n| TC-E1-042-14 | Section 12.7 tables (boundary, ASM-3438) | Component | param_key at varchar(100); one row per parameter and per environment |"
+  },
+  {
+   "old": "| REQ-DRI-010 | Parameter catalog and configuration service, versioned, changed without a release | Epic 1, 3.3; Program, 5.7 | FEAT-CWC-22 | 14 Set strategy, policy and decision rules | R-UNI-38 | TC-E1-042-01 to TC-E1-042-11 |",
+   "new": "| REQ-DRI-010 | Parameter catalog and configuration service, versioned, changed without a release | Epic 1, 3.3; Program, 5.7 | FEAT-CWC-22 | 14 Set strategy, policy and decision rules | R-UNI-38 | TC-E1-042-01 to TC-E1-042-11, TC-E1-042-13, TC-E1-042-14 |\n\nOpen decisions for this story (DOR-RWB-P3-E1042-APP-18): DL01 (ASM-0189, ASM-1230, ASM-1770, ASM-1988); DL11 (ASM-0553, ASM-0703, ASM-1051, ASM-1104); DL16 (ASM-1094, ASM-5264); DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355); DL37 (ASM-0189, ASM-0425, ASM-2516, ASM-3199). Each decision is still open and its assumptions apply until it is closed."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15966",
+   "item": "DOR-RWB-P3-E1042-APP-10",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Screen catalogue entry SCR-39",
+   "change": "Add empty, loading, error and no-access states to SCR-39; the no-access reply is 403 MSG-P4-002 per section 12",
+   "note": "SCR-39 is not in this story. Its states belong to the screen entry; the story gives the no-access reply in section 12."
+  },
+  {
+   "ruling": "R-15967",
+   "item": "DOR-RWB-P3-E1042-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16, 18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the REQ-DRI-010 test list to TC-E1-042-01 to -11, -13 and -14 as section 18 now states",
+   "note": "Added TC-13 contract and TC-14 boundary rows and updated section 18. The RTM v7 list still needs the same alignment."
+  },
+  {
+   "ruling": "R-15968",
+   "item": "DOR-RWB-P3-E1042-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Open decisions DL01, DL11, DL16, DL26 and DL37 with their assumptions added after the section 18 table."
+  },
+  {
+   "ruling": "R-15969",
+   "item": "DOR-RWB-P3-E1042-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for exception X9 with its scenario; section 5 Covered by names AC12; TC-E1-042-12 now covers AC12 too."
+  },
+  {
+   "ruling": "R-15970",
+   "item": "DOR-RWB-P3-E1042-APP-9",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P4-001 row added to section 14. Its message text is not in the sources and is marked as not specified."
+  },
+  {
+   "ruling": "R-22297",
+   "item": "GAP-1214",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Wave-1 design at the rwb-decision and rwb-comms contract review",
+   "change": "Fix the five points: local copy table and columns, parameter rows and read path, two check values with message text, scenario set and run result shape, 300 ms measurement point",
+   "note": "This story does not carry the RWB-P6 values. The five points are fixed at the wave-1 contract review, not in this story."
+  },
+  {
+   "ruling": "R-23174",
+   "item": "GAP-1406",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Refresh event name, TTL source, build-check contract and artefact coordinates source added to section 12."
+  },
+  {
+   "ruling": "R-23175",
+   "item": "GAP-1407",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Contract artefact version 1 with members, DF-REF range, operations, codes, cache rule and freeze rule added to section 12."
+  },
+  {
+   "ruling": "R-23176",
+   "item": "GAP-1408",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Chart values, seed hook, probe and alert rules added to section 12."
+  },
+  {
+   "ruling": "R-23177",
+   "item": "GAP-2212",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Event named rwb.case.ParameterVersionApproved.v1 with payload and TTL fallback. The EV number in the Ownership Map is still unallocated."
+  }
+ ]
+}

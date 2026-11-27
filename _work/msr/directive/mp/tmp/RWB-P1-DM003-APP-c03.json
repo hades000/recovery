@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "- The Ownership Map entry for the four tables is accepted: `recovery_case`, `case_account`, `case_party` and `assignment` are P3's, and rwb-case owns their cutover migration and its Flyway sequence (Ownership Map v1; DP-01; GAP-0521; ASM-0716).",
+   "new": "- The Ownership Map entry for the four tables is accepted: `recovery_case`, `case_account`, `case_party` and `assignment` are P3's, and rwb-case owns their cutover migration and its Flyway sequence. P1 produces the cutover extract and the business-key mapping; rwb-case loads the rows into `rwb_case` through its own migration; P1 writes no other service's schema (Ownership Map v1; DP-01; GAP-0521; ASM-0716)."
+  },
+  {
+   "old": "- The synthetic fixture of the cutover extract, the view fixture and the rwb-case contract mock exist before the first build, so the story starts after its two in-lane predecessors and needs no production data (section 12.8).",
+   "new": "- The synthetic fixture of the cutover extract, the view fixture and the rwb-case contract mock exist before the first build, so the story starts after its two in-lane predecessors and needs no production data (section 12.8).\n- The cutover reconciliation harness pack is agreed at the wave 4 entry check (GAP-0443): a cutover extract fixture with case, account and party rows plus `source` and `migrated_at`, a reconciliation extract with one row per orphan and its reason, a report per business date, a retention that matches the wave evidence, and a gate that fails on any unresolved key or suppressed break. The SIT environment and its base hosts are Not specified in the source documents (GAP-0443)."
+  },
+  {
+   "old": "- The source of the legacy extract, its format and the place that holds the sign-off are given by no source document: the extract is read once from the legacy Workbench cutover dump, lands nothing, and the sign-off is held in the cutover record of the release pipeline (GAP-0522; ASM-0717).",
+   "new": "- The source of the legacy extract, its format and the place that holds the sign-off are given by no source document: the extract is read once from the legacy Workbench cutover dump, lands nothing, and the sign-off is held in the cutover record of the release pipeline (GAP-0522; ASM-0717).\n- The owner-side load is the owning service's own Flyway step under `RWB-PLT-E1044-CON`, run in the same cutover step as this story's extract; no story ID is invented here, and the delta is recorded against the owning service's story set (GAP-0236)."
+  },
+  {
+   "old": "2. CutoverExtractReader reads the legacy Workbench cutover dump once, for the open cases at cutover, and selects `recovery_case`, `case_account`, `case_party` and `assignment` rows with the fields of the legacy Data table. The dump is read as a file; nothing is requested from the running legacy application.",
+   "new": "2. CutoverExtractReader reads the legacy Workbench cutover dump once, for the open cases at cutover, and selects `recovery_case`, `case_account`, `case_party` and `assignment` rows with the fields of the legacy Data table. The dump is read as a file; nothing is requested from the running legacy application. The dump is read once through the cutover run and lands nothing in `rwb_source_data`; its format and holding place are Not specified in the source documents (GAP-0522)."
+  },
+  {
+   "old": "7. rwb-case reads the handed-over extract and loads it into `rwb_case` through its own cutover migration on its own Flyway sequence, which sets the `source` and `migrated_at` of every migrated record. This story does not run that migration and holds no grant on `rwb_case` (DP-01; DP-15).",
+   "new": "7. rwb-case reads the handed-over extract and loads it into `rwb_case` through its own cutover migration on its own Flyway sequence, which sets the `source` and `migrated_at` of every migrated record. This story does not run that migration and holds no grant on `rwb_case` (DP-01; DP-15). The load runs under the owner's migrator login created by `RWB-PLT-N011-DB`, in the owner's schema; this story never writes another service's schema (GAP-0237)."
+  },
+  {
+   "old": "11. After the sign-off the legacy Workbench tables stay read-only for their retention period and the migrated records are served from `rwb_case` through the rwb-case contract (legacy AC3).",
+   "new": "11. After the sign-off the legacy Workbench tables stay read-only in place for the retention class of their content under the P5 retention_rule (DP-01), and the migrated records are served from `rwb_case` through the rwb-case contract (legacy AC3). The data steward signs each schema's cutover before the archive date is set (GAP-0241)."
+  },
+  {
+   "old": "| MSG-P1-001 | Warning | The ACE batch for a business date of the ten clean days is not COMPLETE, so the reconciliation for that date cannot run | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | Warning | The ACE batch for a business date of the ten clean days is not COMPLETE, so the reconciliation for that date cannot run | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "| Signed off | The count of ten, the sign-off in the cutover record, and the legacy tables read-only for their retention period |",
+   "new": "| Signed off | The count of ten, the sign-off in the cutover record, and the legacy tables read-only for their retention period |\n| Empty | Not specified in the source documents (CG-ALL-1904) |\n| Loading | Not specified in the source documents (CG-ALL-1904) |\n| Error | Not specified in the source documents (CG-ALL-1904) |\n| No access | Not specified in the source documents (CG-ALL-1904) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21797",
+   "item": "GAP-0443",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Harness pack added as a section 3 precondition; SIT environment and base hosts stated as not specified in the source documents."
+  },
+  {
+   "ruling": "R-21798",
+   "item": "GAP-0521",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 ownership bullet now states P1 produces extract and mapping, rwb-case loads into rwb_case, and P1 writes no other schema."
+  },
+  {
+   "ruling": "R-21799",
+   "item": "GAP-0522",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Flow step 2 states the dump is read once, lands nothing in rwb_source_data; sign-off held in release pipeline cutover record. Dump format not specified."
+  },
+  {
+   "ruling": "R-21800",
+   "item": "GAP-0236",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 records the owner-side load as the owning service's Flyway step under RWB-PLT-E1044-CON; no story ID invented."
+  },
+  {
+   "ruling": "R-21801",
+   "item": "GAP-0237",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Flow step 7 states the load runs under the owner's migrator login from RWB-PLT-N011-DB; P1 never writes another schema."
+  },
+  {
+   "ruling": "R-24234",
+   "item": "CG-ALL-1900",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 text copied from Error and Message Standard v4: '{product} is from {date}. Today's load has not arrived.'"
+  },
+  {
+   "ruling": "R-24235",
+   "item": "CG-ALL-1903",
+   "status": "Not applied",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Line 281 text with the V000x file name is not in this chunk, so no exact old text is available to edit. Needs next number of the service sequence."
+  },
+  {
+   "ruling": "R-24236",
+   "item": "CG-ALL-1904",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, loading, error and no access states added to the section 15 table, each as Not specified in the source documents."
+  },
+  {
+   "ruling": "R-28405",
+   "item": "GAP-0241",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Flow step 11 now ties read-only retention to the P5 retention_rule and the data steward's sign-off before archive date."
+  },
+  {
+   "ruling": "R-30139",
+   "item": "NEWAC-RWB-P1-DM003-APP-AC4",
+   "status": "Not applied",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Section 7 and section 16 text are not in this chunk, so AC4 and its test case row cannot be placed. Proposed test is Not specified in the source documents."
+  }
+ ]
+}

@@ -1,0 +1,120 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-41 Delegation of authority | Versions; load; approval | Not this story: the DoA table is RWB-P4-E1038-APP's and this page reads none of it |",
+   "new": "| SCR-41 Delegation of authority | Versions; load; approval; empty (per Screen Specifications v1); loading, error and no access: Not specified in the source documents (CG-ALL-4680) | Not this story: the DoA table is RWB-P4-E1038-APP's and this page reads none of it |"
+  },
+  {
+   "old": "| SCR-43 Roles and access | Break-glass warning | MSG-P4-004 is shown above the list while a grant is active, and each entry carries the grant id |",
+   "new": "| SCR-43 Roles and access | Break-glass warning | MSG-P4-004 is shown above the list while a grant is active, and each entry carries the grant id |\n| SCR-43 Roles and access | Empty; loading; error; no access | Empty (no open review for the caller) per Screen Specifications v1; loading, error and no access: Not specified in the source documents (CG-ALL-4681) |"
+  },
+  {
+   "old": "- Legacy JOB-18 \"Access review list — Produces role holder lists for recertification — Every six months — Depends on: None — If it fails or runs late: Rerun — Owner: Security administrator\" (Batch and Scheduling Design v5, Jobs sheet).",
+   "new": "- Legacy JOB-18 \"Access review list — Produces role holder lists for recertification — Every six months — Depends on: None — If it fails or runs late: Rerun — Owner: Security administrator\" (Batch and Scheduling Design v5, Jobs sheet).\n- Access review file (JOB-18): interface ID, file pattern, extract layout, recipient and review-cycle date convention: Not specified in the source documents (GAP-0981). Nothing here blocks the build; file-level delivery matching is agreed with the rwb-integration contract owner (GAP-1572)."
+  },
+  {
+   "old": "| BR8 | A holder with no decision by the close is not confirmed, and its removal is requested through the bank IAM, within the same working day as the bank IAM standard requires | Legacy RWB-AD-008 AC2; DL38; GAP-0810; ASM-1511 |",
+   "new": "| BR8 | A holder with no decision by the close is not confirmed, and its removal is requested through the bank IAM within the DL38 leaver interval of the same working day | Legacy RWB-AD-008 AC2; DL38; GAP-0810; ASM-1511 |"
+  },
+  {
+   "old": "Then the review stays \"OPEN\" while an item is open and the two accepted requests keep their reference",
+   "new": "Then the review stays \"OPEN\" while an item is open and the two accepted requests keep their reference\n\n  Scenario: AC6 The interval is configuration, a reason code outside the contract is refused, and a break-glass grant adds MSG-P4-004 (new, D-RCV-60)\n    Given the access-review Schedule interval is set in its deployment configuration to the DL38 placeholder value of six months\n    When the interval is changed in the Schedule configuration only\n    Then the review cycle follows the changed interval and no code is changed\n    When a decision posts a reason code outside the contract enumeration\n    Then the response is refused and no decision is stored\n    Given a break-glass grant is active for \"U-4101\"\n    When \"U-4101\" calls GET /api/recovery/access/v1/admin/access-reviews/AR-2027-H1\n    Then the answer carries MSG-P4-004 and each decision-record entry carries the grant id\n\n  Scenario: AC7 A call without a valid token is answered 401 and an unknown review is answered 404 (new, D-RCV-60)\n    Given a caller presents no valid token\n    When the caller calls GET /api/recovery/access/v1/admin/access-reviews/AR-2027-H1\n    Then the response is 401 and no role and no holder is answered\n    Given a review id that does not exist\n    When \"U-4101\" calls GET /api/recovery/access/v1/admin/access-reviews/{reviewId}\n    Then the response is 404 and no role and no holder is answered\n\n  Scenario: AC8 A removal request activity that times out is retried and opens no second cycle (new, D-RCV-60)\n    Given review \"AR-2027-H2\" is closed with one holder still \"PENDING\" and its removal request activity times out\n    When the workflow retries the removal request activity\n    Then one removal request is accepted for that holder and the item moves to \"REMOVAL_REQUESTED\"\n    Then the retry opens no second review and writes one decision-record entry per removal request\n\n  Scenario: AC9 The bank IAM does not answer a removal request and the item stays open (new, D-RCV-60)\n    Given the bank IAM contract mock does not answer for holder \"U-4105\" in review \"AR-2027-H2\"\n    When the review closes\n    Then the item stays \"PENDING\" with the failure reason, a follow-up task is raised to the role owner and the security administrator, and an incident is recorded\n    Then the review stays \"OPEN\" while the item is open"
+  },
+  {
+   "old": "| TC-AD-008-09 | BR11, BR12 | Component | The interval changed in the Schedule configuration only; a reason code outside the contract enumeration is refused; with a break-glass grant active the answer carries MSG-P4-004 and each entry carries the grant id |",
+   "new": "| TC-AD-008-09 | BR11, BR12 | Component | The interval changed in the Schedule configuration only; a reason code outside the contract enumeration is refused; with a break-glass grant active the answer carries MSG-P4-004 and each entry carries the grant id |\n| TC-AD-008-10 | AC6, BR11, BR12 | Component | The interval changed in the Schedule configuration only; a reason code outside the contract enumeration refused; a break-glass grant active with MSG-P4-004 and the grant id on each entry |\n| TC-AD-008-11 | AC7 | Contract | A call with no valid token answered 401; a review id that does not exist answered 404 |\n| TC-AD-008-12 | AC8, BR1, BR9 | Component | A removal request activity that times out and is retried by the workflow; one request accepted per holder and no second cycle opened |\n| TC-AD-008-13 | AC9, BR8, BR9 | Component | The bank IAM contract mock does not answer for holder \"U-4105\"; the item stays open with a task and an incident |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-25252",
+   "item": "CG-ALL-4677",
+   "status": "Cross-document",
+   "section": "18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the REQ-ACA-002 and REQ-ACA-011 test lists in the RTM to section 18 of RWB-P4-AD008-APP in its next version",
+   "note": "Story tests are this story's own IDs; RTM v7 trace lists belong to other stories and must be aligned in the RTM."
+  },
+  {
+   "ruling": "R-25253",
+   "item": "CG-ALL-4680",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-41 state cell now lists empty per spec; loading, error, no access marked Not specified (CG-ALL-4680)."
+  },
+  {
+   "ruling": "R-25254",
+   "item": "CG-ALL-4681",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Added SCR-43 state row: empty per spec; loading, error, no access marked Not specified (CG-ALL-4681)."
+  },
+  {
+   "ruling": "R-28448",
+   "item": "GAP-0981",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "Interface configuration version in force (RWB-P2-E1007-CON review)",
+   "change": "Register one OUTBOUND interface row for the access-review file with interface ID, file pattern, data product, owner role and alert role; publish layout and recipient with RWB-P4-AD008-APP",
+   "note": "Story states the open values as Not specified and the review-cycle convention; the register row belongs to the interface configuration."
+  },
+  {
+   "ruling": "R-28960",
+   "item": "GAP-0810",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR8 now states no decision means not confirmed and removal within the DL38 leaver interval of the same working day."
+  },
+  {
+   "ruling": "R-28961",
+   "item": "GAP-1572",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "Interface configuration version in force (RWB-P2-E1007-CON review)",
+   "change": "Register the access-review interface row; publish file layout and review-date convention; agree file-level delivery matching with the rwb-integration contract owner",
+   "note": "Register and layout belong to the interface configuration; story line added in section 3 marks these values Not specified."
+  },
+  {
+   "ruling": "R-30795",
+   "item": "NEWAC-RWB-P4-AD008-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC6 added in section 7 for BR11 and BR12 with test row TC-AD-008-10 in section 16."
+  },
+  {
+   "ruling": "R-30796",
+   "item": "NEWAC-RWB-P4-AD008-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC7 added for 401 and 404 answers with test row TC-AD-008-11 in section 16."
+  },
+  {
+   "ruling": "R-30797",
+   "item": "NEWAC-RWB-P4-AD008-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 added for activity timeout and retry with test row TC-AD-008-12 in section 16."
+  },
+  {
+   "ruling": "R-30798",
+   "item": "NEWAC-RWB-P4-AD008-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added for a consumed call that fails or does not answer with test row TC-AD-008-13 in section 16."
+  }
+ ]
+}

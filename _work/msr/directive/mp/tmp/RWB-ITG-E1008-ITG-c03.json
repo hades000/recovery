@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "| None | `processed_event` (each consumer schema) | event id, consumer group, processed at | Write, read |",
+   "new": "| Not specified in the source documents (DOR-RWB-ITG-E1008-ITG-7) | `processed_event` (each consumer schema) | event id, consumer group, processed at | Write, read |"
+  },
+  {
+   "old": "| BR3 | Entries form one chain in chain_seq order; prev_hash is the entry_hash of the entry before, and 64 zeros for the first | REQ-DRI-003; DF-DEC-017, DF-DEC-018 |",
+   "new": "| BR3 | Each service chains its own decision records in chain_seq order and the central ledger chains its entries on ingest; prev_hash is the entry_hash of the entry before in the same chain, and 64 zeros for the first record of each chain; the ledger chain is the chain of record and the local chain serves replay | REQ-DRI-003; DF-DEC-017, DF-DEC-018 |"
+  },
+  {
+   "old": "Field IDs are those in the Logical Data Model and Data Dictionary and are copied from RWB-E1-008. The harness owns no schema, no table and no field: it reads through the two decision read endpoints and calls the services' own write paths for every append it needs.",
+   "new": "Field IDs are those in the Logical Data Model and Data Dictionary and are copied from RWB-E1-008. The harness owns no schema, no table and no field: it reads through the two decision read endpoints and calls the services' own write paths for every append it needs. Each wave-1 service holds its local record in the table decision_record, created through the decision-record library in its own schema; the DDL is set in the DB story of each service, and the case reference and the trace ID travel in inputsRef. The strict-mode confirmation is the read GET /api/recovery/decision/v1/decision-log/{entryId}, which returns 200 once the entry is sealed, together with the sealed-entry announcement on rwb.decision-record.v1 for the reporting projection. The ledger has no REST append operation: rwb_decision.decision_log_entry is written only by the ingest of rwb.decision-record.v1. decision_log_entry.case_id is a plain uuid with no foreign key, and the case is verified over the P3 case contract."
+  },
+  {
+   "old": "Those are record references and codes, never a business value invented by this story.",
+   "new": "Those are record references and codes, never a business value invented by this story. Ingest into the central ledger dedupes on the CloudEvents id, orders per case from the producer, and rwb-decision assigns chain_seq and prev_hash under the chain lock, with catch-up within five minutes."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13836",
+   "item": "DOR-RWB-ITG-E1008-ITG-4",
+   "status": "Not applied",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Section 7 AC IDs and section 16 TC IDs for BR7 are not in the supplied text; a new AC and TC row cannot be numbered without them."
+  },
+  {
+   "ruling": "R-13837",
+   "item": "DOR-RWB-ITG-E1008-ITG-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add decision_record as a per-service schema entity or map it to the existing decision entity; story keeps the name until then.",
+   "note": "Story row with no BR Field ID now reads Not specified (DOR-7). The decision_record entity is absent from LDM v9 and Data Classification v5."
+  },
+  {
+   "ruling": "R-21895",
+   "item": "GAP-2068",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 now names decision_record per service, created by the library, DDL set in each DB story, case and trace ID in inputsRef."
+  },
+  {
+   "ruling": "R-21896",
+   "item": "GAP-2074",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR3 now states per-service chains, ledger ingest chaining, zero prev_hash per chain, and the ledger as chain of record."
+  },
+  {
+   "ruling": "R-21898",
+   "item": "GAP-0332",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "AsyncAPI contract of rwb.decision-record.v1 (shared-topic contract review)",
+   "change": "Publish the AsyncAPI document with the DecisionRecorded payload and the ingest rule before the first SIT run.",
+   "note": "Section 11 now states the ingest rule; the payload stays Not specified until the AsyncAPI document is published."
+  },
+  {
+   "ruling": "R-21899",
+   "item": "GAP-1224",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P7-E2028 story and the Ownership Map",
+   "change": "Align E2028 to drop POST /decision-log; no append operation is owned unless the Ownership Map adds one first.",
+   "note": "Section 11 now declares no REST append; ledger is written only by ingest of rwb.decision-record.v1."
+  },
+  {
+   "ruling": "R-21900",
+   "item": "GAP-1226",
+   "status": "Cross-document",
+   "section": "",
+   "target": "FSD P7 v3 (next version)",
+   "change": "Withdraw FEAT-DRI-06 and AC-P7-006-01; keep JOB-13 as continuous ingest and JOB-14 as 02:00 chain check; record RWB-E1-014 retirement.",
+   "note": "Lake copy feature and its acceptance criteria remain live in FSD P7 v3; this story already reflects the retirement."
+  },
+  {
+   "ruling": "R-21901",
+   "item": "GAP-1227",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 adopts GET decision-log/{entryId} returning 200 when sealed, plus the rwb.decision-record.v1 announcement; CON publish remains with P7."
+  },
+  {
+   "ruling": "R-21902",
+   "item": "GAP-1231",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Recovery Workbench Physical Schema v6 and the Physical Schema v7 folder",
+   "change": "Drop fk_decision_log_entry_case_id; record the same ruling for every legacy cross-module key of the decision log in v7.",
+   "note": "Section 11 now states case_id is a plain uuid verified over the P3 contract; the v6 key still exists in source."
+  },
+  {
+   "ruling": "R-21903",
+   "item": "GAP-1234",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Deployment story of rwb_decision",
+   "change": "Set RPO zero for committed entries via ACE PITR plus seal files; RTO Not specified in the source documents (GAP-1234) pending service owner; make chain re-verification and append-only check mandatory restore gates.",
+   "note": "Restore objectives belong in the deployment story, which is outside this story's text."
+  }
+ ]
+}

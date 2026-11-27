@@ -1,0 +1,85 @@
+{
+ "edits": [
+  {
+   "old": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released",
+   "new": "    Then the grant refuses the statement, the boundary test fails the build and nothing is released\n\n  Scenario: AC4 The business rules of this step hold (new, D-RCV-60)\n    Given the closure step is triggered by the award confirmation of the lot\n    When the step evaluates R-UNI-47 and writes its result\n    Then the decision record is written before the closure answer, no table of rwb-case is written, no cross-schema join leaves rwb_debtsale, and no person name, identity number or unmasked account identifier is stored\n\n  Scenario: AC5 A consumed activity that times out is retried and writes nothing (new, D-RCV-60)\n    Given the rwb-case contract does not answer inside 2 s\n    When the closure activity runs\n    Then the step waits and retries on the workflow's own schedule, nothing is written and no closure is answered\n\n  Scenario: AC6 A consumed call that fails or does not answer changes nothing (new, D-RCV-60)\n    Given the breaker of a consumed contract is open\n    When the closure element is read\n    Then the read answers 503 with the platform error envelope and nothing changes\n\n  Scenario: AC7 A status change the model does not allow is refused (new, D-RCV-60)\n    Given the case is in the state `CASE_CLOSED_SOLD` after its closure\n    When the award signal of the lot arrives for the same account\n    Then no rule fires, nothing changes, no record is written and the repeat is counted"
+  },
+  {
+   "old": "| X3 | The case is already closed when the award signal arrives | No rule fires: nothing changes, no record is written and the repeat is counted | None | AC1 |",
+   "new": "| X3 | The case is already closed when the award signal arrives | No rule fires: nothing changes, no record is written and the repeat is counted | None | AC1, AC7 |"
+  },
+  {
+   "old": "| X4 | The rwb-case, rwb-access or rwb-decision contract does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and no closure is answered, and the read of the element answers 503 with the platform error envelope | None | AC1 |",
+   "new": "| X4 | The rwb-case, rwb-access or rwb-decision contract does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and no closure is answered, and the read of the element answers 503 with the platform error envelope | None | AC1, AC5, AC6 |"
+  },
+  {
+   "old": "| TC-S6-E6010-APP-15 | BR12 | Component | R-UNI-47 is evaluated with the package in force; the data transfer and the posting are not executed by this step |",
+   "new": "| TC-S6-E6010-APP-15 | BR12 | Component | R-UNI-47 is evaluated with the package in force; the data transfer and the posting are not executed by this step |\n| TC-S6-E6010-APP-16 | AC4, BR1, BR2, BR3, BR5, BR6, BR7, BR8, BR9, BR10 | Component | A closure with a decision record written first, an attempted join to another schema and a person name in the input; the rules hold and nothing outside rwb_debtsale is written |\n| TC-S6-E6010-APP-17 | AC5, X4 | Component | The rwb-case contract stub does not answer inside 2 s; the step waits and retries on its schedule, and nothing is written and no closure is answered |\n| TC-S6-E6010-APP-18 | AC6, X4 | Component | The breaker of a consumed contract is open; the closure element read answers 503 with the platform error envelope and nothing changes |\n| TC-S6-E6010-APP-19 | AC7, X3 | Component | The case is already in CASE_CLOSED_SOLD and the award signal of the lot arrives for the same account; no rule fires, no record is written and the repeat is counted |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29219",
+   "item": "GAP-1788",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Error and Message Standard (message catalogue)",
+   "change": "Carry MSG-S6-001, MSG-P1-001, MSG-P4-002, MSG-P7-003 and MSG-GEN-001 in the message catalogue with a named owner and a Thai and English version; confirm the wording before wave 4",
+   "note": "Message catalogue ownership and Thai and English versions sit outside this story; owner role is Business analyst, S6."
+  },
+  {
+   "ruling": "R-29232",
+   "item": "GAP-1782",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Architecture v5 event catalogue (Ownership Map Events)",
+   "change": "Publish EV-23 LotAwarded and AccountsTransferred as CloudEvents 1.0 on rwb.debtsale.events.v1 keyed by caseId, with BACKWARD-compatible registry schemas, no personal data, and give AccountsTransferred its catalogue number",
+   "note": "Event numbering and schemas are owned by the solution architect outside this story."
+  },
+  {
+   "ruling": "R-32877",
+   "item": "NEWAC-RWB-S6-E6010-APP-AC3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X6 row already cites AC3 and TC-S6-E6010-APP-04 exists in section 16; AC3 is in section 7."
+  },
+  {
+   "ruling": "R-32878",
+   "item": "NEWAC-RWB-S6-E6010-APP-AC4",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC4 covering BR1 to BR10 in section 7 and test row TC-S6-E6010-APP-16 in section 16."
+  },
+  {
+   "ruling": "R-32879",
+   "item": "NEWAC-RWB-S6-E6010-APP-AC5",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 for timed-out activity retry with TC-S6-E6010-APP-17; X4 row now cites AC5."
+  },
+  {
+   "ruling": "R-32880",
+   "item": "NEWAC-RWB-S6-E6010-APP-AC6",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 for a failed or unanswered consumed call with TC-S6-E6010-APP-18; X4 row now cites AC6."
+  },
+  {
+   "ruling": "R-32881",
+   "item": "NEWAC-RWB-S6-E6010-APP-AC7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 for a refused disallowed transition with TC-S6-E6010-APP-19; X3 row now cites AC7."
+  }
+ ]
+}

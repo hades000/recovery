@@ -1,0 +1,121 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E2027-ITG",
+ "unit": "u03",
+ "rulings": [
+  "R-22634",
+  "R-22635",
+  "R-22636",
+  "R-22637",
+  "R-22638",
+  "R-22639",
+  "R-22640",
+  "R-22641"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 4
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-22634",
+     "item": "GAP-1359",
+     "status": "Cross-document",
+     "target": "RWB-P7-E1073-CON",
+     "change": "rwb-decision confirms the result (packageCode, versionInForce, ruleId, rowOrder, outputs) and publishes the version-in-force read operation name.",
+     "section": "12.2",
+     "note": "Story 12.2 updated. RWB-P8-E2027-CON sections 11 and 12.2 already publish the result with placeholder names."
+    },
+    {
+     "ruling": "R-22635",
+     "item": "GAP-1360",
+     "status": "Resolved",
+     "section": "12.4",
+     "target": "",
+     "change": "",
+     "note": "Working payload fields added, copied from RWB-P8-E2027-CON section 12.3, marked for consumer confirmation."
+    },
+    {
+     "ruling": "R-22636",
+     "item": "GAP-1361",
+     "status": "Resolved",
+     "section": "13",
+     "target": "",
+     "change": "",
+     "note": "Values held as placeholders in the three values files, closed with DL11 before UAT; matches RWB-P8-E2027-OPS."
+    },
+    {
+     "ruling": "R-22637",
+     "item": "GAP-1628",
+     "status": "Resolved",
+     "section": "11",
+     "target": "",
+     "change": "",
+     "note": "No edit needed: sections 2 and 11 already put tolerance and window in the PAYMENT_MATCH package only (D-RCV-36 T10), not in rwb-case rows."
+    },
+    {
+     "ruling": "R-22638",
+     "item": "GAP-1880",
+     "status": "Cross-document",
+     "section": "9",
+     "target": "RWB-P8-E2027-CON",
+     "change": "Add the matching read to section 12.1: case, plan and business date in; payment code, due date, match type, rule ID, package code and version, shortfall out.",
+     "note": "Story section 9 updated with state, BROKEN outcome, record stamp and 30-day timer. The read was not found in the contract story."
+    },
+    {
+     "ruling": "R-22639",
+     "item": "GAP-2507",
+     "status": "Resolved",
+     "section": "12.2, 12.4",
+     "target": "",
+     "change": "",
+     "note": "Result, placeholder operation names and payloads added; DecisionRecorded already read only in 12.4. Checked against RWB-P8-E2027-CON section 12."
+    },
+    {
+     "ruling": "R-22640",
+     "item": "GAP-2508",
+     "status": "Resolved",
+     "section": "13",
+     "target": "",
+     "change": "",
+     "note": "Numeric values are placeholders closed by DL11; secrets and identity referenced by role, names left to the secret-store catalogue."
+    },
+    {
+     "ruling": "R-22641",
+     "item": "GAP-2705",
+     "status": "Cross-document",
+     "section": "9, 12.2",
+     "target": "RWB-P8-E2027-CON",
+     "change": "Publish one match-consequence read (case, plan, business date) returning payment code, due date, match type, rule ID, package code and version, shortfall; name members at v1.",
+     "note": "Story 12.2 and section 9 updated with the read and plan states; member names not given in the sources."
+    }
+   ],
+   "edits": [
+    {
+     "old": "The legacy section 12 attribution to P4 under the monolith base is not used, and `/admin/rule-versions` is a legacy path with no target story (GAP-1293).",
+     "new": "The legacy section 12 attribution to P4 under the monolith base is not used, and `/admin/rule-versions` is a legacy path with no target story (GAP-1293).\n\nThe rule-evaluation result that rwb-payment consumes is published in RWB-P8-E2027-CON as `packageCode`, `versionInForce`, `ruleId`, `rowOrder` and `outputs`, with the NoPackageInForce outcome; the harness asserts the rule ID and the package version through the decision log. The operation name of the version-in-force read: Not specified in the source documents (GAP-1359). `treatmentApi.recordInstallmentPaid` in AC2 and AC17 is the legacy in-process name of the installment-paid operation of rwb-treatment, whose target operation name is: Not specified in the source documents (GAP-2507). Both names stay placeholders until their owners publish them.\n\nThe match consequence that rwb-treatment reads from rwb-payment is one read in RWB-P8-E2027-CON that returns, for a case, a plan and a business date, the payment code, the installment due date, the match type, the rule ID, the package code and version and the shortfall, at major version 1. Its operation name, path and payload member names: Not specified in the source documents (GAP-2705). The harness observes the result through the treatment read above."
+    },
+    {
+     "old": "`DecisionRecorded` is read only, as the ledger acknowledgement of a record written locally; the harness registers no second writer of it (GAP-2506).",
+     "new": "`DecisionRecorded` is read only, as the ledger acknowledgement of a record written locally; the harness registers no second writer of it (GAP-2506).\n\nThe working payload fields of the three rwb-payment events are those of RWB-P8-E2027-CON, identifiers and facts only, to be confirmed with the consumers named in the event catalogue: `TreatmentBooked` carries `treatmentid`, `bookingref` and `businessdate`; `PaymentMissed` carries `treatmentid`, `duedate` and `amountdue`; `ProceedsMatched` carries `caseid`, `proceedsid` and `amount`. The harness consumes `PaymentMissed` and `ProceedsMatched` of these three."
+    },
+    {
+     "old": "This story does not change a case status. rwb-case changes the plan route state on the results, and the harness observes it:",
+     "new": "This story does not change a case status. rwb-treatment holds the plan state (PLAN_RUNNING, PLAN_CURE_PERIOD, PLAN_BROKEN, BACK_TO_ROUTE_DECISION) on the standard `state` column of the treatment row, from the match consequence it reads through RWB-P8-E2027-CON. On a breach it writes outcome BROKEN and `outcome_at`, and stamps the rule ID and package version on its local decision record; the decision code of a plan-breach record: Not specified in the source documents (GAP-1880). The plan check is one durable timer of the workflow with the 30-day cure period of the design. The harness observes these transitions:"
+    },
+    {
+     "old": "The load operation is behind `rwb.p3.drools` in the target and is exercised through rwb-decision's operation.",
+     "new": "The load operation is behind `rwb.p3.drools` in the target and is exercised through rwb-decision's operation.\n\n**Operations values and secrets.** The harness fixes no numeric operations value of the matching service. The alert thresholds, the rule-cache staleness window and warm-up timeout, the outbox-lag and dead-letter limits, the worker pool and consumer concurrency sizes, the canary percentage and the probe timings are chart values of the three values files of RWB-P8-E2027-OPS, held as placeholders (Not specified in the source documents (GAP-1361)) and closed with the DL11 decisions before UAT. Every secret and the workload identity are referenced by role, including the rwb-payment login (DP-02); their names are recorded in the platform secret-store catalogue (Not specified in the source documents (GAP-2508))."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

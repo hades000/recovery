@@ -1,0 +1,67 @@
+# DIR-CHK: directive run check of the Sonnet-verified story copies (D-RCV-60)
+
+Write only:
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1001 ITG Recovery tables for the 14 data products - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1007 ITG Integration adapters for outbound files - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1008 ITG Decision log store v1, append only and hash chained - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1011 ITG Reconciliation and data quality report - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1013 ITG Baseline measures - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1015 ITG Freshness stamp per data product - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1018 ITG Case ID issuance and case record v1 - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1020 ITG Allocation and assignment engine v1 - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1021 ITG Transfer rules and engine v1 - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1023 ITG Case record view v1, read only - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1032 ITG Automatic attach from the OCR intake - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1037 ITG Role to permission matrix as data and PDPA field masking by role - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1052 ITG Notice generation v1 - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1055 ITG Proof of delivery capture design with WIN - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1062 ITG Deviation screening agent in shadow [E2b] - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1065 ITG Sandbox database with synthetic recovery data - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1069 ITG Read-only ACE source views, grants and boundary rule - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG E1073 ITG Rule authoring, validation, test scenarios, approval and rollback in Drools - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG TE006 ITG Outbox and retry for outbound work - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W1 Wave 1 integration/RWB ITG TE013 ITG Agent runtime client with fallback - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2001 ITG EFS hand-over with full history - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2002 ITG ACE plan status on the case - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2004 ITG Treatment entity and plan timers data model - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2006 ITG Credit approval pack for NLEADS - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2007 ITG Booking confirmation from the ALS load - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2008 ITG Payment matching with the missed payment event - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2009 ITG Steering dashboard v1 data set - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2010 ITG Stage 2 data products  contracts, plans and treatments - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2013 ITG Approval routing with the delegation of authority table - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2014 ITG Approval screen for D7.1 demand and recall notices - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2018 ITG E-signature flow for customers and the bank - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2021 ITG Letter dispatch loop with proof of delivery from WIN - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2022 ITG SMS and LINE dispatch through NSS and LINE OA - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2025 ITG Extraction for the stage 2 and 3 document types - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2027 ITG Payment matching rules with the data team - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2035 ITG Next action on the case - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W2 Wave 2 integration/RWB ITG E2042 ITG Epic 2 rule packages in Drools - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG AD014 ITG Configure queues - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG AD019 ITG Data quality and reconciliation console - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-ITG-W4 Wave 4 integration/RWB ITG DM003 ITG Migrate case and ownership - integration v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 ACE001 DB ACE DB additions for the Recovery Workbench - ACE DB v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 AD019 APP Data quality and reconciliation console v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1001 APP Recovery tables for the 14 data products v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1002 APP Case list v1 with case ID, owner and queue v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1011 APP Reconciliation and data quality report v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1011 CON Reconciliation and data quality report - contract v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1011 OPS Reconciliation and data quality report - deployment v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1013 APP Baseline measures v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1015 APP Freshness stamp per data product v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1016 APP Access control per data product and catalog entries v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1017 APP Retention and archive rule for the data store v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1018 APP Case ID issuance and case record v1 v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1055 APP Proof of delivery capture design with WIN v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1065 APP Sandbox database with synthetic recovery data v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1065 CON Sandbox database with synthetic recovery data - contract v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1065 DB Sandbox database with synthetic recovery data - ACE DB v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1066 APP Interaction ledger store and writer v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1066 CON Interaction ledger store and writer - contract v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1069 APP Read-only ACE source views, grants and boundary rule v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E1069 DB Read-only ACE source views, grants and boundary rule - ACE DB v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P1 rwb-source-data (Source data)/RWB P1 E2001 APP EFS hand-over with full history v2.md
+- _work/msr/directive/stage-check/04 User stories/Recovery Workbench Service Story Files v2/RWB-SVC-P8 rwb-payment (Payment)/RWB P8 E2027 OPS Payment matching rules with the data team - deployment v2.md
+
+Do not write anything else.

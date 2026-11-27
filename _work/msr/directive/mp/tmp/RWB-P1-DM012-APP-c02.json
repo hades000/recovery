@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "| X5 | The local decision record or its outbox row cannot be written | The transaction rolls back, no DecisionRecorded is published, the run stops with MSG-P7-003 and the entry is named | MSG-P7-003 | TC-DM-012-05 |",
+   "new": "| X5 | The local decision record or its outbox row cannot be written | The transaction rolls back, no DecisionRecorded is published, the run stops with MSG-P7-003 and the entry is named | MSG-P7-003 | AC4, TC-DM-012-05 |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-DM-012-04 |",
+   "new": "| MSG-P4-002 | AC5, TC-DM-012-04 |"
+  },
+  {
+   "old": "And the migrated records are served from the new schema",
+   "new": "And the migrated records are served from the new schema\n\n  Scenario: AC4 The local decision record cannot be written and nothing is published (new, D-RCV-60)\n    Given the decision-record library fake is switched to fail the local record write\n    When the cutover run records an entry\n    Then the local record and its outbox row roll back together\n    And no DecisionRecorded is published and the run stops with MSG-P7-003 naming the entry\n\n  Scenario: AC5 A caller without the Platform administration right is refused (new, D-RCV-60)\n    Given a caller whose Platform administration right is absent\n    When the caller starts the cutover run or reads the cutover result\n    Then the call is refused before the extract is read or any record is written\n    And the refusal carries MSG-P4-002\n\n  Scenario: AC6 DecisionRecorded is published in chain order with the chain fields (new, D-RCV-60)\n    Given the decision-record library fake holds three migrated entries in chain order\n    When the relay publishes them on rwb.decision-record.v1\n    Then each DecisionRecorded carries its chain position, its prev_hash and its entry_hash\n    And the events leave in chain order and a rerun with the same idempotency keys publishes nothing twice"
+  },
+  {
+   "old": "Field IDs are those of the Logical Data Model and Data Dictionary v9, of TSD P1 v3 T3.3 and T3.6, and of the legacy Data table.",
+   "new": "Field IDs are those of the Logical Data Model and Data Dictionary v9, of TSD P1 v3 T3.3 and T3.6, and of the legacy Data table. `flyway_schema_history` is the Flyway framework table of DP-15: it is not an entity or field of the Logical Data Model and Data Dictionary v9 or of Data Classification v5, and is listed only for the history row it writes."
+  },
+  {
+   "old": "- The ledger's tables, its sequence and its consumer are rwb-decision's, and this story neither describes nor applies them (DP-15).",
+   "new": "- The ledger's tables, its sequence and its consumer are rwb-decision's, and this story neither describes nor applies them (DP-15).\n- The schema `rwb_decision` is owned by rwb-decision (Ownership Map v1); this story names it only to refuse any write or grant (BR1)."
+  },
+  {
+   "old": "- No parameter and no reference list is read: DP-06 and DP-07 are not in the pattern set.",
+   "new": "- Parameters read: the feature switch `rwb.source-data.decision-cutover` from the platform flag library. No reference list is read: DP-06 and DP-07 are not in the pattern set, and the reference-data contract is Not specified in the source documents (DOR-RWB-P1-DM012-APP-20)."
+  },
+  {
+   "old": "| TC-DM-012-04 | Access refusal; BR8 |",
+   "new": "| TC-DM-012-04 | AC5; Access refusal; BR8 |"
+  },
+  {
+   "old": "| TC-DM-012-05 | Principle 5; BR3 | Component | The library fake switched to fail the local record write on the third entry; the outbox count and the topic before and after; the assertion that no DecisionRecorded is published, the run ends with MSG-P7-003, and the two committed entries are the only ones present |",
+   "new": "| TC-DM-012-05 | AC4; Principle 5; BR3 | Component | The library fake switched to fail the local record write on the third entry; the outbox count and the topic before and after; the assertion that no DecisionRecorded is published, the run ends with MSG-P7-003, and the two committed entries are the only ones present |\n| TC-DM-012-06 | AC6; BR4; ADR-022 | Component | The library fake holding three migrated entries; the relay run once; the topic read in order; the assertion that each DecisionRecorded carries its chain_seq, prev_hash and entry_hash, and that a rerun with the same idempotency keys adds nothing |"
+  },
+  {
+   "old": "The full new tests, with their Given, When and Then, are recorded in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same test case IDs.",
+   "new": "The full new tests, with their Given, When and Then, are recorded in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same test case IDs.\n\n**Cutover reconciliation harness pack.** Agreed at the wave 4 entry check by the Integration lead: the SIT environment and its base hosts per hop are Not specified in the source documents (GAP-0452); the cutover extract fixture holds two cases, three entries and the chain manifest of `prev_hash` and `entry_hash`; the reconciliation extract holds one row per orphan with its reason; the report is produced per business date; the retention matches the wave evidence; the gate fails on any broken link, missing position or unresolved key; one documented point forces the ledger fake to fail. The break-list fields, the extract format and the data seeding set are Not specified in the source documents (GAP-0452)."
+  },
+  {
+   "old": "| Legacy RWB-DM-012 item | Value (verbatim) | Where it lands |\n|---|---|---|\n| Module | P1 Recovery data engine | Service rwb-source-data, service epic RWB-SVC-P1; `decision_log_entry` is P7's and is sealed by rwb-decision |\n| Epic | E1, release 30 November 2026 | Wave 4 tag from EP08; release 30 November 2026 (tentative) |\n| Depends on | RWB-E1-001, RWB-E1-069 | RWB-P1-E1001-APP (the data products and the catalogue of this service) and RWB-P1-E1069-APP (the views and the grant) |\n| Decision | DL25 | BR9; the ten clean days and the zero-tolerance cutover gate |\n| Data | recovery_case DF-CAS-001 to DF-CAS-055; decision_log_entry DF-DEC-001 to DF-DEC-031 | Section 2 quotation; section 11; AC1; TC-DM-012-01 |\n| Endpoints | No endpoint in this story. The migration is a cutover step run by the recovery service identity, and its breaks are listed on the reconciliation extract. | Section 12.1; API-P1-003 and API-P1-001 are the reads of the breaks and of the run, and belong to other stories |\n| Screen and states | No screen in this story. | Section 15; the result is read on SCR-44 through the gateway-bff composite route |\n| Permission checks | Platform administration R for RW-COE, RW-DATASTEW, RW-AUDIT, RW-COMPLY, RW-PLATADM, RW-SECADM | Section 10 |\n| Guardrails | A migrated record keeps its source and its migration date, and never a copy of an ACE row. | BR2, BR8; AC1; section 17 |\n| AC1 and AC3 | Copied character for character into section 7 with the origin tag | Section 7; TC-DM-012-01 and TC-DM-012-03 |\n| AC2 and TC-DM-012-02 | Reconcile the business keys, REC-05 | Owned by RWB-ITG-DM012-ITG as TC-DM-012-02-ITG; not copied here |",
+   "new": "| Legacy RWB-DM-012 item | Value (verbatim) | Where it lands | Feature | L3 process |\n|---|---|---|---|---|\n| Module | P1 Recovery data engine | Service rwb-source-data, service epic RWB-SVC-P1; `decision_log_entry` is P7's and is sealed by rwb-decision | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Epic | E1, release 30 November 2026 | Wave 4 tag from EP08; release 30 November 2026 (tentative) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Depends on | RWB-E1-001, RWB-E1-069 | RWB-P1-E1001-APP (the data products and the catalogue of this service) and RWB-P1-E1069-APP (the views and the grant) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Decision | DL25 | BR9; the ten clean days and the zero-tolerance cutover gate; open decision DL25, assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602 | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Data | recovery_case DF-CAS-001 to DF-CAS-055; decision_log_entry DF-DEC-001 to DF-DEC-031 | Section 2 quotation; section 11; AC1; TC-DM-012-01 | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Endpoints | No endpoint in this story. The migration is a cutover step run by the recovery service identity, and its breaks are listed on the reconciliation extract. | Section 12.1; API-P1-003 and API-P1-001 are the reads of the breaks and of the run, and belong to other stories | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Screen and states | No screen in this story. | Section 15; the result is read on SCR-44 through the gateway-bff composite route | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Permission checks | Platform administration R for RW-COE, RW-DATASTEW, RW-AUDIT, RW-COMPLY, RW-PLATADM, RW-SECADM | Section 10 | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| Guardrails | A migrated record keeps its source and its migration date, and never a copy of an ACE row. | BR2, BR8; AC1; section 17 | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| AC1 and AC3 | Copied character for character into section 7 with the origin tag | Section 7; TC-DM-012-01 and TC-DM-012-03 | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| AC2 and TC-DM-012-02 | Reconcile the business keys, REC-05 | Owned by RWB-ITG-DM012-ITG as TC-DM-012-02-ITG; not copied here | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |"
+  },
+  {
+   "old": "| Pattern | Source | Applied as |\n|---|---|---|\n| DP-03 | Template and Rules §R5.5 | The local decision record and its outbox row written in one transaction through `RWB-PLT-E1027-CON`, and DecisionRecorded on `rwb.decision-record.v1` sealed by rwb-decision (sections 4 and 12.3) |\n| DP-05 | Template and Rules §R5.5 | The case and person keys are resolved against the views this service owns, on its own login, and an orphan is listed (section 4) |\n| DP-15 | Template and Rules §R5.5 | One version on the per-service sequence, holding no ledger object and recording the extract, its field list and the chain rule (section 13) |\n| DP-19 | Template and Rules §R5.5 | The cutover result is read on SCR-44 through the gateway-bff composite route and the story renders no screen (section 15) |",
+   "new": "| Pattern | Source | Applied as | Feature | L3 process |\n|---|---|---|---|---|\n| DP-03 | Template and Rules §R5.5 | The local decision record and its outbox row written in one transaction through `RWB-PLT-E1027-CON`, and DecisionRecorded on `rwb.decision-record.v1` sealed by rwb-decision (sections 4 and 12.3) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| DP-05 | Template and Rules §R5.5 | The case and person keys are resolved against the views this service owns, on its own login, and an orphan is listed (section 4) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| DP-15 | Template and Rules §R5.5 | One version on the per-service sequence, holding no ledger object and recording the extract, its field list and the chain rule (section 13) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| DP-19 | Template and Rules §R5.5 | The cutover result is read on SCR-44 through the gateway-bff composite route and the story renders no screen (section 15) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |"
+  },
+  {
+   "old": "| Story | Work type | Relation to this story |\n|---|---|---|\n| RWB-PLT-E1027-CON | Contract | H build dependency: the decision-record library, the outbox row and the shared topic |\n| RWB-PLT-E1044-CON | Contract | H build dependency: the per-service Flyway sequence and its history |\n| RWB-PLT-N001-CON | Contract | H build dependency: the gateway-bff composite route that serves SCR-44 |\n| RWB-P1-E1001-APP | App development | H build dependency: the data products and the catalogue the case and person keys resolve against |\n| RWB-P1-E1069-APP | App development | H build dependency: the 30 read-only views, the login and the grant |\n| RWB-P1-E1011-APP | App development | Builds JOB-04 and writes `reconciliation_result`, which is the cutover evidence |\n| RWB-P1-E1002-APP | App development | Owns `case_list_row` and the case list projection the reconciliation reads |\n| RWB-ITG-DM012-ITG | Integration | Owns AC2 and proves the intact chain across the services; its I dependency is this story |\n| The rwb-decision ledger consumer and JOB-14 (P7) | App development | Consumes DecisionRecorded into the central ledger and checks the chain at 02:00; the ledger and its checks are P7's |",
+   "new": "| Story | Work type | Relation to this story | Feature | L3 process |\n|---|---|---|---|---|\n| RWB-PLT-E1027-CON | Contract | H build dependency: the decision-record library, the outbox row and the shared topic | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| RWB-PLT-E1044-CON | Contract | H build dependency: the per-service Flyway sequence and its history | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| RWB-PLT-N001-CON | Contract | H build dependency: the gateway-bff composite route that serves SCR-44 | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| RWB-P1-E1001-APP | App development | H build dependency: the data products and the catalogue the case and person keys resolve against | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| RWB-P1-E1069-APP | App development | H build dependency: the 30 read-only views, the login and the grant | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| RWB-P1-E1011-APP | App development | Builds JOB-04 and writes `reconciliation_result`, which is the cutover evidence | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| RWB-P1-E1002-APP | App development | Owns `case_list_row` and the case list projection the reconciliation reads | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| RWB-ITG-DM012-ITG | Integration | Owns AC2 and proves the intact chain across the services; its I dependency is this story | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |\n| The rwb-decision ledger consumer and JOB-14 (P7) | App development | Consumes DecisionRecorded into the central ledger and checks the chain at 02:00; the ledger and its checks are P7's | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) | Not specified in the source documents (DOR-RWB-P1-DM012-APP-2) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14917",
+   "item": "DOR-RWB-P1-DM012-APP-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "All five build dependencies are named in the header; the two open ones gate Ready to start. Build state is not a story defect; no edit."
+  },
+  {
+   "ruling": "R-14918",
+   "item": "DOR-RWB-P1-DM012-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Decision DL25 row in section 18 names its assumptions ASM-0728, ASM-0735, ASM-0743, ASM-2602; the decision stays open."
+  },
+  {
+   "ruling": "R-14919",
+   "item": "DOR-RWB-P1-DM012-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Feature and L3 process columns added to all three section 18 tables; values are not in the sources and are marked as not specified."
+  },
+  {
+   "ruling": "R-14920",
+   "item": "DOR-RWB-P1-DM012-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Section 13 names the flag parameter and the configuration reads; reference-data contract marked not specified; DP-06 and DP-07 not applied."
+  },
+  {
+   "ruling": "R-14921",
+   "item": "DOR-RWB-P1-DM012-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Section 13 states rwb_decision is owned by rwb-decision and is named only to refuse writes and grants (BR1)."
+  },
+  {
+   "ruling": "R-14922",
+   "item": "DOR-RWB-P1-DM012-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X5 and X10 now covered by new AC4 and AC5 linked to TC-DM-012-05 and TC-DM-012-04; AC4 to AC6 added in section 7."
+  },
+  {
+   "ruling": "R-14923",
+   "item": "DOR-RWB-P1-DM012-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR4 covered by new AC6 and new test case TC-DM-012-06 for chain-ordered publish with chain fields."
+  },
+  {
+   "ruling": "R-14924",
+   "item": "DOR-RWB-P1-DM012-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "flyway_schema_history identified as the DP-15 framework table, not an entity or field of LDM v9 or Data Classification v5."
+  },
+  {
+   "ruling": "R-14925",
+   "item": "DOR-RWB-P1-DM012-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The Error and Message Standard v4 text for MSG-P1-001 is not in the source set; legacy text kept, since aligning it would need invented wording."
+  },
+  {
+   "ruling": "R-21833",
+   "item": "GAP-0452",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Harness pack recorded in section 16 with its elements; unspecified values marked; agreed at the wave 4 entry check."
+  }
+ ]
+}

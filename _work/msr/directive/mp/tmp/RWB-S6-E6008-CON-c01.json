@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "| Ready to start | Day 1 |",
+   "new": "| Ready to start | Day 1 |\n| Size | To be sized at refinement by the squad |\n| Contract version | v1 (major version 1; base `/api/recovery/debtsale/v1`) |"
+  },
+  {
+   "old": "| `rwb-debtsale` in namespace `rwb-recovery` | The stage that hosts the two steps; its signals and its outcome for the parent are declared, not built |",
+   "new": "| `rwb-debtsale` | The stage that hosts the two steps; its signals and its outcome for the parent are declared, not built; namespace `rwb-recovery` |"
+  },
+  {
+   "old": "| The account and balance read (operation name Not specified in the source documents (GAP-3007; ASM-4960)) | `/api/recovery/source-data/v1` | P1 rwb-source-data | The account reference, its code, its status, the contract number, the total balance, the outstanding and the as-of date; faked |",
+   "new": "| The account and balance read (operation name Not specified in the source documents (GAP-3007; ASM-4960)) | `/api/recovery/source-data/v1` | P1 rwb-source-data | The account reference, its code, its status, the contract number, the total balance, the outstanding and the as-of date; faked; source fields `v_ace_score.*`, `v_ace_account.*` and `v_ace_batch_status.*` as the rwb-source-data contract returns them, no view and no ACE table read here |"
+  },
+  {
+   "old": "Every row is one hop with a 2 s timeout, a GET retried once with jitter and a breaker per downstream (ADR-020). The four reads and the item call are contract dependencies of class C that the plan's C row does not carry, and the absence is recorded as GAP-3007 with ASM-4960.",
+   "new": "Every row is one hop with a 2 s timeout, a GET retried once with jitter and a breaker per downstream (ADR-020). The four reads and the item call are contract dependencies of class C that the plan's C row does not carry, and the absence is recorded as GAP-3007 with ASM-4960.\n\nEvery read goes through the rwb-source-data contract (P1): REST for the screen, activity inside the workflow. The path is confirmed with P1 before the wave 3 system test."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-02796",
+   "item": "CG-ALL-10697",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "API Specification v5 yaml (REST bases)",
+   "change": "Declare the REST base /api/recovery/source-data/v1 from the Document Index service table.",
+   "note": "The v5 yaml must declare the base; the story already uses the path in 12.2."
+  },
+  {
+   "ruling": "R-02797",
+   "item": "CG-ALL-10698",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "API Specification v5 yaml (REST bases)",
+   "change": "Declare the REST base /api/recovery/case/v1 from the Document Index service table.",
+   "note": "The v5 yaml must declare the base; the story already uses the path in 12.2."
+  },
+  {
+   "ruling": "R-02798",
+   "item": "CG-ALL-10699",
+   "status": "Cross-document",
+   "section": "12.2",
+   "target": "API Specification v5 yaml (REST bases)",
+   "change": "Declare the REST base /api/recovery/decision/v1 from the Document Index service table.",
+   "note": "The v5 yaml must declare the base; the story already uses the path in 12.2."
+  },
+  {
+   "ruling": "R-02799",
+   "item": "CG-ALL-10700",
+   "status": "Resolved",
+   "section": "12.5",
+   "target": "",
+   "change": "Task queue cell now reads rwb-debtsale; namespace rwb-recovery kept in the contract element.",
+   "note": "Task queue set to rwb-debtsale per the catalog; namespace moved to the contract element so it is not lost."
+  },
+  {
+   "ruling": "R-08539",
+   "item": "DOR-RWB-S6-E6008-CON-14",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Epic design record of RWB-SVC-S6",
+   "change": "Record the signed epic design sign-off for RWB-SVC-S6.",
+   "note": "No signed epic design exists in the story or source documents; the sign-off lives in the epic design record."
+  },
+  {
+   "ruling": "R-08540",
+   "item": "DOR-RWB-S6-E6008-CON-16",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Added header row Size: to be sized at refinement by the squad.",
+   "note": "Size is set by the squad at refinement; the header now states this and no size is invented."
+  },
+  {
+   "ruling": "R-08541",
+   "item": "DOR-RWB-S6-E6008-CON-23",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "Added header row Contract version: v1, major version 1, base /api/recovery/debtsale/v1.",
+   "note": "Contract version 1 is the major version stated in section 9; the header now records it with the base path."
+  },
+  {
+   "ruling": "R-08542",
+   "item": "DOR-RWB-S6-E6008-CON-5",
+   "status": "Cross-document",
+   "section": "9",
+   "target": "LOV catalogue (LOV-BUYER-CLASS)",
+   "change": "Resolve the P1 detcheck entries: the story adds no value to closed list LOV-BUYER-CLASS; confirm the section 9 states are not list values.",
+   "note": "The detcheck findings concern the closed list LOV-BUYER-CLASS, which is outside this story."
+  },
+  {
+   "ruling": "R-08543",
+   "item": "DOR-RWB-S6-E6008-CON-8",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "API Specification v5 yaml (REST bases)",
+   "change": "Declare the three missing REST bases (source-data/v1, case/v1, decision/v1); the task queue item is fixed in the story.",
+   "note": "Contract failures are the missing yaml bases, which sit in the v5 yaml; the task queue mismatch is resolved in 12.5."
+  },
+  {
+   "ruling": "R-09215",
+   "item": "GAP-1770",
+   "status": "Resolved",
+   "section": "12.2",
+   "target": "",
+   "change": "P1 row carries the v_ace field names as rwb-source-data contract fields; no view or ACE table read; P1 path confirmation added.",
+   "note": "All reads go through rwb-source-data; path confirmation with P1 is set before the wave 3 system test."
+  }
+ ]
+}

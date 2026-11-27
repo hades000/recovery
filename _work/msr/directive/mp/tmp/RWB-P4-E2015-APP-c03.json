@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P7-003 | TC-E2-015-08 |",
+   "new": "| MSG-P7-003 | AC10, TC-E2-015-08 |"
+  },
+  {
+   "old": "| MSG-P4-001 | BR1 |",
+   "new": "| MSG-P4-001 | AC11, BR1 |"
+  },
+  {
+   "old": "| MSG-P4-006 | BR8 |",
+   "new": "| MSG-P4-006 | AC12, BR8 |"
+  },
+  {
+   "old": "| MSG-P4-001 | BR1, BR8 |",
+   "new": "| MSG-P4-001 | AC13, BR1, BR8 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | BR8 |",
+   "new": "| MSG-GEN-006 | AC14, BR8 |"
+  },
+  {
+   "old": "Then the next ask is answered under matrix version \"PM-2026.13\" with no deployment",
+   "new": "Then the next ask is answered under matrix version \"PM-2026.13\" with no deployment\n\n  Scenario: AC10 A granted read whose decision record cannot be written is not answered (new, D-RCV-60)\n    Given test user \"U-7301\" holds RW-CASEOWN and owns case \"RW-2026-000501\"\n    When the caller asks for case \"RW-2026-000501\", area \"CASE_RECORD\", right \"R\" and the AC-READ decision record write fails\n    Then the answer is refused with status 503 and message MSG-P7-003\n    Then the answer carries no case data and no field marker\n    Then an incident is raised to the platform administrator queue\n\n  Scenario: AC11 A token with no Recovery role is refused before the policy is read (new, D-RCV-60)\n    Given a test token carries no Recovery role\n    When the caller asks for case \"RW-2026-000501\", area \"CASE_RECORD\", right \"R\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n    Then the permission matrix is not read and one refusal entry with the reason is written\n\n  Scenario: AC12 Two conflicting roles stop the session at sign-in (new, D-RCV-60)\n    Given a test user holds RW-SECADM together with a business role\n    When the caller signs in to the Recovery Workbench\n    Then the sign-in access check refuses the session with message MSG-P4-006 naming both roles\n    Then no authorise request is made\n\n  Scenario: AC13 A service identity is checked under its own roles (new, D-RCV-60)\n    Given a service identity holds no role\n    When the service identity asks for case \"RW-2026-000501\", area \"CASE_RECORD\", right \"R\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n    Then the same checks run under the roles of the service identity and no person role is assumed\n\n  Scenario: AC14 An unavailable reference list gives no guessed answer (new, D-RCV-60)\n    Given the reference list of scope or capability is not available\n    When test user \"U-7301\" asks for case \"RW-2026-000501\", area \"CASE_RECORD\", right \"R\"\n    Then the answer is refused with status 503 and message MSG-GEN-006\n    Then no guessed scope or capability is used and the refusal is recorded\n\n  Scenario: AC15 Role codes, scope values and masking rows are read as data (new, D-RCV-60)\n    Given the default scope and the masking rows of \"MASK-SIT-01\" are read from rwb_access and the reference lists\n    When test user \"U-7301\" holds RW-CASEOWN, owns case \"RW-2026-000501\" and asks for area \"CASE_RECORD\", right \"R\" and field IDs DF-PTY-007, DF-PTY-008 and DF-PTY-016\n    Then the answer is granted with scope \"OWN\" and the three field IDs are marked \"masked\"\n    Then no role code, scope name, capability area, field ID or version string is held as a constant in the code\n\n  Scenario: AC16 Case facts arrive in the request and no case table is read (new, D-RCV-60)\n    Given test user \"U-7301\" holds RW-CASEOWN and owns case \"RW-2026-000501\"\n    When the caller asks for case \"RW-2026-000501\", area \"CASE_RECORD\", right \"R\" with the case ID, team, owner, status and escalation attributes in the request\n    Then the answer is granted with scope \"OWN\"\n    Then no table of rwb_case, rwb_deviation or rwb_decision is read"
+  },
+  {
+   "old": "AC1 to AC9 are the criteria this story owns;",
+   "new": "AC1 to AC16 are the criteria this story owns;"
+  },
+  {
+   "old": "In AC9 the cached answer is proved to change on the policy event and to need no deployment.",
+   "new": "In AC9 the cached answer is proved to change on the policy event and to need no deployment. In AC10 to AC14 each exception of section 5 that had no criterion has its own; AC15 and AC16 prove BR8 and BR9, which no criterion covered."
+  },
+  {
+   "old": "| TC-E2-015-08 | X5, BR5, BR6 | NFR | The decision record write forced to fail during a granted read |",
+   "new": "| TC-E2-015-08 | X5, AC10, BR5, BR6 | NFR | The decision record write forced to fail during a granted read |\n| TC-E2-015-09 | X6, AC11, BR1 | Functional | A token with no Recovery role is refused before the policy is read |\n| TC-E2-015-10 | X7, AC12, BR8 | Functional | Two conflicting roles refuse the session at sign-in with no authorise request |\n| TC-E2-015-11 | X8, AC13, BR1, BR8 | Functional | A service identity is checked under its own roles and refused 401 with no role |\n| TC-E2-015-12 | X9, AC14, BR8 | Functional | A reference list that is not available gives 503 and no guessed answer |\n| TC-E2-015-13 | AC15, BR8 | Functional | Role codes, scope values and masking rows are read as data and no constant is held |\n| TC-E2-015-14 | AC16, BR9 | Functional | Case facts come from the request and no case table is read |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16790",
+   "item": "DOR-RWB-P4-E2015-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC10 to AC14 for exceptions X5 to X9, TC-E2-015-09 to -12, and Covered by column.",
+   "note": "X5 keeps TC-E2-015-08 under AC10. X6 to X9 now have a criterion and a test case row each."
+  },
+  {
+   "ruling": "R-16791",
+   "item": "DOR-RWB-P4-E2015-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 for BR8 and AC16 for BR9 with TC-E2-015-13 and TC-E2-015-14.",
+   "note": "BR8 and BR9 now each have a criterion and a test case row."
+  },
+  {
+   "ruling": "R-16792",
+   "item": "DOR-RWB-P4-E2015-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9",
+   "change": "Register DF-REF-039 in LDM v9; confirm id_no_token and value_token as LDM v9 or Data Classification v5 field names.",
+   "note": "The LDM and classification names are not in the story source; the story cannot supply them."
+  },
+  {
+   "ruling": "R-16793",
+   "item": "DOR-RWB-P4-E2015-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The message standard's meaning for MSG-P4-006 is not in the source documents; a new ID would be invented. Needs the standard."
+  },
+  {
+   "ruling": "R-22212",
+   "item": "GAP-1823",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "FSD S8 (A2.2.4.1 to A2.9.4.3)",
+   "change": "Carry each FSD row as one criterion and add a step criterion per feature for pause, stop, routing, clear and two-deviation behaviour.",
+   "note": "This story has no S8 timer or deviation rows; the groomer rewrites the FSD criteria."
+  },
+  {
+   "ruling": "R-22350",
+   "item": "GAP-3177",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Temporal Workflow and Activity Catalog v1",
+   "change": "Register the five-minute next-action Temporal Schedule in rwb-case; delete TimerDue (EV-18) from the Epic 2 contract tables.",
+   "note": "This story does not reference JOB-05 or EV-18."
+  },
+  {
+   "ruling": "R-22498",
+   "item": "GAP-1832",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Architecture v5 event catalogue (slides 42 and 43)",
+   "change": "Add case, code, state, contact stop flag, return point and decision record reference to EV-06 and EV-07; no personal or financial value.",
+   "note": "This story does not publish or consume the deviation events."
+  },
+  {
+   "ruling": "R-22500",
+   "item": "GAP-0934",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Fix the authorise request with caseId, teamCode, ownerUserRef, escalatedToRole and escalatedAt as v1 with BACKWARD compatibility.",
+   "note": "The contract owns the request shape; this story's Not specified markers stay until the contract is fixed."
+  },
+  {
+   "ruling": "R-22501",
+   "item": "GAP-0399",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Wave 2 harness pack",
+   "change": "Record the composite route path, merge order, timer and deviation fixtures, seeding, evidence format, retention and pass/fail gate at wave 2 entry.",
+   "note": "Harness values are agreed at the wave 2 entry check; this story has no such values to set."
+  },
+  {
+   "ruling": "R-22502",
+   "item": "GAP-0714",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map v1 and the S8 API file",
+   "change": "Add GET /cases/{caseId}/deviations to the S8 rows of Ownership Map v1 and to the S8 API file.",
+   "note": "This story does not read deviations; BR9 keeps deviation reads with S8."
+  }
+ ]
+}

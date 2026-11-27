@@ -1,0 +1,74 @@
+{
+ "target": "05 Technical architecture/Recovery Workbench API Specification v5/asyncapi/rwb-decision.asyncapi.yaml",
+ "unit": "X001",
+ "items": [
+  "R-22397",
+  "R-22930"
+ ],
+ "steps": [
+  {
+   "model": "claude-haiku-5-5",
+   "tries": [
+    {
+     "error": "DISPOSITION INCOMPLETE: no row for ['R-22397', 'R-22930']"
+    },
+    {
+     "ok": true,
+     "fixes": 3
+    }
+   ],
+   "applied": true,
+   "fixes": [
+    {
+     "fix_id": "X001-F1",
+     "finding": "R-22397",
+     "op": "insert_after",
+     "old": "        $ref: '#/components/messages/RulePackageInForce'",
+     "new": "      BookingDecisionMade:\n        $ref: '#/components/messages/BookingDecisionMade'"
+    },
+    {
+     "fix_id": "X001-F2",
+     "finding": "R-22397",
+     "op": "insert_after",
+     "old": "    - $ref: '#/channels/rwb.decision.events.v1/messages/RulePackageInForce'",
+     "new": "  publishBookingDecisionMade:\n    action: send\n    channel:\n      $ref: '#/channels/rwb.decision.events.v1'\n    summary: \"Publish BookingDecisionMade per treatment and business date to rwb.decision.events.v1\"\n    messages:\n    - $ref: '#/channels/rwb.decision.events.v1/messages/BookingDecisionMade'"
+    },
+    {
+     "fix_id": "X001-F3",
+     "finding": "R-22397",
+     "op": "insert_after",
+     "old": "        $ref: '#/components/schemas/RulePackageInForceEvent'",
+     "new": "    BookingDecisionMade:\n      name: \"rwb.decision.BookingDecisionMade.v1\"\n      title: \"BookingDecisionMade\"\n      summary: \"BookingDecisionMade per treatment and business date\"\n      description: \"Published by rwb-decision on rwb.decision.events.v1 per treatment and business date, with outcome, row, package code and version, business date and difference terms. Key: treatmentId per RWB-P2-E2007-CON and RWB-P3-E2007-APP; the channel key is caseId (x-topic key), not reconciled. Property types and formats: Not specified in the source documents (GAP-2487).\"\n      contentType: \"application/cloudevents+json\"\n      headers:\n        $ref: '#/components/schemas/CloudEventsHeaders'\n      payload:\n        type: object\n        description: \"Field types and formats: Not specified in the source documents (GAP-2487)\""
+    }
+   ],
+   "disposition": [
+    {
+     "item": "R-22930",
+     "status": "Already present",
+     "fix_ids": [],
+     "note": "Retry (1 min, 10 min, 1 h), .dlt dead-letter and alert treatment already in x-topic. MSG-P7-009 wording is not in this document; no criterion depends on it."
+    },
+    {
+     "item": "R-22397",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2",
+      "F3"
+     ],
+     "note": "BookingDecisionMade added to rwb-decision contract (channel, operation, message). Key treatmentId conflicts with caseId channel key; left unreconciled per GAP-2487."
+    },
+    {
+     "item": "R-22397",
+     "status": "Resolved",
+     "fix_ids": [
+      "F1",
+      "F2",
+      "F3"
+     ],
+     "note": "Same change as the other R-22397 item: decision event added to rwb-decision; treatmentId key vs caseId channel key left open per GAP-2487."
+    }
+   ]
+  }
+ ]
+}

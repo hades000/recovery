@@ -1,0 +1,220 @@
+{
+ "edits": [
+  {
+   "old": "| TC-S1-E4010-APP-02 | The review timer: the wake fires on the review date, answers the lift and a decided case ignores an obsolete wake | Component | A workflow whose clock is skipped to the review date; the same wake on a case with a decided route |",
+   "new": "| TC-S1-E4010-APP-02 | The review timer: the wake fires on the review date, answers the lift and a decided case ignores an obsolete wake | Component | A workflow whose clock is skipped to the review date; the same wake on a case with a decided route |\n| TC-S1-E4010-APP-03 | Contract: the route operation of section 12, its activities and the absence of any event match their documents | Contract | The route command for case `RC-2026-000410` against the published contract, with each of the statuses 400, 401, 403, 404, 409, 422 and 503 |\n| TC-S1-E4010-APP-04 | Boundary: the tables of section 12.7 are the only objects written in `rwb_valuation`, and no other owner's table or view is read or written | Component | The build scan of step 12 against the `decision_record` and `idempotency_key` objects |\n| TC-S1-E4010-APP-05 | AC3: a caller without the Treatment and offer right is refused with 403 and MSG-P4-002 and nothing is read or written | Component | A role without Treatment and offer U |\n| TC-S1-E4010-APP-06 | AC4: an absent or invalid hold reason or review date is refused, the field is named and nothing is written | Component | A command with the review date absent and a command with an invalid reason |\n| TC-S1-E4010-APP-07 | AC5: a case not at the route decision, or with a route approved, is refused and no record is written | Component | Case `RC-2026-000410` with a route approved |\n| TC-S1-E4010-APP-08 | AC6: an out-of-scope caller sees the case as not known under the 404 envelope and nothing is written | Component | A caller outside the scope of case `RC-2026-000410` |\n| TC-S1-E4010-APP-09 | AC7: a reason code not in the code list of the business date is refused, the field is named and no record is written | Component | A reason code absent from the list returned by rwb-decision |\n| TC-S1-E4010-APP-10 | AC8: rwb-case or rwb-decision not answering inside 2 s, or with its breaker open, returns 503 in the platform envelope and nothing is written | Component | rwb-case not answering inside 2 s |\n| TC-S1-E4010-APP-11 | AC9: the same hold with the same Idempotency-Key makes one record, one answer and no second move, and the repeat is counted | Component | The same command submitted twice with one Idempotency-Key |\n| TC-S1-E4010-APP-12 | AC10: a review date that arrives on a decided case records the obsolete wake, writes no lift record and raises no task | Component | The timer skipped to the review date on a case with a decided route |\n| TC-S1-E4010-APP-13 | AC11: a statement on a `v_ace_*` view, a `recovery_case` row or another service's schema is refused and the boundary test fails the build | Component | A statement on `v_ace_*`, on `recovery_case` and on another service's schema |"
+  },
+  {
+   "old": "| ID | Rule | Message |\n|---|---|---|\n| VR-S1-010-1 | Required field empty | MSG-GEN-001 Enter {field}. |\n| BR-S1-010 | No value a business person may change is written in code; it is read from reference data with its version | None |\n| R-UNI-38 | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |\n| R-UNI-39 | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |\n| R-UNI-40 | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |",
+   "new": "| ID | BR ID | Rule | Message |\n|---|---|---|---|\n| VR-S1-010-1 | BR11 | Required field empty | MSG-GEN-001 Enter {field}. |\n| BR-S1-010 | BR12 | No value a business person may change is written in code; it is read from reference data with its version | None |\n| R-UNI-38 | BR13 | A new rule version reaches its effective date: apply it to decisions taken from that date; open cases keep the version they were decided under | None |\n| R-UNI-39 | BR14 | The decision log entry cannot be written: block the action and raise an incident; no action proceeds unlogged | MSG-P7-003 |\n| R-UNI-40 | BR15 | The same event arrives twice with the same key: ignore the second, record the idempotency hit | None |"
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|\n| BR1 | The held state is the case of record's: no `recovery_case`, `assignment`, `task` or `timer` row is written here, and the move is answered and not applied | Ownership Map (`recovery_case` owner P3); ASM-4345 |\n| BR2 | The hold, its reason code and its review date are recorded before anything is answered, with the rule id and the version in force; a failed write changes nothing and shows MSG-P7-003 | DP-03; R-UNI-39; legacy AC2 |\n| BR3 | The review date is waited for, not polled: the wait is a timer of `RouteDecisionWorkflow`, and no job, Schedule or polling row is added because the ownership rows give S1 no job | context pack S1 ownership rows; ASM-4344 |\n| BR4 | The reason is a coded value of reference data read with its version; no code, list or bound is a constant of the build, and no source publishes a bound on the review date | FSD S1 A2.10.3.1 BR-S1-010; GAP-2640; ASM-4346, ASM-4348 |\n| BR5 | One hold per case per command: a repeated command with the same `Idempotency-Key`, and a repeated wake with the same key, raise no second record and no second move | API-S1-001; R-UNI-40 |\n| BR6 | A hold is taken only where no route is approved: a case that already holds a decided route is refused and nothing is recorded | FSD S1 A2.10.1; legacy AC1 |\n| BR7 | No event is published: the ownership rows give S1 no event, and the step adds no name to `rwb.valuation.events.v1` | context pack S1 ownership rows; ASM-4343 |\n| BR8 | No foreign key leaves `rwb_valuation` and no statement reaches another schema: the case, the rule and the reason code are identifiers of other owners' facts | DP-01 |\n| BR9 | No person name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log or a workflow input; the caller is an identifier held by the case | Template and Rules v1 §R7.2 (s17) |\n| BR10 | The lift on the review date writes its own record and answers its own move, and a wake that arrives on a case already decided records nothing | FSD S1 A2.10.4.4; GAP-2639 |",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|\n| BR1 | The held state is the case of record's: no `recovery_case`, `assignment`, `task` or `timer` row is written here, and the move is answered and not applied | Ownership Map (`recovery_case` owner P3); ASM-4345 | TC-S1-E4010-APP-01 |\n| BR2 | The hold, its reason code and its review date are recorded before anything is answered, with the rule id and the version in force; a failed write changes nothing and shows MSG-P7-003 | DP-03; R-UNI-39; legacy AC2 | AC2, TC-E4-010-02, TC-E4-010-04 |\n| BR3 | The review date is waited for, not polled: the wait is a timer of `RouteDecisionWorkflow`, and no job, Schedule or polling row is added because the ownership rows give S1 no job | context pack S1 ownership rows; ASM-4344 | TC-S1-E4010-APP-02 |\n| BR4 | The reason is a coded value of reference data read with its version; no code, list or bound is a constant of the build, and no source publishes a bound on the review date | FSD S1 A2.10.3.1 BR-S1-010; GAP-2640; ASM-4346, ASM-4348 | AC7, TC-S1-E4010-APP-09 |\n| BR5 | One hold per case per command: a repeated command with the same `Idempotency-Key`, and a repeated wake with the same key, raise no second record and no second move | API-S1-001; R-UNI-40 | AC9, TC-S1-E4010-APP-11 |\n| BR6 | A hold is taken only where no route is approved: a case that already holds a decided route is refused and nothing is recorded | FSD S1 A2.10.1; legacy AC1 | AC5, TC-S1-E4010-APP-07 |\n| BR7 | No event is published: the ownership rows give S1 no event, and the step adds no name to `rwb.valuation.events.v1` | context pack S1 ownership rows; ASM-4343 | TC-S1-E4010-APP-01, TC-S1-E4010-APP-03 |\n| BR8 | No foreign key leaves `rwb_valuation` and no statement reaches another schema: the case, the rule and the reason code are identifiers of other owners' facts | DP-01 | AC11, TC-S1-E4010-APP-04, TC-S1-E4010-APP-13 |\n| BR9 | No person name, address, contact value or identity number enters `rwb_valuation`, the decision record, a log or a workflow input; the caller is an identifier held by the case | Template and Rules v1 §R7.2 (s17) | AC12, TC-S1-E4010-APP-14 |\n| BR10 | The lift on the review date writes its own record and answers its own move, and a wake that arrives on a case already decided records nothing | FSD S1 A2.10.4.4; GAP-2639 | AC10, TC-S1-E4010-APP-02, TC-S1-E4010-APP-12 |"
+  },
+  {
+   "old": "| X2 | The caller does not hold the Treatment and offer right of the operation | 403 before any read or write, and no record is written | MSG-P4-002 | TC-E4-010-03 |",
+   "new": "| X2 | The caller does not hold the Treatment and offer right of the operation | 403 before any read or write, and no record is written | MSG-P4-002 | AC3, TC-E4-010-03 |"
+  },
+  {
+   "old": "| X3 | The hold reason or the review date is absent or invalid | Nothing is written and the field is named | MSG-GEN-001 | TC-E4-010-01 |",
+   "new": "| X3 | The hold reason or the review date is absent or invalid | Nothing is written and the field is named | MSG-GEN-001 | AC4, TC-E4-010-01 |"
+  },
+  {
+   "old": "| X4 | The case is not at the route decision, or a route is already approved for it | The step refuses and no record is written | None (reason on the answer) | TC-E4-010-01 |",
+   "new": "| X4 | The case is not at the route decision, or a route is already approved for it | The step refuses and no record is written | None (reason on the answer) | AC5, TC-E4-010-01 |"
+  },
+  {
+   "old": "| X5 | The caller is out of scope for the case | The case is not shown as known and nothing is written | None (404 envelope) | TC-E4-010-01 |",
+   "new": "| X5 | The caller is out of scope for the case | The case is not shown as known and nothing is written | None (404 envelope) | AC6, TC-E4-010-01 |"
+  },
+  {
+   "old": "| X6 | The hold reason code is not in the code list of the business date | The step refuses the code and names the field; no record is written | MSG-GEN-001 | TC-E4-010-01, GAP-2640 |",
+   "new": "| X6 | The hold reason code is not in the code list of the business date | The step refuses the code and names the field; no record is written | MSG-GEN-001 | AC7, TC-E4-010-01, GAP-2640 |"
+  },
+  {
+   "old": "| X7 | rwb-case or rwb-decision does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 in the platform envelope | None | TC-E4-010-01 |",
+   "new": "| X7 | rwb-case or rwb-decision does not answer inside 2 s, or its breaker is open | The step waits and retries on the workflow's own schedule; nothing is written and the caller sees 503 in the platform envelope | None | AC8, TC-E4-010-01 |"
+  },
+  {
+   "old": "| X8 | The same hold is submitted twice with the same `Idempotency-Key` | One record, one answer and no second move; the repeat is counted | None | TC-E4-010-01 |",
+   "new": "| X8 | The same hold is submitted twice with the same `Idempotency-Key` | One record, one answer and no second move; the repeat is counted | None | AC9, TC-E4-010-01 |"
+  },
+  {
+   "old": "| X9 | The review date arrives while the case has already moved to a decided route | `liftHold` records the obsolete wake, writes no lift record and raises no task | None | TC-E4-010-01 |",
+   "new": "| X9 | The review date arrives while the case has already moved to a decided route | `liftHold` records the obsolete wake, writes no lift record and raises no task | None | AC10, TC-E4-010-01 |"
+  },
+  {
+   "old": "| X10 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | s17, BR8, BR9 |",
+   "new": "| X10 | A component, a statement or a test reaches a `v_ace_*` view, a `recovery_case` row or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC11, TC-S1-E4010-APP-13, s17, BR8, BR9 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Right not held (section 5, X2)\n    Given the rwb-access contract mock returns no Treatment and offer right for the caller\n    When the caller submits the hold for the case \"RC-2026-000410\"\n    Then the system refuses with 403 and MSG-P4-002\n    Then no decision record is written and no read is made\n\n  Scenario: AC4 Reason or review date absent or invalid (section 5, X3)\n    Given the rwb-case contract mock returns the case \"RC-2026-000410\" at the route decision with no route approved\n    When the caller submits the hold with the review date absent\n    Then the system names the field with MSG-GEN-001\n    Then nothing is written\n\n  Scenario: AC5 Case not at the route decision or with a route approved (section 5, X4)\n    Given the rwb-case contract mock returns the case \"RC-2026-000410\" with a route approved\n    When the caller submits the hold\n    Then the step refuses and the reason is returned on the answer\n    Then no record is written\n\n  Scenario: AC6 Caller out of scope (section 5, X5)\n    Given the rwb-case contract mock returns the case \"RC-2026-000410\" as out of scope for the caller\n    When the caller submits the hold\n    Then the case is not shown as known under the 404 envelope\n    Then nothing is written\n\n  Scenario: AC7 Reason code not in the code list (section 5, X6)\n    Given the rwb-decision contract mock returns the reason codes of the business date without the submitted code\n    When the caller submits the hold with that code\n    Then the step refuses the code and names the field with MSG-GEN-001\n    Then no record is written\n\n  Scenario: AC8 Case or rule service does not answer (section 5, X7)\n    Given the rwb-case contract mock does not answer inside 2 s\n    When the caller submits the hold\n    Then the step waits and retries on the workflow's own schedule\n    Then nothing is written and the caller sees 503 in the platform envelope\n\n  Scenario: AC9 Repeated hold (section 5, X8)\n    Given the hold for the case \"RC-2026-000410\" has been recorded with an Idempotency-Key\n    When the same hold is submitted again with the same Idempotency-Key\n    Then one record and one answer exist and no second move is made\n    Then the repeat is counted\n\n  Scenario: AC10 Obsolete review date (section 5, X9)\n    Given the case \"RC-2026-000410\" has moved to a decided route\n    When the review date arrives\n    Then liftHold records the obsolete wake, writes no lift record and raises no task\n\n  Scenario: AC11 Schema boundary (section 5, X10)\n    Given a component, a statement or a test reaches a v_ace_* view, a recovery_case row or another service's schema\n    When the statement is run\n    Then the grant refuses the statement and the boundary test fails the build\n    Then nothing is released"
+  },
+  {
+   "old": "Then nothing is released",
+   "new": "Then nothing is released\n\n  Scenario: AC12 No person data (BR9)\n    Given the hold command carries the caller as an identifier held by the case\n    When the hold is recorded\n    Then no name, address, contact value or identity number is written to the decision record, a log or a workflow input"
+  },
+  {
+   "old": "| TC-S1-E4010-APP-13 | AC11: a statement on a `v_ace_*` view, a `recovery_case` row or another service's schema is refused and the boundary test fails the build | Component | A statement on `v_ace_*`, on `recovery_case` and on another service's schema |",
+   "new": "| TC-S1-E4010-APP-13 | AC11: a statement on a `v_ace_*` view, a `recovery_case` row or another service's schema is refused and the boundary test fails the build | Component | A statement on `v_ace_*`, on `recovery_case` and on another service's schema |\n| TC-S1-E4010-APP-14 | AC12: no name, address, contact value or identity number is written to the decision record, a log or a workflow input | Component | A hold command carrying only the caller identifier, with synthetic fixtures |"
+  },
+  {
+   "old": "12. The boundary test: no statement outside `rwb_valuation`, no `v_ace_*` read, no write to `rwb_case`, `rwb_decision` or `rwb_access`, and no outbox row (X10, BR7, BR8).",
+   "new": "12. The boundary test: no statement outside `rwb_valuation`, no `v_ace_*` read, no write to any other `rwb_*` schema, and no outbox row (X10, BR7, BR8)."
+  },
+  {
+   "old": "with the reason `review_date_reached`",
+   "new": "with the reason code `REVIEW_DATE_REACHED` of the routing logic"
+  },
+  {
+   "old": "- The hold reason code list and the rule version in force of the business date, read as data and never as constants (GAP-2640; ASM-4346).",
+   "new": "- The hold reason code list and the rule version in force of the business date, read as data and never as constants (GAP-2640; ASM-4346).\n- The parameters read are the hold reason code list and the rule version in force, read under the reference-data contract of DP-06 and DP-07; no parameter key is published, so none is named (Not specified in the source documents (DOR-RWB-S1-E4010-APP-20))."
+  },
+  {
+   "old": "Where the data owner confirms a hold or review-date column on a table of this service, the DB story adds it and this story's writer fills it (GAP-2638; ASM-4343).",
+   "new": "Where the data owner confirms a hold or review-date column on a table of this service, the DB story adds it and this story's writer fills it (GAP-2638; ASM-4343). The data owner and the P3 owner name a column and a held state in a minor contract version; until then none is declared in `rwb_valuation` (GAP-2638; ASM-4343)."
+  },
+  {
+   "old": "and no other H row is added.",
+   "new": "and no other H row is added. The P3 owner confirms the held state and the review clock when FEAT-CWC-11 is published; until then the timer of BR3 stands (GAP-2639; ASM-4344, ASM-4347)."
+  },
+  {
+   "old": "and the absence is recorded as GAP-2641 (ASM-4349).",
+   "new": "and the absence is recorded as GAP-2641 (ASM-4349). The hold reason and the review date are declared as optional elements of the one route operation, the step refuses an absent value under X3, and no second operation is declared; the four consumed rows are built against their documented use, a placeholder operation name and a fake, and the placeholder is replaced in a minor contract version when an owner publishes a name (GAP-2641; ASM-4349)."
+  },
+  {
+   "old": "| Source | Reference | Used in |\n|---|---|---|",
+   "new": "| Source | Reference | Feature | L3 process | Used in |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| Legacy story | RWB-E4-010, disposition Split (rework); AC1 and AC2 owned word for word by this story; TC-E4-010-01 to -04; feature FEAT-VAL-10, depends on FEAT-CWC-11 | 1, 7, 16 |",
+   "new": "| Legacy story | RWB-E4-010, disposition Split (rework); AC1 and AC2 owned word for word by this story; TC-E4-010-01 to -04; feature FEAT-VAL-10, depends on FEAT-CWC-11 | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 1, 7, 16 |"
+  },
+  {
+   "old": "| FSD S1 v3 | A1.4 preconditions; A2.10.1 intent and metric; A2.10.2 steps and integration points; A2.10.3.1 VR-S1-010-1 and BR-S1-010; A2.10.3.2 field catalog; A2.10.3.3 roles; A2.10.4.1 to A2.10.4.4; SCR-13 | 2, 3, 4, 5, 8, 11, 14, 15 |",
+   "new": "| FSD S1 v3 | A1.4 preconditions; A2.10.1 intent and metric; A2.10.2 steps and integration points; A2.10.3.1 VR-S1-010-1 and BR-S1-010; A2.10.3.2 field catalog; A2.10.3.3 roles; A2.10.4.1 to A2.10.4.4; SCR-13 | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 2, 3, 4, 5, 8, 11, 14, 15 |"
+  },
+  {
+   "old": "| TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | 3, 10, 11, 12, 13, 16 |",
+   "new": "| TSD S1 v2 | T2 components; T3.0 standard columns; T3.1 `valuation` and `score`; T3.3 relationships; T4 no state machine; T5.2 and T5.3; T6.1 rights; T-A.1 and T-A.2 API-S1-001 | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 3, 10, 11, 12, 13, 16 |"
+  },
+  {
+   "old": "| Epics 3 to 8 specification v3 | FEAT-VAL-10 with its primary role, its systems and its prerequisite; the APIs sheet gives S1 the one route operation | 2, 3, 12 |",
+   "new": "| Epics 3 to 8 specification v3 | FEAT-VAL-10 with its primary role, its systems and its prerequisite; the APIs sheet gives S1 the one route operation | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 2, 3, 12 |"
+  },
+  {
+   "old": "| Logical data model | DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-CAS-001 to DF-CAS-023, DF-WRK-009 to DF-WRK-016, DF-CAS-036 to DF-CAS-045 | 11 |",
+   "new": "| Logical data model | DF-DEC-001 to DF-DEC-018, DF-REF-001 to DF-REF-015, DF-CAS-001 to DF-CAS-023, DF-WRK-009 to DF-WRK-016, DF-CAS-036 to DF-CAS-045 | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 11 |"
+  },
+  {
+   "old": "| Routing logic | R-UNI-38, R-UNI-39 and R-UNI-40; the `REVIEW_DATE_REACHED` event code; the States sheet carries no route-decision set and no held state; no S1 rule row fires the review date | 8, 9, 12.4, 12.6, 14 |",
+   "new": "| Routing logic | R-UNI-38, R-UNI-39 and R-UNI-40; the `REVIEW_DATE_REACHED` event code; the States sheet carries no route-decision set and no held state; no S1 rule row fires the review date | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 8, 9, 12.4, 12.6, 14 |"
+  },
+  {
+   "old": "| Patterns | DP-03, DP-13, DP-19 (Template and Rules v1 §R5.5) | 13 |",
+   "new": "| Patterns | DP-03, DP-13, DP-19 (Template and Rules v1 §R5.5) | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 13 |"
+  },
+  {
+   "old": "| Gaps and assumptions | GAP-2638, -2, -3 and -4; ASM-4343 to -7 | 1, 2, 3, 4, 8, 9, 11, 12, 13, 14 |",
+   "new": "| Gaps and assumptions | GAP-2638, -2, -3 and -4; ASM-4343 to -7 | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | 1, 2, 3, 4, 8, 9, 11, 12, 13, 14 |"
+  },
+  {
+   "old": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-016, ADR-020, ADR-022; D-RCV-60 | all |",
+   "new": "| Decisions | ADR-013, ADR-014, ADR-015, ADR-016, ADR-020, ADR-022; D-RCV-60 | FEAT-VAL-10 | Not specified in the source documents (DOR-RWB-S1-E4010-APP-2) | all |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19073",
+   "item": "DOR-RWB-S1-E4010-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows for TC-E4-010-01 to -04 and TC-S1-E4010-APP-01 to -14 as listed in section 16 of the story.",
+   "note": "Story side added contract row -03 and boundary row -04 for section 12.7. Workbook rows for all story test cases are missing from v8."
+  },
+  {
+   "ruling": "R-19074",
+   "item": "DOR-RWB-S1-E4010-APP-2",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "Feature and L3 process columns added to section 18 table.",
+   "note": "Feature FEAT-VAL-10 on all nine rows; L3 process marked not specified in the source documents."
+  },
+  {
+   "ruling": "R-19075",
+   "item": "DOR-RWB-S1-E4010-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Parameters and reference-data contract DP-06 and DP-07 named in configuration.",
+   "note": "Hold reason code list and rule version named; no parameter key is published, so none is named."
+  },
+  {
+   "ruling": "R-19076",
+   "item": "DOR-RWB-S1-E4010-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 12 names no schema; it refers to any other rwb_* schema.",
+   "note": "Explicit rwb_access, rwb_case and rwb_decision schema names removed from section 13."
+  },
+  {
+   "ruling": "R-19077",
+   "item": "DOR-RWB-S1-E4010-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "AC3 to AC11 added for X2 to X10 with TC rows; section 5 Covered by column updated.",
+   "note": "Each exception X2 to X10 now has its own criterion AC3 to AC11 and a TC-S1-E4010-APP row."
+  },
+  {
+   "ruling": "R-19078",
+   "item": "DOR-RWB-S1-E4010-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR11 to BR15 IDs added to first table; Covered by column added to second table; AC12 and TC-S1-E4010-APP-14 added for BR9.",
+   "note": "BR1 to BR10 now each map to a criterion or test case; rule rows have BR IDs."
+  },
+  {
+   "ruling": "R-19079",
+   "item": "DOR-RWB-S1-E4010-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Name decision_record as a library entity owned by RWB-PLT-E1027-CON created in rwb_valuation, or confirm it as a library object outside the LDM.",
+   "note": "review_date_reached reworded to routing event code REVIEW_DATE_REACHED. Legacy AC1 and AC2 wording kept by change-log copy rule."
+  },
+  {
+   "ruling": "R-23349",
+   "item": "GAP-2638",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Column and held state to be named later in a minor contract version; none declared in rwb_valuation until then.",
+   "note": "Hold kept in decision record and on the case of record; no column or state name declared."
+  },
+  {
+   "ruling": "R-23350",
+   "item": "GAP-2639",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Durable timer of RouteDecisionWorkflow, no Schedule or Quartz job; P3 owner confirms held state and clock when FEAT-CWC-11 is published.",
+   "note": "Review clock owned by RouteDecisionWorkflow timer; FEAT-CWC-11 confirmation recorded as pending."
+  },
+  {
+   "ruling": "R-23351",
+   "item": "GAP-2641",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Hold elements declared optional on the one route operation; four consumed rows built against documented use, placeholder name and fake.",
+   "note": "No second operation declared; placeholder replaced in a minor contract version when an owner publishes a name."
+  }
+ ]
+}

@@ -1,0 +1,103 @@
+{
+ "edits": [
+  {
+   "old": "| BR11 | One provenance entry per refresh run and per measure read, holding the definition version, the business date, the two counts and the verdict, and no measure value and no personal data | DP-03; legacy section 11 |",
+   "new": "| BR11 | One provenance entry per refresh run and per measure read, holding the definition version, the business date, the two counts and the verdict, and no measure value and no personal data | DP-03; legacy section 11 |\n| BR12 | SCR-37 and the report reads are served by rwb-deviation on its own resources behind the gateway-bff route, not composed at the edge | GAP-1658; FSD P9; Arch v5 slide 41 (/dashboards/{id}) |\n| BR13 | The product, route and measure filter lists are read as reference data of rwb-case at their version | GAP-3090 |"
+  },
+  {
+   "old": "so the eleven criteria are new under D-RCV-60",
+   "new": "so the fifteen criteria are new under D-RCV-60"
+  },
+  {
+   "old": "    Then no partial set of measures is shown and 2026-12-15 has no value",
+   "new": "    Then no partial set of measures is shown and 2026-12-15 has no value\n\n  Scenario: AC12 Error answers (new, D-RCV-60)\n    Given a caller sends no credentials\n    When the caller sends GET /reports/measures?from=2026-12-15&to=2026-12-15\n    Then the response is status 401\n    Given a caller asks for a report id the service does not hold\n    When the caller sends GET /reports/{id}\n    Then the response is status 404\n\n  Scenario: AC13 Activity retry and timeout (new, D-RCV-60)\n    Given the rwb-case contract mock times out on its first call for the 2026-12-15 cut-off\n    When the steering measure refresh runs at 01:30 on 2026-12-16\n    Then the retry count and the timeout are Not specified in the source documents (NEWAC-RWB-S8-E2009-APP-AC13)\n    Then the run writes one provenance entry for 2026-12-15 with its verdict\n\n  Scenario: AC14 Consumed call fails (new, D-RCV-60)\n    Given the rwb-decision contract mock returns a failure for the 2026-12-15 read\n    When the steering measure refresh runs at 01:30 on 2026-12-16\n    Then GET /reports/measures?from=2026-12-15&to=2026-12-15 returns status 503 with MSG-GEN-006 naming \"rwb-decision\"\n    Then no partial set of measures is shown and 2026-12-15 has no value\n\n  Scenario: AC15 Disallowed status change (new, D-RCV-60)\n    Given day 2026-12-15 is held under AC4\n    When the steering measure refresh runs again for business date 2026-12-15 and the counts still differ\n    Then the day stays held and no published verdict is returned for it\n    Then the refusal message is Not specified in the source documents (NEWAC-RWB-S8-E2009-APP-AC15)"
+  },
+  {
+   "old": "| TC-E2-009-12 | AC11, BR8 | Component | rwb-case contract mock with no answer for the 2026-12-15 cut-off |",
+   "new": "| TC-E2-009-12 | AC11, BR8 | Component | rwb-case contract mock with no answer for the 2026-12-15 cut-off |\n| TC-E2-009-13 | AC12 | Contract | Caller with no credentials; GET /reports/{id} for an id the service does not hold |\n| TC-E2-009-14 | AC13, BR11 | Component | rwb-case contract mock times out on its first call for 2026-12-15 |\n| TC-E2-009-15 | AC14 | Component | rwb-decision contract mock returns a failure for 2026-12-15 |\n| TC-E2-009-16 | AC15, BR2 | Component | Day 2026-12-15 held under AC4; refresh runs again with counts still differing |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28750",
+   "item": "GAP-0258",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Recovery Workbench Logical Data Model and Data Dictionary v8; Functional Specification Document P3",
+   "change": "Replace the Power BI publication of case_list_row and queue_measure with consumption through rwb-reporting GET /dashboards/{id} and GET /reports/{id}",
+   "note": "Power BI wording sits in LDM v8 and FSD P3; corrected there, not in this story. BR10 already reads the read model through rwb-reporting."
+  },
+  {
+   "ruling": "R-28751",
+   "item": "GAP-1658",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR12 added: SCR-37 and report reads served by rwb-deviation on its own resources behind the gateway-bff route",
+   "note": "Serving path stated in BR12; dashboard is not a composition at the edge."
+  },
+  {
+   "ruling": "R-28753",
+   "item": "GAP-3090",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Workflow kit owner (schedule id, calendar, catch-up policy, rerun input); reporting owner (two Measure fields, dimension format); rwb-comms (channel and two recipients)",
+   "change": "Publish the schedule, Measure field, dimension format and alert channel values; story side: filter lists read as rwb-case reference data",
+   "note": "Values are not in the sources; owners must publish them. BR13 added for the three filter lists as rwb-case reference data."
+  },
+  {
+   "ruling": "R-33053",
+   "item": "NEWAC-RWB-S8-E2009-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "X6 is covered by AC10 in section 7 and by TC-E2-009-10 in section 16 (Access X6). No edit needed."
+  },
+  {
+   "ruling": "R-33054",
+   "item": "NEWAC-RWB-S8-E2009-APP-AC11",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR8 covered by AC11 and TC-E2-009-12; BR10 covered by AC1 and TC-E2-009-01. No edit needed."
+  },
+  {
+   "ruling": "R-33055",
+   "item": "NEWAC-RWB-S8-E2009-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC12 added in section 7 (401 and 404 answers); TC-E2-009-13 added in section 16",
+   "note": "401 and 404 criterion added. Its message is not specified in the sources and is left open."
+  },
+  {
+   "ruling": "R-33056",
+   "item": "NEWAC-RWB-S8-E2009-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC13 added in section 7 (activity retry and timeout); TC-E2-009-14 added in section 16",
+   "note": "Retry count and timeout are not specified in the sources and are marked as such in the criterion."
+  },
+  {
+   "ruling": "R-33057",
+   "item": "NEWAC-RWB-S8-E2009-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC14 added in section 7 (consumed call fails, 503 with MSG-GEN-006); TC-E2-009-15 added in section 16",
+   "note": "Failed consumed call criterion added using the existing MSG-GEN-006 message."
+  },
+  {
+   "ruling": "R-33058",
+   "item": "NEWAC-RWB-S8-E2009-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "AC15 added in section 7 (held day stays held when counts still differ); TC-E2-009-16 added in section 16",
+   "note": "Disallowed transition criterion added; refusal message is not specified in the sources."
+  }
+ ]
+}

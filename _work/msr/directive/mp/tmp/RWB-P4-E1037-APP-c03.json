@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| Ready to start | After RWB-P4-E1022-APP |",
+   "new": "| Ready to start | After RWB-P4-E1022-APP (not built yet; the start gate for this story) |"
+  },
+  {
+   "old": "| TC-E1-037-15 | AC13, BR3 | End to end | RW-COE test user calling approve on a Loaded version |",
+   "new": "| TC-E1-037-15 | AC13, BR3 | End to end | RW-COE test user calling approve on a Loaded version |\n| TC-E1-037-16 | §12 operations, events and activities | Contract | Consumer contract tests of RWB-P4-E1037-CON for the four operations of section 12.1, the event rwb.access.AccessPolicyChanged.v1 and the activities of section 12 |\n| TC-E1-037-17 | §12.7 tables | Boundary | Each table of section 12.7 is read and written in `rwb_access` only; no statement names another schema |"
+  },
+  {
+   "old": "| X10 | A rule asks for the clear identity number | The rule is refused at load; the clearest value a rule can name is `id_no_last4` | MSG-P1-002 | TC-E1-037-13 |",
+   "new": "| X10 | A rule asks for the clear identity number | The rule is refused at load; the clearest value a rule can name is `id_no_last4` | MSG-P1-002 | AC14 |"
+  },
+  {
+   "old": "| X11 | A masking file names a role code the `role` table does not hold, or a field id that is not `is_personal` | The whole masking version is refused and the field is named | MSG-P1-002 | TC-E1-037-13 |",
+   "new": "| X11 | A masking file names a role code the `role` table does not hold, or a field id that is not `is_personal` | The whole masking version is refused and the field is named | MSG-P1-002 | AC15 |"
+  },
+  {
+   "old": "    Then SELECT on public.customer is refused with permission denied\n    Then SELECT on recovery.v_ace_customer returns id_no_masked \"XXXXXXXXX0123\" and id_no_last4 \"0123\" and no column holds the clear value",
+   "new": "    Then the rwb-source-data contract mock refuses any read of the clear identity number\n    Then the rwb-source-data contract mock returns id_no_masked \"XXXXXXXXX0123\" and id_no_last4 \"0123\" and no field holds the clear value"
+  },
+  {
+   "old": "    Then the load stays \"Loaded\"\n```",
+   "new": "    Then the load stays \"Loaded\"\n\n  Scenario: AC14 A masking rule that names the clear identity number is refused at load (exception X10)\n    Given test user \"U-2101\" loads a masking file in which one rule names the clear identity number\n    When the load is checked\n    Then the system refuses the load with message MSG-P1-002 and names the rule\n    Then the system stores no row of that file and \"MASK-SIT-01\" stays in force\n\n  Scenario: AC15 A masking file that names an unknown role or a field that is not personal is refused (exception X11)\n    Given test user \"U-2101\" loads a masking file that names a role code the role table does not hold or a field id that is not is_personal\n    When the load is checked\n    Then the system refuses the whole masking version with message MSG-P1-002 and names the field\n    Then the system stores no row of that file and \"MASK-SIT-01\" stays in force\n\n  Scenario: AC16 An approved version is published as a policy event with no personal value (rule BR13)\n    Given load \"PM-2026.12\" is \"Loaded\"\n    When test user \"U-2102\" holding RW-SECADM approves load \"PM-2026.12\"\n    Then the system publishes rwb.access.AccessPolicyChanged.v1 on rwb.access.events.v1 with the version, the change kind and the effective date\n    Then the event holds no personal value\n\n  Scenario: AC17 Each operation demands the right it declares before its handler runs (rule BR14)\n    Given a test user holds no right in the Reference data area\n    When the user calls GET /masking-policies\n    Then the guard refuses the call with status 403 and message MSG-P4-002 before the handler runs\n\n  Scenario: AC18 A value a business person may change takes effect from its row with no deployment (rule BR15)\n    Given the approver role parameter \"rwb.refload.approver.permission\" holds \"RW-SECADM\"\n    When the parameter is changed to another approver role in the parameter store\n    Then the next approval checks the approver role from the parameter and no code holds the role\n```"
+  },
+  {
+   "old": "| TC-E1-037-17 | §12.7 tables | Boundary | Each table of section 12.7 is read and written in `rwb_access` only; no statement names another schema |",
+   "new": "| TC-E1-037-17 | §12.7 tables | Boundary | Each table of section 12.7 is read and written in `rwb_access` only; no statement names another schema |\n| TC-E1-037-18 | AC14, BR10, BR12 | Component | A masking file with a rule naming the clear identity number; refused with MSG-P1-002 at load |\n| TC-E1-037-19 | AC15, BR12 | Component | A masking file naming an unknown role code and a field id that is not is_personal; the whole version refused |\n| TC-E1-037-20 | AC16, BR13 | End to end | Approval of PM-2026.12; the publish to rwb.access.events.v1 captured and asserted to hold no personal value |\n| TC-E1-037-21 | AC17, BR14 | Component | Test user with no Reference data right calls GET /masking-policies; the handler asserted not to run |\n| TC-E1-037-22 | AC18, BR15 | Component | Approver role parameter changed in the parameter store; the next approval checks the new role with no deployment |"
+  },
+  {
+   "old": "- The masking shape — the last four characters, or the first character and the domain of an e-mail address — is the view function `recovery.ace_mask_value`, owned by the ACE team, so no Workbench parameter sets it.",
+   "new": "- The masking shape — the last four characters, or the first character and the domain of an e-mail address — is the view function `recovery.ace_mask_value`, owned by the ACE team, so no Workbench parameter sets it.\n- Open decisions carried with their assumptions, each still open: DL02 (ASM-0189, ASM-0324, ASM-5687); DL10 (ASM-2250, ASM-2357, ASM-2377, ASM-2863); DL26 (ASM-0247, ASM-0264, ASM-0275, ASM-0355); DL38 (ASM-0245, ASM-1413, ASM-1424, ASM-1508). Each assumption stands until its decision closes."
+  },
+  {
+   "old": "- DB access uses the per-service rwb-access login (DP-02). No grant on `rwb_case`, on `recovery` or on `public` is added by this story.",
+   "new": "- DB access uses the per-service rwb-access login (DP-02). No grant on any schema other than `rwb_access` is added by this story."
+  },
+  {
+   "old": "- Writes `permission` (role_id, capability_area, letters, matrix_version) and `masking_rule` (role_code, field_id, unmasked, masking_version, valid_from, valid_to) in `rwb_access`, each row carrying the `state` and `version` of the standard record columns.",
+   "new": "- Writes `permission` (role_id, capability_area, letters, matrix_version) and `masking_rule` (role_code, field_id, unmasked, masking_version, valid_from, valid_to) in `rwb_access`, each row carrying the `state` and `version` of the standard record columns.\n- The DDL, keys, constraints, indexes, dictionary rows and the Flyway baseline V0001 of the five `rwb_access` authority tables are RWB-P4-E1001-APP's; this story applies that baseline and creates no table."
+  },
+  {
+   "old": "Field IDs are those of the Logical Data Model and Data Dictionary v9, and DF-ACE-* are the `recovery.v_ace_*` view fields of Physical Schema v7. This story writes no ACE value and no personal value: it writes the rows of the two policy tables and the label of the version they belong to.",
+   "new": "Field IDs are those of the Logical Data Model and Data Dictionary v9, and DF-ACE-* are the `recovery.v_ace_*` view fields of Physical Schema v7. This story writes no ACE value and no personal value: it writes the rows of the two policy tables and the label of the version they belong to. The unique keys `uk_permission_version` and `uk_masking_rule` are constraints of the two policy tables named in section 12.7; they are not fields and carry no DF id."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16660",
+   "item": "DOR-RWB-P4-E1037-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx; Recovery Workbench RTM v7",
+   "change": "Add TC-E1-037-13, -14, -15 to v8 tab Story test cases; align section 18 test lists to RTM v7",
+   "note": "Added TC-E1-037-16 (contract) and -17 (boundary) to section 16; v8 and RTM v7 alignment is cross-document."
+  },
+  {
+   "ruling": "R-16661",
+   "item": "DOR-RWB-P4-E1037-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "",
+   "note": "Ready to start states RWB-P4-E1022-APP is not built and gates the start; the 12 named dependencies are unchanged."
+  },
+  {
+   "ruling": "R-16662",
+   "item": "DOR-RWB-P4-E1037-APP-18",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Open decisions DL02, DL10, DL26, DL38 and their assumptions listed in section 13; the decisions stay open."
+  },
+  {
+   "ruling": "R-16663",
+   "item": "DOR-RWB-P4-E1037-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Section 13 DB access names only rwb_access; other data is read through contracts (DP-06, DP-07)."
+  },
+  {
+   "ruling": "R-16664",
+   "item": "DOR-RWB-P4-E1037-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X10 and X11 now covered by AC14 and AC15 with their own Gherkin and test cases TC-E1-037-18 and -19."
+  },
+  {
+   "ruling": "R-16665",
+   "item": "DOR-RWB-P4-E1037-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR13, BR14, BR15 covered by AC16, AC17, AC18 and test cases TC-E1-037-20, -21, -22."
+  },
+  {
+   "ruling": "R-16666",
+   "item": "DOR-RWB-P4-E1037-APP-7",
+   "status": "Resolved",
+   "section": "7, 11",
+   "target": "",
+   "change": "",
+   "note": "AC11 reads through the rwb-source-data mock, not ACE views; the two unique keys are stated as constraints, not fields."
+  },
+  {
+   "ruling": "R-21842",
+   "item": "GAP-0975",
+   "status": "Resolved",
+   "section": "13",
+   "target": "RWB-P4-E1037-CON",
+   "change": "Read sibling rwb_access baseline references as the version this story applies; RWB-P4-E1037-CON creates no table",
+   "note": "DDL, keys, indexes and V0001 of the five tables are stated as RWB-P4-E1001-APP's; this story creates no table."
+  },
+  {
+   "ruling": "R-21962",
+   "item": "GAP-0481",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "TSD P1 v3",
+   "change": "T3.6: masking_rule owned by rwb-access; P1 holds data_product_access only and takes masking answers from POST /api/recovery/access/v1/authorise and the FieldMasker interface of RWB-P4-E1037-CON, one hop, 2 s timeout",
+   "note": "The P1 technical specification keeps masking_rule in P1; the change belongs to TSD P1 v3."
+  },
+  {
+   "ruling": "R-22018",
+   "item": "GAP-1568",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "API Specification v4; TSD P4 v3 appendix T-A and T3.1",
+   "change": "Publish the four rwb-access operations with request, answer, refusal and not-found schemas; state group-to-role resolution in T3.1",
+   "note": "The four operations and their group-to-role read path have no schema; the change belongs to API Specification v4 and TSD P4."
+  }
+ ]
+}

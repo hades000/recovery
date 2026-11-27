@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| X10 | A user without the right starts DailyCaseRun from the run monitor | Refused with 403; nothing runs | MSG-P4-002 | Access test TC-E1-020-14 |",
+   "new": "| X10 | A user without the right starts DailyCaseRun from the run monitor | Refused with 403; nothing runs | MSG-P4-002 | AC14 |"
+  },
+  {
+   "old": "    Then the system places the case in the exception queue \"RWB-EXC\" with reason \"NO_OVERFLOW_QUEUE\"\n    Then the case status stays \"NEW\"",
+   "new": "    Then the system places the case in the exception queue \"RWB-EXC\" with reason \"NO_OVERFLOW_QUEUE\"\n    Then the case status stays \"NEW\"\n\n  Scenario: AC14 A user without the right cannot start DailyCaseRun from the run monitor (exception X10)\n    Given role RW-CASEOWN does not include starting DailyCaseRun\n    When the user starts DailyCaseRun from the run monitor\n    Then the request is refused with 403 and MSG-P4-002\n    Then no allocation run starts and no case is touched\n\n  Scenario: AC15 A decision that cannot be written to the decision record does not proceed (BR7)\n    Given case RW-2026-000201 matches rule \"ALLOC-014\" and owner U-02 is below the cap\n    Given the decision record write fails for case RW-2026-000201\n    When the case is placed in the queue and given an owner\n    Then the case stays \"NEW\" with no queue and no owner\n    Then the assignment row is not written\n\n  Scenario: AC16 An ALLOCATION package without a default last row is refused at load (BR10)\n    Given package ALLOCATION version \"ALLOC-2026.11\" has no default row as its last row\n    When the package is loaded in rwb-decision\n    Then the load is refused at load time\n    Then the morning allocation run does not repeat the default-row check\n\n  Scenario: AC17 A replayed workflow reuses the recorded rule answer (BR11)\n    Given the allocate activity has recorded the rule answer \"ALLOC-014\" for case RW-2026-000201\n    When the case workflow is replayed\n    Then the replay reuses the recorded answer\n    Then no rule is evaluated in workflow code\n\n  Scenario: AC18 The case, assignment, decision record and outbox row are written in one transaction (BR12)\n    Given the case RW-2026-000201 is being allocated\n    When the outbox row write fails\n    Then the case, the assignment, the decision record and the outbox row are all rolled back\n    Then the case stays \"NEW\" with no queue change"
+  },
+  {
+   "old": "| BR12 | The case, the assignment, the decision record and the outbox row are written in one transaction in schema `rwb_case`; a failure in any of them leaves the case unchanged | R-UNI-39 |",
+   "new": "| BR12 | The case, the assignment, the decision record and the outbox row are written in one transaction in schema `rwb_case`; a failure in any of them leaves the case unchanged | R-UNI-39 |\n| BR13 | JOB-03 is a step of DailyCaseRun in rwb-case; its step state is published on the rwb-case run result. The job catalogue read and the rerun stay on the P1 job catalogue. The rerun facade for a workflow step is Not specified in the source documents (GAP-0345) | GAP-0345; ownership map; API Specification v4 |"
+  },
+  {
+   "old": "| Process owner for L1 18, Shared operations | Approves each package version through the rwb-decision rule change process. No delegation of authority level applies |",
+   "new": "| Process owner for L1 18, Shared operations | Approves each package version through the rwb-decision rule change process. No delegation of authority level applies |\n\nEvery REST operation in section 12 is authorised by the rwb-access authorise check (DP-08) against the roles in this table before it runs."
+  },
+  {
+   "old": "No table outside schema `rwb_case` is read or written by this story. The decision ledger (`decision_log_entry`) is P7 rwb-decision and is reached only through `rwb.decision-record.v1`.",
+   "new": "No table outside schema `rwb_case` is read or written by this story. The decision ledger (`decision_log_entry`) is P7 rwb-decision and is reached only through `rwb.decision-record.v1`. The rwb-case service login is Not specified in the source documents (GAP-0684); it is to be allocated with schema `rwb_case`, stored in Key Vault and recorded in the Service Catalog and the RWB-PLT-DB stories before the first deployment."
+  },
+  {
+   "old": "| rwb.case.DecisionRecorded (decision record) | rwb.decision-record.v1 | caseId | caseId, ruleId, ruleVersion, inputsRef, outcome, decidedAt, prev_hash, entry_hash |",
+   "new": "| rwb.case.DecisionRecorded.v1 (decision record) | rwb.decision-record.v1 | caseId | caseId, ruleId, ruleVersion, inputsRef, outcome, decidedAt, prev_hash, entry_hash |"
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10, which is open; assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 apply until it closes."
+  },
+  {
+   "old": "| TC-E1-020-10 | AC10 | End to end | JOB-02 not complete for the business date |\n| TC-E1-020-11 | AC11, BR8 | End to end | Two workers on the same case |",
+   "new": "| TC-E1-020-11 | AC11, BR8 | End to end | Two workers on the same case |"
+  },
+  {
+   "old": "| TC-E1-020-13 | AC13, BR4 | End to end | Queue HP-CEN-CO with no overflow queue and every owner at 150 |",
+   "new": "| TC-E1-020-13 | AC13, BR4 | End to end | Queue HP-CEN-CO with no overflow queue and every owner at 150 |\n| TC-E1-020-16 | Section 12 operations, events and activities | Contract | Contract test of every REST operation, event and activity in section 12 |\n| TC-E1-020-17 | Section 12.7 tables | Component | Boundary test: only the tables in section 12.7 are read or written, none outside schema rwb_case |\n| TC-E1-020-18 | AC15, BR7 | End to end | Decision record write fails for one case in the run |\n| TC-E1-020-19 | AC16, BR10 | Component | ALLOCATION package loaded with no default last row |\n| TC-E1-020-20 | AC17, BR11 | Component | Workflow replayed after the allocate activity has recorded the rule answer |\n| TC-E1-020-21 | AC18, BR12 | Component | Outbox row write fails after the case, assignment and decision record are written |"
+  },
+  {
+   "old": "| TC-E1-020-14 | Access | Component | RW-CASEOWN reruns JOB-03 and is refused with MSG-P4-002 |",
+   "new": "| TC-E1-020-14 | AC14, Access | Component | RW-CASEOWN reruns JOB-03 and is refused with MSG-P4-002 |"
+  },
+  {
+   "old": "TC-E1-020-10 covers AC10, which is owned by RWB-P3-E1018-APP; the TC ID is kept here for the legacy trace and the test is executed with that story.",
+   "new": "TC-E1-020-10 (legacy AC10) is not held in this story; it is owned by RWB-P3-E1018-APP and is executed with that story."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15826",
+   "item": "DOR-RWB-P3-E1020-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16",
+   "target": "",
+   "change": "Added TC-E1-020-16 (contract) and TC-E1-020-17 (12.7 boundary); removed TC-E1-020-10 from this story",
+   "note": "RTM v7 test lists for REQ-CWC-007 to REQ-CWC-016 differ from section 18; RTM v7 needs alignment, not edited here."
+  },
+  {
+   "ruling": "R-15827",
+   "item": "DOR-RWB-P3-E1020-APP-18",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Recovery Workbench decision register",
+   "change": "Carry open decisions DL10, DL11, DL15, DL22 and DL23 each with its assumptions: DL10 ASM-2250, ASM-2357, ASM-2377, ASM-2863; DL11 ASM-0553, ASM-0703, ASM-1051, ASM-1104; DL15 ASM-5264; DL22 ASM-1162, ASM-1304, ASM-2217, ASM-2569; DL23 ASM-1232, ASM-1237, ASM-1259, ASM-1560",
+   "note": "Story now names DL10 assumptions in section 14; DL23 already cited in BR3. DL11, DL15 and DL22 are not referenced in the story text."
+  },
+  {
+   "ruling": "R-15828",
+   "item": "DOR-RWB-P3-E1020-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC14 for exception X10; X10 now covered by AC14; TC-E1-020-14 now covers AC14",
+   "note": "Section 7 now holds 13 owned criteria; section 5 has 11 exception paths, each with a criterion."
+  },
+  {
+   "ruling": "R-15829",
+   "item": "DOR-RWB-P3-E1020-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 (BR7), AC16 (BR10), AC17 (BR11), AC18 (BR12) with TC-E1-020-18 to TC-E1-020-21",
+   "note": "ALLOC-014 is already flagged as test data in the story; no current source holds it, so no change to that ID."
+  },
+  {
+   "ruling": "R-15830",
+   "item": "DOR-RWB-P3-E1020-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Added statement that every section 12 REST operation is authorised by the rwb-access authorise check (DP-08) against the roles in section 10",
+   "note": "No rwb-access check code is given in the sources, so none is invented."
+  },
+  {
+   "ruling": "R-15831",
+   "item": "DOR-RWB-P3-E1020-APP-9",
+   "status": "Cross-document",
+   "section": "12, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Supply v4 wording for MSG-P3-012 and MSG-P3-027 so section 14 can match it",
+   "note": "Event name changed to rwb.case.DecisionRecorded.v1 (DP-14). MSG text unchanged: v4 wording is not in the sources."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "Epic 1 Business Requirements Document",
+   "change": "State in section 8.2 that Epic 1 stories keep the business-epic wave and the delivery lead confirms the wave per story at build sequencing",
+   "note": "This story is in rwb-case, not rwb-payment, rwb-asset or rwb-deviation; story wave 1 unchanged."
+  },
+  {
+   "ruling": "R-21999",
+   "item": "GAP-0064",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "W-MAP kept: story stays wave 1. rwb-case is not rwb-deviation, so no story edit is needed."
+  },
+  {
+   "ruling": "R-22000",
+   "item": "GAP-0345",
+   "status": "Cross-document",
+   "section": "8, 10",
+   "target": "API Specification v4",
+   "change": "Fix the rerun facade for a DailyCaseRun workflow step (JOB-03) in the P1 contract before wave 1 exit",
+   "note": "BR13 added to section 8: JOB-03 step state on rwb-case run result; catalogue read and rerun stay on P1 job catalogue."
+  },
+  {
+   "ruling": "R-22001",
+   "item": "GAP-0684",
+   "status": "Cross-document",
+   "section": "12.7",
+   "target": "ACE database schema and login allocation (ACE team, DBA)",
+   "change": "Allocate the rwb-case login with schema rwb_case, store it in Key Vault, and record it in the Service Catalog and RWB-PLT-DB stories before first deployment",
+   "note": "Section 12.7 now marks the login as Not specified (GAP-0684) with these steps; the login name is in no source."
+  }
+ ]
+}

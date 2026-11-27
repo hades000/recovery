@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "13. The call changes nothing: no row of the ledger is written, updated or deleted, and the read takes no lock (AC3, §17).",
+   "new": "13. The call changes nothing: no row of the ledger is written, updated or deleted, and the read takes no lock (AC3, §17).\n\nStates of SCR-03 and SCR-04: Loading shows a placeholder while the call is pending; its visual form is Not specified in the source documents (DOR-RWB-P1-E1068-APP-10). Empty is step 12 (AC8). Error shows the MSG-GEN-006 message when the read is refused (X6, X8, feature flag). No access shows the 403 and MSG-P4-002 of step 7."
+  },
+  {
+   "old": "| MSG-GEN-006 | Section 12.2 |",
+   "new": "| MSG-GEN-006 | AC9 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | BR-P1-015-4 |",
+   "new": "| MSG-GEN-006 | AC10 |"
+  },
+  {
+   "old": "    Then the history panel shows the Empty state",
+   "new": "    Then the history panel shows the Empty state\n\n  Scenario: AC9 The case contract does not answer inside 2 s or answers 503 (new, D-RCV-60)\n    Given the rwb-case contract mock does not answer for case \"RW-2026-000401\" inside 2 s\n    When user \"u-owner-04\" reads the ledger\n    Then the system refuses the read with status 503 and MSG-GEN-006\n    Then no entry is returned\n\n  Scenario: AC10 The PII access-log write fails while an unmasked summary would be returned (new, D-RCV-60)\n    Given the rwb-access masking contract mock returns an unmasking rule for interaction.summary for the caller's roles\n    Given the rwb-access access-log write fails\n    When user \"u-owner-04\" reads the ledger\n    Then the system refuses the read with status 503 and MSG-GEN-006\n    Then no unmasked field is returned"
+  },
+  {
+   "old": "DP-01 and DP-18 are this story's own patterns: the ledger the monolith held in the shared `recovery` schema is P1's table in `rwb_source_data`, and the read is a local query on it with no join across a schema.",
+   "new": "DP-01 and DP-18 are this story's own patterns: the ledger the monolith held in the shared `recovery` schema is P1's table in `rwb_source_data`, and the read is a local query on it with no join across a schema. This service is the one ledger owner, and the case timeline reads it through the contract; the P7 functional specification is not a source of this table or its read (GAP-1612)."
+  },
+  {
+   "old": "- The masking rule for `interaction.summary` is policy of rwb-access: no row for the caller's roles means masked, and an unmasking row writes the read to the access log (DP-08).",
+   "new": "- The masking rule for `interaction.summary` is policy of rwb-access: no row for the caller's roles means masked, and an unmasking row writes the read to the access log (DP-08). P1 keeps no masking row of its own; the masking answer of this read comes from the rwb-access contract only, and data_product_access is P1's data product access catalogue, not the masking authority (GAP-0584)."
+  },
+  {
+   "old": "Thai text for each message follows decision DL10.",
+   "new": "Thai text for each message follows decision DL10. Open decisions of this story: DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863), DL11 (assumptions ASM-0553, ASM-0703, ASM-1051, ASM-1104) and DL26 (assumptions ASM-0247, ASM-0264, ASM-0275, ASM-0355). Each assumption is confirmed by the programme directive of 26 November 2026; the decisions stay open."
+  },
+  {
+   "old": "All nine rows are this story's",
+   "new": "All thirteen rows are this story's"
+  },
+  {
+   "old": "| TC-E1-068-09 | Access | Component | RW-REFADM reads the ledger; refused with MSG-P4-002 |",
+   "new": "| TC-E1-068-09 | Access | Component | RW-REFADM reads the ledger; refused with MSG-P4-002 |\n| TC-E1-068-10 | 12.1 read operation, DP-11 | Component | Contract test of the operation against the published InteractionPage schema and the fakes of 12.8 |\n| TC-E1-068-11 | 12.7 tables (ASM-3438) | Component | Boundary test at size 1 and size 200 on case RW-2026-000401; only rwb_source_data.interaction is read |\n| TC-E1-068-12 | AC9, X6 | End to end | Case contract mock does not answer inside 2 s |\n| TC-E1-068-13 | AC10, X8 | End to end | PII access-log write fails while an unmasked summary would be returned |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09754",
+   "item": "CG-ALL-2326",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for this read's unavailable text; the story cites it once it exists; MSG-GEN-006 stays as the standard holds it",
+   "note": "No story edit until the business analyst adds the new ID to the standard."
+  },
+  {
+   "ruling": "R-15166",
+   "item": "DOR-RWB-P1-E1068-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Added SCR-03 and SCR-04 Loading, Empty, Error and No access states to section 4 after step 13",
+   "note": "Loading visual form is not in the source documents and is stated as such."
+  },
+  {
+   "ruling": "R-15167",
+   "item": "DOR-RWB-P1-E1068-APP-11",
+   "status": "Not applied",
+   "section": "3, 12.7",
+   "target": "",
+   "change": "",
+   "note": "Personal-data classes of the fields are not in the source documents; writing one would invent a classification."
+  },
+  {
+   "ruling": "R-15168",
+   "item": "DOR-RWB-P1-E1068-APP-12",
+   "status": "Cross-document",
+   "section": "12, 12.7, 16, 18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align this story's test list with section 16, including TC-E1-068-10 to TC-E1-068-13",
+   "note": "Contract, boundary, AC9 and AC10 tests added to section 16; the RTM list follows the story."
+  },
+  {
+   "ruling": "R-15169",
+   "item": "DOR-RWB-P1-E1068-APP-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Build and contract dependencies are named in the header; RWB-P1-E1066-APP is the sequencing condition in Ready to start."
+  },
+  {
+   "ruling": "R-15170",
+   "item": "DOR-RWB-P1-E1068-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Recorded open decisions DL10, DL11 and DL26 with their assumptions in section 14",
+   "note": "Decisions stay open; assumptions are confirmed by the directive of 26 November 2026."
+  },
+  {
+   "ruling": "R-15171",
+   "item": "DOR-RWB-P1-E1068-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC9 and AC10 in section 7 with test cases TC-E1-068-12 and TC-E1-068-13; X6 and X8 now cite them",
+   "note": "X6 and X8 are now covered by their own criteria."
+  },
+  {
+   "ruling": "R-15172",
+   "item": "DOR-RWB-P1-E1068-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Confirm the meaning of MSG-P4-001 as the standard holds it; MSG-GEN-006 follows CG-ALL-2326",
+   "note": "Story text is unchanged; the meanings of these message IDs are set by the standard."
+  },
+  {
+   "ruling": "R-22091",
+   "item": "GAP-0584",
+   "status": "Cross-document",
+   "section": "3, 13",
+   "target": "FSD P1 v3 A2.15 and TSD P1 v3 T3.6",
+   "change": "Align masking: rwb-access is the unmasking authority; data_product_access is the access catalogue; P1 holds no masking_rule row",
+   "note": "Story names rwb-access as the sole masking answer; FSD and TSD follow in their next versions."
+  },
+  {
+   "ruling": "R-22258",
+   "item": "GAP-1612",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "FSD P7 functional specification",
+   "change": "Re-issue without FEAT-ILG-01 to FEAT-ILG-10 and A2.26 to A2.35; keep REQ-ILG-001 to REQ-ILG-014 traced to CAP-P1-012",
+   "note": "Story names rwb-source-data as the sole ledger owner; the P7 re-issue belongs to the solution architect."
+  }
+ ]
+}

@@ -1,0 +1,56 @@
+--- RWB S8 E7008 CON Review an override - contract v1.md
++++ RWB S8 E7008 CON Review an override - contract v2.md
+@@ -30,2 +30,4 @@
+ 
++**Change log.** D-RCV-60, 26 November 2026: fixes from the deterministic build-readiness checks (X20 RWB-S8-E7008-CON). Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
++
+ ### 1. Story
+@@ -47,3 +49,3 @@
+ - Ownership is taken from the context pack and the Ownership Map only: `deviation` is S8's, `recovery_case` and `timer` are P3's, `decision_log_entry` and `rule_row` are P7's, every `v_ace_*` view is P1's, `document` is P5's, `notice` is P6's and `payment` is P8's. This document never declares another service's table or operation as its own.
+-- The two operations are published: TSD S8 T-A.1 gives API-S8-001 `POST /cases/{caseId}/deviations` and API-S8-002 `PATCH /deviations/{deviationId}` with their access and idempotency rules, T-A.2 gives the request and answer elements with the error set 401, 403, 404, 409, 422 and 503, and the API Specification v4 publishes `Deviation`, `DeviationRequest` and `DeviationOutcome`. The review branch is declared inside API-S8-002 and needs no new path.
++- The two operations are published: TSD S8 T-A.1 gives API-S8-001 `POST /cases/{caseId}/deviations` and API-S8-002 `PATCH /deviations/{deviationId}` with their access and idempotency rules, T-A.2 gives the request and answer elements with the error set 401, 403, 404, 409, 422 and 503, and the API Specification v5 publishes `Deviation`, `DeviationRequest` and `DeviationOutcome`. The review branch is declared inside API-S8-002 and needs no new path.
+ - The rwb-decision package row is published with its fake, so the consumed row names a real owner document; it is not in this story's contract-dependency row, which is None, and the absence is recorded (GAP-3067; ASM-5204).
+@@ -113,3 +115,3 @@
+     Given the element section of the baseline
+-    When it is compared with TSD S8 T3.0, T3.1, T3.2 and T-A.2, and with the API Specification v4
++    When it is compared with TSD S8 T3.0, T3.1, T3.2 and T-A.2, and with the API Specification v5
+     Then the Deviation element declares the ten columns of DF-CAS-036 to DF-CAS-045: id, caseId, deviationCode, raisedAt, raisedBy, pausedState, handlerUserId, contactStop, clearedAt and outcome
+@@ -117,3 +119,3 @@
+     Then the lists are LOV-DEVIATION X1 to X7, LOV-RAISED-BY SCREENING_AGENT, RULE, OFFICER and CUSTOMER_CONTACT, and LOV-DEV-OUTCOME RETURNED, RE_ROUTED and CASE_ENDED, copied from TSD S8 T3.2 and published unchanged
+-    Then the DeviationOutcome request declares outcome over LOV-DEV-OUTCOME and the note string of the API Specification v4, and the note is declared as the field that carries the forum's reason
++    Then the DeviationOutcome request declares outcome over LOV-DEV-OUTCOME and the note string of the API Specification v5, and the note is declared as the field that carries the forum's reason
+     Then the document declares no property, field ID or enumeration for the reason, no override entity, no override property and no second outcome set, and the reason's name and value format carry the placeholder Not specified in the source documents (GAP-3067; ASM-5202, ASM-5203)
+@@ -172,6 +174,6 @@
+ | BR2 | The review record is declared as an element written before the answer, through the local library on the shared topic; a failed write changes nothing | DP-03; TSD S8 T2; legacy AC1 and AC2 |
+-| BR3 | No event of this step is declared: EV-06 and EV-07 are the raise and clearance stories' and the outbox library of DP-09 is recorded as an absent H row | ASM-5206; Event and Messaging Design v4; TSD S8 T5.3 |
++| BR3 | No event of this step is declared: EV-06 and EV-07 are the raise and clearance stories' and the outbox library of DP-09 is recorded as an absent H row | ASM-5206; Event and Messaging Design v5; TSD S8 T5.3 |
+ | BR4 | The package is rwb-decision's: the contract declares the package read as consumed and declares no rule row, no threshold and no rule ID set as a property | ASM-5204; TSD S8 T4 |
+ | BR5 | The override is the open deviation record: the baseline declares no override entity, no override path, no override column and no second outcome set | ASM-5202; FSD S8 A2.17.3.2; TSD S8 T3.1 |
+-| BR6 | The reason rides the `note` of the request and is recorded in the decision record; the document declares no reason property, field ID or list | ASM-5203; API Specification v4 `DeviationOutcome` |
++| BR6 | The reason rides the `note` of the request and is recorded in the decision record; the document declares no reason property, field ID or list | ASM-5203; API Specification v5 `DeviationOutcome` |
+ | BR7 | The review records and does not clear: the document declares no `cleared_at` property, no contact-stop write, no timer property and no clock resume | ASM-5205; FSD S8 A2.6, A2.17.2 |
+@@ -231,3 +233,3 @@
+ 
+-The field-level types, lengths and required flags of the declared elements are those of the API Specification v4 and TSD S8 T3.1; this story fixes the element names, the required flags of AC2 and the optionality rule of BR11. **No new table, no new column and no migration** is declared by this story.
++The field-level types, lengths and required flags of the declared elements are those of the API Specification v5 and TSD S8 T3.1; this story fixes the element names, the required flags of AC2 and the optionality rule of BR11. **No new table, no new column and no migration** is declared by this story.
+ 
+@@ -244,3 +246,3 @@
+ 
+-API-S8-002 answers 400, 401, 403 with MSG-P4-002, 404 for a deviation that is not on the case, 409 for a deviation that is not open at `DEV_WITH_OWNER`, 422 with MSG-GEN-001 for a missing or unlisted outcome, and 503, each with the error envelope and one message ID of section 14. The paths, the operation IDs, the element names, the rights and the error codes are published in TSD S8 T-A.1 and T-A.2 and the API Specification v4; the review branch, the meaning of `note` and the fact that no deviation-list read is published carry the placeholder (GAP-3067; ASM-5202, ASM-5203, ASM-5206). The outcome branch of the same operation, the screening and the breach path belong to other stories of the module and none of them is declared here.
++API-S8-002 answers 400, 401, 403 with MSG-P4-002, 404 for a deviation that is not on the case, 409 for a deviation that is not open at `DEV_WITH_OWNER`, 422 with MSG-GEN-001 for a missing or unlisted outcome, and 503, each with the error envelope and one message ID of section 14. The paths, the operation IDs, the element names, the rights and the error codes are published in TSD S8 T-A.1 and T-A.2 and the API Specification v5; the review branch, the meaning of `note` and the fact that no deviation-list read is published carry the placeholder (GAP-3067; ASM-5202, ASM-5203, ASM-5206). The outcome branch of the same operation, the screening and the breach path belong to other stories of the module and none of them is declared here.
+ 
+@@ -256,3 +258,3 @@
+ 
+-None. The service owns the topic `rwb.deviation.events.v1` and its event set carries EV-06 `DeviationRaised` (`caseId`, `deviationCode`, `raisedBy`, consumed by Timers and Communications for the contact stop) and EV-07 `DeviationCleared` (`caseId`, `deviationCode`, `outcome`, consumed by Timers and Communications), both belonging to the raise and clearance steps of the stage (Event and Messaging Design v4; TSD S8 T5.3). A review sets the outcome and the state the rule gives, lifts no stop and closes no case, so this baseline declares no event, no producer group and no outbox row, and the absence test of AC7 fails a build that adds one. The outbox that relays the events is the platform library object of DP-09, which the pattern set for this key does not carry (ASM-5206).
++None. The service owns the topic `rwb.deviation.events.v1` and its event set carries EV-06 `DeviationRaised` (`caseId`, `deviationCode`, `raisedBy`, consumed by Timers and Communications for the contact stop) and EV-07 `DeviationCleared` (`caseId`, `deviationCode`, `outcome`, consumed by Timers and Communications), both belonging to the raise and clearance steps of the stage (Event and Messaging Design v5; TSD S8 T5.3). A review sets the outcome and the state the rule gives, lifts no stop and closes no case, so this baseline declares no event, no producer group and no outbox row, and the absence test of AC7 fails a build that adds one. The outbox that relays the events is the platform library object of DP-09, which the pattern set for this key does not carry (ASM-5206).
+ 
+@@ -368,3 +370,3 @@
+ 
+-The four legacy cases are those of RWB-E7-008 in their legacy order, carried as the contract half: their Covers column names the criterion of this story that fixes the surface each one exercises, their Data keeps the legacy intent, and the business outcome of each is proved by RWB-S8-E7008-APP. The legacy level maps to `Contract` here because the artefact under test is the contract. The five cases `TC-S8-E7008-CON-01` to `-05` are new. The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v7.xlsx, tab Story test cases, under the same ID; no `-ITG` copy is written by this story, and the cross-service journey belongs to the wave 4 harness.
++The four legacy cases are those of RWB-E7-008 in their legacy order, carried as the contract half: their Covers column names the criterion of this story that fixes the surface each one exercises, their Data keeps the legacy intent, and the business outcome of each is proved by RWB-S8-E7008-APP. The legacy level maps to `Contract` here because the artefact under test is the contract. The five cases `TC-S8-E7008-CON-01` to `-05` are new. The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same ID; no `-ITG` copy is written by this story, and the cross-service journey belongs to the wave 4 harness.
+ 
+@@ -396,3 +398,3 @@
+ | Legacy criteria | AC1 and AC2 of the legacy story, owned word for word by RWB-S8-E7008-APP; this baseline copies none of them |
+-| Source text | Legacy RWB-E7-008; FSD S8 Deviation handling v4 A2.17, A2.17.2, A2.17.3 and A2.17.4; TSD S8 Deviation handling v3 T0.2, T2, T3.0, T3.1, T3.2, T4, T5.3, T6.1 and T-A; API Specification v4 elements `Deviation` and `DeviationOutcome`; Business Rules and Routing Logic v4 rows R-DEV-09, R-DEV-10, R-DEV-11 and R-DEV-22 |
++| Source text | Legacy RWB-E7-008; FSD S8 Deviation handling v4 A2.17, A2.17.2, A2.17.3 and A2.17.4; TSD S8 Deviation handling v3 T0.2, T2, T3.0, T3.1, T3.2, T4, T5.3, T6.1 and T-A; API Specification v5 elements `Deviation` and `DeviationOutcome`; Business Rules and Routing Logic v4 rows R-DEV-09, R-DEV-10, R-DEV-11 and R-DEV-22 |
+ | Test cases | The four legacy cases as the contract half, and the five new contract cases TC-S8-E7008-CON-01 to -05 |

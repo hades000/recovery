@@ -1,0 +1,413 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.1.0, 27 November 2026, D-RCV-60 P1 developer readiness (RD-P1 register), targeted edits
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-access (Access and authority)"
+  version: 5.1.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-access (Access and authority, module P4, service
+    wave 1) under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16
+    November 2026) by the D-RCV-60 microservice realignment.
+    This document holds 4 operations under REST base /api/recovery/access/v1; schema rwb_access; topic
+    rwb.access.events.v1; Temporal task queue rwb-access in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: GET /admin/lists/{listCode} (now rwb-case, owner P3); POST
+    /admin/reference-loads (now rwb-case, owner P3); POST /admin/reference-loads/{loadId}/approve (now rwb-case,
+    owner P3); POST /admin/reference-loads/{loadId}/verify (now rwb-case, owner P3); POST
+    /admin/reference-loads/{loadId}/rollback (now rwb-case, owner P3).
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-access.asyncapi.yaml.
+servers:
+- url: "/api/recovery/access/v1"
+  description: "Relative to the rwb-access service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Work"
+- name: "Administration"
+x-service:
+  code: "P4"
+  service: "rwb-access"
+  name: "Access and authority"
+  wave: 1
+  schema: "rwb_access"
+  rest-base: "/api/recovery/access/v1"
+  topic: "rwb.access.events.v1"
+  task-queue: "rwb-access"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-access.asyncapi.yaml"
+  operations: 4
+paths:
+  /admin/roles:
+    get:
+      tags:
+      - Administration
+      summary: List roles with permissions and scope
+      operationId: getAdminRoles
+      x-module: P4
+      x-owner: "P4"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/access-log:
+    get:
+      tags:
+      - Administration
+      summary: Search the access log
+      operationId: getAdminAccessLog
+      x-module: P4
+      x-owner: "P4"
+      x-capability:
+        area: Platform administration
+        right: R
+      x-first-release: E1
+      parameters:
+      - name: user
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: event
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessLogPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /me/session:
+    get:
+      tags:
+      - Work
+      summary: 'Read the caller''s resolved session: roles, scope, matrix and conflict versions, partner and break-glass state'
+      operationId: getMeSession
+      x-module: P4
+      x-owner: "P4"
+      x-capability:
+        area: None
+        right: R
+      x-first-release: E1
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '401':
+          $ref: '#/components/responses/E401'
+        '503':
+          $ref: '#/components/responses/E503'
+  /admin/break-glass-grants:
+    post:
+      tags:
+      - Administration
+      summary: Activate a break-glass grant approved in the bank IAM for an open incident, area, right, scope and reason
+      operationId: postAdminBreakGlassGrants
+      x-module: P4
+      x-owner: "P4"
+      x-capability:
+        area: Platform administration
+        right: C
+      x-first-release: E1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BreakGlassActivation'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BreakGlassGrant'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Role:
+      type: object
+      description: A Workbench role, held as data.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the role
+          readOnly: true
+        roleCode:
+          type: string
+          maxLength: 20
+          description: Role code, for example RW-CASEOWN
+        roleName:
+          type: string
+          maxLength: 80
+          description: Role name
+        roleClass:
+          type: string
+          maxLength: 15
+          enum:
+          - BANK_USER
+          - PARTNER_USER
+          - NON_HUMAN_ACTOR
+          description: Bank user, partner user, non-human actor
+        defaultScope:
+          type: string
+          maxLength: 8
+          enum:
+          - OWN
+          - TEAM
+          - REGION
+          - ALL
+          description: Own, team, region, all
+        entraGroup:
+          type: string
+          maxLength: 120
+          description: Entra ID group mapped to the role, read from v_ace_iam_group; read only
+          readOnly: true
+      required:
+      - id
+      - roleCode
+      - roleName
+      - roleClass
+      - defaultScope
+    AccessLogEntry:
+      type: object
+      properties:
+        at:
+          type: string
+        user:
+          type: string
+        event:
+          type: string
+        capability:
+          type: string
+        result:
+          type: string
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI of the error-map row
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          description: Request path and trace ID, stamped by the owning service
+        messageCode:
+          type: string
+          pattern: '^MSG-[A-Z0-9]+(-[A-Z0-9]+)*-\d{3}$'
+        messageTh:
+          type: string
+          description: Thai text of the message code
+        field:
+          type: string
+          description: JSON Pointer or parameter or header name of the first failing input
+        errors:
+          type: array
+          description: Present only on 400 or 422 when more than one input fails
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              messageCode:
+                type: string
+                pattern: '^MSG-[A-Z0-9]+(-[A-Z0-9]+)*-\d{3}$'
+              detail:
+                type: string
+            required: [field, messageCode, detail]
+        traceId:
+          type: string
+          pattern: '^[0-9a-fA-F]{32}$'
+          description: 32-hex W3C trace ID of the request
+      required: [type, title, status, messageCode, traceId]
+    Session:
+      type: object
+      properties:
+        userRef:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionRole'
+        matrixVersion:
+          type: string
+        conflictVersion:
+          type: string
+        scopeLine:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        partnerId:
+          type: string
+          format: uuid
+        breakGlass:
+          $ref: '#/components/schemas/BreakGlassState'
+    SessionRole:
+      type: object
+      properties:
+        roleCode:
+          type: string
+        roleName:
+          type: string
+        defaultScope:
+          type: string
+    BreakGlassState:
+      type: object
+      properties:
+        active:
+          type: boolean
+        endsAt:
+          type: string
+          format: date-time
+    BreakGlassActivation:
+      type: object
+      properties:
+        incidentReference:
+          type: string
+        iamRequestId:
+          type: string
+        capabilityArea:
+          type: string
+        right:
+          type: string
+        scope:
+          type: string
+        reason:
+          type: string
+    BreakGlassGrant:
+      type: object
+      properties:
+        grantId:
+          type: string
+          format: uuid
+        incidentReference:
+          type: string
+        capabilityArea:
+          type: string
+        right:
+          type: string
+        scope:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+    AccessLogPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessLogEntry'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer

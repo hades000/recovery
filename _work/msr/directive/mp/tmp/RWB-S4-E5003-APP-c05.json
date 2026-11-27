@@ -1,0 +1,67 @@
+{
+ "edits": [
+  {
+   "old": "    Then the change is refused with Not specified in the source documents (NEWAC-RWB-S4-E5003-APP-AC12), nothing is written and no timer starts",
+   "new": "    Then the change is refused with Not specified in the source documents (NEWAC-RWB-S4-E5003-APP-AC12), nothing is written and no timer starts\n\n  Scenario: AC10 Rules of section 8 without a legacy criterion (new in this story, from BR1, BR2, BR4, BR5, BR6, BR7 and BR8 of section 8)\n    Given a case in state NOTICE_DISPATCHED with the notice \"NT-2026-000301\" delivered on \"2026-03-16\"\n    When the notice period is started\n    Then the period is a durable timer of the litigation stage, its length is read from the versioned reference row and its expiry is delivered_at plus that length, never the dispatch date\n    Then the notice stays with rwb-comms and the timer ledger row stays with rwb-case\n    Then the decision record is written before the case moves and a failed write changes nothing\n    Then action_type and status take only the values of LOV-LEGAL-TYPE and LOV-LEGAL-STATUS in force, read with their version\n    Then the service reads no v_ace_* view, no ACE table and no other rwb_* schema\n    Then the row, the decision record, the timer state, the logs and every call carry no borrower or guarantor data\n    Then a repeat of the same signal writes once and is counted\n\n  Scenario: AC11 Error answers of the provided operations (new in this story, from the error answers of section 7 and exception X2)\n    Given a call to API-S4-001, API-S4-002 or API-S4-003 without a valid credential\n    Given a call from a role without the Litigation right\n    Given the notice \"NT-2026-000301\" that belongs to another case than the action\n    When each call is made\n    Then the call without a valid credential answers 401 with the platform envelope\n    Then the call from the role without the Litigation right answers 403 with MSG-P4-002 and nothing is written\n    Then the notice read of the other case answers 404 and nothing is written and no timer starts\n\n  Scenario: AC12 Replay of a write with the same idempotency key (new in this story, from BR8 of section 8)\n    Given a case in state NOTICE_DISPATCHED with the notice \"NT-2026-000301\" delivered on \"2026-03-16\"\n    Given the first write of the notice was made with an Idempotency-Key\n    When the same write is replayed with the same Idempotency-Key\n    Then the repeat is counted and writes nothing\n    Then no second decision record, no second proof attach and no second timer is made"
+  },
+  {
+   "old": "AC7 to AC9 are also this story's own, added for the activity, call and state-model cases of sections 12.5, 15 and 9, and carry the same origin tag.",
+   "new": "AC7 to AC12 are also this story's own, added for the activity, call, state-model, rule, error-answer and replay cases of sections 12.5, 15, 9, 8 and 7, and carry the same origin tag."
+  },
+  {
+   "old": "BR15 by AC1 (X6).",
+   "new": "BR15 by AC1 (X6); BR1, BR2 and BR4 to BR8 also by AC10 and TC-E5-003-13; BR8 also by AC12 and TC-E5-003-15."
+  },
+  {
+   "old": "the state, the notice and the timer are unchanged |",
+   "new": "the state, the notice and the timer are unchanged |\n| TC-E5-003-13 | AC10; BR1; BR2; BR4 to BR8 | Component | Notice \"NT-2026-000301\" of case \"RC-2026-000301\" delivered on \"2026-03-16\"; the period length read from the reference row at its version; expiry taken from delivered_at; the grant refuses any ACE or other rwb_* read; the decision record written before the case move; a repeated signal writes once and is counted; no borrower or guarantor data in the row, record, timer state, logs or calls |\n| TC-E5-003-14 | AC11 | Contract | API-S4-001, API-S4-002 and API-S4-003 called without a valid credential, from a role without the Litigation right, and on the notice of another case; answers 401, 403 and 404 with the platform envelope and nothing written |\n| TC-E5-003-15 | AC12; BR8 | Component | A repeat of the same write with the same Idempotency-Key on the notice \"NT-2026-000301\" of case \"RC-2026-000301\"; one decision record, one proof attach and one timer; the repeat is counted |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-32386",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC5 already exists in section 7 for exception X7 and is tested by TC-E5-003-07; TC-E5-003-05 also covers it. No edit needed."
+  },
+  {
+   "ruling": "R-32387",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC6 already exists in section 7 for exception X11 and is tested by TC-E5-003-09, which covers AC6. No edit needed."
+  },
+  {
+   "ruling": "R-32388",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Added AC10 in section 7 for rules BR1, BR2, BR4 to BR8, with TC-E5-003-13 in section 16 and coverage line updated.",
+   "note": "AC7 number was taken, so the new criterion is AC10 under the next free number; rules mapped in section 8 coverage line."
+  },
+  {
+   "ruling": "R-32389",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC11 in section 7 for 401, 403 and 404 answers of API-S4-001 to 003, with TC-E5-003-14 in section 16.",
+   "note": "AC8 number was taken, so the new criterion is AC11. The 401 and 403 mapping follows the access and credential cases of the story."
+  },
+  {
+   "ruling": "R-32390",
+   "item": "NEWAC-RWB-S4-E5003-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 in section 7 for replay with the same Idempotency-Key, with TC-E5-003-15 in section 16.",
+   "note": "AC9 number was taken, so the new criterion is AC12. Replay behaviour follows BR8."
+  }
+ ]
+}

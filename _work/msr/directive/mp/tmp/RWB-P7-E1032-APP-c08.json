@@ -1,0 +1,36 @@
+{
+ "edits": [
+  {
+   "old": "These nine criteria are new for the `rwb-decision` slice",
+   "new": "These fifteen criteria are new for the `rwb-decision` slice"
+  },
+  {
+   "old": "    Then the text and the file stay in rwb_document behind the masked read of the item",
+   "new": "    Then the text and the file stay in rwb_document behind the masked read of the item\n\n  Scenario: AC14 The record path, the append-only chain, the no-match rule, the fail-closed write and the ledger check hold (new, D-RCV-60)\n    Given a DecisionRecorded fact for document \"DOC-2026-0009981\" of case \"RW-2026-000123\" carries the outcome that rwb-document decided\n    When the listener writes the entry for that fact\n    Then the entry, its chain position and its outbox row commit in one transaction on the DP-03 path and the entry names the rule and the rule version in force\n    Then the entry copies the outcome of rwb-document, and the service applies no pattern, threshold or review rule of its own\n    Then the service writes no row to rwb_document, rwb_case or rwb_access and reads no table of another service\n    Then each entry_hash equals the SHA-256 of the canonical form and no UPDATE or DELETE of an entry succeeds\n    Then a failed append leaves no entry and no chain position, and the fact is redelivered\n    Then the ledger check reports a document of the case with no DOCATT entry in the ingest window as a gap, alerts it, and writes no entry for it\n\n  Scenario: AC15 A read without a credential answers 401 and an unknown entry answers 404 (new, D-RCV-60)\n    Given the entries of AC1 exist for case \"RW-2026-000123\"\n    When GET /api/recovery/decision/v1/decision-log for case \"RW-2026-000123\" is called without a credential\n    Then the answer is 401 and no row is returned\n    When GET /api/recovery/decision/v1/decision-log/{entryId} is called with an entry ID that is not in rwb_decision\n    Then the answer is 404 and no row is returned"
+  },
+  {
+   "old": "| TC-E1-032-19 | AC9, section 12.7 | Contract | Boundary: no write to rwb_document, rwb_case or rwb_access; no OCR text, file or account number in any entry, fact, outbox row or log line; only the tables of section 12.7 written |",
+   "new": "| TC-E1-032-19 | AC9, section 12.7 | Contract | Boundary: no write to rwb_document, rwb_case or rwb_access; no OCR text, file or account number in any entry, fact, outbox row or log line; only the tables of section 12.7 written |\n| TC-E1-032-20 | AC14, BR2, BR5, BR7, BR9, BR10, BR12 | Contract | DecisionRecorded fact of `RW-2026-000123` with its rwb-document outcome; entry, chain position and outbox row in one transaction; a failed append leaves nothing; no write to rwb_document, rwb_case or rwb_access; ledger check reports a document with no entry as a gap |\n| TC-E1-032-21 | AC15 | Component | A read without a credential answers 401; a read of an entry ID not in rwb_decision answers 404; no row returned |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31450",
+   "item": "NEWAC-RWB-P7-E1032-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 covering BR2, BR5, BR7, BR9, BR10, BR12 and test case TC-E1-032-20 (Contract); count of criteria updated to fifteen."
+  },
+  {
+   "ruling": "R-31451",
+   "item": "NEWAC-RWB-P7-E1032-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for 401 on the decision-log read without credential and 404 on an unknown entry; test case TC-E1-032-21 (Component)."
+  }
+ ]
+}

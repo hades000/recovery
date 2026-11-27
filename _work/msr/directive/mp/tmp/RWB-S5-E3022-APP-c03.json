@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "| X8 | A build, a statement or a test reaches `v_ace_pod`, `v_ace_contact`, the `notice` table or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | Section 17, BR3, BR5 |",
+   "new": "| X8 | A build, a statement or a test reaches `v_ace_pod`, `v_ace_contact`, the `notice` table or another service's schema | The grant refuses the statement and the boundary test fails the build; nothing is released | None (pipeline log) | AC5, Section 17, BR3, BR5 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 No ACE read and no foreign statement (X8, DP-05; added for X8, not legacy)\n    Given a build contains a statement that reads `v_ace_pod`, `v_ace_contact`, the `notice` table or a table of another service's schema\n    When the boundary test runs\n    Then the grant refuses the statement, the build fails and nothing is released"
+  },
+  {
+   "old": "| R-DIS-04 | Asset disposal |",
+   "new": "| R-DIS-04 (BR10) | Asset disposal |"
+  },
+  {
+   "old": "| R-DIS-05 | Asset disposal |",
+   "new": "| R-DIS-05 (BR11) | Asset disposal |"
+  },
+  {
+   "old": "| BR9 | No event is published or consumed by this step: EV-22 `AssetTakenOn` belongs to the take-on stories, and a build that adds a topic, a consumer or a Schedule fails the absence test | Architecture v5 slide 19; `GAP-2853`; `ASM-4723` |",
+   "new": "| BR9 | No event is published or consumed by this step: EV-22 `AssetTakenOn` belongs to the take-on stories, and a build that adds a topic, a consumer or a Schedule fails the absence test | Architecture v5 slide 19; `GAP-2853`; `ASM-4723` |\n\nCoverage of the rules, by criterion or test case: BR1 AC1 and TC-E3-022-08; BR2 AC1, AC4, TC-E3-022-04 and TC-E3-022-06; BR3 AC5 and TC-E3-022-08; BR4 AC2 and AC3; BR5 AC5 and TC-E3-022-08; BR6 TC-E3-022-10; BR7 AC1, AC3 and TC-E3-022-11; BR8 TC-E3-022-12; BR9 TC-E3-022-13; R-DIS-04 (BR10) AC2; R-DIS-05 (BR11) AC3."
+  },
+  {
+   "old": "**No new table, no new column and no migration**: this story writes no business table at all, and `decision_record`, `idempotency_key` and `outbox_event` are platform library objects created in `rwb_asset` by the library's own migration (`GAP-2852`; `ASM-4720`).",
+   "new": "**No new table, no new column and no migration**: this story writes no business table at all, and `decision_record`, `idempotency_key` and `outbox_event` are platform library objects created in `rwb_asset` by the library's own migration (`GAP-2852`; `ASM-4720`). The notice reference (`noticeId`, barcode, delivery status and callback date) is carried on the decision record and on the stage answer; whether any notice reference is persisted in `rwb_asset` is decided in step D1 (`GAP-2852`)."
+  },
+  {
+   "old": "**Database and migrations.** No Flyway file. This story writes no business table; the decision record and the idempotency key are library objects created in `rwb_asset` by the library's migration (DP-03).",
+   "new": "**Database and migrations.** No Flyway file. This story writes no business table; the decision record and the idempotency key are library objects created in `rwb_asset` by the library's migration (DP-03). Schema ownership: `rwb_asset` is this service's; `rwb_case` is owned by rwb-case (recovery_case and task, P3) and `rwb_comms` by rwb-comms (notice, P6); the owner of `rwb_decision` is not named in the source documents, and this story writes none of the three."
+  },
+  {
+   "old": "- No parameter is named in the sources for the step itself; the 2 s budget and the single hop are the platform rule of ADR-020.",
+   "new": "- Parameters: the two-working-day target and the hold reasons, read from the DISPOSAL package and reference data under the reference-data contract of DP-06 and DP-07; the 2 s budget and the single hop are the platform rule of ADR-020. Parameter keys in parameter-catalog.csv: Not specified in the source documents (DOR-RWB-S5-E3022-APP-20)."
+  },
+  {
+   "old": "because this step publishes and consumes nothing (`ASM-4723`).",
+   "new": "because this step publishes and consumes nothing (`ASM-4723`). The two legacy REST operations are not owned by this key: API-S5-002 (GET /api/recovery/v1/assets/{assetId}) is declared by RWB-S5-E3019-CON and API-S5-003 (POST /api/recovery/v1/assets/{assetId}/valuations) is assigned to rwb-valuation (ASM-A6-api-6), so this key owns no notice operation; the five consumed rows stay class C dependencies, and step D1 decides whether they become C dependencies of this key (`GAP-2853`)."
+  },
+  {
+   "old": "| TC-E3-022-08 | Boundary (§12.7, ASM-3438) | Component | The tables of §12.7 with only `decision_record` and `idempotency_key` written in `rwb_asset`; no read of the not-owned objects of §12.7 and no `v_ace_*` view |",
+   "new": "| TC-E3-022-08 | Boundary (§12.7, ASM-3438) | Component | The tables of §12.7 with only `decision_record` and `idempotency_key` written in `rwb_asset`; no read of the not-owned objects of §12.7 and no `v_ace_*` view |\n| TC-E3-022-09 | Boundary (AC5, X8, DP-05) | Component | A build or statement that reads `v_ace_pod`, `v_ace_contact`, the `notice` table or another service's schema fails the boundary test and nothing is released |\n| TC-E3-022-10 | Reference data (BR6) | Component | The step reads `LOV-NOTICE`, `LOV-DELIVERY`, `LOV-SENT-TYPE` and the rule package at their version in force and holds no constant of them |\n| TC-E3-022-11 | Idempotency (BR7, X7) | Component | A repeated proof row or `Idempotency-Key` writes one decision record, moves once and requests one task |\n| TC-E3-022-12 | Privacy (BR8) | Component | No person name, address, contact value or identity number enters `rwb_asset`, the decision record, a log or a workflow input |\n| TC-E3-022-13 | Absence (BR9) | Component | The build adds no event topic, consumer or Schedule for this step |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-20158",
+   "item": "DOR-RWB-S5-E3022-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "§13 now names the parameters and the DP-06 and DP-07 reference-data contract; parameter-catalog keys are not in the sources and are marked as such."
+  },
+  {
+   "ruling": "R-20159",
+   "item": "DOR-RWB-S5-E3022-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "§13 states rwb_asset ownership and the owners of rwb_case and rwb_comms; the owner of rwb_decision is not in the sources and is marked as such."
+  },
+  {
+   "ruling": "R-20160",
+   "item": "DOR-RWB-S5-E3022-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 for X8 with TC-E3-022-09; X8 in §5 now cites AC5. §7 now holds five owned criteria."
+  },
+  {
+   "ruling": "R-20161",
+   "item": "DOR-RWB-S5-E3022-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "",
+   "note": "R-DIS-04 is BR10 and R-DIS-05 is BR11; coverage line maps all 11 rules; TC-E3-022-10 to 13 added for uncovered rules."
+  },
+  {
+   "ruling": "R-20162",
+   "item": "DOR-RWB-S5-E3022-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD, the service identity named in §10, to the roles document, or confirm its removal from §10.",
+   "note": "SY-DATALOAD is missing from Users Roles and Permissions v5; no story edit is required for this item."
+  },
+  {
+   "ruling": "R-20163",
+   "item": "DOR-RWB-S5-E3022-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add decision_record as the platform library entity created in rwb_asset, or confirm it is outside both documents.",
+   "note": "Story criteria read no ACE view. P3 legacy decision-log wording is kept word for word by the change log, so it was not changed."
+  },
+  {
+   "ruling": "R-20164",
+   "item": "DOR-RWB-S5-E3022-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 must match Error and Message Standard v4, but that standard's wording is not in the source documents (DOR-RWB-S5-E3022-APP-9)."
+  },
+  {
+   "ruling": "R-23472",
+   "item": "GAP-1767",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Architecture v5 (connection matrix, slide 13)",
+   "change": "Draw the S5 cells to P6 (notice request, proof of delivery) and to P5 (photographs, inspection and transfer documents on rwb-document).",
+   "note": "This story requests the notice on rwb-comms and reads the proof on the rwb-source-data read (BR3); it stores no documents."
+  },
+  {
+   "ruling": "R-23476",
+   "item": "GAP-2853",
+   "status": "Resolved",
+   "section": "12.1, 12.2, 13",
+   "target": "",
+   "change": "",
+   "note": "§13 records None for this key, names API-S5-002 and API-S5-003 as other keys' and services', keeps the five C rows, and publishes no event. The §12 table text was not in the chunk."
+  },
+  {
+   "ruling": "R-23482",
+   "item": "GAP-2852",
+   "status": "Resolved",
+   "section": "11, 13",
+   "target": "",
+   "change": "",
+   "note": "§11 carries the notice reference on the decision record and the answer; step D1 decides whether it is persisted in rwb_asset. The failed task and two moves stay on the rwb-case answer."
+  }
+ ]
+}

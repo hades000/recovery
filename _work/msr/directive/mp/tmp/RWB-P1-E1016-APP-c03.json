@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "Thai text for each message follows decision DL10. MSG-P4-001, MSG-P4-002, MSG-P4-003 and MSG-P7-003 are raised by the rwb-access guard library; this service passes them on unchanged and adds no message of its own.",
+   "new": "Thai text for each message follows decision DL10. MSG-P4-001, MSG-P4-002, MSG-P4-003 and MSG-P7-003 are raised by the rwb-access guard library; this service passes them on unchanged and adds no message of its own. Open decisions: DL10 (assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863) and DL26 (assumptions ASM-0247, ASM-0264, ASM-0275, ASM-0355) are still open; each assumption applies until its decision is made."
+  },
+  {
+   "old": "| X9 | The authorise call does not answer inside 2 s, or answers 5xx | The read is refused with 503 and no field is returned; no answer is taken from a stale cache | MSG-P4-002 from the guard library; no body from this service | Section 12.2 |",
+   "new": "| X9 | The authorise call does not answer inside 2 s, or answers 5xx | The read is refused with 503 and no field is returned; no answer is taken from a stale cache | MSG-P4-002 from the guard library; no body from this service | AC12 |"
+  },
+  {
+   "old": "| X10 | The `FieldMasker` interface cannot be reached | Every personal field is returned masked and the read itself succeeds | None | Section 12.2 |",
+   "new": "| X10 | The `FieldMasker` interface cannot be reached | Every personal field is returned masked and the read itself succeeds | None | AC13 |"
+  },
+  {
+   "old": "    Then the version in force stays in use",
+   "new": "    Then the version in force stays in use\n\n  Scenario: AC12 The authorise call does not answer in time\n    Given the rwb-access authorise contract mock does not answer within 2 s\n    Given user \"u-audit-01\" holds read-only role RW-AUDIT, which reads DP02\n    When the user calls GET /data-products/DP02/records?caseId=RW-2026-000102\n    Then the system refuses the call with status 503 and MSG-P4-002 from the guard library\n    Then no personal field is returned\n    Then no answer is taken from a stale cache\n\n  Scenario: AC13 The FieldMasker interface cannot be reached\n    Given the rwb-access FieldMasker contract mock is unreachable\n    Given the rwb-access authorise contract mock returns granted with role RW-AUDIT and the right Case record R\n    Given user \"u-audit-01\" holds read-only role RW-AUDIT, which reads DP02\n    When user \"u-audit-01\" calls GET /data-products/DP02/records?caseId=RW-2026-000102\n    Then every personal field is returned masked\n    Then the read itself succeeds"
+  },
+  {
+   "old": "The seed rows that AC1 and AC3 depend on are only those of section 11: the rest of the `data_product_access` seed is Not specified in the source documents (GAP-0482; ASM-0674),",
+   "new": "The six seed rows the sources give under version DPA-2026.11 are RW-CASEOWN and RW-AUDIT on DP02, and RW-PHONECOL on DP01, DP02, DP03 and DP05, with no row for DP06; they are the only rows seeded here. The rest of the `data_product_access` seed is Not specified in the source documents (GAP-0482; ASM-0674), no row is invented for it, and a later approved load through the rwb-case reference-data contract adds it, with the data steward closing the gap before the version is relied on outside SIT,"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15033",
+   "item": "DOR-RWB-P1-E1016-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Open decisions DL10 and DL26 and their four assumptions each listed in the section 14 note.",
+   "note": "Section 14 now names DL10 and DL26 as open with their assumptions ASM-2250 to ASM-0355; each assumption applies until decided."
+  },
+  {
+   "ruling": "R-15034",
+   "item": "DOR-RWB-P1-E1016-APP-3",
+   "status": "Not applied",
+   "section": "5, 7",
+   "target": "",
+   "change": "Added AC12 (X9) and AC13 (X10) in section 7 and set their Covered by cells in section 5 to AC12 and AC13.",
+   "note": "Section 16 is not in this chunk, so the TC rows for AC12 and AC13 cannot take a verified next free TC number yet."
+  },
+  {
+   "ruling": "R-15035",
+   "item": "DOR-RWB-P1-E1016-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add v_data_product_catalog, v_data_dictionary and recovery_svc as named read model and login entries, or confirm they sit outside the LDM as read-model and login names.",
+   "note": "Three P2 names in section 11 are not fields or entities in LDM v9 or Data Classification v5; the story needs no change."
+  },
+  {
+   "ruling": "R-15036",
+   "item": "DOR-RWB-P1-E1016-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The Error and Message Standard v4 text for MSG-P1-003 and the meaning of MSG-P4-001 are not in this chunk, so the section 14 wording cannot be aligned without inventing it."
+  },
+  {
+   "ruling": "R-21841",
+   "item": "GAP-0557",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-P1-E1001-APP story",
+   "change": "Adopt the five assumptions: keep V0001 as built; create P1's 13 own tables in rwb_source_data from its split migration; name schema and login rwb_source_data; leave the four extension tables to RWB-P1-E1069-DB; keep the catalog read model with no REST operation added.",
+   "note": "This story already states these boundaries; the sequence and split-migration mechanics belong to the RWB-P1-E1001-APP story."
+  },
+  {
+   "ruling": "R-21961",
+   "item": "GAP-0571",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "rwb-source-data service API document (OpenAPI 3.1 fragment)",
+   "change": "Publish GET /api/recovery/source-data/v1/entry-candidates with required businessDate and threshold, optional page and size, response EntryCandidatePage, and statuses 400, 401, 403, 409, 422 and 503.",
+   "note": "No entry-candidate operation exists in the story text or the source documents; the OpenAPI fragment belongs in the service API document."
+  },
+  {
+   "ruling": "R-21962",
+   "item": "GAP-0481",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 already reads masking_rule only through the FieldMasker interface and the target reading keeps P1 to data_product_access, so no edit was needed."
+  },
+  {
+   "ruling": "R-21963",
+   "item": "GAP-0341",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC10 already reads the retention class through P5's contract, roles and masking through P4, and the legacy AC2 is owned by RWB-P1-E1016-DB."
+  },
+  {
+   "ruling": "R-21964",
+   "item": "GAP-0482",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Named the six DPA-2026.11 seed rows the sources give and stated the remainder is loaded later through the rwb-case reference-data contract.",
+   "note": "Target reading now lists the six rows from the sources (RW-CASEOWN and RW-AUDIT on DP02; RW-PHONECOL on DP01, DP02, DP03, DP05) and invents no other row."
+  },
+  {
+   "ruling": "R-21965",
+   "item": "GAP-0483",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC4 already delivers the load as rwb-case reference data for data_product_access through this service's handler, with no load endpoint of its own."
+  }
+ ]
+}

@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "**Database.** Two tables of this service are written, `party_ext` and `account_ext`, 1:1 by business key. No table is created for the views, no view row is copied, no foreign key crosses a schema and no `public` table is named in any statement (DP-01, DP-05).",
+   "new": "**Database.** Two tables of this service are written, `party_ext` and `account_ext`, 1:1 by business key. No table is created for the views, no view row is copied, no foreign key crosses a schema and no `public` table is named in any statement (DP-01, DP-05). Schema `rwb_source_data` is owned by rwb-source-data; schema `rwb_case` named in AC6 and in Done when is owned by rwb-case, and this service's login is refused any write to it."
+  },
+  {
+   "old": "| X5 | An ACE view raises an error or the statement exceeds its timeout | 503 with MSG-GEN-006 naming \"ACE database\"; no partial page and nothing cached | MSG-GEN-006 | Section 12.1 |",
+   "new": "| X5 | An ACE view raises an error or the statement exceeds its timeout | 503 with MSG-GEN-006 naming \"ACE database\"; no partial page and nothing cached | MSG-GEN-006 | AC7 |"
+  },
+  {
+   "old": "    Then no case number is issued or formatted and no sequence is drawn by this service",
+   "new": "    Then no case number is issued or formatted and no sequence is drawn by this service\n\n  Scenario: AC7 A view error or a timeout answers 503 with no partial page (new, D-RCV-60)\n    Given the ACE view v_ace_account raises an error for 2026-12-01 or the statement exceeds its 5 s timeout\n    When the case creation job calls GET /api/recovery/source-data/v1/entry-candidates with businessDate 2026-12-01 and threshold 90\n    Then the call is refused with status 503 and MSG-GEN-006 naming \"ACE database\"\n    Then the response holds no partial page and nothing is cached"
+  },
+  {
+   "old": "**Where each rule lives in the target.** BR1 is the single SQL predicate",
+   "new": "**Coverage.** BR2 is covered by AC2 (every exclusion value is read from its owner) and BR6 by AC6 (no case attribute in the response or in the schema).\n\n**Where each rule lives in the target.** BR1 is the single SQL predicate"
+  },
+  {
+   "old": "and the right itself is the screen owner's (GAP-0573).",
+   "new": "and the right itself is the screen owner's (GAP-0573). Each operation is authorised by the rwb-access authorise check (DP-08) on the caller's token and right, under a check code Not specified in the source documents (DOR-RWB-P1-E1018-APP-6). The screen's body carries all four party flags on every call, so vulnerable is always written by the caller and never defaulted by P1; a repeat of the same body leaves one row, and a changed body replaces the flags on the same key with a version increment. The confirmation and its audit stay with the screen."
+  },
+  {
+   "old": "8. The response entity, the OpenAPI 3.1 fragment of the three operations and the contract test against the RWB-P3-E1018-CON fake (12.1, 12.8; GAP-0571).",
+   "new": "8. The response entity, the OpenAPI 3.1 fragment of the three operations and the contract test against the RWB-P3-E1018-CON fake (12.1, 12.8; GAP-0571). The read takes businessDate and threshold as required query parameters and page and size as optional ones; the response EntryCandidatePage holds businessDate, threshold, asOf, page, size, total, candidates[] and breaks[], each candidate element named after the field it reads; the status set is 400, 401, 403, 409, 422 and 503."
+  },
+  {
+   "old": "10. Tests for AC1 to AC6 on the ACE view fixture and the fakes of 12.8, and the regression rows of section 16 where the fixture of the owning slice is available.",
+   "new": "10. Tests for AC1 to AC7 on the ACE view fixture, seeded through the W1J01 harness with the ALS batch for 2026-12-01 at COMPLETED, and the fakes of 12.8, and the regression rows of section 16 where the fixture of the owning slice is available."
+  },
+  {
+   "old": "| `EntryCandidate`, `EntryCandidatePage`, `Break` | Entity | The response of 12.1, with an absent flag kept absent and a break naming its key type and view |",
+   "new": "| `EntryCandidate`, `EntryCandidatePage`, `Break` | Entity | The response of 12.1, with an absent flag kept absent and a break carrying keyType ACCOUNT or PERSON, businessKey, viewName and businessDate, listed in the response and counted in the run log; no table holds the breaks |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15077",
+   "item": "DOR-RWB-P1-E1018-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Ownership of rwb_source_data and rwb_case stated in Database paragraph",
+   "note": "Section 13 now states rwb_source_data is owned here and rwb_case belongs to rwb-case, refused as a write target."
+  },
+  {
+   "ruling": "R-15078",
+   "item": "DOR-RWB-P1-E1018-APP-3",
+   "status": "Not applied",
+   "section": "5, 7",
+   "target": "",
+   "change": "X5 re-pointed to new AC7 in section 7",
+   "note": "AC7 added and X5 now covered by it. Its section 16 test row is not in this chunk, so the row was not added."
+  },
+  {
+   "ruling": "R-15079",
+   "item": "DOR-RWB-P1-E1018-APP-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "Coverage line added for BR2 and BR6",
+   "note": "BR2 is covered by AC2 and BR6 by AC6 in the story now. Their test case rows in section 16 are not in this chunk."
+  },
+  {
+   "ruling": "R-15080",
+   "item": "DOR-RWB-P1-E1018-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "rwb-access authorise check (DP-08) named for each operation",
+   "note": "DP-08 check named in section 10. Check code is Not specified in the source documents (DOR-RWB-P1-E1018-APP-6)."
+  },
+  {
+   "ruling": "R-15081",
+   "item": "DOR-RWB-P1-E1018-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "P3 document holding MSG-P1-001 and MSG-GEN-006 (Error and Message Standard v4 comparison)",
+   "change": "Align MSG-P1-001 and MSG-GEN-006 text to Error and Message Standard v4; exact standard text Not specified in the source documents (DOR-RWB-P1-E1018-APP-9)",
+   "note": "Text difference sits in the P3 document, so no edit to section 14 here."
+  },
+  {
+   "ruling": "R-21961",
+   "item": "GAP-0571",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 8 fixes parameters, response fields and status set; OpenAPI fragment published here",
+   "note": "Read, parameters, EntryCandidatePage fields and status set 400/401/403/409/422/503 now fixed in section 13."
+  },
+  {
+   "ruling": "R-21976",
+   "item": "GAP-0343",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Build step 10 seeds ALS batch through W1J01 harness",
+   "note": "Harness seeding added. CaseCreated and DecisionRecorded assertions belong to the rwb-case slice, not claimed here."
+  },
+  {
+   "ruling": "R-21977",
+   "item": "GAP-0575",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Break row fields keyType, businessKey, viewName, businessDate; no table holds breaks",
+   "note": "Break shape and home now in section 13 component row; AC5 already proves the listing."
+  },
+  {
+   "ruling": "R-21978",
+   "item": "GAP-0675",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-SVC-P3 database story and the service catalogue",
+   "change": "Allocate rwb-case login name, grant set (schema rwb_case only) and secret reference; value Not specified in the source documents (GAP-0675)",
+   "note": "Login belongs to rwb-case database story; this story names no rwb-case login."
+  },
+  {
+   "ruling": "R-21979",
+   "item": "GAP-0573",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Writer, right, four-flag body and repeat behaviour stated in section 10",
+   "note": "P1 writes via PUT, screen keeps right and audit, four flags sent per call. Settled in ASM-B-P1-07-E1018-3, proved in AC3."
+  }
+ ]
+}

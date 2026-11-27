@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E2-034-13 | AC3 | Component | Not specified in the source documents (DOR-RWB-P4-E2034-APP-12) |",
+   "new": "| TC-E2-034-13 | AC3 | Component | U-3005 holds RW-AUDIT with scope ALL; MASK-SIT-01 holds unmasked true for DF-INT-011 for RW-AUDIT and no row for DF-INT-022 for RW-AUDIT; ask for case \"RW-2026-000301\" with DF-INT-011 and DF-INT-022: granted, DF-INT-011 clear, DF-INT-022 masked, one AC-READ naming both |"
+  },
+  {
+   "old": "| TC-E2-034-14 | AC9 | Component | Not specified in the source documents (DOR-RWB-P4-E2034-APP-12) |",
+   "new": "| TC-E2-034-14 | AC9 | Component | U-2001 holds RW-CASEOWN and DF-INT-022 is masked under MASK-SIT-01; MASK-SIT-02 is approved on the load path with unmasked true for DF-INT-022 for RW-CASEOWN; the next ask for \"RW-2026-000301\" marks DF-INT-022 clear under MASK-SIT-02 with no deployment, and earlier AC-READ rows still name MASK-SIT-01 |"
+  },
+  {
+   "old": "| TC-E2-034-15 | 12.7 tables (ASM-3438) | Component | Not specified in the source documents (DOR-RWB-P4-E2034-APP-12) |",
+   "new": "| TC-E2-034-15 | 12.7 tables (ASM-3438) | Component | Not specified in the source documents (DOR-RWB-P4-E2034-APP-12) |\n| TC-E2-034-16 | AC10, BR8 | Component | Scope list of LOV-SCOPE not available through DP-07 for \"U-2001\" reading case \"RW-2026-000301\": 503 with MSG-GEN-006, no marker, one AC-DENY with no case ID |\n| TC-E2-034-17 | AC11, BR8 | Component | U-2001 holds RW-CASEOWN and RW-SECADM, a conflict in role_conflict: refused at sign-in with MSG-P4-006 naming both roles, no ledger read, no AC-READ |\n| TC-E2-034-18 | AC12, BR6 | Component | U-4001 holds RW-PLATADM and calls the access-log read with a page size outside its bounds: 422 with MSG-GEN-002, no row read |"
+  },
+  {
+   "old": "AC1 to AC9 are the criteria this story owns;",
+   "new": "AC1 to AC12 are the criteria this story owns;"
+  },
+  {
+   "old": "Then a mask that no row of the new version covers comes back \"masked\"",
+   "new": "Then a mask that no row of the new version covers comes back \"masked\"\n\n  Scenario: AC10 A ledger read is refused when a reference list is not available (new, D-RCV-60)\n    Given the reference-data contract of DP-07 cannot return the scope list of LOV-SCOPE\n    When \"U-2001\" reads the ledger of case \"RW-2026-000301\" with area \"CASE_RECORD\", right \"R\" and field IDs DF-INT-011 and DF-INT-022\n    Then the response is 503 with message MSG-GEN-006\n    Then no marker, no scope and no case data is returned\n    Then one AC-DENY entry is written with area \"CASE_RECORD\" and right \"R\" and it carries no case ID\n\n  Scenario: AC11 Two conflicting roles of one caller are refused at sign-in (new, D-RCV-60)\n    Given the role_conflict rows of rwb_access hold a conflict between RW-SECADM and RW-CASEOWN\n    Given test user \"U-2001\" holds RW-CASEOWN and additionally RW-SECADM\n    When \"U-2001\" signs in with both roles\n    Then the session is refused at sign-in with message MSG-P4-006 naming both roles\n    Then no ledger ask is made and no AC-READ entry exists\n\n  Scenario: AC12 A page size out of bounds is refused before any row is read (new, D-RCV-60)\n    Given test user \"U-4001\" holds RW-PLATADM with Platform administration right \"R\"\n    When \"U-4001\" calls GET /api/recovery/access/v1/admin/access-log with a page size outside its bounds\n    Then the response is 422 with message MSG-GEN-002 naming the field and its bounds\n    Then no row is read"
+  },
+  {
+   "old": "| X4 | The reference list of scope or capability is not available | No answer rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | BR8 |",
+   "new": "| X4 | The reference list of scope or capability is not available | No answer rather than a guessed one: 503; the refusal is recorded | MSG-GEN-006 | AC10, TC-E2-034-16 |"
+  },
+  {
+   "old": "| X7 | Two roles of the caller conflict, for example RW-SECADM with a business role | The session is refused at sign-in from the `role_conflict` rows; no ledger ask is made | MSG-P4-006 | BR8 |",
+   "new": "| X7 | Two roles of the caller conflict, for example RW-SECADM with a business role | The session is refused at sign-in from the `role_conflict` rows; no ledger ask is made | MSG-P4-006 | AC11, TC-E2-034-17 |"
+  },
+  {
+   "old": "| X9 | The page size of the access-log read is out of bounded range | 422 naming the field and its bounds, before any row is read | MSG-GEN-002 | BR6 |",
+   "new": "| X9 | The page size of the access-log read is out of bounded range | 422 naming the field and its bounds, before any row is read | MSG-GEN-002 | AC12, TC-E2-034-18 |"
+  },
+  {
+   "old": "11. Audit: `RW-PLATADM` calls `GET /api/recovery/access/v1/admin/access-log` with the user, the event `AC-READ`, from and to, and reads one row per ledger read with the case ID, the field IDs and their markers (BR6).",
+   "new": "11. Audit: `RW-PLATADM` calls `GET /api/recovery/access/v1/admin/access-log` with the user, the event `AC-READ`, from and to, and reads one row per ledger read with the case ID, the field IDs and their markers (BR6).\n\nScreen states of SCR-03 Case record and SCR-04 Case timeline that this service answers: granted, with the markers under the version used; no access, 403 `MSG-P4-002` or 404 `MSG-P4-003`, with no case data; error, 503 `MSG-P7-003` or `MSG-GEN-006`, with no case data. The empty state is `MSG-P3-024` and the loading state is Not specified in the source documents (DOR-RWB-P4-E2034-APP-10); both are the screen's and are carried by RWB-P3-E2034-APP."
+  },
+  {
+   "old": "the Thai text follows DL10.",
+   "new": "the Thai text follows DL10 (open decision; assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863)."
+  },
+  {
+   "old": "As a **case owner, a team manager, a specialist or an auditor who reads the interaction ledger of a case — and as an agent that reads it on their behalf**",
+   "new": "As a **holder of RW-CASEOWN, RW-TEAMMGR, RW-CONDUCT or RW-AUDIT who reads the interaction ledger of a case — and as an agent that reads it on their behalf**"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09208",
+   "item": "GAP-1844",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Story stays in wave 2. The partner identity and portal slice is S9 and not built here, so no edit is made to this story."
+  },
+  {
+   "ruling": "R-10756",
+   "item": "CG-ALL-5366",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for 'Two roles of the caller conflict' with text '{role} may not be held together with {role}.'; keep MSG-P4-006 for its standard meaning.",
+   "note": "The new ID does not exist yet, so the story cannot cite it. No story edit until the standard issues it."
+  },
+  {
+   "ruling": "R-10757",
+   "item": "CG-ALL-5368",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "TC-E2-034-13 (AC3) and TC-E2-034-14 (AC9) now carry the Given data of their criteria in place of the Not specified placeholder."
+  },
+  {
+   "ruling": "R-16866",
+   "item": "DOR-RWB-P4-E2034-APP-1",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Role text in section 1 now names RW-CASEOWN, RW-TEAMMGR, RW-CONDUCT and RW-AUDIT, the codes used in section 7. The mapping to the prose roles is assumed."
+  },
+  {
+   "ruling": "R-16867",
+   "item": "DOR-RWB-P4-E2034-APP-10",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Section 4 now states the granted, no access and error states for SCR-03 and SCR-04. Empty is MSG-P3-024 (P3); loading is named as a gap."
+  },
+  {
+   "ruling": "R-16868",
+   "item": "DOR-RWB-P4-E2034-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "The open decision DL10 in section 14 now names its assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863."
+  },
+  {
+   "ruling": "R-16869",
+   "item": "DOR-RWB-P4-E2034-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC10, AC11 and AC12 added for X4, X7 and X9 with TC-E2-034-16, -17 and -18. Section 5 Covered by cells updated."
+  },
+  {
+   "ruling": "R-16870",
+   "item": "DOR-RWB-P4-E2034-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR8 is now covered by AC10 and TC-E2-034-16. Section 8 rules are unchanged."
+  },
+  {
+   "ruling": "R-16871",
+   "item": "DOR-RWB-P4-E2034-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Confirm DF-REF-039 is listed for the role table, or drop it from the range; the story keeps DF-REF-034 to DF-REF-039 until then.",
+   "note": "DF-REF-039 is not in LDM v9. The story range is left unchanged until the LDM confirms or drops it."
+  },
+  {
+   "ruling": "R-16872",
+   "item": "DOR-RWB-P4-E2034-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for the role conflict text, as in CG-ALL-5366; the section 14 MSG-P4-006 row cites it once issued.",
+   "note": "Shares the fix of CG-ALL-5366. No story edit until the new ID exists in the standard."
+  }
+ ]
+}

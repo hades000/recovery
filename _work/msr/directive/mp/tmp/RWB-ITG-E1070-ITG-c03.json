@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "All seven criteria are new:",
+   "new": "All nine criteria are new:"
+  },
+  {
+   "old": "Then the Schedule JOB-22 that runs the same workflow type at 06:00 belongs to RWB-PLT-E1070-APP and is neither created nor changed by this story",
+   "new": "Then the Temporal Schedule that runs the same workflow type at 06:00 belongs to RWB-PLT-E1070-APP and is neither created nor changed by this story\n\n  Scenario: AC8 The namespace, retention, queues, endpoints and workflow ID are read from run configuration and the harness never reaches UAT or production (new, D-RCV-60)\n    Given the namespace, the retention, the search attributes, the queue list, the endpoints, the probe queue and the workflow ID are set in the run configuration and not in code\n    When the harness starts the smoke run in SIT\n    Then the run uses the namespace rwb-recovery, the retention of the run configuration and the workflow ID platform-smoke-20261116\n    When the harness is pointed at a UAT or production endpoint\n    Then the harness refuses the endpoint and starts nothing\n\n  Scenario: AC9 A retried or timed-out activity keeps the workflow ID as its key and writes once (new, D-RCV-60)\n    Given the smoke run has started the activity RecordAndApply on task queue rwb-case under the workflow ID platform-smoke-20261116\n    When the first attempt of the activity times out\n    Then the activity is retried on the same task queue rwb-case under the same workflow ID and no second run is started\n    When the retried attempt completes\n    Then the write is recorded once and the history holds one completed activity for the step\n    When the activity EvaluateRules on task queue rwb-decision times out\n    Then the run does not write and the workflow ID stays the key of the run"
+  },
+  {
+   "old": "| TC-E1-070-08-ITG | §12 contract | Contract | Temporal gRPC on port 7233 with mTLS, the Temporal Web UI ingress behind Entra ID OIDC, and the absence of any path under `/api/recovery/<short>/v1` in the chain; synthetic |",
+   "new": "| TC-E1-070-08-ITG | §12 contract | Contract | Temporal gRPC on port 7233 with mTLS, the Temporal Web UI ingress behind Entra ID OIDC, and the absence of any path under `/api/recovery/<short>/v1` in the chain; synthetic |\n| TC-E1-070-09-ITG | AC8, BR10 | Integration | The run configuration of SIT and a UAT or production endpoint set as the harness target; synthetic |\n| TC-E1-070-10-ITG | AC9, BR6 | Integration | The smoke run's `RecordAndApply` call on `rwb-case` and `EvaluateRules` call on `rwb-decision` with a timed-out first attempt; synthetic |"
+  },
+  {
+   "old": "| Store | What it holds | Owner | In the Physical Schema |\n|---|---|---|---|",
+   "new": "| Store | What it holds | Owner | In the Physical Schema | BR Field ID |\n|---|---|---|---|---|"
+  },
+  {
+   "old": "| `temporal` | Workflow histories, mutable state, timers, tasks | `temporal_svc` | No |",
+   "new": "| `temporal` | Workflow histories, mutable state, timers, tasks | `temporal_svc` | No | Not specified in the source documents (DOR-RWB-ITG-E1070-ITG-7) |"
+  },
+  {
+   "old": "| `temporal_visibility` | Workflow visibility records and search attributes | `temporal_svc` | No |",
+   "new": "| `temporal_visibility` | Workflow visibility records and search attributes | `temporal_svc` | No | Not specified in the source documents (DOR-RWB-ITG-E1070-ITG-7) |"
+  },
+  {
+   "old": "| ACE database, the `rwb_*` schemas | Case and module data, the system of record | each service login | Yes, unchanged by this story |",
+   "new": "| ACE database, the `rwb_*` schemas | Case and module data, the system of record | each service login | Yes, unchanged by this story | Not specified in the source documents (DOR-RWB-ITG-E1070-ITG-7) |"
+  },
+  {
+   "old": "Where the suite stores its evidence is Not specified in the source documents (GAP-0378; ASM-0546).",
+   "new": "The SIT evidence is recorded beside the run report, and the grant evidence is taken from the access review of rwb-access (GAP-0378; ASM-0546)."
+  },
+  {
+   "old": "The worker registration, task-queue and namespace contract between the services and the platform — worker identity, certificate per service, queue registration, the selection of the step that belongs to another service and the smoke endpoint target — is Not specified in the source documents (GAP-0378; ASM-0544);",
+   "new": "The worker registration contract is: one worker per service on its queue `rwb-<short>` in namespace `rwb-recovery`, with its own workload identity and a client certificate whose subject names the service; the queues are created at platform install from the service catalogue and a worker that polls another queue is refused; each service has its own codec key under the namespace key; the smoke workflow starts through RWB-PLT-E1070-APP on one named service queue (GAP-0378; ASM-0544);"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14161",
+   "item": "DOR-RWB-ITG-E1070-ITG-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR10 now has AC8 and test TC-E1-070-09-ITG, so every §8 rule is covered by a criterion and a test."
+  },
+  {
+   "ruling": "R-14162",
+   "item": "DOR-RWB-ITG-E1070-ITG-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Register temporal_svc and temporal_visibility as entities or fields in LDM v9 and Data Classification v5.",
+   "note": "Story added BR Field ID column with the not-specified placeholder; LDM entity names belong to the LDM."
+  },
+  {
+   "ruling": "R-22283",
+   "item": "GAP-0002",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "ADR-011",
+   "change": "Update ADR-011 to the parent CaseWorkflow with a child workflow per stage, Continue-As-New and ABANDON close policy before Epic 3.",
+   "note": "ADR-011 is outside this story; the story starts no case or stage workflow."
+  },
+  {
+   "ruling": "R-22284",
+   "item": "GAP-0378",
+   "status": "Resolved",
+   "section": "11, 12.5",
+   "target": "",
+   "change": "",
+   "note": "§12.5 states the worker, queue, certificate and codec contract; §11 records evidence beside the run report and grants from the rwb-access review."
+  },
+  {
+   "ruling": "R-23874",
+   "item": "CG-ALL-448",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC7 now names the Temporal Schedule instead of JOB-22, with no job or decision-log wording left."
+  },
+  {
+   "ruling": "R-28677",
+   "item": "GAP-2038",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Users Roles and Permissions",
+   "change": "Set SY-CASEWF to the identity of P3 rwb-case only, reached through the CaseWorkflow signal; read SY-RULES as one role held by each service identity inside its runtime.",
+   "note": "Role mapping is defined in the roles document; the story does not name SY- roles."
+  },
+  {
+   "ruling": "R-28678",
+   "item": "GAP-2017",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Temporal Workflow and Activity Catalog v1",
+   "change": "Write rwb-platform as the platform team queue outside the 19 service queues, with its smoke and health workflows and owner.",
+   "note": "Queue definition belongs in the catalogue; the story's smoke run uses a service queue only."
+  },
+  {
+   "ruling": "R-28679",
+   "item": "GAP-3163",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Build Notes v6",
+   "change": "Read Module P3 for RWB-E1-070 to RWB-E1-072 as consumed by P3 rather than owned by P3; keep the build order.",
+   "note": "Module wording is in the build notes, not in this story."
+  },
+  {
+   "ruling": "R-29873",
+   "item": "NEWAC-RWB-ITG-E1070-ITG-AC8",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 added for BR10 with test row TC-E1-070-09-ITG; proposed test was not specified in the source."
+  },
+  {
+   "ruling": "R-29874",
+   "item": "NEWAC-RWB-ITG-E1070-ITG-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added for retry and timeout with test row TC-E1-070-10-ITG; no retry counts or timeouts were invented."
+  }
+ ]
+}

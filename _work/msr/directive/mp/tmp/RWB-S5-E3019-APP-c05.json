@@ -1,0 +1,112 @@
+{
+ "edits": [
+  {
+   "old": "| SCR-21 Asset list | Loading; list |",
+   "new": "| SCR-21 Asset list | Loading; list; empty, error and no access: Not specified in the source documents (CG-ALL-9614) |"
+  },
+  {
+   "old": "| SCR-22 Asset record | Take-on; held; listed; sold |",
+   "new": "| SCR-22 Asset record | Take-on; held; listed; sold; empty, loading, error and no access: Not specified in the source documents (CG-ALL-9615) |"
+  },
+  {
+   "old": "    Then the grant refuses the statement and the boundary test fails the build",
+   "new": "    Then the grant refuses the statement and the boundary test fails the build\n\n  Scenario: AC6 Rules BR1 to BR9 hold on the take-on path\n    Given the take-on path has run for case \"RC-2026-000511\"\n    When the boundary and contract checks run\n    Then only the asset row is written to rwb_asset, no cross-schema join or foreign key exists, no person name, address, contact value or identity number is stored, and one AssetTakenOn is published per confirmed take-on\n\n  Scenario: AC7 Error answers of the provided operations\n    Given a caller without a credential, a role without the Asset and disposal right, and an asset reference that does not exist\n    When GET /assets and GET /assets/{assetId} are called\n    Then the caller without a credential gets 401, the role without the right gets 403 and the unknown asset reference gets 404, and nothing changes\n\n  Scenario: AC8 Activity retry and timeout\n    Given the rwb-source-data contract mock does not answer inside 2 s\n    When the take-on activity runs\n    Then the step retries on the workflow's own schedule, writes nothing and returns no outcome\n\n  Scenario: AC9 A consumed call fails\n    Given the rwb-source-data contract mock returns an error for the ACE asset fact\n    When its trigger arrives\n    Then nothing is written, no outcome is returned and the caller sees 503 with the platform error envelope\n\n  Scenario: AC10 A status change the model does not allow is refused\n    Given the rwb-case contract mock returns the case state \"ASSET_HELD\" for \"RC-2026-000511\"\n    When its trigger arrives\n    Then nothing changes and the step returns without a move"
+  },
+  {
+   "old": "| TC-E3-019-08 | §12.7 tables (ASM-3438) | Boundary | The take-on path; the boundary shows no v_ace_* read and no statement against a schema other than rwb_asset |",
+   "new": "| TC-E3-019-08 | §12.7 tables (ASM-3438) | Boundary | The take-on path; the boundary shows no v_ace_* read and no statement against a schema other than rwb_asset |\n| TC-E3-019-09 | AC10, X3 | Component | Case at `ASSET_HELD` rather than `ASSET_PENDING_TAKE_ON`; no move, no write and no outcome |\n| TC-E3-019-10 | AC5 | Boundary | Statement attempts against `v_ace_*`, `recovery_case` and another service's schema; the grant refuses and the boundary test fails the build |\n| TC-E3-019-11 | AC6 | Boundary | Not specified in the source documents (NEWAC-RWB-S5-E3019-APP-AC6) |\n| TC-E3-019-12 | AC7 | Component | Caller without a credential, role without the Asset and disposal right, and unknown asset reference on `GET /assets` and `GET /assets/{assetId}`; 401, 403 and 404 |\n| TC-E3-019-13 | AC8 | Component | The rwb-source-data mock not answering inside 2 s; retry on the workflow's schedule, no write and no outcome |\n| TC-E3-019-14 | AC9 | Component | The rwb-source-data mock returning an error; nothing written, no outcome, 503 with the platform error envelope |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-27272",
+   "item": "CG-ALL-9614",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-21 states now include empty, error and no access, each marked Not specified in the source documents; loading was already listed."
+  },
+  {
+   "ruling": "R-27273",
+   "item": "CG-ALL-9615",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-22 states now include empty, loading, error and no access, each marked Not specified in the source documents (CG-ALL-9615)."
+  },
+  {
+   "ruling": "R-29151",
+   "item": "GAP-2839",
+   "status": "Cross-document",
+   "section": "8",
+   "target": "RWB-S5-E3020-APP story file (RWB-S5-E3020-APP / RWB-S5-E3020-CON gap row)",
+   "change": "Keep AC3 word for word with origin tag; table R-DIS-02 as this step's rule; name R-DIS-01 and R-DIS-03 as sibling rules owned by RWB-S5-E3019-APP and RWB-S5-E3021-APP.",
+   "note": "The gap sits in RWB-E3-020 and its sibling story. This story already owns R-DIS-01 (AC3, BR10); no edit made here."
+  },
+  {
+   "ruling": "R-29153",
+   "item": "GAP-1768",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Thai and English wording of shared and module messages is a DL10 business decision for the business lead; §14 text is not in this chunk."
+  },
+  {
+   "ruling": "R-32568",
+   "item": "NEWAC-RWB-S5-E3019-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added for a disallowed status change from ASSET_HELD; test row TC-E3-019-09 added covering AC10 and X3."
+  },
+  {
+   "ruling": "R-32569",
+   "item": "NEWAC-RWB-S5-E3019-APP-AC5",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC5 already exists in section 7; test row TC-E3-019-10 added to give the boundary criterion a test."
+  },
+  {
+   "ruling": "R-32570",
+   "item": "NEWAC-RWB-S5-E3019-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC6 added covering rules BR1 to BR9 as a boundary check; test row TC-E3-019-11 added with data Not specified in the source documents."
+  },
+  {
+   "ruling": "R-32571",
+   "item": "NEWAC-RWB-S5-E3019-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC7 added naming 401, 403 and 404 on the provided operations; test row TC-E3-019-12 added."
+  },
+  {
+   "ruling": "R-32572",
+   "item": "NEWAC-RWB-S5-E3019-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC8 added for activity retry and timeout, taken from X5; test row TC-E3-019-13 added."
+  },
+  {
+   "ruling": "R-32573",
+   "item": "NEWAC-RWB-S5-E3019-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC9 added for a failed consumed call returning 503 with the platform error envelope; test row TC-E3-019-14 added."
+  }
+ ]
+}

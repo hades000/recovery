@@ -1,0 +1,72 @@
+{
+ "edits": [
+  {
+   "old": "| X8 | The step operation is called with no step key or no rule result | Refused with 422 and no run is started; proved by RWB-P10-TE013-CON | MSG-GEN-001 | AC10, TC-TE-013-12 |",
+   "new": "| X8 | The step operation is called with no step key or no rule result | Refused with 422 and no run is started; proved by TC-TE-013-12 | MSG-GEN-001 | AC10, TC-TE-013-12 |"
+  },
+  {
+   "old": "    Then no agent run is started",
+   "new": "    Then no agent run is started\n\n  Scenario: AC11 The rules BR6 to BR12 hold at the service boundary\n    Given a calling step runs in its own schema and transaction\n    When the step operation reaches an agent\n    Then the client runs under the calling identity and the agent runs its tools as the rwb-agent service identity\n    Then no calling step reads agent_run, agent_policy or a record table in another schema\n    Then the step operation is one hop under /api/recovery/agent/v1 with the policy timeout as its budget\n    Then the decision record is written by the calling step through the local library in its own transaction\n    Then the mode, the timeout, the prompt version and the fallback rule are read from the approved policy row\n    Then the link between a run and a record is written once and a different record for the same run is refused with 409\n    Then the values of mode, run status and product group are read from the rwb-case reference-data contract\n\n  Scenario: AC12 Error answer 401 of the provided operations\n    Given the caller presents no valid identity\n    When it calls GET /api/recovery/agent/v1/admin/agent-runs through the route\n    Then the system refuses the call with 401\n\n  Scenario: AC12 Error answer 404 of the provided operations\n    Given the requested agent run does not exist\n    When the caller reads that agent run through the route\n    Then the system answers 404\n\n  Scenario: AC13 A status change the model does not allow is refused\n    Given the rule result names a next state that the model does not allow from the current status of case RW-2026-000201\n    When the step runs\n    Then the system refuses the status change and case RW-2026-000201 keeps its state and status\n    Then the refusal code is Not specified in the source documents (NEWAC-RWB-P10-TE013-APP-AC13)"
+  },
+  {
+   "old": "| TC-TE-013-17 | BR12 | Component | Mode, run status and product group values read from the rwb-case reference-data contract |",
+   "new": "| TC-TE-013-17 | BR12 | Component | Mode, run status and product group values read from the rwb-case reference-data contract |\n| TC-TE-013-18 | AC11, BR6, BR7, BR8, BR9, BR10, BR11, BR12 | Component | Rules BR6 to BR12 checked as in TC-TE-013-13 to TC-TE-013-17 |\n| TC-TE-013-19 | AC12 | Contract | Caller with no valid identity calls GET /api/recovery/agent/v1/admin/agent-runs through the route; refused with 401; read of an unknown agent run answered 404 |\n| TC-TE-013-20 | AC13 | Component | Rule result names a next state the model does not allow from the current status of case RW-2026-000201; refusal, case keeps its state and status |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28935",
+   "item": "GAP-1318",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-PLT-NF06-DB (P7 DB story)",
+   "change": "Allocate the rwb-decision database login name with its schema and write it into the platform secret store",
+   "note": "Login name is set in the P7 DB story and secret store; the story keeps the phrase and needs no edit."
+  },
+  {
+   "ruling": "R-30419",
+   "item": "NEWAC-RWB-P10-TE013-APP-AC10",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC10 and TC-TE-013-12 already exist; X8 now cites TC-TE-013-12 in place of the CON story. No proposed test needed."
+  },
+  {
+   "ruling": "R-30420",
+   "item": "NEWAC-RWB-P10-TE013-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for BR6 to BR12 with TC-TE-013-18; existing TC-TE-013-13 to 17 still cover the rules."
+  },
+  {
+   "ruling": "R-30421",
+   "item": "NEWAC-RWB-P10-TE013-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for 401 and 404 with TC-TE-013-19; 403 stays with AC9. Message IDs for 401 and 404 are not specified in the sources."
+  },
+  {
+   "ruling": "R-30422",
+   "item": "NEWAC-RWB-P10-TE013-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC13 added for a disallowed status change with TC-TE-013-20; refusal code not specified in the sources."
+  },
+  {
+   "ruling": "R-30423",
+   "item": "NEWAC-RWB-P10-TE013-APP-AC9",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC9 already exists in section 7 and X7 cites AC9 and TC-TE-013-09. No edit needed."
+  }
+ ]
+}

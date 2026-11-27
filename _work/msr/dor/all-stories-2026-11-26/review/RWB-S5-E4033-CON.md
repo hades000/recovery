@@ -1,0 +1,110 @@
+# Build-readiness review (script) — RWB-S5-E4033-CON Rent a held asset to a third party - contract
+
+SCB Collections and Recovery. Henka Group.
+
+Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash. Decision D-RCV-60.
+
+| Item | Value |
+|---|---|
+| Story reviewed | RWB-S5-E4033-CON (RWB S5 E4033 CON Rent a held asset to a third party - contract v1.md) |
+| Review kind | Script checks only: Recovery Workbench Definition of Ready and Done v4 section 2, AC structure, missing-criterion types, detcheck X1-X20 |
+| Service | rwb-asset |
+| Legacy key | RWB-E4-033 |
+
+## R1. Verdict
+
+**NOT READY.** Checklist: Pass 12, Pass (not applicable) 2, Partial 7, Fail 4. Detcheck rows: 22 (6 P1). AC review rows: 1. Missing criteria: 2.
+
+On the story text alone (items 14, 16, 21, 22, 23 left out, they need records the story files do not hold): **NOT READY**.
+
+Failed items: 8 Contract; 14 Epic design; 16 Size; 23 Contract version fixed.
+
+## R2. Definition of ready — every item of Recovery Workbench Definition of Ready and Done v4 section 2
+
+| # | Item | Result | Evidence (story section + document checked) | Gap |
+|---|---|---|---|---|
+| 1 | Story | Partial | §1 role 'tech lead' is not a role code or role name in Users Roles and Permissions v5 | — |
+| 2 | Links | Pass | §18 has 11 traceability rows | — |
+| 3 | Acceptance criteria | Pass | §7 holds 5 owned criteria in Gherkin; §5 has 8 exception paths | — |
+| 4 | Business rules | Partial | 13 of 13 rules are covered by no criterion and no test case: BR1, BR2, BR3, BR4, BR5, BR6, BR7, BR8, BR9, BR10, BR11, BR12, BR13; §8 has 13 rules | — |
+| 5 | State transitions | Pass | §9 has 7 transitions | — |
+| 6 | Authority | Partial | the story provides REST operations and names no rwb-access authorise check (DP-08); §10 has 5 roles | — |
+| 7 | Data | Partial | 8 row(s) of §11 have no BR Field ID; §11 has 8 data rows; detcheck: P2 Name `collateral_id` is not a field or entity in LDM v9 or Data Classification v5; P2 Name `holding_status` is not a field or entity in LDM v9 or Data Classification v5; P2 Name `holding_cost_to_date` is not a field or entity in LDM v9 or Data Classification v5; P2 Name `tenant_ref` is not a field or entity in LDM v9 or Data Classification v5 (+6 more) | CG-ALL-10264, CG-ALL-10265, CG-ALL-10266, CG-ALL-10267, CG-ALL-10268, CG-ALL-10269, CG-ALL-10270, CG-ALL-10271, CG-ALL-10272, CG-ALL-10273 |
+| 8 | Contract | Fail | detcheck: P1 No API Specification v5 yaml has the base of /api/recovery/payment/v1; P1 No API Specification v5 yaml has the base of /api/recovery/case/v1; P1 No API Specification v5 yaml has the base of /api/recovery/comms/v1; P1 No API Specification v5 yaml has the base of /api/recovery/source-data/v1 (+3 more) | CG-ALL-10274, CG-ALL-10275, CG-ALL-10276, CG-ALL-10277, CG-ALL-10278, CG-ALL-10279, CG-ALL-10280, CG-ALL-10281 |
+| 9 | Messages | Pass | §14 lists 5 messages | — |
+| 10 | Screens and states | Partial | detcheck: P3 SCR-21 has no empty, error, no access state in the story; P3 SCR-22 has no empty, loading, error, no access state in the story | CG-ALL-10283, CG-ALL-10284 |
+| 11 | Guardrails | Pass | — | — |
+| 12 | Test cases | Partial | no boundary test for the tables of §12.7 (ASM-3438); §16 has 9 test cases; detcheck: P3 Test cases not in Test Cases v8: TC-E4-033-01, TC-E4-033-02, TC-E4-033-03, TC-E4-033-04, TC-E4-033-05, TC-S5-E4033-CON-01, TC-S5-E4033-CON-02, TC-S5-E4033-CON-03, TC-S5-E4033-CON-04 | CG-ALL-10282 |
+| 13 | Out of scope | Pass | — | — |
+| 14 | Epic design | Fail | no signed epic design is recorded in the story or the source documents; confirm the sign-off with the epic design record | — |
+| 15 | INVEST | Pass | — | — |
+| 16 | Size | Fail | the story carries no size; the squad sizes it at refinement | — |
+| 17 | Dependencies | Pass | 0 dependencies named | — |
+| 18 | Open decisions | Pass | — | — |
+| 19 | Test data | Pass | every test case in §16 names its data (9) | — |
+| 20 | Reference data | Partial | reads lists or parameters and names neither the parameters nor the reference-data contract (DP-06, DP-07) | — |
+| 21 | Contract published | Pass (not applicable) | this is the contract story | — |
+| 22 | Fake published | Pass (not applicable) | this is the contract story; it publishes the fakes | — |
+| 23 | Contract version fixed | Fail | the story states no contract version it builds against (only the /v1 path) | — |
+| 24 | Ownership stated | Pass | — | — |
+| 25 | Ready to start | Pass | Ready to start: Day 1 | — |
+
+## R3. Gap list (detcheck rows of this story)
+
+### R3.1 Blockers (P1) — 6 rows
+
+| CG id | Title | Check | Gap type | Owner role |
+|---|---|---|---|---|
+| CG-ALL-10274 | No API Specification v5 yaml has the base of /api/recovery/payment/v1 | X5 | Missing | Solution architect |
+| CG-ALL-10275 | No API Specification v5 yaml has the base of /api/recovery/case/v1 | X5 | Missing | Solution architect |
+| CG-ALL-10276 | No API Specification v5 yaml has the base of /api/recovery/case/v1 | X5 | Missing | Solution architect |
+| CG-ALL-10277 | No API Specification v5 yaml has the base of /api/recovery/comms/v1 | X5 | Missing | Solution architect |
+| CG-ALL-10278 | No API Specification v5 yaml has the base of /api/recovery/source-data/v1 | X5 | Missing | Solution architect |
+| CG-ALL-10279 | Workflow AssetDisposalWorkflow task queue rwb-asset` in namespace `rwb-recovery differs from the catalog | X6 | Conflict | Solution architect |
+
+### R3.2 Major (P2) — 12 rows
+
+| CG id | Title | Check | Gap type | Owner role |
+|---|---|---|---|---|
+| CG-ALL-10264 | Name `collateral_id` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10265 | Name `holding_status` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10266 | Name `holding_cost_to_date` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10267 | Name `tenant_ref` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10268 | Name `rental_start_date` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10269 | Name `rental_term_months` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10270 | Name `rent_amount` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10271 | Name `rent_currency` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10272 | Name `payment_method` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10273 | Name `auto_debit_ref` is not a field or entity in LDM v9 or Data Classification v5 | X3 | Missing | Data |
+| CG-ALL-10280 | Workflow ID form and start rule of AssetDisposalWorkflow are not stated | X6 | Missing | Solution architect |
+| CG-ALL-10281 | Activity rentHeldAsset is not in Temporal Catalog v1 | X6 | Missing | Solution architect |
+
+### R3.3 Minor (P3) — 4 rows
+
+| CG id | Title | Check | Gap type | Owner role |
+|---|---|---|---|---|
+| CG-ALL-10282 | Test cases not in Test Cases v8: TC-E4-033-01, TC-E4-033-02, TC-E4-033-03, TC-E4-033-04, TC-E4-033-05, TC-S5-E4033-CON-01, TC-S5-E4033-CON-02, TC-S5-E4033-CON-03, TC-S5-E4033-CON-04 | X9 | Missing | QA |
+| CG-ALL-10283 | SCR-21 has no empty, error, no access state in the story | X17 | Missing | Business analyst |
+| CG-ALL-10284 | SCR-22 has no empty, loading, error, no access state in the story | X17 | Missing | Business analyst |
+| CG-ALL-10285 | Story cites document versions that are not the highest | X20 | Outdated | Business analyst |
+
+## R4. AC review — structural problems of the owned criteria
+
+| AC | Problem | Improved Given / When / Then (model pass) |
+|---|---|---|
+| AC2 | vague wording in the steps (should, may, correctly, as expected); the Then must name a value |  |
+
+## R5. Missing acceptance criteria
+
+Proposed AC IDs start at AC6. The Gherkin is written in the model pass from the sources; the script names only what has no criterion.
+
+| Proposed AC | Covers | Proposed TC (proposed) | Gherkin |
+|---|---|---|---|
+| AC6 | §8 BR1, BR2, BR3, BR4, BR5, BR6, BR7, BR8, BR9, BR10, BR11, BR12, BR13 (these rules have no criterion and no test; a rule that is an architecture constraint may belong in a guardrail or boundary test instead) | Not specified in the source documents | |
+| AC7 | a status change the model does not allow is refused (no criterion covers a disallowed transition) | Not specified in the source documents | |
+
+## R7. Assumptions and limits
+
+- Script review only. Not judged here: whether a criterion is correct or testable as written, the meaning of a rule, conflicts of meaning across documents, NFR behaviour (scale, retries, caching), open questions, and the wording of improved or missing criteria. Run the model review for those.
+- Items 14, 16, 21, 22 and 23 read records the story files do not hold (epic design sign-off, size, build status, fake library, contract version); a Fail there is a missing record, not a defect in the text.
+- Missing-criterion types are found by keywords in §7; a criterion worded differently can be missed or reported falsely. Confirm each R5 row.

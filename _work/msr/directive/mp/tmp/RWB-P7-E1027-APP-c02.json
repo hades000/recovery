@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "No personal data is a column of `decision_log_entry`: the actor is a role code or a user identifier, the subject is a case, document or entry identifier, and the inputs reference is a pointer to a snapshot the caller holds.",
+   "new": "Personal data is a column of `decision_log_entry` only as the user identifier in `actor_user_id` (DF-DEC-030), the P2 field that Data Classification v5 classes as personal data; the actor is otherwise a role code, the subject is a case, document or entry identifier, and the inputs reference is a pointer to a snapshot the caller holds."
+  },
+  {
+   "old": "adds `idempotency_key varchar(80)` with a unique index on `idempotency_key` where the store story has not already created it",
+   "new": "adds `idempotency_key varchar(80)` with a unique index on the field `idempotency_key` (DF-DEC-031; the index carries no separate name) where the store story has not already created it"
+  },
+  {
+   "old": "| decision_log_entry | P7, in `rwb_decision` | The entry of every decision: the legacy field identifiers DF-DEC-001 to DF-DEC-018, DF-DEC-030 and DF-DEC-031, the chain columns, the final call and the decided-at time. Appended only |",
+   "new": "| decision_log_entry | P7, in `rwb_decision` | The entry of every decision: the legacy field identifiers DF-DEC-001 to DF-DEC-018, DF-DEC-030 and DF-DEC-031, the chain columns, the final call and the decided-at time. Appended only; the local table is created through the decision-record library, the case reference and the trace ID are carried in inputsRef, and the name and DDL are settled in the DB story of each service |"
+  },
+  {
+   "old": "Each entry is linked to the one before it through `prev_hash` and carries its own `entry_hash`; the chain is verified by the store story at 02:00",
+   "new": "Each service chains its entries in `chain_seq` order through `prev_hash` and `entry_hash`; for the first record of a service, `prev_hash` holds Not specified in the source documents (GAP-2074); the central ledger chains its entries on ingest and is the chain of record, anchored daily to WORM storage, and the local chain serves replay; the chain is verified by the store story at 02:00"
+  },
+  {
+   "old": "| Ready to start | After RWB-P7-E1008-APP |",
+   "new": "| Ready to start | After RWB-P7-E1008-APP and RWB-PLT-E1056-OPS; both are not yet done at 26 November 2026 |"
+  },
+  {
+   "old": "| Size | Not specified in the source documents (DOR-RWB-P7-E1027-APP-16); the squad sizes it at refinement |",
+   "new": "| Size | Small: fits within two weeks; not further sized in the source documents (DOR-RWB-P7-E1027-APP-16); the squad sizes it at refinement |"
+  },
+  {
+   "old": "| X8 | A record carries an approver without an approval level | Refused with the field `approvalLevel` named | MSG-P7-009 | BR4, section 16 TC-E1-027-02 |",
+   "new": "| X8 | A record carries an approver without an approval level | Refused with the field `approvalLevel` named | MSG-P7-009 | AC8, BR4 |"
+  },
+  {
+   "old": "| X9 | A caller outside the right of the capability area calls the writer through an operation | Refused by the gateway and the service guard before the writer is reached | MSG-P4-002 | TC-E1-027-08 |",
+   "new": "| X9 | A caller outside the right of the capability area calls the writer through an operation | Refused by the gateway and the service guard before the writer is reached | MSG-P4-002 | AC9, TC-E1-027-08 |"
+  },
+  {
+   "old": "These seven criteria are the legacy criteria of RWB-E1-027, copied line for line with the origin tag on each scenario.",
+   "new": "These seven criteria are the legacy criteria of RWB-E1-027, copied line for line with the origin tag on each scenario. AC8 and AC9 are this story's own criteria for exceptions X8 and X9 and carry no legacy origin tag."
+  },
+  {
+   "old": "    Then the system refuses it with message MSG-P7-009 naming \"decisionCode\"",
+   "new": "    Then the system refuses it with message MSG-P7-009 naming \"decisionCode\"\n\n  Scenario: AC8 An approver without an approval level is refused (exception X8)\n    Given a record with approver \"U-7101\" and no approval level\n    When it is written\n    Then the system refuses it with message MSG-P7-009 naming \"approvalLevel\"\n\n  Scenario: AC9 A caller outside the right is refused (exception X9)\n    Given a caller without the right of the capability area\n    When it calls the writer through an operation\n    Then the gateway and the service guard refuse the call with message MSG-P4-002 before the writer is reached"
+  },
+  {
+   "old": "| TC-E1-027-09 | Principle 5 | NFR | The decision log write forced to fail; the calling action rolls back |",
+   "new": "| TC-E1-027-09 | Principle 5 | NFR | The decision log write forced to fail; the calling action rolls back |\n| TC-E1-027-10 | §12, BR10, BR12 | Component | The operations, events and activities of section 12 against the contract fakes of 12.8 |\n| TC-E1-027-11 | §12.7 (ASM-3438) | Component | Each table of 12.7 checked against its owner's declared use |\n| TC-E1-027-12 | AC8, BR4 | End to end | Record with an approver and no approval level |\n| TC-E1-027-13 | AC9, Access | Component | A caller without the right calls the writer through an operation |\n| TC-E1-027-14 | BR8 | Component | Entry, change or outbox row fails; none of the three is stored |\n| TC-E1-027-15 | BR9 | Component | Chain of records checked by the store story's verification |\n| TC-E1-027-16 | BR11 | Component | Writer call fails; the writer neither retries nor opens a transaction |\n| TC-E1-027-17 | BR13 | Component | Reporting reads the events; no data-lake copy is written |"
+  },
+  {
+   "old": "The nine cases are the legacy cases of this key, kept in the legacy order with their covers and data unchanged; legacy level System maps to End to end, Access to Component and Resilience to NFR.",
+   "new": "The nine cases are the legacy cases of this key, kept in the legacy order with their covers and data unchanged; legacy level System maps to End to end, Access to Component and Resilience to NFR. TC-E1-027-10 to TC-E1-027-17 are added by this story for the section 12 contract, the 12.7 tables, the criteria AC8 and AC9, and the rules BR8 to BR13 that no legacy case covers."
+  },
+  {
+   "old": "| ADR-014, ADR-020, ADR-022 | The schema and login, the one-hop budget and the local-record model | TC-E1-027-01, TC-E1-027-04, TC-E1-027-08 |",
+   "new": "| ADR-014, ADR-020, ADR-022 | The schema and login, the one-hop budget and the local-record model | TC-E1-027-01, TC-E1-027-04, TC-E1-027-08 |\n| Section 12, ASM-3438 | The contract of 12 and the tables of 12.7 | TC-E1-027-10, TC-E1-027-11 |\n| AC8, AC9, X8, X9, BR4, BR8, BR9, BR11, BR13 | The added criteria and the exception paths they cover | TC-E1-027-12, TC-E1-027-13, TC-E1-027-14, TC-E1-027-15, TC-E1-027-16, TC-E1-027-17 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17923",
+   "item": "DOR-RWB-P7-E1027-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "§11 names actor_user_id (DF-DEC-030) as the P2 personal-data column; the no-personal-data statement is corrected.",
+   "note": "Data Classification v5 P2 field named in the story; other columns stated as carrying no personal data."
+  },
+  {
+   "ruling": "R-17924",
+   "item": "DOR-RWB-P7-E1027-APP-12",
+   "status": "Resolved",
+   "section": "12, 12.7, 16, 18",
+   "target": "",
+   "change": "Added TC-E1-027-10 (contract of §12) and TC-E1-027-11 (boundary of §12.7 tables, ASM-3438); §18 rows added.",
+   "note": "RTM v7 is not in the source set, so §18 is aligned to the story's own TC list; RTM v7 not compared."
+  },
+  {
+   "ruling": "R-17925",
+   "item": "DOR-RWB-P7-E1027-APP-15",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "Size row: Small states the story fits within two weeks.",
+   "note": "Size stated as Small fitting two weeks; further sizing left to refinement."
+  },
+  {
+   "ruling": "R-17926",
+   "item": "DOR-RWB-P7-E1027-APP-17",
+   "status": "Resolved",
+   "section": "Header",
+   "target": "",
+   "change": "Ready to start now names RWB-P7-E1008-APP and RWB-PLT-E1056-OPS, both recorded as not yet done.",
+   "note": "12 dependencies already named (9 build, 2 contract, 1 external); status of the two not-done items stated."
+  },
+  {
+   "ruling": "R-17927",
+   "item": "DOR-RWB-P7-E1027-APP-18",
+   "status": "Not applied",
+   "section": "9",
+   "target": "",
+   "change": "",
+   "note": "DL10 and its four assumptions sit in section 9, which is not in this chunk; no text is available to place them against."
+  },
+  {
+   "ruling": "R-17928",
+   "item": "DOR-RWB-P7-E1027-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC8 (X8) and AC9 (X9) with TC-E1-027-12 and -13; §5 covered-by column now names AC8 and AC9.",
+   "note": "§7 now holds 9 criteria; §5 exception paths each cite a criterion."
+  },
+  {
+   "ruling": "R-17929",
+   "item": "DOR-RWB-P7-E1027-APP-4",
+   "status": "Resolved",
+   "section": "8, 16",
+   "target": "",
+   "change": "BR4 covered by TC-E1-027-12; BR8, BR9, BR11, BR13 covered by TC-14 to TC-17; BR10 and BR12 by TC-10.",
+   "note": "All 13 rules now covered by a criterion or a test case."
+  },
+  {
+   "ruling": "R-17930",
+   "item": "DOR-RWB-P7-E1027-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Migration index now stated as the unique index on field idempotency_key (DF-DEC-031) with no separate index name.",
+   "note": "The named index is not in the story; the field DF-DEC-031 is the identifier used."
+  },
+  {
+   "ruling": "R-21895",
+   "item": "GAP-2068",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "decision_log_entry row: local table created through the decision-record library; case reference and trace ID carried in inputsRef; name and DDL per service DB story.",
+   "note": "Field list kept as stated; DDL and table name left to each service DB story as the fix directs."
+  },
+  {
+   "ruling": "R-21896",
+   "item": "GAP-2074",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR9: per-service chain in chain_seq order, ledger as chain of record with daily WORM anchor, local chain for replay.",
+   "note": "prev_hash for a service's first record left as Not specified in the source documents (GAP-2074)."
+  }
+ ]
+}

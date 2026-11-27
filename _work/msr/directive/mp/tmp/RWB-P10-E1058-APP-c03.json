@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P4-002 | TC-E1-058-16 |",
+   "new": "| MSG-P4-002 | AC16 |"
+  },
+  {
+   "old": "blocks a merge that changes the shape | None to a user | Section 12.2 |",
+   "new": "blocks a merge that changes the shape | None to a user | AC17 |"
+  },
+  {
+   "old": "no code default is used in its place | None to a user | Section 12.2 |",
+   "new": "no code default is used in its place | None to a user | AC18 |"
+  },
+  {
+   "old": "no version row is written | None | Section 12.7 |",
+   "new": "no version row is written | None | AC19 |"
+  },
+  {
+   "old": "X11 is not reached by a criterion of this story: it is proved by the access test case TC-E1-058-16 through the rwb-access contract fake",
+   "new": "X11 is reached by AC16 and is proved by the access test case TC-E1-058-16 through the rwb-access contract fake"
+  },
+  {
+   "old": "or a personal field",
+   "new": "or a personal field\n\n  Scenario: AC16 A role without the right is refused (exception X11)\n    Given RW-CASEOWN holds no Platform administration right\n    When RW-CASEOWN calls GET /admin/agent-runs with agent \"ECHO\", from \"2026-11-30\" and to \"2026-12-01\"\n    Then the system refuses the call with 403 and MSG-P4-002\n    Then no agent run item is returned\n\n  Scenario: AC17 A consumed contract does not answer inside its budget (exception X12)\n    Given the rwb-case contract fake does not answer inside the 2 s client budget\n    When the orchestrator runs agent \"ECHO\" for case \"RW-2026-000101\"\n    Then the tool result is empty and the guardrail records the failed read\n    Then the agent run holds fallback true and the run ends without a retry inside the transaction\n\n  Scenario: AC18 A parameter value the policy does not allow refuses the run (exception X13)\n    Given the parameter key read from rwb-case names a value that the policy does not allow\n    When the orchestrator runs agent \"ECHO\" for case \"RW-2026-000101\"\n    Then the run is refused before the model call and the offending value is named on the run\n    Then no code default is used and the model endpoint is not called\n\n  Scenario: AC19 A failed migration keeps the version in force (exception X14)\n    Given the migration V10_001__agent_runtime.sql of the rwb-agent Flyway sequence fails\n    When the service starts with the new version\n    Then the new version does not start and the version in force keeps serving\n    Then no run row and no version row is written"
+  },
+  {
+   "old": "never through its table.",
+   "new": "never through its table.\n\nPersonal data: the fields of this story hold IDs, codes, measures and masking tokens only (BR5, BR17, AC15). The fields that P2 classes as personal data are Not specified in the source documents (DOR-RWB-P10-E1058-APP-11); this story carries no personal field on that basis.\n\nScreens: this story builds no screen. The empty, loading, error and no-access states of screen SCR-46 in P3 are Not specified in the source documents (DOR-RWB-P10-E1058-APP-10) and are not built here.\n\nThe tool name read_case is a value of agent_policy.allowed_tools and of GatherInputs; it is not a field or entity of the Logical Data Model v9 or Data Classification v5, and it is not a data row of this table."
+  },
+  {
+   "old": "refused with MSG-P4-002 |",
+   "new": "refused with MSG-P4-002 |\n| TC-E1-058-17 | BR12, ASM-3438 | Component | Migration V10_001__agent_runtime.sql run on an empty rwb_agent schema; each table of section 12.7 is created and no foreign key crosses services |\n| TC-E1-058-18 | AC16, BR16 | Contract | RW-CASEOWN calls GET /admin/agent-runs with no Platform administration right through the rwb-access contract fake; refused with MSG-P4-002 |\n| TC-E1-058-19 | AC17, BR15 | Component | rwb-case contract fake answers outside the 2 s client budget |\n| TC-E1-058-20 | AC18, BR11 | Component | Parameter key from rwb-case names a value the policy does not allow |\n| TC-E1-058-21 | AC19 | Component | Migration of the rwb-agent Flyway sequence fails |\n| TC-E1-058-22 | BR13 | Component | One run completion; the run row and its outbox row are written in one transaction, and a failed write leaves neither |\n| TC-E1-058-23 | BR14 | Component | Calling step submits agent ECHO for case RW-2026-000101 through the agent runtime client; queue rwb-agent |\n| TC-E1-058-24 | BR17 | Component | Run of ECHO checked in the listing, the event, the workflow history and the application log for prompt text and model answer |"
+  },
+  {
+   "old": "| TC-E1-058-01, TC-E1-058-05 |",
+   "new": "| TC-E1-058-01, TC-E1-058-05, TC-E1-058-17 |"
+  },
+  {
+   "old": "| TC-E1-058-01, TC-E1-058-04 |",
+   "new": "| TC-E1-058-01, TC-E1-058-04, TC-E1-058-17 |"
+  },
+  {
+   "old": "RWB-P10-E1058-OPS deploys the service.",
+   "new": "RWB-P10-E1058-OPS deploys the service.\n\nOpen decisions DL10, DL11 and DL33 stay open and each carries its assumptions: DL10 with ASM-2250, ASM-2357, ASM-2377 and ASM-2863; DL11 with ASM-0553, ASM-0703, ASM-1051 and ASM-1104; DL33 with ASM-0135, ASM-0140 and ASM-0890."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09820",
+   "item": "CG-ALL-2503",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add an Activities row CheckGuardrail on task queue rwb-agent with the input and output defined in section 12.5 of RWB-P10-E1058-APP",
+   "note": "Activity is named in 12.5 but absent from the catalogue; the catalogue owns the row."
+  },
+  {
+   "ruling": "R-09821",
+   "item": "CG-ALL-2504",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1",
+   "change": "Add an Activities row RecordAgentRun on task queue rwb-agent as a workflow kit activity with the input defined in section 12.5 of RWB-P10-E1058-APP",
+   "note": "Activity is named in 12.5 but absent from the catalogue; the catalogue owns the row."
+  },
+  {
+   "ruling": "R-15269",
+   "item": "DOR-RWB-P10-E1058-APP-10",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states the story builds no screen and that SCR-46 states are Not specified in the source documents."
+  },
+  {
+   "ruling": "R-15270",
+   "item": "DOR-RWB-P10-E1058-APP-11",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states the personal data position and that P2 personal-data classes are Not specified in the source documents."
+  },
+  {
+   "ruling": "R-15271",
+   "item": "DOR-RWB-P10-E1058-APP-12",
+   "status": "Cross-document",
+   "section": "12.7, 16, 18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the test lists of the RWB-E1-058 and RWB-P10-E1058-APP rows with section 18, which now lists TC-E1-058-17 on DP-01 and DP-15",
+   "note": "Boundary test TC-17 and 8 new test rows added; RTM v7 test lists still need alignment."
+  },
+  {
+   "ruling": "R-15272",
+   "item": "DOR-RWB-P10-E1058-APP-17",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Section 18 already tracks INF and OPS as non-blocking external dependencies; 14 dependencies are counted in the header."
+  },
+  {
+   "ruling": "R-15273",
+   "item": "DOR-RWB-P10-E1058-APP-18",
+   "status": "Resolved",
+   "section": "18",
+   "target": "",
+   "change": "",
+   "note": "Section 18 states DL10, DL11 and DL33 remain open with their assumptions ASM IDs."
+  },
+  {
+   "ruling": "R-15274",
+   "item": "DOR-RWB-P10-E1058-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 to AC19 for X11 to X14, linked them in section 5 and gave each a test case row in section 16."
+  },
+  {
+   "ruling": "R-15275",
+   "item": "DOR-RWB-P10-E1058-APP-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-058-17 to TC-E1-058-24 so BR11 to BR17 each have a test case."
+  },
+  {
+   "ruling": "R-15276",
+   "item": "DOR-RWB-P10-E1058-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states read_case is an allowed-tools value and not a field or entity in LDM v9 or Data Classification v5."
+  }
+ ]
+}

@@ -1,0 +1,57 @@
+--- RWB S7 E6020 CON Defer a write-off - contract v1.md
++++ RWB S7 E6020 CON Defer a write-off - contract v2.md
+@@ -30,2 +30,4 @@
+ 
++**Change log.** D-RCV-60, 26 November 2026: fixes from the deterministic build-readiness checks (X20 RWB-S7-E6020-CON). Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
++
+ ### 1. Story
+@@ -48,3 +50,3 @@
+ - The committee-decision operation is published: TSD S7 T-A.1 gives API-S7-002 `POST /write-offs/{writeOffId}/committee-decision` with the request `CommitteeDecision`, the answer `DecisionLogEntry`, right A and the idempotency rule, and T-A.2 gives the error set as 401, 403, 404, 409, 422 and 503. The defer branch is declared inside it and needs no new path; what the sources do not give is the review-date property and a message ID per condition (GAP-3032; ASM-5059, ASM-5060).
+-- The published `CommitteeDecision` element of API Specification v4 is the baseline of the request: its `decision` enumeration already carries `approve`, `reject` and `defer`, with `resolutionReference` and `membersPresent`.
++- The published `CommitteeDecision` element of API Specification v5 is the baseline of the request: its `decision` enumeration already carries `approve`, `reject` and `defer`, with `resolutionReference` and `membersPresent`.
+ - The rwb-case case row, case-move answers and timer answer and the rwb-decision package row are published with their fakes, so every consumed row names a real owner document; they are not in this story's contract-dependency row, which is None, and the absence is recorded (GAP-3032; ASM-5062, ASM-5063, ASM-5064).
+@@ -57,3 +59,3 @@
+ 1. Draft the defer branch of the OpenAPI 3.1 document of rwb-writeoff for API-S7-002: the operation with its path parameter, its request and answer elements, its rights and its error responses.
+-2. Fix the `CommitteeDecision` element as API Specification v4 publishes it — `decision` with its three members, `resolutionReference` and `membersPresent` — and add `reviewDate` as the one additive optional property the rules require, with its placeholder.
++2. Fix the `CommitteeDecision` element as API Specification v5 publishes it — `decision` with its three members, `resolutionReference` and `membersPresent` — and add `reviewDate` as the one additive optional property the rules require, with its placeholder.
+ 3. Fix the `DecisionLogEntry` element over the ledger properties of DF-DEC-001 to DF-DEC-018 and the write-off reference of DF-FIN-010, with the required list the specification publishes.
+@@ -112,3 +114,3 @@
+     Given the element section of the baseline
+-    When it is compared with API Specification v4, TSD S7 T3.1, T3.2 and T-A.2
++    When it is compared with API Specification v5, TSD S7 T3.1, T3.2 and T-A.2
+     Then the CommitteeDecision element declares decision of type string with the published enumeration approve, reject and defer, resolutionReference of type string and membersPresent as an array of strings, copied exactly
+@@ -174,3 +176,3 @@
+ |---|---|---|
+-| BR1 | The deferral is a branch of rwb-writeoff's committee decision, and the contract declares the fields, the required list and the optionality of the `CommitteeDecision` and `DecisionLogEntry` elements only | TSD S7 T3.1, T-A.2; API Specification v4, `CommitteeDecision` and `DecisionLogEntry`; context pack ownership row (table `write_off`) |
++| BR1 | The deferral is a branch of rwb-writeoff's committee decision, and the contract declares the fields, the required list and the optionality of the `CommitteeDecision` and `DecisionLogEntry` elements only | TSD S7 T3.1, T-A.2; API Specification v5, `CommitteeDecision` and `DecisionLogEntry`; context pack ownership row (table `write_off`) |
+ | BR2 | The decision record is declared as an element written before the case moves and before the timer is armed, through the local library on the shared topic; a failed write changes nothing | DP-03; TSD S7 T2; legacy AC1 and AC3 |
+@@ -186,3 +188,3 @@
+ | BR12 | The defer is a branch of the one published operation and not a second path; the approve and reject branches of the same operation are named as other stories' | TSD S7 T-A.1; ASM-5059 |
+-| BR13 | The review timer is declared and not registered: it is a durable timer of the stage workflow, no Schedule, Quartz row or job table is declared, and the timer row is P3's | Batch and Scheduling Design v4, JOB-05 and JOB-16; ASM-5062 |
++| BR13 | The review timer is declared and not registered: it is a durable timer of the stage workflow, no Schedule, Quartz row or job table is declared, and the timer row is P3's | Batch and Scheduling Design v5, JOB-05 and JOB-16; ASM-5062 |
+ | BR14 | The states `WITH_COMMITTEE`, `DEFERRED` and `SCAN_DUE` are declared as the vocabulary of the answers and of rwb-case's machine, and move no case | TSD S7 T4; Business Rules and Routing Logic v4 rows R-WO-17 and R-WO-19 |
+@@ -224,3 +226,3 @@
+ |---|---|
+-| Request element | `CommitteeDecision`: `decision` of type string with the published members `approve`, `reject` and `defer`, `resolutionReference` of type string, `membersPresent` as an array of strings, copied exactly from API Specification v4 (ASM-5061), plus `reviewDate` of format date as the one additive optional property |
++| Request element | `CommitteeDecision`: `decision` of type string with the published members `approve`, `reject` and `defer`, `resolutionReference` of type string, `membersPresent` as an array of strings, copied exactly from API Specification v5 (ASM-5061), plus `reviewDate` of format date as the one additive optional property |
+ | Answer element | `DecisionLogEntry`: the ledger properties of DF-DEC-001 to DF-DEC-018 and the write-off reference, with the required list `id`, `decisionCode`, `inputsRef`, `finalCall`, `decidedAt`, `prevHash`, `entryHash` and `chainSeq` |
+@@ -247,3 +249,3 @@
+ 
+-The operation answers 400, 401, 403 with MSG-P4-002, 404 for a write-off that is not in the pack, 409 for a case that has left `WITH_COMMITTEE`, 422 with MSG-GEN-001 for an absent review date under R-WO-18 and 503, each with the error envelope and one message ID of section 14. The path, the operation ID, the two element names, the right and the error codes are published in TSD S7 T-A.1 and T-A.2 and API Specification v4; the review-date property and the message per condition carry the placeholder (GAP-3032; ASM-5059, ASM-5060). The approve and reject branches of the same operation belong to RWB-S7-E6018-APP and RWB-S7-E6019-APP, and the module's other published operation, `POST /write-off-scans` (API-S7-001, right C), belongs to RWB-S7-E6013-APP; none of them is declared here.
++The operation answers 400, 401, 403 with MSG-P4-002, 404 for a write-off that is not in the pack, 409 for a case that has left `WITH_COMMITTEE`, 422 with MSG-GEN-001 for an absent review date under R-WO-18 and 503, each with the error envelope and one message ID of section 14. The path, the operation ID, the two element names, the right and the error codes are published in TSD S7 T-A.1 and T-A.2 and API Specification v5; the review-date property and the message per condition carry the placeholder (GAP-3032; ASM-5059, ASM-5060). The approve and reject branches of the same operation belong to RWB-S7-E6018-APP and RWB-S7-E6019-APP, and the module's other published operation, `POST /write-off-scans` (API-S7-001, right C), belongs to RWB-S7-E6013-APP; none of them is declared here.
+ 
+@@ -280,3 +282,3 @@
+ 
+-None. The deferral is a member-driven step and the review wait is a durable timer of the stage workflow, so this baseline declares no Temporal Schedule, no Quartz row, no shared job table and no batch table. `JOB-16`, the write-off scan, becomes the Temporal Schedule of R-WO-01 in RWB-S7-E6013-APP, and `JOB-05` Timer check, which implements TimerScheduler for every caller (Batch and Scheduling Design v4, JOB-05), is rwb-case's; both are named here only as other stories' (ASM-5062).
++None. The deferral is a member-driven step and the review wait is a durable timer of the stage workflow, so this baseline declares no Temporal Schedule, no Quartz row, no shared job table and no batch table. `JOB-16`, the write-off scan, becomes the Temporal Schedule of R-WO-01 in RWB-S7-E6013-APP, and `JOB-05` Timer check, which implements TimerScheduler for every caller (Batch and Scheduling Design v5, JOB-05), is rwb-case's; both are named here only as other stories' (ASM-5062).
+ 
+@@ -376,3 +378,3 @@
+ 
+-The five legacy cases are those of RWB-E6-020 in their legacy order, carried as the contract half: their Covers column names the criterion of this story that fixes the surface each one exercises, their Data keeps the legacy intent, and the business outcome of each is proved by RWB-S7-E6020-APP. The legacy level maps to `Contract` here because the artefact under test is the contract. The five cases `TC-S7-E6020-CON-01` to `-05` are new. The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v7.xlsx, tab Story test cases, under the same ID; no `-ITG` copy is written by this story, and the cross-service journey belongs to the wave 4 harness.
++The five legacy cases are those of RWB-E6-020 in their legacy order, carried as the contract half: their Covers column names the criterion of this story that fixes the surface each one exercises, their Data keeps the legacy intent, and the business outcome of each is proved by RWB-S7-E6020-APP. The legacy level maps to `Contract` here because the artefact under test is the contract. The five cases `TC-S7-E6020-CON-01` to `-05` are new. The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same ID; no `-ITG` copy is written by this story, and the cross-service journey belongs to the wave 4 harness.
+ 
+@@ -406,3 +408,3 @@
+ | Wave and release | Wave 4 and release 30 April 2027 (tentative), copied unchanged from the plan; EP06 and the service wave agree at 4, so no W-MAP conflict is raised (ASM-5058) |
+-| Source text | Legacy RWB-E6-020; FSD S7 Write-off and recovery v3 A2.8, Requirements served and Screens; TSD S7 Write-off and recovery v2 T2, T3.1, T3.2, T4, T5.3, T6.1 and T-A; API Specification v4, `CommitteeDecision` and `DecisionLogEntry`; Business Rules and Routing Logic v4 rows R-WO-17, R-WO-18 and R-WO-19; Batch and Scheduling Design v4, JOB-05 and JOB-16 |
++| Source text | Legacy RWB-E6-020; FSD S7 Write-off and recovery v3 A2.8, Requirements served and Screens; TSD S7 Write-off and recovery v2 T2, T3.1, T3.2, T4, T5.3, T6.1 and T-A; API Specification v5, `CommitteeDecision` and `DecisionLogEntry`; Business Rules and Routing Logic v4 rows R-WO-17, R-WO-18 and R-WO-19; Batch and Scheduling Design v5, JOB-05 and JOB-16 |
+ | Test cases | The five legacy cases as the contract half, and the five new contract cases TC-S7-E6020-CON-01 to -05 |

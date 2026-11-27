@@ -1,0 +1,137 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-ITG-E2008-ITG",
+ "unit": "u04",
+ "rulings": [
+  "R-28747",
+  "R-29300",
+  "R-29301",
+  "R-29302",
+  "R-29896",
+  "R-29897",
+  "R-29898",
+  "R-29899"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 8
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-28747",
+     "item": "GAP-2496",
+     "status": "Resolved",
+     "section": "12.8, 13",
+     "target": "",
+     "change": "",
+     "note": "Metadata rows kept; the eight H rows and four consumed contracts are named in 13 and 12.8. Dependency map entry is left to step D1, as the proposed fix says."
+    },
+    {
+     "ruling": "R-29300",
+     "item": "ACR-RWB-ITG-E2008-ITG-AC1",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "The batch-status Given now reads through the rwb-source-data contract; the payment Given already did."
+    },
+    {
+     "ruling": "R-29301",
+     "item": "ACR-RWB-ITG-E2008-ITG-AC3",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "The batch-status Given now reads through the rwb-source-data contract; the payment Given already did."
+    },
+    {
+     "ruling": "R-29302",
+     "item": "ACR-RWB-ITG-E2008-ITG-AC4",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "No edit needed: the only AC4 Given already reads the rwb-source-data contract fake, not an ACE view."
+    },
+    {
+     "ruling": "R-29896",
+     "item": "NEWAC-RWB-ITG-E2008-ITG-AC10",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "Already covered: existing AC10 and TC-E2-008-11-ITG cover BR8."
+    },
+    {
+     "ruling": "R-29897",
+     "item": "NEWAC-RWB-ITG-E2008-ITG-AC11",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC11 and TC-E2-008-12-ITG added; behaviour from RWB-P8-E2008-APP section 7 AC19."
+    },
+    {
+     "ruling": "R-29898",
+     "item": "NEWAC-RWB-ITG-E2008-ITG-AC12",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC12 and TC-E2-008-13-ITG added; 2 s and retry values from RWB-P8-E2008-APP section 7 AC12 and exception X8."
+    },
+    {
+     "ruling": "R-29899",
+     "item": "NEWAC-RWB-ITG-E2008-ITG-AC13",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "",
+     "note": "AC13 and TC-E2-008-14-ITG added from RWB-P8-E2008-APP section 7 AC21; requesting operation marked Not specified."
+    }
+   ],
+   "edits": [
+    {
+     "old": "  Scenario: AC1 Payment matched (legacy RWB-E2-008 AC1)\n    Given the ACE batch for ALS with business date 2026-12-14 is COMPLETED",
+     "new": "  Scenario: AC1 Payment matched (legacy RWB-E2-008 AC1)\n    Given the rwb-source-data contract answers that the ACE batch for ALS with business date 2026-12-14 is COMPLETED"
+    },
+    {
+     "old": "  Scenario: AC3 Exception (legacy RWB-E2-008 AC3)\n    Given the ACE batch for ALS with business date 2026-12-14 is COMPLETED",
+     "new": "  Scenario: AC3 Exception (legacy RWB-E2-008 AC3)\n    Given the rwb-source-data contract answers that the ACE batch for ALS with business date 2026-12-14 is COMPLETED"
+    },
+    {
+     "old": "    Then the REC-04 result shows 15,500.00 THB for the payments and 15,500.00 THB for the proceeds rows\n```",
+     "new": "    Then the REC-04 result shows 15,500.00 THB for the payments and 15,500.00 THB for the proceeds rows\n\n  Scenario: AC11 Duplicate delivery of a consumed event (BR6)\n    Given the rwb-source-data AceDataReady fake delivered the ALS business date 2026-12-14 and JOB-07 consumed it\n    When the same AceDataReady event is delivered again\n    Then no second matching run is started for 2026-12-14\n    Then no second proceeds row, ProceedsMatched or PaymentMissed is written\n\n  Scenario: AC12 A consumed call does not answer\n    Given the rwb-case open-case fake does not answer within 2 s\n    When JOB-07 runs for business date 2026-12-14\n    Then the activity retries on the workflow policy with 1 s initial, back-off 2 and 10 attempts\n    Then no proceeds row and no ProceedsMatched is written while no answer arrives\n\n  Scenario: AC13 A status change the model does not allow is refused\n    Given plan \"T-0701\" is in state \"PLAN_CURE_PERIOD\"\n    When a movement of plan \"T-0701\" is requested that the status model of rwb-case does not allow\n    Then the movement is refused with a problem+json answer\n    Then no case movement is recorded\n```"
+    },
+    {
+     "old": "AC1, AC3, AC4 and AC5 are the legacy criteria of RWB-E2-008 run across the six contracts, the ALS payment fixture and the JOB-07 window; the harness adds no mock Given to them and rewrites no Given, When or Then. AC10 is the journey criterion for BR8 (REC-04).",
+     "new": "AC1, AC3, AC4 and AC5 are the legacy criteria of RWB-E2-008 run across the six contracts, the ALS payment fixture and the JOB-07 window; the Givens of AC1 and AC3 that read ACE data are written against the rwb-source-data contract (DP-01, DP-05). AC10 is the journey criterion for BR8 (REC-04). AC11, AC12 and AC13 are the journey criteria for a redelivered event, an unanswered consumed call and a refused status movement; the operation that requests the movement of AC13: Not specified in the source documents (NEWAC-RWB-ITG-E2008-ITG-AC13)."
+    },
+    {
+     "old": "| TC-E2-008-11-ITG | AC10, BR8 | Integration | PAY-90001 12,500.00 and PAY-90002 3,000.00 for business date 2026-12-14; REC-04 result of that date |",
+     "new": "| TC-E2-008-11-ITG | AC10, BR8 | Integration | PAY-90001 12,500.00 and PAY-90002 3,000.00 for business date 2026-12-14; REC-04 result of that date |\n| TC-E2-008-12-ITG | AC11, BR6 | Integration | `AceDataReady` for business date 2026-12-14 delivered twice |\n| TC-E2-008-13-ITG | AC12 | Integration | rwb-case open-case fake does not answer within 2 s |\n| TC-E2-008-14-ITG | AC13 | Integration | Movement of plan T-0701 in PLAN_CURE_PERIOD that the status model of rwb-case does not allow |"
+    },
+    {
+     "old": "except TC-E2-008-11-ITG, which has no legacy case and covers AC10 of this story.",
+     "new": "except TC-E2-008-11-ITG to TC-E2-008-14-ITG, which have no legacy case and cover AC10 to AC13 of this story."
+    },
+    {
+     "old": "Each fake is replaced by the real service as its I story lands, without a change to the scenarios.",
+     "new": "Each fake is replaced by the real service as its I story lands, without a change to the scenarios. The consumed contracts that the patterns of §13 add (RWB-P7-E1073-CON, RWB-P3-E1042-CON, RWB-P3-E1043-CON and RWB-P4-E1037-CON) are built against from Day 1 through their published contracts and fakes."
+    },
+    {
+     "old": "The platform H dependencies named by this table are delivered by the platform wave and are not repeated in the metadata H list.",
+     "new": "The platform H dependencies named by this table (RWB-PLT-E1027-CON, RWB-PLT-E1072-CON, RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-E1044-CON and RWB-PLT-N001-CON) are delivered by the platform wave and are not repeated in the metadata H list. The consumed contracts the patterns add are RWB-P7-E1073-CON, RWB-P3-E1042-CON, RWB-P3-E1043-CON and RWB-P4-E1037-CON."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

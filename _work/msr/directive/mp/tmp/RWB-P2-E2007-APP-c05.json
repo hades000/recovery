@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "the last two from the Section B columns of RWB-ACE-001 (RWB-P1-E2007-APP; GAP-0657; ASM-1115).",
+   "new": "the last two from the Section B columns of RWB-ACE-001 (RWB-P1-E2007-APP; GAP-0657; ASM-1115). Until the Section B migration is applied, the read answers `fieldState` NOT_AVAILABLE for the three Section B fields (`principal_outstanding`, `settlement_booked_date`, `settlement_booked_amount`), never a zero amount or a default date, behind the flag `rwb.dataengine.booking-facts` (GAP-0596)."
+  },
+  {
+   "old": "3. `readBookedTerms` activity: asks the rwb-source-data freshness answer for the ALS batch of business date D; a batch that is not COMPLETE ends the run with MSG-P1-001 and no missing-booking task for D, which is the legacy AC5 statement that the integration harness proves end to end.",
+   "new": "3. `readBookedTerms` activity: asks the rwb-source-data batch-status read `GET /batch-status` (sourceSystem ALS, businessDate D) for the ALS batch of business date D, which is the gate read of this match and not the product freshness reads of RWB-P1-E1015-APP; a batch that is not COMPLETE, or no batch row (404), ends the run with MSG-P1-001 and no missing-booking task for D, which is the legacy AC5 statement that the integration harness proves end to end."
+  },
+  {
+   "old": "5. `readBookedTerms` activity: for each treatment, reads the treatment's case accounts through the rwb-source-data contract at business date D together with the booked terms of each account; no account row is copied and nothing is cached in `rwb_integration`.",
+   "new": "5. `readBookedTerms` activity: for each treatment, reads the treatment's case accounts and product group from the case list row for business date D (DF-RPT-005, DF-RPT-007), since `rwb_case.case_account` is not read, and reads the booked terms of each account through the rwb-source-data `GET /booking-facts` read at business date D; the read returns account facts only, with no treatment term, outcome, difference, tolerance or package version, and no account row is copied and nothing is cached in `rwb_integration`."
+  },
+  {
+   "old": "its outcome is read through the treatment, the task list and the reconciliation answer.",
+   "new": "its outcome is read through the treatment, the task list and the reconciliation answer. The two reads this story consumes are published by rwb-source-data in RWB-P2-E2007-CON: `GET /booking-facts` returns account facts as BookingFact records with a FieldState per field (AVAILABLE or NOT_AVAILABLE, no value on NOT_AVAILABLE), and `GET /batch-status` (key sourceSystem and businessDate) returns BatchStatusAnswer with status, isComplete, startedAt, completedAt, recordCount and feedVersion, answering 404 with MSG-P1-001 when no batch row exists; the freshness element beside the facts is the DataProductFreshness record of RWB-P1-E1015-CON. The freshness reads of RWB-P1-E1015-APP remain the product reads (GAP-0594; GAP-0596; GAP-0597)."
+  },
+  {
+   "old": "2. `TreatmentClient` and `SourceDataClient` over their contracts, with the approved-not-booked read, the case-account read and the freshness gate; tests for the gate and the account facts (AC2, AC3, AC4).",
+   "new": "2. `TreatmentClient` and `SourceDataClient` over their contracts, with the approved-not-booked read, the case-account read and the batch-status gate; tests for the gate and the account facts (AC2, AC3, AC4), and a contract test that fails on any outcome-shaped field of the account read (GAP-0598)."
+  },
+  {
+   "old": "and no Schedule is created (GAP-0657; ASM-1114).",
+   "new": "and no Schedule is created (GAP-0657; ASM-1114). Package BOOKING_MATCH is evaluated in this service on the package version in force read through RWB-P3-E2042-CON, through the embedded kit (DP-04; GAP-2485); the treatment state, the task, the route move and the posting stay with their owners."
+  },
+  {
+   "old": "**Done when.** The tests in section 16 pass,",
+   "new": "**Done when.** The composite booking and treatment route path, the harness environment, the evidence format and the pass or fail gate are recorded at the wave 2 entry check (GAP-0395), and the tests in section 16 pass,"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-22384",
+   "item": "GAP-0596",
+   "status": "Resolved",
+   "section": "3, 12",
+   "target": "",
+   "change": "",
+   "note": "Section 3 gives per-field fieldState NOT_AVAILABLE and flag rwb.dataengine.booking-facts; section 12 states the answer. CON must publish the same."
+  },
+  {
+   "ruling": "R-22385",
+   "item": "GAP-0597",
+   "status": "Resolved",
+   "section": "4, 12",
+   "target": "",
+   "change": "",
+   "note": "Step 3 uses GET /batch-status with 404 MSG-P1-001; section 12 names the key pair and six values, and that it is the gate read, not the product freshness reads."
+  },
+  {
+   "ruling": "R-22386",
+   "item": "GAP-0594",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Section 12 names GET /booking-facts and GET /batch-status with BookingFact, BookingFactsAnswer, FieldState, BatchStatusAnswer and DataProductFreshness, to be published in RWB-P2-E2007-CON."
+  },
+  {
+   "ruling": "R-22387",
+   "item": "GAP-0595",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Step 5 reads the case account set and product group from the case list row (DF-RPT-005, DF-RPT-007). rwb_case.case_account is not read."
+  },
+  {
+   "ruling": "R-22388",
+   "item": "GAP-0923",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "TSD P4 (T6.1 RBAC matrix)",
+   "change": "Add Case record and Treatment and offer columns to T6.1 with CASE_RECORD R and U and TREATMENT_AND_OFFER R for RW-RESTRUCT and RW-CREDITAD. Publish the 14-area matrix with RWB-P4-AD002-APP after matrix-owner confirmation.",
+   "note": "The matrix columns belong to TSD P4. The story needs no edit."
+  },
+  {
+   "ruling": "R-22389",
+   "item": "GAP-0922",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "TSD P4 appendix T-A and RWB-P4-E1037-CON",
+   "change": "Add POST /authorise with request and answer schemas to T-A and the TSD P4 object list. Publish and stub it in RWB-P4-E1037-CON. Fix the rwb-access login in the platform DB story. Publish the composite route through gateway-bff (DP-19).",
+   "note": "The authorise path and the rwb-access login belong to TSD P4, the contract and the platform DB story."
+  },
+  {
+   "ruling": "R-22390",
+   "item": "GAP-2485",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Placement kept: BOOKING_MATCH is evaluated here on the package version in force from RWB-P3-E2042-CON. Change Register entry is still needed."
+  },
+  {
+   "ruling": "R-22391",
+   "item": "GAP-0395",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Done-when now records the route path, harness environment, evidence format and gate as fixed at the wave 2 entry check."
+  },
+  {
+   "ruling": "R-22392",
+   "item": "GAP-0598",
+   "status": "Resolved",
+   "section": "4, 12, 13",
+   "target": "",
+   "change": "",
+   "note": "Step 5 and section 12 make GET /booking-facts return account facts only. Build step 2 adds the outcome-field contract test."
+  },
+  {
+   "ruling": "R-22393",
+   "item": "GAP-0658",
+   "status": "Cross-document",
+   "section": "3, 12.1",
+   "target": "RWB-P2-E2007-CON",
+   "change": "Baseline the result shape, task table, envelope, rerun operation, twelve consumed operations and seven fakes, with contract-owner confirmation. Record the JOB-08 ownership correction and the TSD P2 Integration v3 T5.2 supersession in the gap register.",
+   "note": "The contract baseline and register entries belong to CON and the gap register. Architecture v5 slide 44 needs correcting."
+  }
+ ]
+}

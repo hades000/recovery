@@ -1,0 +1,94 @@
+{
+ "edits": [
+  {
+   "old": "| External dependencies | None |",
+   "new": "| External dependencies | None |\n| Flyway migration | V2005_1__declog_approver_index.sql (index only) in the rwb-decision sequence after the RWB-P7-E1008-APP baseline; no file of RWB-P7-E1008-APP is edited |"
+  },
+  {
+   "old": "The measure is the time to answer an audit sample: the first page of a query over 10,000 matching entries in 3 seconds or less, which the legacy story states as assumed (DL11) and no non-functional target fixes yet, so it is carried as a gap and a working read (GAP-1247; ASM-2211).",
+   "new": "The measure is the time to answer an audit sample: the first page of 500 rows over 10,000 matching entries in 3 seconds or less, carried as a working target and tested in SIT as a parameter and not a fixed value; DL11 confirms or replaces the number before the wave 2 exit (GAP-1247; ASM-2211)."
+  },
+  {
+   "old": "    Then nothing is recorded as a successful read",
+   "new": "    Then nothing is recorded as a successful read\n\n  Scenario: AC13 The rules without a criterion hold on every query (new, D-RCV-60)\n    When \"U-8101\" calls GET /decision-log with ruleId \"R-LIT-03\" and ruleVersion \"LIT-2026.12\" and size 500\n    Then no entry is changed or purged, and the service login holds SELECT on decision_log_entry only\n    Then the page is ordered by chain_seq, and personal fields appear only in recommendation and actions\n\n  Scenario: AC14 The provided operations answer 401 without a token and 404 for an absent entry (new, D-RCV-60)\n    When a caller without a valid token calls GET /decision-log\n    Then the call returns status 401 with message Not specified in the source documents (GAP-1249)\n    Then when \"U-8101\" asks by ID for an entry that does not exist in case \"RW-2026-000123\", the call returns status 404 with message MSG-P4-003\n\n  Scenario: AC15 A consumed call that fails or does not answer returns no page (new, D-RCV-60)\n    Given the rwb-access contract mock does not answer within the 2 s budget of BR13\n    When \"U-8101\" calls GET /decision-log with ruleId \"R-LIT-03\" and ruleVersion \"LIT-2026.12\"\n    Then the GET is retried once and the call returns status 503 with message MSG-GEN-006\n    Then no page is returned, not even a partial one"
+  },
+  {
+   "old": "| TC-E2-005-16 | Section 12.7, BR7, BR8, BR17 | Component | Service login tried with a write on decision_log_entry; SELECT only |",
+   "new": "| TC-E2-005-16 | Section 12.7, BR7, BR8, BR17 | Component | Service login tried with a write on decision_log_entry; SELECT only |\n| TC-E2-005-17 | AC13, BR7, BR8, BR9, BR10, BR11, BR12, BR13, BR14, BR15, BR16, BR17 | Component | RW-AUDIT test user and the ledger of DL-AUDIT-01 |\n| TC-E2-005-18 | AC14 | Contract | Call without a token; entry ID that does not exist |\n| TC-E2-005-19 | AC15, BR13 | NFR | rwb-access contract mock held past the 2 s budget |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28717",
+   "item": "GAP-1249",
+   "status": "Resolved",
+   "section": "12",
+   "target": "",
+   "change": "",
+   "note": "Placeholder stands; contract test asserts the 401 status only until the platform catalogue binds MSG-P4-001 to these reads. No edit."
+  },
+  {
+   "ruling": "R-28718",
+   "item": "GAP-1246",
+   "status": "Resolved",
+   "section": "Header; 13",
+   "target": "",
+   "change": "",
+   "note": "Header row names V2005_1__declog_approver_index.sql after the E1008-APP baseline; no E1008 file is edited."
+  },
+  {
+   "ruling": "R-28720",
+   "item": "GAP-1247",
+   "status": "Resolved",
+   "section": "2",
+   "target": "",
+   "change": "",
+   "note": "Target carried as a working value, tested in SIT as a parameter; DL11 confirms or replaces it before wave 2 exit."
+  },
+  {
+   "ruling": "R-31467",
+   "item": "NEWAC-RWB-P7-E2005-APP-AC11",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC11 exists in section 7 and TC-E2-005-13 covers it; X7 Covered by names AC11. No edit needed."
+  },
+  {
+   "ruling": "R-31468",
+   "item": "NEWAC-RWB-P7-E2005-APP-AC12",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC12 exists in section 7 and TC-E2-005-14 covers it; X8 Covered by names AC12. No edit needed."
+  },
+  {
+   "ruling": "R-31469",
+   "item": "NEWAC-RWB-P7-E2005-APP-AC13",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 in section 7 covering BR7 to BR17, with TC-E2-005-17 in section 16."
+  },
+  {
+   "ruling": "R-31470",
+   "item": "NEWAC-RWB-P7-E2005-APP-AC14",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for 401 and 404 with TC-E2-005-18; the 401 message stays a gap (GAP-1249)."
+  },
+  {
+   "ruling": "R-31471",
+   "item": "NEWAC-RWB-P7-E2005-APP-AC15",
+   "status": "Resolved",
+   "section": "7; 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for a failed consumed call with TC-E2-005-19; reuses MSG-GEN-006 and the BR13 single retry."
+  }
+ ]
+}

@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "| MSG-P1-012 | A product group does not reconcile for the business date | The case list for {date} does not reconcile to ACE for {product}: a difference of {variance} accounts, {pct} percent. |",
+   "new": "| MSG-P1-012 | A product group does not reconcile for the business date | The case list for {date} does not reconcile to ALS for {product}: a difference of {variance} accounts, {pct} percent. |"
+  },
+  {
+   "old": "| MSG-P1-001 | The ALS batch of the business date is not complete, or a product is past its expected business date | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | The ALS batch of the business date is not complete, or a product is past its expected business date | {product} is from {date}. Today's load has not arrived. |"
+  },
+  {
+   "old": "The screen keeps the legacy states Loading, breaks, referential completeness and stale (legacy RWB-AD-019 \"Screen and states\"); the first and the fourth of the four above are what this story adds to that list, because a reader of the operation needs to tell \"no break\" from \"not run\".",
+   "new": "The screen keeps the legacy states Loading, breaks, referential completeness and stale (legacy RWB-AD-019 \"Screen and states\"); the first and the fourth of the four above are what this story adds to that list, because a reader of the operation needs to tell \"no break\" from \"not run\".\n\nThe empty, error and no access states of SCR-45 are Not specified in the source documents (CG-ALL-1874), because Screen Specifications v1 does not give them; the loading state is the legacy Loading state named above."
+  },
+  {
+   "old": "    Then the result for that product group is BREAK, the orphan is listed with its table, its column and its key, and the Workbench row and the ACE rows are unchanged",
+   "new": "    Then the result for that product group is BREAK, the orphan is listed with its table, its column and its key, and the Workbench row and the ACE rows are unchanged\n\n  Scenario: AC11 Reconciliation rules hold on every run\n    Given a reconciliation run for one business date\n    When the run completes\n    Then rules BR1, BR2, BR3, BR4, BR5, BR6, BR8, BR9, BR10 and BR14 of section 8 hold for that run\n\n  Scenario: AC12 A provided operation answers 401, 403 or 404\n    Given a caller of GET /api/recovery/source-data/v1/admin/reconciliation/results\n    When the call carries no valid credential, lacks the scope, or names a path the service does not provide\n    Then the answer is 401, 403 or 404 respectively, no row is returned and nothing is written\n\n  Scenario: AC13 A consumed event delivered again after its run has completed\n    Given AceDataReady with an event id has been consumed and its run has completed\n    When the same event is delivered again\n    Then the inbox dedupes it, the workflow starts nothing and no second reconciliation_result row is written\n\n  Scenario: AC14 A run activity is retried or times out\n    Given an activity of the reconciliation run fails or times out\n    When the activity is retried within the retry window of the run\n    Then a retry that completes lets the run continue, and an activity that does not complete ends the run FAILED with no reconciliation_result row written for the date\n\n  Scenario: AC15 A consumed call fails or does not answer\n    Given a call the run consumes, an ACE view or the freshness interface, does not answer\n    When the run reads it\n    Then the run ends FAILED, no reconciliation_result row is written for the date and MSG-GEN-006 is shown\n\n  Scenario: AC16 A status change the model does not allow is refused\n    Given the case list of a business date has a publish_status in case_list_row\n    When a status change that the publish status model does not allow is attempted\n    Then the change is refused, case_list_row keeps its status and no case is changed"
+  },
+  {
+   "old": "| TC-AD-019-12 | BR3; BR10; BR14 | Component | One reconciliation_result row per check and product group with the DF-OPS-118 to DF-OPS-129 fields; the variance and percent are served as the run wrote them |",
+   "new": "| TC-AD-019-12 | BR3; BR10; BR14 | Component | One reconciliation_result row per check and product group with the DF-OPS-118 to DF-OPS-129 fields; the variance and percent are served as the run wrote them |\n| TC-AD-019-13 | AC11; BR1, BR2, BR3, BR4, BR5, BR6, BR8, BR9, BR10, BR14 | Component | A reconciliation run for one business date, each rule of section 8 listed in the Covers column checked against the run |\n| TC-AD-019-14 | AC12 | Component | A call with no valid credential, a call without the scope and a call to a path the service does not provide: answers 401, 403 and 404, with no row returned |\n| TC-AD-019-15 | AC13; BR4 | Component | AceDataReady delivered again after its run has completed: no workflow start and no second reconciliation_result row |\n| TC-AD-019-16 | AC14 | Component | An activity that fails or times out and is retried: the retry runs within the retry window, and an activity that does not complete ends the run FAILED with no row written |\n| TC-AD-019-17 | AC15 | Component | An ACE view or the freshness interface the run consumes does not answer: the run ends FAILED, no row is written and MSG-GEN-006 is shown |\n| TC-AD-019-18 | AC16 | Component | A publish status change the model does not allow: the change is refused and case_list_row keeps its status |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-24222",
+   "item": "CG-ALL-1871",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-012 text in section 14 copied from Error and Message Standard v4 (ALS).",
+   "note": "Story use matches standard's tolerance break raise, so text copied; no new message ID needed."
+  },
+  {
+   "ruling": "R-24223",
+   "item": "CG-ALL-1872",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "MSG-P1-001 text in section 14 copied from Error and Message Standard v4 (Today's load).",
+   "note": "Story use covers the late or failed load case, so text copied; no new message ID needed."
+  },
+  {
+   "ruling": "R-24224",
+   "item": "CG-ALL-1874",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 states that SCR-45 empty, error and no access states are Not specified in the source documents; loading is the legacy state.",
+   "note": "Screen Specifications v1 lacks empty, error and no access; recorded as Not specified in the source documents (CG-ALL-1874)."
+  },
+  {
+   "ruling": "R-28468",
+   "item": "GAP-0271",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "v3 Reconciliations register (sheet Reconciliations)",
+   "change": "Add a Per-service reconciliation sheet with one row per service of the 19, giving tables, check part, key, tolerance, cadence, break and result route, pattern and basis; use the Template and Rules R9 placeholder where no cadence or route is stated.",
+   "note": "Register gap outside this story; story text not changed."
+  },
+  {
+   "ruling": "R-30121",
+   "item": "NEWAC-RWB-P1-AD019-APP-AC10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC11 (section 7) and TC-AD-019-13 (section 16) covering BR1, BR2, BR3, BR4, BR5, BR6, BR8, BR9, BR10, BR14.",
+   "note": "AC10 already in use; next free number AC11 used. Data follows the criterion; no invented value."
+  },
+  {
+   "ruling": "R-30122",
+   "item": "NEWAC-RWB-P1-AD019-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC12 (section 7) and TC-AD-019-14 (section 16) for answers 401, 403 and 404.",
+   "note": "Numbered AC12 after AC11 was taken by item above; codes 401, 403, 404 as given."
+  },
+  {
+   "ruling": "R-30123",
+   "item": "NEWAC-RWB-P1-AD019-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC13 (section 7) and TC-AD-019-15 (section 16) for a redelivered consumed event after its run completed.",
+   "note": "Numbered AC13 as next free AC; covers redelivery after completion, distinct from AC5."
+  },
+  {
+   "ruling": "R-30124",
+   "item": "NEWAC-RWB-P1-AD019-APP-AC13",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC14 (section 7) and TC-AD-019-16 (section 16) for activity retry and timeout within the retry window.",
+   "note": "Numbered AC14 as next free AC; no retry number invented."
+  },
+  {
+   "ruling": "R-30125",
+   "item": "NEWAC-RWB-P1-AD019-APP-AC14",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC15 (section 7) and TC-AD-019-17 (section 16) for a failed or silent consumed call with MSG-GEN-006.",
+   "note": "Numbered AC15 as next free AC; MSG-GEN-006 used as in AC9."
+  },
+  {
+   "ruling": "R-30126",
+   "item": "NEWAC-RWB-P1-AD019-APP-AC15",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC16 (section 7) and TC-AD-019-18 (section 16) for a refused disallowed publish status change.",
+   "note": "Numbered AC16 as next free AC; publish status model not further specified in story."
+  }
+ ]
+}

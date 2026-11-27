@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "| BR6 | Each package version carries at least `rules.testcases.min` scenarios — 50 — and every scenario passes before the version may be approved | REQ-CWC-014; D-RCV-36 T4; legacy BR2 |",
+   "new": "| BR6 | Each package version carries at least `rules.testcases.min` scenarios — 50 — and every scenario passes before the version may be approved | REQ-CWC-014 (BRD Epic 1 v4 section 4; BRD Program v4 section 5.3; the legacy pointer 'Epic 1, 3.3; Epic 2, 3.2 and 3.8; Program, 5.3' is stale); D-RCV-36 T4; legacy BR2 |"
+  },
+  {
+   "old": "| BR14 | `payment_match_rule` is never created in `rwb_decision`; DF-REF-261 to DF-REF-273 stay retired and no migration, rule row, test or query references them | D-RCV-36 T10; legacy BR5 |",
+   "new": "| BR14 | `payment_match_rule` is never created in `rwb_decision`; the match rules are the PAYMENT_MATCH package of the registry and the proceeds rows stay in `rwb-payment`; DF-REF-261 to DF-REF-273 stay retired and no migration, rule row, test or query references them | D-RCV-36 T10; legacy BR5; GAP-1994 |"
+  },
+  {
+   "old": "| BR11 | Every governance action — load, approve, promote, roll back — writes one hash-chained decision record in the same transaction, and an action whose record cannot be written is not taken | FSD P7 v3 VR-P7-001-2 and principle 5; R-UNI-39; DP-03; legacy BR9 |",
+   "new": "| BR11 | Every governance action — load, approve, promote, roll back — writes one hash-chained decision record in the same transaction, and an action whose record cannot be written is not taken. The package code and the checksum of a version are carried on that decision record and on no notice, template or merge_field; the two field IDs of the record that carry them are Not specified in the source documents (GAP-2397) and are to be confirmed by the decision-record owner | FSD P7 v3 VR-P7-001-2 and principle 5; R-UNI-39; DP-03; legacy BR9; GAP-2397 |"
+  },
+  {
+   "old": "| BR15 | The registry is read, not evaluated: this story never evaluates a package for a case, never caches a KieBase and never reads another service's schema | Arch v5 slide 27; DP-04; DP-05 |",
+   "new": "| BR15 | The registry is read, not evaluated: this story never evaluates a package for a case, never caches a KieBase and never reads another service's schema. The PAYMENT_MATCH package is owned and evaluated by rwb-treatment (S2), and the matchPayments activity of rwb-payment asks S2 for the answer through S2's contract; this is an assumption until the package is authored. UNIVERSAL (R-UNI-01 to 50) is authored, scenario-tested and approved in rwb-decision (P7) and is evaluated in every service from its own copy of the same approved version | Arch v5 slide 27; DP-04; DP-05; GAP-2026; GAP-2034 |"
+  },
+  {
+   "old": "    Then the 93-table count of the legacy criterion is not asserted here, because it is the monolith schema's and RWB-P3-E2042-APP's",
+   "new": "    Then the 93-table count of the legacy criterion is not asserted here, because it is the monolith schema's and RWB-P3-E2042-APP's\n\n  Scenario: AC10 The version states and the business values are rows and parameters, and the package read evaluates nothing (new, D-RCV-60)\n    Given the registry holds RESTRUCTURE, PAYMENT_MATCH and BOOKING_MATCH with their versions\n    When the registry schema check and the package read run against rwb_decision\n    Then the version states written are LOADED, APPROVED, IN_FORCE, SUPERSEDED, ROLLED_BACK and REFUSED and no other value\n    Then the business values of BR13 are read from rule_package, rule_package_version and the parameters and none of them is code\n    Then the package read evaluates no case, caches no KieBase and reads no other service's schema\n\n  Scenario: AC11 The provided operations answer 401 without a caller, 403 to a caller without the right and 404 for an unknown version (new, D-RCV-60)\n    Given a request to the approve operation is sent without authentication\n    When the request reaches POST /api/recovery/decision/v1/admin/rule-package-versions/{versionId}/approve\n    Then the answer is 401 and no version state changes\n    Given a caller without the Rules and parameters A right holds a LOADED version\n    When the caller calls POST /api/recovery/decision/v1/admin/rule-package-versions/{versionId}/approve for that version\n    Then the answer is 403 and the version stays LOADED with no approver\n    Given no version carries the version identifier used in the call\n    When a caller calls POST /api/recovery/decision/v1/admin/rule-package-versions/{versionId}/approve for that identifier\n    Then the answer is 404 and no decision record is written\n\n  Scenario: AC12 A replay of a write with the same idempotency key changes nothing and returns the answer of the first call (new, D-RCV-60)\n    Given version RES-2026.12 was loaded by a write carrying an idempotency key\n    When the same write is replayed with the same idempotency key\n    Then no version row, rule row, test case or decision record is written a second time\n    Then the answer is the answer of the first call"
+  },
+  {
+   "old": "The nine criteria are new under D-RCV-60 and they test only the registry",
+   "new": "The twelve criteria are new under D-RCV-60 and they test only the registry"
+  },
+  {
+   "old": "| TC-E2-042-08 | BR1, BR10, BR13, BR15 | Component | The version states, the business values held as rows and parameters, and a package read but not evaluated for a case |",
+   "new": "| TC-E2-042-08 | AC10, BR1, BR10, BR13, BR15 | Component | The version states, the business values held as rows and parameters, and a package read but not evaluated for a case |\n| TC-E2-042-09 | AC11, BR12 | Contract | An approve call without authentication, by a caller without the Rules and parameters A right, and for an unknown version identifier |\n| TC-E2-042-10 | AC12, BR11 | Contract | A load or approve write replayed with the same idempotency key |"
+  },
+  {
+   "old": "(GAP-1296; ASM-2306).",
+   "new": "(GAP-1296; GAP-2398; ASM-2306)."
+  },
+  {
+   "old": "They are recorded in GAP-1296 and ASM-2306:",
+   "new": "They are recorded in GAP-1296, GAP-2398 and ASM-2306:"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28868",
+   "item": "GAP-1303",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR6 source now cites BRD Epic 1 v4 section 4 and BRD Program v4 section 5.3; legacy pointer marked stale, not deleted."
+  },
+  {
+   "ruling": "R-28869",
+   "item": "GAP-1994",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR14 states match rules are the PAYMENT_MATCH registry package and proceeds rows stay in rwb-payment."
+  },
+  {
+   "ruling": "R-28870",
+   "item": "GAP-2026",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR15 assigns PAYMENT_MATCH ownership and evaluation to rwb-treatment (S2) as an assumption until the package is authored."
+  },
+  {
+   "ruling": "R-28871",
+   "item": "GAP-2034",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR15 states UNIVERSAL is authored in rwb-decision and evaluated in every service from its own copy of the approved version."
+  },
+  {
+   "ruling": "R-28872",
+   "item": "GAP-2397",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR11 keeps the pin on the decision record, adds no notice column; the two field IDs remain Not specified, for owner confirmation."
+  },
+  {
+   "ruling": "R-28873",
+   "item": "GAP-1296",
+   "status": "Resolved",
+   "section": "3, 13",
+   "target": "",
+   "change": "",
+   "note": "Metadata kept as written; the DP-added H and C dependencies are carried in sections 3 and 13 and cite GAP-1296; Ready to start stays Day 1."
+  },
+  {
+   "ruling": "R-28874",
+   "item": "GAP-2398",
+   "status": "Resolved",
+   "section": "3, 13",
+   "target": "",
+   "change": "",
+   "note": "Eleven DP-added rows carried in sections 3 and 13 with GAP-2398 cited; metadata rows unchanged; Day 1 holds."
+  },
+  {
+   "ruling": "R-31547",
+   "item": "NEWAC-RWB-P7-E2042-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC10 added covering BR1, BR10, BR13, BR15; TC-E2-042-08 Covers now includes AC10."
+  },
+  {
+   "ruling": "R-31548",
+   "item": "NEWAC-RWB-P7-E2042-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 added for 401, 403 and 404; TC-E2-042-09 added at Contract level."
+  },
+  {
+   "ruling": "R-31549",
+   "item": "NEWAC-RWB-P7-E2042-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 added for idempotency-key replay; TC-E2-042-10 added at Contract level."
+  }
+ ]
+}

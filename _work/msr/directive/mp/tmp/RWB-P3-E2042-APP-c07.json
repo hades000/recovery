@@ -1,0 +1,58 @@
+{
+ "edits": [
+  {
+   "old": "| Depends on (build) | RWB-P3-E2042-CON, RWB-PLT-E1027-CON, RWB-PLT-E1072-CON, RWB-PLT-E1042-CON, RWB-P3-E1042-CON, RWB-PLT-E1043-CON, RWB-P3-E1043-CON, RWB-PLT-E1071-CON, RWB-PLT-E1047-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON, RWB-P3-E1073-APP |",
+   "new": "| Depends on (build) | None |"
+  },
+  {
+   "old": "| Contract dependencies | None |",
+   "new": "| Contract dependencies | RWB-P3-E2042-CON |"
+  },
+  {
+   "old": "    Then the build fails if any migration in the release creates payment_match_rule",
+   "new": "    Then the build fails if any migration in the release creates payment_match_rule\n\n  Scenario: AC7 rwb-case holds only evaluated copies and writes no rule governance rows (BR6, BR8, BR10, BR11, BR13)\n    Given rwb-case holds package \"PAYMENT_MATCH\" version \"PMT-2026.12\" in force on 2026-12-15\n    When rwb-case builds the KieBase and stores it in the cache\n    Then the RuleSet of the workbook is \"PAYMENT_MATCH\" and the version label is \"PMT-2026.12\"\n    Then the cache keeps at most 20 KieBase instances, one per package version, and no KieBase is edited in place\n    Then an open case keeps the package version it was decided under when a newer version reaches its valid-from date\n    Given the fetched model for \"PAYMENT_MATCH\" version \"PMT-2026.12\" has a SHA-256 that differs from the announced checksum\n    When rwb-case verifies the model before use\n    Then the KieBase is not used, the last good model stays in force and the package is alerted\n    Then no code in rwb-case writes rule_package, rule_package_version, rule_row or rule_test_case\n\n  Scenario: AC8 an activity that is retried or times out does not record a decision\n    Given the EvaluateRules activity for case \"RW-2026-000777\" is started against package \"RESTRUCTURE\" version \"RES-2026.12\"\n    When the activity fails and is retried\n    Then the retry runs against the same package version and the case keeps its decided version\n    When the activity exceeds its timeout\n    Then the timed-out attempt is not recorded as a decision and the activity is retried\n\n  Scenario: AC9 a status change the model does not allow is refused\n    Given package version \"PMT-2026.12\" is APPROVED and in force on 2026-12-15\n    When a status change to a state that the model does not allow is requested for that version\n    Then the change is refused and version \"PMT-2026.12\" stays APPROVED\n    Then the refusal is recorded and no rule_row is changed"
+  },
+  {
+   "old": "| TC-E2-042-12 | BR13 | Component | No rwb-case code writes rule_package, rule_package_version, rule_row or rule_test_case |",
+   "new": "| TC-E2-042-12 | BR13 | Component | No rwb-case code writes rule_package, rule_package_version, rule_row or rule_test_case |\n| TC-E2-042-13 | AC7, BR6, BR8, BR10, BR11, BR13 | Component | PAYMENT_MATCH PMT-2026.12 in cache; checksum mismatch; no write to rule tables |\n| TC-E2-042-14 | AC8 | Component | EvaluateRules activity on RESTRUCTURE RES-2026.12, retried and timed out |\n| TC-E2-042-15 | AC9 | Component | PMT-2026.12 APPROVED; disallowed status change requested |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28874",
+   "item": "GAP-2398",
+   "status": "Not applied",
+   "section": "13, 18",
+   "target": "",
+   "change": "Depends on (build) set to None and Contract dependencies to RWB-P3-E2042-CON",
+   "note": "Header metadata set to Work Package values. Section 13 and 18 DP rows are not in this chunk and need a later chunk."
+  },
+  {
+   "ruling": "R-30727",
+   "item": "NEWAC-RWB-P3-E2042-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 scenario and TC-E2-042-13",
+   "note": "AC7 covers BR6, BR8, BR10, BR11 and BR13 with its test case row."
+  },
+  {
+   "ruling": "R-30728",
+   "item": "NEWAC-RWB-P3-E2042-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 scenario and TC-E2-042-14",
+   "note": "AC8 covers activity retry and timeout with its test case row."
+  },
+  {
+   "ruling": "R-30729",
+   "item": "NEWAC-RWB-P3-E2042-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 scenario and TC-E2-042-15",
+   "note": "AC9 covers refusal of a disallowed status change with its test case row."
+  }
+ ]
+}

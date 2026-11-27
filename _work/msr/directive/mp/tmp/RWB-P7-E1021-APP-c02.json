@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "| `rwb.decision.RulePackageInForce.v1` | `rwb.decision.events.v1` | packageCode | JOB-20 at 00:01, or a rollback | EV-30; the owning service takes the package code and the version label from it, fetches the model on 12.1 and verifies the checksum |",
+   "new": "| `rwb.decision.RulePackageInForce.v1` | `rwb.decision.events.v1` | packageCode | JOB-20 at 00:01, or a rollback | EV-30 with approvedby, packagecode, packageversion, validfrom and versionid; the owning service takes the package code and the version label from it, fetches the model on 12.1 and verifies the checksum |"
+  },
+  {
+   "old": "No name, account number, amount or document text is copied into the entry.",
+   "new": "No name, account number, amount or document text is copied into the entry. The route-decided trigger of TRF-002 is read as the route-decided fact that rwb-case commits as rwb.case.CaseStateChanged.v1 and is asserted in wave 1; the RouteDecided announcement of rwb-valuation is asserted separately when that service lands in wave 3 (assumption, GAP-0346)."
+  },
+  {
+   "old": "    Then the inbound coordinate is not committed, the record stays on the topic and the entry is appended when the store returns",
+   "new": "    Then the inbound coordinate is not committed, the record stays on the topic and the entry is appended when the store returns\n  Scenario: AC8 A decision code outside LOV-DECISION is refused before any append and names the field (new, D-RCV-60)\n    Given the rwb-case contract mock returns a DecisionRecorded event \"EV-9a04-0002\" for case \"RW-2026-000304\" with decision code \"D99\"\n    When the event arrives on \"rwb.decision-record.v1\"\n    Then the record is refused with MSG-P7-009 naming \"decisionCode\"\n    Then no decision_log_entry is appended and no chain_seq is used"
+  },
+  {
+   "old": "The authorisation decision is the cached permission decision from rwb-access that the service template's guard already holds; DP-08 is not in this slice's pattern set, so this story adds no guard of its own.",
+   "new": "The authorisation decision on every REST operation of this service is the rwb-access authorise check, a cached permission decision that the service template's guard calls before the operation runs; its operation name is Not specified in the source documents (DP-08). DP-08 is not in this slice's pattern set, so this story adds no guard of its own."
+  },
+  {
+   "old": "| TC-E1-021-18 | AC5, AC6: the owned rows are read in row order from TRF-001 to TRF-009 and the decision log page size runs from 1 to 500 | Component | Package TRANSFER \"TRF-2026.11\" with rows TRF-001 and TRF-009; decision log read of case `RW-2026-000301` with size 1 and size 500 |",
+   "new": "| TC-E1-021-18 | AC5, AC6: the owned rows are read in row order from TRF-001 to TRF-009 and the decision log page size runs from 1 to 500 | Component | Package TRANSFER \"TRF-2026.11\" with rows TRF-001 and TRF-009; decision log read of case `RW-2026-000301` with size 1 and size 500 |\n| TC-E1-021-19 | AC6, BR8: the model read serves TRF-2026.11 in state IN_FORCE with its checksum and row order, and refuses a LOADED version and a checksum mismatch | Component | Package TRANSFER \"TRF-2026.11\" in state IN_FORCE with checksum \"SHA-256-TRF-2026-11\"; a version in state LOADED; the stored checksum changed so it no longer matches the compiled model |\n| TC-E1-021-20 | AC8, BR4: a decision code outside LOV-DECISION is refused before any append and the refusal names decisionCode | Component | DecisionRecorded event \"EV-9a04-0002\" for case `RW-2026-000304` with decision code \"D99\"; MSG-P7-009 naming \"decisionCode\" |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11186",
+   "item": "CG-ALL-6908",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "Payload of RulePackageInForce row now lists approvedby, packagecode, packageversion, validfrom and versionid",
+   "note": "Payload aligned with Kafka Catalog v1 EV-30 field list; consumer behaviour unchanged."
+  },
+  {
+   "ruling": "R-11187",
+   "item": "CG-ALL-6909",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for the ledger schema refusal (ruleVersion, decisionCode, versions, state or checksum); the story cites it once it exists",
+   "note": "New ID needed from the standard; no story edit until it exists. MSG-P7-009 stays as cited until then."
+  },
+  {
+   "ruling": "R-11188",
+   "item": "CG-ALL-6910",
+   "status": "Cross-document",
+   "section": "4, 14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for the decision log chain break on the page; the story cites it once it exists",
+   "note": "New ID needed from the standard; no story edit until it exists. MSG-P7-012 stays as cited until then."
+  },
+  {
+   "ruling": "R-11189",
+   "item": "CG-ALL-6912",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "TC-E1-021-19 added for AC6 (IN_FORCE model read, row order, LOADED and checksum refusals)",
+   "note": "TC-E1-021-17 and -18 already touched AC6; the new row gives AC6 its own test case."
+  },
+  {
+   "ruling": "R-17918",
+   "item": "DOR-RWB-P7-E1021-APP-10",
+   "status": "Cross-document",
+   "section": "n/a",
+   "target": "RWB-P3-E1021-APP",
+   "change": "Define empty, loading, error and no-access states for screen SCR-03",
+   "note": "SCR-03 belongs to rwb-case (P3), not to this service story, which has no screen."
+  },
+  {
+   "ruling": "R-17919",
+   "item": "DOR-RWB-P7-E1021-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "AC8 added for BR4 with TC-E1-021-20",
+   "note": "BR4 now covered by a criterion and a test case; AC4 keeps its decisionCode refusal unchanged."
+  },
+  {
+   "ruling": "R-17920",
+   "item": "DOR-RWB-P7-E1021-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "Section 10 names the rwb-access authorise check on every REST operation; its operation name is a placeholder",
+   "note": "Operation name not in sources; marked Not specified (DP-08). Story now names the check it relies on."
+  },
+  {
+   "ruling": "R-17921",
+   "item": "DOR-RWB-P7-E1021-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add new message IDs for the ledger schema refusal and the chain break; story cites them once they exist",
+   "note": "Same two new IDs as CG-ALL-6909 and CG-ALL-6910; no story edit until they exist."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "BRD",
+   "change": "State in section 8.2 that the business-epic wave is kept and the service starts in its own wave; delivery lead confirms wave per story at build sequencing",
+   "note": "Story keeps Wave 1 per R5.6; the rule belongs in the BRD, not this story."
+  },
+  {
+   "ruling": "R-22009",
+   "item": "GAP-0346",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Flow step 5 records the route-decided trigger as rwb.case.CaseStateChanged.v1 in wave 1, with S1 RouteDecided asserted in wave 3 (assumption)",
+   "note": "Assumption recorded in the story; no value invented."
+  }
+ ]
+}

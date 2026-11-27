@@ -1,0 +1,129 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E1055-APP",
+ "unit": "u02",
+ "rulings": [
+  "R-16018",
+  "R-16019",
+  "R-16021",
+  "R-16022",
+  "R-22178",
+  "R-22179",
+  "R-22182",
+  "R-30615"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 6
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-16018",
+     "item": "DOR-RWB-P3-E1055-APP-11",
+     "status": "Resolved",
+     "section": "17",
+     "target": "",
+     "change": "Guardrail bullet no longer lists the barcode among the fields carried and names DF-ACE-078 as not read",
+     "note": "The field carried in the §17 list while §11 says none is was the barcode; it now stays with rwb-comms and DF-ACE-078 is named as not read (masked field, Test Cases v8 TC-E1-037-08)."
+    },
+    {
+     "ruling": "R-16019",
+     "item": "DOR-RWB-P3-E1055-APP-12",
+     "status": "Cross-document",
+     "section": "16, 18",
+     "target": "Recovery Workbench Test Cases v8; Recovery Workbench Requirements Traceability Matrix v7",
+     "change": "Add story test cases TC-E1-055-13 to TC-E1-055-21 with their Given, When and Then, and align the RTM v7 test lists of REQ-OCC-003, REQ-ILG-004 and REQ-DRI-006 with the section 18 lists",
+     "note": "The §12.7 boundary test (ASM-3438) is TC-E1-055-17 and the new criterion has TC-E1-055-21 in §16; the workbook rows and RTM lists are outside this story."
+    },
+    {
+     "ruling": "R-16021",
+     "item": "DOR-RWB-P3-E1055-APP-4",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "AC12 added in section 7 and TC-E1-055-21 in section 16, covering BR1, BR2, BR6, BR7 and BR8",
+     "note": "One criterion and one test case now cover the five rules; the rule table of section 8 is unchanged."
+    },
+    {
+     "ruling": "R-16022",
+     "item": "DOR-RWB-P3-E1055-APP-9",
+     "status": "Resolved",
+     "section": "14, 12.1",
+     "target": "",
+     "change": "MSG-P4-001 now carries the standard's meaning, when and English text",
+     "note": "Text from Error and Message Standard v4 table 3 row 96: 'You have no Recovery Workbench role. Ask your team manager to request one.' The 401 error line follows."
+    },
+    {
+     "ruling": "R-22178",
+     "item": "GAP-0578",
+     "status": "Cross-document",
+     "section": "1, 11, 19",
+     "target": "RWB-P1-E1055-APP; RWB-P1-E1066-APP",
+     "change": "Give the delivery entry to rwb-source-data: its ledger writer records it inside the same transaction as the pod read, against the caseId the caller names on the read; rwb-comms writes only the dispatch entry through POST /api/recovery/source-data/v1/cases/{caseId}/interactions; a read without caseId writes nothing",
+     "note": "This story writes no ledger entry (§1, §11, §19 give it to rwb-source-data); the write path is settled in the two rwb-source-data stories, per the item's proposed fix."
+    },
+    {
+     "ruling": "R-22179",
+     "item": "GAP-0580",
+     "status": "Cross-document",
+     "section": "5, 7",
+     "target": "RWB-P6-E1055-APP",
+     "change": "Count each repeat of a proof-of-delivery read as one increment of data_product_load.duplicate_count on the DP07 stamp of the business date (DF-OPS-009); write no interaction-ledger row and no log-only hit for the repeat",
+     "note": "Counter taken from the item (TSD P1 v3 T3.6/T3.7, FSD P1 v3 A2.14.2); §5 X3 here counts only the inbox repeat of the fact."
+    },
+    {
+     "ruling": "R-22182",
+     "item": "GAP-0366",
+     "status": "Cross-document",
+     "section": "1, 12.6",
+     "target": "RWB-P6-E1055-APP; RWB-P1-E1055-APP",
+     "change": "Run JOB-10 as the Airflow file window plus the P6 NoticeDispatchWorkflow, let rwb-integration deliver the INT-14 file and return the acknowledgment, read the pod rows and freshness through rwb-source-data, write the letter interaction through rwb-source-data's ledger writer and prove the P3 timer from NoticeDelivered, keeping every legacy value, barcode, date and message",
+     "note": "This story already matches the target: §1, §11 and §12.6 give JOB-10, the pod read and the ledger to rwb-comms and rwb-source-data; the move lands in those two stories."
+    },
+    {
+     "ruling": "R-30615",
+     "item": "NEWAC-RWB-P3-E1055-APP-AC12",
+     "status": "Resolved",
+     "section": "7, 16",
+     "target": "",
+     "change": "AC12 added to section 7 with its Scenario line ending (new, D-RCV-60) and TC-E1-055-21 to section 16",
+     "note": "The five rules are asserted in one criterion and its component test case; no new story key and no new value outside the story was used."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then the response is status 403 with MSG-P4-002",
+     "new": "    Then the response is status 403 with MSG-P4-002\n\n  Scenario: AC12 The five rules with no criterion are asserted together (new, D-RCV-60)\n    Given notice \"N-0001\" for case \"RC-2026-000123\" was sent for registered mail on 2026-11-26 with barcode \"RR123456789TH\"\n    And NOTICE_PERIOD_DAYS 30 calendar days is in force for \"MORTGAGE\" on 2026-11-28 within the catalog range 1 to 365\n    When the NoticeDelivered for \"N-0001\" with call-back date 2026-11-28 is consumed\n    Then the NOTICE_PERIOD timer has started_at 2026-11-28 and expires_at 2026-12-28, not the print date 2026-11-26\n    Then the timer row holds the notice reference \"N-0001\" and the two dates only, and no notice state, barcode or address\n    When the same NoticeDelivered event is delivered again with the same event ID\n    Then case \"RC-2026-000123\" has one NOTICE_PERIOD timer and the repeat is counted under rule \"R-UNI-40\"\n    Then only NoticeClockBoundary writes the NOTICE_PERIOD row and no caller writes or updates the timer row"
+    },
+    {
+     "old": "| TC-E1-055-20 | AC15 | Component | Not specified in the source documents (NEWAC-RWB-P3-E1055-APP-AC15) |",
+     "new": "| TC-E1-055-20 | AC15 | Component | Not specified in the source documents (NEWAC-RWB-P3-E1055-APP-AC15) |\n| TC-E1-055-21 | AC12, BR1, BR2, BR6, BR7, BR8 | Component | Notice \"N-0001\" delivered 2026-11-28 on a MORTGAGE case with NOTICE_PERIOD_DAYS 30 calendar days in force; the same event delivered twice |"
+    },
+    {
+     "old": "- No personal data in events, workflow history, logs or prompts: the case number, the notice reference, two dates, a barcode and codes only; no name, address or notice text enters `rwb_case`.",
+     "new": "- No personal data in events, workflow history, logs or prompts: the case number, the notice reference, two dates and codes only; the barcode stays with `rwb-comms` and the contact address (DF-ACE-078) is not read, so no name, address or notice text enters `rwb_case`."
+    },
+    {
+     "old": "| MSG-P4-001 | No session on a read | Your session has ended. Sign in again. |",
+     "new": "| MSG-P4-001 | A read without a Workbench role or a valid session | You have no Recovery Workbench role. Ask your team manager to request one. |"
+    },
+    {
+     "old": "MSG-P3-034 uses the English text of the Error and Message Standard v4; MSG-P3-004 is the case record text of the timers story;",
+     "new": "MSG-P3-034 and MSG-P4-001 use the English text of the Error and Message Standard v4; MSG-P3-004 is the case record text of the timers story;"
+    },
+    {
+     "old": "Errors: 401 no session (MSG-P4-001), 403 no Case record R (MSG-P4-002), 404 unknown or out of scope (MSG-P4-003), 503 store down.",
+     "new": "Errors: 401 no Workbench role or no valid session (MSG-P4-001), 403 no Case record R (MSG-P4-002), 404 unknown or out of scope (MSG-P4-003), 503 store down."
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

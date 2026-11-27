@@ -1,0 +1,54 @@
+{
+ "edits": [
+  {
+   "old": "| X6 | The token carries no Workbench role | No answer is given: 401 before the policy is read | MSG-P4-001 | AC10 |",
+   "new": "| X6 | The token carries no Workbench role | No answer is given: 401 before the policy is read | MSG-P4-001 | AC10, AC11 |"
+  },
+  {
+   "old": "    Then the answer is status 401 with message MSG-P4-001, before the permission policy is read",
+   "new": "    Then the answer is status 401 with message MSG-P4-001, before the permission policy is read\n\n  Scenario: AC11 A token with no Workbench role gets no permission view (new, D-RCV-60)\n    Given a test user holds a token that carries no Workbench role\n    When the caller calls GET /api/recovery/access/v1/me/permissions\n    Then the answer is status 401 with message MSG-P4-001 and names no role, matrix version or scope\n    Then no role, permission row or matrix version is read for the caller\n\n  Scenario: AC12 The service holds only its own tables and writes the entry through the library (new, D-RCV-60)\n    Given the rwb-access service is built from its code and configuration\n    When the architecture guardrail scans rwb-access for case-side reads and hard-coded values\n    Then no table of \"rwb_case\", no rwb-case operation and no \"v_ace_*\" view is read, and nothing is copied into \"rwb_access\"\n    Then the service holds only role, permission, masking_rule, the decision record and the outbox\n    Then no role code, area, letter or scope value is written in Java, and the entry is relayed on \"rwb.decision-record.v1\" only\n\n  Scenario: AC13 Each error answer carries its status code and message ID (new, D-RCV-60)\n    Given test user \"U-7104\" holds RW-REFADM, which has no CASE_RECORD row in \"PM-2026.12\"\n    When the caller asks POST /api/recovery/access/v1/authorise for area \"CASE_RECORD\", right \"R\" and case \"RW-2026-000310\"\n    Then the error answers of both operations use only the status codes and message IDs listed in section 5, namely 401 MSG-P4-001, 403 MSG-P4-002, 404 MSG-P4-003, 503 MSG-GEN-006 and 503 MSG-P7-003\n    Then each error answer carries no case data\n\n  Scenario: AC14 A replayed write with the same idempotency key writes nothing new (new, D-RCV-60)\n    Given test user \"U-7101\" holds RW-CASEOWN with scope \"OWN\" and owns case \"RW-2026-000310\"\n    And the caller has already asked POST /api/recovery/access/v1/authorise for area \"CASE_RECORD\", right \"R\" and case \"RW-2026-000310\" under matrix version \"PM-2026.12\" with an idempotency key\n    When the caller replays the same POST /api/recovery/access/v1/authorise with the same idempotency key\n    Then the replayed answer equals the first answer with decision code \"AC-READ\" and matrix version \"PM-2026.12\"\n    Then no second access entry is written and the entry count is unchanged"
+  },
+  {
+   "old": "| TC-E2-002-17 | AC8, BR8 | Component | Caller asks for case RW-2026-000310 with no owner attribute in the request; answered 404 MSG-P4-003 with no case data, no rwb_case read and one AC-DENY entry |",
+   "new": "| TC-E2-002-17 | AC8, BR8 | Component | Caller asks for case RW-2026-000310 with no owner attribute in the request; answered 404 MSG-P4-003 with no case data, no rwb_case read and one AC-DENY entry |\n| TC-E2-002-18 | AC11, BR1 | Component | Token with no Workbench role asks for GET /me/permissions; answered 401 MSG-P4-001 with no role, matrix version or scope returned |\n| TC-E2-002-19 | AC12, BR5, BR8, BR11 | Component | Architecture guardrail scan of rwb-access: no rwb_case table, rwb-case operation or v_ace_* view read; no role, area, letter or scope value in Java; entry relayed on rwb.decision-record.v1 only |\n| TC-E2-002-20 | AC13 | Contract | POST /authorise and GET /me/permissions error answers checked against the rwb-access contract fake; each status code and message ID matches section 5 |\n| TC-E2-002-21 | AC14, BR4, BR7 | End to end | Same POST /authorise repeated with the same idempotency key under PM-2026.12; the replayed answer equals the first and no second AC-READ entry is written |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30906",
+   "item": "NEWAC-RWB-P4-E2002-APP-AC11",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 (no-role token gets 401 on GET /me/permissions, no role read) and TC-E2-002-18; X6 now covered by AC10, AC11."
+  },
+  {
+   "ruling": "R-30907",
+   "item": "NEWAC-RWB-P4-E2002-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 boundary/guardrail criterion covering BR5, BR8, BR11 and TC-E2-002-19 for the architecture guardrail scan."
+  },
+  {
+   "ruling": "R-30908",
+   "item": "NEWAC-RWB-P4-E2002-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 naming the section 5 status codes and message IDs for error answers and TC-E2-002-20 contract row."
+  },
+  {
+   "ruling": "R-30909",
+   "item": "NEWAC-RWB-P4-E2002-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 for replay with the same idempotency key (no second entry, same answer) and TC-E2-002-21. Header name not specified in source."
+  }
+ ]
+}

@@ -1,0 +1,107 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P1-E2008-APP",
+ "unit": "u02",
+ "rulings": [
+  "R-30286",
+  "R-30287",
+  "R-30288",
+  "R-30289",
+  "R-30290"
+ ],
+ "steps": [
+  {
+   "model": "claude-sonnet-5-5",
+   "effort": "medium",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 8
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-30286",
+     "item": "NEWAC-RWB-P1-E2008-APP-AC11",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "X6 is covered by story AC8, now extended to malformed values and accountKey; TC-E2-008-14 updated."
+    },
+    {
+     "ruling": "R-30287",
+     "item": "NEWAC-RWB-P1-E2008-APP-AC12",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "X7 is covered by story AC9, now extended to a view answering an error; TC-E2-008-15 updated."
+    },
+    {
+     "ruling": "R-30288",
+     "item": "NEWAC-RWB-P1-E2008-APP-AC13",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "X8 is covered by story AC10, now extended to both reads; TC-E2-008-16 updated."
+    },
+    {
+     "ruling": "R-30289",
+     "item": "NEWAC-RWB-P1-E2008-APP-AC14",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "BR8 already has a criterion and a test: AC6 with TC-E2-008-17, which covers AC6 and BR8. No edit needed for this item."
+    },
+    {
+     "ruling": "R-30290",
+     "item": "NEWAC-RWB-P1-E2008-APP-AC15",
+     "status": "Resolved",
+     "section": "7",
+     "target": "",
+     "change": "",
+     "note": "403 is in AC10, 404 in AC7; 401 added as AC12 and TC-E2-008-19, with MSG-P4-001 as stated in section 12 of the story."
+    }
+   ],
+   "edits": [
+    {
+     "old": "    Then the answer is 400 with a problem body that names the field businessDate and carries MSG-GEN-001\n    Then no view is read\n",
+     "new": "    Then the answer is 400 with a problem body that names the field businessDate and carries MSG-GEN-001\n    Then no view is read\n    Then a call of either read with a malformed businessDate, and an installment-facts call with a missing or malformed accountKey, is also answered 400 with MSG-GEN-001 naming the field, and no view is read\n"
+    },
+    {
+     "old": "    Then the answer is 503 with a problem body that names the ACE database as the unavailable system and carries MSG-GEN-006\n    Then no cached row is answered\n",
+     "new": "    Then the answer is 503 with a problem body that names the ACE database as the unavailable system and carries MSG-GEN-006\n    Then no cached row is answered\n    Then the same 503 answer is given when a view of either read answers an error\n"
+    },
+    {
+     "old": "    Then the answer is 403 with MSG-P4-002 naming the action\n    Then the refusal is logged without a key value\n",
+     "new": "    Then the answer is 403 with MSG-P4-002 naming the action\n    Then the refusal is logged without a key value\n    Then the same caller on GET /api/recovery/source-data/v1/accounts/A-0555/installment-facts?businessDate=2026-12-14 is refused in the same way\n"
+    },
+    {
+     "old": "    Then the status of \"DP01\" for 2026-12-14 stays \"LOADED\" and no row of any kind is written\n",
+     "new": "    Then the status of \"DP01\" for 2026-12-14 stays \"LOADED\" and no row of any kind is written\n\n  Scenario: AC12 A call without a token is refused with 401 on either read (new, D-RCV-60)\n    Given the caller presents no token\n    When the caller calls GET /api/recovery/source-data/v1/payments?businessDate=2026-12-14 and GET /api/recovery/source-data/v1/accounts/A-0555/installment-facts?businessDate=2026-12-14\n    Then each call answers 401 with a problem body that carries MSG-P4-001\n    Then no payment row and no installment fact is answered\n"
+    },
+    {
+     "old": "| TC-E2-008-14 | AC8, X6 — businessDate missing on the payments read | Component | GET payments without businessDate |",
+     "new": "| TC-E2-008-14 | AC8, X6 — businessDate or accountKey missing or malformed | Component | GET payments without businessDate; either read with a malformed businessDate; installment-facts with a missing or malformed accountKey |"
+    },
+    {
+     "old": "| TC-E2-008-15 | AC9, X7 — v_ace_payment does not answer inside 5 s | Component | View delayed beyond 5 s |",
+     "new": "| TC-E2-008-15 | AC9, X7 — a view does not answer inside 5 s, or answers an error | Component | View delayed beyond 5 s; view answering an error |"
+    },
+    {
+     "old": "| TC-E2-008-16 | AC10, X8 — caller without the right on either read | Component | Caller with no right; refused with MSG-P4-002 |",
+     "new": "| TC-E2-008-16 | AC10, X8 — caller without the right on either read | Component | Caller with no right on the payments read and on the installment-facts read of A-0555; refused with MSG-P4-002 |"
+    },
+    {
+     "old": "| Component | DP01 LOADED for 2026-12-14; status change to a status the model does not allow |",
+     "new": "| Component | DP01 LOADED for 2026-12-14; status change to a status the model does not allow |\n| TC-E2-008-19 | AC12 — a call without a token on either read is refused with 401 | Component | No token; payments of 2026-12-14 and installment facts of A-0555; refused with MSG-P4-001 |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

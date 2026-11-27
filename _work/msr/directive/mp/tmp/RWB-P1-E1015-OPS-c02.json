@@ -1,0 +1,148 @@
+{
+ "edits": [
+  {
+   "old": "| BR7 | The feature switch keeps the capability off until the ACE batch record and the view exist; with the switch off no stamp is guessed and no job is held on one | DL43; legacy RWB-E1-015 section 13 |",
+   "new": "| BR7 | The feature switch keeps the capability off until the ACE batch record and the view exist; with the switch off no stamp is guessed and no job is held on one; before the ACE additions land, freshness is read from `recovery.v_ace_batch_status` populated with synthetic batch rows in system test, and where the view is absent the data product shows as not stamped | DL43 (decided by the directive of 26 November 2026; assumptions ASM-0193, ASM-0737, ASM-0748, ASM-0816 confirmed); legacy RWB-E1-015 section 13 |"
+  },
+  {
+   "old": "| Item | Content |\n|---|---|",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|"
+  },
+  {
+   "old": "| Deployment values | Image digest, chart version, replica counts of the api and the worker, KEDA thresholds, resource requests and limits, probe paths and timings, log level, feature switches |",
+   "new": "| Deployment values | Image digest, chart version, replica counts of the api and the worker, KEDA thresholds, resource requests and limits, probe paths and timings, log level, feature switches | BR5 |"
+  },
+  {
+   "old": "| Schema | `rwb_source_data`, migrated by the per-service Flyway sequence; `data_product_load` and `data_product` plus the library objects |",
+   "new": "| Schema | `rwb_source_data`, migrated by the per-service Flyway sequence; `data_product_load` and `data_product` plus the library objects | BR2 |"
+  },
+  {
+   "old": "| Views | `recovery.v_ace_batch_status` and the other `v_ace_*` views, read-only through the `rwb_source_data` login |",
+   "new": "| Views | `recovery.v_ace_batch_status` and the other `v_ace_*` views, read-only through the `rwb_source_data` login | BR8 |"
+  },
+  {
+   "old": "| Topics | `rwb.source-data.events.v1` with retry and `.dlt`; `rwb.decision-record.v1` reused as provided |",
+   "new": "| Topics | `rwb.source-data.events.v1` with retry and `.dlt`; `rwb.decision-record.v1` reused as provided | BR3 |"
+  },
+  {
+   "old": "| Queue | Temporal task queue `rwb-source-data` in namespace `rwb-recovery` |",
+   "new": "| Queue | Temporal task queue `rwb-source-data` in namespace `rwb-recovery` | Not specified in the source documents (DOR-RWB-P1-E1015-OPS-7) |"
+  },
+  {
+   "old": "| Schedules | One cut-off check per source-fed data product, from `data_product.expected_by` |",
+   "new": "| Schedules | One cut-off check per source-fed data product, from `data_product.expected_by` | BR4 |"
+  },
+  {
+   "old": "| Dashboard series | stamps written, products stale, stale duration, gate results COMPLETE and HOLD, listener lag, event lag, duplicate count, Schedule fires, skipped runs, workflow failures, switch state |",
+   "new": "| Dashboard series | stamps written, products stale, stale duration, gate results COMPLETE and HOLD, listener lag, event lag, duplicate count, Schedule fires, skipped runs, workflow failures, switch state | BR9 |"
+  },
+  {
+   "old": "| Runbook entries | cut-off missed, batch failed, repeated batch, long stale duration, gate hold, listener stalled, migration failure, probe failure, switch left off |",
+   "new": "| Runbook entries | cut-off missed, batch failed, repeated batch, long stale duration, gate hold, listener stalled, migration failure, probe failure, switch left off | BR6 |"
+  },
+  {
+   "old": "| Secrets | The `rwb_source_data` login secret, the Kafka client credential and the Temporal mTLS material, all from the platform secret store |",
+   "new": "| Secrets | The `rwb_source_data` login secret, the Kafka client credential and the Temporal mTLS material, all from the platform secret store | BR1 |"
+  },
+  {
+   "old": "| TC-E1-015-12 | AC4, AC6 | NFR | CCMS COMPLETED 2026-11-27; SVAF only to 2026-11-20; the long-stale alert |",
+   "new": "| TC-E1-015-12 | AC4, AC6 | NFR | CCMS COMPLETED 2026-11-27; SVAF only to 2026-11-20; the long-stale alert |\n| TC-E1-015-13 | §12 operations, events and activities | Contract | Each operation, event and activity in §12 is checked against the contract it implements |\n| TC-E1-015-14 | §12.7 tables | Boundary | Migration creates data_product_load, data_product, outbox_event and processed_event in rwb_source_data; decision_log_entry is not created, read or granted |\n| TC-E1-015-15 | BR1 | NFR | The deployment runs under the rwb_source_data login only; no other service credential is used |\n| TC-E1-015-16 | BR2 | NFR | The Flyway sequence runs in schema rwb_source_data before the deployment is ready |\n| TC-E1-015-17 | BR3 | NFR | A failed event goes to the retry topic and the .dlt topic; an event not processed is never acknowledged |\n| TC-E1-015-18 | BR4 | NFR | A cut-off Schedule is registered per source-fed product from data_product.expected_by with overlap policy SKIP |\n| TC-E1-015-19 | BR5 | NFR | Replica counts, KEDA thresholds, alert thresholds and the catch-up window come from values files and parameters |\n| TC-E1-015-20 | BR6 | NFR | An alert carries a message ID and links one runbook entry |\n| TC-E1-015-21 | BR7 | NFR | With the feature switch off no stamp is guessed and no job is held |\n| TC-E1-015-22 | BR8 | NFR | The service writes only rwb_source_data and reads ACE only through the recovery.v_ace_* views |\n| TC-E1-015-23 | BR9 | NFR | Logs, dashboard series, alert payloads and the runbook carry no personal data |"
+  },
+  {
+   "old": "so the twelve rows above are the legacy test cases of RWB-E1-015",
+   "new": "so the first twelve rows above are the legacy test cases of RWB-E1-015"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15022",
+   "item": "DOR-RWB-P1-E1015-OPS-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Register 'platform engineer' as a role code or name, or confirm the role section 1 uses",
+   "note": "Section 1 left unchanged; the role registration belongs to Users Roles and Permissions v5."
+  },
+  {
+   "ruling": "R-15023",
+   "item": "DOR-RWB-P1-E1015-OPS-10",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "SCR-03 is not in this story; empty and loading state wording is Not specified in the source documents (DOR-RWB-P1-E1015-OPS-10)."
+  },
+  {
+   "ruling": "R-15024",
+   "item": "DOR-RWB-P1-E1015-OPS-12",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx (tab Story test cases); Recovery Workbench RTM v7",
+   "change": "Add TC-E1-015-10, -11, -12 to Test Cases v8 with Given, When, Then; align section 18 test lists to RTM v7",
+   "note": "Added TC-E1-015-13 and -14 in section 16. TC-10 to -12 in Test Cases v8 and section 18 vs RTM v7 are cross-document."
+  },
+  {
+   "ruling": "R-15025",
+   "item": "DOR-RWB-P1-E1015-OPS-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "DL43 decided by the directive; assumptions ASM-0193, ASM-0737, ASM-0748, ASM-0816 confirmed in the BR7 row."
+  },
+  {
+   "ruling": "R-15026",
+   "item": "DOR-RWB-P1-E1015-OPS-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-015-15 to -23 in section 16, one test case per rule BR1 to BR9."
+  },
+  {
+   "ruling": "R-15027",
+   "item": "DOR-RWB-P1-E1015-OPS-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Added BR Field ID column to section 11 and mapped each row to its section 8 rule; the Queue row is Not specified."
+  },
+  {
+   "ruling": "R-15028",
+   "item": "DOR-RWB-P1-E1015-OPS-9",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Error and Message Standard v4",
+   "change": "Confirm the v4 wording of MSG-P1-001 so section 14 can match it",
+   "note": "Section 14 wording needs the v4 text for MSG-P1-001; no wording invented here."
+  },
+  {
+   "ruling": "R-21954",
+   "item": "GAP-0357",
+   "status": "Resolved",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "No edit: this story holds no template operation, SCR-33 or generation hold; its freshness stamp stays on the P1 contract."
+  },
+  {
+   "ruling": "R-21955",
+   "item": "GAP-1507",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR7 now sets synthetic-row freshness in system test and not-stamped display without a view; fallback source still to be named before go-live."
+  },
+  {
+   "ruling": "R-21956",
+   "item": "GAP-0340",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-ITG-W2",
+   "change": "Verify JOB-07 and JOB-08 start (rwb-payment, P8) in the wave 2 integration tests",
+   "note": "No JOB-07, JOB-08 or lake text in the sections given here; the start check moves to RWB-ITG-W2."
+  }
+ ]
+}

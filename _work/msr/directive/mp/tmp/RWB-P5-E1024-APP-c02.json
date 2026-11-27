@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "| `rwb.document.DocumentStored.v1` (EV-16) | `rwb.document.events.v1` | P5 | caseId | documentId, caseId, documentType, source, storedAt |",
+   "new": "| `rwb.document.DocumentStored.v1` (EV-16) | `rwb.document.events.v1` | P5 | caseId | caseid, documentid, source, type |"
+  },
+  {
+   "old": "CloudEvents 1.0 envelope, binary mode; no personal data in either payload.",
+   "new": "CloudEvents 1.0 envelope, binary mode; no personal data in either payload. The extracted fields in `document_field` carry the personal-data class that Data Classification v5 gives each field; a field classed as personal data is read only under BR9."
+  },
+  {
+   "old": "| X10 | The caller's role lacks the Documents right | Refused with 403 | MSG-P4-002 | TC-E1-024-13 (Access) |",
+   "new": "| X10 | The caller's role lacks the Documents right | Refused with 403 | MSG-P4-002 | AC13 |"
+  },
+  {
+   "old": "| X11 | The decision record write fails | Nothing is stored; incident raised (R-UNI-39) | MSG-P7-003 | TC-E1-024-14 (Principle 5) |",
+   "new": "| X11 | The decision record write fails | Nothing is stored; incident raised (R-UNI-39) | MSG-P7-003 | AC14 |"
+  },
+  {
+   "old": "| X12 | The `rwb-case` contract does not answer within 2 s, or the breaker is open | Refused with 503; nothing is stored; the circuit breaker shields the case service | MSG-GEN-006 | TC-E1-024-11 (target path) |",
+   "new": "| X12 | The `rwb-case` contract does not answer within 2 s, or the breaker is open | Refused with 503; nothing is stored; the circuit breaker shields the case service | MSG-GEN-006 | AC15 |"
+  },
+  {
+   "old": "| X13 | The outbox relay is down when the store commits | The row, the fields, the decision record and the outbox row are committed; the event is published by the relay when it recovers, once, with no duplicate store | None | TC-E1-024-08 (target path) |",
+   "new": "| X13 | The outbox relay is down when the store commits | The row, the fields, the decision record and the outbox row are committed; the event is published by the relay when it recovers, once, with no duplicate store | None | AC16 |"
+  },
+  {
+   "old": "    Then no metadata or content is returned",
+   "new": "    Then no metadata or content is returned\n\n  Scenario: AC13 Caller without the Documents right (new in rwb-document; X10)\n    Given a capacity and workforce planner with role RW-CAPACITY who has no Documents right\n    When the planner requests the court notice from AC1\n    Then the system refuses the request with 403 and MSG-P4-002\n    Then no metadata or content is returned\n\n  Scenario: AC14 Decision record write fails (new in rwb-document; X11, BR8)\n    Given the decision record write is forced to fail\n    When a court notice is stored for case \"RW-2026-000123\"\n    Then nothing is stored\n    Then an incident is raised (R-UNI-39) and the system refuses the store with MSG-P7-003\n\n  Scenario: AC15 Case contract does not answer (new in rwb-document; X12)\n    Given the rwb-case contract mock does not answer within 2 s\n    When a court notice is stored for case \"RW-2026-000123\"\n    Then the system refuses the store with 503 and MSG-GEN-006\n    Then nothing is stored and the circuit breaker shields the case service\n\n  Scenario: AC16 Outbox relay down at commit (new in rwb-document; X13)\n    Given the outbox relay is down\n    When a court notice is stored for case \"RW-2026-000123\"\n    Then the row, the fields, the decision record and the outbox row are committed together\n    Then the relay publishes DocumentStored once when it recovers, with no duplicate store\n\n  Scenario: AC17 Empty state of the case documents screen (new in rwb-document; SCR-30)\n    Given case \"RW-2026-000123\" has no document rows\n    When the case documents screen SCR-30 is opened for the case\n    Then the screen shows the empty state with a message Not specified in the source documents (DOR-RWB-P5-E1024-APP-10)\n\n  Scenario: AC18 Loading state of the case documents screen (new in rwb-document; SCR-30)\n    Given the document list of case \"RW-2026-000123\" is being fetched\n    When the case documents screen SCR-30 is opened for the case\n    Then the screen shows the loading state until the list returns\n\n  Scenario: AC19 Error state of the case documents screen (new in rwb-document; SCR-30)\n    Given the document list read for case \"RW-2026-000123\" fails\n    When the case documents screen SCR-30 is opened for the case\n    Then the screen shows the error state with a message Not specified in the source documents (DOR-RWB-P5-E1024-APP-10)\n\n  Scenario: AC20 No-access state of the case documents screen (new in rwb-document; SCR-30)\n    Given a caller whose role lacks the Documents right\n    When the case documents screen SCR-30 is opened for case \"RW-2026-000123\"\n    Then the screen shows the no-access state and the system refuses the request with 403 and MSG-P4-002"
+  },
+  {
+   "old": "| TC-E1-024-13 | Access | Component | Capacity and workforce planner (RW-CAPACITY, no Documents right) reads a document; refused with MSG-P4-002 |",
+   "new": "| TC-E1-024-13 | Access, AC13 | Component | Capacity and workforce planner (RW-CAPACITY, no Documents right) reads a document; refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E1-024-14 | Principle 5 | NFR | Decision record write forced to fail during a store; nothing stored, MSG-P7-003 |",
+   "new": "| TC-E1-024-14 | Principle 5, AC14, BR8 | NFR | Decision record write forced to fail during a store; nothing stored, MSG-P7-003 |"
+  },
+  {
+   "old": "| TC-E1-024-12 | AC12, BR9 | End to end | Phone collector with scope OWN on another owner's case |",
+   "new": "| TC-E1-024-12 | AC12, BR9 | End to end | Phone collector with scope OWN on another owner's case |\n| TC-E1-024-15 | AC15 | End to end | rwb-case contract mock does not answer within 2 s on a court notice store for case RW-2026-000123, breaker open |\n| TC-E1-024-16 | AC16 | End to end | Outbox relay stopped when a court notice is stored for case RW-2026-000123; relay restarted |\n| TC-E1-024-17 | AC17, AC18, AC19, AC20 | Component | Case documents screen SCR-30 on case RW-2026-000123 in the empty, loading, error and no-access states |\n| TC-E1-024-18 | §12 operations, events and activities | Component | Contract test of the REST operations, the DocumentStored.v1 event and the workflow activities of section 12 |\n| TC-E1-024-19 | §12.7 tables (ASM-3438) | Component | Boundary test on the tables document, document_field, document_type and document_hub_parameter at their limits |"
+  },
+  {
+   "old": "- DP-07 keeps the four lists in reference data; DP-15 puts the store migration in the per-service Flyway sequence as one step in `rwb_document`; DP-09 puts the event in the outbox inside the same transaction.",
+   "new": "- DP-07 keeps the four lists in reference data; DP-15 puts the store migration in the per-service Flyway sequence as one step in `rwb_document`; DP-09 puts the event in the outbox inside the same transaction.\n\nOpen decisions DL10, DL11 and DL27 stay open. Their assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863, ASM-0553, ASM-0703, ASM-1051, ASM-1104, ASM-1771, ASM-2532, ASM-2709 and ASM-2716 are confirmed by the programme directive of 26 November 2026, and this story is built on them."
+  },
+  {
+   "old": "this story inherits it.",
+   "new": "this story inherits it. Each REST operation of 12.1 calls the rwb-access authorise check through the shared guard before the operation runs."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10842",
+   "item": "CG-ALL-5795",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "LDM v9",
+   "change": "Record uk_document_case_type_hash as the unique partial index on rwb_document.document (case_id, document_type, content_sha256) WHERE is_active, or use its dictionary name.",
+   "note": "Index is a physical object in rwb_document; story already defines it in section 13. Owning document must record it."
+  },
+  {
+   "ruling": "R-10843",
+   "item": "CG-ALL-5797",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "DocumentStored.v1 payload set to caseid, documentid, source, type as in Kafka Catalog v1 EV-16.",
+   "note": "Catalog names used as written; storedAt and documentType are removed from the payload to match the catalog."
+  },
+  {
+   "ruling": "R-17121",
+   "item": "DOR-RWB-P5-E1024-APP-10",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC17-AC20 for empty, loading, error and no-access states of SCR-30, with TC-E1-024-17.",
+   "note": "Empty and error messages are not specified in the source documents and are marked as such in the criteria."
+  },
+  {
+   "ruling": "R-17122",
+   "item": "DOR-RWB-P5-E1024-APP-11",
+   "status": "Resolved",
+   "section": "12.3",
+   "target": "",
+   "change": "Stated that document_field personal-data class follows Data Classification v5 and such fields are read only under BR9.",
+   "note": "Story no longer claims no personal data is carried by the fields; payload statement kept."
+  },
+  {
+   "ruling": "R-17123",
+   "item": "DOR-RWB-P5-E1024-APP-12",
+   "status": "Not applied",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added contract test TC-E1-024-18 and boundary test TC-E1-024-19. §18 cannot be aligned to RTM v7: its test lists are not in this chunk."
+  },
+  {
+   "ruling": "R-17124",
+   "item": "DOR-RWB-P5-E1024-APP-17",
+   "status": "Cross-document",
+   "section": "header",
+   "target": "RWB-P5-E1025-APP and RWB-PLT-TE012-APP story files",
+   "change": "Complete both builds; this story is gated by them (Ready to start already names RWB-P5-E1025-APP).",
+   "note": "Dependency completion is outside this story; no story edit is needed."
+  },
+  {
+   "ruling": "R-17125",
+   "item": "DOR-RWB-P5-E1024-APP-18",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "Stated that DL10, DL11 and DL27 stay open and that their twelve assumptions are confirmed by the directive.",
+   "note": "Assumptions confirmed by the programme directive of 26 November 2026."
+  },
+  {
+   "ruling": "R-17126",
+   "item": "DOR-RWB-P5-E1024-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "Covered by of X10-X13 now AC13-AC16; AC13-AC16 added with TC-E1-024-13, 14, 15, 16.",
+   "note": "Each exception path now maps to a criterion and a test case row."
+  },
+  {
+   "ruling": "R-17127",
+   "item": "DOR-RWB-P5-E1024-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "change": "BR8 covered by AC14 and TC-E1-024-14.",
+   "target": "",
+   "note": "BR8 now has a criterion and a test case."
+  },
+  {
+   "ruling": "R-17128",
+   "item": "DOR-RWB-P5-E1024-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DOCUMENT (rwb-document service identity) to the roles list.",
+   "note": "Story §10 now names the rwb-access authorise check for each REST operation (DP-08)."
+  }
+ ]
+}

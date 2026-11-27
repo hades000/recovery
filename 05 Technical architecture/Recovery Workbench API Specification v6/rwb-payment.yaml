@@ -1,0 +1,283 @@
+# SCB Collections and Recovery. Henka Group, 22 November 2026.
+# (C) Siam Commercial Bank and Henka Pte Ltd
+# Change log
+# 5.0.0, 22 November 2026, D-RCV-60 microservice realignment, T3 Code / OpenCode / DeepSeek v4.1 Flash
+
+openapi: 3.1.0
+info:
+  title: "Recovery Workbench API - rwb-payment (Payment)"
+  version: 5.0.0
+  description: >-
+    Operations of the Recovery Workbench API that belong to rwb-payment (Payment, module P8, service wave 2)
+    under Microservice Ownership Map v1, split from Recovery Workbench API Specification v4 (4.0.0, 16 November
+    2026) by the D-RCV-60 microservice realignment.
+    This document holds 2 operations under REST base /api/recovery/payment/v1; schema rwb_payment; topic
+    rwb.payment.events.v1; Temporal task queue rwb-payment in namespace rwb-recovery. The v4 text of every
+    operation, parameter, schema, response, number and date is kept unchanged.
+    Moved into this document from another module of v4: none.
+    Moved out of this document to another service: none.
+    The v4 document description, the tag list and the document map are kept in index.yaml; the event contract of
+    the service is in asyncapi/rwb-payment.asyncapi.yaml.
+servers:
+- url: "/api/recovery/payment/v1"
+  description: "Relative to the rwb-payment service in each environment"
+security:
+- entraId: []
+tags:
+- name: "Money"
+x-service:
+  code: "P8"
+  service: "rwb-payment"
+  name: "Payment"
+  wave: 2
+  schema: "rwb_payment"
+  rest-base: "/api/recovery/payment/v1"
+  topic: "rwb.payment.events.v1"
+  task-queue: "rwb-payment"
+  namespace: "rwb-recovery"
+  asyncapi: "asyncapi/rwb-payment.asyncapi.yaml"
+  operations: 2
+paths:
+  /proceeds:
+    get:
+      tags:
+      - Money
+      summary: List receipts with their match status
+      operationId: getProceeds
+      x-module: P8
+      x-owner: "P8"
+      x-capability:
+        area: Write-off and posting
+        right: R
+      x-first-release: E2
+      parameters:
+      - name: matched
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProceedsPage'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '503':
+          $ref: '#/components/responses/E503'
+  /proceeds/{proceedsId}/match:
+    post:
+      tags:
+      - Money
+      summary: Match a receipt to a case and an ACE account
+      operationId: postProceedsProceedsidMatch
+      x-module: P8
+      x-owner: "P8"
+      x-capability:
+        area: Write-off and posting
+        right: U
+      x-first-release: E4
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchRequest'
+      parameters:
+      - name: proceedsId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Proceeds'
+        '401':
+          $ref: '#/components/responses/E401'
+        '403':
+          $ref: '#/components/responses/E403'
+        '404':
+          $ref: '#/components/responses/E404'
+        '409':
+          $ref: '#/components/responses/E409'
+        '422':
+          $ref: '#/components/responses/E422'
+        '503':
+          $ref: '#/components/responses/E503'
+components:
+  securitySchemes:
+    entraId:
+      type: openIdConnect
+      openIdConnectUrl: https://login.microsoftonline.com/{tenant}/v2.0/.well-known/openid-configuration
+  responses:
+    E401:
+      description: Unauthorized. No valid session, or the person holds no Workbench role. Messages MSG-P4-001
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E403:
+      description: Forbidden. The role lacks the right in the capability area. Messages MSG-P4-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E404:
+      description: Not found. The record does not exist or is outside the caller's scope. Messages MSG-P4-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E409:
+      description: Conflict. The state does not allow the action, the record changed, the approver is above the limit or prepared the decision.
+        Messages MSG-P3-005, MSG-GEN-004, MSG-P7-001, MSG-P7-002
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E422:
+      description: Unprocessable. A field fails validation. Messages MSG-GEN-001, MSG-GEN-002, MSG-GEN-003
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    E503:
+      description: Service unavailable. The decision could not be recorded, or a system of record is down. Messages MSG-P7-003, MSG-GEN-006
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Proceeds:
+      type: object
+      description: Money received on a case and what it was matched to.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Record identifier of the proceeds
+          readOnly: true
+        caseId:
+          type: string
+          format: uuid
+          description: The recovery_case this record belongs to
+        treatmentId:
+          type: string
+          format: uuid
+          description: The treatment this record belongs to
+        paymentCode:
+          type: string
+          maxLength: 255
+          description: ACE payment_code of the payment matched (v_ace_payment); business key, no foreign key
+        source:
+          type: string
+          maxLength: 12
+          enum:
+          - CUSTOMER
+          - LED
+          - AUCTION
+          - BUYER
+          - AGENCY
+          - INSURER
+          - GUARANTOR
+          description: Customer, LED, auction, buyer, agency, insurer, guarantor
+        amount:
+          type: number
+          description: Amount, baht
+        receivedDate:
+          type: string
+          format: date
+          description: Date received
+        matchedTo:
+          type: string
+          maxLength: 15
+          enum:
+          - INSTALLMENT
+          - SETTLEMENT
+          - FEE
+          - SALE_PROCEEDS
+          - UNMATCHED
+          description: Installment, settlement, fee, sale proceeds, unmatched
+        postingRef:
+          type: string
+          maxLength: 40
+          description: Posting reference in the core or GL
+      required:
+      - id
+      - caseId
+      - source
+      - amount
+      - receivedDate
+      - matchedTo
+    MatchRequest:
+      type: object
+      properties:
+        caseId:
+          type: string
+          format: uuid
+        accountKey:
+          type: string
+          maxLength: 255
+        note:
+          type: string
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        messageCode:
+          type: string
+        messageTh:
+          type: string
+        field:
+          type: string
+        traceId:
+          type: string
+    ProceedsPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Proceeds'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer

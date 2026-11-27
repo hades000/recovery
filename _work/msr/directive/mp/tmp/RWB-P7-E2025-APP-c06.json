@@ -1,0 +1,50 @@
+{
+ "edits": [
+  {
+   "old": "    Then the entry is refused with MSG-P7-009 naming ruleVersion and no entry is written",
+   "new": "    Then the entry is refused with MSG-P7-009 naming ruleVersion and no entry is written\n\n  Scenario: AC10 Every decision leaves one entry or nothing stands, and no other service is written (new, D-RCV-60)\n    Given the extraction decisions of document \"DOC-0601\" for contract_amount and contract_date are composed\n    When the append of the entry for contract_amount fails after its chain position is taken\n    Then no entry, no chain position and no outbox row exist for that decision, and the fact is redelivered\n    Then the entry, its chain position and its outbox row are written in one transaction\n    Then a decision code outside the list in force is refused with MSG-P7-009 naming decisionCode\n    Then a repeated decision under the idempotency key \"EV-7f3a-0001\" adds no entry and counts the repeat\n    Then an UPDATE or DELETE on the log is refused, and a correction is a new entry naming the entry it corrects in corrects_entry_id\n    Then no document, field, case, legal action, hearing, judgment or treatment is written, and no table of another service is read\n\n  Scenario: AC11 A call without a valid credential is answered 401 on both reads (new, D-RCV-60)\n    Given a caller without a valid credential\n    When the caller calls GET /api/recovery/decision/v1/decision-log\n    Then the response is 401 and no entry is returned\n    When the caller calls GET /api/recovery/decision/v1/decision-log/{entryId} for an entry of \"DOC-0601\"\n    Then the response is 401 and no entry is returned\n\n  Scenario: AC12 A consumed threshold read that fails or does not answer writes no entry (new, D-RCV-60)\n    Given the rwb-case parameters contract mock does not answer within 2 s, or answers with an error, for the field threshold\n    When the extraction decision of judgment_amount of \"DOC-0602\" is recorded\n    Then no entry is written with an assumed threshold or an assumed parameter version\n    Then no entry, no chain position and no outbox row exist for the decision, and the decision is redelivered"
+  },
+  {
+   "old": "| TC-E2-025-19 | AC9, BR10 | Component | The slice registers no outbox row, no inbox row, no consumer and no Schedule; a build that adds one fails this case (DP-09, DP-10) |",
+   "new": "| TC-E2-025-19 | AC9, BR10 | Component | The slice registers no outbox row, no inbox row, no consumer and no Schedule; a build that adds one fails this case (DP-09, DP-10) |\n| TC-E2-025-20 | AC10, BR9, BR10, BR11, BR13, BR14, BR15 | Component | Document DOC-0601 with contract_amount and contract_date; a failed append after the chain position is taken, a decision code outside the list in force, a repeat under idempotency key \"EV-7f3a-0001\", an UPDATE or DELETE on the log and a write attempt on document and recovery_case; each result asserted |\n| TC-E2-025-21 | AC11, BR12 | Component | Call to GET /api/recovery/decision/v1/decision-log and to GET /api/recovery/decision/v1/decision-log/{entryId} with no valid credential; 401 on both and no entry returned |\n| TC-E2-025-22 | AC12, BR3, BR9 | Component | rwb-case parameters contract mock with no answer within 2 s and with an error answer for the field threshold; no entry, no chain position and no outbox row, and the decision is redelivered |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29645",
+   "item": "ACR-RWB-P7-E2025-APP-AC5",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "AC5 already has TC-E2-025-14 in section 16 (covers AC5, BR14); no edit needed."
+  },
+  {
+   "ruling": "R-31520",
+   "item": "NEWAC-RWB-P7-E2025-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 in section 7 for BR9, BR10, BR11, BR13, BR14, BR15 and TC-E2-025-20 in section 16; next free AC number used, not AC11."
+  },
+  {
+   "ruling": "R-31521",
+   "item": "NEWAC-RWB-P7-E2025-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 in section 7 (401 on both reads) and TC-E2-025-21 in section 16; next free AC number used, not AC12."
+  },
+  {
+   "ruling": "R-31522",
+   "item": "NEWAC-RWB-P7-E2025-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 in section 7 (failed threshold read writes no entry) and TC-E2-025-22 in section 16; next free AC number used, not AC13."
+  }
+ ]
+}

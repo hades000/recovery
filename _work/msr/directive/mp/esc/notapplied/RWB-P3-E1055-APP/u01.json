@@ -1,0 +1,117 @@
+{
+ "stage": "notapplied",
+ "story": "RWB-P3-E1055-APP",
+ "unit": "u01",
+ "rulings": [
+  "R-00806",
+  "R-00808",
+  "R-00809",
+  "R-05121",
+  "R-05124",
+  "R-05125",
+  "R-10325",
+  "R-16017"
+ ],
+ "steps": [
+  {
+   "model": "opencode-go/deepseek-v4.1-flash",
+   "effort": "-",
+   "tries": [
+    {
+     "ok": true,
+     "edits": 3
+    }
+   ],
+   "applied": true,
+   "disposition": [
+    {
+     "ruling": "R-00806",
+     "item": "CG-ALL-3857",
+     "status": "Cross-document",
+     "section": "13",
+     "target": "06 Data/Recovery Workbench Logical Data Model and Data Dictionary v9.xlsx",
+     "change": "Add to the Fields sheet, entity timer, the nullable varchar(40) notice-reference field the story writes and indexes (`reference_ref`), with its DF-WRK field ID, so `ux_timer_notice_running ON timer (case_id, reference_ref)` rests on an LDM v9 field.",
+     "note": "LDM v9 Fields, entity timer, shows case_id (DF-WRK-028) and the other columns but no notice-reference field; the story's section 11 already carries it as GAP-2246/ASM-3703."
+    },
+    {
+     "ruling": "R-00808",
+     "item": "CG-ALL-3870",
+     "status": "Cross-document",
+     "section": "1, 13",
+     "target": "05 Technical architecture/Recovery Workbench Service Template Specification v1.md",
+     "change": "The P3 row (L371) must record the package segment the solution architect rules for rwb-case in place of the Java reserved word `case`, so the package compiles; section 1 and section 13 of the story then copy that segment.",
+     "note": "Service Template Specification v1 L371 gives th.co.scb.ace.workbench.recovery.case for P3; the ruling segment lives in that row, not in this story."
+    },
+    {
+     "ruling": "R-00809",
+     "item": "CG-ALL-3871",
+     "status": "Cross-document",
+     "section": "13",
+     "target": "05 Technical architecture/Recovery Workbench Service Template Specification v1.md",
+     "change": "The same P3 row (L371) segment rules the parent package, so `th.co.scb.ace.workbench.recovery.<segment>.noticeperiod` follows from it; section 13 Package of the story copies it.",
+     "note": "Service Template Specification v1 L371 holds the rwb-case package; the module name noticeperiod is the story's and stays."
+    },
+    {
+     "ruling": "R-05121",
+     "item": "DOR-RWB-P3-E1055-APP-14",
+     "status": "Not applied",
+     "section": "",
+     "target": "",
+     "change": "",
+     "note": "Looked for a signed epic design record or its sign-off date in sections 3 and 13 and in the DoR v4 extract (table 3 row 3); neither is present, so the sign-off cannot be recorded."
+    },
+    {
+     "ruling": "R-05124",
+     "item": "DOR-RWB-P3-E1055-APP-22",
+     "status": "Not applied",
+     "section": "",
+     "target": "",
+     "change": "",
+     "note": "Looked for a published contract fake library version in sections 3, 12.8 and 12.9 and in the DoR v4 extract; no fake library version is recorded anywhere I can see."
+    },
+    {
+     "ruling": "R-05125",
+     "item": "DOR-RWB-P3-E1055-APP-23",
+     "status": "Not applied",
+     "section": "",
+     "target": "",
+     "change": "",
+     "note": "Looked for the contract version of RWB-P6-E1055-CON in sections 3 and 12 and in the DoR v4 extract; only the /v1 paths are stated, so no version can be fixed."
+    },
+    {
+     "ruling": "R-10325",
+     "item": "CG-ALL-3859",
+     "status": "Not applied",
+     "section": "12.1",
+     "target": "",
+     "change": "",
+     "note": "Looked for the standard's system-unavailable message ID in Error and Message Standard v4 section 4 and in section 14; only MSG-GEN-006 exists and its queued-and-retried text does not fit these reads."
+    },
+    {
+     "ruling": "R-16017",
+     "item": "DOR-RWB-P3-E1055-APP-10",
+     "status": "Resolved",
+     "section": "15",
+     "target": "",
+     "change": "The SCR-03, SCR-09 and SCR-44 rows of section 15 now give the empty, loading, error and no access states.",
+     "note": "States taken from the story itself: X7 and X8 of section 5, MSG-P4-002 and MSG-P4-003, and the roles of section 10; no copy or ID was invented."
+    }
+   ],
+   "edits": [
+    {
+     "old": "| SCR-03, states | Loading, Read only, On hold (the clock keeps running while the case is on hold or under a deviation), Closed (the clock is STOPPED). Empty, error and no access: Not specified in the source documents (CG-ALL-3872) |",
+     "new": "| SCR-03, states | Loading, Read only, On hold (the clock keeps running while the case is on hold or under a deviation), Closed (the clock is STOPPED), Empty (the case has no running or last `NOTICE_PERIOD` timer, so the case read carries no `noticePeriod`), Error (the `rwb-comms` answer is down or beyond 2 s: the retry state of X7 while `noticePeriod` is still returned), No access (404 MSG-P4-003 outside the scope, 403 MSG-P4-002 without Case record R) |"
+    },
+    {
+     "old": "| SCR-09 Exception queue | The cases with MSG-P3-034 for a product group with no notice period in force, in its Loading and List states. Empty, error and no access: Not specified in the source documents (CG-ALL-3873) |",
+     "new": "| SCR-09 Exception queue | The cases with MSG-P3-034 for a product group with no notice period in force, in its Loading and List states, Empty (no case carries MSG-P3-034 for a product group with no notice period in force), Error (the queue read fails and is retried; nothing is applied), No access (read by RW-DATASTEW; 403 MSG-P4-002 without the role, 404 MSG-P4-003 outside the scope) |"
+    },
+    {
+     "old": "| SCR-44 Interface and job monitor | The consumer record of the delivery fact, its retries and its `.dlt` entries; no `JOB-10` row belongs to this service. Empty, loading, error and no access: Not specified in the source documents (CG-ALL-3874) |",
+     "new": "| SCR-44 Interface and job monitor | The consumer record of the delivery fact, its retries and its `.dlt` entries; no `JOB-10` row belongs to this service. Loading (the consumer record read in flight), Empty (no delivery fact consumed yet), Error (the record read fails and is retried; the `.dlt` entry stays listed), No access (read by RW-PLATADM; 403 MSG-P4-002 without the role, 404 MSG-P4-003 outside the scope) |"
+    }
+   ],
+   "findings": []
+  }
+ ]
+}

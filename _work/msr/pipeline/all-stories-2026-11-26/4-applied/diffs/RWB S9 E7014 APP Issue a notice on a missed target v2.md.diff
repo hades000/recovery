@@ -1,0 +1,32 @@
+--- RWB S9 E7014 APP Issue a notice on a missed target v1.md
++++ RWB S9 E7014 APP Issue a notice on a missed target v2.md
+@@ -30,2 +30,4 @@
+ 
++**Change log.** D-RCV-60, 26 November 2026: fixes from the deterministic build-readiness checks (X20 RWB-S9-E7014-APP). Tool: T3 Code / OpenCode / DeepSeek v4.1 Flash.
++
+ ### 1. Story
+@@ -141,3 +143,3 @@
+ | BR3 | A notice is issued only to a partner at `ACTIVE` with a contract in force and a score below its target; a partner at `ON_NOTICE`, `SUSPENDED` or `EXITED`, or a contract that has ended, is refused | TSD S9 T3.2 (LOV-PANEL); ASM-5455; legacy AC1 |
+-| BR4 | The notice is a rwb-comms element, requested on one hop with a 2 s budget and a breaker; this service holds no notice row, no notice template and no dispatch status | FSD S9 T5.2; Event and Messaging Design v4 events EV-13 and EV-14; ASM-5450 |
++| BR4 | The notice is a rwb-comms element, requested on one hop with a 2 s budget and a breaker; this service holds no notice row, no notice template and no dispatch status | FSD S9 T5.2; Event and Messaging Design v5 events EV-13 and EV-14; ASM-5450 |
+ | BR5 | No cross-schema join and no foreign key leaves `rwb_partner`; `case_id` and `partner_id` are identifiers of other services' facts | DP-01; TSD S9 T3.3 |
+@@ -148,3 +150,3 @@
+ | BR10 | The same submission twice writes one record, one instruction and one notice: the operation declares the `Idempotency-Key` header and stores the key and its answer | TSD S9 T-A.2 |
+-| BR11 | This step publishes and consumes no event; the partner result (EV-21) and the instruction (EV-20) belong to other steps of the service | Event and Messaging Design v4 events EV-20 and EV-21; TSD S9 T5.3; ASM-5454 |
++| BR11 | This step publishes and consumes no event; the partner result (EV-21) and the instruction (EV-20) belong to other steps of the service | Event and Messaging Design v5 events EV-20 and EV-21; TSD S9 T5.3; ASM-5454 |
+ 
+@@ -232,3 +234,3 @@
+ 
+-None. The service owns the topic `rwb.partner.events.v1` and its event set carries EV-20 `InstructionIssued` (`instructionId`, `partnerId`, `type`, `dueOn`, consumed by the partner portal) and EV-21 `PartnerResultSubmitted` (`instructionId`, `result`, `documents`), and both belong to the instruction and result steps of the service (Event and Messaging Design v4; TSD S9 T5.3). A notice is a Communications fact: rwb-comms publishes `NoticeGenerated` (EV-13) and `NoticeDispatched` (EV-14), and this step only requests the notice and records the panel change. It therefore declares no event, no producer group and no outbox row, and a build that publishes EV-20 or an event of its own here fails the absence test. The topic carries the retry and `.dlt` topics of the platform (DP-14), and the outbox and inbox library that relays an event is the DP-09 dependency the plan does not carry (GAP-3127; ASM-5454).
++None. The service owns the topic `rwb.partner.events.v1` and its event set carries EV-20 `InstructionIssued` (`instructionId`, `partnerId`, `type`, `dueOn`, consumed by the partner portal) and EV-21 `PartnerResultSubmitted` (`instructionId`, `result`, `documents`), and both belong to the instruction and result steps of the service (Event and Messaging Design v5; TSD S9 T5.3). A notice is a Communications fact: rwb-comms publishes `NoticeGenerated` (EV-13) and `NoticeDispatched` (EV-14), and this step only requests the notice and records the panel change. It therefore declares no event, no producer group and no outbox row, and a build that publishes EV-20 or an event of its own here fails the absence test. The topic carries the retry and `.dlt` topics of the platform (DP-14), and the outbox and inbox library that relays an event is the DP-09 dependency the plan does not carry (GAP-3127; ASM-5454).
+ 
+@@ -364,3 +366,3 @@
+ 
+-The four legacy cases are those of RWB-E7-014 in their legacy order, with the Level column added: every case runs on the fakes, so every case is `Component`. TC-E7-014-01 exercises the notice step this story builds, and its criterion AC1 is owned by RWB-ITG-E7014-ITG, which runs the journey end to end and does not restate it here. The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v7.xlsx, tab Story test cases, under the same ID; no `-ITG` copy is written by this story.
++The four legacy cases are those of RWB-E7-014 in their legacy order, with the Level column added: every case runs on the fakes, so every case is `Component`. TC-E7-014-01 exercises the notice step this story builds, and its criterion AC1 is owned by RWB-ITG-E7014-ITG, which runs the journey end to end and does not restate it here. The full test, with its Given, When and Then, is in Recovery Workbench Test Cases v8.xlsx, tab Story test cases, under the same ID; no `-ITG` copy is written by this story.
+ 
+@@ -394,3 +396,3 @@
+ | Wave and release | Wave 4 and release 31 May 2027 (tentative), copied unchanged from the plan; EP07 is wave 4 and the service's Arch v5 wave is 4, so the W-MAP wave is not earlier and no conflict is raised (ASM-5457) |
+-| Source text | Legacy RWB-E7-014; FSD S9 Partner management v3 A1.3, A2.11, A2.11.2, A2.11.3.1 to A2.11.3.3 and A2.11.4; TSD S9 Partner management v2 T1, T2, T3.0, T3.1, T3.2, T4, T5.2, T5.3, T6.1, T6.2, T8 and T-A; Business Rules and Routing Logic v4 rows R-RES-27 and R-UNI-25 to R-UNI-29; Event and Messaging Design v4 events EV-13, EV-14, EV-20 and EV-21; Epics 3 to 8 Specification v3 row FEAT-PRM-11 |
++| Source text | Legacy RWB-E7-014; FSD S9 Partner management v3 A1.3, A2.11, A2.11.2, A2.11.3.1 to A2.11.3.3 and A2.11.4; TSD S9 Partner management v2 T1, T2, T3.0, T3.1, T3.2, T4, T5.2, T5.3, T6.1, T6.2, T8 and T-A; Business Rules and Routing Logic v4 rows R-RES-27 and R-UNI-25 to R-UNI-29; Event and Messaging Design v5 events EV-13, EV-14, EV-20 and EV-21; Epics 3 to 8 Specification v3 row FEAT-PRM-11 |
+ | Test cases | TC-E7-014-01 to TC-E7-014-04 |

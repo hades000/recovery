@@ -1,0 +1,152 @@
+{
+ "edits": [
+  {
+   "old": "**Feature flag.** `rwb.case.queuetables`, from the platform flag library. Off: the applier does not run and the queue rows from the seed migration stay.",
+   "new": "**Feature flag.** `rwb.case.queuetables`, from the platform flag library. Off: the applier does not run and the queue rows from the seed migration stay.\n\n**Screen states.** Screen SCR-42 names four states: empty, loading, error and no access. The content of each state is Not specified in the source documents (DOR-RWB-P3-E1019-APP-10)."
+  },
+  {
+   "old": "| External dependencies | RWB-P3-E1019-DB |",
+   "new": "| External dependencies | RWB-P3-E1019-DB (not done yet; the build waits for it) |"
+  },
+  {
+   "old": "- Parameter `queue.cap.max` = 500 (assumed; DL23) from the rwb-case parameters contract (DP-06).",
+   "new": "- Parameter `queue.cap.max` = 500 (assumed; DL23) from the rwb-case parameters contract (DP-06).\n- Open decisions, both still open: DL01 (assumptions ASM-0189, ASM-1230, ASM-1770, ASM-1988); DL23 (assumptions ASM-1232, ASM-1237, ASM-1259, ASM-1560). Each assumption stands until its decision closes."
+  },
+  {
+   "old": "No grant on `rwb_access` and no grant to any other service's login.",
+   "new": "No grant on any schema outside `rwb_case` and no grant to any other service's login."
+  },
+  {
+   "old": "| X10 | A role without Reference data C loads a file | Refused with 403 | MSG-P4-002 | Access test TC-E1-019-13 |",
+   "new": "| X10 | A role without Reference data C loads a file | Refused with 403 | MSG-P4-002 | AC13; TC-E1-019-13 |"
+  },
+  {
+   "old": "| X11 | The rwb-access contract does not answer inside 2 s | The load is refused with 503 and nothing is written; no role answer is guessed from cache past its time-to-live | MSG-P4-002 | Not a legacy AC; TC-P3-E1019-CON-04 covers the 503 |",
+   "new": "| X11 | The rwb-access contract does not answer inside 2 s | The load is refused with 503 and nothing is written; no role answer is guessed from cache past its time-to-live | MSG-P4-002 | AC14; TC-E1-019-14; TC-P3-E1019-CON-04 covers the 503 |"
+  },
+  {
+   "old": "| X12 | The queue applies but the member replace fails | The whole apply rolls back; the previous version stays in force | None | Not a legacy AC; TC-P3-E1019-DB-06 covers the rollback |",
+   "new": "| X12 | The queue applies but the member replace fails | The whole apply rolls back; the previous version stays in force | None | AC15; TC-P3-E1019-DB-06 covers the rollback |"
+  },
+  {
+   "old": "    Then the system refuses the load with MSG-GEN-001 for assignment method on row 3",
+   "new": "    Then the system refuses the load with MSG-GEN-001 for assignment method on row 3\n\n  Scenario: AC13 Role without Reference data C refused (exception X10)\n    Given the loader holds RW-CASEOWN without Reference data C\n    When the loader calls POST /admin/reference-loads with the QUEUE sheet\n    Then the system refuses the call with 403 and MSG-P4-002\n\n  Scenario: AC14 Contract silent for 2 s (exception X11)\n    Given the rwb-access contract does not answer within 2 s\n    When the QUEUE sheet is loaded\n    Then the system refuses the load with 503 and MSG-P4-002\n    Then nothing is written\n    Then no role answer is taken from cache past its time-to-live\n\n  Scenario: AC15 Member replace fails after the queue applies (exception X12)\n    Given QUEUE version 2 is in force and version 3 is approved\n    When the queue applies and the member replace fails\n    Then the whole apply rolls back\n    Then the previous version stays in force\n\n  Scenario: AC16 Assignment method outside LOV-ASSIGN (BR7)\n    Given queue row 5 has assignment method \"RANDOM\"\n    When the QUEUE sheet is loaded\n    Then the system refuses the load in full naming row 5 with message Not specified in the source documents (DOR-RWB-P3-E1019-APP-4)"
+  },
+  {
+   "old": "Every AC above is the legacy AC, value for value, with its origin tag.",
+   "new": "Every AC from AC1 to AC12 is the legacy AC, value for value, with its origin tag. AC13 to AC16 are not legacy ACs: AC13 to AC15 cover exceptions X10 to X12 and AC16 covers BR7."
+  },
+  {
+   "old": "| TC-E1-019-13 | Access | Component | RW-CASEOWN calls POST /admin/reference-loads and is refused with MSG-P4-002 |",
+   "new": "| TC-E1-019-13 | AC13, Access | Component | RW-CASEOWN calls POST /admin/reference-loads and is refused with MSG-P4-002 |"
+  },
+  {
+   "old": "| TC-E1-019-12 | AC12, BR2 | End to end | Row 3 with no assignment method |",
+   "new": "| TC-E1-019-12 | AC12, BR2 | End to end | Row 3 with no assignment method |\n| TC-E1-019-14 | AC14 | Component | rwb-access contract silent for 2 s; the 503 is also covered by TC-P3-E1019-CON-04 |\n| TC-E1-019-15 | AC15 | End to end | Member replace fails after version 2 is in force and version 3 is approved |\n| TC-E1-019-16 | AC16, BR7 | End to end | Row 5 with assignment method RANDOM |"
+  },
+  {
+   "old": "| REQ-CWC-006 | Roles, teams, queues, membership and capacity as versioned data | Epic 1, 3.3; Program, 5.3 | FEAT-CWC-06 | All recovery processes | R-UNI-38 | TC-E1-019-01 to TC-E1-019-12 |",
+   "new": "| REQ-CWC-006 | Roles, teams, queues, membership and capacity as versioned data | Epic 1, 3.3; Program, 5.3 | FEAT-CWC-06 | All recovery processes | R-UNI-38 | TC-E1-019-01 to TC-E1-019-16 |"
+  },
+  {
+   "old": "| REQ-ACA-002 | Roles held as data; a change without a release | Epic 1, 3.4; Program, 5.4 | FEAT-ACA-03 | All recovery processes | None | TC-E1-019-01, TC-E1-019-10 |",
+   "new": "| REQ-ACA-002 | Roles held as data; a change without a release | Epic 1, 3.4; Program, 5.4 | FEAT-ACA-03 | All recovery processes | None | TC-E1-019-01, TC-E1-019-10, TC-E1-019-13 |"
+  },
+  {
+   "old": "DF-REF-035 (`role.role_code`) is in schema `rwb_access`, owned by rwb-access (P4), and is read over the authorise contract with the role list, never by SQL (DP-01, DP-08).",
+   "new": "DF-REF-035 (`role.role_code`) is in schema `rwb_access`, owned by rwb-access (P4), and is read over the authorise contract with the role list, never by SQL (DP-01, DP-08). Roles, permissions, scope, masking and delegation stay with rwb-access. `rwb_case` keeps TEAM as reference data and keeps only `role_code` as a code on the queue, validated at load time over the authorise contract (DP-08). The column list is confirmed with P4 in RWB-P4-E1037-CON."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15801",
+   "item": "DOR-RWB-P3-E1019-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added Screen states line for SCR-42 in section 13",
+   "note": "SCR-42 empty, loading, error and no access states named in section 13; their content is a placeholder."
+  },
+  {
+   "ruling": "R-15802",
+   "item": "DOR-RWB-P3-E1019-APP-12",
+   "status": "Resolved",
+   "section": "16, 18",
+   "target": "",
+   "change": "Added TC-E1-019-13 to -16 to section 16; extended section 18 ranges",
+   "note": "RTM v7 is not in this chunk, so the list is not checked against it."
+  },
+  {
+   "ruling": "R-15803",
+   "item": "DOR-RWB-P3-E1019-APP-17",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "External dependencies row annotates RWB-P3-E1019-DB as not done yet",
+   "note": "The count of 11 is 9 build, 1 contract and 1 external; the DB dependency is marked as not done."
+  },
+  {
+   "ruling": "R-15804",
+   "item": "DOR-RWB-P3-E1019-APP-18",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Added open decisions DL01 and DL23 with assumptions to section 13 configuration",
+   "note": "DL01 and DL23 listed with their assumptions; both decisions remain open."
+  },
+  {
+   "ruling": "R-15805",
+   "item": "DOR-RWB-P3-E1019-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "Database bullet now refers to any schema outside rwb_case",
+   "note": "The rwb_access schema name is removed from section 13; only rwb_case is named."
+  },
+  {
+   "ruling": "R-15806",
+   "item": "DOR-RWB-P3-E1019-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "Added AC13 to AC15 for X10 to X12 and TC-E1-019-13 to -15; section 5 Covered by updated",
+   "note": "Exceptions X10, X11 and X12 now have criteria in section 7 and test rows in section 16."
+  },
+  {
+   "ruling": "R-15807",
+   "item": "DOR-RWB-P3-E1019-APP-4",
+   "status": "Resolved",
+   "section": "7, 16, 18",
+   "target": "",
+   "change": "Added AC16 and TC-E1-019-16 for BR7; section 18 range extended",
+   "note": "BR7 now has a criterion and a test case; section 18 covers TC-E1-019-16."
+  },
+  {
+   "ruling": "R-21773",
+   "item": "GAP-2273",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "rwb-access OpenAPI document (RWB-P4-E1037-CON)",
+   "change": "Add POST and GET /api/recovery/access/v1/admin/queue-file-checks with Reference data C for the check and R for the read; the cap maximum and seven finding codes stay in that contract document.",
+   "note": "Gate operations belong to rwb-access; queue, member and reference-load rows stay with rwb-case, as this story already states."
+  },
+  {
+   "ruling": "R-21988",
+   "item": "GAP-0679",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Section 11 states which roles and columns stay with rwb-access and which stay with rwb-case",
+   "note": "Column split is now stated in section 11; P4 confirms the column list in RWB-P4-E1037-CON."
+  },
+  {
+   "ruling": "R-21989",
+   "item": "GAP-0344",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "rwb-access OpenAPI document (GET /me/session) and rwb-comms OpenAPI document (POST /cases/{caseId}/notices)",
+   "change": "Publish the team scope field and the queue and team code fields before wave 1 exit, or record them in the Service Contract Catalog.",
+   "note": "Field names belong to the two services' contracts; this story asserts no such values, so the story is unchanged."
+  }
+ ]
+}

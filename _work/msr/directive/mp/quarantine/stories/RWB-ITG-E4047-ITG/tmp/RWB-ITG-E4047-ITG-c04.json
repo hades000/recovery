@@ -1,0 +1,76 @@
+{
+ "edits": [
+  {
+   "old": "3. Harness: reads the payments the case holds through `GET /api/recovery/payment/v1/cases/{caseId}/payments`, proving the payment side of the match is the owner's and not the harness's.",
+   "new": "3. Harness: reads the receipts the case holds through `GET /proceeds` with its case filter, proving the payment side of the match is the owner's and not the harness's."
+  },
+  {
+   "old": "| BR5 | A rejection holds the posting and raises an exception task, and a corrected cause is re-posted | R-DS-32; R-DS-33; R-WO-22; R-WO-23 |",
+   "new": "| BR5 | A rejection holds the posting and raises an exception task, and a corrected cause is re-posted; for a settlement or an asset sale the rejection is an exception item of the outbound interface row, retried and resent, and the route service owns any case state | R-DS-32; R-DS-33; R-WO-22; R-WO-23 |"
+  },
+  {
+   "old": "    Then the system writes the result to the decision log with the rule version",
+   "new": "    Then the system writes the result to the decision log with the rule version\n\n  Scenario: AC3 A debt-sale posting, an approved write-off and a rejected posting follow their rules (new, D-RCV-60)\n    Given a debt sale is derecognised and a write-off is approved in the run\n    When the general ledger posting run takes the two postings and one posting is rejected\n    Then the debt-sale posting goes to the ledger and the provision input goes to Finance\n    Then the approved write-off posts to the core system and the ledger and its posting reference is recorded when both return it\n    Then the rejected posting is held and raises an exception task"
+  },
+  {
+   "old": "| TC-E4-047-04-ITG | Principle 5 | NFR | Forced decision-log write failure; nothing moves |",
+   "new": "| TC-E4-047-04-ITG | Principle 5 | NFR | Forced decision-log write failure; nothing moves |\n| TC-E4-047-05-ITG | AC3, BR3, BR4, BR5 | Integration | Seeded debt sale, approved write-off and rejected posting |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28898",
+   "item": "GAP-2558",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "Harness step 3 now reads receipts through GET /proceeds with its case filter; the payments read is removed from the harness.",
+   "note": "Harness corrected to GET /proceeds case filter. Section 12.2 still lists the cases/{caseId}/payments read; it is outside this chunk."
+  },
+  {
+   "ruling": "R-28899",
+   "item": "GAP-2559",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR5 states that a settlement or asset-sale rejection is an outbound interface exception item, retried and resent, with the route service owning case state.",
+   "note": "BR5 now assigns the settlement and asset-sale rejection to the interface exception item and the route service."
+  },
+  {
+   "ruling": "R-30016",
+   "item": "NEWAC-RWB-ITG-E4047-ITG-AC3",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added AC3 covering BR3, BR4 and BR5 in section 7 and TC-E4-047-05-ITG in section 16.",
+   "note": "AC3 added for BR3, BR4, BR5 with TC-E4-047-05-ITG in section 16."
+  },
+  {
+   "ruling": "R-30017",
+   "item": "NEWAC-RWB-ITG-E4047-ITG-AC4",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "No source states the outcome of a redelivered consumed event; writing one would invent expected behaviour. No edit made."
+  },
+  {
+   "ruling": "R-30018",
+   "item": "NEWAC-RWB-ITG-E4047-ITG-AC5",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "No source states the outcome of a failed or unanswered consumed call; BR6 covers only the outbound interface. No edit made."
+  },
+  {
+   "ruling": "R-30019",
+   "item": "NEWAC-RWB-ITG-E4047-ITG-AC6",
+   "status": "Not applied",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "No source names the status model or the expected refusal of a disallowed transition; writing one would invent it. No edit made."
+  }
+ ]
+}

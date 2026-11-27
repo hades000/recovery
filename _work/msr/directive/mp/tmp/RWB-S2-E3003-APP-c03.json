@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E3-003-06 | Principle 5 | Component | A forced decision-record write failure stops the action with MSG-P7-003; the treatment row, the outbox and the parent report are unchanged |",
+   "new": "| TC-E3-003-06 | Principle 5 | Component | A forced decision-record write failure stops the action with MSG-P7-003; the treatment row, the outbox and the parent report are unchanged |\n| TC-E3-003-07 | Contract | Component | Every operation, event and activity of section 12 checked against the `RWB-S2-E3003-CON` contract fakes: the `TreatmentApproved.v1` envelope with key `caseId`, the `ApprovalWorkflow` child input and output, and the `requestSecondSignature` and `recordAndApply` elements |\n| TC-E3-003-08 | Boundary | Component | The section 12.7 tables: `treatment` changes only `approval_level` and the four outcome columns, `decision_record` and `outbox` are written in the same transaction, and `approval` and `delegation_limit` are neither written nor read |"
+  },
+  {
+   "old": "No new table is created for the second signature, and no foreign key crosses a schema (DP-01). `decision_log_entry` is P7's ledger and is named here only.",
+   "new": "No new table is created for the second signature, and no foreign key crosses a schema (DP-01). `decision_log_entry` is P7's ledger and is named here only.\n\nOpen decision DL10 is still open and applies to this story; its assumptions are ASM-2250, ASM-2357, ASM-2377 and ASM-2863, and each stays an assumption until DL10 closes."
+  },
+  {
+   "old": "The rule package versions arrive through `rwb.decision.RulePackageInForce.v1`. The capability area and the right are the guard library's data.",
+   "new": "The parameters read here, the floor, the levels and limits, the clock and the reason codes, arrive through the reference-data contract (DP-06, DP-07) with their version. The rule package versions arrive through `rwb.decision.RulePackageInForce.v1`. The capability area and the right are the guard library's data."
+  },
+  {
+   "old": "No credential, personal name or email address appears in the workflow input, the activity payloads, the event or the logs, which carry treatment and case identifiers, codes, levels, amounts, versions and timestamps only.",
+   "new": "The operations of this story are guarded by the rwb-access authorise check (DP-08) on the capability area and the right declared here; this story names the check and does not build it.\n\nNo credential, personal name or email address appears in the workflow input, the activity payloads, the event or the logs, which carry treatment and case identifiers, codes, levels, amounts, versions and timestamps only."
+  },
+  {
+   "old": "| rwb-access (P4) | Owns `delegation_limit`, the levels L1 to L6, their holders, substitutes and valid-from dates |",
+   "new": "| rwb-access (P4) | Owns `delegation_limit`, the levels L1 to L6, their holders, substitutes and valid-from dates; the one delegation row the approval reads, read by the kit's `ApprovalWorkflow` on rwb-decision's queue in one hop within 2 s with its version written with the answer, and never by this service |"
+  },
+  {
+   "old": "the payload has no published shape and is the working read of ASM-3068 (GAP-1872).",
+   "new": "the payload is the working read of ASM-3068 (GAP-1872), carries treatmentId, caseId, treatmentType, offerAmount, approvalLevel, approverRole, finalCall, decidedAt, ruleId and ruleVersion, and has no published shape in any source."
+  },
+  {
+   "old": "\"The decision log\" of AC1 and",
+   "new": "\"The decision record\" of AC1 and"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "and has no published shape in any source.",
+   "new": "and has no published shape in any source.\n\nScenario: AC5 A settlement offer below the floor is routed to the approver with the gap to the floor and moves to AWAITING_APPROVAL_SET with a three-working-day clock (new, D-RCV-60)\n\nScenario: AC6 A transfer price below the floor is routed for a second signature and moves to AWAITING_SECOND_SIGNATURE with a three-working-day clock (new, D-RCV-60)\n\nScenario: AC7 A refused second signature returns the case to the route decision with reason `price_below_floor`, and a refused settlement approval records the reason and the gap (new, D-RCV-60)\n\nScenario: AC8 A granted approval releases the offer to the customer, or generates the documents for a deed in lieu (new, D-RCV-60)\n\nScenario: AC9 The approval routes to the level the delegation of authority names for the product, the decision and the amount on the routing date, and the level and limit version are written with the answer (new, D-RCV-60)\n\nScenario: AC10 Every value a business person may change is read as a value in force with its version and is never written in code (new, D-RCV-60)\n\nScenario: AC11 The approval outcome is recorded on the treatment row as approval_level plus the final call, approver role, decided-at time and reason code, with no new table (new, D-RCV-60)\n\nScenario: AC12 A below-floor approval that cannot be recorded does not take effect and the caller's transaction is rolled back (new, D-RCV-60)\n\nScenario: AC13 The case status is rwb-case's; this story reports the stage outcome to the parent workflow and writes no case table (new, D-RCV-60)"
+  },
+  {
+   "old": "SCR-14 Treatment record: states Draft, submitted, approved, booked, broken; this story shows",
+   "new": "SCR-14 Treatment record: states Draft, submitted, approved, booked, broken; empty, loading, error and no access are Not specified in the source documents (CG-ALL-8499); this story shows"
+  },
+  {
+   "old": "| TC-E3-003-08 | Boundary | Component | The section 12.7 tables: `treatment` changes only `approval_level` and the four outcome columns, `decision_record` and `outbox` are written in the same transaction, and `approval` and `delegation_limit` are neither written nor read |",
+   "new": "| TC-E3-003-08 | Boundary | Component | The section 12.7 tables: `treatment` changes only `approval_level` and the four outcome columns, `decision_record` and `outbox` are written in the same transaction, and `approval` and `delegation_limit` are neither written nor read |\n| TC-E3-003-09 | AC5 | End to end | An offer below the floor of its case; `checkFloor` returns below with the gap; the case reaches AWAITING_APPROVAL_SET with the three-working-day clock |\n| TC-E3-003-10 | AC6 | End to end | A transfer price below the floor; `requestSecondSignature` starts the `ApprovalWorkflow` child; the case reaches AWAITING_SECOND_SIGNATURE |\n| TC-E3-003-11 | AC7 | End to end | A refused second signature and a refused settlement approval; the reason codes in force are read, never literal; the gap is recorded on the refusal |\n| TC-E3-003-12 | AC8 | End to end | A granted settlement approval and a granted deed in lieu approval; the offer is released or the documents are generated |\n| TC-E3-003-13 | AC9 | End to end | An approval request for a product, a decision and an amount; the level and the limit version come back from the `ApprovalWorkflow` answer and are written with it |\n| TC-E3-003-14 | AC10 | Component | A floor, clock or reason code changed in its owner's reference data under a new version; the branch reads the new version with no code change |\n| TC-E3-003-15 | AC11 | Component | An approved treatment; the treatment row holds `approval_level` and the four outcome columns and no second-signature table exists |\n| TC-E3-003-16 | AC12 | Component | A failed decision-record append inside `recordAndApply`; the approval does not take effect and the transaction rolls back |\n| TC-E3-003-17 | AC13 | Component | A stage outcome reported to the parent; no case table is written and this story does not change the case status |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-19256",
+   "item": "DOR-RWB-S2-E3003-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Contract test TC-E3-003-07 and boundary test TC-E3-003-08 added. TC-E3-003-01 to -06 absent from Test Cases v8 is outside this story."
+  },
+  {
+   "ruling": "R-19257",
+   "item": "DOR-RWB-S2-E3003-APP-18",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "",
+   "note": "Open decision DL10 named with assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 as still open."
+  },
+  {
+   "ruling": "R-19258",
+   "item": "DOR-RWB-S2-E3003-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Configuration paragraph names the parameters and the reference-data contract (DP-06, DP-07)."
+  },
+  {
+   "ruling": "R-19259",
+   "item": "DOR-RWB-S2-E3003-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC5 to AC13 added for BR1 to BR9 in section 7, with TC-E3-003-09 to TC-E3-003-17 in section 16."
+  },
+  {
+   "ruling": "R-19260",
+   "item": "DOR-RWB-S2-E3003-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "rwb-access authorise check (DP-08) named as the guard of the operations; capability area and right declared here."
+  },
+  {
+   "ruling": "R-19261",
+   "item": "DOR-RWB-S2-E3003-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Add field or entity entries for treatment final_call, approver_role, decided_at, reason_code and decision_record, or list them as reference values; resolve the one further name in the detcheck.",
+   "note": "Names not in LDM v9 or Data Classification v5; change belongs to those documents, no story edit."
+  },
+  {
+   "ruling": "R-23344",
+   "item": "GAP-2634",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "rwb-access owns the one delegation_limit row; ApprovalWorkflow reads it in one hop with version written; this service never reads it. Other owner reading dropped."
+  },
+  {
+   "ruling": "R-23366",
+   "item": "GAP-1872",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "",
+   "note": "TreatmentApproved payload fields and the approval-outcome record fixed in section 7 target reading and BR7; owner confirmation taken per directive."
+  },
+  {
+   "ruling": "R-26886",
+   "item": "CG-ALL-8498",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC1, AC4 and the target reading now say decision record instead of decision log; no JOB-nn or job record wording remains."
+  },
+  {
+   "ruling": "R-26887",
+   "item": "CG-ALL-8499",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "SCR-14 empty, loading, error and no access states added as Not specified in the source documents (CG-ALL-8499)."
+  }
+ ]
+}

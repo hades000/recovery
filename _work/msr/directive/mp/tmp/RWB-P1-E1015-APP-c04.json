@@ -1,0 +1,116 @@
+{
+ "edits": [
+  {
+   "old": "- RWB-P1-E1069-APP is done: `v_ace_batch_status` is readable through the `rwb_source_data` login, which holds SELECT on the 30 `recovery.v_ace_*` views and no privilege on `public` (DP-02, DP-05). Until RWB-ACE-001 lands the feature stays behind its flag (DL43).",
+   "new": "- RWB-P1-E1069-APP is done: `v_ace_batch_status` is readable through the `rwb_source_data` login, which holds SELECT on the 30 `recovery.v_ace_*` views and no privilege on `public` (DP-02, DP-05). Until RWB-ACE-001 lands the feature stays behind its flag (DL43). In system test before RWB-ACE-001 lands, freshness is read from `v_ace_batch_status` populated with synthetic batch rows; where the view is absent the data product shows as not stamped and no date is inferred (GAP-1507)."
+  },
+  {
+   "old": "**One source of truth.** Freshness is read from `v_ace_batch_status` only and never inferred from `data_as_of`, a row count or a file (BR9; FSD P1 A2.14.3 BR-P1-014-2). The Workbench writes no ACE data and holds product codes, source codes and times only.",
+   "new": "**One source of truth.** Freshness is read from `v_ace_batch_status` only and never inferred from `data_as_of`, a row count or a file (BR9; FSD P1 A2.14.3 BR-P1-014-2). The Workbench writes no ACE data and holds product codes, source codes and times only.\n\n**Wave 1 integration.** Wave 1 asserts JOB-02 (P3) and JOB-04 (P1); the start of JOB-07 and JOB-08 (rwb-payment, P8, wave 2) is verified in RWB-ITG-W2. The released case list is read from P1's `case_list_row` projection, not from a copy in the data lake (DP-17)."
+  },
+  {
+   "old": "- **In-process calls become events and a contract:** `AceDataReady` and `AceDataLate` are published as `rwb.source-data.AceDataReady.v1` and `rwb.source-data.AceDataLate.v1` on `rwb.source-data.events.v1` under a CloudEvents 1.0 envelope (DP-09); `FreshnessQuery` and `DailyCompletenessGate` are published interfaces of this service, reached over the contract, one hop and 2 s timeout (DP-11).",
+   "new": "- **In-process calls become events and a contract:** `AceDataReady` and `AceDataLate` are published as `rwb.source-data.AceDataReady.v1` and `rwb.source-data.AceDataLate.v1` on `rwb.source-data.events.v1` under a CloudEvents 1.0 envelope (DP-09); `FreshnessQuery` and `DailyCompletenessGate` are published interfaces of this service, reached over the contract, one hop and 2 s timeout (DP-11).\n- **Event envelope:** the CloudEvents attributes are `id`, `source`, `type`, `specversion`, `time`, `subject` (set to the source system) and `datacontenttype`; both events are keyed by `sourceSystem` and `businessDate`; the seven payload fields of TSD P1 T5.3 are typed in the AsyncAPI document; the registry subject is named by the platform event owner; the producing login is the rwb_source_data login (DP-02)."
+  },
+  {
+   "old": "12. System: a later COMPLETED batch for the same business date sets status LOADED, records the new `loaded_at`, and starts the daily jobs through `AceDataReady`.",
+   "new": "12. System: a later COMPLETED batch for the same business date sets status LOADED, records the new `loaded_at`, and starts the daily jobs through `AceDataReady`.\n\nThe bank scheduler contract has two paths: the ready and status operations for the scheduler, and the poll of the ACE batch record as the fallback. The path live at go-live is confirmed with the bank platform team before the integration test."
+  },
+  {
+   "old": "| MSG-P1-001 | A product is stale, or the gate holds a job, shown in the case record data panel and the alert | {product} is from {date}. Today's ACE batch has not arrived. |",
+   "new": "| MSG-P1-001 | A product is stale, or the gate holds a job, shown in the case record data panel and the alert | {product} is from {date}. Today's load has not arrived. |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-21955",
+   "item": "GAP-1507",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Added system-test fallback read from v_ace_batch_status with synthetic rows, and not-stamped rule when the view is absent, to the dependency line."
+  },
+  {
+   "ruling": "R-21956",
+   "item": "GAP-0340",
+   "status": "Resolved",
+   "section": "2",
+   "target": "",
+   "change": "",
+   "note": "Added wave 1 integration line: JOB-02 and JOB-04 asserted, JOB-07 and JOB-08 verified in RWB-ITG-W2, case list read from case_list_row."
+  },
+  {
+   "ruling": "R-21957",
+   "item": "GAP-0492",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "TSD P1 v3",
+   "change": "Correct T3.6: DF-OPS-005 source_extracted_at from started_at; DF-OPS-006 loaded_at from completed_at. Story already reads this way.",
+   "note": "Story flow and AC3 already use started_at and completed_at; the TSD table needs correction at its next version."
+  },
+  {
+   "ruling": "R-21958",
+   "item": "GAP-0493",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Platform event owner and Architecture v5 AsyncAPI",
+   "change": "Name the registry subject and compatibility level for rwb.source-data.events.v1; fix types and nullability of the seven T5.3 payload fields.",
+   "note": "Envelope attributes, key and login now stated in section 1; registry subject and payload schema are platform and AsyncAPI values."
+  },
+  {
+   "ruling": "R-21959",
+   "item": "GAP-1504",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Event and Messaging Design v4",
+   "change": "Set EV-26 and EV-27 direction to Produced by rwb-source-data on rwb.source-data.events.v1; ACE ingestion is not a producer on a Recovery topic.",
+   "note": "Story already states this service publishes both events; the event document needs correcting at its next version."
+  },
+  {
+   "ruling": "R-21960",
+   "item": "GAP-1513",
+   "status": "Resolved",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "Section 4 now states both the scheduler ready and status path and the ACE batch poll fallback; live path confirmed with bank platform team before integration test."
+  },
+  {
+   "ruling": "R-22385",
+   "item": "GAP-0597",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "RWB-P2-E2007-CON",
+   "change": "Publish GET /batch-status with key pair sourceSystem and businessDate, values status, isComplete, startedAt, completedAt, recordCount, feedVersion; 404 with MSG-P1-001 when no batch row; state it is the gate read distinct from the freshness reads.",
+   "note": "Operation belongs to the P2 contract; add it in the next API Specification version."
+  },
+  {
+   "ruling": "R-22403",
+   "item": "GAP-0599",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "RWB-P8-E2008-CON",
+   "change": "Publish the two reads on /api/recovery/source-data/v1 with resource names, businessDate query parameter, element names and status set; consume them from the OpenAPI fragment at contract freeze.",
+   "note": "Shapes and status set are not in this story; P8 contract consumes them and P1 message owner confirms MSG-P2-007."
+  },
+  {
+   "ruling": "R-22428",
+   "item": "GAP-0604",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "RWB-P3-E1043-CON is already in Contract dependencies; DP01 to DP14 are this service's own data_product rows per section 3. No change."
+  },
+  {
+   "ruling": "R-24329",
+   "item": "CG-ALL-2113",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P1-001 English text now matches Error and Message Standard v4; Thai text left as legacy per DL10."
+  }
+ ]
+}

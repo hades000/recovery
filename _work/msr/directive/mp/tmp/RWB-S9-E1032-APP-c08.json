@@ -1,0 +1,102 @@
+{
+ "edits": [
+  {
+   "old": "| Wave | 1 (contract-only slice: partner identity and partner document path published in wave 1; the rest in wave 4; wave-map conflict GAP-3139 kept per R5.6) |",
+   "new": "| Wave | 1 (contract-only slice: partner identity and partner document path published in wave 1; the rest in wave 4 per Arch v5 slide 41; wave-map conflicts GAP-3139 and GAP-3174 kept per R5.6, one conflict row per service and business epic; the rwb-partner service wave governs the later stories) |"
+  },
+  {
+   "old": "| Patterns applied | DP01, DP03, DP05, DP06, DP07, DP09, DP10, DP11, DP15, DP19 |",
+   "new": "| Patterns applied | DP01, DP03, DP05, DP06, DP07, DP09, DP10, DP11, DP15, DP19 |\n| Platform H rows (GAP-3140) | H empty for this slice. The seven platform rows of DP-03, DP-06, DP-07, DP-09, DP-10, DP-15 and DP-19 (RWB-PLT-E1027-CON, RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-TE006-CON, RWB-PLT-E1071-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON) are the shared baseline of wave 0, not H; revisit if one is not published before the wave 1 entry check |"
+  },
+  {
+   "old": "| X4 | The intake creation misses the 2 s budget or its breaker is open | The row stays `PENDING`; the reconcile run retries with jitter; the partner is told it is queued | MSG-GEN-006 | AC8 |",
+   "new": "| X4 | The intake creation misses the 2 s budget or its breaker is open | The row stays `PENDING`; the reconcile run retries with jitter; the partner is told it is queued | MSG-GEN-006 | AC8, AC16 |"
+  },
+  {
+   "old": "| X7 | A component or test reaches a document, intake, case or ledger table | The grant refuses and the boundary test fails the build | None (pipeline log) | AC9 |",
+   "new": "| X7 | A component or test reaches a document, intake, case or ledger table | The grant refuses and the boundary test fails the build | None (pipeline log) | AC9, AC17 |"
+  },
+  {
+   "old": "    Then the grant refuses the access and the boundary test fails the build, with the pipeline log as the only record",
+   "new": "    Then the grant refuses the access and the boundary test fails the build, with the pipeline log as the only record\n\n  Scenario: AC16 A contract call past the 2 s budget or with the breaker open changes no state (new, D-RCV-60)\n    Given the intake creation of a submission misses the 2 s budget or its breaker is open\n    When the reconcile run retries the intake call\n    Then the row stays in state PENDING, no second row or event is written, and the partner sees MSG-GEN-006 as queued\n\n  Scenario: AC17 A test that reaches a document, document_intake, recovery_case or ledger table outside rwb_partner is refused (new, D-RCV-60)\n    Given a test of this service reads or writes a document, document_intake, recovery_case or ledger table\n    When the boundary test runs\n    Then the grant refuses the access and the build fails, with the pipeline log as the only record\n\n  Scenario: AC18 A contract read or call that misses the 2 s budget changes nothing and is retried once with jitter (new, D-RCV-60)\n    Given a contract read or call of this service misses the 2 s budget\n    When the call times out\n    Then no column changes and no record, row or event is written, and the call is retried once with jitter\n\n  Scenario: AC19 A call to a provided operation without valid credentials answers 401 (new, D-RCV-60)\n    Given the caller holds no valid credentials\n    When the caller calls the submission operation of /api/recovery/partner/v1\n    Then the answer is 401, and no partner_intake row, decision record or event is written\n\n  Scenario: AC20 A redelivered consumed event changes no state (new, D-RCV-60)\n    Given the attach event for \"TI-0001\" on case \"RW-2026-000123\" has been consumed once\n    When the same attach event is redelivered\n    Then partner_intake holds state \"MATCHED\" unchanged, PartnerInstructionWorkflow receives no second documentAttached signal, and no row is added to the inbox or outbox\n\n  Scenario: AC21 A reconcile activity that times out is retried once and writes no second record (new, D-RCV-60)\n    Given the reconcile run calls the intake for a submission and the activity times out at the 2 s budget\n    When the activity is retried once with jitter\n    Then no second partner_intake row and no second PartnerDocumentSubmitted event is written"
+  },
+  {
+   "old": "| TC-S9-E1032-APP-10 | AC8, BR6, X4 | Component | An intake creation past the 2 s budget with the breaker open; the row stays `PENDING`, the partner gets MSG-GEN-006, one retry with jitter in the reconcile run |",
+   "new": "| TC-S9-E1032-APP-10 | AC8, BR6, X4 | Component | An intake creation past the 2 s budget with the breaker open; the row stays `PENDING`, the partner gets MSG-GEN-006, one retry with jitter in the reconcile run |\n| TC-S9-E1032-APP-11 | AC16, X4 | Component | An intake creation past the 2 s budget with the breaker open, reconciled twice; one row, one event, row stays `PENDING` |\n| TC-S9-E1032-APP-12 | AC17, X7 | Component | A test reading or writing `document`, `document_intake`, `recovery_case` or a ledger table outside `rwb_partner`; the grant refuses and the build fails |\n| TC-S9-E1032-APP-13 | AC18, BR6 | Component | A contract read that misses the 2 s budget; no column changed, one retry with jitter |\n| TC-S9-E1032-APP-14 | AC19 | Contract | A submission and a read on `/api/recovery/partner/v1` without credentials; the answer is 401 and nothing is written |\n| TC-S9-E1032-APP-15 | AC20, BR7 | Component | The attach event for intake item `TI-0001` redelivered after consumption; no column changed, no second signal |\n| TC-S9-E1032-APP-16 | AC21, BR6 | Component | A reconcile activity timing out at the 2 s budget; one retry with jitter; no second row or event |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-28573",
+   "item": "GAP-3174",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Wave row now states the wave 4 plan per Arch v5 slide 41, keeps GAP-3139 and GAP-3174 conflicts per R5.6, and says the service wave governs later stories."
+  },
+  {
+   "ruling": "R-28574",
+   "item": "GAP-3140",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Patterns row gains a row recording the seven platform rows as the wave 0 shared baseline; H stays empty; revisit before wave 1 entry check."
+  },
+  {
+   "ruling": "R-33200",
+   "item": "NEWAC-RWB-S9-E1032-APP-AC16",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 (contract call past 2 s budget or breaker open) and TC-11; X4 now covered by AC8 and AC16. AC16 numbering follows the item ID; AC10-15 left to the primary slice."
+  },
+  {
+   "ruling": "R-33201",
+   "item": "NEWAC-RWB-S9-E1032-APP-AC17",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC17 (test reaching document, document_intake, recovery_case or ledger table refused) and TC-12; X7 now covered by AC9 and AC17."
+  },
+  {
+   "ruling": "R-33202",
+   "item": "NEWAC-RWB-S9-E1032-APP-AC18",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC18 for BR6 (2 s miss changes nothing, one retry with jitter) with TC-13 covering AC18 and BR6."
+  },
+  {
+   "ruling": "R-33203",
+   "item": "NEWAC-RWB-S9-E1032-APP-AC19",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC19 (no valid credentials on a provided operation answers 401, nothing written) with contract test TC-14."
+  },
+  {
+   "ruling": "R-33204",
+   "item": "NEWAC-RWB-S9-E1032-APP-AC20",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC20 (redelivered consumed attach event changes no state, no second signal) with TC-15 covering AC20 and BR7."
+  },
+  {
+   "ruling": "R-33205",
+   "item": "NEWAC-RWB-S9-E1032-APP-AC21",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC21 (timed-out reconcile activity retried once, no second row or event) with TC-16 covering AC21 and BR6."
+  }
+ ]
+}

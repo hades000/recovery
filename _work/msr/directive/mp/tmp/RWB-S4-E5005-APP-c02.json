@@ -1,0 +1,172 @@
+{
+ "edits": [
+  {
+   "old": "**Feature flag.** `rwb.litigation.pack-defects-v1`",
+   "new": "**Screen states.** SCR-19 (`PackDefects`) and SCR-20 both read through the gateway-bff composite route and show these states. Empty: when the checklist has no rows, the empty checklist is shown as a state (X5) and no pack move is shown. Loading: shown while the composite route answers; its display is not specified in the source documents (DOR-RWB-S4-E5005-APP-10). Error: the 503 of X4 is shown with the platform error envelope. No access: the 403 of X2 is shown with MSG-P4-002 and no pack data.\n\n**Feature flag.** `rwb.litigation.pack-defects-v1`"
+  },
+  {
+   "old": "| TC-E5-005-06 | Principle 5 | NFR | A forced decision log write failure stops the action with MSG-P7-003 |",
+   "new": "| TC-E5-005-06 | Principle 5 | NFR | A forced decision record write failure stops the action with MSG-P7-003 |\n| TC-E5-005-07 | Section 12 (operations, events and activities) | Contract | The published contract of each consumed owner answers the operations, events and activities of section 12 |\n| TC-E5-005-08 | AC6, section 12.7 (ASM-3438), BR5 | Boundary | No statement outside rwb_litigation, no read of a v_ace_* object and no write to a sibling owner's object |\n| TC-E5-005-09 | AC7, BR6 | Component | The same case, rule and checklist version twice writes once |\n| TC-E5-005-10 | AC8, BR7 | Component | A list value outside LOV-LEGAL-TYPE is refused |\n| TC-E5-005-11 | AC9, BR8 | NFR | The decision record and the workflow input carry no personal data |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E5-005-05 |",
+   "new": "| MSG-P4-002 | AC5, TC-E5-005-05 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17, BR5 |",
+   "new": "| None (pipeline log) | AC6, TC-E5-005-08, BR5 |"
+  },
+  {
+   "old": "Then nothing changes and the user sees MSG-P7-003",
+   "new": "Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC5 The role without the Litigation right is refused before any read or write (new, D-RCV-60)\n    Given the caller does not hold the Litigation right of the operation\n    When the pack check is requested for \"LA-2026-000705\"\n    Then the system answers 403 with MSG-P4-002\n    Then nothing changes and no decision record is written\n\n  Scenario: AC6 A statement reaching a sibling owner's object fails the build (new, D-RCV-60)\n    Given a component, a statement or a test reaches a rwb_document, rwb_case or v_ace_* object\n    When the boundary test runs\n    Then the grant refuses the statement and the build fails\n    Then nothing is released\n\n  Scenario: AC7 The same case, rule and checklist version twice writes once (new, D-RCV-60)\n    Given the same case, rule and checklist version arrive twice with the same Idempotency-Key\n    When the repeat arrives\n    Then one decision record and one case answer exist\n    Then the repeat is counted and no second record is written\n\n  Scenario: AC8 A list value outside the closed vocabulary is refused (new, D-RCV-60)\n    Given the legal action carries an action_type outside LOV-LEGAL-TYPE\n    When the action is checked\n    Then the step refuses it and writes nothing\n\n  Scenario: AC9 Personal data is kept out of the record, the log and the workflow input (new, D-RCV-60)\n    Given the checked pack holds the documents of case \"RC-2026-000705\"\n    When the decision record and the workflow input are written\n    Then they carry only identifiers, document type codes, counts, dates and the rule version"
+  },
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "`the decision log cannot be written`, `document retrieved` and `its trigger arrives` all stand.",
+   "new": "`document retrieved` and `its trigger arrives` all stand. The decision-log wording of AC1 and AC4 is replaced by decision record (DOR-RWB-S4-E5005-APP-7)."
+  },
+  {
+   "old": "| R-LIT-16 | Litigation | D7 |",
+   "new": "| R-LIT-16 (BR9) | Litigation | D7 |"
+  },
+  {
+   "old": "| R-LIT-17 | Litigation | D7 |",
+   "new": "| R-LIT-17 (BR10) | Litigation | D7 |"
+  },
+  {
+   "old": "| R-LIT-18 | Litigation | D7 |",
+   "new": "| R-LIT-18 (BR11) | Litigation | D7 |"
+  },
+  {
+   "old": "| R-LIT-31 | Litigation | D7 |",
+   "new": "| R-LIT-31 (BR12) | Litigation | D7 |"
+  },
+  {
+   "old": "| R-LIT-32 | Litigation | D7 |",
+   "new": "| R-LIT-32 (BR13) | Litigation | D7 |"
+  },
+  {
+   "old": "The five rows are the rows of the Business Rules and Routing Logic v4, copied character for character.",
+   "new": "The five rows are the rows of the Business Rules and Routing Logic v4, copied character for character, with the BR ID of this section added in brackets to the rule cell."
+  },
+  {
+   "old": "**Where each rule lives in the target.**",
+   "new": "**Rule coverage.** BR1: AC1, TC-E5-005-01. BR2: AC1, AC4, TC-E5-005-01, TC-E5-005-04, TC-E5-005-06. BR3: AC2, AC3, TC-E5-005-02, TC-E5-005-03. BR4: AC1, TC-E5-005-01. BR5: AC6, TC-E5-005-08. BR6: AC7, TC-E5-005-09. BR7: AC8, TC-E5-005-10. BR8: AC9, TC-E5-005-11. BR9 and BR10: AC1, TC-E5-005-01. BR11: AC2, TC-E5-005-02. BR12 and BR13: AC3, TC-E5-005-03.\n\n**Where each rule lives in the target.**"
+  },
+  {
+   "old": "The rights above are the rows of TSD S4 T6.1 and nothing wider.",
+   "new": "The rights above are the rows of TSD S4 T6.1 and nothing wider.\n\nThe authorise check is the rwb-access guard for the capability area \"Litigation\" and the right of each operation of section 12, called before any read or write; the check is stated here and its build is the service template's (DP-08)."
+  },
+  {
+   "old": "no write to `rwb_document`, `rwb_case` or `rwb_decision` (X9, BR5).",
+   "new": "no write to any sibling owner's schema named in section 11 (X9, BR5, AC6)."
+  },
+  {
+   "old": "- The capability area \"Litigation\" and its rights are access rows of rwb-access, read through the guard.",
+   "new": "- The capability area \"Litigation\" and its rights are access rows of rwb-access, read through the guard.\n- The reference-data contract is the owner's published contract of each source: the checklist rows on API-P5-008 of rwb-document and the LOV pair of TSD S4 T3.2 (DP-06, DP-07); the parameters the step reads are not named in the source documents (DOR-RWB-S4-E5005-APP-20)."
+  },
+  {
+   "old": "The six legacy test case IDs, their Covers and their Data are kept in order and character for character.",
+   "new": "The six legacy test case IDs, their Covers and their Data are kept in order and character for character, except the decision-log wording of TC-E5-005-06, which now reads decision record (DOR-RWB-S4-E5005-APP-7)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12521",
+   "item": "CG-ALL-9098",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows TC-E5-005-01 to TC-E5-005-06 with Given, When and Then copied from AC1 to AC5, and rows TC-E5-005-07 to TC-E5-005-11 from section 16.",
+   "note": "Story section 16 lists the rows; the v8 workbook has no rows, so it is changed in the next Test Cases version."
+  },
+  {
+   "ruling": "R-19783",
+   "item": "DOR-RWB-S4-E5005-APP-10",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Added screen states for SCR-19 and SCR-20: empty, loading, error and no access. Loading display is not specified in the source documents."
+  },
+  {
+   "ruling": "R-19784",
+   "item": "DOR-RWB-S4-E5005-APP-11",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Data Classification v5",
+   "change": "Classify each field of section 11 and remove any field classed as personal data from the read or write list; the field is not named in the source documents.",
+   "note": "No field is named in the detcheck, so the story cannot be edited to remove it."
+  },
+  {
+   "ruling": "R-19785",
+   "item": "DOR-RWB-S4-E5005-APP-12",
+   "status": "Resolved",
+   "section": "12, 16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E5-005-07 (contract, section 12) and TC-E5-005-08 (boundary, section 12.7, ASM-3438). The Test Cases v8 gap is in CG-ALL-9098."
+  },
+  {
+   "ruling": "R-19786",
+   "item": "DOR-RWB-S4-E5005-APP-20",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Named the reference-data contracts (API-P5-008, LOV pair TSD S4 T3.2). Parameters are not named in the source documents."
+  },
+  {
+   "ruling": "R-19787",
+   "item": "DOR-RWB-S4-E5005-APP-24",
+   "status": "Resolved",
+   "section": "13",
+   "target": "",
+   "change": "",
+   "note": "Build step 8 now refers to the sibling owner schemas named in section 11 instead of naming them in section 13."
+  },
+  {
+   "ruling": "R-19788",
+   "item": "DOR-RWB-S4-E5005-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 (X2), AC6 (X9), AC7 (BR6), AC8 (BR7), AC9 (BR8). Section 5 Covered by now names the criteria; wording uses decision record."
+  },
+  {
+   "ruling": "R-19789",
+   "item": "DOR-RWB-S4-E5005-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR9 to BR13 added to the five R-LIT rows; a rule coverage paragraph maps BR1 to BR13 to criteria and test cases."
+  },
+  {
+   "ruling": "R-19790",
+   "item": "DOR-RWB-S4-E5005-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role SY-DATALOAD with Litigation R or U as TSD S4 T6.1 gives it.",
+   "note": "Story now names the rwb-access authorise check per operation (DP-08); the role row is in the other document."
+  },
+  {
+   "ruling": "R-19791",
+   "item": "DOR-RWB-S4-E5005-APP-7",
+   "status": "Cross-document",
+   "section": "11, 7, 16",
+   "target": "Logical Data Model and Data Dictionary v9; Data Classification v5",
+   "change": "Add decision_record as the platform library entity of rwb_litigation, or confirm the name the story uses.",
+   "note": "Criteria AC1, AC4 and TC-E5-005-06 now say decision record. Change log line not edited; owner to update it."
+  }
+ ]
+}

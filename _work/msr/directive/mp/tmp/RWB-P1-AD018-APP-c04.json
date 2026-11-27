@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "this story fixes the three answers it reads and no screen of its own.",
+   "new": "this story fixes the three answers it reads and no screen of its own. RWB-P1-AD018-APP serves those three reads, RWB-P1-AD018-CON publishes them and RWB-P1-AD018-OPS registers the gateway-bff route and its alerts. The empty, loading, error and no access states: Not specified in the source documents (CG-ALL-1850). Alert thresholds, panel baselines, channel, replica count, resource size and retention of the monitor are held per environment in the values file; the 15-minute failed-job target of NFR-068 is kept, and the thresholds are confirmed with the operations owner at the wave 4 readiness review."
+  },
+  {
+   "old": "    Then no ACE batch, feed or file is started, stopped or rerun",
+   "new": "    Then no ACE batch, feed or file is started, stopped or rerun\n\n  Scenario: AC7 A replay of a rerun with the same idempotency key is answered as specified (new, D-RCV-60)\n    Given a rerun request was accepted for a failed Workbench job\n    When the same write is sent again with the same idempotency key\n    Then the answer is Not specified in the source documents (NEWAC-RWB-P1-AD018-APP-AC10)\n\n  Scenario: AC8 A consumed call that fails or does not answer leaves the job list answering (new, D-RCV-60)\n    Given v_ace_batch_status or the rwb-integration mock does not answer or fails\n    When I open the monitor\n    Then the affected values show unknown or empty with their own marker and the job list still answers\n\n  Scenario: AC9 A status change the model does not allow is refused (new, D-RCV-60)\n    Given the latest run of a job is RUNNING\n    When I rerun it from its run book\n    Then the answer is 409 and no second run row is written\n    Given the latest run of a job is COMPLETE\n    When I rerun it from its run book\n    Then the answer is Not specified in the source documents (NEWAC-RWB-P1-AD018-APP-AC12)\n\n  Scenario: AC10 An unknown job code on the monitor is refused with MSG-GEN-001 (new, D-RCV-60)\n    Given the job code is not in the job catalogue\n    When I open the monitor for that job code\n    Then the answer is 404 with MSG-GEN-001 in the error envelope and no partial job list is shown\n\n  Scenario: AC11 A caller holding Platform administration R and not U is refused with MSG-P4-002 and no run row is written (new, D-RCV-60)\n    Given I hold Platform administration R and not U\n    Given a failed Workbench job\n    When I rerun it from its run book\n    Then the answer is 403 with MSG-P4-002 and the run log holds no new row\n\n  Scenario: AC12 The provided operations answer 401, 403 and 404 with the error envelope (new, D-RCV-60)\n    Given I call a provided operation without a valid login\n    When the call is answered\n    Then the answer is 401 with the error envelope\n    Given I hold Platform administration R and not U\n    When I rerun a failed Workbench job\n    Then the answer is 403 with MSG-P4-002\n    Given the job code is not in the job catalogue\n    When I request the job for that job code\n    Then the answer is 404 with the error envelope (NEWAC-RWB-P1-AD018-APP-AC9)"
+  },
+  {
+   "old": "| X1 | The job code is unknown | 404 with the error envelope; no partial job list | MSG-GEN-001 | AC3; Contract test of RWB-P1-AD018-CON |",
+   "new": "| X1 | The job code is unknown | 404 with the error envelope; no partial job list | MSG-GEN-001 | AC3, AC10; Contract test of RWB-P1-AD018-CON |"
+  },
+  {
+   "old": "| X4 | The caller holds Platform administration R and not U | 403; nothing is written and no run is created | MSG-P4-002 | AC4; TC-AD-018-04 |",
+   "new": "| X4 | The caller holds Platform administration R and not U | 403; nothing is written and no run is created | MSG-P4-002 | AC4, AC11; TC-AD-018-04 |"
+  },
+  {
+   "old": "| BR3 | A job whose source batch is not complete for the business date is recorded WAITING, is not started and is not rerun | RWB-AD-018 AC3 and guardrail; NFR-015 |",
+   "new": "| BR3 | A job whose source batch is not complete for the business date is recorded WAITING, is not started and is not rerun | RWB-AD-018 AC3 and guardrail; NFR-015; covered by AC5 and TC-AD-018-08 |"
+  },
+  {
+   "old": "| BR7 | No ACE batch, feed or file is started, stopped or rerun from the Workbench | RWB-AD-018 guardrail; NFR-015 |",
+   "new": "| BR7 | No ACE batch, feed or file is started, stopped or rerun from the Workbench | RWB-AD-018 guardrail; NFR-015; covered by AC6 and TC-AD-018-09 |"
+  },
+  {
+   "old": "| TC-AD-018-09 | AC6, BR7 | Component | A job that reads ACE on the monitor; a start, stop or rerun request for an ACE batch, feed or file |",
+   "new": "| TC-AD-018-09 | AC6, BR7 | Component | A job that reads ACE on the monitor; a start, stop or rerun request for an ACE batch, feed or file |\n| TC-AD-018-10 | AC7 | Contract | A rerun request replayed; idempotency key not specified in the source documents (NEWAC-RWB-P1-AD018-APP-AC10) |\n| TC-AD-018-11 | AC8 | Component | v_ace_batch_status or the rwb-integration mock does not answer or fails; the job list still answers |\n| TC-AD-018-12 | AC9, BR4 | End to end | A job with a RUNNING latest run and one with a COMPLETE latest run, each asked to rerun; the COMPLETE answer not specified in the source documents (NEWAC-RWB-P1-AD018-APP-AC12) |\n| TC-AD-018-13 | AC10, X1 | Component | A job code not in the job catalogue on the monitor; MSG-GEN-001 shown |\n| TC-AD-018-14 | AC11, X4 | Component | RW-AUDIT asks a rerun with Platform administration R and not U; the run log gets no new row |\n| TC-AD-018-15 | AC12 | Contract | Calls without a valid login, with refused rights and with an unknown job code; the 401, 403 and 404 answers of the provided operations |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-24212",
+   "item": "CG-ALL-1850",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Added empty, loading, error and no access states to SCR-44 as Not specified in the source documents (CG-ALL-1850).",
+   "note": "Screen Specifications v1 lacks these states; recorded as not specified."
+  },
+  {
+   "ruling": "R-28403",
+   "item": "GAP-2164",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 states that thresholds, baselines, channel, replica count, resource size and retention are held per environment in the values file, with NFR-068 15-minute target and wave 4 confirmation.",
+   "note": "Story side resolved; values held per environment and confirmed at wave 4 readiness review."
+  },
+  {
+   "ruling": "R-28404",
+   "item": "GAP-0516",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "Section 15 assigns serving reads to APP, publishing to CON and registering the gateway-bff route and alerts to OPS.",
+   "note": "Split of SCR-44 route work across the three P1 stories stated in section 15."
+  },
+  {
+   "ruling": "R-30112",
+   "item": "NEWAC-RWB-P1-AD018-APP-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC7 for replay of a rerun with the same idempotency key and TC-AD-018-10 row.",
+   "note": "Idempotency key details not in sources; expected answer recorded as Not specified."
+  },
+  {
+   "ruling": "R-30113",
+   "item": "NEWAC-RWB-P1-AD018-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 for a consumed call that fails or does not answer and TC-AD-018-11 row.",
+   "note": "Covers v_ace_batch_status and rwb-integration failures per X5 and X8."
+  },
+  {
+   "ruling": "R-30114",
+   "item": "NEWAC-RWB-P1-AD018-APP-AC12",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 for refused disallowed transitions (RUNNING 409; COMPLETE answer not specified) and TC-AD-018-12 row.",
+   "note": "RUNNING refusal sourced from X2; COMPLETE answer not in sources."
+  },
+  {
+   "ruling": "R-30115",
+   "item": "NEWAC-RWB-P1-AD018-APP-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC10 for X1 unknown job code with MSG-GEN-001 and linked it in X1 Covered by column with TC-AD-018-13 row.",
+   "note": "X1 now covered by AC10 in addition to the contract test."
+  },
+  {
+   "ruling": "R-30116",
+   "item": "NEWAC-RWB-P1-AD018-APP-AC7",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "Added AC11 for X4 refusal with no run row and linked it in X4 Covered by column with TC-AD-018-14 row.",
+   "note": "X4 now covered by AC11 in addition to TC-AD-018-04."
+  },
+  {
+   "ruling": "R-30117",
+   "item": "NEWAC-RWB-P1-AD018-APP-AC8",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "BR3 and BR7 Source cells now cite AC5 with TC-AD-018-08 and AC6 with TC-AD-018-09, which already test them.",
+   "note": "BR3 and BR7 were already covered by existing criteria and tests; references added."
+  },
+  {
+   "ruling": "R-30118",
+   "item": "NEWAC-RWB-P1-AD018-APP-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC12 for 401, 403 and 404 error answers of provided operations and TC-AD-018-15 row.",
+   "note": "401 answer taken from item; 403 and 404 from X4 and X1."
+  }
+ ]
+}

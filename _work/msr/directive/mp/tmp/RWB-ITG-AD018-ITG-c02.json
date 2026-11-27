@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "| None | Section 17 |",
+   "new": "| None | AC7 |"
+  },
+  {
+   "old": "    And the dependent job stays WAITING and no run is created",
+   "new": "    And the dependent job stays WAITING and no run is created\n\n  Scenario: AC7 A suite step cannot read the ACE view or a service schema directly (new, D-RCV-60)\n    Given the suite is built with no client for recovery.v_ace_batch_status, rwb_source_data or any other service schema\n    When the pipeline scans a change that adds a direct read of one of them\n    Then the scan fails that change and no step reads the view or the schema\n\n  Scenario: AC8 JOB-04 is an event-started workflow and JOB-05 is not in the monitor (new, D-RCV-60)\n    Given the job list for business date \"2026-11-30\" is read through P1's job read\n    When the monitor is composed from that answer\n    Then JOB-04 Reconciliation is listed as an event-started workflow and no job in the monitor is timed by a Quartz entry\n    And JOB-05 is not listed in the monitor"
+  },
+  {
+   "old": "| ID | Rule | Source |\n|---|---|---|",
+   "new": "| ID | Rule | Source | Covered by |\n|---|---|---|---|"
+  },
+  {
+   "old": "| BR1 | Every Workbench job shows its job ID, business date, status, duration and the result of each check, and each job that reads ACE shows the last complete ACE business date of its source | RWB-AD-018 AC1 |",
+   "new": "| BR1 | Every Workbench job shows its job ID, business date, status, duration and the result of each check, and each job that reads ACE shows the last complete ACE business date of its source | RWB-AD-018 AC1 | AC1 |"
+  },
+  {
+   "old": "| BR2 | A failed Workbench job is rerun from its run book after the cause is fixed, and both runs are in the job log | RWB-AD-018 AC2 |",
+   "new": "| BR2 | A failed Workbench job is rerun from its run book after the cause is fixed, and both runs are in the job log | RWB-AD-018 AC2 | AC2 |"
+  },
+  {
+   "old": "| BR3 | A late or failed ACE batch leaves the dependent job recorded WAITING and not rerun, and its data product STALE with MSG-P1-001 | RWB-AD-018 AC3 |",
+   "new": "| BR3 | A late or failed ACE batch leaves the dependent job recorded WAITING and not rerun, and its data product STALE with MSG-P1-001 | RWB-AD-018 AC3 | AC3 |"
+  },
+  {
+   "old": "| BR4 | **No ACE batch is rerun from the Workbench**: ACE ingestion owns the source runs, and the Workbench records the dependent job as WAITING | RWB-AD-018 guardrail; Architecture v5 slide 32 (Airflow runs the ACE ingestion DAG and says the business date is ready) |",
+   "new": "| BR4 | **No ACE batch is rerun from the Workbench**: ACE ingestion owns the source runs, and the Workbench records the dependent job as WAITING | RWB-AD-018 guardrail; Architecture v5 slide 32 (Airflow runs the ACE ingestion DAG and says the business date is ready) | AC6 |"
+  },
+  {
+   "old": "| BR5 | **A late batch is WAITING, not failed**: WAITING is the state of a job whose source has not delivered, FAILED is the state of a run that ran and failed, and only the second may be rerun | RWB-AD-018 AC2 and AC3; the guardrail of the same story |",
+   "new": "| BR5 | **A late batch is WAITING, not failed**: WAITING is the state of a job whose source has not delivered, FAILED is the state of a run that ran and failed, and only the second may be rerun | RWB-AD-018 AC2 and AC3; the guardrail of the same story | AC3, AC6 |"
+  },
+  {
+   "old": "| BR6 | `v_ace_batch_status` is read only through rwb-source-data's contract, and no service opens the view or reads another service's table | DP-05, DP-01; RWB-AD-018 guardrail; Architecture v5 slide 41 (P1 owns the ACE view contract and freshness) |",
+   "new": "| BR6 | `v_ace_batch_status` is read only through rwb-source-data's contract, and no service opens the view or reads another service's table | DP-05, DP-01; RWB-AD-018 guardrail; Architecture v5 slide 41 (P1 owns the ACE view contract and freshness) | AC1, AC7 |"
+  },
+  {
+   "old": "| BR7 | The freshness of a data product is P1's single fact: the last complete ACE business date of its source and the state of the product are answered once and never copied | DP-05; Architecture v5 slide 41; Architecture v5 slide 45 (only rwb-source-data reads the 30 ACE views) |",
+   "new": "| BR7 | The freshness of a data product is P1's single fact: the last complete ACE business date of its source and the state of the product are answered once and never copied | DP-05; Architecture v5 slide 41; Architecture v5 slide 45 (only rwb-source-data reads the 30 ACE views) | AC1, AC5 |"
+  },
+  {
+   "old": "| BR8 | JOB-04 Reconciliation is an event-started workflow in rwb-source-data and JOB-05 is retired, so no job in the monitor is timed by a Quartz entry | Architecture v5 slide 44; ADR-016 |",
+   "new": "| BR8 | JOB-04 Reconciliation is an event-started workflow in rwb-source-data and JOB-05 is retired, so no job in the monitor is timed by a Quartz entry | Architecture v5 slide 44; ADR-016 | AC8 |"
+  },
+  {
+   "old": "| BR9 | Every call in the run is one hop on the owner's base `/api/recovery/<short>/v1` with a 2 s timeout, and the composite path the screen uses is the gateway-bff route | DP-11, DP-13, DP-19; ADR-020 |",
+   "new": "| BR9 | Every call in the run is one hop on the owner's base `/api/recovery/<short>/v1` with a 2 s timeout, and the composite path the screen uses is the gateway-bff route | DP-11, DP-13, DP-19; ADR-020 | AC1, X9 |"
+  },
+  {
+   "old": "| BR10 | A rerun carries one Idempotency-Key and a repeat of the key answers the same run instead of starting a second, and the right to rerun is Platform administration U | RWB-AD-018 permission checks; DP-13; ADR-020 |",
+   "new": "| BR10 | A rerun carries one Idempotency-Key and a repeat of the key answers the same run instead of starting a second, and the right to rerun is Platform administration U | RWB-AD-018 permission checks; DP-13; ADR-020 | AC2, AC4 |"
+  },
+  {
+   "old": "the right is answered by rwb-access and enforced by P1, and the values in the table are the legacy ones.",
+   "new": "the right is taken from the platform session and enforced by P1 with MSG-P4-002 on refusal, and the values in the table are the legacy ones."
+  },
+  {
+   "old": "Read through P1's job read only; the row itself stays with P2 rwb-integration (ASM-0075) and is never read from a schema",
+   "new": "P1 lists the Workbench jobs it owns from its own job map and the ACE batch record; a catalog field is read through P2 rwb-integration's contract only (ASM-0075), never by table or schema"
+  },
+  {
+   "old": "P2 rwb-integration's rows, read only through P1's job read; this story does not call rwb-integration",
+   "new": "P2 rwb-integration's rows, read only through P1's job read (GAP-2162); until the rwb-integration operation is published the harness shows them through its contract mock, with no build dependency claimed"
+  },
+  {
+   "old": "| DF-OPS-118 to DF-OPS-129 | reconciliation_result | Not specified in the source documents (GAP-0440; ASM-0632) | Read only if P1's job read carries it; the run reads no reconciliation row directly |",
+   "new": "| DF-OPS-118 to DF-OPS-129 | reconciliation_result | Not specified in the source documents (GAP-0440; ASM-0632) | Read only if P1's job read carries it; the run reads no reconciliation row directly |\n| Not specified in the source documents (GAP-2162) | rwb_source_data run log, one row per attempt | job_id, business_date, run_no, status, duration, result of each check | Read through P1's job read only; never read from a schema |"
+  },
+  {
+   "old": "Every key in the run is synthetic, and no field in the table carries personal data.",
+   "new": "Every key in the run is synthetic, and no field in the table carries personal data. Reference data: lists and parameters are read only through the published reference-data contract (DP-06, DP-07), and the parameter names are Not specified in the source documents (DOR-RWB-ITG-AD018-ITG-20). Until P1 publishes the answer schemas under GAP-0440, the harness asserts each answer field by field from the published contract and cites GAP-0440."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-13676",
+   "item": "DOR-RWB-ITG-AD018-ITG-20",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 names the reference-data contract (DP-06, DP-07); parameter names marked Not specified (DOR-RWB-ITG-AD018-ITG-20)."
+  },
+  {
+   "ruling": "R-13677",
+   "item": "DOR-RWB-ITG-AD018-ITG-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "X10 now covered by new AC7 (Gherkin, D-RCV-60); AC8 added. Section 16 test case rows are not in this chunk and remain to add."
+  },
+  {
+   "ruling": "R-13678",
+   "item": "DOR-RWB-ITG-AD018-ITG-4",
+   "status": "Resolved",
+   "section": "8, 7",
+   "target": "",
+   "change": "",
+   "note": "Covered by column added to section 8 for BR1 to BR10 mapped to criteria; AC7 and AC8 added. Section 16 test case rows not in this chunk."
+  },
+  {
+   "ruling": "R-13679",
+   "item": "DOR-RWB-ITG-AD018-ITG-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add role RW-OFF (officer without the administration rights) used in section 10, AC4 and X6.",
+   "note": "Role RW-OFF is missing from Users Roles and Permissions v5; no story edit."
+  },
+  {
+   "ruling": "R-13680",
+   "item": "DOR-RWB-ITG-AD018-ITG-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "P2 Criteria and test data",
+   "change": "Read ACE views only through P1's contract (DP-05), never directly; section 11 already states this rule.",
+   "note": "P2 criteria and test data read ACE views directly; change belongs to that document."
+  },
+  {
+   "ruling": "R-13681",
+   "item": "DOR-RWB-ITG-AD018-ITG-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Align MSG-P1-001 text in P3 with Error and Message Standard v4; section 14 follows once aligned.",
+   "note": "MSG-P1-001 text in P3 differs from Error and Message Standard v4; no story-side text change."
+  },
+  {
+   "ruling": "R-21784",
+   "item": "GAP-0440",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P1-AD018-APP OpenAPI and AsyncAPI (P1 rwb-source-data); message catalogue",
+   "change": "Publish the job read, rerun answer, job-log fields, freshness answer and v_ace_batch_status read path at wave 4 entry; add refused-rerun and not-a-Workbench-job messages.",
+   "note": "Story now asserts answer fields from the published contract until P1 publishes, citing GAP-0440. Owner: solution architect."
+  },
+  {
+   "ruling": "R-21785",
+   "item": "GAP-0514",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-P1-AD018-CON",
+   "change": "Publish response fields of the job read, rerun answer and freshness answer by field ID: DF-OPS-224 to DF-OPS-232, DF-OPS-001 to DF-OPS-008, DF-ACE-178 to DF-ACE-186.",
+   "note": "Response shapes are not specified in the source; field IDs are already in section 11. Owner: tech lead."
+  },
+  {
+   "ruling": "R-21786",
+   "item": "GAP-0515",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 job_catalog row: P1 lists jobs it owns from its job map and ACE batch record; catalog fields read via P2 contract only."
+  },
+  {
+   "ruling": "R-21787",
+   "item": "GAP-2162",
+   "status": "Resolved",
+   "section": "9, 11",
+   "target": "",
+   "change": "",
+   "note": "Run log row added (keyed by job_id, business_date, run_no); outbound rows via rwb-integration mock; right taken from platform session with MSG-P4-002."
+  }
+ ]
+}

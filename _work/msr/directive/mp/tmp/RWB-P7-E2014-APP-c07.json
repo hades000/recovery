@@ -1,0 +1,41 @@
+{
+ "edits": [
+  {
+   "old": "    Then the system answers with status 404",
+   "new": "    Then the system answers with status 404\n\n  Scenario: AC14 A replayed write with the same idempotency key changes nothing\n    Given \"U-9212\" has approved \"A-0201\" once with an idempotency key\n    When \"U-9212\" sends the same approve call again with the same idempotency key\n    Then the system returns the stored result of the first call\n    Then notice \"N-0201\" is not approved a second time and the decision log holds one entry\n\n  Scenario: AC15 A retried or timed-out activity records one decision\n    Given an activity of the approval of \"A-0201\" times out after its 2 s budget\n    When the activity is retried\n    Then the decision log holds one entry for \"A-0201\" and the timed-out call is answered as missing\n    Then the timed-out call never approves notice \"N-0201\"\n\n  Scenario: AC16 A consumed call that fails or does not answer approves nothing\n    Given the rwb-comms contract mock fails or does not answer the approve operation for notice \"N-0201\"\n    When \"U-9212\" approves \"A-0201\"\n    Then the call is answered as missing past its 2 s budget and the system refuses the approve call\n    Then notice \"N-0201\" stays in state \"Generated\" and the approval status is unchanged"
+  },
+  {
+   "old": "| TC-E2-014-24 | AC13 | Component | A call without authentication, a call without the right and a call to an unknown approval answer 401, 403 and 404 |",
+   "new": "| TC-E2-014-24 | AC13 | Component | A call without authentication, a call without the right and a call to an unknown approval answer 401, 403 and 404 |\n| TC-E2-014-25 | AC14 | End to end | Not specified in the source documents (NEWAC-RWB-P7-E2014-APP-AC14) |\n| TC-E2-014-26 | AC15 | NFR | Not specified in the source documents (NEWAC-RWB-P7-E2014-APP-AC15) |\n| TC-E2-014-27 | AC16 | End to end | Not specified in the source documents (NEWAC-RWB-P7-E2014-APP-AC16) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31502",
+   "item": "NEWAC-RWB-P7-E2014-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC14 replay scenario to section 7 and TC-E2-014-25 to section 16.",
+   "note": "AC14 added for replay with the same idempotency key. Test data not in source; recorded as such in TC-E2-014-25."
+  },
+  {
+   "ruling": "R-31503",
+   "item": "NEWAC-RWB-P7-E2014-APP-AC15",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC15 retry and timeout scenario to section 7 and TC-E2-014-26 to section 16.",
+   "note": "AC15 added for retried or timed-out activity. Test data not in source; recorded as such in TC-E2-014-26."
+  },
+  {
+   "ruling": "R-31504",
+   "item": "NEWAC-RWB-P7-E2014-APP-AC16",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC16 failed or unanswered consumed call scenario to section 7 and TC-E2-014-27 to section 16.",
+   "note": "AC16 added for a failed or unanswered consumed call. Test data not in source; recorded as such in TC-E2-014-27."
+  }
+ ]
+}

@@ -1,0 +1,124 @@
+{
+ "edits": [
+  {
+   "old": "the Thai text follows DL10.",
+   "new": "the Thai text follows DL10 (assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 confirmed by the directive of 26 November 2026)."
+  },
+  {
+   "old": "| MSG-P4-001 | BR1 |",
+   "new": "| MSG-P4-001 | AC10 |"
+  },
+  {
+   "old": "| Placeholder | BR5 |",
+   "new": "| Placeholder | AC11 |"
+  },
+  {
+   "old": "| MSG-P4-006 | BR9 |",
+   "new": "| MSG-P4-006 | AC12 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | BR2 |",
+   "new": "| MSG-GEN-006 | AC13 |"
+  },
+  {
+   "old": "Then an incident is raised to the platform administrator queue and no AC-READ entry is written",
+   "new": "Then an incident is raised to the platform administrator queue and no AC-READ entry is written\n\n  Scenario: AC10 A token with no Recovery role or no second factor gets no answer (new, D-RCV-60)\n    Given test user \"U-7405\" holds a token with no Recovery role, or a Recovery role and no second factor\n    When \"U-7405\" asks for case \"RW-2026-000401\", area \"CASE_RECORD\", right \"R\"\n    Then the answer is refused with status 401 and message MSG-P4-001\n    Then no policy row is read and the answer carries no case data\n\n  Scenario: AC11 A role code with no row in force gives no name (new, D-RCV-60)\n    Given a role code with no row in force, or an inactive row, under matrix version \"PM-2026.12\"\n    When test user \"U-7403\" holding RW-SPECIAL calls GET /api/recovery/access/v1/role-catalogue/{roleCode} for that role code\n    Then the answer is 404 with no roleName and no roleClass\n    Then the caller shows the role code as it stands and no guessed name\n\n  Scenario: AC12 Conflicting roles are refused at sign-in (new, D-RCV-60)\n    Given test user \"U-7406\" holds RW-SECADM and a business role that the role_conflict rows in force name as conflicting with RW-SECADM\n    When \"U-7406\" signs in and the sign-in access check runs\n    Then the session is refused with message MSG-P4-006\n    Then no authorise request is made to POST /api/recovery/access/v1/authorise\n\n  Scenario: AC13 A reference list that is not available gives no answer (new, D-RCV-60)\n    Given the reference list LOV-SCOPE is not available from the reference-data contract of DP-07\n    When test user \"U-7407\" asks for case \"RW-2026-000401\", area \"CASE_RECORD\", right \"R\"\n    Then the answer is 503 with message MSG-GEN-006 and no guessed scope\n    Then the refusal is recorded in the decision record and no case data is returned\n\n  Scenario: AC14 A field with no covering masking row is answered masked (new, D-RCV-60)\n    Given test user \"U-7401\" holds RW-CASEOWN and owns case \"RW-2026-000401\"\n    Given masking version \"MASK-SIT-01\" is in force and holds no row covering the field ID under test\n    When \"U-7401\" asks for case \"RW-2026-000401\", area \"CASE_RECORD\", right \"R\" and the field ID under test\n    Then the answer marks the field ID \"masked\" and carries no value for it\n\n  Scenario: AC15 A scope value added as a list row needs no code change (new, D-RCV-60)\n    Given LOV-SCOPE in force holds a scope value added as a new list row\n    When test user \"U-7401\" asks for case \"RW-2026-000401\", area \"CASE_RECORD\", right \"R\"\n    Then the scope check uses the list value from the reference-data contract and no code change is made\n\n  Scenario: AC16 The case facts come from the request and no case table is read (new, D-RCV-60)\n    Given test user \"U-7401\" holds RW-CASEOWN and owns case \"RW-2026-000401\"\n    When \"U-7401\" asks for case \"RW-2026-000401\", area \"CASE_RECORD\", right \"R\" with the case owner, team and queue role in the request\n    Then the answer is built from the request facts and the access repository reads no table of rwb_case, rwb_decision or rwb_source_data"
+  },
+  {
+   "old": "AC1 to AC9 are the criteria this story owns;",
+   "new": "AC1 to AC16 are the criteria this story owns;"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16876",
+   "item": "DOR-RWB-P4-E2035-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "DL10 assumptions confirmed in the section 14 reference; DL22 and DL24 are not used in this story",
+   "note": "Directive confirms DL10 assumptions ASM-2250, ASM-2357, ASM-2377, ASM-2863 in section 14. DL22 and DL24 not used here; DL24 gap sits in P2."
+  },
+  {
+   "ruling": "R-16877",
+   "item": "DOR-RWB-P4-E2035-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "AC10 to AC13 added for X4, X5, X6, X9; section 5 Covered by column updated",
+   "note": "AC10 to AC13 added to section 7; section 5 Covered by updated for X4, X5, X6, X9. Section 16 test rows not in this chunk."
+  },
+  {
+   "ruling": "R-16878",
+   "item": "DOR-RWB-P4-E2035-APP-4",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "AC14 (BR3), AC15 (BR9), AC16 (BR10) added to section 7",
+   "note": "AC14 (BR3), AC15 (BR9), AC16 (BR10) added to section 7. Section 16 test case rows for these not in this chunk."
+  },
+  {
+   "ruling": "R-16879",
+   "item": "DOR-RWB-P4-E2035-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model and Data Dictionary v9",
+   "change": "Confirm or add DF-REF-039 as a field ID of table role in rwb_access",
+   "note": "DF-REF-039 is not in LDM v9; the change belongs to the LDM. No story edit."
+  },
+  {
+   "ruling": "R-16880",
+   "item": "DOR-RWB-P4-E2035-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Message catalogue of P4 (standard entry MSG-P4-006)",
+   "change": "Settle the meaning of MSG-P4-006 or assign a new ID for the role-conflict message used in section 14",
+   "note": "MSG-P4-006 means something else in the standard; the role-conflict message is this story's. Change belongs to the catalogue."
+  },
+  {
+   "ruling": "R-22325",
+   "item": "GAP-2395",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Legacy RWB-E2-042 and FSD P6 v3",
+   "change": "Name the rule package codes and the rwb-comms package assignment as the proposed fix sets out",
+   "note": "Package assignment for rwb-comms sits in the legacy story and FSD P6. This story reads no package; no edit here."
+  },
+  {
+   "ruling": "R-22350",
+   "item": "GAP-3177",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "Temporal Workflow and Activity Catalog v1",
+   "change": "Register the five-minute next-action Schedule in rwb-case; delete EV-18 from the Epic 2 contract tables",
+   "note": "Schedule registration belongs to the workflow catalogue. Section 13 DP-10 already names a Temporal Schedule; no text change."
+  },
+  {
+   "ruling": "R-22694",
+   "item": "GAP-0667",
+   "status": "Cross-document",
+   "section": "4, 7, 12",
+   "target": "Ownership Map v1; RWB-P2-E2035-CON; rwb-case, rwb-access and rwb-decision contract baselines",
+   "change": "Correct the next-action row to P2 read and P3 write; fix login, field names, operation names, Schedule values and message texts",
+   "note": "Ownership, login, contract names and message texts belong to other documents. Section 7 mock already uses rwb-integration; no edit here."
+  },
+  {
+   "ruling": "R-22695",
+   "item": "GAP-0668",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "RWB-P2-E2035-CON and rwb-case, rwb-access, rwb-decision contract baselines",
+   "change": "Baseline operation names, consumed shapes, Schedule values and error mapping; record the read path ruling in the Ownership Map",
+   "note": "Contract baseline belongs to the contract owners and P2. Section 12 has no content in this chunk; no edit here."
+  },
+  {
+   "ruling": "R-22696",
+   "item": "GAP-0669",
+   "status": "Cross-document",
+   "section": "13",
+   "target": "RWB-P2-E2035-OPS and the P2 job catalogue (API-P2-009)",
+   "change": "Fix the identity and secret reference; create the next-action-check job row with its run book path; record ownership",
+   "note": "Deployment identity, job catalogue row and run book belong to the ops document and job catalogue. No story text change."
+  }
+ ]
+}

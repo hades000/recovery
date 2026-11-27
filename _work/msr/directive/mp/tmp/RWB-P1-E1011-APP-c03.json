@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "AC5 (the release half); the break criterion AC2 belongs to the sibling slices |",
+   "new": "AC9; AC5 (the release half) |"
+  },
+  {
+   "old": "| None | BR6 |",
+   "new": "| None | AC10 |"
+  },
+  {
+   "old": "| MSG-P1-001 | BR9 |",
+   "new": "| MSG-P1-001 | AC11 |"
+  },
+  {
+   "old": "| None | BR13 |",
+   "new": "| None | AC12 |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E1-011-07 |",
+   "new": "| MSG-P4-002 | AC13; TC-E1-011-07 |"
+  },
+  {
+   "old": "    Then the restart writes all fifteen rows for 2026-11-30",
+   "new": "    Then the restart writes all fifteen rows for 2026-11-30\n\n  Scenario: AC9 A break holds the publish (legacy exception X1)\n    Given a product's variance is above the tolerance for 2026-11-30\n    When the reconciliation step runs\n    Then the result for that product is BREAK and the publish status of the date is held\n    Then the break rows are listed with the account keys and MSG-P1-012 is shown\n\n  Scenario: AC10 Variance equal to the tolerance passes (legacy exception X2)\n    Given a product's variance percent equals recon.tolerance.pct\n    When the reconciliation step runs\n    Then the result for that product is PASS\n\n  Scenario: AC11 Batch not complete holds the reconciliation (legacy exception X3)\n    Given v_ace_batch_status does not show the ACE batch for 2026-11-30 as COMPLETE\n    When the reconciliation step is due to run\n    Then the reconciliation does not run and writes no reconciliation_result for 2026-11-30\n    Then the publish stays held and MSG-P1-001 is shown\n\n  Scenario: AC12 Orphan key is listed and changes nothing (legacy exception X6)\n    Given an account_key on a P1 table has no row in v_ace_account\n    When the reconciliation step runs\n    Then the orphan is counted and listed with its table, column and key\n    Then no Workbench row and no ACE row is changed\n\n  Scenario: AC13 Read without Platform administration R is refused (legacy exception X8)\n    Given a role without Platform administration R\n    When that role reads the reconciliation results\n    Then the guard returns 403 with MSG-P4-002\n    Then this service returns no body\n\n  Scenario: AC14 Treatment and payment checks are not run here (BR3, BR4)\n    Given the business date is 2026-11-30 and the ACE batch is COMPLETE\n    When the reconciliation step runs\n    Then no reconciliation_result row is written for REC-03 or REC-04\n    Then the reconciliation reads no treatment or proceeds table"
+  },
+  {
+   "old": "read as the release of the case list for the read path of RWB-P1-E1002-APP: no lake exists in the target and no extract is written (DP-17; GAP-0495; ASM-0687).",
+   "new": "read as the release of the case list through the contract: publish_status and the row count on GET /case-list/dates/{businessDate}, and the paged rows in the 19-column order on GET /case-list/rows, served to rwb-case for SCR-02 and to rwb-reporting for its measures, with the publish_status gate kept as the release point. No lake exists in the target and no extract is written (DP-17; GAP-0495; ASM-0687)."
+  },
+  {
+   "old": "P1 writes no row for them and reads no treatment or proceeds table (DP-01).",
+   "new": "P1 writes no row for them and reads no treatment or proceeds table (DP-01). They are covered by AC14."
+  },
+  {
+   "old": "BR10 is the grade vocabulary of the result row and of the freshness read, and the report that used to carry it as a colour is now the query of section 12.1.",
+   "new": "BR10 is the grade vocabulary of the result row and of the freshness read, and the report that used to carry it as a colour is now the query of section 12.1. The results, the freshness of the 14 data products and the six quality measures are this service's product output, served to rwb-reporting through its snapshot activity and read model; no lake copy and no INT-19 extract is written here, and the measures and any regulatory extract are published in rwb-reporting."
+  },
+  {
+   "old": "| RW-TEAMMGR and other report readers | Read the results through rwb-reporting and the case list views (Reporting R) |",
+   "new": "| RW-TEAMMGR and other report readers | Read the results through rwb-reporting and the case list views (Reporting R) |\n\n**Authorise check.** Every REST operation of this service calls the rwb-access authorise check before it runs, and a caller without the right is refused with 403 (MSG-P4-002). The authorise check name is Not specified in the source documents (DOR-RWB-P1-E1011-APP-6)."
+  },
+  {
+   "old": "No `dq_exception` row is written, because that legacy table has left the schema and is not in LDM v9.",
+   "new": "No row is written to the legacy exception table, because that table has left the schema and is not in LDM v9."
+  },
+  {
+   "old": "No `dq_exception` and no `dq_rule` exists or is created; both are legacy objects removed from the schema and are not in LDM v9 or Data Classification v5.",
+   "new": "No legacy exception table and no legacy rule table exists or is created; both are removed from the schema and are not in LDM v9 or Data Classification v5."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-14981",
+   "item": "DOR-RWB-P1-E1011-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "AC9 to AC13 added for X1, X2, X3, X6, X8; section 5 Covered by re-pointed. TC rows for AC9 to AC13 in section 16 are not in this chunk and still need adding."
+  },
+  {
+   "ruling": "R-14982",
+   "item": "DOR-RWB-P1-E1011-APP-4",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "",
+   "note": "AC14 added covering BR3 and BR4 (P1 writes no row, reads no treatment or proceeds table); section 8 note points to AC14. TC row for AC14 in section 16 still needed."
+  },
+  {
+   "ruling": "R-14983",
+   "item": "DOR-RWB-P1-E1011-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Authorise check paragraph added under section 10 for REST operations; check name not in sources, marked Not specified."
+  },
+  {
+   "ruling": "R-14984",
+   "item": "DOR-RWB-P1-E1011-APP-7",
+   "status": "Resolved",
+   "section": "4, 13",
+   "target": "",
+   "change": "",
+   "note": "Literal legacy names dq_exception and dq_rule replaced with descriptions of the removed legacy tables in sections 4 and 13."
+  },
+  {
+   "ruling": "R-14985",
+   "item": "DOR-RWB-P1-E1011-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Standard v4 text for MSG-P1-001 and MSG-P1-012 is not in this chunk; copying it would invent message text."
+  },
+  {
+   "ruling": "R-21866",
+   "item": "GAP-0485",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Target reading now names the contract reads for release (GET /case-list/dates and /case-list/rows) and keeps publish_status as the gate; no lake target. Confirm paths in API yaml."
+  },
+  {
+   "ruling": "R-21904",
+   "item": "GAP-0268",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P1 v3, sheet Reconciliations",
+   "change": "Give each reconciliation row an owner from the Ownership Map sheet Tables; the Workbench side of REC-01 to REC-08 is answered by the owning service on its contract, one hop with a 2 s timeout; rwb-source-data keeps the ACE side and the JOB-04 run.",
+   "note": "Owner per reconciliation row and per-service split belong to the v3 workbook, not this story."
+  },
+  {
+   "ruling": "R-21905",
+   "item": "GAP-0269",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P1 v3, sheets Reconciliations and Quality measures",
+   "change": "Append Owner and Per-service reconciliation columns to Reconciliations and an Owner service column to Quality measures, with values from the Ownership Map sheet Tables.",
+   "note": "Columns are added in the v3 workbook; the story has no owner column to change."
+  },
+  {
+   "ruling": "R-21906",
+   "item": "GAP-1499",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Section 8 states the results, freshness and six measures are served to rwb-reporting; no lake copy or INT-19 extract here. Measure channel to be confirmed with data steward before wave 2."
+  },
+  {
+   "ruling": "R-21907",
+   "item": "GAP-1456",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Business Requirements Document, section 8.2",
+   "change": "State the rule that Epic 1 stories keep the business-epic wave and the delivery lead confirms the build wave per story at build sequencing.",
+   "note": "Wave rule belongs to the BRD; this story's wave 1 is unchanged."
+  }
+ ]
+}

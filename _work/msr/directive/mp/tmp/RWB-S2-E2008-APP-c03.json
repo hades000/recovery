@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "Given no payment on account \"A-0555\" appears in v_ace_payment between 2026-12-05 and 2026-12-15",
+   "new": "Given the rwb-source-data contract fake returns no payment on account \"A-0555\" between 2026-12-05 and 2026-12-15"
+  },
+  {
+   "old": "one hop each | AC6 |",
+   "new": "one hop each | AC6 |\n| rwb-source-data contract fake, ID Not specified in the source documents (CG-ALL-8333) | no payment on account \"A-0555\" appears between 2026-12-05 and 2026-12-15 | AC2 |"
+  },
+  {
+   "old": "| MSG-GEN-006 | BR6 |",
+   "new": "| MSG-GEN-006 | AC8 |"
+  },
+  {
+   "old": "| None (pipeline log) | Section 17 |",
+   "new": "| None (pipeline log) | AC9 |"
+  },
+  {
+   "old": "The seven criteria are new under D-RCV-60",
+   "new": "The eleven criteria are new under D-RCV-60"
+  },
+  {
+   "old": "Then no name, address, telephone number, national identity number or account holder name is written, logged or put on a message",
+   "new": "Then no name, address, telephone number, national identity number or account holder name is written, logged or put on a message\n\n  Scenario: AC8 A parameters or list read that does not answer changes nothing (new, D-RCV-60)\n    Given the rwb-case parameters and reference-data fakes answer beyond the 2 s budget for case \"RC-2026-000555\"\n    When TreatmentWorkflow consumes the proceedsMatched of AC1\n    Then no column of treatment \"T-0701\" changes and no decision record is written\n    Then the step answers MSG-GEN-006 and the activity retries on the workflow policy of 1 s initial interval, back-off 2, 10 attempts\n\n  Scenario: AC9 A statement that reads a payment, proceeds, rule, case or timer table is refused (new, D-RCV-60)\n    Given a test statement of this service names the `proceeds` table of rwb_payment\n    When the boundary test of section 12.7 runs in the build\n    Then the grant refuses the statement and the boundary test fails the build\n\n  Scenario: AC10 The match window and grace come from the package row (new, D-RCV-60)\n    Given the plan-position and package fixture holds a second version of package \"PAYMENT_MATCH\" with a changed window for row \"EXACT\"\n    When TreatmentWorkflow evaluates the plan position for business date 2026-12-14\n    Then the window and grace applied are those of the version in force and no window or grace value is a constant of this build\n\n  Scenario: AC11 The plan position is derived from the plan terms (new, D-RCV-60)\n    Given treatment \"T-0701\" holds installments 24, installment_amount 12,500.00 and installments_paid 3\n    When TreatmentWorkflow applies the plan advance of AC1\n    Then the next due date and the installment are derived from first_due_date, installments, installment_amount and installments_paid, and no frequency, amount or date is a constant of this build"
+  },
+  {
+   "old": "and it runs under the service identity of the service.",
+   "new": "and it runs under the service identity of the service. The REST operation on `/api/recovery/treatment/v1` is authorised by the rwb-access authorise check, Not specified in the source documents (DOR-RWB-S2-E2008-APP-6; DP-08)."
+  },
+  {
+   "old": "| Event | Topic | Consumer group | Payload used | When |\n|---|---|---|---|---|\n| `rwb.payment.ProceedsMatched.v1` (EV-25) | `rwb.payment.events.v1`, owner P8 | `rwb-treatment.payment-proceeds-matched.v1` | the case ID, the treatment ID, the payment code, the amount, the due date and the business date; starts the plan advance | on the relay of rwb-payment, deduped in the inbox |\n| `rwb.payment.PaymentMissed.v1` (EV-12) | `rwb.payment.events.v1`, owner P8 | `rwb-treatment.payment-missed.v1` | the same payload; holds the missed installment on the plan position | on the relay of rwb-payment, deduped in the inbox |\n| `rwb.decision.RulePackageInForce.v1` (EV-30) | `rwb.decision.events.v1`, owner P7 | `rwb-treatment.rule-package-in-force.v1` | announces the RESTRUCTURE package version in force; the stage swaps it in and stamps it on the record | once per published version |",
+   "new": "| Event | Topic | Owner service | Consuming service | Consumer group | Payload used | When |\n|---|---|---|---|---|---|---|\n| `rwb.payment.ProceedsMatched.v1` (EV-25) | `rwb.payment.events.v1`, owner P8 | rwb-payment (P8) | rwb-treatment | `rwb-treatment.payment-proceeds-matched.v1` | the case ID, the treatment ID, the payment code, the amount, the due date and the business date; starts the plan advance | on the relay of rwb-payment, deduped in the inbox |\n| `rwb.payment.PaymentMissed.v1` (EV-12) | `rwb.payment.events.v1`, owner P8 | rwb-payment (P8) | rwb-treatment | `rwb-treatment.payment-missed.v1` | the same payload; holds the missed installment on the plan position | on the relay of rwb-payment, deduped in the inbox |\n| `rwb.decision.RulePackageInForce.v1` (EV-30) | `rwb.decision.events.v1`, owner P7 | rwb-decision (P7) | rwb-treatment | `rwb-treatment.rule-package-in-force.v1` | announces the RESTRUCTURE package version in force; the stage swaps it in and stamps it on the record | once per published version |"
+  },
+  {
+   "old": "| TC-S2-E2008-APP-05 | AC7 | Contract | a property check over a synthetic party name in the event and the answer; no personal field in the row, the record, the log lines or the span attributes |",
+   "new": "| TC-S2-E2008-APP-05 | AC7 | Contract | a property check over a synthetic party name in the event and the answer; no personal field in the row, the record, the log lines or the span attributes |\n| TC-S2-E2008-APP-06 | AC9, BR4, X6 | Contract | a statement reading the `proceeds` table of rwb_payment from this service; the grant refuses it and the build fails |\n| TC-S2-E2008-APP-07 | AC8, BR6 | Component | the parameters read answering beyond the 2 s budget, then the retry policy of the workflow kit |\n| TC-S2-E2008-APP-08 | AC10, BR7 | Component | a second package version with a changed window for row \"EXACT\" |\n| TC-S2-E2008-APP-09 | AC11, BR8 | Component | treatment \"T-0701\" with installments 24, installment_amount 12,500.00 and installments_paid 3 |"
+  },
+  {
+   "old": "The five new cases prove the criteria no legacy row exercises.",
+   "new": "The nine new cases prove the criteria no legacy row exercises."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-12134",
+   "item": "CG-ALL-8330",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx, tab Story test cases",
+   "change": "Add rows for TC-S2-E2008-APP-01 to -05 with Given, When and Then copied from AC3 to AC7 of this story.",
+   "note": "Story §16 already lists the IDs; the missing Test Cases v8 rows belong to the workbook."
+  },
+  {
+   "ruling": "R-12136",
+   "item": "CG-ALL-8333",
+   "status": "Resolved",
+   "section": "7, 12.8",
+   "target": "",
+   "change": "",
+   "note": "AC2 Given now reads the rwb-source-data contract fake; fake row added to 12.8. Fake ID is not in the sources."
+  },
+  {
+   "ruling": "R-19146",
+   "item": "DOR-RWB-S2-E2008-APP-10",
+   "status": "Not applied",
+   "section": "n/a (section 14 not in chunk)",
+   "target": "",
+   "change": "",
+   "note": "Section 14 text is not in this chunk, so the empty, loading, error and no-access rows cannot be anchored. Re-issue with section 14."
+  },
+  {
+   "ruling": "R-19147",
+   "item": "DOR-RWB-S2-E2008-APP-11",
+   "status": "Cross-document",
+   "section": "n/a (field not named)",
+   "target": "Recovery Workbench LDM (rwb_treatment field classification)",
+   "change": "Reclassify the personal-data flags on the rwb_treatment fields P2 names so they match AC7, which states no personal field is carried.",
+   "note": "The flagged fields are not named in the item; the classification sits in the LDM."
+  },
+  {
+   "ruling": "R-19148",
+   "item": "DOR-RWB-S2-E2008-APP-12",
+   "status": "Cross-document",
+   "section": "7, 12.7, 16, 18",
+   "target": "Recovery Workbench RTM v7",
+   "change": "Align the §18 test lists of REQ-CHO-007 and REQ-CHO-009 with §16, which now carries TC-S2-E2008-APP-06 to -09.",
+   "note": "Boundary test added as TC-06 (AC9). The RTM v7 list mismatch is in the other workbook."
+  },
+  {
+   "ruling": "R-19149",
+   "item": "DOR-RWB-S2-E2008-APP-18",
+   "status": "Not applied",
+   "section": "n/a (not located in chunk)",
+   "target": "",
+   "change": "",
+   "note": "DL10 and its assumptions are not in this chunk; the open-decision row needs the decision log text to apply."
+  },
+  {
+   "ruling": "R-19150",
+   "item": "DOR-RWB-S2-E2008-APP-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Added Owner service and Consuming service columns; owners P8 and P7 taken from the existing topic cells."
+  },
+  {
+   "ruling": "R-19151",
+   "item": "DOR-RWB-S2-E2008-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X5 now covered by AC8 (TC-07); X6 by AC9 (TC-06). Section 7 now holds eleven criteria."
+  },
+  {
+   "ruling": "R-19152",
+   "item": "DOR-RWB-S2-E2008-APP-4",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "BR6 via AC8/TC-07, BR7 via AC10/TC-08, BR8 via AC11/TC-09; each rule now has a criterion and a test case."
+  },
+  {
+   "ruling": "R-19153",
+   "item": "DOR-RWB-S2-E2008-APP-6",
+   "status": "Resolved",
+   "section": "10",
+   "target": "",
+   "change": "",
+   "note": "Names the rwb-access authorise check on the REST operation; check name is a placeholder, not in the sources."
+  }
+ ]
+}

@@ -1,0 +1,168 @@
+{
+ "edits": [
+  {
+   "old": "401 no session; 403 the role lacks the right (MSG-P4-002); 404 an unknown package code or version;",
+   "new": "401 no session (messageId Not specified in the source documents (CG-ALL-7320)); 403 the role lacks the right (MSG-P4-002); 404 an unknown package code or version (messageId Not specified in the source documents (CG-ALL-7320));"
+  },
+  {
+   "old": "with the package code, the version label, the checksum and the valid-from date.",
+   "new": "with the fields of Kafka Catalog v1 EV-30: the package code, the package version, the version ID, the valid-from date and the approver."
+  },
+  {
+   "old": "package code, version label, package version ID, checksum, valid-from date, promoted at |",
+   "new": "package code, package version, version ID, valid-from date, approver (Kafka Catalog v1 EV-30 fields packagecode, packageversion, versionid, validfrom, approvedby) |"
+  },
+  {
+   "old": "with packageCode \"PAYMENT_MATCH\", versionLabel \"PM-2027.01\", the checksum and valid from 2027-01-01",
+   "new": "with packageCode \"PAYMENT_MATCH\", packageVersion \"PM-2027.01\", the version ID, validFrom 2027-01-01 and the approver"
+  },
+  {
+   "old": "The rule version was refused at the {check} check: {detail}.",
+   "new": "The {table} load was refused: {check}. The version in force is unchanged."
+  },
+  {
+   "old": "For MSG-P3-027 the {check} value is compile, schema, overlap, unreachable row, default row, scenario or package in force, and {detail} names the row ID, the column, the test-case ID or the package code only, never a payment or a person.",
+   "new": "For MSG-P3-027 the {check} value is compile, schema, overlap, unreachable row, default row, scenario or package in force, and {table} names the rule table or the package code only, never a payment or a person; the row ID, the column and the test-case ID go in the problem detail of 12.1."
+  },
+  {
+   "old": "The six texts above are copied unchanged from the legacy story and FSD P7 v3 A2.7;",
+   "new": "MSG-P3-027 is copied from Error and Message Standard v4 section 4; the other texts above are copied unchanged from the legacy story and FSD P7 v3 A2.7;"
+  },
+  {
+   "old": "| MSG-P7-003 | TC-E2-027-07, TC-E2-027-13 |",
+   "new": "| MSG-P7-003 | AC10, TC-E2-027-07, TC-E2-027-13 |"
+  },
+  {
+   "old": "| MSG-GEN-004 | TC-E2-027-06 |",
+   "new": "| MSG-GEN-004 | AC11, TC-E2-027-06 |"
+  },
+  {
+   "old": "| MSG-GEN-001 | TC-E2-027-06 |",
+   "new": "| MSG-GEN-001 | AC12, TC-E2-027-06 |"
+  },
+  {
+   "old": "| MSG-P4-002 | TC-E2-027-11, TC-E2-027-12 |",
+   "new": "| MSG-P4-002 | AC13, TC-E2-027-11, TC-E2-027-12 |"
+  },
+  {
+   "old": "| MSG-P3-027 | TC-E2-027-10 |",
+   "new": "| MSG-P3-027 | AC14, TC-E2-027-10 |"
+  },
+  {
+   "old": "The nine criteria are new under D-RCV-60",
+   "new": "The seventeen criteria are new under D-RCV-60"
+  },
+  {
+   "old": "    Then the answer holds that entry's prevHash, entryHash, actions and outcome",
+   "new": "    Then the answer holds that entry's prevHash, entryHash, actions and outcome\n\n  Scenario: AC10 A governance action whose decision record cannot be written is not taken (new, D-RCV-60)\n    Given the decision log write is forced to fail\n    When RW-COE loads the PAYMENT_MATCH workbook version \"PM-2027.01\" with POST /api/recovery/decision/v1/admin/rule-packages/PAYMENT_MATCH/versions and validFrom 2027-01-01\n    Then the answer is 503 with MSG-P7-003\n    And no version row, no status change, no promotion, no rollback and no event is written\n    And an incident is raised and the action is retried by its caller\n\n  Scenario: AC11 A version label already loaded is refused (new, D-RCV-60)\n    Given PAYMENT_MATCH version \"PM-2026.12\" is \"IN_FORCE\" from 2026-12-01\n    When RW-COE loads a PAYMENT_MATCH workbook with the version label \"PM-2026.12\" with POST /api/recovery/decision/v1/admin/rule-packages/PAYMENT_MATCH/versions\n    Then the answer is 409 with MSG-GEN-004\n    And the version already held is untouched\n\n  Scenario: AC12 An empty workbook or one without validFrom is refused (new, D-RCV-60)\n    Given the rwb-case contract mock returns a PAYMENT_MATCH workbook that is empty or has no validFrom\n    When RW-COE loads it with POST /api/recovery/decision/v1/admin/rule-packages/PAYMENT_MATCH/versions\n    Then the answer is 422 with MSG-GEN-001 naming the missing field\n    And nothing is written\n\n  Scenario: AC13 A caller with no right for the operation is refused (new, D-RCV-60)\n    Given the rwb-access contract mock returns RW-CASEOWN holding no Rules and parameters right\n    When RW-CASEOWN calls POST /api/recovery/decision/v1/admin/rule-packages/PAYMENT_MATCH/versions\n    Then the answer is 403 with MSG-P4-002\n    And nothing is read, written or promoted\n\n  Scenario: AC14 No version in force on the business date is refused, never defaulted (new, D-RCV-60)\n    Given no PAYMENT_MATCH version has a valid-from date on or before a business date before 2026-12-01\n    When the consuming service asks the registry for the version in force on that business date\n    Then the registry answers that no version is in force for that date\n    And the consuming service raises NoPackageInForce and reports MSG-P3-027\n    And no default version is substituted\n\n  Scenario: AC15 A version status is one of the six registry states (new, D-RCV-60)\n    When RW-AUDIT reads GET /api/recovery/decision/v1/admin/rule-packages/PAYMENT_MATCH/versions\n    Then every version holds a status of LOADED, APPROVED, IN_FORCE, SUPERSEDED, ROLLED_BACK or REFUSED\n    And no other status value is written\n\n  Scenario: AC16 No operation other than a load writes a rule row or a test case (new, D-RCV-60)\n    Given PAYMENT_MATCH version \"PM-2027.01\" is \"LOADED\" with its rule rows and test cases\n    When RW-RISK calls POST /api/recovery/decision/v1/admin/rule-package-versions/{versionId}/approve for \"PM-2027.01\"\n    Then the rule rows and test cases of \"PM-2027.01\" are unchanged\n    And only the load writes rule_row and rule_test_case rows\n\n  Scenario: AC17 The decision code and rule ID of a governance record are reference values (new, D-RCV-60)\n    Given the rwb-case contract mock returns the LOV-DECISION list with its version\n    When RW-AUDIT reads GET /api/recovery/decision/v1/decision-log with ruleId \"PAYMENT_MATCH\" from 2027-01-01 to 2027-01-01\n    Then every entry holds a decision code of the LOV-DECISION list and the ruleId of its package"
+  },
+  {
+   "old": "and the Data column keeps the legacy data.",
+   "new": "and the Data column keeps the legacy data. Rows TC-E2-027-14 to TC-E2-027-22 are added for this story: they cover AC10 to AC17 and the rules of section 8 of this story, and the boundary of the section 12.7 tables."
+  },
+  {
+   "old": "| TC-E2-027-13 | Principle 5 | NFR | Decision log write forced to fail for 50 payments; no proceeds row written |",
+   "new": "| TC-E2-027-13 | Principle 5 | NFR | Decision log write forced to fail for 50 payments; no proceeds row written |\n| TC-E2-027-14 | §12.7 tables, boundary (ASM-3438) | Component | Not specified in the source documents (DOR-RWB-P7-E2027-APP-12) |\n| TC-E2-027-15 | AC10, BR8 | Contract | Decision log write forced to fail for PM-2027.01 |\n| TC-E2-027-16 | AC11, BR2 | Component | PM-2026.12 loaded again |\n| TC-E2-027-17 | AC12, BR2 | Component | Empty workbook; workbook without validFrom |\n| TC-E2-027-18 | AC13, Access | Contract | RW-CASEOWN without the Rules and parameters right calls POST /admin/rule-packages/PAYMENT_MATCH/versions; refused with MSG-P4-002 |\n| TC-E2-027-19 | AC14, BR10 | Component | No PAYMENT_MATCH version valid on a business date before 2026-12-01 |\n| TC-E2-027-20 | AC15, BR11 | Component | Version statuses of PAYMENT_MATCH |\n| TC-E2-027-21 | AC16, BR12 | Component | PM-2027.01 LOADED with its rule rows and test cases |\n| TC-E2-027-22 | AC17, BR13 | Contract | Decision log entries of PAYMENT_MATCH |"
+  },
+  {
+   "old": "and the `-ITG` copies of all thirteen cases belong to RWB-ITG-E2027-ITG.",
+   "new": "and the `-ITG` copies of all twenty-two cases belong to RWB-ITG-E2027-ITG."
+  },
+  {
+   "old": "TC-E2-027-01 to TC-E2-027-13 |",
+   "new": "TC-E2-027-01 to TC-E2-027-22 |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-11327",
+   "item": "CG-ALL-7320",
+   "status": "Resolved",
+   "section": "12.1",
+   "target": "",
+   "change": "",
+   "note": "401 and 404 messageId set to Not specified in the source documents (CG-ALL-7320); BA confirms the standard IDs."
+  },
+  {
+   "ruling": "R-11328",
+   "item": "CG-ALL-7322",
+   "status": "Resolved",
+   "section": "4, 12.3, AC6",
+   "target": "",
+   "change": "",
+   "note": "Payload aligned to catalog EV-30 in 12.3, step 6 and AC6. Checksum dropped, but step 7 still verifies a checksum; owner to confirm."
+  },
+  {
+   "ruling": "R-11329",
+   "item": "CG-ALL-7324",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P3-027 text and placeholders copied from Error and Message Standard v4; closing note and placeholder explanation updated."
+  },
+  {
+   "ruling": "R-11330",
+   "item": "CG-ALL-7325",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Standard has no message ID for the rollback-without-predecessor use; BA must add one first. No ID invented, story unchanged."
+  },
+  {
+   "ruling": "R-11331",
+   "item": "CG-ALL-7326",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Recovery Workbench Test Cases v8.xlsx",
+   "change": "Add Story test cases rows for TC-E2-027-12 (Given, When, Then from AC13) and TC-E2-027-13 (from AC10), and TC-E2-027-14 to TC-E2-027-22 added by this story.",
+   "note": "Story-side criteria AC10 and AC13 now exist to copy from; new TC rows also need adding to v8."
+  },
+  {
+   "ruling": "R-18155",
+   "item": "DOR-RWB-P7-E2027-APP-10",
+   "status": "Not applied",
+   "section": "not located",
+   "target": "",
+   "change": "",
+   "note": "SCR-28, SCR-39 and SCR-40 and their states are not in the story text given; no state invented."
+  },
+  {
+   "ruling": "R-18156",
+   "item": "DOR-RWB-P7-E2027-APP-12",
+   "status": "Cross-document",
+   "section": "12.7, 16, 18",
+   "target": "Requirements Traceability Matrix v7",
+   "change": "Align REQ-CHO-009 test case list with this story's TC-E2-027-01 to TC-E2-027-22 as given in section 18.",
+   "note": "Boundary test TC-14 added; §18 range updated. Test-list mismatch with RTM v7 cannot be checked from the story."
+  },
+  {
+   "ruling": "R-18157",
+   "item": "DOR-RWB-P7-E2027-APP-18",
+   "status": "Not applied",
+   "section": "not located",
+   "target": "",
+   "change": "",
+   "note": "DL24 and DL10 rows are not in the story text given; no assumption ID for DL24 exists in sources; none invented."
+  },
+  {
+   "ruling": "R-18158",
+   "item": "DOR-RWB-P7-E2027-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Criteria AC10 to AC14 added for X4, X6, X7, X8 and X9; section 5 covers and section 16 rows TC-15 to TC-19 updated."
+  },
+  {
+   "ruling": "R-18159",
+   "item": "DOR-RWB-P7-E2027-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "BR10 covered by AC14; BR11, BR12, BR13 by AC15 to AC17; test rows TC-19 to TC-22 added."
+  }
+ ]
+}

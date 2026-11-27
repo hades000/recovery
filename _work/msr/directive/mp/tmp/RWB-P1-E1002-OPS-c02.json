@@ -1,0 +1,108 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E1-002-11 | Access | Component | A role without Platform administration R is refused with MSG-P4-002 on the jobs operation |",
+   "new": "| TC-E1-002-11 | Access | Component | A role without Platform administration R is refused with MSG-P4-002 on the jobs operation |\n| TC-E1-002-12 | AC4 | Component | Contract test: the operations, events and activities of section 12 match the catalogued contracts |\n| TC-E1-002-13 | AC1 | NFR | Boundary test: each table of section 12.7 is created once by the migration job (ASM-3438) |\n| TC-E1-002-14 | BR1 | Component | The release uses the `rwb_source_data` login reference and no other service credential |\n| TC-E1-002-15 | BR2 | NFR | The per-service Flyway sequence in `rwb_source_data` runs before the rollout is ready |\n| TC-E1-002-16 | BR3 | Component | Every topic has a retry topic and a `.dlt` topic, and the consumer dedupes through the inbox |\n| TC-E1-002-17 | BR4 | Component | DailyCaseList uses overlap policy SKIP with a catch-up window and takes the business date as input |\n| TC-E1-002-18 | BR5 | NFR | No environment value is hard-coded: replica counts, sizes, thresholds, cadences and the three parameters come from values files and contracts |\n| TC-E1-002-19 | BR6 | NFR | An alert carries a message ID where one exists, the agreed text and one runbook entry |\n| TC-E1-002-20 | BR8 | Component | The service writes only schema `rwb_source_data` and reads ACE only through the `recovery.v_ace_*` views |"
+  },
+  {
+   "old": "| Event | Topic | Provisioning |\n|---|---|---|\n| `rwb.source-data.AceDataReady.v1` | `rwb.source-data.events.v1` | Consumer group for rwb-source-data with the inbox, the retry topic and the `.dlt` topic; starts `CaseListBuildWorkflow` |",
+   "new": "| Event | Topic | Provisioning | Owner |\n|---|---|---|---|\n| `rwb.source-data.AceDataReady.v1` | `rwb.source-data.events.v1` | Consumer group for rwb-source-data with the inbox, the retry topic and the `.dlt` topic; starts `CaseListBuildWorkflow` | rwb-source-data |"
+  },
+  {
+   "old": "There is no lake path, no extract file and no data-set refresh time to document (DP-17; GAP-0485).",
+   "new": "There is no lake path, no extract file and no data-set refresh time to document (DP-17; GAP-0485).\n\nThe released rows are read by contract, not by file: GET /case-list/dates/{businessDate} answers the publish status and the row count, and GET /case-list/rows answers the paged rows in the 19-column order (GAP-0485)."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09668",
+   "item": "CG-ALL-2041",
+   "status": "Cross-document",
+   "section": "12.4",
+   "target": "Kafka Catalog v1 (Events row EV-26 and its ACL)",
+   "change": "Add rwb-source-data as a consumer of rwb.source-data.AceDataReady.v1 with its ACL, or drop the handler",
+   "note": "The catalogue owns the consumer list. The story keeps the handler in 12.4 until the catalogue is updated."
+  },
+  {
+   "ruling": "R-09669",
+   "item": "CG-ALL-2043",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1, Activities",
+   "change": "Add activity snapshot(page) on task queue rwb-source-data, or use a catalogued activity",
+   "note": "The activity is named in 12.5 and kept. The catalogue row is missing."
+  },
+  {
+   "ruling": "R-14969",
+   "item": "DOR-RWB-P1-E1002-OPS-1",
+   "status": "Cross-document",
+   "section": "1",
+   "target": "Users Roles and Permissions v5",
+   "change": "Add 'platform engineer' as a role name in Users Roles and Permissions v5",
+   "note": "Section 1 keeps the role name. It is not a code or name in v5 yet."
+  },
+  {
+   "ruling": "R-14970",
+   "item": "DOR-RWB-P1-E1002-OPS-10",
+   "status": "Not applied",
+   "section": "find it",
+   "target": "",
+   "change": "",
+   "note": "SCR-02 error and access states are in no source and belong to the rwb-case screen spec. No wording invented."
+  },
+  {
+   "ruling": "R-14971",
+   "item": "DOR-RWB-P1-E1002-OPS-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-002-12 (contract) and TC-E1-002-13 (boundary, ASM-3438). Section 18 vs RTM v7 and Test Cases v8 remain cross-document."
+  },
+  {
+   "ruling": "R-14972",
+   "item": "DOR-RWB-P1-E1002-OPS-24",
+   "status": "Resolved",
+   "section": "12.4",
+   "target": "",
+   "change": "",
+   "note": "Added Owner column to 12.4 with rwb-source-data, the service that consumes the event."
+  },
+  {
+   "ruling": "R-14973",
+   "item": "DOR-RWB-P1-E1002-OPS-4",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E1-002-14 to -20 covering BR1-BR6 and BR8. New section 7 criteria not added: section 7 text not in this chunk."
+  },
+  {
+   "ruling": "R-14974",
+   "item": "DOR-RWB-P1-E1002-OPS-7",
+   "status": "Not applied",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "No BR Field ID exists in any source. Mapping the nine rows would invent IDs."
+  },
+  {
+   "ruling": "R-14975",
+   "item": "DOR-RWB-P1-E1002-OPS-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 wording for MSG-P1-001 is not in this chunk. Copying it would invent text. Legacy text kept."
+  },
+  {
+   "ruling": "R-21866",
+   "item": "GAP-0485",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "rwb-source-data API yaml (case-list paths)",
+   "change": "Add GET /case-list/dates/{businessDate} and GET /case-list/rows; keep the publish_status gate of RWB-P1-E1011-APP",
+   "note": "Story 11 now states the contract read path. AC2/AC9 rewrite in section 7 not applied: section 7 text not in chunk."
+  }
+ ]
+}

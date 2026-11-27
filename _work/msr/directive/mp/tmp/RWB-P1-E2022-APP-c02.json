@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "and `tr_interaction_append_only` stays in force |",
+   "new": "and the append-only trigger `tr_interaction_append_only` stays in force (a database trigger of RWB-P1-E1066-APP, not a dictionary field) |"
+  },
+  {
+   "old": "Thai text follows DL10, and no message carries a name, an identity number, a phone number, a LINE identifier or an address.",
+   "new": "Thai text follows DL10, which stays open; assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed by the programme directive of 26 November 2026. No message carries a name, an identity number, a phone number, a LINE identifier or an address."
+  },
+  {
+   "old": "Roles and rights are data in rwb-access (DP-01; TSD P1 T6.2).",
+   "new": "Roles and rights are data in rwb-access (DP-01; TSD P1 T6.2). Each operation of §12 calls the rwb-access authorise check of DP-08 before it answers; the check's name is Not specified in the source documents (DOR-RWB-P1-E2022-APP-6)."
+  },
+  {
+   "old": "Field IDs are those of the LDM and the data dictionary.",
+   "new": "Field IDs are those of the LDM and the data dictionary. `tr_interaction_append_only` is not a field and is not a row of this table; it is the database trigger of RWB-P1-E1066-APP."
+  },
+  {
+   "old": "| X4 | The same `Idempotency-Key` with a different body | 409; nothing written | None | Section 12.1 |",
+   "new": "| X4 | The same `Idempotency-Key` with a different body | 409; nothing written | None | AC7 |"
+  },
+  {
+   "old": "| X6 | `v_ace_contact` does not answer inside 5 s or errors | 503 naming the ACE database; nothing guessed from a cache | MSG-GEN-006 | Section 12.1 |",
+   "new": "| X6 | `v_ace_contact` does not answer inside 5 s or errors | 503 naming the ACE database; nothing guessed from a cache | MSG-GEN-006 | AC8 |"
+  },
+  {
+   "old": "| X7 | The delivery columns are missing because the letter slice of this key has not migrated | The append is refused with 503; no entry with a null reference | MSG-GEN-006 | Section 13 |",
+   "new": "| X7 | The delivery columns are missing because the letter slice of this key has not migrated | The append is refused with 503; no entry with a null reference | MSG-GEN-006 | AC9 |"
+  },
+  {
+   "old": "| X8 | A caller without the right | 403, logged without a token or a reference value | MSG-P4-002 | Section 10 |",
+   "new": "| X8 | A caller without the right | 403, logged without a token or a reference value | MSG-P4-002 | AC10 |"
+  },
+  {
+   "old": "    Then no column of contact_point_ext and none of this story's migration holds a number or a LINE identifier",
+   "new": "    Then no column of contact_point_ext and none of this story's migration holds a number or a LINE identifier\n\n  Scenario: AC7 The same Idempotency-Key with a different body is refused with 409 and nothing written (new, D-RCV-60)\n    Given party \"P-0077\" has a verified \"MOBILE\" contact point with consent \"GIVEN\" and failed count 0\n    When rwb-comms posts the message of case \"RC-2026-000777\" with Idempotency-Key \"c0ffee00-0001\" and a body that differs from the first call\n    Then the answer is 409 and no interaction entry is written\n    Then the count of every contact point of \"P-0077\" stays 0\n\n  Scenario: AC8 A view that does not answer inside 5 s is refused with 503 naming the ACE database and nothing is guessed from a cache (new, D-RCV-60)\n    Given the v_ace_contact view of party \"P-0077\" does not answer inside 5 s\n    When rwb-comms calls GET /api/recovery/source-data/v1/contact-points?personKey=P-0077&channel=MOBILE\n    Then the answer is 503 with MSG-GEN-006 naming the ACE database\n    Then no cached contact point is returned\n\n  Scenario: AC9 The append is refused with 503 and no entry with a null reference is written while the delivery columns are missing (new, D-RCV-60)\n    Given the delivery columns of interaction are missing because the letter slice of this key has not migrated\n    When rwb-comms posts the message of case \"RC-2026-000777\" with channel \"SMS\", direction \"OUTBOUND\", conduct check \"PASSED\", status \"DELIVERED\" and reference \"NSS-7781\" with a new Idempotency-Key\n    Then the answer is 503 with MSG-GEN-006\n    Then no interaction entry with a null external reference exists\n\n  Scenario: AC10 A caller without the right is refused with 403 and the log holds neither the token nor the reference value (new, D-RCV-60)\n    Given a caller holds no right to append a message in rwb-access\n    When the caller posts a message to POST /api/recovery/source-data/v1/interactions\n    Then the answer is 403 with MSG-P4-002\n    Then the log line holds neither the token nor the reference value"
+  },
+  {
+   "old": "| TC-E2-022-14 | Principle 5; regression, the proof is rwb-decision's and RWB-ITG-E2022-ITG's | NFR | Decision log write forced to fail on 10 refusals; none recorded as sent |",
+   "new": "| TC-E2-022-14 | Principle 5; regression, the proof is rwb-decision's and RWB-ITG-E2022-ITG's | NFR | Decision log write forced to fail on 10 refusals; none recorded as sent |\n| TC-E2-022-15 | §12 operations, events and activities; contract test of each operation against rwb-source-data.yaml | Contract | Each operation of §12 with its request and response |\n| TC-E2-022-16 | §12.7 tables; boundary of the table rules, failed_count non-negative with default 0 (ASM-3438) | Component | failed_count 0 and 1 |\n| TC-E2-022-17 | AC7, X4; the same key with a different body | Component | Idempotency-Key c0ffee00-0001 with a changed body |\n| TC-E2-022-18 | AC8, X6; the view does not answer inside 5 s | Component | v_ace_contact stub delayed beyond 5 s |\n| TC-E2-022-19 | AC9, X7; the delivery columns missing | Component | Letter slice not migrated; no delivery columns |\n| TC-E2-022-20 | AC10, X8; a caller without the right | Component | Caller without the right posts a message |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-04538",
+   "item": "DOR-RWB-P1-E2022-APP-8",
+   "status": "Cross-document",
+   "section": "12",
+   "target": "rwb-source-data.yaml",
+   "change": "Add paths GET and POST /api/recovery/source-data/v1/contact-points, POST .../contact-points/{contactPointKey}/failed-contacts, GET and POST /api/recovery/source-data/v1/interactions, and the one further path.",
+   "note": "Four paths named by detcheck are absent from the API yaml; the '+1 more' path is not named in the item, so it is not listed."
+  },
+  {
+   "ruling": "R-09800",
+   "item": "CG-ALL-2454",
+   "status": "Resolved",
+   "section": "12.7",
+   "target": "",
+   "change": "",
+   "note": "Section 12.7 and section 11 now record tr_interaction_append_only as a database trigger of RWB-P1-E1066-APP, not a dictionary field."
+  },
+  {
+   "ruling": "R-09801",
+   "item": "CG-ALL-2460",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4",
+   "change": "Add a new message ID for 'No token' with text 'Your session has ended. Sign in again.'; section 14 then cites it in place of MSG-P4-001.",
+   "note": "MSG-P4-001 is held for 'Sign-in with no Workbench role'; the new ID does not exist yet, so the story is not edited."
+  },
+  {
+   "ruling": "R-15242",
+   "item": "DOR-RWB-P1-E2022-APP-10",
+   "status": "Cross-document",
+   "section": "",
+   "target": "Recovery Workbench P3 screen stories for SCR-03, SCR-04 and SCR-09",
+   "change": "Add empty, loading, error and no-access states for SCR-03, SCR-04 and SCR-09.",
+   "note": "This is an API-only story with no screens; the states belong to the P3 stories that own those screens."
+  },
+  {
+   "ruling": "R-15243",
+   "item": "DOR-RWB-P1-E2022-APP-11",
+   "status": "Not applied",
+   "section": "",
+   "target": "",
+   "change": "",
+   "note": "The detcheck does not name the field; its personal-data class is set in Data Classification v5 and cannot be assigned here."
+  },
+  {
+   "ruling": "R-15244",
+   "item": "DOR-RWB-P1-E2022-APP-12",
+   "status": "Resolved",
+   "section": "16",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-022-15 (contract) and TC-E2-022-16 (boundary). Test Cases v8 and RTM v7 alignment of section 18 remains cross-document."
+  },
+  {
+   "ruling": "R-15245",
+   "item": "DOR-RWB-P1-E2022-APP-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Section 14 records DL10 as open and states its assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 as confirmed by the directive."
+  },
+  {
+   "ruling": "R-15246",
+   "item": "DOR-RWB-P1-E2022-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 to AC10 for X4, X6, X7 and X8 with their test rows TC-17 to TC-20; section 5 Covered by now cites them."
+  },
+  {
+   "ruling": "R-15247",
+   "item": "DOR-RWB-P1-E2022-APP-6",
+   "status": "Cross-document",
+   "section": "10",
+   "target": "rwb-access",
+   "change": "Name the authorise check of DP-08 that the REST operations of section 12 call.",
+   "note": "Section 10 now states the check is required; its name is Not specified in the source documents, so it is not invented."
+  },
+  {
+   "ruling": "R-15248",
+   "item": "DOR-RWB-P1-E2022-APP-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states tr_interaction_append_only is not a field or a row; the 25 data rows are unchanged."
+  }
+ ]
+}

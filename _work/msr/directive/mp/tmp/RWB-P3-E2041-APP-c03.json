@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "| Depends on (build) | RWB-P3-E2041-CON, RWB-PLT-E1027-CON, RWB-PLT-E1072-CON, RWB-PLT-E1042-CON, RWB-P3-E1042-CON, RWB-PLT-E1043-CON, RWB-P3-E1043-CON, RWB-PLT-E1037-CON, RWB-PLT-E1047-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON, RWB-P3-E1073-APP |",
+   "new": "| Depends on (build) | RWB-PLT-E1027-CON, RWB-PLT-E1072-CON, RWB-PLT-E1042-CON, RWB-PLT-E1043-CON, RWB-PLT-E1037-CON, RWB-PLT-E1047-CON, RWB-PLT-E1044-CON, RWB-PLT-N001-CON, RWB-P3-E1073-APP |"
+  },
+  {
+   "old": "| Contract dependencies | RWB-P4-E1037-CON |",
+   "new": "| Contract dependencies | RWB-P3-E2041-CON, RWB-P7-E1073-CON, RWB-P3-E1042-CON, RWB-P3-E1043-CON, RWB-P4-E1037-CON |"
+  },
+  {
+   "old": "| X7 | A reader holds no Rules and parameters right | The authorise check behind the operation refuses the call; nothing is returned | MSG-P4-002 | TC-E2-041-11 |",
+   "new": "| X7 | A reader holds no Rules and parameters right | The authorise check behind the operation refuses the call; nothing is returned | MSG-P4-002 | AC11 |"
+  },
+  {
+   "old": "These ten criteria are the legacy acceptance of the whole governance journey",
+   "new": "These ten criteria are the legacy acceptance of the whole governance journey; AC11 to AC16 are new in this story and cover exception X7 and rules BR2, BR7, BR9, BR12 and BR14"
+  },
+  {
+   "old": "returns 96 decision log entries",
+   "new": "returns 96 decision ledger entries"
+  },
+  {
+   "old": "Given the decision log holds 96 entries",
+   "new": "Given the decision ledger holds 96 entries"
+  },
+  {
+   "old": "(ALLOC-032 is test data)",
+   "new": "(ALLOC-032 is test data, not a rule in any current source)"
+  },
+  {
+   "old": "    Then RWB-E2-005 reconciles the count per package version from this report",
+   "new": "    Then RWB-E2-005 reconciles the count per package version from this report\n\n  Scenario: AC11 Reader without the Rules and parameters right (exception X7)\n    Given a reader holds RW-CASEOWN and no Rules and parameters right\n    When the reader reads the change report for 2026-12-01 to 2026-12-31\n    Then the authorise check behind the operation refuses the call with MSG-P4-002\n    Then nothing is returned\n\n  Scenario: AC12 Approver is the author (BR2)\n    Given the rwb-decision contract mock returns ALLOCATION version \"ALLOC-2026.12\" authored by \"U-41\" and awaiting approval\n    When \"U-41\" approves it\n    Then the system refuses the approval with MSG-P7-002\n\n  Scenario: AC13 Rollback appears as its own entry (BR7)\n    Given the rwb-decision contract mock returns a rollback of ALLOCATION to version \"ALLOC-2026.11\" loaded by \"U-41\"\n    When \"U-AUD-01\" reads the change report for 2026-12-01 to 2026-12-31\n    Then one entry shows the rollback as its own entry naming version \"ALLOC-2026.11\"\n\n  Scenario: AC14 Checklist held on the package version row (BR9)\n    Given the rwb-decision contract mock returns ALLOCATION version \"ALLOC-2026.12\" with its checklist\n    When \"U-AUD-01\" reads the change report for 2026-12-01 to 2026-12-31\n    Then the checklist arrives as one JSON object on the version entry\n    Then this story adds no table and no column for the checklist\n\n  Scenario: AC15 Version not in force is never used (BR12)\n    Given no ALLOCATION package version is in force on the business date 2026-12-01\n    When a case is decided under ALLOCATION\n    Then the evaluation fails with NoPackageInForce and nothing is written\n    Then the system answers MSG-P3-027 with check \"package in force\" and detail \"ALLOCATION\"\n\n  Scenario: AC16 Impact count from the case list (BR14)\n    Given the queue \"MTG-BKK-CO\" holds 412 open Mortgage cases in the case list of rwb-case\n    When \"U-41\" loads ALLOCATION version \"ALLOC-2026.12\" with a change to queue \"MTG-BKK-CO\"\n    Then the impact summary reads \"412 open Mortgage cases in the BKK queue\""
+  },
+  {
+   "old": "The response shape of the case-side audit read and its CSV column list are Not specified in the source documents (GAP-0718; ASM-1265);",
+   "new": "The case-side audit read is GET /api/recovery/case/v1/admin/rule-change-audit under Rules and parameters R, with one entry per package version carrying decisions, casesAffected, firstDecisionAt, lastDecisionAt, openCasesAtVersion and openCasesKeepingVersion; its CSV columns follow that field order (GAP-0718; ASM-1265);"
+  },
+  {
+   "old": "Where a criterion speaks of the decision log,",
+   "new": "Where a criterion speaks of the decision ledger,"
+  },
+  {
+   "old": "| MSG-P7-003 | The decision record could not be written | The action was not taken because the decision could not be recorded. Try again in a few minutes. |",
+   "new": "| MSG-P7-003 | The decision record could not be written | The action was not taken because the decision could not be recorded. Try again in a few minutes. |\n| MSG-P4-001 | Not specified in the source documents (DOR-RWB-P3-E2041-APP-9) | Not specified in the source documents (DOR-RWB-P3-E2041-APP-9) |"
+  },
+  {
+   "old": "| TC-E2-041-11 | Access; BR13 | Component | RW-CASEOWN (no Rules and parameters right) reads the audit read; refused with MSG-P4-002 |",
+   "new": "| TC-E2-041-11 | Access; BR13 | Component | RW-CASEOWN (no Rules and parameters right) reads the audit read; refused with MSG-P4-002 |\n| TC-E2-041-13 | Access; X7 | Component | RW-CASEOWN reads the change report without the Rules and parameters right; refused with MSG-P4-002 (AC11) |\n| TC-E2-041-14 | Rule; BR2 | Component | U-41 approves own ALLOCATION version; refused with MSG-P7-002 (AC12) |\n| TC-E2-041-15 | Rule; BR7 | Component | Rollback of ALLOCATION to ALLOC-2026.11 appears as its own entry (AC13) |\n| TC-E2-041-16 | Rule; BR9 | Component | Checklist arrives as one JSON object on the version entry; no table added (AC14) |\n| TC-E2-041-17 | Rule; BR12 | Component | Case decided with no ALLOCATION version in force; NoPackageInForce, nothing written, MSG-P3-027 (AC15) |\n| TC-E2-041-18 | Rule; BR14 | Component | Impact summary counts 412 open Mortgage cases of queue MTG-BKK-CO from the rwb-case case list (AC16) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-16251",
+   "item": "DOR-RWB-P3-E2041-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X7 now covered by new AC11 with TC-E2-041-13; section 7 holds 16 owned criteria."
+  },
+  {
+   "ruling": "R-16252",
+   "item": "DOR-RWB-P3-E2041-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "AC12 to AC16 cover BR2, BR7, BR9, BR12 and BR14 with TC-E2-041-14 to 18; ALLOC-032 marked as test data with no source rule."
+  },
+  {
+   "ruling": "R-16253",
+   "item": "DOR-RWB-P3-E2041-APP-7",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Criteria now use decision ledger wording for the decision log; decision-log path kept. Section 11 rows unchanged."
+  },
+  {
+   "ruling": "R-16254",
+   "item": "DOR-RWB-P3-E2041-APP-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "MSG-P4-001 row added with text Not specified. MSG-P3-027 cannot be aligned to Error and Message Standard v4 text, which is not in the sources."
+  },
+  {
+   "ruling": "R-22089",
+   "item": "GAP-2414",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Build list carries eight platform contracts; contract list carries five; RWB-P7-E2042-APP treated as the registry op set. Wave 2 re-check stays open."
+  },
+  {
+   "ruling": "R-22285",
+   "item": "GAP-1615",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P7 rwb-decision; TSD P3; TSD P4; API Specification v4",
+   "change": "Re-issue TSD P7 with T3.1 entries for the four rule tables and appendix T-A rule-version and rule-package operations; remove them from TSD P3 and TSD P4; set x-module of nine rule paths to P7.",
+   "note": "Story already states the registry as P7 owned. Document edits sit outside this story."
+  },
+  {
+   "ruling": "R-22286",
+   "item": "GAP-1993",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Story reads package and catalogue through the rwb-decision contract (section 11 rows); no further story change needed."
+  },
+  {
+   "ruling": "R-22715",
+   "item": "GAP-1565",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "TSD P4 and API Specification v4; rwb-decision documents for FEAT-ADM-02",
+   "change": "Re-issue TSD P4 without the four rule tables, RulePackageStore and six rule-package operations; move FEAT-ADM-02 to rwb-decision documents; set x-module of six paths to P7.",
+   "note": "Rule administration sits outside this story; the change lives in TSD P4 and API Specification v4."
+  },
+  {
+   "ruling": "R-22716",
+   "item": "GAP-0420",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "Rule-change report harness pack (integration lead with QA)",
+   "change": "Record SIT environment, seeding of ALLOC-2026.11 to ALLOC-2026.14, RES-2026.12, PMT-2026.12, 96 and 1,204 entries, evidence format and retention, pass/fail gate and composite route detail at wave 2 entry check.",
+   "note": "Values are held in the harness pack, not the story; no value invented in the story."
+  },
+  {
+   "ruling": "R-22717",
+   "item": "GAP-0718",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "rwb-case API file and Ownership Map",
+   "change": "Publish GET /api/recovery/case/v1/admin/rule-change-audit with the section 11 entry fields and Rules and parameters R; add the ownership map row before the wave 2 baseline.",
+   "note": "Section 11 now names path, right, fields and CSV order. Retention (GAP-0720) remains open."
+  }
+ ]
+}

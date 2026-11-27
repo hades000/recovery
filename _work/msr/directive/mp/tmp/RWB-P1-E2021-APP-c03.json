@@ -1,0 +1,144 @@
+{
+ "edits": [
+  {
+   "old": "| X1 | `productCode` is not a product this service serves, or `caseId` is missing or malformed | 400 with the problem body naming the field; no row is answered | MSG-GEN-004 | §12.1 |",
+   "new": "| X1 | `productCode` is not a product this service serves, or `caseId` is missing or malformed | 400 with the problem body naming the field; no row is answered | MSG-GEN-004 | AC8 |"
+  },
+  {
+   "old": "| X2 | A caller without the right calls the read or the append | 403, and the refusal is logged without a key value | MSG-P4-002 | §10 |",
+   "new": "| X2 | A caller without the right calls the read or the append | 403, and the refusal is logged without a key value | MSG-P4-002 | AC9 |"
+  },
+  {
+   "old": "| X3 | A view, `contact_point_ext` or the stamp does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database; no row is guessed from a cache | MSG-GEN-006 | §12.1 |",
+   "new": "| X3 | A view, `contact_point_ext` or the stamp does not answer inside 5 s, or answers an error | 503 with a problem body naming the ACE database; no row is guessed from a cache | MSG-GEN-006 | AC10 |"
+  },
+  {
+   "old": "| X6 | The case of the append does not exist or is outside the caller's scope | 404 as the case check of the writer answers it, passed on unchanged; no entry is written | MSG-P4-003 | §12.1 |",
+   "new": "| X6 | The case of the append does not exist or is outside the caller's scope | 404 as the case check of the writer answers it, passed on unchanged; no entry is written | MSG-P4-003 | AC11 |"
+  },
+  {
+   "old": "| X8 | The ledger cannot be written | The transaction rolls back, the caller receives 503, and no entry exists | MSG-P1-022 | §12.1 |",
+   "new": "| X8 | The ledger cannot be written | The transaction rolls back, the caller receives 503, and no entry exists | MSG-P1-022 | AC12 |"
+  },
+  {
+   "old": "    Then this story publishes no event, starts no workflow and writes no row outside the interaction ledger",
+   "new": "    Then this story publishes no event, starts no workflow and writes no row outside the interaction ledger\n\n  Scenario: AC8 A read of a product this service does not serve, or with no case, is refused with 400 (new, D-RCV-60)\n    When the dispatch loop calls GET /api/recovery/source-data/v1/data-products/{productCode}/records with a productCode this service does not serve\n    Then the answer is status 400 with MSG-GEN-004 and no row is answered\n    Then the same call with no caseId is answered with status 400 and MSG-GEN-004\n\n  Scenario: AC9 A caller without the right is refused with 403 and the refusal is logged without a key value (new, D-RCV-60)\n    Given the caller's role carries no right on the read of case \"RC-2026-000321\"\n    When the dispatch loop calls GET /api/recovery/source-data/v1/data-products/DP02/records?caseId=RC-2026-000321\n    Then the answer is status 403 with MSG-P4-002\n    Then the refusal is logged with no key value\n\n  Scenario: AC10 A view that does not answer inside 5 s gives 503 and no guessed row (new, D-RCV-60)\n    Given v_ace_contact does not answer inside 5 s for case \"RC-2026-000321\"\n    When the dispatch loop calls GET /api/recovery/source-data/v1/data-products/DP02/records?caseId=RC-2026-000321\n    Then the answer is status 503 with MSG-GEN-006 naming the ACE database\n    Then no row is answered from a cache or guessed\n\n  Scenario: AC11 An append to a case that does not exist or is out of scope is refused with 404 and nothing is written (new, D-RCV-60)\n    Given the case of the append does not exist or is outside the caller's scope\n    When the dispatch loop appends the letter of notice \"N-0101\" to that case with conduct check \"PASSED\" and a valid Idempotency-Key\n    Then the answer is status 404 with MSG-P4-003, passed on unchanged from the case check\n    Then no entry is written to the ledger\n\n  Scenario: AC12 A ledger that cannot be written rolls back, answers 503 and leaves no entry (new, D-RCV-60)\n    Given the interaction ledger cannot be written\n    When the dispatch loop appends the letter of notice \"N-0101\" of case \"RC-2026-000321\" with conduct check \"PASSED\", delivery status \"SENT\" and external ref \"RR223344556TH\" with a valid Idempotency-Key\n    Then the transaction rolls back and the answer is status 503 with MSG-P1-022\n    Then no entry exists for \"RR223344556TH\"\n\n  Scenario: AC13 This service starts no notice-period timer and takes the proof date as given (new, D-RCV-60)\n    Given the proof entry of \"RR223344556TH\" is on the ledger of case \"RC-2026-000321\", written by RWB-P1-E1055-APP with occurred time 2026-12-21\n    When the dispatch loop calls GET /api/recovery/source-data/v1/cases/RC-2026-000321/interactions\n    Then the proof entry answers the occurred time 2026-12-21 as given\n    Then no notice-period timer, no notice-period end date and no case task is written here"
+  },
+  {
+   "old": "| BR1 | The letter is dispatched by rwb-comms after the conduct check, and the result of that check is a value on the ledger entry of the letter | REQ-OCC-005; FEAT-OCC-05; legacy BR1 |",
+   "new": "| BR1 | The letter is dispatched by rwb-comms after the conduct check, and the result of that check is a value on the ledger entry of the letter. The conduct and consent checks are one versioned rule package governed in rwb-decision and run in the owning service, rwb-comms; the package name is Not specified in the source documents (GAP-1610) | REQ-OCC-005; FEAT-OCC-05; legacy BR1 |"
+  },
+  {
+   "old": "| BR4 | Entries of the interaction ledger are append only; a correction or a later outcome is a new entry, never an update | tr_interaction_append_only; BR4 of RWB-P1-E1066-APP; legacy BR5 |",
+   "new": "| BR4 | Entries of the interaction ledger are append only; a correction or a later outcome is a new entry, never an update | append-only trigger of RWB-P1-E1066-APP (database object, not an LDM field); BR4 of RWB-P1-E1066-APP; legacy BR5 |"
+  },
+  {
+   "old": "| BR6 | The notice period starts from the delivery date on the proof, and the timer is rwb-case's; this service writes the date it is given and starts nothing | R-LIT-07; CTL-15; legacy BR5 |",
+   "new": "| BR6 | The notice period starts from the delivery date on the proof, and the timer is rwb-case's; this service writes the date it is given and starts nothing | R-LIT-07; CTL-15; legacy BR5; AC13 |"
+  },
+  {
+   "old": "| BR8 | No address, name or identity value is read into an answer, written to the ledger, logged or put in an event | BR-P1-001-5; legacy BR5, §17 |",
+   "new": "| BR8 | No address, name or identity value is read into an answer, written to the ledger, logged or put in an event | BR-P1-001-5; legacy BR5, §17; AC7 |"
+  },
+  {
+   "old": "| MSG-P6-001 | A contact stop blocks the letter, in the loop that holds the notice | Contact with this customer is stopped for {reason}. |",
+   "new": "| MSG-P6-001 | A contact stop blocks the letter, in the loop that holds the notice | Contact with this customer is stopped for {reason}. |\n| MSG-P6-003 | Carried from the legacy story (Target reading, §7); not raised by this service | Not specified in the source documents (DOR-RWB-P1-E2021-APP-9) |\n| MSG-P3-004 | Carried from the legacy story (Target reading, §7); not raised by this service | Not specified in the source documents (DOR-RWB-P1-E2021-APP-9) |"
+  },
+  {
+   "old": "The row shape and the consent vocabulary are in no source — the legacy read was an in-process view query — and are fixed as here (GAP-2181; ASM-3527).",
+   "new": "The row shape and the consent vocabulary are in no source — the legacy read was an in-process view query — and are fixed as here (GAP-2181; ASM-3527). Until RWB-P1-E1016-CON and RWB-P1-E1066-CON publish them, these shapes and the mapping of sections 12.1 and 13 hold, and the point closes against the reference-data contract of DP-07."
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15238",
+   "item": "DOR-RWB-P1-E2021-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC8-AC12 for X1, X2, X3, X6, X8 and pointed §5 Covered by at them. §16 test case rows are not in this chunk and remain to add."
+  },
+  {
+   "ruling": "R-15239",
+   "item": "DOR-RWB-P1-E2021-APP-4",
+   "status": "Resolved",
+   "section": "7, 8",
+   "target": "",
+   "change": "",
+   "note": "BR8 now cited to AC7; added AC13 for BR6 and cited it. §16 test case rows for AC13 are not in this chunk and remain to add."
+  },
+  {
+   "ruling": "R-15240",
+   "item": "DOR-RWB-P1-E2021-APP-7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR4 source no longer names the trigger as an LDM field; it is described as a database object of the writer's migration."
+  },
+  {
+   "ruling": "R-15241",
+   "item": "DOR-RWB-P1-E2021-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "RWB-P1-E1066-CON",
+   "change": "Confirm the standard meaning of MSG-GEN-004 covers the idempotency replay and schema uses in X1, X7 and §14, or align those uses. MSG-P3-004 and MSG-P6-003 rows added to §14.",
+   "note": "Standard text of MSG-GEN-004 is not in the chunk; story side added the two missing messages with text Not specified."
+  },
+  {
+   "ruling": "R-22173",
+   "item": "GAP-1597",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Architecture v5 (slides 17, 41) and FSD P6 document control change note v3",
+   "change": "Keep the notice and its proof fields in rwb-comms; read proof rows through the rwb-source-data contract and apply by barcode; assign the v_ace_pod writer question to the ACE team.",
+   "note": "Story already places the proof read and notice state in P6; no story edit needed."
+  },
+  {
+   "ruling": "R-22174",
+   "item": "GAP-2090",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map v1 (Tables sheet, P6 rows) and TSD P6 T3.1",
+   "change": "Hold barcode, callback date and delivery status on the notice row, listed in the P6 object list; add a proof table only if a DB story needs it.",
+   "note": "Story relies only on notice fields for proof; no story edit needed."
+  },
+  {
+   "ruling": "R-22175",
+   "item": "GAP-2096",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Architecture v5 (slides 42 and 44)",
+   "change": "Add the proof-arrival path: read proof through the P1 contract on the ACE batch business date, match by barcode, and publish EV-15 NoticeDelivered from rwb-comms; no new job invented.",
+   "note": "Story keeps NoticeDelivered out of scope; no story edit needed."
+  },
+  {
+   "ruling": "R-22476",
+   "item": "GAP-2093",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Architecture v5 (slide 17) and Ownership Map v1 (Endpoints sheet)",
+   "change": "Remove 'Decision: child: approval' from the rwb-comms OUT list; hold ApprovalWorkflow in P7 with the notice as source; keep POST /notices/{noticeId}/approve of S4 as decision point; notice waits in Approved.",
+   "note": "Story already gates dispatch on APPROVED; no story edit needed."
+  },
+  {
+   "ruling": "R-22553",
+   "item": "GAP-1610",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR1 now names the conduct and consent checks as one versioned rule package governed in rwb-decision. Package name is Not specified; officer approval is outside the story."
+  },
+  {
+   "ruling": "R-22556",
+   "item": "GAP-2181",
+   "status": "Cross-document",
+   "section": "12.1",
+   "target": "RWB-P1-E1016-CON and RWB-P1-E1066-CON",
+   "change": "Publish the DP02 contact row and its vocabulary in RWB-P1-E1016-CON; add the LETTER required-members table to RWB-P1-E1066-CON; add UNSERVED to LOV-SEND-STATUS with its version or confirm the FAILED mapping with the ACE result code in source_ref.",
+   "note": "§12.1 now states the shapes hold and the point closes against DP-07 until both contracts are published."
+  }
+ ]
+}

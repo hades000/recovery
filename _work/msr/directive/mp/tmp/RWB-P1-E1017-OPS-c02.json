@@ -1,0 +1,104 @@
+{
+ "edits": [
+  {
+   "old": "The texts are copied unchanged from the legacy story; the deployment adds the alert routing and the runbook link, never a new wording. Thai text follows decision DL10.",
+   "new": "The texts are copied unchanged from the legacy story; the deployment adds the alert routing and the runbook link, never a new wording. Thai text follows decision DL10, which stays open; assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 are confirmed by the programme directive of 26 November 2026."
+  },
+  {
+   "old": "| Item | Content |\n|---|---|\n| Deployment values | Image digest, chart version, api and worker replica counts, resource requests and limits, probe paths and timings, log level, feature switches, KEDA thresholds |\n| Schema | `rwb_source_data`, migrated by the per-service Flyway sequence; the eight tables in scope of the run plus `data_product`, `sys_objects` and `sys_fields` |\n| Container | The write-once container of RWB-PLT-TE012-APP, prefix `retention/`, immutable once written, with a manifest of the row count and the SHA-256 per file |\n| Queue | Temporal task queue `rwb-source-data` in namespace `rwb-recovery` |\n| Schedule | None in this service; JOB-17 is rwb-document's |\n| Configuration keys | `rwb.source-data.retention.batch-size=5000`, `rwb.source-data.retention.archive-container`, `rwb.retention.purge` (transaction setting), feature flag `rwb.source-data.retention` |\n| Dashboard series | runs started, completed, failed; rows selected, archived, deleted, kept on hold per table; run duration; container write failures; refused rule sets by check; held cases |\n| Runbook entries | refused rule set, unreachable container, failed delete, duplicate start, failed migration, probe failure |\n| Secrets | The rwb-source-data login secret, the container credential and the Temporal mTLS material, all from the platform secret store |",
+   "new": "| Item | Content | BR Field ID |\n|---|---|---|\n| Deployment values | Image digest, chart version, api and worker replica counts, resource requests and limits, probe paths and timings, log level, feature switches, KEDA thresholds | BR6 |\n| Schema | `rwb_source_data`, migrated by the per-service Flyway sequence; the eight tables in scope of the run plus `data_product`, `sys_objects` and `sys_fields`. The interaction ledger stays in this schema under the same rule version. P5 rwb-document owns `retention_rule`, `retention_action`, the load and the JOB-17 Schedule; this schema holds no rule table, and the service receives the rule version, the run date and the rules in the run request, validates them against its own tables and applies them to its eight tables | BR2, BR8 |\n| Container | The write-once container of RWB-PLT-TE012-APP, prefix `retention/`, immutable once written, with a manifest of the row count and the SHA-256 per file; the path is `retention/YYYY-MM-DD/<table>/`, written under the service's own credential and read back before any delete. The container account, credential scope, immutability policy and manifest schema are Not specified in the source documents (GAP-0490) and stay with RWB-PLT-TE012-APP | BR5 |\n| Queue | Temporal task queue `rwb-source-data` in namespace `rwb-recovery` | BR4 |\n| Schedule | None in this service; JOB-17 is rwb-document's | BR3 |\n| Configuration keys | `rwb.source-data.retention.batch-size=5000`, `rwb.source-data.retention.archive-container`, `rwb.retention.purge` (transaction setting), feature flag `rwb.source-data.retention` | BR6 |\n| Dashboard series | runs started, completed, failed; rows selected, archived, deleted, kept on hold per table; run duration; container write failures; refused rule sets by check; held cases | Not specified in the source documents (DOR-RWB-P1-E1017-OPS-7) |\n| Runbook entries | refused rule set, unreachable container, failed delete, duplicate start, failed migration, probe failure | BR7 |\n| Secrets | The rwb-source-data login secret, the container credential and the Temporal mTLS material, all from the platform secret store | BR1 |\n| Retention-run API | POST /retention-runs and GET /retention-runs/{runId} on /api/recovery/source-data/v1. The request carries the rule version, the run date and the rules; a start while a run is active returns 409 and an accepted start returns 202 with a run id; the answer carries the status, counts per table, rule version, archive location and held cases; the field names are settled in RWB-P1-E1017-CON | Not specified in the source documents (DOR-RWB-P1-E1017-OPS-7) |\n| Decision record | Archive and purge records are written as decision log entries: decision_code and the final call come from LOV-DECISION and the final-call list in force, through the rwb-case reference-data contract; ruleId stays empty; the run reference goes in inputsRef; the product, table, counts archived and kept, hold report reference and archive location go in actions and outcome; the value names are settled with the reference-data owner before the first joint environment | Not specified in the source documents (DOR-RWB-P1-E1017-OPS-7) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-15071",
+   "item": "DOR-RWB-P1-E1017-OPS-18",
+   "status": "Resolved",
+   "section": "14",
+   "target": "",
+   "change": "Section 14 states DL10 stays open and confirms assumptions ASM-2250, ASM-2357, ASM-2377 and ASM-2863 per the directive.",
+   "note": "DL10 stays open; its four assumptions are confirmed by the directive and recorded in section 14."
+  },
+  {
+   "ruling": "R-15072",
+   "item": "DOR-RWB-P1-E1017-OPS-4",
+   "status": "Not applied",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Sections 7 and 16 are outside this chunk; the new criteria and test case rows need their current text."
+  },
+  {
+   "ruling": "R-15073",
+   "item": "DOR-RWB-P1-E1017-OPS-7",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Added a BR Field ID column to section 11 linking each data row to its BR rule, with a Not specified mark where no rule fits.",
+   "note": "BR Field ID column added to section 11; three rows with no BR rule are marked Not specified."
+  },
+  {
+   "ruling": "R-15074",
+   "item": "DOR-RWB-P1-E1017-OPS-9",
+   "status": "Not applied",
+   "section": "14",
+   "target": "",
+   "change": "",
+   "note": "Error and Message Standard v4 wording for MSG-P2-006 is not in this chunk; the text cannot be copied."
+  },
+  {
+   "ruling": "R-21968",
+   "item": "GAP-0342",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Schema row: P5 owns the rule and the archive; P1 keeps the interaction ledger under the rule version; trigger and status surface added as the retention-run API row.",
+   "note": "Schema row: P5 owns rule and archive, P1 keeps its ledger and applies the rule; trigger and status API in the retention-run row."
+  },
+  {
+   "ruling": "R-21969",
+   "item": "GAP-0488",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Schema row: P5 rwb-document owns retention_rule, retention_action, the load and the JOB-17 Schedule; P1 holds no rule table and validates and applies the rule from the run request.",
+   "note": "Schema row: P5 owns retention_rule, retention_action, load and JOB-17; P1 receives the rule in the run request and applies it."
+  },
+  {
+   "ruling": "R-21970",
+   "item": "GAP-0489",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Added a Retention-run API row: POST /retention-runs and GET /retention-runs/{runId} on /api/recovery/source-data/v1 with request, answer, 202, 409; field detail in RWB-P1-E1017-CON.",
+   "note": "Retention-run API row: POST and GET /retention-runs on /api/recovery/source-data/v1; field detail in RWB-P1-E1017-CON."
+  },
+  {
+   "ruling": "R-21972",
+   "item": "GAP-2426",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Added a Decision record row: codes and final call from LOV-DECISION through rwb-case reference data, ruleId empty, run reference in inputsRef, detail in actions and outcome.",
+   "note": "Decision record row: LOV-DECISION codes via rwb-case reference data, ruleId empty, run reference in inputsRef, detail in actions and outcome."
+  },
+  {
+   "ruling": "R-21973",
+   "item": "GAP-3158",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "Schema row: P5 rwb-document owns both retention tables and the JOB-17 Schedule; P1 holds neither and reads the rule through the contract.",
+   "note": "Schema row: P5 owns both retention tables and the Schedule; P1 holds neither and reads the rule through the contract."
+  },
+  {
+   "ruling": "R-21975",
+   "item": "GAP-0490",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "RWB-PLT-TE012-APP",
+   "change": "Specify the write-once container contract: account, credential scope, immutability policy, request shape and manifest schema.",
+   "note": "Story side: container row keeps the path and manifest and adds read-back before delete; container contract sits with the owner."
+  }
+ ]
+}

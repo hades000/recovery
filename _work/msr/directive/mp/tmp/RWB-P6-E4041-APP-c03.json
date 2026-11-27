@@ -1,0 +1,156 @@
+{
+ "edits": [
+  {
+   "old": "- The reference lists this story reads are the service's own lists of TSD P6 T3.2: LOV-NOTICE and LOV-DELIVERY, read with the version in force and never written in code (BR-P6-020).",
+   "new": "- The reference lists this story reads are the service's own lists of TSD P6 T3.2: LOV-NOTICE, LOV-DELIVERY and LOV-SENT-TYPE, read with the version in force and never written in code (BR-P6-020). The parameters read are Not specified in the source documents (DOR-RWB-P6-E4041-APP-20); the reference-data contract is DP-06 and DP-07."
+  },
+  {
+   "old": "The discovery production behind the document side of the answer is Not specified in the source documents (GAP-1151; ASM-2098).",
+   "new": "The discovery production behind the document side of the answer is a P5 obligation under rwb-document, Not specified in the source documents (GAP-1151; ASM-2098), and no contract row of this story depends on it until P5 publishes it."
+  },
+  {
+   "old": "is Not specified in the source documents as a shape of this service's operation (GAP-1153; ASM-2100).",
+   "new": "is served by the rwb-document discovery production, and a cross-case answer is out of scope of this story until the two owners agree one shape (GAP-1153; ASM-2100)."
+  },
+  {
+   "old": "| X2 | The caller does not hold the Documents right on the case | 403 with the platform refusal; nothing is written | MSG-P4-002 | TC-E4-041-03 |",
+   "new": "| X2 | The caller does not hold the Documents right on the case | 403 with the platform refusal; nothing is written | MSG-P4-002 | AC3; TC-E4-041-03 |"
+  },
+  {
+   "old": "| X3 | The request id is unknown, or the case is outside the caller's scope | 404 with the platform not-found envelope; no index entry and no document reference is returned | Not specified in the source documents (GAP-1152; ASM-2099) | BR9 |",
+   "new": "| X3 | The request id is unknown, or the case is outside the caller's scope | 404 with the platform not-found envelope; no index entry and no document reference is returned | Not specified in the source documents (GAP-1152; ASM-2099) | AC4; BR9 |"
+  },
+  {
+   "old": "| X4 | The case reference is missing from the POST | 422 with the field message; no request row is created | MSG-GEN-001 | BR9 |",
+   "new": "| X4 | The case reference is missing from the POST | 422 with the field message; no request row is created | MSG-GEN-001 | AC5; BR9 |"
+  },
+  {
+   "old": "| X5 | A notice of the case has no document yet | The index entry is returned with its document reference empty; the answer is not refused | None | BR5 |",
+   "new": "| X5 | A notice of the case has no document yet | The index entry is returned with its document reference empty; the answer is not refused | None | AC6; BR5 |"
+  },
+  {
+   "old": "| X6 | The rwb-document read does not answer inside 2 s | The answer is not returned; the request stays OPENED and is retried once with jitter | Not specified in the source documents (GAP-1151; ASM-2098) | BR11 |",
+   "new": "| X6 | The rwb-document read does not answer inside 2 s | The answer is not returned; the request stays OPENED and is retried once with jitter | Not specified in the source documents (GAP-1151; ASM-2098) | AC7; BR11 |"
+  },
+  {
+   "old": "| X7 | A produced copy cannot be read from the store | The document line is returned with its reference and a pending state, and the caller is told the copy is not yet available | Not specified in the source documents (GAP-1155; ASM-2102) | BR11 |",
+   "new": "| X7 | A produced copy cannot be read from the store | The document line is returned with its reference and a pending state, and the caller is told the copy is not yet available | Not specified in the source documents (GAP-1155; ASM-2102) | AC8; BR11 |"
+  },
+  {
+   "old": "| X8 | The same POST is repeated with one Idempotency-Key | The first answer is returned with status 201; no second request exists | None | BR10 |",
+   "new": "| X8 | The same POST is repeated with one Idempotency-Key | The first answer is returned with status 201; no second request exists | None | AC9; BR10 |"
+  },
+  {
+   "old": "    Then nothing changes and the user sees MSG-P7-003",
+   "new": "    Then nothing changes and the user sees MSG-P7-003\n\n  Scenario: AC3 Caller without the Documents right (exception X2, BR7)\n    Given \"AUD-0001\" holds no Documents right on case \"RC-2026-000321\"\n    When \"AUD-0001\" sends the POST on case \"RC-2026-000321\"\n    Then the system returns 403 with MSG-P4-002\n    Then nothing is written\n\n  Scenario: AC4 Request id unknown or case outside scope (exception X3, BR9)\n    Given the request id is unknown or the case is outside the scope of the caller\n    When the caller asks for the answer\n    Then the system returns 404 with the platform not-found envelope\n    Then no index entry and no document reference is returned\n\n  Scenario: AC5 Case reference missing from the POST (exception X4, BR9)\n    Given the POST carries no case reference\n    When the POST is sent\n    Then the system returns 422 with MSG-GEN-001\n    Then no request row is created\n\n  Scenario: AC6 Notice without a document (exception X5, BR5)\n    Given a notice of the case has no document yet\n    When the answer is requested\n    Then the index entry is returned with its document reference empty\n    Then the answer is not refused\n    And the index entry carries only the TSD P6 T3.1 fields DF-LEG-015 to DF-LEG-023\n\n  Scenario: AC7 rwb-document read does not answer inside 2 s (exception X6, BR11)\n    Given the rwb-document contract does not answer inside 2 s\n    When the answer is requested\n    Then the answer is not returned and the request stays OPENED\n    Then the rwb-document read is retried once with jitter\n    Then no partial answer is returned as complete\n\n  Scenario: AC8 Produced copy cannot be read (exception X7, BR11)\n    Given the produced copy of document \"DOC-0101\" cannot be read from the store\n    When the answer is requested\n    Then the document line is returned with its reference and a pending state\n    Then the caller is told the copy is not yet available\n\n  Scenario: AC9 Repeat with one Idempotency-Key (exception X8, BR10)\n    Given the POST was answered with status 201 for one Idempotency-Key\n    When the same POST is repeated with that Idempotency-Key\n    Then the first answer is returned with status 201\n    Then no second request exists\n\n  Scenario: AC10 Document facts carried unchanged (BR2)\n    Given the rwb-document contract returns document \"DOC-0101\" with its origin, entry date, alteration flag and readers\n    When the answer is requested\n    Then the document line carries those facts exactly as rwb-document returns them\n    Then this service rewrites none of them\n\n  Scenario: AC11 Answer stored and read back unchanged (BR4)\n    Given an answer has been stored as answered\n    When the answer is read back\n    Then the answer is returned unchanged and no value is recomputed\n\n  Scenario: AC12 Notice type and delivery status from the lists in force (BR6)\n    Given the lists LOV-NOTICE and LOV-DELIVERY have a version in force\n    When the answer is requested\n    Then the notice type and delivery status values are read from those lists\n    Then no value is written in code\n\n  Scenario: AC13 Request opened per case only (BR8)\n    Given the POST names case \"RC-2026-000321\"\n    When the POST is sent\n    Then the request is opened for that case only\n    Then no selector across cases is accepted\n\n  Scenario: AC14 Reads on the owner contracts only (BR12)\n    Given the notice rows and the request rows are rwb_comms rows\n    When the answer is requested\n    Then the notice is read from rwb_comms\n    Then the document is read on the rwb-document contract and never from its tables\n\n  Scenario: AC15 Legal hold respected (BR13)\n    Given document \"DOC-0101\" is under a legal hold\n    When the answer is requested\n    Then the preserved document is read\n    Then this story writes no custody, retention or hold fact\n\n  Scenario: AC16 No personal data in the answer (BR14)\n    Given the answer is produced for case \"RC-2026-000321\"\n    When the answer is requested\n    Then the answer carries notice ids, case ids, document ids, document types, barcodes, dates and status codes only"
+  },
+  {
+   "old": "(Architecture v5 slides 42 and 43 notes). Two tables are added by this story",
+   "new": "(Architecture v5 slides 42 and 43 notes). The answer medium is a JSON list of index entries and document lines with one reference per produced document; an archive or export file is not an operation of this baseline, and the archived file and its protection are a P5 decision under REQ-DCM-018 and REQ-DCM-020. Two tables are added by this story"
+  },
+  {
+   "old": "`V4041_1__document_request.sql`",
+   "new": "`V<next number>__document_request.sql`, where the next number of the service's own sequence is Not specified in the source documents (CG-ALL-6771)"
+  },
+  {
+   "old": "| ANSWERED | The index entries of every notice of the case, the document lines with their version and their court attributes, and the link to the produced copy on the rwb-document content operation |",
+   "new": "| ANSWERED | The index entries of every notice of the case, the document lines with their version and their court attributes, and the link to the produced copy on the rwb-document content operation |\n| Empty | Not specified in the source documents (CG-ALL-6772) |\n| Loading | Not specified in the source documents (CG-ALL-6772) |\n| Error | Not specified in the source documents (CG-ALL-6772) |\n| No access | Not specified in the source documents (CG-ALL-6772) |"
+  },
+  {
+   "old": "| TC-E4-041-03 | Access, BR7, BR9 | Component | `AUD-0001` without the Documents right on the case sends the POST; refused with 403 and MSG-P4-002 and nothing is written |",
+   "new": "| TC-E4-041-03 | AC3, Access, BR7, BR9 | Component | `AUD-0001` without the Documents right on the case sends the POST; refused with 403 and MSG-P4-002 and nothing is written |\n| TC-E4-041-04 | AC4, BR9 | Component | An unknown request id, and a case outside the caller's scope, each get 404 with the platform not-found envelope and no index entry |\n| TC-E4-041-05 | AC5, BR9 | Component | A POST with no case reference is refused with 422 and MSG-GEN-001 and no request row is created |\n| TC-E4-041-06 | AC6, BR5 | Component | A notice with no document yet is returned with its document reference empty and only the TSD P6 T3.1 fields |\n| TC-E4-041-07 | AC7, BR11 | Component | The rwb-document read misses 2 s; the request stays OPENED, is retried once with jitter and no partial answer is returned |\n| TC-E4-041-08 | AC8, BR11 | Component | A produced copy that cannot be read is returned as a document line with its reference and a pending state |\n| TC-E4-041-09 | AC9, BR10 | Component | A repeat POST with one Idempotency-Key returns the first answer with status 201 and opens no second request |\n| TC-E4-041-10 | AC10, BR2 | Component | The origin, entry date, alteration flag and readers are carried unchanged from rwb-document |\n| TC-E4-041-11 | AC11, BR4 | Component | A stored answer is read back unchanged and no value is recomputed |\n| TC-E4-041-12 | AC12, BR6 | Component | Notice type and delivery status values are read from LOV-NOTICE and LOV-DELIVERY with the version in force |\n| TC-E4-041-13 | AC13, BR8 | Component | A request is opened for the named case only and no selector across cases is accepted |\n| TC-E4-041-14 | AC14, BR12 | Component | Notice and request rows are read from rwb_comms and the document only on the rwb-document contract |\n| TC-E4-041-15 | AC15, BR13 | Component | A document under legal hold is read and no custody, retention or hold fact is written |\n| TC-E4-041-16 | AC16, BR14 | Component | The answer carries notice ids, case ids, document ids, document types, barcodes, dates and status codes only |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-17814",
+   "item": "DOR-RWB-P6-E4041-APP-20",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 names LOV-NOTICE, LOV-DELIVERY, LOV-SENT-TYPE and the reference-data contract DP-06 and DP-07; parameters read are placeholder."
+  },
+  {
+   "ruling": "R-17815",
+   "item": "DOR-RWB-P6-E4041-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC3 to AC16 for X2 to X8 and BR2, BR4, BR6, BR8, BR12 to BR14, with TC rows; section 5 Covered by cites the AC IDs."
+  },
+  {
+   "ruling": "R-17816",
+   "item": "DOR-RWB-P6-E4041-APP-4",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "BR5, BR10, BR11 covered by AC6, AC9, AC7 and AC8; BR2, BR4, BR6, BR8, BR12, BR13, BR14 by AC10 to AC16 and TC-E4-041-10 to 16."
+  },
+  {
+   "ruling": "R-17817",
+   "item": "DOR-RWB-P6-E4041-APP-7",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "Logical Data Model v9 and Data Classification v5",
+   "change": "Register document_request and document_request_entry in rwb_comms and field notice_id, or confirm they remain objects owned by RWB-P6-E4041-APP.",
+   "note": "Story already records these three objects as story-owned in sections 11 and 9; the registration is an LDM and DC decision."
+  },
+  {
+   "ruling": "R-23115",
+   "item": "GAP-1151",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-P5 rwb-document API (/api/recovery/document/v1)",
+   "change": "Publish one discovery operation with its request and answer, then add its C row to RWB-P6-E4041-APP.",
+   "note": "Section 3 now states the production is a P5 obligation with the placeholder; no C row is added until P5 publishes it."
+  },
+  {
+   "ruling": "R-23116",
+   "item": "GAP-1152",
+   "status": "Cross-document",
+   "section": "3",
+   "target": "RWB-P6-E4041-CON",
+   "change": "Publish POST /cases/{caseId}/document-requests and GET /document-requests/{requestId} under /api/recovery/comms/v1, the DocumentRequest and DocumentRequestAnswer shapes, the two tables and the record element; confirm field types, decision code and rule id.",
+   "note": "Story already names both operations and keeps field types, decision code and rule id as placeholders in section 11."
+  },
+  {
+   "ruling": "R-23117",
+   "item": "GAP-1153",
+   "status": "Resolved",
+   "section": "3",
+   "target": "",
+   "change": "",
+   "note": "Section 3 states the population selector is served by the rwb-document discovery production; cross-case answer is out of scope."
+  },
+  {
+   "ruling": "R-23118",
+   "item": "GAP-1155",
+   "status": "Resolved",
+   "section": "11",
+   "target": "",
+   "change": "",
+   "note": "Section 11 states the answer is a JSON list with one reference per produced document; archive and protection are P5 under REQ-DCM-018 and 020."
+  },
+  {
+   "ruling": "R-26155",
+   "item": "CG-ALL-6771",
+   "status": "Resolved",
+   "section": "3, 3.1",
+   "target": "",
+   "change": "",
+   "note": "Migration name now uses the Vnnnn form; the next number of the service sequence is a placeholder, as no source gives it."
+  },
+  {
+   "ruling": "R-26156",
+   "item": "CG-ALL-6772",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Section 15 state table adds empty, loading, error and no access rows, each Not specified in the source documents (CG-ALL-6772)."
+  }
+ ]
+}

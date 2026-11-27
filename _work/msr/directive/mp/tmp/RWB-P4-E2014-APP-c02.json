@@ -1,0 +1,140 @@
+{
+ "edits": [
+  {
+   "old": "As a **litigation officer, legal counsel and head of litigation who decides a D7.1 demand or recall notice**",
+   "new": "As a **litigation officer (RW-LITOFF), legal counsel (RW-LEGAL) or head of litigation (RW-HEADLIT) who decides a D7.1 demand or recall notice**"
+  },
+  {
+   "old": "- The slice builds no screen. The approval queue SCR-10, the decision screen SCR-11 and the notice approval panel SCR-18 are `rwb-decision`'s, served through the gateway-bff composite route; the notice itself is `rwb-comms`'s; the case facts, the case state and the case-owner task are `rwb-case`'s.",
+   "new": "- The slice builds no screen. The approval queue SCR-10, the decision screen SCR-11 and the notice approval panel SCR-18 are `rwb-decision`'s, served through the gateway-bff composite route; the notice itself is `rwb-comms`'s; the case facts, the case state and the case-owner task are `rwb-case`'s.\n- The screen states of SCR-10, SCR-11 and SCR-18 (empty, loading, error, no access) are `rwb-decision`'s; this slice's part is the no-access answer, 403 with MSG-P4-002, and the 503 with MSG-P7-003 for a failed entry write in section 11."
+  },
+  {
+   "old": "| X5 | The decision record of the access entry cannot be written | The call returns 503, no answer and no data; the reason is logged; the cache is unchanged | MSG-P7-003 | BR7 |",
+   "new": "| X5 | The decision record of the access entry cannot be written | The call returns 503, no answer and no data; the reason is logged; the cache is unchanged | MSG-P7-003 | AC9 |"
+  },
+  {
+   "old": "| X6 | A second call arrives with the same `Idempotency-Key` | The first answer and its entry are returned; no second entry is written | None | BR7 |",
+   "new": "| X6 | A second call arrives with the same `Idempotency-Key` | The first answer and its entry are returned; no second entry is written | None | AC10 |"
+  },
+  {
+   "old": "Given no masking row in \"MASK-SIT-01\" covers \"v_ace_customer.date_of_birth\" for any role",
+   "new": "Given the policy pack fixture holds no masking row in \"MASK-SIT-01\" for the field \"date_of_birth\" for any role"
+  },
+  {
+   "old": "Then the \"AC-DENY\" entry holds the actor, the area, the right and the approval reference only",
+   "new": "Then the \"AC-DENY\" entry holds the actor, the area, the right and the approval reference only\n\n  Scenario: AC9 A decision record that cannot be written refuses the answer (new, D-RCV-60)\n    Given the decision-record fake forces the write of the access entry to fail\n    When \"U-9212\" asks the authorise path for area \"LITIGATION\" and right \"R\" on notice \"N-0201\"\n    Then the call returns status 503 and message MSG-P7-003\n    Then the call holds no answer and no data, the reason is logged and the cache is unchanged\n    Then no access-log entry is written for that call\n\n  Scenario: AC10 A repeated call with the same Idempotency-Key returns the first answer (new, D-RCV-60)\n    Given \"U-9212\" has made an authorise call for area \"LITIGATION\" and right \"R\" on notice \"N-0201\" with an Idempotency-Key\n    When the same call arrives again with the same Idempotency-Key\n    Then the first answer and its access-log entry are returned\n    Then no second access-log entry is written for that call"
+  },
+  {
+   "old": "The eight criteria above are the ones this story owns;",
+   "new": "The ten criteria above are the ones this story owns;"
+  },
+  {
+   "old": "The caller's own session; the answer is the decision",
+   "new": "The caller's own session and an `Idempotency-Key` header; the answer is the decision"
+  },
+  {
+   "old": "| TC-E2-014-12 | AC1, AC6, BR7, BR9 | NFR | The decision-record write forced to fail: 503 MSG-P7-003, no answer and no data; in the same run a masking-version change published on AccessPolicyChanged reaches the next answer with no deployment |",
+   "new": "| TC-E2-014-12 | AC1, AC6, BR7, BR9 | NFR | The decision-record write forced to fail: 503 MSG-P7-003, no answer and no data; in the same run a masking-version change published on AccessPolicyChanged reaches the next answer with no deployment |\n| TC-E2-014-13 | AC5, AC7 | Component | Boundary on the tables of section 12.7: first and last `permission` row under `PM-2026.12` and first and last `masking_rule` row under `MASK-SIT-01`; `U-9217` with no LITIGATION row and `date_of_birth` with no masking row |\n| TC-E2-014-14 | AC9 | Component | Decision-record write forced to fail through the decision-record fake; 503 MSG-P7-003, no answer and no data, reason logged, cache unchanged |\n| TC-E2-014-15 | AC10 | Component | Second authorise call with the same Idempotency-Key; the first answer and its entry are returned and no second entry is written |"
+  },
+  {
+   "old": "TC-E2-014-11, TC-E2-014-12 |",
+   "new": "TC-E2-014-11, TC-E2-014-12, TC-E2-014-13, TC-E2-014-14, TC-E2-014-15 |"
+  },
+  {
+   "old": "| Size | Set by the squad at refinement |",
+   "new": "| Size | Small; fits two weeks; set by the squad at refinement |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-05806",
+   "item": "DOR-RWB-P4-E2014-APP-8",
+   "status": "Cross-document",
+   "section": "11",
+   "target": "rwb-access.yaml",
+   "change": "Add POST /api/recovery/access/v1/authorise with Idempotency-Key, GET /api/recovery/access/v1/me/permissions and GET /api/recovery/access/v1/masking-policies; read LOV-SCOPE as data, not a closed defaultScope enum.",
+   "note": "Story side: Idempotency-Key added to the authorise row in section 11. The four paths and the defaultScope enum change are in rwb-access.yaml."
+  },
+  {
+   "ruling": "R-10719",
+   "item": "CG-ALL-5209",
+   "status": "Cross-document",
+   "section": "1, 11",
+   "target": "LDM v9",
+   "change": "Record value_token as the field of contact_point holding the postal address over v_ace_contact.contact_value, or record the object in LDM v9 and Data Classification v5.",
+   "note": "No dictionary name matches value_token; the owning document must record it. Story name kept."
+  },
+  {
+   "ruling": "R-10720",
+   "item": "CG-ALL-5210",
+   "status": "Cross-document",
+   "section": "1, 11, 12.7, 17",
+   "target": "LDM v9",
+   "change": "Record contact_point as the P1-owned entity read through the DP-05 owner contract, or record the object in LDM v9 and Data Classification v5.",
+   "note": "No dictionary name matches contact_point; the owning document must record it. Story name kept."
+  },
+  {
+   "ruling": "R-10721",
+   "item": "CG-ALL-5215",
+   "status": "Cross-document",
+   "section": "12.3",
+   "target": "Kafka Catalog v1",
+   "change": "Define the payload of rwb.access.AccessPolicyChanged.v1 in the Events row (new) as: policy kind, old and new version, validFrom, affected capability areas or fields, load reference.",
+   "note": "Catalog payload is not specified (gap-0127; asm-0204), so the story cannot be aligned to it. Catalog must be defined first."
+  },
+  {
+   "ruling": "R-10722",
+   "item": "CG-ALL-5220",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "AC5 Given now sets up the policy pack fixture, not the ACE view; field named as date_of_birth."
+  },
+  {
+   "ruling": "R-16779",
+   "item": "DOR-RWB-P4-E2014-APP-1",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Section 1 role now names codes RW-LITOFF, RW-LEGAL and RW-HEADLIT. Users Roles and Permissions v5 match not checked here."
+  },
+  {
+   "ruling": "R-16780",
+   "item": "DOR-RWB-P4-E2014-APP-10",
+   "status": "Resolved",
+   "section": "1",
+   "target": "",
+   "change": "",
+   "note": "Section 1 states that SCR-10, SCR-11 and SCR-18 states are rwb-decision's and names this slice's no-access and error answers."
+  },
+  {
+   "ruling": "R-16781",
+   "item": "DOR-RWB-P4-E2014-APP-12",
+   "status": "Resolved",
+   "section": "16, 18",
+   "target": "",
+   "change": "",
+   "note": "Added TC-E2-014-13 boundary case for the 12.7 tables and TC-14/15 for AC9/AC10; §18 updated. RTM v7 and Test Cases v8 still need the IDs."
+  },
+  {
+   "ruling": "R-16782",
+   "item": "DOR-RWB-P4-E2014-APP-15",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Size row now states Small and that it fits two weeks."
+  },
+  {
+   "ruling": "R-16783",
+   "item": "DOR-RWB-P4-E2014-APP-3",
+   "status": "Resolved",
+   "section": "5, 7",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 (503 on failed entry write) and AC10 (repeat Idempotency-Key); X5 and X6 now covered by them; TC-14 and TC-15 added."
+  }
+ ]
+}

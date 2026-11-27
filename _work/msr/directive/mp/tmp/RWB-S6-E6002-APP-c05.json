@@ -1,0 +1,107 @@
+{
+ "edits": [
+  {
+   "old": "AC5 to AC7 are added by this story for X2, X8 and R-DS-16 and carry no legacy text.",
+   "new": "AC5 to AC7 are added by this story for X2, X8 and R-DS-16 and carry no legacy text. The module sources of this story are the legacy FSD S6 Debt sale v3 and TSD S6 Debt sale v2 files, because the extract folder holds no FSD or TSD S6 extract; the two sets are reconciled when the extract is produced (GAP-1973)."
+  },
+  {
+   "old": "| X3 | The case is not in the state the rule expects (`DATA_ROOM_OPEN` for R-DS-14, `BIDDING_OPEN` for R-DS-18) | The step holds and writes nothing; a case that has already moved is not re-evaluated | None | AC2, AC3 |",
+   "new": "| X3 | The case is not in the state the rule expects (`DATA_ROOM_OPEN` for R-DS-14, `BIDDING_OPEN` for R-DS-18) | The step holds and writes nothing; a case that has already moved is not re-evaluated | None | AC2, AC3, AC10 |"
+  },
+  {
+   "old": "| X5 | The rwb-partner, rwb-case or rwb-decision contract does not answer inside 2 s, or its breaker is open | The step retries on the workflow's own schedule; nothing is written and no move is answered; the caller sees 503 with the platform envelope | None | AC1, X3 |",
+   "new": "| X5 | The rwb-partner, rwb-case or rwb-decision contract does not answer inside 2 s, or its breaker is open | The step retries on the workflow's own schedule; nothing is written and no move is answered; the caller sees 503 with the platform envelope | None | AC1, X3, AC8, AC9 |"
+  },
+  {
+   "old": "    Then the case moves to BUYER_REJECTED",
+   "new": "    Then the case moves to BUYER_REJECTED\n\n  Scenario: AC8 Activity retry and timeout (X5, added by this story)\n    Given the rwb-partner contract mock does not answer inside 2 s\n    Given the rwb-case contract mock returns the case state \"DATA_ROOM_OPEN\" for \"RC-2026-000842\"\n    Given a case in state DATA_ROOM_OPEN\n    When buyer requested access\n    Then the step retries on the workflow's own schedule\n    Then nothing is written and no move is answered\n    Then the caller sees 503 with the platform envelope\n\n  Scenario: AC9 Consumed call fails (X3 and X5, added by this story)\n    Given the rwb-partner contract mock fails the call that returns the buyer facts\n    Given a case in state DATA_ROOM_OPEN\n    When buyer requested access\n    Then the step holds and writes nothing\n    Then no move is answered\n\n  Scenario: AC10 Disallowed transition (X3, added by this story)\n    Given the rwb-case contract mock returns the case state \"DATA_ROOM_OPEN\" for \"RC-2026-000842\"\n    Given a case in state DATA_ROOM_OPEN\n    When bid submitted\n    Then the status change is refused and nothing is written\n    Then no move is answered"
+  },
+  {
+   "old": "| TC-E6-002-10 | AC7 | Component | Buyer `PTR-2026-000031` with KYC failed at `BUYER_PENDING_KYC`; the refusal and its reason recorded and `BUYER_REJECTED` answered |",
+   "new": "| TC-E6-002-10 | AC7 | Component | Buyer `PTR-2026-000031` with KYC failed at `BUYER_PENDING_KYC`; the refusal and its reason recorded and `BUYER_REJECTED` answered |\n| TC-E6-002-11 | AC8 | Component | Buyer `PTR-2026-000031` with the rwb-partner fake not answering inside 2 s; the retry asserted, nothing written and 503 with the platform envelope |\n| TC-E6-002-12 | AC9 | Component | Buyer `PTR-2026-000031` with the rwb-partner fake failing the call; nothing written and no move answered |\n| TC-E6-002-13 | AC10 | Component | Case `RC-2026-000842` at `DATA_ROOM_OPEN` with bid submitted; the status change refused, nothing written and no move answered |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-29210",
+   "item": "GAP-1975",
+   "status": "Cross-document",
+   "section": "7",
+   "target": "_work/msr/extract (extract set)",
+   "change": "Add FSD S6 Debt sale v3 and TSD S6 Debt sale v2 extracts for the later stages; keep the R7.3 fill order unchanged. Story reads the legacy files meanwhile.",
+   "note": "Story text does not depend on the extract folder; the S6 module pair is read from the requirements folders and the extract step is asked to add it."
+  },
+  {
+   "ruling": "R-29226",
+   "item": "GAP-1973",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "Added a sentence after the section 7 closing paragraph naming the legacy FSD S6 v3 and TSD S6 v2 files as module sources, to be reconciled with the extract.",
+   "note": "Substitution recorded in section 7; reconciliation with the extract is a later step."
+  },
+  {
+   "ruling": "R-29227",
+   "item": "GAP-1972",
+   "status": "Resolved",
+   "section": "header",
+   "target": "",
+   "change": "",
+   "note": "Wave 4 kept per R5.6; Day 1 start is against the CON baseline; wave difference already recorded in the change log; no further edit."
+  },
+  {
+   "ruling": "R-32819",
+   "item": "CG-ALL-AC10",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC10 (disallowed transition, bid from DATA_ROOM_OPEN refused) and TC-E6-002-13; X3 covered-by now includes AC10.",
+   "note": "AC10 added with its test row; the refusal follows the X3 hold-and-write-nothing behaviour."
+  },
+  {
+   "ruling": "R-32820",
+   "item": "CG-ALL-AC5",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC5 already exists in section 7 for X2 and X2 Covered by lists AC5 with TC-E6-002-05; no edit needed."
+  },
+  {
+   "ruling": "R-32821",
+   "item": "CG-ALL-AC6",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "AC6 already exists for X8 in section 7 and TC-E6-002-08 covers it; X8 Covered by lists AC6; no edit needed."
+  },
+  {
+   "ruling": "R-32822",
+   "item": "CG-ALL-AC7",
+   "status": "Resolved",
+   "section": "8",
+   "target": "",
+   "change": "",
+   "note": "Second section 8 table maps BR1 to BR10 to AC and TC IDs in Covered by; coverage already exists; no edit needed."
+  },
+  {
+   "ruling": "R-32823",
+   "item": "CG-ALL-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC8 (retry and 2 s timeout, 503 with envelope) and TC-E6-002-11; X5 covered-by now includes AC8.",
+   "note": "Retry and timeout criterion added with its test row, using only the X5 values."
+  },
+  {
+   "ruling": "R-32824",
+   "item": "CG-ALL-AC9",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "Added AC9 (rwb-partner call fails, step holds and writes nothing) and TC-E6-002-12; X5 covered-by now includes AC9.",
+   "note": "Failed-call criterion added with its test row; follows X3 hold behaviour."
+  }
+ ]
+}

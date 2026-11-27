@@ -1,0 +1,45 @@
+{
+ "edits": [
+  {
+   "old": "| X6 | The view, the database or the ledger does not answer | 503 with the platform problem envelope; no entry is written and no partial answer is presented | MSG-GEN-006; MSG-P1-022 | AC7 |",
+   "new": "| X6 | The view, the database or the ledger does not answer | 503 with the platform problem envelope; no entry is written and no partial answer is presented | MSG-GEN-006; MSG-P1-022 | AC7, AC8 |"
+  },
+  {
+   "old": "    Then MSG-GEN-006 names the failed source, and a failed ledger write is answered with MSG-P1-022",
+   "new": "    Then MSG-GEN-006 names the failed source, and a failed ledger write is answered with MSG-P1-022\n\n  Scenario: AC8 The view, the database or the ledger does not answer returns no partial answer (new, D-RCV-60)\n    Given v_ace_pod, the database or the interaction ledger does not answer for business date 2026-11-30\n    When rwb-comms calls the proof-of-delivery read for business date 2026-11-30 for case \"RC-2026-000123\"\n    Then the answer is 503 with the platform problem envelope and holds no row of 2026-11-30\n    Then no entry is written to the interaction ledger of case \"RC-2026-000123\"\n\n  Scenario: AC9 The business rules BR2, BR4, BR5 and BR8 hold in the read and the entry (new, D-RCV-60)\n    Given the DP07 stamp of 2026-11-30 has LIT late and WIN COMPLETE, and the interaction ledger of case \"RC-2026-000123\" holds the delivery of notice \"N-0001\"\n    When rwb-comms calls the proof-of-delivery read for business date 2026-11-30 for case \"RC-2026-000123\"\n    Then the rows are read from recovery.v_ace_pod only, granted to rwb_source_data with no privilege on public, and this service does not open the WIN file\n    Then DP07 is STALE because LIT is late, and the read states the stamp it found\n    Then the entry's occurred time is the callback date 2026-11-28 and never the time the read ran\n    Then the delivery is recorded once on the interaction ledger of case \"RC-2026-000123\"\n\n  Scenario: AC10 Errors of the proof-of-delivery operation answer 401, 403 and 404 (new, D-RCV-60)\n    When rwb-comms calls GET /api/recovery/source-data/v1/proof-of-delivery?businessDate=2026-11-30 without a valid credential\n    Then the answer is 401 with the platform problem envelope, holds no row and writes no entry\n    When rwb-comms calls GET /api/recovery/source-data/v1/proof-of-delivery?businessDate=2026-11-30 holding no permission on the operation\n    Then the answer is 403 with the platform problem envelope, holds no row and writes no entry\n    When rwb-comms calls a path of base /api/recovery/source-data/v1 that names no operation\n    Then the answer is 404 with the platform problem envelope and holds no row"
+  },
+  {
+   "old": "| TC-E1-055-17 | BR4, BR5 — DP07 stamp fed by LIT and WIN with LIT late; the delivery date carried unchanged | Component | DP07 stamp of 2026-11-30 with LIT late and WIN COMPLETE; callback_date 2026-11-28 |",
+   "new": "| TC-E1-055-17 | BR4, BR5 — DP07 stamp fed by LIT and WIN with LIT late; the delivery date carried unchanged | Component | DP07 stamp of 2026-11-30 with LIT late and WIN COMPLETE; callback_date 2026-11-28 |\n| TC-E1-055-18 | AC8, X6 — the view, the database or the ledger does not answer: 503, no partial answer and no entry | Component | Not specified in the source documents (NEWAC-RWB-P1-E1055-APP-AC12) |\n| TC-E1-055-19 | AC9, BR2, BR4, BR5, BR8 — the schema boundary, DP07 fed by two sources, the callback date and the one ledger | Component | Not specified in the source documents (NEWAC-RWB-P1-E1055-APP-AC13) |\n| TC-E1-055-20 | AC10 — error answers 401, 403 and 404 of the proof-of-delivery operation | Contract | Not specified in the source documents (NEWAC-RWB-P1-E1055-APP-AC14) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-30239",
+   "item": "NEWAC-RWB-P1-E1055-APP-AC12",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "X6 now covered by AC7 and new AC8 (503, no partial answer, no entry); TC-E1-055-18 added. Proposed test not specified in sources."
+  },
+  {
+   "ruling": "R-30240",
+   "item": "NEWAC-RWB-P1-E1055-APP-AC13",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "New AC9 covers BR2, BR4, BR5 and BR8; TC-E1-055-19 added. Proposed test not specified in sources."
+  },
+  {
+   "ruling": "R-30241",
+   "item": "NEWAC-RWB-P1-E1055-APP-AC14",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "New AC10 covers 401, 403 and 404 of the operation with no row and no entry; TC-E1-055-20 added at Contract level. Proposed test not specified in sources."
+  }
+ ]
+}

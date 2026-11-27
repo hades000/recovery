@@ -1,0 +1,136 @@
+{
+ "edits": [
+  {
+   "old": "5. `readClearance` reads `v_ace_account` for the zero balance of the account (AC1), `v_ace_payment` for the clearing installment and `v_ace_collateral` with `v_ace_collateral_detail` for the securities and their title detail, read only and with no write to any ACE object (DP-05).",
+   "new": "5. `readClearance` obtains through the rwb-source-data contract the zero balance of the account (AC1), the clearing installment and the securities with their title detail, read only, with no write to any ACE object and no direct read of an ACE view (DP-05; GAP-1696)."
+  },
+  {
+   "old": "7. `confirmRelease` re-reads `v_ace_collateral` and `v_ace_collateral_detail` on each ACE data-ready signal and on a durable timer, and reports the security inactive when the read shows the legacy `in_active` fact false for every security of the account (AC1; ASM-4421).",
+   "new": "7. `confirmRelease` re-reads the securities and their title detail through the rwb-source-data contract on each ACE data-ready signal and on a durable timer, and reports the security inactive when the read shows the legacy `in_active` fact false for every security of the account (AC1; ASM-4421; GAP-1696)."
+  },
+  {
+   "old": "10. The case owner reads the release on SCR-14 Treatment record through the treatment read, one hop through the gateway-bff composite route (DP-19): the release status, the securities released, the request date, the released date, the rule ID and version.",
+   "new": "10. The case owner reads the release on SCR-14 Treatment record through the treatment read, one hop through the gateway-bff composite route (DP-19): the release status, the securities released, the request date, the released date, the rule ID and version. States of SCR-14: empty when the treatment has no release record, loading and error Not specified in the source documents (DOR-RWB-S2-E3017-APP-10), no access refused with MSG-P4-002 (TC-E3-017-05)."
+  },
+  {
+   "old": "The balance and the securities of AC1 are read from `v_ace_account`, `v_ace_payment`, `v_ace_collateral` and `v_ace_collateral_detail` under DP-05, read only;",
+   "new": "The balance and the securities of AC1 are read through the rwb-source-data contract under DP-05, read only, with no direct read of any ACE view (GAP-1696);"
+  },
+  {
+   "old": "| PLAN_RUNNING | FINAL_INSTALLMENT_PAID | installments_paid = installments_due | PLAN_COMPLETED (R-RES-33) |",
+   "new": "| PLAN_RUNNING | FINAL_INSTALLMENT_PAID | installments_paid = installments | PLAN_COMPLETED (R-RES-33) |"
+  },
+  {
+   "old": "The four views are read with SELECT only under DP-05 and no ACE object is written;",
+   "new": "The four ACE sources are read through the rwb-source-data contract only, under DP-05, and no ACE object is written;"
+  },
+  {
+   "old": "The legacy condition of R-RES-33 names `installments_due` and TSD S2 T3.1 carries `installments` and `installments_paid` only, so the comparison is made on those two fields and the naming is the working read (GAP-2682; ASM-4422).",
+   "new": "The legacy condition of R-RES-33 compares the due count, held as `installments`, with `installments_paid`; TSD S2 T3.1 carries `installments` and `installments_paid` only, so the comparison is made on those two fields and the naming is the working read (GAP-2682; ASM-4422)."
+  },
+  {
+   "old": "| ACE view fixture | The read of the four views | A zero-balance account with two active securities and one clearing installment; a security whose `in_active` fact turns false on the second read; a balance that is not zero; an account with no security |",
+   "new": "| rwb-source-data contract fake | The read of the four ACE sources through rwb-source-data | A zero-balance account with two active securities and one clearing installment; a security whose `in_active` fact turns false on the second read; a balance that is not zero; an account with no security |"
+  },
+  {
+   "old": "the adapter fake and the view fixture stand in",
+   "new": "the adapter fake and the rwb-source-data contract fake stand in"
+  },
+  {
+   "old": "and the ACE view fixture of section 12.8 stand behind every case",
+   "new": "and the rwb-source-data contract fake of section 12.8 stand behind every case"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-09205",
+   "item": "GAP-1696",
+   "status": "Cross-document",
+   "section": "4",
+   "target": "Architecture v5 (connection matrix slide 13; slides 37 and 45)",
+   "change": "Add S2 to P1 REST cell in the connection matrix; restate slides 37 and 45 so rwb-source-data is the only ACE reader and other modules use its REST contract or a Temporal activity.",
+   "note": "Story reads moved to rwb-source-data in flow steps 5 and 7, section 7 and section 11. The matrix and slide changes sit in Architecture v5."
+  },
+  {
+   "ruling": "R-12366",
+   "item": "CG-ALL-8776",
+   "status": "Cross-document",
+   "section": "find it",
+   "target": "RWB-PLT-E1027-CON decision-record library (and LDM v9 if the dictionary name is kept)",
+   "change": "Record decision_record as a library object (index, library table or flag) in the owning document, or use the dictionary name.",
+   "note": "decision_record is a library object of RWB-PLT-E1027-CON, not an LDM or classification field. The owning document must record it."
+  },
+  {
+   "ruling": "R-12367",
+   "item": "CG-ALL-8777",
+   "status": "Resolved",
+   "section": "9, 11",
+   "target": "",
+   "change": "",
+   "note": "installments_due replaced by the dictionary name installments in the R-RES-33 row and the comparison sentence."
+  },
+  {
+   "ruling": "R-12368",
+   "item": "CG-ALL-8782",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1 (Activities)",
+   "change": "Add activity readClearance on task queue rwb-treatment, or name a catalogued activity.",
+   "note": "Activity names are a design choice of this story; the catalog row must be added or the name changed in the catalog."
+  },
+  {
+   "ruling": "R-12369",
+   "item": "CG-ALL-8783",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1 (Activities)",
+   "change": "Add activity requestRelease on task queue rwb-treatment, or name a catalogued activity.",
+   "note": "Activity names are a design choice of this story; the catalog row must be added or the name changed in the catalog."
+  },
+  {
+   "ruling": "R-12370",
+   "item": "CG-ALL-8784",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1 (Activities)",
+   "change": "Add activity confirmRelease on task queue rwb-treatment, or name a catalogued activity.",
+   "note": "Activity names are a design choice of this story; the catalog row must be added or the name changed in the catalog."
+  },
+  {
+   "ruling": "R-12371",
+   "item": "CG-ALL-8785",
+   "status": "Cross-document",
+   "section": "12.5",
+   "target": "Temporal Catalog v1 (Activities)",
+   "change": "Add activity recordAndApply on task queue rwb-treatment, or name a catalogued activity.",
+   "note": "Activity names are a design choice of this story; the catalog row must be added or the name changed in the catalog."
+  },
+  {
+   "ruling": "R-12372",
+   "item": "CG-ALL-8786",
+   "status": "Cross-document",
+   "section": "16",
+   "target": "Test Cases v8 (Story test cases), next version",
+   "change": "Add rows TC-E3-017-01 to TC-E3-017-06 with Given, When and Then copied from the criteria they cover.",
+   "note": "Story §16 already lists the six IDs; the Given, When and Then rows belong in the next Test Cases version."
+  },
+  {
+   "ruling": "R-12374",
+   "item": "CG-ALL-8789",
+   "status": "Not applied",
+   "section": "4, 12.8",
+   "target": "",
+   "change": "",
+   "note": "§12.8 fixture and flow steps 5 and 7 now use the rwb-source-data fake. The AC Given lines in section 7 are outside this chunk and cannot be edited here."
+  },
+  {
+   "ruling": "R-19508",
+   "item": "DOR-RWB-S2-E3017-APP-10",
+   "status": "Not applied",
+   "section": "4",
+   "target": "",
+   "change": "",
+   "note": "SCR-14 states added to flow step 10. Error and loading states are not in the sources; SCR-15 text is outside this chunk."
+  }
+ ]
+}

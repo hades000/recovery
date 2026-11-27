@@ -1,0 +1,50 @@
+{
+ "edits": [
+  {
+   "old": "    And no other service starts JOB-17",
+   "new": "    And no other service starts JOB-17\n\n  Scenario: AC13 The rule, the archive location and the run are owned and read as data (new, D-RCV-60)\n    Given retention rule version \"RET-2026.11\" holds product \"DP10\", table \"document\", the archive container \"rwb-docs-archive\", a batch size, and a purge setting\n    When JOB-17 runs\n    Then the container, the batch size, the rule version and the purge setting are read from rows or properties\n    And the run reads and writes only \"rwb_document\" and reaches the other owners only through their contracts\n    And JOB-17 is started by the Schedule of rwb-document and calls the P1 archive contract once\n\n  Scenario Outline: AC14 A call that is not authenticated or names a job that does not exist is answered (new, D-RCV-60)\n    Given <condition>\n    When the caller <call>\n    Then the system answers status <status> and no run starts\n\n    Examples:\n      | condition | call | status |\n      | the caller presents no valid credential | posts a rerun of JOB-17 | 401 |\n      | the job id named in the call does not exist | posts a rerun of that job id | 404 |\n\n  Scenario: AC15 A contract call that does not answer within 2 s fails the run (new, D-RCV-60)\n    Given the P3 case contract mock does not answer within 2 s\n    When JOB-17 runs\n    Then the run ends \"FAILED\" and no document is archived or deleted\n    And the retry count of the activity is Not specified in the source documents (NEWAC-RWB-P5-E1017-APP-AC13)\n\n  Scenario: AC16 A consumed call that fails ends the run (new, D-RCV-60)\n    Given the P1 archive contract fails\n    When JOB-17 runs\n    Then the run ends \"FAILED\" with MSG-GEN-006 for system \"P1 archive contract\"\n    And no document is deleted before the archive copy is checked"
+  },
+  {
+   "old": "| TC-E1-017-16 | AC12, BR10 | End to end | A JOB-17 Schedule run that calls the P1 archive contract |",
+   "new": "| TC-E1-017-16 | AC12, BR10 | End to end | A JOB-17 Schedule run that calls the P1 archive contract |\n| TC-E1-017-17 | AC13, BR8, BR9, BR10 | Boundary | Not specified in the source documents (NEWAC-RWB-P5-E1017-APP-AC11) |\n| TC-E1-017-18 | AC14 | Component | Not specified in the source documents (NEWAC-RWB-P5-E1017-APP-AC12) |\n| TC-E1-017-19 | AC15 | End to end | Not specified in the source documents (NEWAC-RWB-P5-E1017-APP-AC13) |\n| TC-E1-017-20 | AC16 | Contract | Not specified in the source documents (NEWAC-RWB-P5-E1017-APP-AC14) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-31077",
+   "item": "NEWAC-RWB-P5-E1017-APP-AC11",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 covering BR8, BR9, BR10 and TC-E1-017-17; proposed test not in source, so Data is marked Not specified."
+  },
+  {
+   "ruling": "R-31078",
+   "item": "NEWAC-RWB-P5-E1017-APP-AC12",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC14 (Scenario Outline for 401 and 404) and TC-E1-017-18; proposed test not in source, Data marked Not specified."
+  },
+  {
+   "ruling": "R-31079",
+   "item": "NEWAC-RWB-P5-E1017-APP-AC13",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC15 for the 2 s contract timeout ending FAILED, and TC-E1-017-19; retry count marked Not specified."
+  },
+  {
+   "ruling": "R-31080",
+   "item": "NEWAC-RWB-P5-E1017-APP-AC14",
+   "status": "Resolved",
+   "section": "7",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 for a failed consumed P1 call ending FAILED, and TC-E1-017-20; proposed test not in source, Data marked Not specified."
+  }
+ ]
+}

@@ -1,0 +1,128 @@
+{
+ "edits": [
+  {
+   "old": "| TC-E2-033-14 | AC12 | Component | Not specified in the source documents (DOR-RWB-P4-E2033-APP-12) |",
+   "new": "| TC-E2-033-14 | AC12 | Component | Matrix PM-2026.12 read on 10 December 2026, then PM-2026.13 (valid_from 11 December 2026, scope REGION) read on 11 December 2026; no cached answer |"
+  },
+  {
+   "old": "| X1 | No Recovery role in the session | 401 before the policy is read; no scope, no version and no row | MSG-P4-001 | BR1 |",
+   "new": "| X1 | No Recovery role in the session | 401 before the policy is read; no scope, no version and no row | MSG-P4-001 | AC13 |"
+  },
+  {
+   "old": "| X8 | The access record cannot be written | The extract is refused with 503 and no file is made, and an incident is raised to the platform queue | MSG-P7-003 | BR7 |",
+   "new": "| X8 | The access record cannot be written | The extract is refused with 503 and no file is made, and an incident is raised to the platform queue | MSG-P7-003 | AC14 |"
+  },
+  {
+   "old": "| X9 | The parameters or reference contract does not answer inside its budget | No answer rather than a guessed one: 503, and the refusal is recorded | MSG-GEN-006 | BR9 |",
+   "new": "| X9 | The parameters or reference contract does not answer inside its budget | No answer rather than a guessed one: 503, and the refusal is recorded | MSG-GEN-006 | AC15 |"
+  },
+  {
+   "old": "    Then no cached answer survives the change",
+   "new": "    Then no cached answer survives the change\n\n  Scenario: AC13 A caller with no Recovery role is refused before the policy is read (new, D-RCV-60)\n    Given test user holds no Recovery Workbench role\n    When the caller reads GET /api/recovery/access/v1/me/session\n    Then the answer is 401 with message MSG-P4-001\n    Then the answer carries no scope, no version and no row\n    Then no permission or masking_rule row is read before the refusal\n\n  Scenario: AC14 An extract whose access record cannot be written serves no file (new, D-RCV-60)\n    Given the access record cannot be written for the extract\n    When the manager asks the export answer with product \"MORTGAGE\" and row count 1\n    Then the answer is 503 with message MSG-P7-003\n    Then no workbook is built and no file is served\n    Then an incident is raised to the platform queue\n\n  Scenario: AC15 No guessed answer when a contract misses its budget (new, D-RCV-60)\n    Given the parameters or reference contract does not answer inside its budget\n    When the caller asks the authorise answer for case \"RW-2026-000101\"\n    Then the answer is 503 with message MSG-GEN-006 and carries no data\n    Then the refusal is recorded and no guessed answer is given\n\n  Scenario: AC16 The answer reads only the three rwb_access tables (new, D-RCV-60)\n    Given test user \"U-1000\" holds RW-TEAMMGR for team \"MTG-BKK\"\n    When the caller reads GET /api/recovery/access/v1/me/session\n    Then the answer is granted with scope \"TEAM\" and reads only the role, permission and masking_rule rows of rwb_access\n    Then no case, queue, timer, parameter, list or queue code is read and no other schema is named"
+  },
+  {
+   "old": "| BR5 | Masking: a field whose `masking_rule` row for the role and the version in force holds `unmasked` false is marked masked, and a field with no covering row is masked with the default marker. The answer marks fields and never carries a value | `masking_rule`; AC-EXC-P4-004-05; legacy BR7 |",
+   "new": "| BR5 | Masking: a field whose `masking_rule` row for the role and the version in force holds `unmasked` false is marked masked, and a field with no covering row is masked with the default marker. The answer marks fields and never carries a value | `masking_rule`; AC-EXC-P4-004-05; legacy BR7; AC11; TC-E2-033-13 |"
+  },
+  {
+   "old": "| BR8 | Only `role`, `permission` and `masking_rule` of `rwb_access` are read. No case, queue, timer, parameter, list or queue code is read here, and no other schema is named | DP-01, DP-05, DP-06, DP-07 |",
+   "new": "| BR8 | Only `role`, `permission` and `masking_rule` of `rwb_access` are read. No case, queue, timer, parameter, list or queue code is read here, and no other schema is named | DP-01, DP-05, DP-06, DP-07; AC16; TC-E2-033-19 |"
+  },
+  {
+   "old": "| TC-E2-033-15 | BR2, BR5 | Component | Boundary: role, permission and masking_rule rows read at the matrix and masking versions in force only; rows of other versions not read |",
+   "new": "| TC-E2-033-15 | BR2, BR5 | Component | Boundary: role, permission and masking_rule rows read at the matrix and masking versions in force only; rows of other versions not read |\n| TC-E2-033-16 | AC13, BR1 | Component | Caller with no Recovery role; 401 MSG-P4-001, no scope and no row |\n| TC-E2-033-17 | AC14, BR7 | Contract | Access record cannot be written; 503 MSG-P7-003, no workbook and no file |\n| TC-E2-033-18 | AC15, BR9 | Component | Parameters or reference contract misses its budget; 503 MSG-GEN-006 and no data |\n| TC-E2-033-19 | AC16, BR8 | Component | Session answer for RW-TEAMMGR; only role, permission and masking_rule rows read |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-10754",
+   "item": "CG-ALL-5358",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC11 already has TC-E2-033-13. AC12 has TC-E2-033-14, whose placeholder data is replaced with the AC12 versions and dates."
+  },
+  {
+   "ruling": "R-16861",
+   "item": "DOR-RWB-P4-E2033-APP-10",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-P3-E2033-APP",
+   "change": "Add empty, loading, error and no-access states for SCR-02 to the P3 story.",
+   "note": "This story has no screens; the SCR-02 states belong to the P3 story."
+  },
+  {
+   "ruling": "R-16862",
+   "item": "DOR-RWB-P4-E2033-APP-18",
+   "status": "Not applied",
+   "section": "none",
+   "target": "",
+   "change": "",
+   "note": "DL31 has no assumption in any source. Recording one would invent a value, so no edit is made."
+  },
+  {
+   "ruling": "R-16863",
+   "item": "DOR-RWB-P4-E2033-APP-3",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC13 (X1), AC14 (X8), AC15 (X9) with TC-16, TC-17, TC-18. Section 5 Covered by now names these criteria."
+  },
+  {
+   "ruling": "R-16864",
+   "item": "DOR-RWB-P4-E2033-APP-4",
+   "status": "Resolved",
+   "section": "7, 8, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC16 and TC-19 for BR8. BR5 now lists AC11 and TC-E2-033-13 in section 8."
+  },
+  {
+   "ruling": "R-16865",
+   "item": "DOR-RWB-P4-E2033-APP-9",
+   "status": "Cross-document",
+   "section": "14",
+   "target": "Error and Message Standard v4; RWB-P3-E2033-APP; RWB-P2-E2033-APP",
+   "change": "Align the P3 MSG-GEN-007 text and the P2 MSG-GEN-006 use with Error and Message Standard v4.",
+   "note": "The standard has precedence. Story MSG-GEN-006 text stays not specified because no source gives it."
+  },
+  {
+   "ruling": "R-22109",
+   "item": "GAP-0661",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-P2-E2033-CON; Ownership Map API",
+   "change": "Baseline GET /api/recovery/integration/v1 read-only operations with twelve columns, filter set, breach filter, order, paging envelope and problem body; declare eight consumed operations, no table, event, workflow or Schedule.",
+   "note": "Register gap owned by the solution architect; this story takes no edit."
+  },
+  {
+   "ruling": "R-22110",
+   "item": "GAP-0660",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-P3-E2033-APP; RWB-P4-E2033-APP contract stories; Ownership Map API",
+   "change": "Keep GET /cases and GET /cases/export with rwb-case; add composed read and export on the integration base as additional, read-only; fix ageing, reference-data and access-log operations.",
+   "note": "Register gap owned by the solution architect; no edit in this story."
+  },
+  {
+   "ruling": "R-22682",
+   "item": "GAP-2224",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "RWB-P2-E2033-CON; RWB-P3-E2011-APP; rwb-case baseline",
+   "change": "Fix row and envelope names in v1, confirm page bounds and export limit as parameter rows, keep ageDays with ageInStateDays added, drop duplicate timer index, name login and flag owner.",
+   "note": "Register gap owned by the solution architect; the source-side decisions sit in other documents."
+  },
+  {
+   "ruling": "R-22683",
+   "item": "GAP-3101",
+   "status": "Cross-document",
+   "section": "none",
+   "target": "Ownership Map API; RWB-P2-E2033-CON; rwb-case baseline",
+   "change": "Declare a batched read GET /api/recovery/deviation/v1/deviation-flags with one hop and a page-bound parameter row; add it to the RWB-P2-E2033-CON consumed set.",
+   "note": "Register gap owned by the solution architect; this story reads no deviation flag per AC4 and takes no edit."
+  }
+ ]
+}

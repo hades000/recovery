@@ -1,0 +1,132 @@
+{
+ "edits": [
+  {
+   "old": "Then the system writes the result to the decision log with the rule version",
+   "new": "Then the system writes the result to the decision record with the rule version"
+  },
+  {
+   "old": "Given the decision log cannot be written",
+   "new": "Given the decision record cannot be written"
+  },
+  {
+   "old": "A forced decision-log write failure at the moment of the proceeds write",
+   "new": "A forced decision-record write failure at the moment of the proceeds write"
+  },
+  {
+   "old": "with the platform error envelope | None | AC1 |",
+   "new": "with the platform error envelope | None | AC1, AC5 |"
+  },
+  {
+   "old": "AC3, TC-E4-049-03, TC-E4-049-05 |",
+   "new": "AC3, TC-E4-049-03, TC-E4-049-05, AC7, TC-E4-049-09 |"
+  },
+  {
+   "old": "AC4, TC-E4-049-06, Section 17, BR5, BR8 |",
+   "new": "AC4, TC-E4-049-06, AC8, TC-E4-049-10, Section 17, BR5, BR8 |"
+  },
+  {
+   "old": "each read from the same route.",
+   "new": "each read from the same route.\n\nThe empty, error and no-access states of SCR-28 are Not specified in the source documents (CG-ALL-7762); the 403 answer of this route is the refused state with MSG-P4-002."
+  },
+  {
+   "old": "Then nothing is released",
+   "new": "Then nothing is released\n\n  Scenario: AC5 A consumed call fails or does not answer (X4)\n    Given the rwb-source-data contract mock does not answer inside 2 s\n    When the application step runs\n    Then the step retries on the workflow's own backoff\n    Then nothing is written and no event is published\n\n  Scenario: AC6 A status change the model does not allow is refused\n    Given a status change the model does not allow is requested for a proceeds row\n    When the change is requested\n    Then the change is refused with an answer Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC11)\n    Then nothing changes\n\n  Scenario: AC7 Role without the right is refused on each operation (X2)\n    Given the role holds the Write-off and posting right R for `GET /proceeds` but not U for `POST /proceeds/{proceedsId}/match`\n    When the role calls `POST /proceeds/{proceedsId}/match`\n    Then the answer is 403 with MSG-P4-002 before any read or write\n    Then nothing changes and no record is written\n\n  Scenario: AC8 Boundary reach is logged by the pipeline (X8)\n    Given a test reaches a `v_ace_*` view, a `recovery_case` row or another `rwb_*` schema\n    When the build runs its boundary test\n    Then the boundary test fails the build\n    Then the pipeline log records the refused statement\n\n  Scenario: AC9 Every business rule has a criterion or a guardrail test\n    Given the rules BR1 to BR12 of section 8\n    When the story is checked for coverage\n    Then each rule is covered by a criterion, a guardrail test or a boundary test\n\n  Scenario: AC10 Error answers carry their status codes\n    Given the provided operations `GET /proceeds` and `POST /proceeds/{proceedsId}/match`\n    When a call has no valid credential, a role without the right, or an unknown proceedsId\n    Then the answer is 401, 403 or 404 respectively with the platform error envelope\n\n  Scenario: AC11 A replayed write with the same Idempotency-Key writes once\n    Given `POST /proceeds/{proceedsId}/match` has answered a call with an Idempotency-Key\n    When the same Idempotency-Key is sent again\n    Then the stored answer is returned, no second row and no second event, and the repeat is counted\n\n  Scenario: AC12 A redelivered consumed event is applied once\n    Given the consumed event `AceDataReady` is delivered a second time\n    When the event is consumed\n    Then the amount is applied once and no second record or event is written"
+  },
+  {
+   "old": "and no foreign key leaves the schema |",
+   "new": "and no foreign key leaves the schema |\n| TC-E4-049-07 | AC5 | NFR | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC10) |\n| TC-E4-049-08 | AC6 | Component | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC11) |\n| TC-E4-049-09 | AC7 | Contract | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC3) |\n| TC-E4-049-10 | AC8 | Pipeline | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC4) |\n| TC-E4-049-11 | AC9 | Pipeline | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC5) |\n| TC-E4-049-12 | AC10 | Contract | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC6) |\n| TC-E4-049-13 | AC11 | Component | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC7) |\n| TC-E4-049-14 | AC12 | Component | Not specified in the source documents (NEWAC-RWB-P8-E4049-APP-AC8) |"
+  }
+ ],
+ "disposition": [
+  {
+   "ruling": "R-26532",
+   "item": "CG-ALL-7761",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "AC1, AC2 Given and TC-E4-049-04 now use decision record wording; no JOB-nn or job record wording in criteria or tests."
+  },
+  {
+   "ruling": "R-26533",
+   "item": "CG-ALL-7762",
+   "status": "Resolved",
+   "section": "15",
+   "target": "",
+   "change": "",
+   "note": "Empty, error and no-access states of SCR-28 marked Not specified in the source documents; the 403 answer is the refused state."
+  },
+  {
+   "ruling": "R-31654",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC10",
+   "status": "Resolved",
+   "section": "5, 7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC5 for a failed or unanswered consumed call, linked to X4, with TC-E4-049-07; test data Not specified."
+  },
+  {
+   "ruling": "R-31655",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC11",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC6 for a disallowed status change refused with no change, with TC-E4-049-08; refusal answer Not specified."
+  },
+  {
+   "ruling": "R-31656",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC3",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added AC7 for refusal on each operation; X2 Covered by now lists AC7 and TC-E4-049-09."
+  },
+  {
+   "ruling": "R-31657",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC4",
+   "status": "Resolved",
+   "section": "5",
+   "target": "",
+   "change": "",
+   "note": "Added AC8 and TC-E4-049-10 for the boundary reach; X8 Covered by now lists both."
+  },
+  {
+   "ruling": "R-31658",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC5",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC9 requiring each of BR1 to BR12 to have a criterion, guardrail or boundary test, with TC-E4-049-11."
+  },
+  {
+   "ruling": "R-31659",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC6",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC10 naming 401, 403 and 404 answers with TC-E4-049-12; test data Not specified."
+  },
+  {
+   "ruling": "R-31660",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC7",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC11 for a replayed write with the same Idempotency-Key, writing once, with TC-E4-049-13."
+  },
+  {
+   "ruling": "R-31661",
+   "item": "NEWAC-RWB-P8-E4049-APP-AC8",
+   "status": "Resolved",
+   "section": "7, 16",
+   "target": "",
+   "change": "",
+   "note": "Added AC12 for a redelivered AceDataReady applied once, with TC-E4-049-14; test data Not specified."
+  }
+ ]
+}
